@@ -81,7 +81,7 @@ export default function Home() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {features.map((feature) => (
           <FeatureCard
-            key={feature.href}
+            key={feature.label}
             title={feature.label}
             description={feature.description}
             href={feature.href}
