@@ -101,9 +101,6 @@ export default function Home() {
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-8 max-w-2xl">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome to ShrinkRay
-        </h1>
         <p className="mt-2 text-muted-foreground">
           Your all-in-one tool for file manipulation. Fast, private, and
           easy to use. All processing is done directly in your browser.

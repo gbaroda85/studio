@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['Orbitron', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -88,10 +88,15 @@ export default {
             height: '0',
           },
         },
+        'header-glow': {
+          '0%': { 'box-shadow': '0 1px 2px 0px hsl(var(--primary) / 0.5)' },
+          '100%': { 'box-shadow': '0 1px 4px 1px hsl(var(--primary) / 0.7)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'header-glow': 'header-glow 3s ease-in-out infinite alternate',
       },
     },
   },

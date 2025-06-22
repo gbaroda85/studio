@@ -83,12 +83,18 @@ function AppSidebar() {
 
 function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm lg:h-[60px] lg:px-6">
-      <SidebarTrigger className="md:hidden" />
-      <div className="flex-1">
-        {/* Can add breadcrumbs or page title here */}
+    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
+      <div className="flex flex-1 items-center">
+        <SidebarTrigger className="md:hidden" />
       </div>
-      <ThemeToggle />
+      <div className="flex flex-1 items-center justify-center">
+        <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl">
+            Welcome to ShrinkRay
+        </Link>
+      </div>
+      <div className="flex flex-1 items-center justify-end">
+        <ThemeToggle />
+      </div>
     </header>
   );
 }
