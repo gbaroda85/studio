@@ -23,7 +23,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block">
-      <Card className="h-full transition-all duration-200 group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg">
+      <Card className="h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-xl group-hover:shadow-primary/20">
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
             <div className="mb-3 grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
