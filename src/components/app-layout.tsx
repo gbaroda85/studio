@@ -29,14 +29,14 @@ import {Button} from '@/components/ui/button';
 
 const menuItems = [
   {href: '/image-compress', label: 'Image Compress', icon: Shrink},
-  {href: '#', label: 'Crop Image', icon: Crop},
-  {href: '#', label: 'Image to JPG', icon: FileOutput},
-  {href: '#', label: 'Image to PNG', icon: FileOutput},
-  {href: '#', label: 'Image to PDF', icon: FileDigit},
-  {href: '#', label: 'PDF to Image', icon: ImageIcon},
-  {href: '#', label: 'Compress PDF', icon: FileArchive},
-  {href: '#', label: 'Merge PDF', icon: Merge},
-  {href: '#', label: 'Scan to PDF', icon: ScanLine},
+  {href: '/crop-image', label: 'Crop Image', icon: Crop},
+  {href: '/image-to-jpg', label: 'Image to JPG', icon: FileOutput},
+  {href: '/image-to-png', label: 'Image to PNG', icon: FileOutput},
+  {href: '/image-to-pdf', label: 'Image to PDF', icon: FileDigit},
+  {href: '/pdf-to-image', label: 'PDF to Image', icon: ImageIcon},
+  {href: '/compress-pdf', label: 'Compress PDF', icon: FileArchive},
+  {href: '/merge-pdf', label: 'Merge PDF', icon: Merge},
+  {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine},
 ];
 
 function AppSidebar() {
