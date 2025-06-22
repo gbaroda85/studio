@@ -16,6 +16,7 @@ import {
   ScanLine,
   Shrink,
   Unlock,
+  Scissors,
 } from 'lucide-react';
 
 const imageFeatures = [
@@ -69,6 +70,12 @@ const pdfFeatures = [
     label: 'Merge PDF',
     description: 'Combine multiple PDFs into one document.',
     icon: Merge,
+  },
+  {
+    href: '/split-pdf',
+    label: 'Split PDF',
+    description: 'Extract specific pages from a PDF.',
+    icon: Scissors,
   },
   {
     href: '/scan-to-pdf',

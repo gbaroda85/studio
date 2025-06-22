@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, PDFFont } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,8 +47,19 @@ export default function PdfProtector() {
             const pdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfBytes);
             
+            // Setting permissions is crucial for some PDF readers to enforce protection.
             const protectedPdfBytes = await pdfDoc.save({
-                userPassword: password
+                userPassword: password,
+                ownerPassword: password, // It's good practice to set both
+                permissions: {
+                    printing: 'none',
+                    modifying: false,
+                    copying: false,
+                    annotating: false,
+                    fillingForms: false,
+                    contentAccessibility: false,
+                    documentAssembly: false,
+                },
             });
             
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
