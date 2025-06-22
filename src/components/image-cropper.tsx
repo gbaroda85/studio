@@ -2,13 +2,13 @@
 
 import 'react-image-crop/dist/ReactCrop.css';
 
-import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
+import React, { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { UploadCloud, Download, Scissors } from 'lucide-react';
+import { UploadCloud, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number): Crop {
@@ -18,20 +18,6 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
     mediaHeight,
   );
 }
-
-function useDebounceEffect(fn: () => void, waitTime: number, deps: any[]) {
-  const timeout = useRef<NodeJS.Timeout>();
-  
-  const useEffect = (typeof window !== 'undefined') ? React.useEffect : () => {};
-
-  useEffect(() => {
-    timeout.current = setTimeout(fn, waitTime);
-    return () => {
-      clearTimeout(timeout.current);
-    };
-  }, deps);
-}
-
 
 export default function ImageCropper() {
   const [imgSrc, setImgSrc] = useState('');
@@ -70,8 +56,13 @@ export default function ImageCropper() {
 
   function handleDownloadCrop() {
     const image = imgRef.current;
-    if (!image || !completedCrop) {
-      throw new Error('Crop details not available');
+    if (!image || !completedCrop?.width) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not download image. Please ensure you have selected a crop area.',
+      });
+      return;
     }
 
     const canvas = document.createElement('canvas');
@@ -83,7 +74,12 @@ export default function ImageCropper() {
     
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      throw new Error('No 2d context');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not process the image for cropping.',
+      });
+      return;
     }
 
     ctx.drawImage(
@@ -147,12 +143,12 @@ export default function ImageCropper() {
               alt="Crop me"
               src={imgSrc}
               onLoad={onImageLoad}
-              style={{ maxHeight: '70vh' }}
+              style={{ maxHeight: '70vh', maxWidth: '100%' }}
             />
           </ReactCrop>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
+      <CardFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" onClick={() => setImgSrc('')}>Upload Another</Button>
         <Button onClick={handleDownloadCrop} disabled={!completedCrop?.width || !completedCrop?.height}>
           <Download className="mr-2" />
