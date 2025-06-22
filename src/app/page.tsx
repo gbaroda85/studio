@@ -11,9 +11,11 @@ import {
   FileDigit,
   FileOutput,
   Image as ImageIcon,
+  Lock,
   Merge,
   ScanLine,
   Shrink,
+  Unlock,
 } from 'lucide-react';
 
 const imageFeatures = [
@@ -73,6 +75,18 @@ const pdfFeatures = [
     label: 'Scan to PDF',
     description: 'Scan documents directly to a PDF file.',
     icon: ScanLine,
+  },
+  {
+    href: '/protect-pdf',
+    label: 'Protect PDF',
+    description: 'Add a password to your PDF.',
+    icon: Lock,
+  },
+  {
+    href: '/unlock-pdf',
+    label: 'Unlock PDF',
+    description: 'Remove password protection from a PDF.',
+    icon: Unlock,
   },
 ];
 
