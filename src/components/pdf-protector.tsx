@@ -45,34 +45,35 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            
-            // First, try to load it without a password to check if it's already encrypted.
+            let pdfDoc;
+
+            // Try loading the document. If it's encrypted, it will throw an error.
             try {
-                await PDFDocument.load(existingPdfBytes);
-            } catch (e: any) {
-                // If it fails with EncryptedPDFError, it's already protected.
-                if (e.name === 'EncryptedPDFError') {
-                    toast({
+                pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+                if (pdfDoc.isEncrypted) {
+                     toast({
                         variant: 'destructive',
                         title: 'Already Protected',
-                        description: 'This PDF is already password protected. Please use the Unlock PDF tool first.',
+                        description: 'This PDF is already password protected. Please use the Unlock PDF tool first if you wish to change the password.',
                     });
                     setIsProtecting(false);
                     return;
                 }
-                // For other errors, it's likely a corrupted file.
-                throw new Error('Could not load the PDF. It may be corrupted.');
+            } catch (e: any) {
+                 // Handle other potential loading errors
+                throw new Error('Could not load the PDF. The file might be corrupted.');
             }
-            
-            // If it loaded successfully, it's not encrypted.
-            // Now, load it again to get a doc instance and save with the password.
-            const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
             // Set metadata
             pdfDoc.setProducer('ShrinkRay PDF Protector');
+            pdfDoc.setCreationDate(new Date());
             pdfDoc.setModificationDate(new Date());
 
-            const protectedPdfBytes = await pdfDoc.save({ userPassword: password });
+            // Encrypt and save the PDF
+            const protectedPdfBytes = await pdfDoc.save({
+                userPassword: password,
+                ownerPassword: password,
+            });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
@@ -91,7 +92,7 @@ export default function PdfProtector() {
             toast({
                 variant: 'destructive',
                 title: 'Error Protecting PDF',
-                description: error.message || 'An unexpected error occurred.',
+                description: error.message || 'An unexpected error occurred. Please ensure the file is not corrupted.',
             });
         } finally {
             setIsProtecting(false);
