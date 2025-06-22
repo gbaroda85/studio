@@ -121,7 +121,7 @@ export default function Home() {
           <TabsTrigger value="pdf">PDF Tools</TabsTrigger>
         </TabsList>
         <TabsContent value="image">
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-6 grid gap-4 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
             {imageFeatures.map((feature) => (
               <FeatureCard
                 key={feature.label}
@@ -134,7 +134,7 @@ export default function Home() {
           </div>
         </TabsContent>
         <TabsContent value="pdf">
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-6 grid gap-4 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
             {pdfFeatures.map((feature) => (
               <FeatureCard
                 key={feature.label}
