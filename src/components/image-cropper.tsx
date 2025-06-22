@@ -3,21 +3,13 @@
 import 'react-image-crop/dist/ReactCrop.css';
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
-import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { UploadCloud, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number): Crop {
-  return centerCrop(
-    makeAspectCrop({ unit: '%', width: 90 }, aspect, mediaWidth, mediaHeight),
-    mediaWidth,
-    mediaHeight,
-  );
-}
 
 export default function ImageCropper() {
   const [imgSrc, setImgSrc] = useState('');
@@ -50,8 +42,11 @@ export default function ImageCropper() {
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
-    const aspect = 16 / 9;
-    setCrop(centerAspectCrop(width, height, aspect));
+    setCrop(centerCrop({
+      unit: '%',
+      width: 90,
+      height: 90
+    }, width, height));
   }
 
   function handleDownloadCrop() {
@@ -136,7 +131,6 @@ export default function ImageCropper() {
             crop={crop}
             onChange={(_, percentCrop) => setCrop(percentCrop)}
             onComplete={(c) => setCompletedCrop(c)}
-            aspect={16 / 9}
           >
             <img
               ref={imgRef}
