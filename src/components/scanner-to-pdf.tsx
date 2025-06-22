@@ -18,20 +18,35 @@ export default function ScannerToPdf() {
 
   useEffect(() => {
     async function getCameraPermission() {
+      // Prefer the rear camera
+      const constraints = {
+        video: { facingMode: 'environment' }
+      };
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
         setHasCameraPermission(true);
       } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings.',
-        });
+        console.warn('Rear camera not available, trying any camera.', error);
+        // If rear camera fails, try any camera
+        try {
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (videoRef.current) {
+                videoRef.current.srcObject = fallbackStream;
+            }
+            setHasCameraPermission(true);
+        } catch (fallbackError) {
+            console.error('Error accessing camera:', fallbackError);
+            setHasCameraPermission(false);
+            toast({
+              variant: 'destructive',
+              title: 'Camera Access Denied',
+              description: 'Please enable camera permissions in your browser settings.',
+            });
+        }
       }
     }
     getCameraPermission();
