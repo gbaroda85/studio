@@ -27,36 +27,42 @@ const imageFeatures = [
     label: 'Image Compress',
     description: 'Reduce image file size without losing quality.',
     icon: Shrink,
+    color: 'text-green-500',
   },
   {
     href: '/image-resize',
     label: 'Resize Image',
     description: 'Change the dimensions of your image quickly.',
     icon: Maximize,
+    color: 'text-fuchsia-500',
   },
   {
     href: '/crop-image',
     label: 'Crop Image',
     description: 'Easily crop your images to the perfect size.',
     icon: Crop,
+    color: 'text-blue-500',
   },
   {
     href: '/image-to-jpg',
     label: 'Image to JPG',
     description: 'Convert various image formats to JPG.',
     icon: FileOutput,
+    color: 'text-yellow-500',
   },
   {
     href: '/image-to-png',
     label: 'Image to PNG',
     description: 'Convert various image formats to PNG.',
     icon: FileOutput,
+    color: 'text-sky-500',
   },
   {
     href: '/image-to-pdf',
     label: 'Image to PDF',
     description: 'Convert images into a single PDF file.',
     icon: FileDigit,
+    color: 'text-red-500',
   },
 ];
 
@@ -66,42 +72,49 @@ const pdfFeatures = [
     label: 'PDF to Image',
     description: 'Extract all pages from a PDF as images.',
     icon: ImageIcon,
+    color: 'text-orange-500',
   },
   {
     href: '/compress-pdf',
     label: 'Compress PDF',
     description: 'Reduce the file size of your PDF documents.',
     icon: FileArchive,
+    color: 'text-purple-500',
   },
   {
     href: '/merge-pdf',
     label: 'Merge PDF',
     description: 'Combine multiple PDFs into one document.',
     icon: Merge,
+    color: 'text-pink-500',
   },
   {
     href: '/split-pdf',
     label: 'Split PDF',
     description: 'Extract specific pages from a PDF.',
     icon: Scissors,
+    color: 'text-cyan-500',
   },
   {
     href: '/scan-to-pdf',
     label: 'Scan to PDF',
     description: 'Scan documents directly to a PDF file.',
     icon: ScanLine,
+    color: 'text-indigo-500',
   },
   {
     href: '/protect-pdf',
     label: 'Protect PDF',
     description: 'Add a password to your PDF.',
     icon: Lock,
+    color: 'text-gray-500',
   },
   {
     href: '/unlock-pdf',
     label: 'Unlock PDF',
     description: 'Remove password protection from a PDF.',
     icon: Unlock,
+    color: 'text-teal-500',
   },
 ];
 
@@ -129,6 +142,7 @@ export default function Home() {
                 description={feature.description}
                 href={feature.href}
                 icon={feature.icon}
+                color={feature.color}
               />
             ))}
           </div>
@@ -142,6 +156,7 @@ export default function Home() {
                 description={feature.description}
                 href={feature.href}
                 icon={feature.icon}
+                color={feature.color}
               />
             ))}
           </div>

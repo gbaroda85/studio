@@ -7,12 +7,14 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import {ArrowRight} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type FeatureCardProps = {
   title: string;
   description: string;
   href: string;
   icon: LucideIcon;
+  color: string;
 };
 
 export function FeatureCard({
@@ -20,13 +22,14 @@ export function FeatureCard({
   description,
   href,
   icon: Icon,
+  color,
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block">
       <Card className="h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-xl group-hover:shadow-primary/20">
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <div className="mb-3 grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
+            <div className={cn("mb-3 grid size-10 place-items-center rounded-lg bg-primary/10", color)}>
               <Icon className="h-5 w-5" />
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
