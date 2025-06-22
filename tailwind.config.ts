@@ -89,8 +89,8 @@ export default {
           },
         },
         'header-glow': {
-          '0%': { 'box-shadow': '0 1px 2px 0px hsl(var(--primary) / 0.5)' },
-          '100%': { 'box-shadow': '0 1px 4px 1px hsl(var(--primary) / 0.7)' },
+          '0%': { 'box-shadow': '0 1px 2px 0px hsl(var(--primary) / 0.3)' },
+          '100%': { 'box-shadow': '0 1px 3px 1px hsl(var(--primary) / 0.4)' },
         }
       },
       animation: {
