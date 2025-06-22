@@ -1,25 +1,94 @@
-import ImageCompressor from "@/components/image-compressor";
-import { Shrink } from "lucide-react";
+import {FeatureCard} from '@/components/feature-card';
+import {
+  Crop,
+  FileArchive,
+  FileDigit,
+  FileOutput,
+  Image as ImageIcon,
+  Merge,
+  ScanLine,
+  Shrink,
+} from 'lucide-react';
+
+const features = [
+  {
+    href: '/image-compress',
+    label: 'Image Compress',
+    description: 'Reduce the file size of your images without losing quality.',
+    icon: Shrink,
+  },
+  {
+    href: '#',
+    label: 'Crop Image',
+    description: 'Easily crop your images to the perfect size.',
+    icon: Crop,
+  },
+  {
+    href: '#',
+    label: 'Image to JPG',
+    description: 'Convert various image formats to JPG.',
+    icon: FileOutput,
+  },
+  {
+    href: '#',
+    label: 'Image to PNG',
+    description: 'Convert various image formats to PNG.',
+    icon: FileOutput,
+  },
+  {
+    href: '#',
+    label: 'Image to PDF',
+    description: 'Convert your images into a single PDF file.',
+    icon: FileDigit,
+  },
+  {
+    href: '#',
+    label: 'PDF to Image',
+    description: 'Extract images from your PDF files.',
+    icon: ImageIcon,
+  },
+  {
+    href: '#',
+    label: 'Compress PDF',
+    description: 'Reduce the file size of your PDF documents.',
+    icon: FileArchive,
+  },
+  {
+    href: '#',
+    label: 'Merge PDF',
+    description: 'Combine multiple PDF files into one document.',
+    icon: Merge,
+  },
+  {
+    href: '#',
+    label: 'Scan to PDF',
+    description: 'Scan documents directly to a PDF file.',
+    icon: ScanLine,
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-dvh bg-background font-body text-foreground antialiased">
-      <header className="p-4 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto flex items-center gap-3">
-          <Shrink className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold font-headline text-foreground">
-            ShrinkRay
-          </h1>
-        </div>
-      </header>
-      <main className="flex-grow container mx-auto p-4 md:p-8 flex items-center justify-center">
-        <ImageCompressor />
-      </main>
-      <footer className="text-center p-4 text-muted-foreground text-sm border-t">
-        <p>
-          Built with Next.js and shad/cn. &copy; {new Date().getFullYear()} ShrinkRay
+    <main className="flex-1 p-4 md:p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Welcome to ShrinkRay
+        </h1>
+        <p className="text-muted-foreground">
+          Your all-in-one tool for file manipulation.
         </p>
-      </footer>
-    </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {features.map((feature) => (
+          <FeatureCard
+            key={feature.href}
+            title={feature.label}
+            description={feature.description}
+            href={feature.href}
+            icon={feature.icon}
+          />
+        ))}
+      </div>
+    </main>
   );
 }
