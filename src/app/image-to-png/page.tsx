@@ -1,12 +1,9 @@
-import {PlaceholderPage} from '@/components/placeholder-page';
-import {FileOutput} from 'lucide-react';
+import ImageConverter from '@/components/image-converter';
 
 export default function ImageToPngPage() {
   return (
-    <PlaceholderPage
-      title="Image to PNG"
-      description="This feature is coming soon! You'll be able to convert various image formats to PNG."
-      icon={FileOutput}
-    />
+    <main className="flex flex-1 items-start justify-center p-4 md:p-8">
+      <ImageConverter targetFormat="png" />
+    </main>
   );
 }

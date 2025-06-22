@@ -1,12 +1,9 @@
-import {PlaceholderPage} from '@/components/placeholder-page';
-import {Image as ImageIcon} from 'lucide-react';
+import PdfToImageConverter from '@/components/pdf-to-image-converter';
 
 export default function PdfToImagePage() {
   return (
-    <PlaceholderPage
-      title="PDF to Image"
-      description="This feature is coming soon! You'll be able to extract images from your PDF files."
-      icon={ImageIcon}
-    />
+    <main className="flex flex-1 items-start justify-center p-4 md:p-8">
+      <PdfToImageConverter />
+    </main>
   );
 }

@@ -1,12 +1,9 @@
-import {PlaceholderPage} from '@/components/placeholder-page';
-import {FileOutput} from 'lucide-react';
+import ImageConverter from '@/components/image-converter';
 
 export default function ImageToJpgPage() {
   return (
-    <PlaceholderPage
-      title="Image to JPG"
-      description="This feature is coming soon! You'll be able to convert various image formats to JPG."
-      icon={FileOutput}
-    />
+    <main className="flex flex-1 items-start justify-center p-4 md:p-8">
+      <ImageConverter targetFormat="jpeg" />
+    </main>
   );
 }

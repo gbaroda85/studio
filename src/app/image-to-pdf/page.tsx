@@ -1,12 +1,9 @@
-import {PlaceholderPage} from '@/components/placeholder-page';
-import {FileDigit} from 'lucide-react';
+import ImageToPdfConverter from '@/components/image-to-pdf-converter';
 
 export default function ImageToPdfPage() {
   return (
-    <PlaceholderPage
-      title="Image to PDF"
-      description="This feature is coming soon! You'll be able to convert your images into a single PDF file."
-      icon={FileDigit}
-    />
+    <main className="flex flex-1 items-start justify-center p-4 md:p-8">
+      <ImageToPdfConverter />
+    </main>
   );
 }

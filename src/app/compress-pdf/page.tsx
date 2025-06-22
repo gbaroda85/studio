@@ -5,7 +5,7 @@ export default function CompressPdfPage() {
   return (
     <PlaceholderPage
       title="Compress PDF"
-      description="This feature is coming soon! You'll be able to reduce the file size of your PDF documents."
+      description="This feature is coming soon! PDF compression requires complex server-side processing that can't be done in the browser alone. We're working on it!"
       icon={FileArchive}
     />
   );

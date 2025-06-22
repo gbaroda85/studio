@@ -1,12 +1,9 @@
-import {PlaceholderPage} from '@/components/placeholder-page';
-import {Merge} from 'lucide-react';
+import PdfMerger from '@/components/pdf-merger';
 
 export default function MergePdfPage() {
   return (
-    <PlaceholderPage
-      title="Merge PDF"
-      description="This feature is coming soon! You'll be able to combine multiple PDF files into one document."
-      icon={Merge}
-    />
+    <main className="flex flex-1 items-start justify-center p-4 md:p-8">
+      <PdfMerger />
+    </main>
   );
 }

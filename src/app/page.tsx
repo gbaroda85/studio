@@ -1,5 +1,11 @@
 import {FeatureCard} from '@/components/feature-card';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import {
   Crop,
   FileArchive,
   FileDigit,
@@ -10,11 +16,11 @@ import {
   Shrink,
 } from 'lucide-react';
 
-const features = [
+const imageFeatures = [
   {
     href: '/image-compress',
     label: 'Image Compress',
-    description: 'Reduce the file size of your images without losing quality.',
+    description: 'Reduce image file size without losing quality.',
     icon: Shrink,
   },
   {
@@ -38,13 +44,16 @@ const features = [
   {
     href: '/image-to-pdf',
     label: 'Image to PDF',
-    description: 'Convert your images into a single PDF file.',
+    description: 'Convert images into a single PDF file.',
     icon: FileDigit,
   },
+];
+
+const pdfFeatures = [
   {
     href: '/pdf-to-image',
     label: 'PDF to Image',
-    description: 'Extract images from your PDF files.',
+    description: 'Extract all pages from a PDF as images.',
     icon: ImageIcon,
   },
   {
@@ -56,7 +65,7 @@ const features = [
   {
     href: '/merge-pdf',
     label: 'Merge PDF',
-    description: 'Combine multiple PDF files into one document.',
+    description: 'Combine multiple PDFs into one document.',
     icon: Merge,
   },
   {
@@ -70,25 +79,48 @@ const features = [
 export default function Home() {
   return (
     <main className="flex-1 p-4 md:p-8">
-      <div className="mb-8">
+      <div className="mb-8 max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight">
           Welcome to ShrinkRay
         </h1>
-        <p className="text-muted-foreground">
-          Your all-in-one tool for file manipulation.
+        <p className="mt-2 text-muted-foreground">
+          Your all-in-one tool for file manipulation. Fast, private, and
+          easy to use. All processing is done directly in your browser.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {features.map((feature) => (
-          <FeatureCard
-            key={feature.label}
-            title={feature.label}
-            description={feature.description}
-            href={feature.href}
-            icon={feature.icon}
-          />
-        ))}
-      </div>
+
+      <Tabs defaultValue="image">
+        <TabsList className="grid w-full grid-cols-2 md:max-w-sm">
+          <TabsTrigger value="image">Image Tools</TabsTrigger>
+          <TabsTrigger value="pdf">PDF Tools</TabsTrigger>
+        </TabsList>
+        <TabsContent value="image">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {imageFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.label}
+                title={feature.label}
+                description={feature.description}
+                href={feature.href}
+                icon={feature.icon}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        <TabsContent value="pdf">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {pdfFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.label}
+                title={feature.label}
+                description={feature.description}
+                href={feature.href}
+                icon={feature.icon}
+              />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
