@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -6,17 +7,22 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Loader2, Download, Image as ImageIcon } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 // Set up the worker for pdfjs
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
 
+type OutputFormat = 'png' | 'jpeg';
+
 export default function PdfToImageConverter() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [outputFormat, setOutputFormat] = useState<OutputFormat>('png');
     const [isDragOver, setIsDragOver] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,6 +43,7 @@ export default function PdfToImageConverter() {
 
     const handlePdfToImage = async (file: File) => {
         setIsProcessing(true);
+        setImageUrls([]);
         const fileReader = new FileReader();
 
         fileReader.onload = async (e) => {
@@ -44,16 +51,22 @@ export default function PdfToImageConverter() {
             try {
                 const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
                 const urls: string[] = [];
+                const mimeType = `image/${outputFormat}`;
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
+                    const viewport = page.getViewport({ scale: 2.0 }); // Increased scale for better quality
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
                     if (context) {
+                        if (outputFormat === 'jpeg') {
+                            context.fillStyle = '#FFFFFF';
+                            context.fillRect(0, 0, canvas.width, canvas.height);
+                        }
                         await page.render({ canvasContext: context, viewport: viewport }).promise;
-                        urls.push(canvas.toDataURL('image/png'));
+                        urls.push(canvas.toDataURL(mimeType, 0.95));
                     }
                 }
                 setImageUrls(urls);
@@ -71,7 +84,7 @@ export default function PdfToImageConverter() {
     const handleDownload = (url: string, index: number) => {
         const link = document.createElement('a');
         link.href = url;
-        link.download = `page-${index + 1}.png`;
+        link.download = `page-${index + 1}.${outputFormat}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -101,8 +114,22 @@ export default function PdfToImageConverter() {
     return (
         <Card className="w-full max-w-6xl">
             <CardHeader>
-                <CardTitle>PDF to Image Results</CardTitle>
-                <CardDescription>Found {imageUrls.length || '...'} pages in <span className="font-semibold">{pdfFile.name}</span>.</CardDescription>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                        <CardTitle>PDF to Image Results</CardTitle>
+                        <CardDescription>Found {imageUrls.length || '...'} pages in <span className="font-semibold">{pdfFile.name}</span>.</CardDescription>
+                    </div>
+                    <div className="w-full sm:w-48 space-y-2">
+                        <Label htmlFor="format">Output Format</Label>
+                        <Select value={outputFormat} onValueChange={(v) => {setOutputFormat(v as OutputFormat); handlePdfToImage(pdfFile)}} disabled={isProcessing}>
+                            <SelectTrigger id="format"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="png">PNG</SelectItem>
+                                <SelectItem value="jpeg">JPEG</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 {isProcessing ? (
@@ -113,8 +140,8 @@ export default function PdfToImageConverter() {
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {imageUrls.map((url, index) => (
-                             <div key={index} className="group relative border rounded-md overflow-hidden">
-                                <Image src={url} width={300} height={400} alt={`Page ${index + 1}`} className="w-full h-auto" />
+                             <div key={index} className="group relative border rounded-md overflow-hidden aspect-[_0.707]">
+                                <Image src={url} width={300} height={424} alt={`Page ${index + 1}`} className="w-full h-full object-contain bg-white" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Button onClick={() => handleDownload(url, index)}>
                                         <Download className="mr-2 h-4 w-4"/>
@@ -127,7 +154,7 @@ export default function PdfToImageConverter() {
                 )}
             </CardContent>
             <CardFooter>
-                <Button variant="outline" onClick={() => setPdfFile(null)}>Process Another PDF</Button>
+                <Button variant="outline" onClick={() => { setPdfFile(null); setImageUrls([]); }}>Process Another PDF</Button>
             </CardFooter>
         </Card>
     )

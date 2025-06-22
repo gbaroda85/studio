@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -10,11 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { UploadCloud, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type OutputFormat = 'jpeg' | 'png' | 'webp';
 
 export default function ImageCropper() {
   const [imgSrc, setImgSrc] = useState('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -42,11 +48,15 @@ export default function ImageCropper() {
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
-    setCrop(centerCrop({
-      unit: '%',
-      width: 90,
-      height: 90
-    }, width, height));
+    const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+    setCrop(initialCrop);
+    setCompletedCrop({
+      unit: 'px',
+      x: (width * initialCrop.x) / 100,
+      y: (height * initialCrop.y) / 100,
+      width: (width * initialCrop.width) / 100,
+      height: (height * initialCrop.height) / 100
+    });
   }
 
   function handleDownloadCrop() {
@@ -88,11 +98,12 @@ export default function ImageCropper() {
       canvas.width,
       canvas.height,
     );
-
-    const base64Image = canvas.toDataURL('image/jpeg');
+    
+    const mimeType = `image/${outputFormat}`;
+    const base64Image = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? 0.9 : undefined);
     const link = document.createElement('a');
     link.href = base64Image;
-    link.download = 'cropped-image.jpeg';
+    link.download = `cropped-image.${outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -137,17 +148,30 @@ export default function ImageCropper() {
               alt="Crop me"
               src={imgSrc}
               onLoad={onImageLoad}
-              style={{ maxHeight: '70vh', maxWidth: '100%' }}
+              style={{ maxHeight: '70vh', objectFit: 'contain' }}
             />
           </ReactCrop>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={() => setImgSrc('')}>Upload Another</Button>
-        <Button onClick={handleDownloadCrop} disabled={!completedCrop?.width || !completedCrop?.height}>
-          <Download className="mr-2" />
-          Download Cropped Image
-        </Button>
+      <CardFooter className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end sm:items-center">
+        <div className="w-full sm:w-auto grid grid-cols-2 gap-2 items-center">
+            <Label htmlFor="format" className="text-right sm:text-left">Format:</Label>
+            <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
+                <SelectTrigger id="format"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="jpeg">JPEG</SelectItem>
+                    <SelectItem value="png">PNG</SelectItem>
+                    <SelectItem value="webp">WEBP</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+        <div className="flex w-full sm:w-auto gap-2">
+            <Button variant="outline" onClick={() => setImgSrc('')} className="flex-1 sm:flex-initial">Upload Another</Button>
+            <Button onClick={handleDownloadCrop} disabled={!completedCrop?.width || !completedCrop?.height} className="flex-1 sm:flex-initial">
+              <Download className="mr-2" />
+              Download
+            </Button>
+        </div>
       </CardFooter>
     </Card>
   );

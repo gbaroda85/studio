@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
@@ -26,11 +27,15 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type CompressionResult = {
   newSize: number;
   savings: number;
 };
+
+type OutputFormat = 'jpeg' | 'png' | 'webp';
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -48,6 +53,8 @@ export default function ImageCompressor() {
   const [compressedImageSrc, setCompressedImageSrc] = useState<string | null>(null);
   const [originalSize, setOriginalSize] = useState<number | null>(null);
   const [quality, setQuality] = useState<number[]>([80]);
+  const [dimensions, setDimensions] = useState<{ width: string; height: string }>({ width: '', height: '' });
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -104,8 +111,24 @@ export default function ImageCompressor() {
     img.src = originalImageSrc;
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
+      let targetWidth = img.width;
+      let targetHeight = img.height;
+      const inputWidth = dimensions.width ? parseInt(dimensions.width, 10) : 0;
+      const inputHeight = dimensions.height ? parseInt(dimensions.height, 10) : 0;
+
+      if (inputWidth > 0 && inputHeight > 0) {
+        targetWidth = inputWidth;
+        targetHeight = inputHeight;
+      } else if (inputWidth > 0) {
+        targetWidth = inputWidth;
+        targetHeight = (img.height * inputWidth) / img.width;
+      } else if (inputHeight > 0) {
+        targetHeight = inputHeight;
+        targetWidth = (img.width * inputHeight) / img.height;
+      }
+      
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
       const ctx = canvas.getContext("2d");
 
       if (!ctx) {
@@ -113,10 +136,11 @@ export default function ImageCompressor() {
         setIsCompressing(false);
         return;
       }
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
+      const mimeType = `image/${outputFormat}`;
       const qualityValue = quality[0] / 100;
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", qualityValue);
+      const compressedDataUrl = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? qualityValue : undefined);
       setCompressedImageSrc(compressedDataUrl);
 
       fetch(compressedDataUrl)
@@ -140,7 +164,7 @@ export default function ImageCompressor() {
     link.href = compressedImageSrc;
     const nameParts = imageFile.name.split(".");
     const name = nameParts.slice(0, -1).join(".");
-    link.download = `${name}-shrunk.jpg`;
+    link.download = `${name}-shrunk.${outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -153,6 +177,7 @@ export default function ImageCompressor() {
     setOriginalSize(null);
     setCompressionResult(null);
     setIsCompressing(false);
+    setDimensions({ width: '', height: '' });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -220,18 +245,40 @@ export default function ImageCompressor() {
           <Card>
             <CardHeader>
               <CardTitle>Controls</CardTitle>
-              <CardDescription>Adjust quality to compress your image to JPG.</CardDescription>
+              <CardDescription>Adjust quality, size, and format.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="width">Width (px)</Label>
+                  <Input id="width" type="number" placeholder="Auto" value={dimensions.width} onChange={(e) => setDimensions(d => ({ ...d, width: e.target.value }))} disabled={isCompressing} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="height">Height (px)</Label>
+                  <Input id="height" type="number" placeholder="Auto" value={dimensions.height} onChange={(e) => setDimensions(d => ({ ...d, height: e.target.value }))} disabled={isCompressing} />
+                </div>
+              </div>
               <div className="space-y-2">
+                <Label htmlFor="format">Output Format</Label>
+                 <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isCompressing}>
+                    <SelectTrigger id="format"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="jpeg">JPEG</SelectItem>
+                        <SelectItem value="png">PNG</SelectItem>
+                        <SelectItem value="webp">WEBP</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+              <div className={cn("space-y-2", outputFormat !== 'jpeg' && "opacity-50")}>
                 <Label htmlFor="quality" className="flex justify-between"><span>Quality</span><span className="text-primary font-medium">{quality[0]}%</span></Label>
-                <Slider id="quality" min={1} max={100} step={1} value={quality} onValueChange={setQuality} disabled={isCompressing} />
+                <Slider id="quality" min={1} max={100} step={1} value={quality} onValueChange={setQuality} disabled={isCompressing || outputFormat !== 'jpeg'} />
+                {outputFormat !== 'jpeg' && <p className="text-xs text-muted-foreground -mt-1">Quality adjustment only applies to JPEG format.</p>}
               </div>
             </CardContent>
             <CardFooter>
               <Button className="w-full" onClick={handleCompress} disabled={isCompressing}>
                 {isCompressing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                {isCompressing ? "Compressing..." : "Compress Image"}
+                {isCompressing ? "Processing..." : "Apply & Compress"}
               </Button>
             </CardFooter>
           </Card>

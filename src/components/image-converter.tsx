@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
@@ -6,10 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, Download, Loader2, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+type OutputFormat = 'jpeg' | 'png' | 'webp';
+
 type ImageConverterProps = {
-  targetFormat: "jpeg" | "png";
+  targetFormat: OutputFormat;
 };
 
 export default function ImageConverter({ targetFormat }: ImageConverterProps) {
@@ -17,12 +22,13 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [convertedSrc, setConvertedSrc] = useState<string | null>(null);
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(targetFormat);
   const [isConverting, setIsConverting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const title = `Image to ${targetFormat.toUpperCase()}`;
-  const mimeType = `image/${targetFormat}`;
+  const title = `Image Converter`;
+  const mimeType = `image/${outputFormat}`;
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -59,6 +65,11 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       if (ctx) {
+        // For formats that don't support transparency, fill with white
+        if (outputFormat === 'jpeg') {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
         ctx.drawImage(img, 0, 0);
         const dataUrl = canvas.toDataURL(mimeType);
         setConvertedSrc(dataUrl);
@@ -76,7 +87,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     const link = document.createElement("a");
     link.href = convertedSrc;
     const name = imageFile.name.split(".").slice(0, -1).join(".");
-    link.download = `${name}.${targetFormat}`;
+    link.download = `${name}.${outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -107,7 +118,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Your image is ready to be converted.</CardDescription>
+        <CardDescription>Select an output format and convert your image.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
         <div className="relative w-full aspect-video rounded-md overflow-hidden bg-muted/30">
@@ -117,13 +128,24 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 <Image src={imageSrc} alt="Original" fill className="object-contain" />
             )}
         </div>
+        <div className="w-full space-y-2">
+            <Label htmlFor="format">Output Format</Label>
+            <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setConvertedSrc(null); }} disabled={isConverting}>
+                <SelectTrigger id="format"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="jpeg">JPEG</SelectItem>
+                    <SelectItem value="png">PNG</SelectItem>
+                    <SelectItem value="webp">WEBP</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
         {convertedSrc && <p className="text-sm font-medium text-green-600">Conversion successful!</p>}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
         {!convertedSrc ? (
             <Button onClick={handleConvert} disabled={isConverting} className="w-full">
                 {isConverting ? <Loader2 className="animate-spin mr-2"/> : <FileOutput className="mr-2"/>}
-                Convert to {targetFormat.toUpperCase()}
+                Convert to {outputFormat.toUpperCase()}
             </Button>
         ) : (
             <Button onClick={handleDownload} className="w-full">
@@ -131,7 +153,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 Download Image
             </Button>
         )}
-        <Button variant="ghost" onClick={() => setImageSrc(null)}>Convert another image</Button>
+        <Button variant="ghost" onClick={() => { setImageSrc(null); setConvertedSrc(null); setImageFile(null); }}>Convert another image</Button>
       </CardFooter>
     </Card>
   )
