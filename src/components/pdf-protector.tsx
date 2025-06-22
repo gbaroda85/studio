@@ -45,12 +45,35 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+            let pdfDoc;
+            try {
+                 pdfDoc = await PDFDocument.load(existingPdfBytes);
+            } catch(e: any) {
+                if (e?.name === 'EncryptedPDFError') {
+                    toast({ variant: 'destructive', title: 'Already Encrypted', description: 'This PDF is already password protected. Please unlock it first.' });
+                    setIsProtecting(false);
+                    return;
+                }
+                toast({ variant: 'destructive', title: 'Invalid PDF', description: 'Could not load the PDF file. It may be corrupted.' });
+                setIsProtecting(false);
+                return;
+            }
+
+            if (pdfDoc.isEncrypted) {
+                toast({ variant: 'destructive', title: 'Already Encrypted', description: 'This PDF is already password protected.' });
+                setIsProtecting(false);
+                return;
+            }
             
             const newDoc = await PDFDocument.create();
             const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
             copiedPages.forEach(page => newDoc.addPage(page));
 
+            newDoc.setTitle(pdfDoc.getTitle() ?? "Protected Document");
+            newDoc.setAuthor(pdfDoc.getAuthor() ?? "ShrinkRay User");
+            newDoc.setProducer("ShrinkRay PDF Protector");
+            newDoc.setCreator(pdfDoc.getCreator() ?? "ShrinkRay");
+            
             const protectedPdfBytes = await newDoc.save({
                 userPassword: password,
             });
@@ -69,7 +92,7 @@ export default function PdfProtector() {
 
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error Protecting PDF', description: 'Could not protect the PDF. It might be corrupted or already protected.' });
+            toast({ variant: 'destructive', title: 'Error Protecting PDF', description: 'An unexpected error occurred while protecting the PDF.' });
         } finally {
             setIsProtecting(false);
         }
@@ -103,7 +126,7 @@ export default function PdfProtector() {
                 <CardDescription>Set a password to encrypt your PDF file.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="font-medium text-sm">File: {pdfFile.name}</div>
+                <div className="font-medium text-sm truncate">File: {pdfFile.name}</div>
                 <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <Input 
@@ -121,7 +144,7 @@ export default function PdfProtector() {
                     {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2"/>}
                     Protect & Download
                 </Button>
-                <Button variant="ghost" onClick={() => setPdfFile(null)}>Protect another file</Button>
+                <Button variant="ghost" onClick={() => { setPdfFile(null); setPassword(''); }}>Protect another file</Button>
             </CardFooter>
         </Card>
     );
