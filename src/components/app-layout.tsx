@@ -23,6 +23,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
 import {Button} from '@/components/ui/button';
@@ -42,6 +43,7 @@ const menuItems = [
 
 function AppSidebar() {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
 
   return (
     <Sidebar>
@@ -60,7 +62,7 @@ function AppSidebar() {
                 tooltip={item.label}
                 asChild
               >
-                <Link href={item.href}>
+                <Link href={item.href} onClick={() => setOpenMobile(false)}>
                   <item.icon className={item.color} />
                   <span>{item.label}</span>
                 </Link>
