@@ -16,6 +16,7 @@ import {
   Unlock,
   Scissors,
   Maximize,
+  FilePenLine,
 } from 'lucide-react';
 
 import {
@@ -31,7 +32,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
-import {Button} from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
@@ -44,6 +44,7 @@ const menuItems = [
   {href: '/pdf-to-image', label: 'PDF to Image', icon: ImageIcon, color: 'text-orange-500'},
   {href: '/compress-pdf', label: 'Compress PDF', icon: FileArchive, color: 'text-purple-500'},
   {href: '/merge-pdf', label: 'Merge PDF', icon: Merge, color: 'text-pink-500'},
+  {href: '/edit-pdf', label: 'Edit PDF', icon: FilePenLine, color: 'text-lime-500'},
   {href: '/split-pdf', label: 'Split PDF', icon: Scissors, color: 'text-cyan-500'},
   {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine, color: 'text-indigo-500'},
   {href: '/protect-pdf', label: 'Protect PDF', icon: Lock, color: 'text-gray-500'},

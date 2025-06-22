@@ -19,6 +19,7 @@ import {
   Unlock,
   Scissors,
   Maximize,
+  FilePenLine,
 } from 'lucide-react';
 
 const imageFeatures = [
@@ -87,6 +88,13 @@ const pdfFeatures = [
     description: 'Combine multiple PDFs into one document.',
     icon: Merge,
     color: 'text-pink-500',
+  },
+   {
+    href: '/edit-pdf',
+    label: 'Edit PDF',
+    description: 'Add text, shapes, and annotations to a PDF.',
+    icon: FilePenLine,
+    color: 'text-lime-500',
   },
   {
     href: '/split-pdf',
