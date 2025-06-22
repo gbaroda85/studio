@@ -45,11 +45,10 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            let pdfDoc;
-
+            
+            // First, try to load it without a password to check if it's already encrypted.
             try {
-                // Try to load it without a password. If it works, it's not encrypted.
-                pdfDoc = await PDFDocument.load(existingPdfBytes);
+                await PDFDocument.load(existingPdfBytes);
             } catch (e: any) {
                 // If it fails with EncryptedPDFError, it's already protected.
                 if (e.name === 'EncryptedPDFError') {
@@ -64,28 +63,17 @@ export default function PdfProtector() {
                 // For other errors, it's likely a corrupted file.
                 throw new Error('Could not load the PDF. It may be corrupted.');
             }
-
-            // Rebuilding the document is the safest way to apply changes.
-            const newDoc = await PDFDocument.create();
-
-            // Copy metadata
-            newDoc.setTitle(pdfDoc.getTitle() ?? '');
-            newDoc.setAuthor(pdfDoc.getAuthor() ?? '');
-            newDoc.setSubject(pdfDoc.getSubject() ?? '');
-            newDoc.setKeywords(pdfDoc.getKeywords() ?? []);
-            newDoc.setProducer('ShrinkRay PDF Protector');
-            newDoc.setCreator(pdfDoc.getCreator() ?? 'ShrinkRay');
-            newDoc.setCreationDate(pdfDoc.getCreationDate() ?? new Date());
-            newDoc.setModificationDate(new Date());
-
-            // Copy pages
-            const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-            copiedPages.forEach((page) => newDoc.addPage(page));
-
-            // Apply encryption
-            const protectedPdfBytes = await newDoc.save({ userPassword: password });
             
-            // Create blob and trigger download
+            // If it loaded successfully, it's not encrypted.
+            // Now, load it again to get a doc instance and save with the password.
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+            // Set metadata
+            pdfDoc.setProducer('ShrinkRay PDF Protector');
+            pdfDoc.setModificationDate(new Date());
+
+            const protectedPdfBytes = await pdfDoc.save({ userPassword: password });
+
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
