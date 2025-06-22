@@ -64,12 +64,14 @@ function AppSidebar() {
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton
+                size="lg"
+                variant="outline"
                 isActive={pathname === item.href}
                 tooltip={item.label}
                 asChild
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={item.color} />
+                  <item.icon className={cn("size-5", item.color)} />
                   <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
@@ -83,12 +85,12 @@ function AppSidebar() {
 
 function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
+    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="md:hidden" />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl">
+        <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap">
             Welcome to ShrinkRay
         </Link>
       </div>

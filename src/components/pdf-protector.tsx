@@ -46,38 +46,46 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             let pdfDoc;
+
             try {
-                 pdfDoc = await PDFDocument.load(existingPdfBytes);
-            } catch(e: any) {
-                if (e?.name === 'EncryptedPDFError') {
-                    toast({ variant: 'destructive', title: 'Already Encrypted', description: 'This PDF is already password protected. Please unlock it first.' });
+                // Try to load it without a password. If it works, it's not encrypted.
+                pdfDoc = await PDFDocument.load(existingPdfBytes);
+            } catch (e: any) {
+                // If it fails with EncryptedPDFError, it's already protected.
+                if (e.name === 'EncryptedPDFError') {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Already Protected',
+                        description: 'This PDF is already password protected. Please use the Unlock PDF tool first.',
+                    });
                     setIsProtecting(false);
                     return;
                 }
-                toast({ variant: 'destructive', title: 'Invalid PDF', description: 'Could not load the PDF file. It may be corrupted.' });
-                setIsProtecting(false);
-                return;
+                // For other errors, it's likely a corrupted file.
+                throw new Error('Could not load the PDF. It may be corrupted.');
             }
 
-            if (pdfDoc.isEncrypted) {
-                toast({ variant: 'destructive', title: 'Already Encrypted', description: 'This PDF is already password protected.' });
-                setIsProtecting(false);
-                return;
-            }
-            
+            // Rebuilding the document is the safest way to apply changes.
             const newDoc = await PDFDocument.create();
-            const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-            copiedPages.forEach(page => newDoc.addPage(page));
 
-            newDoc.setTitle(pdfDoc.getTitle() ?? "Protected Document");
-            newDoc.setAuthor(pdfDoc.getAuthor() ?? "ShrinkRay User");
-            newDoc.setProducer("ShrinkRay PDF Protector");
-            newDoc.setCreator(pdfDoc.getCreator() ?? "ShrinkRay");
+            // Copy metadata
+            newDoc.setTitle(pdfDoc.getTitle() ?? '');
+            newDoc.setAuthor(pdfDoc.getAuthor() ?? '');
+            newDoc.setSubject(pdfDoc.getSubject() ?? '');
+            newDoc.setKeywords(pdfDoc.getKeywords() ?? []);
+            newDoc.setProducer('ShrinkRay PDF Protector');
+            newDoc.setCreator(pdfDoc.getCreator() ?? 'ShrinkRay');
+            newDoc.setCreationDate(pdfDoc.getCreationDate() ?? new Date());
+            newDoc.setModificationDate(new Date());
+
+            // Copy pages
+            const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach((page) => newDoc.addPage(page));
+
+            // Apply encryption
+            const protectedPdfBytes = await newDoc.save({ userPassword: password });
             
-            const protectedPdfBytes = await newDoc.save({
-                userPassword: password,
-            });
-            
+            // Create blob and trigger download
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -88,11 +96,15 @@ export default function PdfProtector() {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
             
-            toast({title: 'Success!', description: 'Your PDF has been protected and downloaded.'});
+            toast({ title: 'Success!', description: 'Your PDF has been protected and downloaded.' });
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error Protecting PDF', description: 'An unexpected error occurred while protecting the PDF.' });
+            toast({
+                variant: 'destructive',
+                title: 'Error Protecting PDF',
+                description: error.message || 'An unexpected error occurred.',
+            });
         } finally {
             setIsProtecting(false);
         }
