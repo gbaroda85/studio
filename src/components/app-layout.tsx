@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -14,6 +15,7 @@ import {
   Shrink,
   Unlock,
   Scissors,
+  Maximize,
 } from 'lucide-react';
 
 import {
@@ -34,6 +36,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   {href: '/image-compress', label: 'Image Compress', icon: Shrink, color: 'text-green-500'},
+  {href: '/image-resize', label: 'Resize Image', icon: Maximize, color: 'text-fuchsia-500'},
   {href: '/crop-image', label: 'Crop Image', icon: Crop, color: 'text-blue-500'},
   {href: '/image-to-jpg', label: 'Image to JPG', icon: FileOutput, color: 'text-yellow-500'},
   {href: '/image-to-png', label: 'Image to PNG', icon: FileOutput, color: 'text-sky-500'},

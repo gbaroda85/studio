@@ -1,3 +1,4 @@
+
 import {FeatureCard} from '@/components/feature-card';
 import {
   Tabs,
@@ -17,6 +18,7 @@ import {
   Shrink,
   Unlock,
   Scissors,
+  Maximize,
 } from 'lucide-react';
 
 const imageFeatures = [
@@ -25,6 +27,12 @@ const imageFeatures = [
     label: 'Image Compress',
     description: 'Reduce image file size without losing quality.',
     icon: Shrink,
+  },
+  {
+    href: '/image-resize',
+    label: 'Resize Image',
+    description: 'Change the dimensions of your image quickly.',
+    icon: Maximize,
   },
   {
     href: '/crop-image',
