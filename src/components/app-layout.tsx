@@ -26,17 +26,18 @@ import {
 } from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
 import {Button} from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
-  {href: '/image-compress', label: 'Image Compress', icon: Shrink},
-  {href: '/crop-image', label: 'Crop Image', icon: Crop},
-  {href: '/image-to-jpg', label: 'Image to JPG', icon: FileOutput},
-  {href: '/image-to-png', label: 'Image to PNG', icon: FileOutput},
-  {href: '/image-to-pdf', label: 'Image to PDF', icon: FileDigit},
-  {href: '/pdf-to-image', label: 'PDF to Image', icon: ImageIcon},
-  {href: '/compress-pdf', label: 'Compress PDF', icon: FileArchive},
-  {href: '/merge-pdf', label: 'Merge PDF', icon: Merge},
-  {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine},
+  {href: '/image-compress', label: 'Image Compress', icon: Shrink, color: 'text-green-500'},
+  {href: '/crop-image', label: 'Crop Image', icon: Crop, color: 'text-blue-500'},
+  {href: '/image-to-jpg', label: 'Image to JPG', icon: FileOutput, color: 'text-yellow-500'},
+  {href: '/image-to-png', label: 'Image to PNG', icon: FileOutput, color: 'text-sky-500'},
+  {href: '/image-to-pdf', label: 'Image to PDF', icon: FileDigit, color: 'text-red-500'},
+  {href: '/pdf-to-image', label: 'PDF to Image', icon: ImageIcon, color: 'text-orange-500'},
+  {href: '/compress-pdf', label: 'Compress PDF', icon: FileArchive, color: 'text-purple-500'},
+  {href: '/merge-pdf', label: 'Merge PDF', icon: Merge, color: 'text-pink-500'},
+  {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine, color: 'text-indigo-500'},
 ];
 
 function AppSidebar() {
@@ -45,21 +46,10 @@ function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            asChild
-            size="icon"
-            className="group-data-[collapsible=icon]:hidden"
-          >
-            <Link href="/">
-              <Shrink className="h-6 w-6 text-primary" />
-            </Link>
-          </Button>
-          <h1 className="text-xl font-bold group-data-[collapsible=icon]:hidden">
-            ShrinkRay
-          </h1>
-        </div>
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Shrink className="h-6 w-6 text-primary" />
+            <span className="group-data-[collapsible=icon]:hidden">ShrinkRay</span>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
@@ -71,7 +61,7 @@ function AppSidebar() {
                 asChild
               >
                 <Link href={item.href}>
-                  <item.icon />
+                  <item.icon className={item.color} />
                   <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
