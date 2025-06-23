@@ -37,6 +37,7 @@ import {
   Gauge,
   Coins,
   Waves,
+  Route,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -211,6 +212,13 @@ export default function Home() {
       descriptionKey: 'percentage_calculator_description',
       icon: Percent,
       color: 'text-blue-500',
+    },
+    {
+      href: '/fuel-cost-calculator',
+      labelKey: 'fuel_cost_calculator_label',
+      descriptionKey: 'fuel_cost_calculator_description',
+      icon: Route,
+      color: 'text-rose-500',
     },
   ];
   
