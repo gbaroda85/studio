@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import {FeatureCard} from '@/components/feature-card';
 import {
   Tabs,
@@ -35,6 +36,11 @@ import {useLanguage} from '@/contexts/language-context';
 
 export default function Home() {
   const {t} = useLanguage();
+  const searchParams = useSearchParams();
+
+  const validTabs = ['image', 'pdf', 'file', 'calculator'];
+  const tabParam = searchParams.get('tab');
+  const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
   const imageFeatures = [
     {
@@ -209,7 +215,7 @@ export default function Home() {
         <p className="mt-2 text-muted-foreground">{t('tagline')}</p>
       </div>
 
-      <Tabs defaultValue="image">
+      <Tabs defaultValue={defaultTab}>
         <TabsList className="grid w-full grid-cols-4 md:max-w-xl">
           <TabsTrigger value="image">
             <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
