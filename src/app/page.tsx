@@ -1,4 +1,3 @@
-
 'use client';
 
 import {FeatureCard} from '@/components/feature-card';
@@ -176,15 +175,15 @@ export default function Home() {
       <Tabs defaultValue="image">
         <TabsList className="grid w-full grid-cols-3 md:max-w-md">
           <TabsTrigger value="image">
-            <ImageIcon className="mr-2 h-4 w-4" />
+            <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
             {t('image_tools')}
           </TabsTrigger>
           <TabsTrigger value="pdf">
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4 text-red-500" />
             {t('pdf_tools')}
           </TabsTrigger>
           <TabsTrigger value="file">
-            <Archive className="mr-2 h-4 w-4" />
+            <Archive className="mr-2 h-4 w-4 text-purple-500" />
             {t('file_tools')}
           </TabsTrigger>
         </TabsList>
