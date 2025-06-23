@@ -13,8 +13,11 @@ import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import Image from 'next/image';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+
+type TextPosition = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 export default function PdfEditor() {
   const { toast } = useToast();
@@ -23,6 +26,7 @@ export default function PdfEditor() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textToAdd, setTextToAdd] = useState('Confidential');
+  const [position, setPosition] = useState<TextPosition>('center');
   
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,11 +102,50 @@ export default function PdfEditor() {
         const page = pages[currentPage - 1];
         const { width, height } = page.getSize();
         
+        const fontSize = 50;
+        const textWidth = helveticaFont.widthOfTextAtSize(textToAdd, fontSize);
+        const textHeight = helveticaFont.heightAtSize(fontSize);
+        const margin = 40;
+
+        let x = 0;
+        let y = 0;
+
+        switch (position) {
+            case 'top-left':
+                x = margin;
+                y = height - margin - textHeight;
+                break;
+            case 'top-center':
+                x = (width / 2) - (textWidth / 2);
+                y = height - margin - textHeight;
+                break;
+            case 'top-right':
+                x = width - margin - textWidth;
+                y = height - margin - textHeight;
+                break;
+            case 'center':
+                x = (width / 2) - (textWidth / 2);
+                y = (height / 2) - (textHeight / 2);
+                break;
+            case 'bottom-left':
+                x = margin;
+                y = margin;
+                break;
+            case 'bottom-center':
+                x = (width / 2) - (textWidth / 2);
+                y = margin;
+                break;
+            case 'bottom-right':
+                x = width - margin - textWidth;
+                y = margin;
+                break;
+        }
+
         page.drawText(textToAdd, {
-            x: 50,
-            y: height / 2,
+            x,
+            y,
             font: helveticaFont,
-            size: 50,
+            size: fontSize,
             color: rgb(0.95, 0.1, 0.1),
             opacity: 0.75,
         });
@@ -197,7 +240,22 @@ export default function PdfEditor() {
                         <Label htmlFor="text-to-add">Text to Add</Label>
                         <Textarea id="text-to-add" value={textToAdd} onChange={(e) => setTextToAdd(e.target.value)} placeholder="Enter text" />
                     </div>
-                    <p className="text-xs text-muted-foreground">More options like font, color, and position are coming soon!</p>
+                    <div className="space-y-2">
+                        <Label htmlFor="position">Position</Label>
+                        <Select value={position} onValueChange={(v) => setPosition(v as TextPosition)} disabled={isProcessing}>
+                            <SelectTrigger id="position"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="top-left">Top Left</SelectItem>
+                                <SelectItem value="top-center">Top Center</SelectItem>
+                                <SelectItem value="top-right">Top Right</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                                <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                                <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <p className="text-xs text-muted-foreground">More options like font and color are coming soon!</p>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
                     <Button className="w-full" onClick={handleAddText} disabled={isProcessing}>
