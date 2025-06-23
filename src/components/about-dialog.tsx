@@ -25,14 +25,15 @@ export function AboutDialog() {
           <span>{t('about_tooltip')}</span>
         </SidebarMenuButton>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] shadow-primary/20 shadow-2xl ring-2 ring-primary/50 dark:shadow-primary/10">
+      <DialogContent className="sm:max-w-[425px] shadow-primary/20 shadow-2xl ring-2 ring-primary/50 dark:shadow-primary/10 rounded-2xl">
         <DialogHeader>
           <DialogTitle>{t('about_shrinkray_title')}</DialogTitle>
           <DialogDescription>
             {t('tagline')}
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 text-sm text-center text-muted-foreground">
+        <div className="py-4 text-sm text-center text-muted-foreground space-y-4">
+          <p>{t('about_detailed_description')}</p>
           <p>
             {t('developed_by')}{" "}
             <span className="font-semibold text-foreground">Gaurav S</span>.
