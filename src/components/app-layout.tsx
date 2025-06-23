@@ -22,6 +22,10 @@ import {
   Settings,
   Archive,
   ArchiveRestore,
+  Calculator,
+  Landmark,
+  Cake,
+  Percent,
 } from 'lucide-react';
 
 import {
@@ -75,6 +79,10 @@ function AppSidebar() {
     {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
     {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-500'},
     {href: '/unzip-file', labelKey: 'unzip_file_label', icon: ArchiveRestore, color: 'text-stone-500'},
+    {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-cyan-500'},
+    {href: '/loan-calculator', labelKey: 'loan_emi_calculator_label', icon: Landmark, color: 'text-cyan-500'},
+    {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-cyan-500'},
+    {href: '/percentage-calculator', labelKey: 'percentage_calculator_label', icon: Percent, color: 'text-cyan-500'},
   ];
 
   return (

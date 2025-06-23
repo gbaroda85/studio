@@ -1,0 +1,123 @@
+"use client"
+
+import { useState } from "react"
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, addMonths } from "date-fns"
+import { Calendar as CalendarIcon, Calculator } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
+
+export default function AgeCalculator() {
+  const [dateOfBirth, setDateOfBirth] = useState<Date>()
+  const [age, setAge] = useState<{ years: number, months: number, days: number } | null>(null)
+  const { toast } = useToast()
+
+  const handleCalculateAge = () => {
+    if (!dateOfBirth) {
+      toast({
+        variant: "destructive",
+        title: "No Date Selected",
+        description: "Please select your date of birth.",
+      })
+      return
+    }
+
+    const now = new Date()
+    if (dateOfBirth > now) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Date",
+        description: "Date of birth cannot be in the future.",
+      })
+      return
+    }
+
+    const years = differenceInYears(now, dateOfBirth)
+    const pastDateWithYears = addYears(dateOfBirth, years)
+    const months = differenceInMonths(now, pastDateWithYears)
+    const pastDateWithMonths = addMonths(pastDateWithYears, months)
+    const days = differenceInDays(now, pastDateWithMonths)
+
+    setAge({ years, months, days })
+  }
+  
+  const handleReset = () => {
+    setDateOfBirth(undefined);
+    setAge(null);
+  }
+
+  return (
+    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+      <CardHeader>
+        <CardTitle>Age Calculator</CardTitle>
+        <CardDescription>Select your date of birth to find out your exact age.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !dateOfBirth && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={dateOfBirth}
+                onSelect={setDateOfBirth}
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={new Date().getFullYear()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {age !== null && (
+           <div className="pt-4 text-center">
+                <p className="text-muted-foreground">You are</p>
+                <div className="flex justify-center items-baseline gap-4 my-2">
+                    <div className="flex flex-col items-center">
+                        <span className="text-5xl font-bold text-cyan-500">{age.years}</span>
+                        <span className="text-sm text-muted-foreground">Years</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-5xl font-bold text-cyan-500">{age.months}</span>
+                        <span className="text-sm text-muted-foreground">Months</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-5xl font-bold text-cyan-500">{age.days}</span>
+                        <span className="text-sm text-muted-foreground">Days</span>
+                    </div>
+                </div>
+                <p className="text-muted-foreground">old</p>
+           </div>
+        )}
+
+      </CardContent>
+      <CardFooter className="flex flex-col gap-2">
+        <Button onClick={handleCalculateAge} className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+          <Calculator className="mr-2" />
+          Calculate Age
+        </Button>
+        {age !== null && <Button variant="ghost" onClick={handleReset} className="w-full">Calculate another</Button>}
+      </CardFooter>
+    </Card>
+  )
+}

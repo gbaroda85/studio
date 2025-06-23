@@ -25,6 +25,10 @@ import {
   Archive,
   ArchiveRestore,
   FileText,
+  Calculator,
+  Landmark,
+  Cake,
+  Percent,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -166,6 +170,38 @@ export default function Home() {
     },
   ];
 
+  const calculatorFeatures = [
+    {
+      href: '/standard-calculator',
+      labelKey: 'standard_calculator_label',
+      descriptionKey: 'standard_calculator_description',
+      icon: Calculator,
+      color: 'text-cyan-500',
+    },
+    {
+      href: '/loan-calculator',
+      labelKey: 'loan_emi_calculator_label',
+      descriptionKey: 'loan_emi_calculator_description',
+      icon: Landmark,
+      color: 'text-cyan-500',
+    },
+    {
+      href: '/age-calculator',
+      labelKey: 'age_calculator_label',
+      descriptionKey: 'age_calculator_description',
+      icon: Cake,
+      color: 'text-cyan-500',
+    },
+    {
+      href: '/percentage-calculator',
+      labelKey: 'percentage_calculator_label',
+      descriptionKey: 'percentage_calculator_description',
+      icon: Percent,
+      color: 'text-cyan-500',
+    },
+  ];
+
+
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-8 max-w-2xl">
@@ -173,7 +209,7 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue="image">
-        <TabsList className="grid w-full grid-cols-3 md:max-w-md">
+        <TabsList className="grid w-full grid-cols-4 md:max-w-xl">
           <TabsTrigger value="image">
             <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
             {t('image_tools')}
@@ -185,6 +221,10 @@ export default function Home() {
           <TabsTrigger value="file">
             <Archive className="mr-2 h-4 w-4 text-purple-500" />
             {t('file_tools')}
+          </TabsTrigger>
+          <TabsTrigger value="calculator">
+            <Calculator className="mr-2 h-4 w-4 text-cyan-500" />
+            {t('calculator_pro')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="image">
@@ -218,6 +258,20 @@ export default function Home() {
         <TabsContent value="file">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
             {fileFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.href}
+                title={t(feature.labelKey)}
+                description={t(feature.descriptionKey)}
+                href={feature.href}
+                icon={feature.icon}
+                color={feature.color}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        <TabsContent value="calculator">
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+            {calculatorFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
