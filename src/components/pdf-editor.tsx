@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -27,14 +27,33 @@ export default function PdfEditor() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textToAdd, setTextToAdd] = useState('Confidential');
   const [position, setPosition] = useState<TextPosition>('center');
+  const [editedPdfUrl, setEditedPdfUrl] = useState<string | null>(null);
   
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagePreviews, setPagePreviews] = useState<string[]>([]);
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
+  useEffect(() => {
+    // Clean up blob URL on unmount
+    return () => {
+      if (editedPdfUrl) {
+        URL.revokeObjectURL(editedPdfUrl);
+      }
+    };
+  }, [editedPdfUrl]);
+
+  useEffect(() => {
+      if (editedPdfUrl) {
+          URL.revokeObjectURL(editedPdfUrl);
+          setEditedPdfUrl(null);
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [textToAdd, position]);
+
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
+      resetState();
       setPdfFile(file);
       setIsProcessing(true);
       try {
@@ -83,6 +102,10 @@ export default function PdfEditor() {
   const handlePageChange = (newPage: number) => {
       if (newPage > 0 && newPage <= numPages) {
           setCurrentPage(newPage);
+          if (editedPdfUrl) {
+            URL.revokeObjectURL(editedPdfUrl);
+            setEditedPdfUrl(null);
+          }
       }
   }
 
@@ -111,34 +134,13 @@ export default function PdfEditor() {
         let y = 0;
 
         switch (position) {
-            case 'top-left':
-                x = margin;
-                y = height - margin - textHeight;
-                break;
-            case 'top-center':
-                x = (width / 2) - (textWidth / 2);
-                y = height - margin - textHeight;
-                break;
-            case 'top-right':
-                x = width - margin - textWidth;
-                y = height - margin - textHeight;
-                break;
-            case 'center':
-                x = (width / 2) - (textWidth / 2);
-                y = (height / 2) - (textHeight / 2);
-                break;
-            case 'bottom-left':
-                x = margin;
-                y = margin;
-                break;
-            case 'bottom-center':
-                x = (width / 2) - (textWidth / 2);
-                y = margin;
-                break;
-            case 'bottom-right':
-                x = width - margin - textWidth;
-                y = margin;
-                break;
+            case 'top-left': x = margin; y = height - margin - textHeight; break;
+            case 'top-center': x = (width / 2) - (textWidth / 2); y = height - margin - textHeight; break;
+            case 'top-right': x = width - margin - textWidth; y = height - margin - textHeight; break;
+            case 'center': x = (width / 2) - (textWidth / 2); y = (height / 2) - (textHeight / 2); break;
+            case 'bottom-left': x = margin; y = margin; break;
+            case 'bottom-center': x = (width / 2) - (textWidth / 2); y = margin; break;
+            case 'bottom-right': x = width - margin - textWidth; y = margin; break;
         }
 
         page.drawText(textToAdd, {
@@ -153,20 +155,24 @@ export default function PdfEditor() {
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `edited-${pdfFile.name}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast({title: "Success", description: "Text added and PDF downloaded."});
+        setEditedPdfUrl(url);
+        toast({title: "Success", description: "Text added. Your PDF is ready to download."});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to edit the PDF.'});
     } finally {
         setIsProcessing(false);
     }
+  }
+  
+  const handleDownload = () => {
+      if (!editedPdfUrl || !pdfFile) return;
+      const link = document.createElement('a');
+      link.href = editedPdfUrl;
+      link.download = `edited-${pdfFile.name}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
   }
 
   const resetState = () => {
@@ -175,6 +181,10 @@ export default function PdfEditor() {
       setNumPages(0);
       setCurrentPage(1);
       setPagePreviews([]);
+      if (editedPdfUrl) {
+          URL.revokeObjectURL(editedPdfUrl);
+          setEditedPdfUrl(null);
+      }
       pdfDocRef.current = null;
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -258,10 +268,17 @@ export default function PdfEditor() {
                     <p className="text-xs text-muted-foreground">More options like font and color are coming soon!</p>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
-                    <Button className="w-full" onClick={handleAddText} disabled={isProcessing}>
-                        <Type className="mr-2" />
-                        Add Text & Download
-                    </Button>
+                    {!editedPdfUrl ? (
+                        <Button className="w-full" onClick={handleAddText} disabled={isProcessing}>
+                            {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Type className="mr-2" />}
+                            Apply Text
+                        </Button>
+                    ) : (
+                        <Button className="w-full" onClick={handleDownload}>
+                            <Download className="mr-2" />
+                            Download PDF
+                        </Button>
+                    )}
                     <Button variant="outline" onClick={resetState} className="w-full">Upload Another</Button>
                 </CardFooter>
             </Card>

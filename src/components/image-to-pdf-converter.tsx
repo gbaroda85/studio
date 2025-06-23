@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
@@ -15,9 +15,23 @@ export default function ImageToPdfConverter() {
   const [imageSrcs, setImageSrcs] = useState<string[]>([]);
   const [isConverting, setIsConverting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    // Clean up blob URL on unmount
+    return () => {
+      if (convertedPdfUrl) {
+        URL.revokeObjectURL(convertedPdfUrl);
+      }
+    };
+  }, [convertedPdfUrl]);
+
   const handleFilesChange = (files: FileList | null) => {
+    if (convertedPdfUrl) {
+        URL.revokeObjectURL(convertedPdfUrl);
+        setConvertedPdfUrl(null);
+    }
     const newFiles = Array.from(files || []).filter(file => file.type.startsWith('image/'));
     if (newFiles.length === 0 && files && files.length > 0) {
         toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only image files.' });
@@ -44,8 +58,21 @@ export default function ImageToPdfConverter() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
 
   const handleRemoveImage = (index: number) => {
+    if (convertedPdfUrl) {
+        URL.revokeObjectURL(convertedPdfUrl);
+        setConvertedPdfUrl(null);
+    }
     setImageFiles(files => files.filter((_, i) => i !== index));
     setImageSrcs(srcs => srcs.filter((_, i) => i !== index));
+  }
+  
+  const handleReset = () => {
+    setImageFiles([]);
+    setImageSrcs([]);
+    if (convertedPdfUrl) {
+      URL.revokeObjectURL(convertedPdfUrl);
+    }
+    setConvertedPdfUrl(null);
   }
 
   const handleConvertToPdf = () => {
@@ -54,42 +81,61 @@ export default function ImageToPdfConverter() {
 
     const pdf = new jsPDF();
     let processedImages = 0;
-
-    imageSrcs.forEach((src, index) => {
-        const img = new window.Image();
-        img.src = src;
-        img.onload = () => {
-            if (index > 0) {
-                pdf.addPage();
+    
+    // Create a new promise to handle the async operations
+    new Promise<string>((resolve, reject) => {
+        imageSrcs.forEach((src, index) => {
+            const img = new window.Image();
+            img.src = src;
+            img.onload = () => {
+                if (index > 0) {
+                    pdf.addPage();
+                }
+                const imgProps = pdf.getImageProperties(img);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const widthRatio = pdfWidth / imgProps.width;
+                const heightRatio = pdfHeight / imgProps.height;
+                const ratio = Math.min(widthRatio, heightRatio);
+                const imgWidth = imgProps.width * ratio;
+                const imgHeight = imgProps.height * ratio;
+                const x = (pdfWidth - imgWidth) / 2;
+                const y = (pdfHeight - imgHeight) / 2;
+                pdf.addImage(img, 'PNG', x, y, imgWidth, imgHeight);
+                
+                processedImages++;
+                if (processedImages === imageFiles.length) {
+                    const pdfBlob = pdf.output('blob');
+                    const url = URL.createObjectURL(pdfBlob);
+                    resolve(url);
+                }
             }
-            const imgProps = pdf.getImageProperties(img);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const widthRatio = pdfWidth / imgProps.width;
-            const heightRatio = pdfHeight / imgProps.height;
-            const ratio = Math.min(widthRatio, heightRatio);
-            const imgWidth = imgProps.width * ratio;
-            const imgHeight = imgProps.height * ratio;
-            const x = (pdfWidth - imgWidth) / 2;
-            const y = (pdfHeight - imgHeight) / 2;
-            pdf.addImage(img, 'PNG', x, y, imgWidth, imgHeight);
-            
-            processedImages++;
-            if (processedImages === imageFiles.length) {
-                pdf.save('converted.pdf');
-                setIsConverting(false);
+            img.onerror = () => {
+                processedImages++;
+                toast({variant: 'destructive', title: 'Error', description: `Could not load image ${imageFiles[index].name}`})
+                if (processedImages === imageFiles.length) {
+                    const pdfBlob = pdf.output('blob');
+                    const url = URL.createObjectURL(pdfBlob);
+                    resolve(url);
+                }
             }
-        }
-        img.onerror = () => {
-            processedImages++;
-            toast({variant: 'destructive', title: 'Error', description: `Could not load image ${imageFiles[index].name}`})
-            if (processedImages === imageFiles.length) {
-                pdf.save('converted.pdf');
-                setIsConverting(false);
-            }
-        }
+        });
+    }).then(url => {
+        setConvertedPdfUrl(url);
+        toast({ title: "Success!", description: "Your PDF is ready for download." });
+        setIsConverting(false);
     });
   };
+  
+  const handleDownload = () => {
+      if (!convertedPdfUrl) return;
+      const link = document.createElement('a');
+      link.href = convertedPdfUrl;
+      link.download = "converted-images.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  }
 
   return (
     <Card className={cn("w-full max-w-4xl transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
@@ -114,7 +160,7 @@ export default function ImageToPdfConverter() {
                  </Button>
               </div>
             ))}
-            <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+            <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors aspect-square" onClick={() => fileInputRef.current?.click()}>
                  <UploadCloud className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
@@ -122,11 +168,19 @@ export default function ImageToPdfConverter() {
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-         {imageSrcs.length > 0 && <Button variant="outline" onClick={() => {setImageFiles([]); setImageSrcs([])}}>Clear All</Button>}
-        <Button onClick={handleConvertToPdf} disabled={isConverting || imageFiles.length === 0}>
-          {isConverting ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />}
-          {isConverting ? "Converting..." : "Convert & Download PDF"}
-        </Button>
+         {imageSrcs.length > 0 && <Button variant="outline" onClick={handleReset}>Clear All</Button>}
+         
+         {!convertedPdfUrl ? (
+            <Button onClick={handleConvertToPdf} disabled={isConverting || imageFiles.length === 0}>
+                {isConverting ? <Loader2 className="mr-2 animate-spin" /> : <FileDigit className="mr-2" />}
+                {isConverting ? "Converting..." : "Convert to PDF"}
+            </Button>
+         ) : (
+            <Button onClick={handleDownload}>
+                <Download className="mr-2" />
+                Download PDF
+            </Button>
+         )}
       </CardFooter>
     </Card>
   );

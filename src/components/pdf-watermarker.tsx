@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,9 +28,25 @@ export default function PdfWatermarker() {
   const [opacity, setOpacity] = useState([50]);
   const [fontSize, setFontSize] = useState(50);
   const [rotation, setRotation] = useState(0);
+  const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+        if(watermarkedPdfUrl) URL.revokeObjectURL(watermarkedPdfUrl);
+    }
+  }, [watermarkedPdfUrl]);
+
+  useEffect(() => {
+    if (watermarkedPdfUrl) {
+        URL.revokeObjectURL(watermarkedPdfUrl);
+        setWatermarkedPdfUrl(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watermarkText, position, opacity, fontSize, rotation]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type === 'application/pdf') {
+      resetState();
       setPdfFile(file);
     } else if (file) {
       toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
@@ -106,13 +122,8 @@ export default function PdfWatermarker() {
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `watermarked-${pdfFile.name}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        setWatermarkedPdfUrl(url);
+        toast({title: "Success!", description: "Watermark applied. Your PDF is ready for download."});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to add watermark. The PDF might be encrypted.'});
@@ -120,9 +131,23 @@ export default function PdfWatermarker() {
         setIsProcessing(false);
     }
   }
+  
+  const handleDownload = () => {
+    if (!watermarkedPdfUrl || !pdfFile) return;
+    const link = document.createElement('a');
+    link.href = watermarkedPdfUrl;
+    link.download = `watermarked-${pdfFile.name}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   const resetState = () => {
       setPdfFile(null);
+      if (watermarkedPdfUrl) {
+          URL.revokeObjectURL(watermarkedPdfUrl);
+          setWatermarkedPdfUrl(null);
+      }
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
   
@@ -190,10 +215,17 @@ export default function PdfWatermarker() {
         </CardContent>
         <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <Button variant="outline" onClick={resetState}>Upload Another</Button>
-            <Button onClick={handleApplyWatermark} disabled={isProcessing}>
-                {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Copyright className="mr-2" />}
-                Apply Watermark & Download
-            </Button>
+            {!watermarkedPdfUrl ? (
+                <Button onClick={handleApplyWatermark} disabled={isProcessing}>
+                    {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Copyright className="mr-2" />}
+                    Apply Watermark
+                </Button>
+            ) : (
+                <Button onClick={handleDownload}>
+                    <Download className="mr-2" />
+                    Download PDF
+                </Button>
+            )}
         </CardFooter>
     </Card>
   )

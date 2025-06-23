@@ -3,7 +3,7 @@
 
 import 'react-image-crop/dist/ReactCrop.css';
 
-import React, { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
+import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
@@ -28,13 +28,23 @@ export default function PdfCropper() {
   const [pageImage, setPageImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [croppedPdfUrl, setCroppedPdfUrl] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
+  useEffect(() => {
+    // Clean up blob URL on unmount
+    return () => {
+      if (croppedPdfUrl) {
+        URL.revokeObjectURL(croppedPdfUrl);
+      }
+    };
+  }, [croppedPdfUrl]);
+
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
+      resetState();
       setPdfFile(file);
-      setCrop(undefined);
       setIsProcessing(true);
       try {
         const fileReader = new FileReader();
@@ -91,6 +101,7 @@ export default function PdfCropper() {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
     setCrop(initialCrop);
+    setCompletedCrop(undefined); // Reset completed crop on image load
   }
 
   const handlePageChange = (newPage: number) => {
@@ -98,6 +109,10 @@ export default function PdfCropper() {
           setCurrentPage(newPage);
           setCrop(undefined);
           setCompletedCrop(undefined);
+          if (croppedPdfUrl) {
+            URL.revokeObjectURL(croppedPdfUrl);
+            setCroppedPdfUrl(null);
+          }
           renderPage(pdfDocRef.current, newPage);
       }
   }
@@ -116,47 +131,28 @@ export default function PdfCropper() {
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-
-      // Create a new document for the single, cropped page
       const newPdfDoc = await PDFDocument.create();
       const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
       newPdfDoc.addPage(copiedPage);
-      const page = newPdfDoc.getPage(0); // Work with the page in the new document
+      const page = newPdfDoc.getPage(0); 
 
       const image = imgRef.current;
       if (!image) throw new Error('Image reference not found');
 
-      // The scale used to render the PDF page to canvas
       const RENDER_SCALE = 2.0;
-
-      // Get page dimensions from pdf-lib
       const {width: pagePointsWidth, height: pagePointsHeight} = page.getSize();
-
-      // Get displayed image dimensions
       const {width: displayWidth, height: displayHeight} = image;
-
-      // Get the natural (unscaled by browser) image dimensions, which is the size of the canvas we rendered to.
       const {naturalWidth, naturalHeight} = image;
-
-      // Calculate the scaling factor between the displayed image and the natural image.
       const scaleX = naturalWidth / displayWidth;
       const scaleY = naturalHeight / displayHeight;
-
-      // Convert the visual crop coordinates (in display pixels) to coordinates on the full-resolution canvas.
       const canvasCropX = completedCrop.x * scaleX;
       const canvasCropY = completedCrop.y * scaleY;
       const canvasCropWidth = completedCrop.width * scaleX;
       const canvasCropHeight = completedCrop.height * scaleY;
-
-      // Convert canvas pixel coordinates to PDF points.
-      // The canvas was rendered at RENDER_SCALE, so we divide by that scale.
       const cropBoxX = canvasCropX / RENDER_SCALE;
       const cropBoxWidth = canvasCropWidth / RENDER_SCALE;
       const cropBoxHeight = canvasCropHeight / RENDER_SCALE;
-
-      // The Y-coordinate in pdf-lib is from the bottom-left corner, so we need to invert it.
-      const cropBoxY =
-        pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
+      const cropBoxY = pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
 
       if (page.getRotation().angle !== 0) {
         toast({
@@ -167,24 +163,14 @@ export default function PdfCropper() {
       }
 
       page.setCropBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
-      // Also set MediaBox to ensure viewers respect the crop
       page.setMediaBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
 
-      // Save the new, single-page document
       const newPdfBytes = await newPdfDoc.save();
       const blob = new Blob([newPdfBytes], {type: 'application/pdf'});
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      const originalName = pdfFile.name.replace(/\.pdf$/i, '');
-      link.download = `${originalName}-page${currentPage}-cropped.pdf`;
+      setCroppedPdfUrl(url);
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      toast({ title: "Success!", description: `Page ${currentPage} was cropped and downloaded.` });
+      toast({ title: "Success!", description: `Page ${currentPage} was cropped and is ready for download.` });
     } catch (error) {
       console.error(error);
       toast({
@@ -196,6 +182,17 @@ export default function PdfCropper() {
       setIsProcessing(false);
     }
   };
+  
+  const handleDownload = () => {
+    if (!croppedPdfUrl || !pdfFile) return;
+    const link = document.createElement('a');
+    link.href = croppedPdfUrl;
+    const originalName = pdfFile.name.replace(/\.pdf$/i, '');
+    link.download = `${originalName}-page${currentPage}-cropped.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   const resetState = () => {
       setPdfFile(null);
@@ -205,6 +202,10 @@ export default function PdfCropper() {
       setPageImage(null);
       setCrop(undefined);
       setCompletedCrop(undefined);
+      if (croppedPdfUrl) {
+          URL.revokeObjectURL(croppedPdfUrl);
+          setCroppedPdfUrl(null);
+      }
       pdfDocRef.current = null;
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -234,13 +235,13 @@ export default function PdfCropper() {
     <Card className="w-full max-w-4xl">
         <CardHeader>
             <CardTitle>Crop PDF</CardTitle>
-            <CardDescription>Select an area on the page to crop. A new PDF with only the cropped page will be downloaded.</CardDescription>
+            <CardDescription>Select an area on the page to crop. A new PDF with only the cropped page will be created.</CardDescription>
         </CardHeader>
         <CardContent>
             {isProcessing && !pageImage && <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>}
             {pageImage && (
                 <div className="flex justify-center bg-muted/30 p-4 rounded-md relative">
-                    {isProcessing && <div className="absolute inset-0 bg-background/50 flex justify-center items-center z-10"><Loader2 className="h-8 w-8 animate-spin" /></div>}
+                    {isProcessing && !croppedPdfUrl && <div className="absolute inset-0 bg-background/50 flex justify-center items-center z-10"><Loader2 className="h-8 w-8 animate-spin" /></div>}
                     <ReactCrop
                         crop={crop}
                         onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -271,10 +272,17 @@ export default function PdfCropper() {
             </div>
             <div className="flex gap-2">
                 <Button variant="outline" onClick={resetState}>Upload Another</Button>
-                <Button onClick={handleCropPdf} disabled={!completedCrop?.width || isProcessing}>
-                    <Scissors className="mr-2" />
-                    Crop & Download Page
-                </Button>
+                {!croppedPdfUrl ? (
+                    <Button onClick={handleCropPdf} disabled={!completedCrop?.width || isProcessing}>
+                        <Scissors className="mr-2" />
+                        Crop Page
+                    </Button>
+                ) : (
+                    <Button onClick={handleDownload}>
+                        <Download className="mr-2" />
+                        Download Cropped Page
+                    </Button>
+                )}
             </div>
         </CardFooter>
     </Card>

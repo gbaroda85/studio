@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -13,9 +13,27 @@ export default function PdfMerger() {
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [isMerging, setIsMerging] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        // Clean up blob URL on unmount
+        return () => {
+            if (mergedPdfUrl) {
+                URL.revokeObjectURL(mergedPdfUrl);
+            }
+        };
+    }, [mergedPdfUrl]);
+    
+    const clearMergedFile = () => {
+        if (mergedPdfUrl) {
+            URL.revokeObjectURL(mergedPdfUrl);
+            setMergedPdfUrl(null);
+        }
+    }
+
     const handleFilesChange = (files: FileList | null) => {
+        clearMergedFile();
         const newFiles = Array.from(files || []).filter(file => file.type === 'application/pdf');
         if (newFiles.length === 0 && files && files.length > 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
@@ -30,8 +48,14 @@ export default function PdfMerger() {
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
 
     const handleRemoveFile = (index: number) => {
+        clearMergedFile();
         setPdfFiles(files => files.filter((_, i) => i !== index));
     };
+    
+    const handleReset = () => {
+        setPdfFiles([]);
+        clearMergedFile();
+    }
 
     const handleMergePdfs = async () => {
         if (pdfFiles.length < 2) {
@@ -44,7 +68,7 @@ export default function PdfMerger() {
             const mergedPdf = await PDFDocument.create();
             for (const file of pdfFiles) {
                 const pdfBytes = await file.arrayBuffer();
-                const pdfDoc = await PDFDocument.load(pdfBytes);
+                const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
                 const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
@@ -52,15 +76,9 @@ export default function PdfMerger() {
             
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'merged.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            setMergedPdfUrl(url);
             
-            toast({title: 'Success!', description: 'Your PDFs have been merged and downloaded.'});
+            toast({title: 'Success!', description: 'Your PDFs have been merged and are ready to download.'});
 
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error Merging', description: 'Could not merge the PDFs. One or more files might be corrupt or password-protected.' });
@@ -68,6 +86,16 @@ export default function PdfMerger() {
             setIsMerging(false);
         }
     };
+    
+    const handleDownload = () => {
+        if (!mergedPdfUrl) return;
+        const link = document.createElement('a');
+        link.href = mergedPdfUrl;
+        link.download = 'merged.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
     
     return (
         <Card className={cn("w-full max-w-4xl transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
@@ -102,11 +130,19 @@ export default function PdfMerger() {
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
-                {pdfFiles.length > 0 && <Button variant="outline" onClick={() => setPdfFiles([])}>Clear All</Button>}
-                <Button onClick={handleMergePdfs} disabled={isMerging || pdfFiles.length < 2}>
-                    {isMerging ? <Loader2 className="mr-2 animate-spin" /> : <Merge className="mr-2" />}
-                    {isMerging ? 'Merging...' : 'Merge & Download'}
-                </Button>
+                {pdfFiles.length > 0 && <Button variant="outline" onClick={handleReset}>Clear All</Button>}
+                
+                {!mergedPdfUrl ? (
+                    <Button onClick={handleMergePdfs} disabled={isMerging || pdfFiles.length < 2}>
+                        {isMerging ? <Loader2 className="mr-2 animate-spin" /> : <Merge className="mr-2" />}
+                        {isMerging ? 'Merging...' : 'Merge PDFs'}
+                    </Button>
+                ) : (
+                    <Button onClick={handleDownload}>
+                        <Download className="mr-2" />
+                        Download Merged PDF
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     )

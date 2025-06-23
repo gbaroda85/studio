@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -48,12 +48,27 @@ export default function PdfSplitter() {
     const [pageRanges, setPageRanges] = useState('');
     const [isSplitting, setIsSplitting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [splitPdfUrl, setSplitPdfUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    useEffect(() => {
+        return () => {
+            if (splitPdfUrl) URL.revokeObjectURL(splitPdfUrl);
+        }
+    }, [splitPdfUrl]);
+    
+    const clearSplitFile = () => {
+        if (splitPdfUrl) {
+            URL.revokeObjectURL(splitPdfUrl);
+            setSplitPdfUrl(null);
+        }
+    }
 
     const handleFileChange = async (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPageRanges('');
+            clearSplitFile();
             setIsSplitting(true); // Show loader while getting page count
             try {
                 const pdfBytes = await file.arrayBuffer();
@@ -86,6 +101,7 @@ export default function PdfSplitter() {
         }
         
         setIsSplitting(true);
+        clearSplitFile();
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
@@ -100,15 +116,9 @@ export default function PdfSplitter() {
             
             const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `split-${pdfFile.name}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            setSplitPdfUrl(url);
             
-            toast({title: 'Success!', description: `Created a new PDF with ${pagesToExtract.length} pages.`});
+            toast({title: 'Success!', description: `Created a new PDF with ${pagesToExtract.length} pages. It's ready for download.`});
 
         } catch (error) {
             console.error(error);
@@ -117,6 +127,25 @@ export default function PdfSplitter() {
             setIsSplitting(false);
         }
     };
+    
+    const handleDownload = () => {
+        if (!splitPdfUrl || !pdfFile) return;
+        const link = document.createElement('a');
+        link.href = splitPdfUrl;
+        link.download = `split-${pdfFile.name}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    const resetState = () => {
+        setPdfFile(null);
+        setTotalPages(0);
+        clearSplitFile();
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
     
     if (!pdfFile) {
         return (
@@ -154,7 +183,7 @@ export default function PdfSplitter() {
                         id="pages" 
                         type="text" 
                         value={pageRanges} 
-                        onChange={(e) => setPageRanges(e.target.value)}
+                        onChange={(e) => { setPageRanges(e.target.value); clearSplitFile(); }}
                         placeholder="e.g., 1-3, 5, 8-10"
                         disabled={isSplitting}
                     />
@@ -164,11 +193,18 @@ export default function PdfSplitter() {
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-                <Button onClick={handleSplitPdf} disabled={isSplitting || !pageRanges} className="w-full">
-                    {isSplitting ? <Loader2 className="animate-spin mr-2"/> : <Scissors className="mr-2"/>}
-                    Split & Download
-                </Button>
-                <Button variant="ghost" onClick={() => {setPdfFile(null); setTotalPages(0);}}>Split another file</Button>
+                {!splitPdfUrl ? (
+                    <Button onClick={handleSplitPdf} disabled={isSplitting || !pageRanges} className="w-full">
+                        {isSplitting ? <Loader2 className="animate-spin mr-2"/> : <Scissors className="mr-2"/>}
+                        Split PDF
+                    </Button>
+                ) : (
+                    <Button onClick={handleDownload} className="w-full">
+                        <Download className="mr-2" />
+                        Download Split PDF
+                    </Button>
+                )}
+                <Button variant="ghost" onClick={resetState}>Split another file</Button>
             </CardFooter>
         </Card>
     );

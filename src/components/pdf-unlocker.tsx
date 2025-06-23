@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -17,12 +17,27 @@ export default function PdfUnlocker() {
     const [password, setPassword] = useState('');
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [unlockedPdfUrl, setUnlockedPdfUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    useEffect(() => {
+        return () => {
+            if (unlockedPdfUrl) URL.revokeObjectURL(unlockedPdfUrl);
+        }
+    }, [unlockedPdfUrl]);
+    
+    const clearUnlockedFile = () => {
+        if (unlockedPdfUrl) {
+            URL.revokeObjectURL(unlockedPdfUrl);
+            setUnlockedPdfUrl(null);
+        }
+    }
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPassword('');
+            clearUnlockedFile();
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
@@ -36,6 +51,7 @@ export default function PdfUnlocker() {
     const resetState = () => {
         setPdfFile(null);
         setPassword('');
+        clearUnlockedFile();
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
@@ -51,6 +67,7 @@ export default function PdfUnlocker() {
             return;
         }
         setIsUnlocking(true);
+        clearUnlockedFile();
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
@@ -62,34 +79,23 @@ export default function PdfUnlocker() {
                 return;
             }
 
-            // Try loading with the provided password
             const pdfDoc = await PDFDocument.load(pdfBytes, {
                 userPassword: password,
             });
 
-            // Create a new, clean document to be sure all encryption is stripped.
             const unlockedDoc = await PDFDocument.create();
             const copiedPages = await unlockedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
             copiedPages.forEach((page) => {
                 unlockedDoc.addPage(page);
-});
+            });
 
-            // Save the new document, which has no encryption.
             const unlockedPdfBytes = await unlockedDoc.save();
             
             const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `unlocked-${pdfFile.name}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            setUnlockedPdfUrl(url);
             
-            toast({title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
-            resetState();
-
+            toast({title: 'Success!', description: 'Your PDF has been unlocked and is ready for download.'});
         } catch (error: any) {
             if (error.constructor.name === 'EncryptedPDFError' || (error.message && error.message.includes('password'))) {
                  toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password you entered is incorrect.' });
@@ -101,6 +107,16 @@ export default function PdfUnlocker() {
             setIsUnlocking(false);
         }
     };
+    
+    const handleDownload = () => {
+        if (!unlockedPdfUrl || !pdfFile) return;
+        const link = document.createElement('a');
+        link.href = unlockedPdfUrl;
+        link.download = `unlocked-${pdfFile.name}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     if (!pdfFile) {
         return (
@@ -137,17 +153,24 @@ export default function PdfUnlocker() {
                         id="password" 
                         type="password" 
                         value={password} 
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => { setPassword(e.target.value); clearUnlockedFile(); }}
                         placeholder="Enter current password"
                         disabled={isUnlocking}
                     />
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-                <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password} className="w-full">
-                    {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Unlock className="mr-2"/>}
-                    Unlock & Download
-                </Button>
+                {!unlockedPdfUrl ? (
+                    <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password} className="w-full">
+                        {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Unlock className="mr-2"/>}
+                        Unlock PDF
+                    </Button>
+                ) : (
+                    <Button onClick={handleDownload} className="w-full">
+                        <Download className="mr-2" />
+                        Download Unlocked PDF
+                    </Button>
+                )}
                 <Button variant="ghost" onClick={resetState}>Unlock another file</Button>
             </CardFooter>
         </Card>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
 import Image from "next/image";
 import {
   UploadCloud,
@@ -59,6 +59,17 @@ export default function ImageCompressor() {
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset compressed state if settings change
+  useEffect(() => {
+    if (compressedImageSrc) {
+      setCompressedImageSrc(null);
+      setCompressionResult(null);
+      toast({ title: 'Settings changed', description: 'Please re-compress the image to apply new settings.'});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quality, dimensions, outputFormat]);
+
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -150,6 +161,7 @@ export default function ImageCompressor() {
           const savings = ((originalSize - newSize) / originalSize) * 100;
           setCompressionResult({ newSize, savings: Math.max(0, savings) });
           setIsCompressing(false);
+          toast({ title: "Success!", description: "Image compressed. Check the preview and download." });
         });
     };
     img.onerror = () => {

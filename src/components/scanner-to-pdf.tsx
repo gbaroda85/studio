@@ -21,6 +21,7 @@ export default function ScannerToPdf() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedImages, setScannedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [createdPdfUrl, setCreatedPdfUrl] = useState<string | null>(null);
   
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState<CropType>();
@@ -61,11 +62,23 @@ export default function ScannerToPdf() {
             const stream = videoRef.current.srcObject as MediaStream;
             stream.getTracks().forEach(track => track.stop());
         }
+        if (createdPdfUrl) {
+            URL.revokeObjectURL(createdPdfUrl);
+        }
     }
-  }, [toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  const clearCreatedPdf = () => {
+      if(createdPdfUrl) {
+          URL.revokeObjectURL(createdPdfUrl);
+          setCreatedPdfUrl(null);
+      }
+  }
 
   const handleScan = () => {
     if (!videoRef.current) return;
+    clearCreatedPdf();
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -79,6 +92,7 @@ export default function ScannerToPdf() {
   };
   
   const handleRemoveImage = (index: number) => {
+    clearCreatedPdf();
     setScannedImages(images => images.filter((_, i) => i !== index));
   }
 
@@ -96,9 +110,22 @@ export default function ScannerToPdf() {
       const height = imgProps.height * ratio;
       pdf.addImage(src, 'JPEG', (pdfWidth - width) / 2, (pdfHeight - height) / 2, width, height);
     });
-    pdf.save('scanned-document.pdf');
+    const pdfBlob = pdf.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    setCreatedPdfUrl(url);
     setIsProcessing(false);
+    toast({ title: 'Success!', description: 'PDF created and ready for download.'});
   };
+  
+  const handleDownload = () => {
+      if (!createdPdfUrl) return;
+      const link = document.createElement('a');
+      link.href = createdPdfUrl;
+      link.download = "scanned-document.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  }
 
   function onCropImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
@@ -166,6 +193,11 @@ export default function ScannerToPdf() {
     setImageToCrop(null);
   };
   
+  const handleReset = () => {
+      setScannedImages([]);
+      clearCreatedPdf();
+  }
+  
   return (
     <>
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8">
@@ -221,11 +253,19 @@ export default function ScannerToPdf() {
               )}
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
-              {scannedImages.length > 0 && <Button variant="outline" onClick={() => setScannedImages([])}>Clear All</Button>}
-              <Button onClick={handleCreatePdf} disabled={scannedImages.length === 0 || isProcessing}>
-                  {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />}
-                  Create & Download PDF
-              </Button>
+              {scannedImages.length > 0 && <Button variant="outline" onClick={handleReset}>Clear All</Button>}
+              
+              {!createdPdfUrl ? (
+                <Button onClick={handleCreatePdf} disabled={scannedImages.length === 0 || isProcessing}>
+                    {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <FileDigit className="mr-2" />}
+                    Create PDF
+                </Button>
+              ) : (
+                <Button onClick={handleDownload}>
+                    <Download className="mr-2" />
+                    Download PDF
+                </Button>
+              )}
           </CardFooter>
         </Card>
       </div>

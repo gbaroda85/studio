@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -17,12 +17,30 @@ export default function PdfProtector() {
     const [password, setPassword] = useState('');
     const [isProtecting, setIsProtecting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [protectedPdfUrl, setProtectedPdfUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    useEffect(() => {
+        // Clean up blob URL on unmount
+        return () => {
+            if (protectedPdfUrl) {
+                URL.revokeObjectURL(protectedPdfUrl);
+            }
+        };
+    }, [protectedPdfUrl]);
+    
+    const clearProtectedFile = () => {
+        if (protectedPdfUrl) {
+            URL.revokeObjectURL(protectedPdfUrl);
+            setProtectedPdfUrl(null);
+        }
+    }
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPassword('');
+            clearProtectedFile();
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
@@ -36,6 +54,7 @@ export default function PdfProtector() {
     const resetState = () => {
         setPdfFile(null);
         setPassword('');
+        clearProtectedFile();
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
@@ -51,6 +70,7 @@ export default function PdfProtector() {
             return;
         }
         setIsProtecting(true);
+        clearProtectedFile();
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
@@ -69,8 +89,6 @@ export default function PdfProtector() {
                 return;
             }
 
-            // Encrypt the document directly with the provided password.
-            // This is a more robust method for applying encryption.
             pdfDoc.encrypt({
                 userPassword: password,
                 ownerPassword: password,
@@ -80,16 +98,9 @@ export default function PdfProtector() {
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `protected-${pdfFile.name}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            setProtectedPdfUrl(url);
             
-            toast({ title: 'Success!', description: 'Your PDF has been protected and downloaded.' });
-            resetState();
+            toast({ title: 'Success!', description: 'Your PDF has been protected and is ready to download.' });
 
         } catch (error: any) {
             console.error(error);
@@ -102,6 +113,16 @@ export default function PdfProtector() {
             setIsProtecting(false);
         }
     };
+    
+    const handleDownload = () => {
+        if (!protectedPdfUrl || !pdfFile) return;
+        const link = document.createElement('a');
+        link.href = protectedPdfUrl;
+        link.download = `protected-${pdfFile.name}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     if (!pdfFile) {
         return (
@@ -138,17 +159,24 @@ export default function PdfProtector() {
                         id="password" 
                         type="password" 
                         value={password} 
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {setPassword(e.target.value); clearProtectedFile();}}
                         placeholder="Enter password"
                         disabled={isProtecting}
                     />
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-                <Button onClick={handleProtectPdf} disabled={isProtecting || !password} className="w-full">
-                    {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2"/>}
-                    Protect & Download
-                </Button>
+                {!protectedPdfUrl ? (
+                    <Button onClick={handleProtectPdf} disabled={isProtecting || !password} className="w-full">
+                        {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2"/>}
+                        Protect PDF
+                    </Button>
+                ) : (
+                    <Button onClick={handleDownload} className="w-full">
+                        <Download className="mr-2" />
+                        Download Protected PDF
+                    </Button>
+                )}
                 <Button variant="ghost" onClick={resetState}>Protect another file</Button>
             </CardFooter>
         </Card>
