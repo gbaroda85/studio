@@ -18,6 +18,8 @@ import {
   Maximize,
   FilePenLine,
   Info,
+  Copyright,
+  Settings,
 } from 'lucide-react';
 
 import {
@@ -36,6 +38,15 @@ import {
 import {ThemeToggle} from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
 import { AboutDialog } from './about-dialog';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const menuItems = [
   {href: '/image-compress', label: 'Image Compress', icon: Shrink, color: 'text-green-500'},
@@ -53,6 +64,7 @@ const menuItems = [
   {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine, color: 'text-indigo-500'},
   {href: '/protect-pdf', label: 'Protect PDF', icon: Lock, color: 'text-gray-500'},
   {href: '/unlock-pdf', label: 'Unlock PDF', icon: Unlock, color: 'text-teal-500'},
+  {href: '/add-watermark', label: 'Add Watermark', icon: Copyright, color: 'text-rose-500'},
 ];
 
 function AppSidebar() {
@@ -98,6 +110,26 @@ function AppSidebar() {
   );
 }
 
+function SettingsMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Settings className="h-[1.2rem] w-[1.2rem]" />
+          <span className="sr-only">Settings</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Language</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>English</DropdownMenuItem>
+        <DropdownMenuItem>Hindi</DropdownMenuItem>
+        <DropdownMenuItem>Spanish</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function AppHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
@@ -109,7 +141,8 @@ function AppHeader() {
             Welcome to ShrinkRay
         </Link>
       </div>
-      <div className="flex flex-1 items-center justify-end">
+      <div className="flex flex-1 items-center justify-end gap-2">
+        <SettingsMenu />
         <ThemeToggle />
       </div>
     </header>

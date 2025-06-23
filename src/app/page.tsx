@@ -20,6 +20,7 @@ import {
   Scissors,
   Maximize,
   FilePenLine,
+  Copyright,
 } from 'lucide-react';
 
 const imageFeatures = [
@@ -130,6 +131,13 @@ const pdfFeatures = [
     description: 'Remove password protection from a PDF.',
     icon: Unlock,
     color: 'text-teal-500',
+  },
+  {
+    href: '/add-watermark',
+    label: 'Add Watermark',
+    description: 'Add a text or image watermark to your PDF.',
+    icon: Copyright,
+    color: 'text-rose-500',
   },
 ];
 
