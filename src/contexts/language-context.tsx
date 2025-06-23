@@ -79,6 +79,10 @@ const translations = {
     area_converter_description: 'Convert between different units of area.',
     fuel_converter_label: 'Fuel Consumption Converter',
     fuel_converter_description: 'Convert between different fuel efficiency units.',
+    currency_converter_label: 'Currency Converter',
+    currency_converter_description: 'Convert between major world currencies.',
+    pressure_converter_label: 'Pressure Converter',
+    pressure_converter_description: 'Convert between different units of pressure.',
   },
   hi: {
     welcome: 'जीआरएस मल्टी टूल्स किट हब में आपका स्वागत है',
@@ -147,6 +151,10 @@ const translations = {
     area_converter_description: 'क्षेत्र की विभिन्न इकाइयों के बीच कनवर्ट करें।',
     fuel_converter_label: 'ईंधन खपत कनवर्टर',
     fuel_converter_description: 'विभिन्न ईंधन दक्षता इकाइयों के बीच कनवर्ट करें।',
+    currency_converter_label: 'मुद्रा परिवर्तक',
+    currency_converter_description: 'प्रमुख विश्व मुद्राओं के बीच कनवर्ट करें।',
+    pressure_converter_label: 'दबाव कनवर्टर',
+    pressure_converter_description: 'दबाव की विभिन्न इकाइयों के बीच कनवर्ट करें।',
   },
   es: {
     welcome: 'Bienvenido a GRs Multi Tools Kit hub',
@@ -215,6 +223,10 @@ const translations = {
     area_converter_description: 'Convierte entre diferentes unidades de área.',
     fuel_converter_label: 'Convertidor de Consumo de Combustible',
     fuel_converter_description: 'Convierte entre diferentes unidades de eficiencia de combustible.',
+    currency_converter_label: 'Convertidor de Divisas',
+    currency_converter_description: 'Convierte entre las principales monedas del mundo.',
+    pressure_converter_label: 'Convertidor de Presión',
+    pressure_converter_description: 'Convierte entre diferentes unidades de presión.',
   },
 };
 

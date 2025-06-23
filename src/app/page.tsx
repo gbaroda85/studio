@@ -35,6 +35,8 @@ import {
   AreaChart,
   Fuel,
   Gauge,
+  Coins,
+  Waves,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -233,6 +235,20 @@ export default function Home() {
       descriptionKey: 'fuel_converter_description',
       icon: Fuel,
       color: 'text-orange-500',
+    },
+    {
+      href: '/currency-converter',
+      labelKey: 'currency_converter_label',
+      descriptionKey: 'currency_converter_description',
+      icon: Coins,
+      color: 'text-yellow-500',
+    },
+    {
+      href: '/pressure-converter',
+      labelKey: 'pressure_converter_label',
+      descriptionKey: 'pressure_converter_description',
+      icon: Waves,
+      color: 'text-sky-500',
     },
   ];
 
