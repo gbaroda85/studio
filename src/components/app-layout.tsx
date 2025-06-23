@@ -79,10 +79,10 @@ function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="justify-center">
         <Link href="/" className="flex items-center gap-2 font-semibold">
             <Shrink className="h-6 w-6 text-primary" />
-            <span className="group-data-[collapsible=icon]:hidden">ShrinkRay</span>
+            <span className="group-data-[collapsible=icon]:hidden">GRs Tools</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -147,7 +147,7 @@ function AppHeader() {
         <SidebarTrigger className="md:hidden" />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap">
+        <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap animate-zoom-in-out">
             {t('welcome')}
         </Link>
       </div>

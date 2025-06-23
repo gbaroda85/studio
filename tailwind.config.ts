@@ -91,12 +91,17 @@ export default {
         'header-glow': {
           '0%': { 'box-shadow': '0 1px 2px 0px hsl(var(--primary) / 0.3)' },
           '100%': { 'box-shadow': '0 1px 3px 1px hsl(var(--primary) / 0.4)' },
+        },
+        'zoom-in-out': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'header-glow': 'header-glow 3s ease-in-out infinite alternate',
+        'zoom-in-out': 'zoom-in-out 4s ease-in-out infinite',
       },
     },
   },

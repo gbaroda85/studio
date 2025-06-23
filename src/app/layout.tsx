@@ -6,7 +6,7 @@ import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/contexts/language-context';
 
 export const metadata: Metadata = {
-  title: 'ShrinkRay - Ultimate File Compressor',
+  title: 'GRs Multi Tools Kit hub',
   description: 'Compress and convert images and PDFs with ease.',
 };
 
