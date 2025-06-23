@@ -1,7 +1,17 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfCropper from '@/components/pdf-cropper';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Select a PDF file from your computer.",
+    "Navigate Pages: Use the arrow buttons to find the page you want to crop.",
+    "Select Area: Drag the selection box over the part of the page you want to keep.",
+    "Crop Page: Click the 'Crop Page' button.",
+    "Download: A new PDF containing only your cropped page will be created. Click 'Download' to save it.",
+];
 
 export default function CropPdfPage() {
   return (
@@ -17,6 +27,7 @@ export default function CropPdfPage() {
         <div className="w-full flex justify-center">
             <PdfCropper />
         </div>
+        <HowToGuide title="PDF Cropper" steps={steps} />
     </main>
   );
 }

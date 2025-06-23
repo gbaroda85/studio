@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageConverter from '@/components/image-converter';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload Image: Choose any image file (like PNG, WEBP, etc.) to convert.",
+    "Select Format: The format is pre-selected. You can change it if needed.",
+    "Convert: Click the 'Convert to JPG' button.",
+    "Download: Once the conversion is complete, click 'Download Image' to save your new JPG file.",
+];
 
 export default function ImageToJpgPage() {
   return (
@@ -17,6 +26,7 @@ export default function ImageToJpgPage() {
         <div className="w-full flex justify-center">
             <ImageConverter targetFormat="jpeg" />
         </div>
+        <HowToGuide title="Image to JPG Converter" steps={steps} />
     </main>
   );
 }

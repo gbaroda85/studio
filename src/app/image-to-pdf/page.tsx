@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageToPdfConverter from '@/components/image-to-pdf-converter';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload Images: Select one or more image files. You can add more files later.",
+    "Review Order: The images will appear in the order they will be in the PDF.",
+    "Convert: Click the 'Convert to PDF' button.",
+    "Download: Click 'Download PDF' to save your combined document.",
+];
 
 export default function ImageToPdfPage() {
   return (
@@ -17,6 +26,7 @@ export default function ImageToPdfPage() {
         <div className="w-full flex justify-center">
             <ImageToPdfConverter />
         </div>
+        <HowToGuide title="Image to PDF Converter" steps={steps} />
     </main>
   );
 }

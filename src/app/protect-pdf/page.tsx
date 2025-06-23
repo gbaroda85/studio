@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfProtector from '@/components/pdf-protector';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Select the PDF file you want to secure.",
+    "Set Password: Enter a strong password in the input field.",
+    "Protect: Click the 'Protect PDF' button to encrypt the file.",
+    "Download: Click 'Download Protected PDF' to save your new password-protected file.",
+];
 
 export default function ProtectPdfPage() {
   return (
@@ -17,6 +26,7 @@ export default function ProtectPdfPage() {
         <div className="w-full flex justify-center">
             <PdfProtector />
         </div>
+        <HowToGuide title="PDF Protector" steps={steps} />
     </main>
   );
 }

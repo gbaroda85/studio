@@ -1,7 +1,17 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfWatermarker from '@/components/pdf-watermarker';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+  "Upload PDF: Click the upload area or drag and drop your PDF file.",
+  "Enter Text: Type the text you want to use as a watermark.",
+  "Customize: Adjust the position, opacity, font size, and rotation to your liking.",
+  "Apply Watermark: Click the 'Apply Watermark' button.",
+  "Download: Once processed, click 'Download PDF' to save your watermarked file.",
+];
 
 export default function AddWatermarkPage() {
   return (
@@ -17,6 +27,7 @@ export default function AddWatermarkPage() {
         <div className="w-full flex justify-center">
             <PdfWatermarker />
         </div>
+        <HowToGuide title="Add Watermark Tool" steps={steps} />
     </main>
   );
 }

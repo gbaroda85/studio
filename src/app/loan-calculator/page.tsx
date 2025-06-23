@@ -1,7 +1,17 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoanCalculator from '@/components/loan-calculator';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Enter Loan Amount: Input the total amount of the loan you are considering.",
+    "Enter Interest Rate: Add the annual interest rate for the loan.",
+    "Enter Tenure: Input the duration of the loan and select whether it's in years or months.",
+    "Calculate: Click the 'Calculate EMI' button.",
+    "View Details: The calculator will display your monthly payment (EMI), total interest, and total payment.",
+];
 
 export default function LoanCalculatorPage() {
   return (
@@ -17,6 +27,7 @@ export default function LoanCalculatorPage() {
         <div className="w-full flex justify-center">
             <LoanCalculator />
         </div>
+        <HowToGuide title="Loan & EMI Calculator" steps={steps} />
     </main>
   );
 }

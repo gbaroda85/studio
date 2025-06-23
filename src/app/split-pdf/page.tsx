@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfSplitter from '@/components/pdf-splitter';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Choose the PDF file you want to split. The total number of pages will be shown.",
+    "Enter Ranges: Specify pages to extract. e.g., '1-3' for a range, '5' for a single page, or combine them like '1-3, 5, 8'.",
+    "Split: Click the 'Split PDF' button.",
+    "Download: A new PDF with your selected pages will be created. Click 'Download Split PDF' to save it.",
+];
 
 export default function SplitPdfPage() {
   return (
@@ -17,6 +26,7 @@ export default function SplitPdfPage() {
         <div className="w-full flex justify-center">
             <PdfSplitter />
         </div>
+        <HowToGuide title="PDF Splitter" steps={steps} />
     </main>
   );
 }

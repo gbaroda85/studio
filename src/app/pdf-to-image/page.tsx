@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Select the PDF you want to convert.",
+    "Choose Format: Select whether you want PNG or JPEG images.",
+    "Process: The tool will automatically extract each page as a separate image.",
+    "Download: You can download individual images or click 'Download All (.zip)' to get all images in a single archive.",
+];
 
 export default function PdfToImagePage() {
   return (
@@ -17,6 +26,7 @@ export default function PdfToImagePage() {
         <div className="w-full flex justify-center">
             <PdfToImageConverter />
         </div>
+        <HowToGuide title="PDF to Image Converter" steps={steps} />
     </main>
   );
 }

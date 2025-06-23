@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PercentageCalculator from '@/components/percentage-calculator';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Choose Mode: Select the type of calculation you need: 'Simple', 'Part/Whole', or 'Marks'.",
+    "Enter Values: Fill in the required input fields for your chosen mode.",
+    "Calculate: Click the 'Calculate' button.",
+    "See Result: The result will be instantly displayed below the inputs.",
+];
 
 export default function PercentageCalculatorPage() {
   return (
@@ -17,6 +26,7 @@ export default function PercentageCalculatorPage() {
         <div className="w-full flex justify-center">
             <PercentageCalculator />
         </div>
+        <HowToGuide title="Percentage Calculator" steps={steps} />
     </main>
   );
 }

@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ZipCreator from '@/components/zip-creator';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Add Files: Drag and drop files into the upload area, or click to select multiple files.",
+    "Review Files: Your selected files will be listed. You can add more or remove them as needed.",
+    "Create Archive: Click the 'Create Zip' button.",
+    "Download: Once the zip archive is created, click 'Download Zip' to save it.",
+];
 
 export default function CreateZipPage() {
   return (
@@ -17,6 +26,7 @@ export default function CreateZipPage() {
         <div className="w-full flex justify-center">
             <ZipCreator />
         </div>
+        <HowToGuide title="Zip Creator" steps={steps} />
     </main>
   );
 }

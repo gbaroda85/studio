@@ -1,7 +1,17 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfCompressor from '@/components/pdf-compressor';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Drag and drop your PDF or click to select the file you want to compress.",
+    "Start Compression: Click the 'Compress PDF' button to begin the process.",
+    "Review Results: The tool will show you the compression savings.",
+    "Download: Click 'Download Compressed PDF' to get your smaller file.",
+];
+
 
 export default function CompressPdfPage() {
   return (
@@ -17,6 +27,7 @@ export default function CompressPdfPage() {
         <div className="w-full flex justify-center">
             <PdfCompressor />
         </div>
+        <HowToGuide title="PDF Compressor" steps={steps} />
     </main>
   );
 }

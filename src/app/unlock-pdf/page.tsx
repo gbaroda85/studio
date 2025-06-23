@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfUnlocker from '@/components/pdf-unlocker';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDF: Select your password-protected PDF file.",
+    "Enter Password: Type the current password for the PDF.",
+    "Unlock: Click the 'Unlock PDF' button to remove the encryption.",
+    "Download: Click 'Download Unlocked PDF' to save the decrypted file.",
+];
 
 export default function UnlockPdfPage() {
   return (
@@ -17,6 +26,7 @@ export default function UnlockPdfPage() {
         <div className="w-full flex justify-center">
             <PdfUnlocker />
         </div>
+        <HowToGuide title="PDF Unlocker" steps={steps} />
     </main>
   );
 }

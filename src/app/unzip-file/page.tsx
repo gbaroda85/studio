@@ -1,7 +1,15 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Unzipper from '@/components/unzipper';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload Zip File: Drag and drop your .zip file or click to select it.",
+    "Process: The tool will automatically begin extracting the contents.",
+    "View & Download: The list of extracted files will appear. Click 'Download' next to any file to save it individually.",
+];
 
 export default function UnzipFilePage() {
   return (
@@ -17,6 +25,7 @@ export default function UnzipFilePage() {
         <div className="w-full flex justify-center">
             <Unzipper />
         </div>
+        <HowToGuide title="Unzipper Tool" steps={steps} />
     </main>
   );
 }

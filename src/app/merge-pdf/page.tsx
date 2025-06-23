@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfMerger from '@/components/pdf-merger';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload PDFs: Drag and drop two or more PDF files, or click to select them.",
+    "Add More (Optional): You can add more files to the list. The merge order is based on the list order.",
+    "Merge: Click the 'Merge PDFs' button to combine all the files.",
+    "Download: Click 'Download Merged PDF' to save your single, combined document.",
+];
 
 export default function MergePdfPage() {
   return (
@@ -17,6 +26,7 @@ export default function MergePdfPage() {
         <div className="w-full flex justify-center">
             <PdfMerger />
         </div>
+        <HowToGuide title="PDF Merger" steps={steps} />
     </main>
   );
 }

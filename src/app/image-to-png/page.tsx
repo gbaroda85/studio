@@ -1,7 +1,16 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageConverter from '@/components/image-converter';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload Image: Choose any image file (like JPG, WEBP, etc.) to convert.",
+    "Select Format: The format is pre-selected. You can change it if needed.",
+    "Convert: Click the 'Convert to PNG' button.",
+    "Download: Once the conversion is complete, click 'Download Image' to save your new PNG file.",
+];
 
 export default function ImageToPngPage() {
   return (
@@ -17,6 +26,7 @@ export default function ImageToPngPage() {
         <div className="w-full flex justify-center">
             <ImageConverter targetFormat="png" />
         </div>
+        <HowToGuide title="Image to PNG Converter" steps={steps} />
     </main>
   );
 }

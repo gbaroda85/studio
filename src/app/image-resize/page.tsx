@@ -1,7 +1,17 @@
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageResizer from '@/components/image-resizer';
+import { HowToGuide } from '@/components/how-to-guide';
+
+const steps = [
+    "Upload Image: Select the image you want to resize.",
+    "Enter Dimensions: Input your desired width and/or height in pixels. Check 'Maintain aspect ratio' to avoid distortion.",
+    "Choose Format: Select the output format (PNG, JPEG, or WEBP).",
+    "Resize: Click the 'Resize Image' button.",
+    "Download: Preview your resized image and click 'Download' to save it.",
+];
 
 export default function ImageResizePage() {
   return (
@@ -17,6 +27,7 @@ export default function ImageResizePage() {
         <div className="w-full flex justify-center">
             <ImageResizer />
         </div>
+        <HowToGuide title="Image Resizer" steps={steps} />
     </main>
   );
 }
