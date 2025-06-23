@@ -190,21 +190,21 @@ export default function Home() {
       labelKey: 'loan_emi_calculator_label',
       descriptionKey: 'loan_emi_calculator_description',
       icon: Landmark,
-      color: 'text-cyan-500',
+      color: 'text-sky-500',
     },
     {
       href: '/age-calculator',
       labelKey: 'age_calculator_label',
       descriptionKey: 'age_calculator_description',
       icon: Cake,
-      color: 'text-cyan-500',
+      color: 'text-teal-500',
     },
     {
       href: '/percentage-calculator',
       labelKey: 'percentage_calculator_label',
       descriptionKey: 'percentage_calculator_description',
       icon: Percent,
-      color: 'text-cyan-500',
+      color: 'text-blue-500',
     },
   ];
 
