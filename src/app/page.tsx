@@ -31,6 +31,10 @@ import {
   Landmark,
   Cake,
   Percent,
+  Infinity,
+  AreaChart,
+  Fuel,
+  Gauge,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -38,7 +42,7 @@ export default function Home() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
 
-  const validTabs = ['image', 'pdf', 'file', 'calculator'];
+  const validTabs = ['image', 'pdf', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
@@ -207,6 +211,30 @@ export default function Home() {
       color: 'text-blue-500',
     },
   ];
+  
+  const converterFeatures = [
+    {
+      href: '/acceleration-converter',
+      labelKey: 'acceleration_converter_label',
+      descriptionKey: 'acceleration_converter_description',
+      icon: Gauge,
+      color: 'text-emerald-500',
+    },
+    {
+      href: '/area-converter',
+      labelKey: 'area_converter_label',
+      descriptionKey: 'area_converter_description',
+      icon: AreaChart,
+      color: 'text-lime-500',
+    },
+    {
+      href: '/fuel-converter',
+      labelKey: 'fuel_converter_label',
+      descriptionKey: 'fuel_converter_description',
+      icon: Fuel,
+      color: 'text-orange-500',
+    },
+  ];
 
 
   return (
@@ -216,7 +244,7 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="grid w-full grid-cols-4 md:max-w-xl">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 md:max-w-4xl">
           <TabsTrigger value="image">
             <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
             {t('image_tools')}
@@ -232,6 +260,10 @@ export default function Home() {
           <TabsTrigger value="calculator">
             <Calculator className="mr-2 h-4 w-4 text-cyan-500" />
             {t('calculator_pro')}
+          </TabsTrigger>
+           <TabsTrigger value="converters">
+            <Infinity className="mr-2 h-4 w-4 text-emerald-500" />
+            {t('converter_tools')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="image">
@@ -279,6 +311,20 @@ export default function Home() {
         <TabsContent value="calculator">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
             {calculatorFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.href}
+                title={t(feature.labelKey)}
+                description={t(feature.descriptionKey)}
+                href={feature.href}
+                icon={feature.icon}
+                color={feature.color}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        <TabsContent value="converters">
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+            {converterFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
