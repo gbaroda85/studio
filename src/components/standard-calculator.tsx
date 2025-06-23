@@ -95,7 +95,7 @@ export default function StandardCalculator() {
   ]
 
   return (
-    <Card className="w-full max-w-sm mx-auto transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+    <Card className="w-full max-w-md mx-auto transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
       <CardHeader>
         <CardTitle className="sr-only">Standard Calculator</CardTitle>
         <div className="bg-muted text-right p-4 rounded-lg">
