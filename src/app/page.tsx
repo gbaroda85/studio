@@ -123,13 +123,6 @@ export default function Home() {
       color: 'text-pink-500',
     },
     {
-      href: '/edit-pdf',
-      labelKey: 'edit_pdf_label',
-      descriptionKey: 'edit_pdf_description',
-      icon: FilePenLine,
-      color: 'text-lime-500',
-    },
-    {
       href: '/split-pdf',
       labelKey: 'split_pdf_label',
       descriptionKey: 'split_pdf_description',
