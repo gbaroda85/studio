@@ -113,22 +113,38 @@ export default function PdfCropper() {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
         const page = pdfDoc.getPage(currentPage - 1);
-        const { width: pageWidth, height: pageHeight } = page.getSize();
         
         const image = imgRef.current;
         if (!image) throw new Error('Image reference not found');
 
-        const scaleX = pageWidth / image.naturalWidth;
-        const scaleY = pageHeight / image.naturalHeight;
+        // Scale from displayed image size to natural image size
+        const scaleX = image.naturalWidth / image.width;
+        const scaleY = image.naturalHeight / image.height;
 
+        const naturalCropX = completedCrop.x * scaleX;
+        const naturalCropY = completedCrop.y * scaleY;
+        const naturalCropWidth = completedCrop.width * scaleX;
+        const naturalCropHeight = completedCrop.height * scaleY;
+
+        // Get PDF page size
+        const { width: pageWidth, height: pageHeight } = page.getSize();
+        
+        // Scale from natural image size to PDF points
+        const pointsPerPixelX = pageWidth / image.naturalWidth;
+        const pointsPerPixelY = pageHeight / image.naturalHeight;
+
+        const cropBoxX = naturalCropX * pointsPerPixelX;
+        const cropBoxWidth = naturalCropWidth * pointsPerPixelX;
+        const cropBoxHeight = naturalCropHeight * pointsPerPixelY;
+        
         // pdf-lib's y-coordinate is from the bottom-left corner.
-        const newY = pageHeight - (completedCrop.y * scaleY + completedCrop.height * scaleY);
+        const cropBoxY = pageHeight - (naturalCropY * pointsPerPixelY) - cropBoxHeight;
         
         page.setCropBox(
-            completedCrop.x * scaleX,
-            newY,
-            completedCrop.width * scaleX,
-            completedCrop.height * scaleY
+            cropBoxX,
+            cropBoxY,
+            cropBoxWidth,
+            cropBoxHeight
         );
 
         const newPdfBytes = await pdfDoc.save();
