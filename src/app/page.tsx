@@ -104,6 +104,13 @@ const pdfFeatures = [
     color: 'text-cyan-500',
   },
   {
+    href: '/crop-pdf',
+    label: 'Crop PDF',
+    description: 'Crop the visible area of PDF pages.',
+    icon: Crop,
+    color: 'text-amber-500',
+  },
+  {
     href: '/scan-to-pdf',
     label: 'Scan to PDF',
     description: 'Scan documents directly to a PDF file.',
