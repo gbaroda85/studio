@@ -1,377 +1,155 @@
 
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-import {FeatureCard} from '@/components/feature-card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import {
-  Crop,
-  FileArchive,
-  FileDigit,
-  FileOutput,
-  Image as ImageIcon,
-  Lock,
-  Merge,
-  ScanLine,
-  Shrink,
-  Unlock,
-  Scissors,
-  Maximize,
-  FilePenLine,
-  Copyright,
-  Archive,
-  ArchiveRestore,
-  FileText,
-  Calculator,
-  Landmark,
-  Cake,
-  Percent,
-  Infinity,
-  AreaChart,
-  Fuel,
-  Gauge,
-  Coins,
-  Waves,
-  Route,
-  Search,
-  Receipt,
-} from 'lucide-react';
-import {useLanguage} from '@/contexts/language-context';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight, Image as ImageIcon, FileText, Calculator, ShieldCheck, Zap, DownloadCloud, MousePointerClick } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/language-context';
 
-export default function Home() {
-  const {t} = useLanguage();
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
+function FeatureCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
+  return (
+    <Card className="text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/20 dark:hover:shadow-primary/10">
+      <CardHeader className="items-center">
+        <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary mb-4">
+          <Icon className="h-7 w-7" />
+        </div>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
 
-  const validTabs = ['image', 'pdf', 'file', 'calculator', 'converters'];
-  const tabParam = searchParams.get('tab');
-  const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
-
-  const imageFeatures = [
-    {
-      href: '/image-compress',
-      labelKey: 'image_compress_label',
-      descriptionKey: 'image_compress_description',
-      icon: Shrink,
-      color: 'text-green-500',
-    },
-    {
-      href: '/image-resize',
-      labelKey: 'resize_image_label',
-      descriptionKey: 'resize_image_description',
-      icon: Maximize,
-      color: 'text-fuchsia-500',
-    },
-    {
-      href: '/crop-image',
-      labelKey: 'crop_image_label',
-      descriptionKey: 'crop_image_description',
-      icon: Crop,
-      color: 'text-blue-500',
-    },
-    {
-      href: '/image-to-jpg',
-      labelKey: 'image_to_jpg_label',
-      descriptionKey: 'image_to_jpg_description',
-      icon: FileOutput,
-      color: 'text-yellow-500',
-    },
-    {
-      href: '/image-to-png',
-      labelKey: 'image_to_png_label',
-      descriptionKey: 'image_to_png_description',
-      icon: FileOutput,
-      color: 'text-sky-500',
-    },
-    {
-      href: '/image-to-pdf',
-      labelKey: 'image_to_pdf_label',
-      descriptionKey: 'image_to_pdf_description',
-      icon: FileDigit,
-      color: 'text-red-500',
-    },
-  ];
-
-  const pdfFeatures = [
-    {
-      href: '/pdf-to-image',
-      labelKey: 'pdf_to_image_label',
-      descriptionKey: 'pdf_to_image_description',
-      icon: ImageIcon,
-      color: 'text-orange-500',
-    },
-    {
-      href: '/compress-pdf',
-      labelKey: 'compress_pdf_label',
-      descriptionKey: 'compress_pdf_description',
-      icon: FileArchive,
-      color: 'text-purple-500',
-    },
-    {
-      href: '/merge-pdf',
-      labelKey: 'merge_pdf_label',
-      descriptionKey: 'merge_pdf_description',
-      icon: Merge,
-      color: 'text-pink-500',
-    },
-    {
-      href: '/split-pdf',
-      labelKey: 'split_pdf_label',
-      descriptionKey: 'split_pdf_description',
-      icon: Scissors,
-      color: 'text-cyan-500',
-    },
-    {
-      href: '/crop-pdf',
-      labelKey: 'crop_pdf_label',
-      descriptionKey: 'crop_pdf_description',
-      icon: Crop,
-      color: 'text-amber-500',
-    },
-    {
-      href: '/scan-to-pdf',
-      labelKey: 'scan_to_pdf_label',
-      descriptionKey: 'scan_to_pdf_description',
-      icon: ScanLine,
-      color: 'text-indigo-500',
-    },
-    {
-      href: '/protect-pdf',
-      labelKey: 'protect_pdf_label',
-      descriptionKey: 'protect_pdf_description',
-      icon: Lock,
-      color: 'text-gray-500',
-    },
-    {
-      href: '/unlock-pdf',
-      labelKey: 'unlock_pdf_label',
-      descriptionKey: 'unlock_pdf_description',
-      icon: Unlock,
-      color: 'text-teal-500',
-    },
-    {
-      href: '/add-watermark',
-      labelKey: 'add_watermark_label',
-      descriptionKey: 'add_watermark_description',
-      icon: Copyright,
-      color: 'text-rose-500',
-    },
-  ];
-
-  const fileFeatures = [
-    {
-      href: '/create-zip',
-      labelKey: 'create_zip_label',
-      descriptionKey: 'create_zip_description',
-      icon: Archive,
-      color: 'text-violet-500',
-    },
-    {
-      href: '/unzip-file',
-      labelKey: 'unzip_file_label',
-      descriptionKey: 'unzip_file_description',
-      icon: ArchiveRestore,
-      color: 'text-stone-500',
-    },
-  ];
-
-  const calculatorFeatures = [
-    {
-      href: '/standard-calculator',
-      labelKey: 'standard_calculator_label',
-      descriptionKey: 'standard_calculator_description',
-      icon: Calculator,
-      color: 'text-cyan-500',
-    },
-    {
-      href: '/loan-calculator',
-      labelKey: 'loan_emi_calculator_label',
-      descriptionKey: 'loan_emi_calculator_description',
-      icon: Landmark,
-      color: 'text-sky-500',
-    },
-    {
-      href: '/age-calculator',
-      labelKey: 'age_calculator_label',
-      descriptionKey: 'age_calculator_description',
-      icon: Cake,
-      color: 'text-teal-500',
-    },
-    {
-      href: '/percentage-calculator',
-      labelKey: 'percentage_calculator_label',
-      descriptionKey: 'percentage_calculator_description',
-      icon: Percent,
-      color: 'text-blue-500',
-    },
-    {
-      href: '/fuel-cost-calculator',
-      labelKey: 'fuel_cost_calculator_label',
-      descriptionKey: 'fuel_cost_calculator_description',
-      icon: Route,
-      color: 'text-rose-500',
-    },
-    {
-      href: '/interest-calculator',
-      labelKey: 'interest_calculator_label',
-      descriptionKey: 'interest_calculator_description',
-      icon: Coins,
-      color: 'text-yellow-500',
-    },
-    {
-      href: '/sales-tax-calculator',
-      labelKey: 'sales_tax_calculator_label',
-      descriptionKey: 'sales_tax_calculator_description',
-      icon: Receipt,
-      color: 'text-indigo-500',
-    },
-  ];
-  
-  const converterFeatures = [
-    {
-      href: '/acceleration-converter',
-      labelKey: 'acceleration_converter_label',
-      descriptionKey: 'acceleration_converter_description',
-      icon: Gauge,
-      color: 'text-emerald-500',
-    },
-    {
-      href: '/area-converter',
-      labelKey: 'area_converter_label',
-      descriptionKey: 'area_converter_description',
-      icon: AreaChart,
-      color: 'text-lime-500',
-    },
-    {
-      href: '/fuel-converter',
-      labelKey: 'fuel_converter_label',
-      descriptionKey: 'fuel_converter_description',
-      icon: Fuel,
-      color: 'text-orange-500',
-    },
-    {
-      href: '/pressure-converter',
-      labelKey: 'pressure_converter_label',
-      descriptionKey: 'pressure_converter_description',
-      icon: Waves,
-      color: 'text-sky-500',
-    },
-  ];
-
-  const filterFeatures = (features: typeof imageFeatures) => {
-    if (!searchQuery.trim()) {
-      return features;
-    }
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    return features.filter(
-      (feature) =>
-        t(feature.labelKey).toLowerCase().includes(lowerCaseQuery) ||
-        t(feature.descriptionKey).toLowerCase().includes(lowerCaseQuery)
-    );
-  };
-  
-  const isSearching = searchQuery.trim() !== '';
-
-  const allFeatureGroups = [
-    { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
-    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-red-500' },
-    { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
-    { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
-    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
-  ];
-
-  const searchResults = allFeatureGroups
-    .map(group => ({
-        ...group,
-        features: filterFeatures(group.features)
-    }))
-    .filter(group => group.features.length > 0);
+export default function LandingPage() {
+  const { t } = useLanguage();
 
   return (
-    <main className="flex-1 p-4 md:p-8">
-      <div className="mb-8 max-w-2xl">
-        <p className="mt-2 text-muted-foreground">{t('tagline')}</p>
-      </div>
-
-      <div className="relative mb-12 max-w-xl mx-auto">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-            type="search"
-            placeholder={t('search_tools_placeholder')}
-            className="w-full pl-12 h-14 text-base rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
-      {isSearching ? (
-        <div className="mt-8 space-y-10">
-          {searchResults.length > 0 ? (
-            searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-              <section key={categoryKey}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                  <Icon className={cn("h-7 w-7", color)} />
-                  {t(categoryKey)}
-                </h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-                  {features.map((feature) => (
-                    <FeatureCard
-                      key={feature.href}
-                      title={t(feature.labelKey)}
-                      description={t(feature.descriptionKey)}
-                      href={feature.href}
-                      icon={feature.icon}
-                      color={feature.color}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="mx-auto h-12 w-12 mb-4" />
-              <p className="font-semibold">{t('no_tools_found')}</p>
-              <p className="text-sm">Try a different search term.</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <Tabs defaultValue={defaultTab}>
-          <TabsList className="flex h-auto flex-wrap justify-center">
-            {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-              <TabsTrigger key={value} value={value}>
-                <Icon className={cn("mr-2 h-4 w-4", color)} />
-                {t(categoryKey)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {allFeatureGroups.map(({ value, features }) => (
-            <TabsContent key={value} value={value}>
-              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-                {features.map((feature) => (
-                  <FeatureCard
-                    key={feature.href}
-                    title={t(feature.labelKey)}
-                    description={t(feature.descriptionKey)}
-                    href={feature.href}
-                    icon={feature.icon}
-                    color={feature.color}
-                  />
-                ))}
+    <div className="flex flex-col min-h-screen bg-background">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-b from-background to-primary/5">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline">
+                  {t('welcome')}
+                </h1>
+                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  {t('tagline')}
+                </p>
+                <Button asChild size="lg" className="group">
+                  <Link href="/tools">
+                    Explore All Tools <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      )}
-    </main>
+              <Image
+                src="https://placehold.co/600x400.png"
+                width="600"
+                height="400"
+                alt="Hero Image"
+                data-ai-hint="digital tools abstract"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need, All in One Place</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                From image optimization to complex calculations, our suite of tools is designed to be powerful yet simple to use.
+              </p>
+            </div>
+            <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
+              <FeatureCard
+                icon={ImageIcon}
+                title={t('image_tools')}
+                description="Compress, resize, crop, and convert images in various formats with ease."
+              />
+              <FeatureCard
+                icon={FileText}
+                title={t('pdf_tools')}
+                description="Merge, split, compress, and protect your PDF documents in seconds."
+              />
+              <FeatureCard
+                icon={Calculator}
+                title={t('calculator_pro')}
+                description="From simple sums to loan interest and sales tax, we have the calculators you need."
+              />
+            </div>
+          </div>
+        </section>
+        
+        {/* How It Works Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Simple and Fast</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl">Get your tasks done in three easy steps.</p>
+            </div>
+            <div className="mx-auto grid gap-8 sm:grid-cols-3">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="grid size-16 place-items-center rounded-full bg-primary text-primary-foreground mb-4">
+                  <MousePointerClick className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold">1. Choose a Tool</h3>
+                <p className="text-muted-foreground">Select from our wide range of image, PDF, and calculator tools.</p>
+              </div>
+              <div className="flex flex-col items-center text-center space-y-3">
+                 <div className="grid size-16 place-items-center rounded-full bg-primary text-primary-foreground mb-4">
+                  <Zap className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold">2. Process Your File</h3>
+                <p className="text-muted-foreground">Upload your file or enter your data. All processing happens instantly in your browser.</p>
+              </div>
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="grid size-16 place-items-center rounded-full bg-primary text-primary-foreground mb-4">
+                  <DownloadCloud className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold">3. Download</h3>
+                <p className="text-muted-foreground">Your result is ready. Download your new file with a single click.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Privacy Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+            <div className="space-y-3">
+              <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Privacy First</div>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Your Files are Safe and Private</h2>
+              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                We believe in privacy. That's why every tool runs entirely within your browser. Your files are never uploaded to any server, ever.
+              </p>
+            </div>
+             <div className="flex justify-center">
+                <ShieldCheck className="w-24 h-24 text-green-500" />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} GRs Multi Tools Kit. All rights reserved.</p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link href="/tools" className="text-xs hover:underline underline-offset-4">
+            Tools
+          </Link>
+          <Link href="mailto:gaurav.thearmy@yahoo.com" className="text-xs hover:underline underline-offset-4">
+            Contact
+          </Link>
+        </nav>
+      </footer>
+    </div>
   );
 }

@@ -57,6 +57,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/language-context';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+import { LanguageProvider } from '@/contexts/language-context';
 
 function AppSidebar() {
   const pathname = usePathname();
@@ -103,7 +106,7 @@ function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="justify-center">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <Link href="/tools" className="flex items-center gap-2 font-semibold">
             <Shrink className="h-6 w-6 text-primary" />
             <span className="group-data-[collapsible=icon]:hidden">GRs Tools</span>
         </Link>
@@ -163,7 +166,6 @@ function SettingsMenu() {
 }
 
 function AppHeader() {
-  const { t } = useLanguage();
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
       <div className="flex flex-1 items-center">
@@ -171,7 +173,7 @@ function AppHeader() {
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap animate-zoom-in-out">
-            {t('welcome')}
+            GRs Multi Tools Kit
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
@@ -183,6 +185,12 @@ function AppHeader() {
 }
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
+  const pathname = usePathname();
+  
+  if (pathname === '/') {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
