@@ -2,22 +2,37 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Type } from 'lucide-react';
+import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Type, RotateCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
+import { Input } from './ui/input';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Slider } from './ui/slider';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
 
 type TextPosition = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+
+function hexToRgbForPdfLib(hex: string) {
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 4) {
+    r = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r = parseInt(hex.substring(1, 3), 16);
+    g = parseInt(hex.substring(3, 5), 16);
+    b = parseInt(hex.substring(5, 7), 16);
+  }
+  return rgb(r / 255, g / 255, b / 255);
+}
 
 export default function PdfEditor() {
   const { toast } = useToast();
@@ -25,8 +40,14 @@ export default function PdfEditor() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Editing state
   const [textToAdd, setTextToAdd] = useState('Confidential');
   const [position, setPosition] = useState<TextPosition>('center');
+  const [fontSize, setFontSize] = useState(50);
+  const [color, setColor] = useState('#ff0000');
+  const [rotation, setRotation] = useState([0]);
+
   const [editedPdfUrl, setEditedPdfUrl] = useState<string | null>(null);
   
   const [numPages, setNumPages] = useState(0);
@@ -35,11 +56,8 @@ export default function PdfEditor() {
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
   useEffect(() => {
-    // Clean up blob URL on unmount
     return () => {
-      if (editedPdfUrl) {
-        URL.revokeObjectURL(editedPdfUrl);
-      }
+      if (editedPdfUrl) URL.revokeObjectURL(editedPdfUrl);
     };
   }, [editedPdfUrl]);
 
@@ -49,7 +67,7 @@ export default function PdfEditor() {
           setEditedPdfUrl(null);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textToAdd, position]);
+  }, [textToAdd, position, fontSize, color, rotation]);
 
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
@@ -121,11 +139,9 @@ export default function PdfEditor() {
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
-        const pages = pdfDoc.getPages();
-        const page = pages[currentPage - 1];
+        const page = pdfDoc.getPage(currentPage - 1);
         const { width, height } = page.getSize();
         
-        const fontSize = 50;
         const textWidth = helveticaFont.widthOfTextAtSize(textToAdd, fontSize);
         const textHeight = helveticaFont.heightAtSize(fontSize);
         const margin = 40;
@@ -148,7 +164,8 @@ export default function PdfEditor() {
             y,
             font: helveticaFont,
             size: fontSize,
-            color: rgb(0.95, 0.1, 0.1),
+            color: hexToRgbForPdfLib(color),
+            rotate: degrees(rotation[0]),
             opacity: 0.75,
         });
 
@@ -243,12 +260,22 @@ export default function PdfEditor() {
             <Card>
                 <CardHeader>
                     <CardTitle>Editing Tools</CardTitle>
-                    <CardDescription>Add text to the current page.</CardDescription>
+                    <CardDescription>Add text to page {currentPage}.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="text-to-add">Text to Add</Label>
-                        <Textarea id="text-to-add" value={textToAdd} onChange={(e) => setTextToAdd(e.target.value)} placeholder="Enter text" />
+                        <Label htmlFor="text-to-add">Text</Label>
+                        <Input id="text-to-add" value={textToAdd} onChange={(e) => setTextToAdd(e.target.value)} placeholder="Enter text" />
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="font-size">Font Size</Label>
+                            <Input id="font-size" type="number" value={fontSize} onChange={e => setFontSize(Number(e.target.value))} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="color">Color</Label>
+                            <Input id="color" type="color" value={color} onChange={e => setColor(e.target.value)} className="p-1"/>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="position">Position</Label>
@@ -265,7 +292,21 @@ export default function PdfEditor() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <p className="text-xs text-muted-foreground">More options like font and color are coming soon!</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="rotation" className="flex justify-between">
+                        <span><RotateCw className="inline-block mr-2 h-4 w-4" />Rotation</span>
+                        <span className="text-primary font-medium">{rotation[0]}°</span>
+                      </Label>
+                      <Slider
+                        id="rotation"
+                        min={-180}
+                        max={180}
+                        step={1}
+                        value={rotation}
+                        onValueChange={setRotation}
+                        disabled={isProcessing}
+                      />
+                    </div>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
                     {!editedPdfUrl ? (

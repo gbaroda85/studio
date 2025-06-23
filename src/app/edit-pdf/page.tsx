@@ -8,8 +8,7 @@ import { HowToGuide } from '@/components/how-to-guide';
 const steps = [
     "Upload PDF: Choose the PDF file you wish to edit.",
     "Navigate Page: Use the pagination controls to select the page you want to add text to.",
-    "Enter Text: Type your desired text in the 'Text to Add' field.",
-    "Set Position: Choose where you want the text to appear on the page from the dropdown menu.",
+    "Enter Text & Customize: Type your text, then adjust its position, font size, color, and rotation using the controls.",
     "Apply & Download: Click 'Apply Text', then 'Download PDF' to save your edited file.",
 ];
 
