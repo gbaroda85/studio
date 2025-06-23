@@ -3,10 +3,11 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import * as pdfjs from 'pdfjs-dist';
+import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Loader2, Download, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, Loader2, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
@@ -21,6 +22,7 @@ export default function PdfToImageConverter() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isZipping, setIsZipping] = useState(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [outputFormat, setOutputFormat] = useState<OutputFormat>('png');
     const [isDragOver, setIsDragOver] = useState(false);
@@ -89,6 +91,40 @@ export default function PdfToImageConverter() {
         link.click();
         document.body.removeChild(link);
     }
+
+    const handleDownloadAll = async () => {
+        if (imageUrls.length === 0 || !pdfFile) return;
+
+        setIsZipping(true);
+        toast({ title: 'Zipping files...', description: 'Please wait while we create your zip file.' });
+
+        try {
+            const zip = new JSZip();
+            
+            imageUrls.forEach((url, index) => {
+                const base64Data = url.split(',')[1];
+                zip.file(`page-${index + 1}.${outputFormat}`, base64Data, { base64: true });
+            });
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            const zipName = pdfFile.name.replace(/\.pdf$/i, '') || 'images';
+            link.download = `${zipName}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            toast({ title: 'Success!', description: 'Your zip file has been downloaded.' });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not create the zip file.' });
+        } finally {
+            setIsZipping(false);
+        }
+    };
     
     if (!pdfFile) {
         return (
@@ -121,7 +157,7 @@ export default function PdfToImageConverter() {
                     </div>
                     <div className="w-full sm:w-48 space-y-2">
                         <Label htmlFor="format">Output Format</Label>
-                        <Select value={outputFormat} onValueChange={(v) => {setOutputFormat(v as OutputFormat); handlePdfToImage(pdfFile)}} disabled={isProcessing}>
+                        <Select value={outputFormat} onValueChange={(v) => {setOutputFormat(v as OutputFormat); if(pdfFile) {handlePdfToImage(pdfFile)}}} disabled={isProcessing}>
                             <SelectTrigger id="format"><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="png">PNG</SelectItem>
@@ -153,8 +189,14 @@ export default function PdfToImageConverter() {
                     </div>
                 )}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between">
                 <Button variant="outline" onClick={() => { setPdfFile(null); setImageUrls([]); }}>Process Another PDF</Button>
+                 {imageUrls.length > 0 && (
+                    <Button onClick={handleDownloadAll} disabled={isProcessing || isZipping}>
+                        {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                        Download All (.zip)
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     )
