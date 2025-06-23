@@ -17,11 +17,13 @@ import {
   Scissors,
   Maximize,
   FilePenLine,
+  Info,
 } from 'lucide-react';
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -33,6 +35,7 @@ import {
 } from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
+import { AboutDialog } from './about-dialog';
 
 const menuItems = [
   {href: '/image-compress', label: 'Image Compress', icon: Shrink, color: 'text-green-500'},
@@ -83,6 +86,13 @@ function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <AboutDialog />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
