@@ -86,7 +86,7 @@ function AppSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu className="grid grid-cols-2 flex-row gap-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
@@ -95,10 +95,11 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
+                className="h-24 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-5", item.color)} />
-                  <span>{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-6", item.color)} />
+                  <span className="text-xs text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
