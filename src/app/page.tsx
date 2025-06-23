@@ -250,13 +250,6 @@ export default function Home() {
       color: 'text-orange-500',
     },
     {
-      href: '/currency-converter',
-      labelKey: 'currency_converter_label',
-      descriptionKey: 'currency_converter_description',
-      icon: Coins,
-      color: 'text-yellow-500',
-    },
-    {
       href: '/pressure-converter',
       labelKey: 'pressure_converter_label',
       descriptionKey: 'pressure_converter_description',
