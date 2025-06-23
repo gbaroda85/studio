@@ -1,4 +1,6 @@
 
+'use client';
+
 import {FeatureCard} from '@/components/feature-card';
 import {
   Tabs,
@@ -22,6 +24,7 @@ import {
   FilePenLine,
   Copyright,
 } from 'lucide-react';
+import {useLanguage} from '@/contexts/language-context';
 
 const imageFeatures = [
   {
@@ -142,12 +145,12 @@ const pdfFeatures = [
 ];
 
 export default function Home() {
+  const {t} = useLanguage();
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-8 max-w-2xl">
         <p className="mt-2 text-muted-foreground">
-          Your all-in-one tool for file manipulation. Fast, private, and
-          easy to use. All processing is done directly in your browser.
+          {t('tagline')}
         </p>
       </div>
 

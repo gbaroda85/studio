@@ -3,6 +3,7 @@ import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
 import AppLayout from '@/components/app-layout';
 import {Toaster} from '@/components/ui/toaster';
+import {LanguageProvider} from '@/contexts/language-context';
 
 export const metadata: Metadata = {
   title: 'ShrinkRay - Ultimate File Compressor',
@@ -31,8 +32,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppLayout>{children}</AppLayout>
-          <Toaster />
+          <LanguageProvider>
+            <AppLayout>{children}</AppLayout>
+            <Toaster />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
