@@ -23,7 +23,7 @@ export function AboutDialog() {
           <span>About</span>
         </SidebarMenuButton>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] shadow-primary/20 shadow-2xl ring-2 ring-primary/50 dark:shadow-primary/10">
         <DialogHeader>
           <DialogTitle>About ShrinkRay</DialogTitle>
           <DialogDescription>
