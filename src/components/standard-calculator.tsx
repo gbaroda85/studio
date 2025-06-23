@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -98,7 +99,7 @@ export default function StandardCalculator() {
     <Card className="w-full max-w-md mx-auto transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
       <CardHeader>
         <CardTitle className="sr-only">Standard Calculator</CardTitle>
-        <div className="bg-muted text-right p-4 rounded-lg">
+        <div className="bg-muted text-right p-6 rounded-lg">
           <p className="text-sm text-muted-foreground h-6">{previousInput} {operator}</p>
           <p className="text-5xl font-bold text-foreground truncate">{input}</p>
         </div>
@@ -110,7 +111,7 @@ export default function StandardCalculator() {
               key={btn.label}
               onClick={btn.handler}
               variant="secondary"
-              className={cn("h-16 text-2xl font-semibold", btn.className)}
+              className={cn("h-20 text-2xl font-semibold", btn.className)}
             >
               {btn.label}
             </Button>
