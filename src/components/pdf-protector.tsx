@@ -46,11 +46,11 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            const checkDoc = await PDFDocument.load(existingPdfBytes, {
+            const pdfDoc = await PDFDocument.load(existingPdfBytes, {
                 ignoreEncryption: true,
             });
 
-            if (checkDoc.isEncrypted) {
+            if (pdfDoc.isEncrypted) {
                 toast({
                     variant: 'destructive',
                     title: 'Already Protected',
@@ -60,24 +60,21 @@ export default function PdfProtector() {
                 return;
             }
 
-            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            // Create a new document and copy pages. This is a robust way to apply changes.
+            const newDoc = await PDFDocument.create();
+            const content = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            content.forEach((page) => {
+                newDoc.addPage(page);
+            });
             
-            // Use the dedicated encrypt method before saving
-            pdfDoc.encrypt({
+            // Save the new document with encryption options
+            const protectedPdfBytes = await newDoc.save({
               userPassword: password,
               ownerPassword: password,
               permissions: {
                   printing: true,
-                  modifying: false,
-                  copying: false,
-                  annotating: false,
-                  fillingForms: false,
-                  contentAccessibility: false,
-                  documentAssembly: false,
               },
             });
-
-            const protectedPdfBytes = await pdfDoc.save();
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
