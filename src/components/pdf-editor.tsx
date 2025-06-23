@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
 
-type TextPosition = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+type ContentPosition = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 const standardFonts = {
   'Courier': StandardFonts.Courier,
@@ -61,20 +61,22 @@ export default function PdfEditor() {
   
   // Editing state
   const [activeTab, setActiveTab] = useState('text');
+  
+  // Text state
   const [textToAdd, setTextToAdd] = useState('Confidential');
   const [font, setFont] = useState<FontKey>('Helvetica-Bold');
-  const [position, setPosition] = useState<TextPosition>('center');
+  const [textPosition, setTextPosition] = useState<ContentPosition>('center');
   const [fontSize, setFontSize] = useState(50);
-  const [color, setColor] = useState('#ff0000');
-  const [rotation, setRotation] = useState([0]);
+  const [textColor, setTextColor] = useState('#ff0000');
+  const [textRotation, setTextRotation] = useState([0]);
+  const [textOpacity, setTextOpacity] = useState([85]);
 
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [imageX, setImageX] = useState(50);
-  const [imageY, setImageY] = useState(50);
-  const [imageWidth, setImageWidth] = useState(150);
-  const [imageHeight, setImageHeight] = useState(100);
+  const [imagePosition, setImagePosition] = useState<ContentPosition>('center');
+  const [imageScale, setImageScale] = useState([25]);
+  const [imageOpacity, setImageOpacity] = useState([100]);
 
   const [editedPdfUrl, setEditedPdfUrl] = useState<string | null>(null);
   
@@ -96,7 +98,10 @@ export default function PdfEditor() {
           setEditedPdfUrl(null);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textToAdd, position, fontSize, color, rotation, font, imageFile, imageX, imageY, imageWidth, imageHeight]);
+  }, [
+    textToAdd, textPosition, fontSize, textColor, textRotation, font, textOpacity,
+    imageFile, imagePosition, imageScale, imageOpacity
+  ]);
 
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
@@ -115,7 +120,7 @@ export default function PdfEditor() {
             const previews: string[] = [];
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
+                const viewport = page.getViewport({ scale: 1.5 }); // Better quality preview
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
@@ -145,6 +150,7 @@ export default function PdfEditor() {
     const file = e.target.files?.[0];
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       setImageFile(file);
+      if(imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
       const url = URL.createObjectURL(file);
       setImagePreviewUrl(url);
     } else if (file) {
@@ -197,7 +203,7 @@ export default function PdfEditor() {
         let x = 0;
         let y = 0;
 
-        switch (position) {
+        switch (textPosition) {
             case 'top-left': x = margin; y = height - margin - textHeight; break;
             case 'top-center': x = (width / 2) - (textWidth / 2); y = height - margin - textHeight; break;
             case 'top-right': x = width - margin - textWidth; y = height - margin - textHeight; break;
@@ -212,9 +218,9 @@ export default function PdfEditor() {
             y,
             font: selectedFont,
             size: fontSize,
-            color: hexToRgbForPdfLib(color),
-            rotate: degrees(rotation[0]),
-            opacity: 0.85,
+            color: hexToRgbForPdfLib(textColor),
+            rotate: degrees(textRotation[0]),
+            opacity: textOpacity[0] / 100,
         });
 
         const newPdfBytes = await pdfDoc.save();
@@ -249,14 +255,32 @@ export default function PdfEditor() {
         }
 
         const page = pdfDoc.getPage(currentPage - 1);
-        const { height } = page.getSize();
+        const { width: pageWidth, height: pageHeight } = page.getSize();
+        
+        const scale = imageScale[0] / 100;
+        const imgWidth = embeddedImage.width * scale;
+        const imgHeight = embeddedImage.height * scale;
+        const margin = 40;
+        
+        let x = 0;
+        let y = 0;
+
+        switch (imagePosition) {
+            case 'top-left': x = margin; y = pageHeight - margin - imgHeight; break;
+            case 'top-center': x = (pageWidth - imgWidth) / 2; y = pageHeight - margin - imgHeight; break;
+            case 'top-right': x = pageWidth - margin - imgWidth; y = pageHeight - margin - imgHeight; break;
+            case 'center': x = (pageWidth - imgWidth) / 2; y = (pageHeight - imgHeight) / 2; break;
+            case 'bottom-left': x = margin; y = margin; break;
+            case 'bottom-center': x = (pageWidth - imgWidth) / 2; y = margin; break;
+            case 'bottom-right': x = pageWidth - margin - imgWidth; y = margin; break;
+        }
         
         page.drawImage(embeddedImage, {
-            x: imageX,
-            y: height - imageHeight - imageY,
-            width: imageWidth,
-            height: imageHeight,
-            opacity: 0.85,
+            x,
+            y,
+            width: imgWidth,
+            height: imgHeight,
+            opacity: imageOpacity[0] / 100,
         });
 
         const newPdfBytes = await pdfDoc.save();
@@ -384,12 +408,12 @@ export default function PdfEditor() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="color">Color</Label>
-                                    <Input id="color" type="color" value={color} onChange={e => setColor(e.target.value)} className="p-1"/>
+                                    <Input id="color" type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="p-1"/>
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="position">Position</Label>
-                                <Select value={position} onValueChange={(v) => setPosition(v as TextPosition)}>
+                                <Select value={textPosition} onValueChange={(v) => setTextPosition(v as ContentPosition)}>
                                     <SelectTrigger id="position"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="top-left">Top Left</SelectItem>
@@ -403,11 +427,18 @@ export default function PdfEditor() {
                                 </Select>
                             </div>
                             <div className="space-y-2">
+                                <Label htmlFor="text-opacity" className="flex justify-between">
+                                    <span>Opacity</span>
+                                    <span className="text-primary font-medium">{textOpacity[0]}%</span>
+                                </Label>
+                                <Slider id="text-opacity" min={0} max={100} step={1} value={textOpacity} onValueChange={setTextOpacity} />
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="rotation" className="flex justify-between">
                                     <span><RotateCw className="inline-block mr-2 h-4 w-4" />Rotation</span>
-                                    <span className="text-primary font-medium">{rotation[0]}°</span>
+                                    <span className="text-primary font-medium">{textRotation[0]}°</span>
                                 </Label>
-                                <Slider id="rotation" min={-180} max={180} step={1} value={rotation} onValueChange={setRotation} />
+                                <Slider id="rotation" min={-180} max={180} step={1} value={textRotation} onValueChange={setTextRotation} />
                             </div>
                         </TabsContent>
                         <TabsContent value="image" className="space-y-4 pt-4">
@@ -416,27 +447,38 @@ export default function PdfEditor() {
                                 <Input id="image-upload" type="file" accept="image/jpeg,image/png" onChange={handleImageFileChange} />
                             </div>
                             {imagePreviewUrl && (
-                                <div className="p-2 border rounded-md">
+                                <div className="p-2 border rounded-md flex justify-center">
                                     <Image src={imagePreviewUrl} alt="Image Preview" width={100} height={100} className="object-contain" />
                                 </div>
                             )}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="image-x">X Position</Label>
-                                    <Input id="image-x" type="number" value={imageX} onChange={e => setImageX(Number(e.target.value))} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="image-y">Y Position</Label>
-                                    <Input id="image-y" type="number" value={imageY} onChange={e => setImageY(Number(e.target.value))} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="image-width">Width</Label>
-                                    <Input id="image-width" type="number" value={imageWidth} onChange={e => setImageWidth(Number(e.target.value))} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="image-height">Height</Label>
-                                    <Input id="image-height" type="number" value={imageHeight} onChange={e => setImageHeight(Number(e.target.value))} />
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image-position">Position</Label>
+                                <Select value={imagePosition} onValueChange={(v) => setImagePosition(v as ContentPosition)}>
+                                    <SelectTrigger id="image-position"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="top-left">Top Left</SelectItem>
+                                        <SelectItem value="top-center">Top Center</SelectItem>
+                                        <SelectItem value="top-right">Top Right</SelectItem>
+                                        <SelectItem value="center">Center</SelectItem>
+                                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                                        <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image-scale" className="flex justify-between">
+                                    <span>Scale</span>
+                                    <span className="text-primary font-medium">{imageScale[0]}%</span>
+                                </Label>
+                                <Slider id="image-scale" min={1} max={200} step={1} value={imageScale} onValueChange={setImageScale} />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="image-opacity" className="flex justify-between">
+                                    <span>Opacity</span>
+                                    <span className="text-primary font-medium">{imageOpacity[0]}%</span>
+                                </Label>
+                                <Slider id="image-opacity" min={0} max={100} step={1} value={imageOpacity} onValueChange={setImageOpacity} />
                             </div>
                         </TabsContent>
                     </Tabs>
