@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
-import { PDFDocument, PDFPermissions } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,9 +61,6 @@ export default function PdfProtector() {
             }
 
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
-
-            pdfDoc.revokeAllPermissions();
-            pdfDoc.grantPermission(PDFPermissions.Print);
             
             pdfDoc.setProducer('ShrinkRay PDF Protector');
             pdfDoc.setCreationDate(new Date());
@@ -72,6 +69,15 @@ export default function PdfProtector() {
             const protectedPdfBytes = await pdfDoc.save({
                 userPassword: password,
                 ownerPassword: password,
+                permissions: {
+                    printing: true,
+                    modifying: false,
+                    copying: false,
+                    annotating: false,
+                    fillingForms: false,
+                    contentAccessibility: false,
+                    documentAssembly: false,
+                },
             });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
