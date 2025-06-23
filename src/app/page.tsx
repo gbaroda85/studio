@@ -23,6 +23,8 @@ import {
   Maximize,
   FilePenLine,
   Copyright,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -144,6 +146,20 @@ export default function Home() {
       descriptionKey: 'add_watermark_description',
       icon: Copyright,
       color: 'text-rose-500',
+    },
+    {
+      href: '/create-zip',
+      labelKey: 'create_zip_label',
+      descriptionKey: 'create_zip_description',
+      icon: Archive,
+      color: 'text-violet-500',
+    },
+    {
+      href: '/unzip-file',
+      labelKey: 'unzip_file_label',
+      descriptionKey: 'unzip_file_description',
+      icon: ArchiveRestore,
+      color: 'text-stone-500',
     },
   ];
 
