@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-type CalcMode = 'simple' | 'part_of_whole' | 'marks';
+type CalcMode = 'simple' | 'part_of_whole' | 'marks' | 'ratio';
 
 export default function PercentageCalculator() {
   const [mode, setMode] = useState<CalcMode>('simple');
@@ -30,6 +30,11 @@ export default function PercentageCalculator() {
   const [p3_total, setP3_total] = useState("")
   const [p3_result, setP3_result] = useState<string | null>(null)
 
+  // State for "Ratio to Percentage"
+  const [p4_ratioX, setP4_ratioX] = useState("")
+  const [p4_ratioY, setP4_ratioY] = useState("")
+  const [p4_result, setP4_result] = useState<string | null>(null)
+
 
   const handleCalculate = () => {
     if (mode === 'simple') {
@@ -47,6 +52,11 @@ export default function PercentageCalculator() {
         const total = parseFloat(p3_total);
         if (isNaN(obtained) || isNaN(total) || total === 0) { setP3_result(null); return; }
         setP3_result(((obtained / total) * 100).toLocaleString(undefined, { maximumFractionDigits: 2 }) + "%");
+    } else if (mode === 'ratio') {
+        const x = parseFloat(p4_ratioX);
+        const y = parseFloat(p4_ratioY);
+        if (isNaN(x) || isNaN(y) || y === 0) { setP4_result(null); return; }
+        setP4_result(((x / y) * 100).toLocaleString(undefined, { maximumFractionDigits: 2 }) + "%");
     }
   }
 
@@ -63,6 +73,10 @@ export default function PercentageCalculator() {
         setP3_obtained("");
         setP3_total("");
         setP3_result(null);
+    } else if (mode === 'ratio') {
+        setP4_ratioX("");
+        setP4_ratioY("");
+        setP4_result(null);
     }
   }
   
@@ -84,10 +98,11 @@ export default function PercentageCalculator() {
       </CardHeader>
       <CardContent>
           <Tabs value={mode} onValueChange={(v) => setMode(v as CalcMode)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="simple">Simple</TabsTrigger>
               <TabsTrigger value="part_of_whole">Part/Whole</TabsTrigger>
               <TabsTrigger value="marks">Marks</TabsTrigger>
+              <TabsTrigger value="ratio">Ratio</TabsTrigger>
             </TabsList>
             <TabsContent value="simple" className="space-y-4 pt-4">
               <div className="flex items-end gap-4">
@@ -130,6 +145,21 @@ export default function PercentageCalculator() {
                 </div>
               </div>
               {renderResult(p3_result)}
+            </TabsContent>
+            <TabsContent value="ratio" className="space-y-4 pt-4">
+               <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="p4_ratioX">Ratio Value</Label>
+                  <Input id="p4_ratioX" type="number" value={p4_ratioX} onChange={(e) => setP4_ratioX(e.target.value)} placeholder="e.g., 3" />
+                </div>
+                <span className="pb-2 text-2xl font-bold text-muted-foreground">:</span>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="p4_ratioY">To Value</Label>
+                  <Input id="p4_ratioY" type="number" value={p4_ratioY} onChange={(e) => setP4_ratioY(e.target.value)} placeholder="e.g., 4" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">Converts the ratio X:Y into a percentage.</p>
+              {renderResult(p4_result)}
             </TabsContent>
           </Tabs>
       </CardContent>

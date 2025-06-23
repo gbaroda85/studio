@@ -6,7 +6,7 @@ import PercentageCalculator from '@/components/percentage-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 const steps = [
-    "Choose Mode: Select the type of calculation you need: 'Simple', 'Part/Whole', or 'Marks'.",
+    "Choose Mode: Select the type of calculation you need: 'Simple', 'Part/Whole', 'Marks', or 'Ratio'.",
     "Enter Values: Fill in the required input fields for your chosen mode.",
     "Calculate: Click the 'Calculate' button.",
     "See Result: The result will be instantly displayed below the inputs.",
