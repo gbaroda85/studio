@@ -25,6 +25,7 @@ import {
   Copyright,
   Archive,
   ArchiveRestore,
+  FileText,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
@@ -174,9 +175,18 @@ export default function Home() {
 
       <Tabs defaultValue="image">
         <TabsList className="grid w-full grid-cols-3 md:max-w-md">
-          <TabsTrigger value="image">{t('image_tools')}</TabsTrigger>
-          <TabsTrigger value="pdf">{t('pdf_tools')}</TabsTrigger>
-          <TabsTrigger value="file">{t('file_tools')}</TabsTrigger>
+          <TabsTrigger value="image">
+            <ImageIcon className="mr-2 h-4 w-4" />
+            {t('image_tools')}
+          </TabsTrigger>
+          <TabsTrigger value="pdf">
+            <FileText className="mr-2 h-4 w-4" />
+            {t('pdf_tools')}
+          </TabsTrigger>
+          <TabsTrigger value="file">
+            <Archive className="mr-2 h-4 w-4" />
+            {t('file_tools')}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="image">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
