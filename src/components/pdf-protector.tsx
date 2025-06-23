@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -53,11 +54,13 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+            
+            // Load the original document. We use ignoreEncryption to check if it's already locked.
+            const originalDoc = await PDFDocument.load(existingPdfBytes, {
                 ignoreEncryption: true,
             });
 
-            if (pdfDoc.isEncrypted) {
+            if (originalDoc.isEncrypted) {
                 toast({
                     variant: 'destructive',
                     title: 'Already Protected',
@@ -66,11 +69,17 @@ export default function PdfProtector() {
                 setIsProtecting(false);
                 return;
             }
+
+            // To ensure a clean and reliable result, we create a new document
+            // and copy the pages. This avoids issues with modifying existing files.
+            const newDoc = await PDFDocument.create();
+            const copiedPages = await newDoc.copyPages(originalDoc, originalDoc.getPageIndices());
+            copiedPages.forEach((page) => {
+                newDoc.addPage(page);
+            });
             
-            // This is the new, simplified logic. This sets the user password, which is required to open
-            // the document. We are not setting any other options to ensure maximum
-            // compatibility with all PDF viewers.
-            const protectedPdfBytes = await pdfDoc.save({ userPassword: password });
+            // Save the new document WITH the password. This is the most robust method.
+            const protectedPdfBytes = await newDoc.save({ userPassword: password });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
