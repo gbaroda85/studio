@@ -63,14 +63,13 @@ export default function PdfProtector() {
                 return;
             }
 
-            // Re-creating the document is a robust way to apply changes
-            // and remove any potentially conflicting metadata.
+            // Create a new document to ensure a clean slate
             const newDoc = await PDFDocument.create();
             const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
             copiedPages.forEach((page) => newDoc.addPage(page));
 
-            // Set the password and deny all permissions for the user,
-            // which should force a password prompt on opening.
+            // Set a user password and deny all permissions.
+            // This is the critical step that forces PDF viewers to require a password.
             const protectedPdfBytes = await newDoc.save({
                 userPassword: password,
                 ownerPassword: password, // For changing permissions later
@@ -79,6 +78,8 @@ export default function PdfProtector() {
                     modifying: false,
                     copying: false,
                     annotating: false,
+                    fillingForms: false,
+                    assembling: false,
                 },
             });
 
