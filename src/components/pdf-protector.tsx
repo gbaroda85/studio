@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFPermissions } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,31 +45,30 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            let pdfDoc;
+            
+            const checkDoc = await PDFDocument.load(existingPdfBytes, {
+                ignoreEncryption: true,
+            });
 
-            // Try loading the document. If it's encrypted, it will throw an error.
-            try {
-                pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-                if (pdfDoc.isEncrypted) {
-                     toast({
-                        variant: 'destructive',
-                        title: 'Already Protected',
-                        description: 'This PDF is already password protected. Please use the Unlock PDF tool first if you wish to change the password.',
-                    });
-                    setIsProtecting(false);
-                    return;
-                }
-            } catch (e: any) {
-                 // Handle other potential loading errors
-                throw new Error('Could not load the PDF. The file might be corrupted.');
+            if (checkDoc.isEncrypted) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Already Protected',
+                    description: 'This PDF is already password protected. Please use the Unlock PDF tool first.',
+                });
+                setIsProtecting(false);
+                return;
             }
 
-            // Set metadata
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+            pdfDoc.revokeAllPermissions();
+            pdfDoc.grantPermission(PDFPermissions.Print);
+            
             pdfDoc.setProducer('ShrinkRay PDF Protector');
             pdfDoc.setCreationDate(new Date());
             pdfDoc.setModificationDate(new Date());
-
-            // Encrypt and save the PDF
+            
             const protectedPdfBytes = await pdfDoc.save({
                 userPassword: password,
                 ownerPassword: password,
@@ -92,7 +91,7 @@ export default function PdfProtector() {
             toast({
                 variant: 'destructive',
                 title: 'Error Protecting PDF',
-                description: error.message || 'An unexpected error occurred. Please ensure the file is not corrupted.',
+                description: 'An unexpected error occurred. Please ensure the file is not corrupted.',
             });
         } finally {
             setIsProtecting(false);
