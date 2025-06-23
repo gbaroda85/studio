@@ -34,11 +34,11 @@ export default function LandingPage() {
         <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-br from-background via-primary/5 to-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-8 text-center">
-              <div className="space-y-4 max-w-5xl">
+              <div className="space-y-4 max-w-6xl">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline bg-gradient-to-r from-primary to-foreground/70 text-transparent bg-clip-text">
                   {t('welcome')}
                 </h1>
-                <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
+                <p className="max-w-4xl mx-auto text-muted-foreground md:text-xl">
                   {t('tagline')}
                 </p>
                 <Button asChild size="lg" className="group text-lg py-7 px-10">
