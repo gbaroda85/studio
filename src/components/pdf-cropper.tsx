@@ -104,79 +104,98 @@ export default function PdfCropper() {
 
   const handleCropPdf = async () => {
     if (!pdfFile || !completedCrop?.width) {
-        toast({variant: 'destructive', title: 'No crop selected', description: 'Please select an area to crop.'});
-        return;
+      toast({
+        variant: 'destructive',
+        title: 'No crop selected',
+        description: 'Please select an area to crop.',
+      });
+      return;
     }
     setIsProcessing(true);
 
     try {
-        const existingPdfBytes = await pdfFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(existingPdfBytes);
-        const page = pdfDoc.getPage(currentPage - 1);
-        
-        const image = imgRef.current;
-        if (!image) throw new Error('Image reference not found');
+      const existingPdfBytes = await pdfFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-        // The scale used to render the PDF page to canvas
-        const RENDER_SCALE = 2.0;
+      // Create a new document for the single, cropped page
+      const newPdfDoc = await PDFDocument.create();
+      const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
+      newPdfDoc.addPage(copiedPage);
+      const page = newPdfDoc.getPage(0); // Work with the page in the new document
 
-        // Get page dimensions from pdf-lib
-        const { width: pagePointsWidth, height: pagePointsHeight } = page.getSize();
-        
-        // Get displayed image dimensions
-        const { width: displayWidth, height: displayHeight } = image;
-        
-        // Get the natural (unscaled by browser) image dimensions, which is the size of the canvas we rendered to.
-        const { naturalWidth, naturalHeight } = image;
+      const image = imgRef.current;
+      if (!image) throw new Error('Image reference not found');
 
-        // Calculate the scaling factor between the displayed image and the natural image.
-        const scaleX = naturalWidth / displayWidth;
-        const scaleY = naturalHeight / displayHeight;
+      // The scale used to render the PDF page to canvas
+      const RENDER_SCALE = 2.0;
 
-        // Convert the visual crop coordinates (in display pixels) to coordinates on the full-resolution canvas.
-        const canvasCropX = completedCrop.x * scaleX;
-        const canvasCropY = completedCrop.y * scaleY;
-        const canvasCropWidth = completedCrop.width * scaleX;
-        const canvasCropHeight = completedCrop.height * scaleY;
-        
-        // Convert canvas pixel coordinates to PDF points.
-        // The canvas was rendered at RENDER_SCALE, so we divide by that scale.
-        const cropBoxX = canvasCropX / RENDER_SCALE;
-        const cropBoxWidth = canvasCropWidth / RENDER_SCALE;
-        const cropBoxHeight = canvasCropHeight / RENDER_SCALE;
+      // Get page dimensions from pdf-lib
+      const {width: pagePointsWidth, height: pagePointsHeight} = page.getSize();
 
-        // The Y-coordinate in pdf-lib is from the bottom-left corner, so we need to invert it.
-        const cropBoxY = pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
-        
-        if (page.getRotation().angle !== 0) {
-          toast({
-            variant: 'default',
-            title: 'Rotated Page Warning',
-            description: 'Cropping may not work as expected on rotated pages.'
-          })
-        }
+      // Get displayed image dimensions
+      const {width: displayWidth, height: displayHeight} = image;
 
-        page.setCropBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
-        // Also set MediaBox to ensure viewers respect the crop
-        page.setMediaBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
+      // Get the natural (unscaled by browser) image dimensions, which is the size of the canvas we rendered to.
+      const {naturalWidth, naturalHeight} = image;
 
-        const newPdfBytes = await pdfDoc.save();
-        const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `cropped-${pdfFile.name}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      // Calculate the scaling factor between the displayed image and the natural image.
+      const scaleX = naturalWidth / displayWidth;
+      const scaleY = naturalHeight / displayHeight;
+
+      // Convert the visual crop coordinates (in display pixels) to coordinates on the full-resolution canvas.
+      const canvasCropX = completedCrop.x * scaleX;
+      const canvasCropY = completedCrop.y * scaleY;
+      const canvasCropWidth = completedCrop.width * scaleX;
+      const canvasCropHeight = completedCrop.height * scaleY;
+
+      // Convert canvas pixel coordinates to PDF points.
+      // The canvas was rendered at RENDER_SCALE, so we divide by that scale.
+      const cropBoxX = canvasCropX / RENDER_SCALE;
+      const cropBoxWidth = canvasCropWidth / RENDER_SCALE;
+      const cropBoxHeight = canvasCropHeight / RENDER_SCALE;
+
+      // The Y-coordinate in pdf-lib is from the bottom-left corner, so we need to invert it.
+      const cropBoxY =
+        pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
+
+      if (page.getRotation().angle !== 0) {
+        toast({
+          variant: 'default',
+          title: 'Rotated Page Warning',
+          description: 'Cropping may not work as expected on rotated pages.',
+        });
+      }
+
+      page.setCropBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
+      // Also set MediaBox to ensure viewers respect the crop
+      page.setMediaBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
+
+      // Save the new, single-page document
+      const newPdfBytes = await newPdfDoc.save();
+      const blob = new Blob([newPdfBytes], {type: 'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const originalName = pdfFile.name.replace(/\.pdf$/i, '');
+      link.download = `${originalName}-page${currentPage}-cropped.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: "Success!", description: `Page ${currentPage} was cropped and downloaded.` });
     } catch (error) {
-        console.error(error);
-        toast({variant: 'destructive', title: 'Error', description: 'Failed to crop the PDF.'});
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to crop the PDF.',
+      });
     } finally {
-        setIsProcessing(false);
+      setIsProcessing(false);
     }
-  }
+  };
 
   const resetState = () => {
       setPdfFile(null);
@@ -198,7 +217,7 @@ export default function PdfCropper() {
       >
         <CardHeader>
           <CardTitle>Crop PDF</CardTitle>
-          <CardDescription>Upload a PDF to crop its pages.</CardDescription>
+          <CardDescription>Upload a PDF to crop a page and download it.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
@@ -215,7 +234,7 @@ export default function PdfCropper() {
     <Card className="w-full max-w-4xl">
         <CardHeader>
             <CardTitle>Crop PDF</CardTitle>
-            <CardDescription>Select an area on the page to crop. Cropping is applied to the current page only.</CardDescription>
+            <CardDescription>Select an area on the page to crop. A new PDF with only the cropped page will be downloaded.</CardDescription>
         </CardHeader>
         <CardContent>
             {isProcessing && !pageImage && <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>}
@@ -254,7 +273,7 @@ export default function PdfCropper() {
                 <Button variant="outline" onClick={resetState}>Upload Another</Button>
                 <Button onClick={handleCropPdf} disabled={!completedCrop?.width || isProcessing}>
                     <Scissors className="mr-2" />
-                    Crop & Download
+                    Crop & Download Page
                 </Button>
             </div>
         </CardFooter>
