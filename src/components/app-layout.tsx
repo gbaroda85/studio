@@ -27,6 +27,8 @@ import {
   Cake,
   Percent,
   Route,
+  Coins,
+  Receipt,
 } from 'lucide-react';
 
 import {
@@ -85,6 +87,18 @@ function AppSidebar() {
     {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-teal-500'},
     {href: '/percentage-calculator', labelKey: 'percentage_calculator_label', icon: Percent, color: 'text-blue-500'},
     {href: '/fuel-cost-calculator', labelKey: 'fuel_cost_calculator_label', icon: Route, color: 'text-rose-500'},
+    {
+      href: '/interest-calculator',
+      labelKey: 'interest_calculator_label',
+      icon: Coins,
+      color: 'text-yellow-500',
+    },
+    {
+      href: '/sales-tax-calculator',
+      labelKey: 'sales_tax_calculator_label',
+      icon: Receipt,
+      color: 'text-indigo-500',
+    },
   ];
 
   return (

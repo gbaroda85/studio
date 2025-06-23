@@ -41,6 +41,7 @@ import {
   Waves,
   Route,
   Search,
+  Receipt,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -224,6 +225,20 @@ export default function Home() {
       descriptionKey: 'fuel_cost_calculator_description',
       icon: Route,
       color: 'text-rose-500',
+    },
+    {
+      href: '/interest-calculator',
+      labelKey: 'interest_calculator_label',
+      descriptionKey: 'interest_calculator_description',
+      icon: Coins,
+      color: 'text-yellow-500',
+    },
+    {
+      href: '/sales-tax-calculator',
+      labelKey: 'sales_tax_calculator_label',
+      descriptionKey: 'sales_tax_calculator_description',
+      icon: Receipt,
+      color: 'text-indigo-500',
     },
   ];
   
