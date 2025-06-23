@@ -3,13 +3,14 @@
 
 import 'react-image-crop/dist/ReactCrop.css';
 
-import React, { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
+import React, { useState, useRef, type ChangeEvent, type DragEvent, type SyntheticEvent } from 'react';
+import Image from 'next/image';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { UploadCloud, Download } from 'lucide-react';
+import { UploadCloud, Download, Crop as CropIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +19,7 @@ type OutputFormat = 'jpeg' | 'png' | 'webp';
 
 export default function ImageCropper() {
   const [imgSrc, setImgSrc] = useState('');
+  const [croppedImageSrc, setCroppedImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
@@ -29,6 +31,7 @@ export default function ImageCropper() {
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
       setCrop(undefined); // Clear crop on new image
+      setCroppedImageSrc(null); // Clear previous cropped image
       const reader = new FileReader();
       reader.addEventListener('load', () => setImgSrc(reader.result?.toString() || ''));
       reader.readAsDataURL(file);
@@ -46,7 +49,7 @@ export default function ImageCropper() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+  function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
     setCrop(initialCrop);
@@ -59,13 +62,13 @@ export default function ImageCropper() {
     });
   }
 
-  function handleDownloadCrop() {
+  function handleCropImage() {
     const image = imgRef.current;
     if (!image || !completedCrop?.width) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Could not download image. Please ensure you have selected a crop area.',
+        description: 'Could not crop image. Please ensure you have selected a crop area.',
       });
       return;
     }
@@ -101,12 +104,34 @@ export default function ImageCropper() {
     
     const mimeType = `image/${outputFormat}`;
     const base64Image = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? 0.9 : undefined);
+    setCroppedImageSrc(base64Image);
+    toast({
+        title: "Image Cropped",
+        description: "Preview is shown below. You can now download the image."
+    });
+  }
+
+  function handleDownload() {
+    if (!croppedImageSrc) return;
     const link = document.createElement('a');
-    link.href = base64Image;
+    link.href = croppedImageSrc;
     link.download = `cropped-image.${outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  const handleReset = () => {
+      setImgSrc('');
+      setCroppedImageSrc(null);
+      setCrop(undefined);
+      setCompletedCrop(undefined);
+  }
+
+  const handleRecrop = () => {
+      setCroppedImageSrc(null);
+      setCrop(undefined);
+      setCompletedCrop(undefined);
   }
 
   if (!imgSrc) {
@@ -134,24 +159,41 @@ export default function ImageCropper() {
     <Card className="w-full max-w-4xl">
       <CardHeader>
         <CardTitle>Crop Image</CardTitle>
-        <CardDescription>Select the area you want to crop and click download.</CardDescription>
+        <CardDescription>
+          {croppedImageSrc ? "Preview your cropped image below." : "Select the area you want to crop."}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-center bg-muted/30 p-4 rounded-md">
-          <ReactCrop
-            crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
-            onComplete={(c) => setCompletedCrop(c)}
-          >
-            <img
-              ref={imgRef}
-              alt="Crop me"
-              src={imgSrc}
-              onLoad={onImageLoad}
-              style={{ maxHeight: '70vh', objectFit: 'contain' }}
-            />
-          </ReactCrop>
-        </div>
+        {croppedImageSrc ? (
+             <div className="flex flex-col items-center gap-4">
+                <p className="text-sm font-medium text-green-600">Cropped Preview</p>
+                <div className="flex justify-center bg-muted/30 p-4 rounded-md">
+                    <Image
+                        src={croppedImageSrc}
+                        alt="Cropped image preview"
+                        width={500}
+                        height={500}
+                        style={{ maxHeight: '60vh', objectFit: 'contain', width: 'auto' }}
+                    />
+                </div>
+            </div>
+        ) : (
+            <div className="flex justify-center bg-muted/30 p-4 rounded-md">
+            <ReactCrop
+                crop={crop}
+                onChange={(_, percentCrop) => setCrop(percentCrop)}
+                onComplete={(c) => setCompletedCrop(c)}
+            >
+                <img
+                ref={imgRef}
+                alt="Crop me"
+                src={imgSrc}
+                onLoad={onImageLoad}
+                style={{ maxHeight: '70vh', objectFit: 'contain' }}
+                />
+            </ReactCrop>
+            </div>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end sm:items-center">
         <div className="w-full sm:w-auto grid grid-cols-2 gap-2 items-center">
@@ -166,11 +208,21 @@ export default function ImageCropper() {
             </Select>
         </div>
         <div className="flex w-full sm:w-auto gap-2">
-            <Button variant="outline" onClick={() => setImgSrc('')} className="flex-1 sm:flex-initial">Upload Another</Button>
-            <Button onClick={handleDownloadCrop} disabled={!completedCrop?.width || !completedCrop?.height} className="flex-1 sm:flex-initial">
-              <Download className="mr-2" />
-              Download
-            </Button>
+            <Button variant="outline" onClick={handleReset} className="flex-1 sm:flex-initial">Upload Another</Button>
+            {croppedImageSrc ? (
+                <>
+                    <Button variant="outline" onClick={handleRecrop} className="flex-1 sm:flex-initial">Crop Again</Button>
+                    <Button onClick={handleDownload} className="flex-1 sm:flex-initial">
+                        <Download className="mr-2" />
+                        Download
+                    </Button>
+                </>
+            ) : (
+                <Button onClick={handleCropImage} disabled={!completedCrop?.width || !completedCrop?.height} className="flex-1 sm:flex-initial">
+                    <CropIcon className="mr-2" />
+                    Crop Image
+                </Button>
+            )}
         </div>
       </CardFooter>
     </Card>
