@@ -7,9 +7,10 @@ import { HowToGuide } from '@/components/how-to-guide';
 
 const steps = [
     "Upload PDF: Choose the PDF file you wish to edit.",
-    "Navigate Page: Use the pagination controls to select the page you want to add text to.",
-    "Enter Text & Customize: Type your text, then adjust its position, font size, color, and rotation using the controls.",
-    "Apply & Download: Click 'Apply Text', then 'Download PDF' to save your edited file.",
+    "Choose Tool: Select the 'Add Text' or 'Add Image' tab.",
+    "Customize Content: For text, enter your text and adjust font, size, color, and position. For images, upload an image and set its position and size.",
+    "Apply Changes: Click the 'Apply Text' or 'Apply Image' button.",
+    "Download PDF: Once processed, click 'Download PDF' to save your edited file.",
 ];
 
 export default function EditPdfPage() {
