@@ -45,9 +45,8 @@ export default function PdfProtector() {
 
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            
             const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-                ignoreEncryption: true, 
+                ignoreEncryption: true,
             });
 
             if (pdfDoc.isEncrypted) {
@@ -59,20 +58,10 @@ export default function PdfProtector() {
                 setIsProtecting(false);
                 return;
             }
-
-            // Create a new document to ensure a clean slate for applying encryption.
-            const newDoc = await PDFDocument.create();
-            const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-            copiedPages.forEach((page) => newDoc.addPage(page));
             
-            // Generate a random, strong owner password to ensure it's different from the user password.
-            // This is the key to forcing PDF viewers to ask for the user password on open.
-            const ownerPassword = Math.random().toString(36).slice(-16) + Date.now().toString(36);
-
-            // Apply encryption with different user and owner passwords.
-            const protectedPdfBytes = await newDoc.save({
+            const protectedPdfBytes = await pdfDoc.save({
                 userPassword: password,
-                ownerPassword: ownerPassword,
+                ownerPassword: crypto.randomUUID(), 
                 permissions: {
                     printing: false,
                     modifying: false,

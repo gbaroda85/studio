@@ -50,8 +50,15 @@ export default function PdfUnlocker() {
                 userPassword: password,
             });
 
-            // If loaded successfully, save without a password
-            const unlockedPdfBytes = await pdfDoc.save();
+            // Create a new, clean document to be sure all encryption is stripped.
+            const unlockedDoc = await PDFDocument.create();
+            const copiedPages = await unlockedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach((page) => {
+                unlockedDoc.addPage(page);
+            });
+
+            // Save the new document, which has no encryption.
+            const unlockedPdfBytes = await unlockedDoc.save();
             
             const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
@@ -69,11 +76,11 @@ export default function PdfUnlocker() {
             console.error(error);
             if (error.name === 'EncryptedPDFError') {
                  toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password you entered is incorrect.' });
-            } else if (error.message?.includes('not encrypted')) {
+            } else if (error.message?.includes('is not encrypted')) {
                  toast({ variant: 'destructive', title: 'Not Encrypted', description: 'This PDF is not password protected.' });
             }
             else {
-                toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted.' });
+                toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted or in an unexpected format.' });
             }
         } finally {
             setIsUnlocking(false);
