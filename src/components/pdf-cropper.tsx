@@ -117,35 +117,48 @@ export default function PdfCropper() {
         const image = imgRef.current;
         if (!image) throw new Error('Image reference not found');
 
-        // Scale from displayed image size to natural image size
-        const scaleX = image.naturalWidth / image.width;
-        const scaleY = image.naturalHeight / image.height;
+        // The scale used to render the PDF page to canvas
+        const RENDER_SCALE = 2.0;
 
-        const naturalCropX = completedCrop.x * scaleX;
-        const naturalCropY = completedCrop.y * scaleY;
-        const naturalCropWidth = completedCrop.width * scaleX;
-        const naturalCropHeight = completedCrop.height * scaleY;
+        // Get page dimensions from pdf-lib
+        const { width: pagePointsWidth, height: pagePointsHeight } = page.getSize();
+        
+        // Get displayed image dimensions
+        const { width: displayWidth, height: displayHeight } = image;
+        
+        // Get the natural (unscaled by browser) image dimensions, which is the size of the canvas we rendered to.
+        const { naturalWidth, naturalHeight } = image;
 
-        // Get PDF page size
-        const { width: pageWidth, height: pageHeight } = page.getSize();
-        
-        // Scale from natural image size to PDF points
-        const pointsPerPixelX = pageWidth / image.naturalWidth;
-        const pointsPerPixelY = pageHeight / image.naturalHeight;
+        // Calculate the scaling factor between the displayed image and the natural image.
+        const scaleX = naturalWidth / displayWidth;
+        const scaleY = naturalHeight / displayHeight;
 
-        const cropBoxX = naturalCropX * pointsPerPixelX;
-        const cropBoxWidth = naturalCropWidth * pointsPerPixelX;
-        const cropBoxHeight = naturalCropHeight * pointsPerPixelY;
+        // Convert the visual crop coordinates (in display pixels) to coordinates on the full-resolution canvas.
+        const canvasCropX = completedCrop.x * scaleX;
+        const canvasCropY = completedCrop.y * scaleY;
+        const canvasCropWidth = completedCrop.width * scaleX;
+        const canvasCropHeight = completedCrop.height * scaleY;
         
-        // pdf-lib's y-coordinate is from the bottom-left corner.
-        const cropBoxY = pageHeight - (naturalCropY * pointsPerPixelY) - cropBoxHeight;
+        // Convert canvas pixel coordinates to PDF points.
+        // The canvas was rendered at RENDER_SCALE, so we divide by that scale.
+        const cropBoxX = canvasCropX / RENDER_SCALE;
+        const cropBoxWidth = canvasCropWidth / RENDER_SCALE;
+        const cropBoxHeight = canvasCropHeight / RENDER_SCALE;
+
+        // The Y-coordinate in pdf-lib is from the bottom-left corner, so we need to invert it.
+        const cropBoxY = pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
         
-        page.setCropBox(
-            cropBoxX,
-            cropBoxY,
-            cropBoxWidth,
-            cropBoxHeight
-        );
+        if (page.getRotation().angle !== 0) {
+          toast({
+            variant: 'default',
+            title: 'Rotated Page Warning',
+            description: 'Cropping may not work as expected on rotated pages.'
+          })
+        }
+
+        page.setCropBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
+        // Also set MediaBox to ensure viewers respect the crop
+        page.setMediaBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
 
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
