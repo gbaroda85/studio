@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -48,8 +47,6 @@ export default function PdfProtector() {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
             const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-                // It is important to ignore encryption when loading,
-                // so we can check if it's already encrypted without errors.
                 ignoreEncryption: true, 
             });
 
@@ -63,23 +60,27 @@ export default function PdfProtector() {
                 return;
             }
 
-            // Create a new document to ensure a clean slate
+            // Create a new document to ensure a clean slate for applying encryption.
             const newDoc = await PDFDocument.create();
             const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
             copiedPages.forEach((page) => newDoc.addPage(page));
+            
+            // Generate a random, strong owner password to ensure it's different from the user password.
+            // This is the key to forcing PDF viewers to ask for the user password on open.
+            const ownerPassword = Math.random().toString(36).slice(-16) + Date.now().toString(36);
 
-            // Set a user password and deny all permissions.
-            // This is the critical step that forces PDF viewers to require a password.
+            // Apply encryption with different user and owner passwords.
             const protectedPdfBytes = await newDoc.save({
                 userPassword: password,
-                ownerPassword: password, // For changing permissions later
+                ownerPassword: ownerPassword,
                 permissions: {
                     printing: false,
                     modifying: false,
                     copying: false,
                     annotating: false,
                     fillingForms: false,
-                    assembling: false,
+                    contentAccessibility: false,
+                    documentAssembly: false,
                 },
             });
 
