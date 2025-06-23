@@ -186,7 +186,7 @@ export default function ImageCompressor() {
   if (!originalImageSrc) {
     return (
       <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out", isDragOver && "border-primary ring-4 ring-primary/20")}
+        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
