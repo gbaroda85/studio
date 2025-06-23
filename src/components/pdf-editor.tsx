@@ -19,8 +19,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
 
-type ContentPosition = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-
 const standardFonts = {
   'Courier': StandardFonts.Courier,
   'Courier-Bold': StandardFonts.CourierBold,
@@ -65,18 +63,21 @@ export default function PdfEditor() {
   // Text state
   const [textToAdd, setTextToAdd] = useState('Confidential');
   const [font, setFont] = useState<FontKey>('Helvetica-Bold');
-  const [textPosition, setTextPosition] = useState<ContentPosition>('center');
   const [fontSize, setFontSize] = useState(50);
   const [textColor, setTextColor] = useState('#ff0000');
   const [textRotation, setTextRotation] = useState([0]);
   const [textOpacity, setTextOpacity] = useState([85]);
+  const [textX, setTextX] = useState('50');
+  const [textY, setTextY] = useState('400');
 
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [imagePosition, setImagePosition] = useState<ContentPosition>('center');
   const [imageScale, setImageScale] = useState([25]);
   const [imageOpacity, setImageOpacity] = useState([100]);
+  const [imageX, setImageX] = useState('50');
+  const [imageY, setImageY] = useState('400');
+
 
   const [editedPdfUrl, setEditedPdfUrl] = useState<string | null>(null);
   
@@ -210,24 +211,9 @@ export default function PdfEditor() {
         const selectedFont = await pdfDoc.embedFont(standardFonts[font]);
         
         const page = pdfDoc.getPage(currentPage - 1);
-        const { width, height } = page.getSize();
         
-        const textWidth = selectedFont.widthOfTextAtSize(textToAdd, fontSize);
-        const textHeight = selectedFont.heightAtSize(fontSize);
-        const margin = 40;
-
-        let x = 0;
-        let y = 0;
-
-        switch (textPosition) {
-            case 'top-left': x = margin; y = height - margin - textHeight; break;
-            case 'top-center': x = (width / 2) - (textWidth / 2); y = height - margin - textHeight; break;
-            case 'top-right': x = width - margin - textWidth; y = height - margin - textHeight; break;
-            case 'center': x = (width / 2) - (textWidth / 2); y = (height / 2) - (textHeight / 2); break;
-            case 'bottom-left': x = margin; y = margin; break;
-            case 'bottom-center': x = (width / 2) - (textWidth / 2); y = margin; break;
-            case 'bottom-right': x = width - margin - textWidth; y = margin; break;
-        }
+        const x = parseFloat(textX) || 0;
+        const y = parseFloat(textY) || 0;
 
         page.drawText(textToAdd, {
             x,
@@ -281,25 +267,12 @@ export default function PdfEditor() {
         }
 
         const page = pdfDoc.getPage(currentPage - 1);
-        const { width: pageWidth, height: pageHeight } = page.getSize();
-        
         const scale = imageScale[0] / 100;
         const imgWidth = embeddedImage.width * scale;
         const imgHeight = embeddedImage.height * scale;
-        const margin = 40;
         
-        let x = 0;
-        let y = 0;
-
-        switch (imagePosition) {
-            case 'top-left': x = margin; y = pageHeight - margin - imgHeight; break;
-            case 'top-center': x = (pageWidth - imgWidth) / 2; y = pageHeight - margin - imgHeight; break;
-            case 'top-right': x = pageWidth - margin - imgWidth; y = pageHeight - margin - imgHeight; break;
-            case 'center': x = (pageWidth - imgWidth) / 2; y = (pageHeight - imgHeight) / 2; break;
-            case 'bottom-left': x = margin; y = margin; break;
-            case 'bottom-center': x = (pageWidth - imgWidth) / 2; y = margin; break;
-            case 'bottom-right': x = pageWidth - margin - imgWidth; y = margin; break;
-        }
+        const x = parseFloat(imageX) || 0;
+        const y = parseFloat(imageY) || 0;
         
         page.drawImage(embeddedImage, {
             x,
@@ -460,21 +433,17 @@ export default function PdfEditor() {
                                     <Input id="color" type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="p-1"/>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="position">Position</Label>
-                                <Select value={textPosition} onValueChange={(v) => setTextPosition(v as ContentPosition)}>
-                                    <SelectTrigger id="position"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="top-left">Top Left</SelectItem>
-                                        <SelectItem value="top-center">Top Center</SelectItem>
-                                        <SelectItem value="top-right">Top Right</SelectItem>
-                                        <SelectItem value="center">Center</SelectItem>
-                                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                                        <SelectItem value="bottom-center">Bottom Center</SelectItem>
-                                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                             <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="text-x">X Position</Label>
+                                    <Input id="text-x" type="number" value={textX} onChange={e => setTextX(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="text-y">Y Position</Label>
+                                    <Input id="text-y" type="number" value={textY} onChange={e => setTextY(e.target.value)} />
+                                </div>
                             </div>
+                             <p className="text-xs text-muted-foreground -mt-2">Coordinates start from the bottom-left corner.</p>
                             <div className="space-y-2">
                                 <Label htmlFor="text-opacity" className="flex justify-between">
                                     <span>Opacity</span>
@@ -500,21 +469,17 @@ export default function PdfEditor() {
                                     <Image src={imagePreviewUrl} alt="Image Preview" width={100} height={100} className="object-contain" />
                                 </div>
                             )}
-                            <div className="space-y-2">
-                                <Label htmlFor="image-position">Position</Label>
-                                <Select value={imagePosition} onValueChange={(v) => setImagePosition(v as ContentPosition)}>
-                                    <SelectTrigger id="image-position"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="top-left">Top Left</SelectItem>
-                                        <SelectItem value="top-center">Top Center</SelectItem>
-                                        <SelectItem value="top-right">Top Right</SelectItem>
-                                        <SelectItem value="center">Center</SelectItem>
-                                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                                        <SelectItem value="bottom-center">Bottom Center</SelectItem>
-                                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                             <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="image-x">X Position</Label>
+                                    <Input id="image-x" type="number" value={imageX} onChange={e => setImageX(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="image-y">Y Position</Label>
+                                    <Input id="image-y" type="number" value={imageY} onChange={e => setImageY(e.target.value)} />
+                                </div>
                             </div>
+                             <p className="text-xs text-muted-foreground -mt-2">Coordinates start from the bottom-left corner.</p>
                             <div className="space-y-2">
                                 <Label htmlFor="image-scale" className="flex justify-between">
                                     <span>Scale</span>
@@ -548,5 +513,7 @@ export default function PdfEditor() {
     </div>
   )
 }
+
+    
 
     
