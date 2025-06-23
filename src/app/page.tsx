@@ -147,6 +147,9 @@ export default function Home() {
       icon: Copyright,
       color: 'text-rose-500',
     },
+  ];
+
+  const fileFeatures = [
     {
       href: '/create-zip',
       labelKey: 'create_zip_label',
@@ -170,9 +173,10 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue="image">
-        <TabsList className="grid w-full grid-cols-2 md:max-w-sm">
+        <TabsList className="grid w-full grid-cols-3 md:max-w-md">
           <TabsTrigger value="image">{t('image_tools')}</TabsTrigger>
           <TabsTrigger value="pdf">{t('pdf_tools')}</TabsTrigger>
+          <TabsTrigger value="file">{t('file_tools')}</TabsTrigger>
         </TabsList>
         <TabsContent value="image">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
@@ -191,6 +195,20 @@ export default function Home() {
         <TabsContent value="pdf">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
             {pdfFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.href}
+                title={t(feature.labelKey)}
+                description={t(feature.descriptionKey)}
+                href={feature.href}
+                icon={feature.icon}
+                color={feature.color}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        <TabsContent value="file">
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+            {fileFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
