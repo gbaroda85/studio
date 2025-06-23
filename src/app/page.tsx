@@ -26,146 +26,145 @@ import {
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
-const imageFeatures = [
-  {
-    href: '/image-compress',
-    label: 'Image Compress',
-    description: 'Reduce image file size without losing quality.',
-    icon: Shrink,
-    color: 'text-green-500',
-  },
-  {
-    href: '/image-resize',
-    label: 'Resize Image',
-    description: 'Change the dimensions of your image quickly.',
-    icon: Maximize,
-    color: 'text-fuchsia-500',
-  },
-  {
-    href: '/crop-image',
-    label: 'Crop Image',
-    description: 'Easily crop your images to the perfect size.',
-    icon: Crop,
-    color: 'text-blue-500',
-  },
-  {
-    href: '/image-to-jpg',
-    label: 'Image to JPG',
-    description: 'Convert various image formats to JPG.',
-    icon: FileOutput,
-    color: 'text-yellow-500',
-  },
-  {
-    href: '/image-to-png',
-    label: 'Image to PNG',
-    description: 'Convert various image formats to PNG.',
-    icon: FileOutput,
-    color: 'text-sky-500',
-  },
-  {
-    href: '/image-to-pdf',
-    label: 'Image to PDF',
-    description: 'Convert images into a single PDF file.',
-    icon: FileDigit,
-    color: 'text-red-500',
-  },
-];
-
-const pdfFeatures = [
-  {
-    href: '/pdf-to-image',
-    label: 'PDF to Image',
-    description: 'Extract all pages from a PDF as images.',
-    icon: ImageIcon,
-    color: 'text-orange-500',
-  },
-  {
-    href: '/compress-pdf',
-    label: 'Compress PDF',
-    description: 'Reduce the file size of your PDF documents.',
-    icon: FileArchive,
-    color: 'text-purple-500',
-  },
-  {
-    href: '/merge-pdf',
-    label: 'Merge PDF',
-    description: 'Combine multiple PDFs into one document.',
-    icon: Merge,
-    color: 'text-pink-500',
-  },
-   {
-    href: '/edit-pdf',
-    label: 'Edit PDF',
-    description: 'Add text, shapes, and annotations to a PDF.',
-    icon: FilePenLine,
-    color: 'text-lime-500',
-  },
-  {
-    href: '/split-pdf',
-    label: 'Split PDF',
-    description: 'Extract specific pages from a PDF.',
-    icon: Scissors,
-    color: 'text-cyan-500',
-  },
-  {
-    href: '/crop-pdf',
-    label: 'Crop PDF',
-    description: 'Crop the visible area of PDF pages.',
-    icon: Crop,
-    color: 'text-amber-500',
-  },
-  {
-    href: '/scan-to-pdf',
-    label: 'Scan to PDF',
-    description: 'Scan documents directly to a PDF file.',
-    icon: ScanLine,
-    color: 'text-indigo-500',
-  },
-  {
-    href: '/protect-pdf',
-    label: 'Protect PDF',
-    description: 'Add a password to your PDF.',
-    icon: Lock,
-    color: 'text-gray-500',
-  },
-  {
-    href: '/unlock-pdf',
-    label: 'Unlock PDF',
-    description: 'Remove password protection from a PDF.',
-    icon: Unlock,
-    color: 'text-teal-500',
-  },
-  {
-    href: '/add-watermark',
-    label: 'Add Watermark',
-    description: 'Add a text or image watermark to your PDF.',
-    icon: Copyright,
-    color: 'text-rose-500',
-  },
-];
-
 export default function Home() {
   const {t} = useLanguage();
+
+  const imageFeatures = [
+    {
+      href: '/image-compress',
+      labelKey: 'image_compress_label',
+      descriptionKey: 'image_compress_description',
+      icon: Shrink,
+      color: 'text-green-500',
+    },
+    {
+      href: '/image-resize',
+      labelKey: 'resize_image_label',
+      descriptionKey: 'resize_image_description',
+      icon: Maximize,
+      color: 'text-fuchsia-500',
+    },
+    {
+      href: '/crop-image',
+      labelKey: 'crop_image_label',
+      descriptionKey: 'crop_image_description',
+      icon: Crop,
+      color: 'text-blue-500',
+    },
+    {
+      href: '/image-to-jpg',
+      labelKey: 'image_to_jpg_label',
+      descriptionKey: 'image_to_jpg_description',
+      icon: FileOutput,
+      color: 'text-yellow-500',
+    },
+    {
+      href: '/image-to-png',
+      labelKey: 'image_to_png_label',
+      descriptionKey: 'image_to_png_description',
+      icon: FileOutput,
+      color: 'text-sky-500',
+    },
+    {
+      href: '/image-to-pdf',
+      labelKey: 'image_to_pdf_label',
+      descriptionKey: 'image_to_pdf_description',
+      icon: FileDigit,
+      color: 'text-red-500',
+    },
+  ];
+
+  const pdfFeatures = [
+    {
+      href: '/pdf-to-image',
+      labelKey: 'pdf_to_image_label',
+      descriptionKey: 'pdf_to_image_description',
+      icon: ImageIcon,
+      color: 'text-orange-500',
+    },
+    {
+      href: '/compress-pdf',
+      labelKey: 'compress_pdf_label',
+      descriptionKey: 'compress_pdf_description',
+      icon: FileArchive,
+      color: 'text-purple-500',
+    },
+    {
+      href: '/merge-pdf',
+      labelKey: 'merge_pdf_label',
+      descriptionKey: 'merge_pdf_description',
+      icon: Merge,
+      color: 'text-pink-500',
+    },
+    {
+      href: '/edit-pdf',
+      labelKey: 'edit_pdf_label',
+      descriptionKey: 'edit_pdf_description',
+      icon: FilePenLine,
+      color: 'text-lime-500',
+    },
+    {
+      href: '/split-pdf',
+      labelKey: 'split_pdf_label',
+      descriptionKey: 'split_pdf_description',
+      icon: Scissors,
+      color: 'text-cyan-500',
+    },
+    {
+      href: '/crop-pdf',
+      labelKey: 'crop_pdf_label',
+      descriptionKey: 'crop_pdf_description',
+      icon: Crop,
+      color: 'text-amber-500',
+    },
+    {
+      href: '/scan-to-pdf',
+      labelKey: 'scan_to_pdf_label',
+      descriptionKey: 'scan_to_pdf_description',
+      icon: ScanLine,
+      color: 'text-indigo-500',
+    },
+    {
+      href: '/protect-pdf',
+      labelKey: 'protect_pdf_label',
+      descriptionKey: 'protect_pdf_description',
+      icon: Lock,
+      color: 'text-gray-500',
+    },
+    {
+      href: '/unlock-pdf',
+      labelKey: 'unlock_pdf_label',
+      descriptionKey: 'unlock_pdf_description',
+      icon: Unlock,
+      color: 'text-teal-500',
+    },
+    {
+      href: '/add-watermark',
+      labelKey: 'add_watermark_label',
+      descriptionKey: 'add_watermark_description',
+      icon: Copyright,
+      color: 'text-rose-500',
+    },
+  ];
+
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-8 max-w-2xl">
-        <p className="mt-2 text-muted-foreground">
-          {t('tagline')}
-        </p>
+        <p className="mt-2 text-muted-foreground">{t('tagline')}</p>
       </div>
 
       <Tabs defaultValue="image">
         <TabsList className="grid w-full grid-cols-2 md:max-w-sm">
-          <TabsTrigger value="image">Image Tools</TabsTrigger>
-          <TabsTrigger value="pdf">PDF Tools</TabsTrigger>
+          <TabsTrigger value="image">{t('image_tools')}</TabsTrigger>
+          <TabsTrigger value="pdf">{t('pdf_tools')}</TabsTrigger>
         </TabsList>
         <TabsContent value="image">
-          <div className="mt-6 grid gap-4 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
             {imageFeatures.map((feature) => (
               <FeatureCard
-                key={feature.label}
-                title={feature.label}
-                description={feature.description}
+                key={feature.href}
+                title={t(feature.labelKey)}
+                description={t(feature.descriptionKey)}
                 href={feature.href}
                 icon={feature.icon}
                 color={feature.color}
@@ -174,12 +173,12 @@ export default function Home() {
           </div>
         </TabsContent>
         <TabsContent value="pdf">
-          <div className="mt-6 grid gap-4 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
             {pdfFeatures.map((feature) => (
               <FeatureCard
-                key={feature.label}
-                title={feature.label}
-                description={feature.description}
+                key={feature.href}
+                title={t(feature.labelKey)}
+                description={t(feature.descriptionKey)}
                 href={feature.href}
                 icon={feature.icon}
                 color={feature.color}

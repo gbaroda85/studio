@@ -49,28 +49,29 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/language-context';
 
-const menuItems = [
-  {href: '/image-compress', label: 'Image Compress', icon: Shrink, color: 'text-green-500'},
-  {href: '/image-resize', label: 'Resize Image', icon: Maximize, color: 'text-fuchsia-500'},
-  {href: '/crop-image', label: 'Crop Image', icon: Crop, color: 'text-blue-500'},
-  {href: '/image-to-jpg', label: 'Image to JPG', icon: FileOutput, color: 'text-yellow-500'},
-  {href: '/image-to-png', label: 'Image to PNG', icon: FileOutput, color: 'text-sky-500'},
-  {href: '/image-to-pdf', label: 'Image to PDF', icon: FileDigit, color: 'text-red-500'},
-  {href: '/pdf-to-image', label: 'PDF to Image', icon: ImageIcon, color: 'text-orange-500'},
-  {href: '/compress-pdf', label: 'Compress PDF', icon: FileArchive, color: 'text-purple-500'},
-  {href: '/merge-pdf', label: 'Merge PDF', icon: Merge, color: 'text-pink-500'},
-  {href: '/edit-pdf', label: 'Edit PDF', icon: FilePenLine, color: 'text-lime-500'},
-  {href: '/split-pdf', label: 'Split PDF', icon: Scissors, color: 'text-cyan-500'},
-  {href: '/crop-pdf', label: 'Crop PDF', icon: Crop, color: 'text-amber-500'},
-  {href: '/scan-to-pdf', label: 'Scan to PDF', icon: ScanLine, color: 'text-indigo-500'},
-  {href: '/protect-pdf', label: 'Protect PDF', icon: Lock, color: 'text-gray-500'},
-  {href: '/unlock-pdf', label: 'Unlock PDF', icon: Unlock, color: 'text-teal-500'},
-  {href: '/add-watermark', label: 'Add Watermark', icon: Copyright, color: 'text-rose-500'},
-];
-
 function AppSidebar() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { t } = useLanguage();
+
+  const menuItems = [
+    {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-green-500'},
+    {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-fuchsia-500'},
+    {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-blue-500'},
+    {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
+    {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
+    {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
+    {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
+    {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
+    {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
+    {href: '/edit-pdf', labelKey: 'edit_pdf_label', icon: FilePenLine, color: 'text-lime-500'},
+    {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-500'},
+    {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-amber-500'},
+    {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-indigo-500'},
+    {href: '/protect-pdf', labelKey: 'protect_pdf_label', icon: Lock, color: 'text-gray-500'},
+    {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-teal-500'},
+    {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
+  ];
 
   return (
     <Sidebar>
@@ -83,17 +84,17 @@ function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
+            <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 size="lg"
                 variant="outline"
                 isActive={pathname === item.href}
-                tooltip={item.label}
+                tooltip={t(item.labelKey)}
                 asChild
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
                   <item.icon className={cn("size-5", item.color)} />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
