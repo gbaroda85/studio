@@ -34,11 +34,11 @@ export default function LandingPage() {
         <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-br from-background via-primary/5 to-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-8 text-center">
-              <div className="space-y-4 max-w-3xl">
+              <div className="space-y-4 max-w-4xl">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline bg-gradient-to-r from-primary to-foreground/70 text-transparent bg-clip-text">
                   {t('welcome')}
                 </h1>
-                <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
+                <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
                   {t('tagline')}
                 </p>
                 <Button asChild size="lg" className="group text-lg py-7 px-10">
@@ -47,9 +47,9 @@ export default function LandingPage() {
                   </Link>
                 </Button>
               </div>
-              <div className="relative w-full max-w-5xl group">
+              <div className="relative w-full max-w-7xl group">
                  <Image
-                    src="https://placehold.co/1200x600/eaeaea/333333.png"
+                    src="https://placehold.co/1200x600.png"
                     width="1200"
                     height="600"
                     alt="Hero Image"
@@ -68,11 +68,11 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need, All in One Place</h2>
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-5xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 From image optimization to complex calculations, our suite of tools is designed to be powerful yet simple to use.
               </p>
             </div>
-            <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
+            <div className="mx-auto grid items-start gap-8 sm:max-w-5xl sm:grid-cols-2 md:gap-12 lg:max-w-7xl lg:grid-cols-3">
               <FeatureCard
                 icon={ImageIcon}
                 title={t('image_tools')}
@@ -97,7 +97,7 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Simple and Fast</h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">Get your tasks done in three easy steps.</p>
+                <p className="max-w-5xl text-muted-foreground md:text-xl">Get your tasks done in three easy steps.</p>
             </div>
             <div className="relative">
                 <div className="absolute top-1/2 left-0 w-full h-0.5 bg-border -translate-y-1/2 hidden sm:block"></div>
@@ -136,7 +136,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Privacy First</div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Your Files are Safe and Private</h2>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-3xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 We believe in privacy. That's why every tool runs entirely within your browser. Your files are never uploaded to any server, ever.
               </p>
             </div>
