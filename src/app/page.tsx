@@ -244,7 +244,7 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 md:max-w-4xl">
+        <TabsList className="flex h-auto flex-wrap justify-center">
           <TabsTrigger value="image">
             <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
             {t('image_tools')}
