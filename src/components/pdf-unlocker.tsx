@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -71,7 +72,7 @@ export default function PdfUnlocker() {
             const copiedPages = await unlockedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
             copiedPages.forEach((page) => {
                 unlockedDoc.addPage(page);
-            });
+});
 
             // Save the new document, which has no encryption.
             const unlockedPdfBytes = await unlockedDoc.save();
@@ -90,9 +91,10 @@ export default function PdfUnlocker() {
             resetState();
 
         } catch (error: any) {
-            if (error.constructor.name === 'EncryptedPDFError') {
+            if (error.constructor.name === 'EncryptedPDFError' || (error.message && error.message.includes('password'))) {
                  toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password you entered is incorrect.' });
             } else {
+                console.error(error);
                 toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted.' });
             }
         } finally {
@@ -128,7 +130,7 @@ export default function PdfUnlocker() {
                 <CardDescription>Enter the password to decrypt your PDF file.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="font-medium text-sm">File: {pdfFile.name}</div>
+                <div className="font-medium text-sm truncate">File: {pdfFile.name}</div>
                 <div className="space-y-2">
                     <Label htmlFor="password">Current Password</Label>
                     <Input 
