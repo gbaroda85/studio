@@ -89,19 +89,39 @@ export default function PdfEditor() {
     return () => {
       if (editedPdfUrl) URL.revokeObjectURL(editedPdfUrl);
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      pagePreviews.forEach(URL.revokeObjectURL);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editedPdfUrl, imagePreviewUrl]);
 
-  useEffect(() => {
-      if (editedPdfUrl) {
-          URL.revokeObjectURL(editedPdfUrl);
-          setEditedPdfUrl(null);
+
+  const updatePagePreview = async (pdfBytes: ArrayBuffer, pageNumber: number) => {
+      const typedArray = new Uint8Array(pdfBytes);
+      const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
+      pdfDocRef.current = pdf;
+
+      const page = await pdf.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      if (context) {
+          context.fillStyle = '#FFFFFF';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          await page.render({ canvasContext: context, viewport }).promise;
+          const newPreviewUrl = canvas.toDataURL('image/png');
+          setPagePreviews(previews => {
+              const newPreviews = [...previews];
+              if (newPreviews[pageNumber - 1]) {
+                  URL.revokeObjectURL(newPreviews[pageNumber - 1]);
+              }
+              newPreviews[pageNumber - 1] = newPreviewUrl;
+              return newPreviews;
+          });
       }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    textToAdd, textPosition, fontSize, textColor, textRotation, font, textOpacity,
-    imageFile, imagePosition, imageScale, imageOpacity
-  ]);
+  }
+
 
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
@@ -166,10 +186,6 @@ export default function PdfEditor() {
   const handlePageChange = (newPage: number) => {
       if (newPage > 0 && newPage <= numPages) {
           setCurrentPage(newPage);
-          if (editedPdfUrl) {
-            URL.revokeObjectURL(editedPdfUrl);
-            setEditedPdfUrl(null);
-          }
       }
   }
   
@@ -225,9 +241,19 @@ export default function PdfEditor() {
 
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+        
+        // Update file in state for cumulative edits
+        const newFile = new File([blob], pdfFile.name, { type: 'application/pdf' });
+        setPdfFile(newFile);
+        
+        // Update download URL
+        if(editedPdfUrl) URL.revokeObjectURL(editedPdfUrl);
         const url = URL.createObjectURL(blob);
         setEditedPdfUrl(url);
-        toast({title: "Success", description: "Text added. Your PDF is ready to download."});
+
+        // Update preview
+        await updatePagePreview(newPdfBytes, currentPage);
+        toast({title: "Success", description: "Text added. You can apply more changes or download."});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to edit the PDF.'});
@@ -285,9 +311,16 @@ export default function PdfEditor() {
 
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+        
+        const newFile = new File([blob], pdfFile.name, { type: 'application/pdf' });
+        setPdfFile(newFile);
+
+        if(editedPdfUrl) URL.revokeObjectURL(editedPdfUrl);
         const url = URL.createObjectURL(blob);
         setEditedPdfUrl(url);
-        toast({title: "Success", description: "Image added. Your PDF is ready to download."});
+
+        await updatePagePreview(newPdfBytes, currentPage);
+        toast({title: "Success", description: "Image added. You can apply more changes or download."});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to add image to PDF.'});
@@ -297,10 +330,26 @@ export default function PdfEditor() {
   }
   
   const handleDownload = () => {
-      if (!editedPdfUrl || !pdfFile) return;
+      if (!editedPdfUrl && !pdfFile) {
+          toast({variant: 'destructive', title: 'No file to download', description: 'Please apply an edit first.'});
+          return;
+      }
+
+      if (!editedPdfUrl && pdfFile) {
+          const url = URL.createObjectURL(pdfFile);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `edited-${pdfFile.name}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          return;
+      }
+      
       const link = document.createElement('a');
-      link.href = editedPdfUrl;
-      link.download = `edited-${pdfFile.name}`;
+      link.href = editedPdfUrl!;
+      link.download = `edited-${pdfFile!.name}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -484,17 +533,14 @@ export default function PdfEditor() {
                     </Tabs>
                 </CardContent>
                 <CardFooter className="flex-col gap-2 pt-4">
-                    {!editedPdfUrl ? (
-                        <Button className="w-full" onClick={handleApply} disabled={isProcessing}>
-                            {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : (activeTab === 'text' ? <Type className="mr-2" /> : <ImageIcon className="mr-2" />)}
-                            Apply {activeTab === 'text' ? 'Text' : 'Image'}
-                        </Button>
-                    ) : (
-                        <Button className="w-full" onClick={handleDownload}>
-                            <Download className="mr-2" />
-                            Download PDF
-                        </Button>
-                    )}
+                    <Button className="w-full" onClick={handleApply} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : (activeTab === 'text' ? <Type className="mr-2" /> : <ImageIcon className="mr-2" />)}
+                        Apply to Page {currentPage}
+                    </Button>
+                    <Button className="w-full" onClick={handleDownload} variant="secondary">
+                        <Download className="mr-2" />
+                        Download PDF
+                    </Button>
                     <Button variant="outline" onClick={resetState} className="w-full">Start Over</Button>
                 </CardFooter>
             </Card>
@@ -502,3 +548,5 @@ export default function PdfEditor() {
     </div>
   )
 }
+
+    
