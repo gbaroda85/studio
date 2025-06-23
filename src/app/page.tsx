@@ -34,7 +34,7 @@ export default function LandingPage() {
         <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-br from-background via-primary/5 to-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-8 text-center">
-              <div className="space-y-4 max-w-4xl">
+              <div className="space-y-4 max-w-5xl">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline bg-gradient-to-r from-primary to-foreground/70 text-transparent bg-clip-text">
                   {t('welcome')}
                 </h1>
@@ -49,11 +49,11 @@ export default function LandingPage() {
               </div>
               <div className="relative w-full max-w-7xl group">
                  <Image
-                    src="https://placehold.co/1200x600.png"
+                    src="https://placehold.co/1200x800.png"
                     width="1200"
-                    height="600"
+                    height="800"
                     alt="Hero Image"
-                    data-ai-hint="digital tools abstract"
+                    data-ai-hint="laptop screen"
                     className="mx-auto aspect-video overflow-hidden rounded-2xl object-cover shadow-2xl shadow-primary/10 transition-all duration-300 group-hover:shadow-primary/20 group-hover:shadow-xl"
                  />
                  <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent rounded-2xl"></div>
@@ -68,7 +68,7 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need, All in One Place</h2>
-              <p className="max-w-5xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-6xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 From image optimization to complex calculations, our suite of tools is designed to be powerful yet simple to use.
               </p>
             </div>
@@ -97,7 +97,7 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Simple and Fast</h2>
-                <p className="max-w-5xl text-muted-foreground md:text-xl">Get your tasks done in three easy steps.</p>
+                <p className="max-w-6xl text-muted-foreground md:text-xl">Get your tasks done in three easy steps.</p>
             </div>
             <div className="relative">
                 <div className="absolute top-1/2 left-0 w-full h-0.5 bg-border -translate-y-1/2 hidden sm:block"></div>
@@ -136,7 +136,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Privacy First</div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Your Files are Safe and Private</h2>
-              <p className="max-w-3xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-4xl text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 We believe in privacy. That's why every tool runs entirely within your browser. Your files are never uploaded to any server, ever.
               </p>
             </div>
