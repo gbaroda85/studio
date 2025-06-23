@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -47,33 +48,38 @@ export default function PdfProtector() {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
             const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-                ignoreEncryption: true,
+                // It is important to ignore encryption when loading,
+                // so we can check if it's already encrypted without errors.
+                ignoreEncryption: true, 
             });
 
             if (pdfDoc.isEncrypted) {
                 toast({
                     variant: 'destructive',
                     title: 'Already Protected',
-                    description: 'This PDF is already password protected. Please use the Unlock PDF tool first.',
+                    description: 'This PDF is already password protected. Use the Unlock PDF tool first.',
                 });
                 setIsProtecting(false);
                 return;
             }
 
-            // Create a new document and copy pages. This is a robust way to apply changes.
+            // Re-creating the document is a robust way to apply changes
+            // and remove any potentially conflicting metadata.
             const newDoc = await PDFDocument.create();
-            const content = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-            content.forEach((page) => {
-                newDoc.addPage(page);
-            });
-            
-            // Save the new document with encryption options
+            const copiedPages = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach((page) => newDoc.addPage(page));
+
+            // Set the password and deny all permissions for the user,
+            // which should force a password prompt on opening.
             const protectedPdfBytes = await newDoc.save({
-              userPassword: password,
-              ownerPassword: password,
-              permissions: {
-                  printing: true,
-              },
+                userPassword: password,
+                ownerPassword: password, // For changing permissions later
+                permissions: {
+                    printing: false,
+                    modifying: false,
+                    copying: false,
+                    annotating: false,
+                },
             });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
@@ -93,7 +99,7 @@ export default function PdfProtector() {
             toast({
                 variant: 'destructive',
                 title: 'Error Protecting PDF',
-                description: 'An unexpected error occurred. Please ensure the file is not corrupted.',
+                description: 'An unexpected error occurred. The file might be corrupted.',
             });
         } finally {
             setIsProtecting(false);
