@@ -32,6 +32,14 @@ export default function PdfUnlocker() {
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
+    const resetState = () => {
+        setPdfFile(null);
+        setPassword('');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
+
     const handleUnlockPdf = async () => {
         if (!pdfFile) {
             toast({ variant: 'destructive', title: 'No file', description: 'Please upload a PDF file first.' });
@@ -45,6 +53,14 @@ export default function PdfUnlocker() {
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
+
+            const checkDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+            if (!checkDoc.isEncrypted) {
+                toast({ variant: 'destructive', title: 'Not Encrypted', description: 'This PDF is not password protected.' });
+                setIsUnlocking(false);
+                return;
+            }
+
             // Try loading with the provided password
             const pdfDoc = await PDFDocument.load(pdfBytes, {
                 userPassword: password,
@@ -71,16 +87,13 @@ export default function PdfUnlocker() {
             URL.revokeObjectURL(url);
             
             toast({title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
+            resetState();
 
         } catch (error: any) {
-            console.error(error);
-            if (error.name === 'EncryptedPDFError') {
+            if (error.constructor.name === 'EncryptedPDFError') {
                  toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password you entered is incorrect.' });
-            } else if (error.message?.includes('is not encrypted')) {
-                 toast({ variant: 'destructive', title: 'Not Encrypted', description: 'This PDF is not password protected.' });
-            }
-            else {
-                toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted or in an unexpected format.' });
+            } else {
+                toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted.' });
             }
         } finally {
             setIsUnlocking(false);
@@ -133,7 +146,7 @@ export default function PdfUnlocker() {
                     {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Unlock className="mr-2"/>}
                     Unlock & Download
                 </Button>
-                <Button variant="ghost" onClick={() => setPdfFile(null)}>Unlock another file</Button>
+                <Button variant="ghost" onClick={resetState}>Unlock another file</Button>
             </CardFooter>
         </Card>
     );

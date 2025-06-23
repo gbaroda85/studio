@@ -31,6 +31,14 @@ export default function PdfProtector() {
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+    
+    const resetState = () => {
+        setPdfFile(null);
+        setPassword('');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
 
     const handleProtectPdf = async () => {
         if (!pdfFile) {
@@ -59,19 +67,10 @@ export default function PdfProtector() {
                 return;
             }
             
-            const protectedPdfBytes = await pdfDoc.save({
-                userPassword: password,
-                ownerPassword: crypto.randomUUID(), 
-                permissions: {
-                    printing: false,
-                    modifying: false,
-                    copying: false,
-                    annotating: false,
-                    fillingForms: false,
-                    contentAccessibility: false,
-                    documentAssembly: false,
-                },
-            });
+            // This is the new, simplified logic. This sets the user password, which is required to open
+            // the document. We are not setting any other options to ensure maximum
+            // compatibility with all PDF viewers.
+            const protectedPdfBytes = await pdfDoc.save({ userPassword: password });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
@@ -84,6 +83,7 @@ export default function PdfProtector() {
             URL.revokeObjectURL(url);
             
             toast({ title: 'Success!', description: 'Your PDF has been protected and downloaded.' });
+            resetState();
 
         } catch (error: any) {
             console.error(error);
@@ -143,7 +143,7 @@ export default function PdfProtector() {
                     {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2"/>}
                     Protect & Download
                 </Button>
-                <Button variant="ghost" onClick={() => { setPdfFile(null); setPassword(''); }}>Protect another file</Button>
+                <Button variant="ghost" onClick={resetState}>Protect another file</Button>
             </CardFooter>
         </Card>
     );
