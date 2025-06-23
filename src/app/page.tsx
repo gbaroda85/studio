@@ -43,6 +43,7 @@ import {
   Search,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const {t} = useLanguage();
@@ -264,7 +265,6 @@ export default function Home() {
     },
   ];
 
-
   const filterFeatures = (features: typeof imageFeatures) => {
     if (!searchQuery.trim()) {
       return features;
@@ -276,20 +276,23 @@ export default function Home() {
         t(feature.descriptionKey).toLowerCase().includes(lowerCaseQuery)
     );
   };
+  
+  const isSearching = searchQuery.trim() !== '';
 
-  const filteredImageFeatures = filterFeatures(imageFeatures);
-  const filteredPdfFeatures = filterFeatures(pdfFeatures);
-  const filteredFileFeatures = filterFeatures(fileFeatures);
-  const filteredCalculatorFeatures = filterFeatures(calculatorFeatures);
-  const filteredConverterFeatures = filterFeatures(converterFeatures);
+  const allFeatureGroups = [
+    { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
+    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-red-500' },
+    { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
+    { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
+    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
+  ];
 
-  const NoResults = () => (
-    <div className="col-span-full text-center py-12 text-muted-foreground">
-      <Search className="mx-auto h-12 w-12 mb-4" />
-      <p className="font-semibold">{t('no_tools_found')}</p>
-      <p className="text-sm">Try a different search term.</p>
-    </div>
-  );
+  const searchResults = allFeatureGroups
+    .map(group => ({
+        ...group,
+        features: filterFeatures(group.features)
+    }))
+    .filter(group => group.features.length > 0);
 
   return (
     <main className="flex-1 p-4 md:p-8">
@@ -307,101 +310,67 @@ export default function Home() {
             onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      
+      {isSearching ? (
+        <div className="mt-8 space-y-10">
+          {searchResults.length > 0 ? (
+            searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
+              <section key={categoryKey}>
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <Icon className={cn("h-7 w-7", color)} />
+                  {t(categoryKey)}
+                </h2>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+                  {features.map((feature) => (
+                    <FeatureCard
+                      key={feature.href}
+                      title={t(feature.labelKey)}
+                      description={t(feature.descriptionKey)}
+                      href={feature.href}
+                      icon={feature.icon}
+                      color={feature.color}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="mx-auto h-12 w-12 mb-4" />
+              <p className="font-semibold">{t('no_tools_found')}</p>
+              <p className="text-sm">Try a different search term.</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <Tabs defaultValue={defaultTab}>
+          <TabsList className="flex h-auto flex-wrap justify-center">
+            {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
+              <TabsTrigger key={value} value={value}>
+                <Icon className={cn("mr-2 h-4 w-4", color)} />
+                {t(categoryKey)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      <Tabs defaultValue={defaultTab}>
-        <TabsList className="flex h-auto flex-wrap justify-center">
-          <TabsTrigger value="image">
-            <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
-            {t('image_tools')}
-          </TabsTrigger>
-          <TabsTrigger value="pdf">
-            <FileText className="mr-2 h-4 w-4 text-red-500" />
-            {t('pdf_tools')}
-          </TabsTrigger>
-          <TabsTrigger value="file">
-            <Archive className="mr-2 h-4 w-4 text-purple-500" />
-            {t('file_tools')}
-          </TabsTrigger>
-          <TabsTrigger value="calculator">
-            <Calculator className="mr-2 h-4 w-4 text-cyan-500" />
-            {t('calculator_pro')}
-          </TabsTrigger>
-           <TabsTrigger value="converters">
-            <Infinity className="mr-2 h-4 w-4 text-emerald-500" />
-            {t('converter_tools')}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="image">
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {filteredImageFeatures.length > 0 ? filteredImageFeatures.map((feature) => (
-              <FeatureCard
-                key={feature.href}
-                title={t(feature.labelKey)}
-                description={t(feature.descriptionKey)}
-                href={feature.href}
-                icon={feature.icon}
-                color={feature.color}
-              />
-            )) : <NoResults />}
-          </div>
-        </TabsContent>
-        <TabsContent value="pdf">
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {filteredPdfFeatures.length > 0 ? filteredPdfFeatures.map((feature) => (
-              <FeatureCard
-                key={feature.href}
-                title={t(feature.labelKey)}
-                description={t(feature.descriptionKey)}
-                href={feature.href}
-                icon={feature.icon}
-                color={feature.color}
-              />
-            )) : <NoResults />}
-          </div>
-        </TabsContent>
-        <TabsContent value="file">
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {filteredFileFeatures.length > 0 ? filteredFileFeatures.map((feature) => (
-              <FeatureCard
-                key={feature.href}
-                title={t(feature.labelKey)}
-                description={t(feature.descriptionKey)}
-                href={feature.href}
-                icon={feature.icon}
-                color={feature.color}
-              />
-            )) : <NoResults />}
-          </div>
-        </TabsContent>
-        <TabsContent value="calculator">
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {filteredCalculatorFeatures.length > 0 ? filteredCalculatorFeatures.map((feature) => (
-              <FeatureCard
-                key={feature.href}
-                title={t(feature.labelKey)}
-                description={t(feature.descriptionKey)}
-                href={feature.href}
-                icon={feature.icon}
-                color={feature.color}
-              />
-            )) : <NoResults />}
-          </div>
-        </TabsContent>
-        <TabsContent value="converters">
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {filteredConverterFeatures.length > 0 ? filteredConverterFeatures.map((feature) => (
-              <FeatureCard
-                key={feature.href}
-                title={t(feature.labelKey)}
-                description={t(feature.descriptionKey)}
-                href={feature.href}
-                icon={feature.icon}
-                color={feature.color}
-              />
-            )) : <NoResults />}
-          </div>
-        </TabsContent>
-      </Tabs>
+          {allFeatureGroups.map(({ value, features }) => (
+            <TabsContent key={value} value={value}>
+              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+                {features.map((feature) => (
+                  <FeatureCard
+                    key={feature.href}
+                    title={t(feature.labelKey)}
+                    description={t(feature.descriptionKey)}
+                    href={feature.href}
+                    icon={feature.icon}
+                    color={feature.color}
+                  />
+                ))}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
     </main>
   );
 }
