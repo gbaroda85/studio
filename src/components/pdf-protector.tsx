@@ -62,23 +62,22 @@ export default function PdfProtector() {
 
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
             
-            pdfDoc.setProducer('ShrinkRay PDF Protector');
-            pdfDoc.setCreationDate(new Date());
-            pdfDoc.setModificationDate(new Date());
-            
-            const protectedPdfBytes = await pdfDoc.save({
-                userPassword: password,
-                ownerPassword: password,
-                permissions: {
-                    printing: true,
-                    modifying: false,
-                    copying: false,
-                    annotating: false,
-                    fillingForms: false,
-                    contentAccessibility: false,
-                    documentAssembly: false,
-                },
+            // Use the dedicated encrypt method before saving
+            pdfDoc.encrypt({
+              userPassword: password,
+              ownerPassword: password,
+              permissions: {
+                  printing: true,
+                  modifying: false,
+                  copying: false,
+                  annotating: false,
+                  fillingForms: false,
+                  contentAccessibility: false,
+                  documentAssembly: false,
+              },
             });
+
+            const protectedPdfBytes = await pdfDoc.save();
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
