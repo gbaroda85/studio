@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, type SyntheticEvent } from 'react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import { Camera, Download, ScanLine, X, Loader2, AlertTriangle, Crop } from 'lucide-react';
+import { Camera, Download, ScanLine, X, Loader2, AlertTriangle, Crop, FileDigit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
