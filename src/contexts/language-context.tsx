@@ -85,6 +85,8 @@ const translations = {
     pressure_converter_description: 'Convert between different units of pressure.',
     fuel_cost_calculator_label: 'Fuel Cost Calculator',
     fuel_cost_calculator_description: 'Estimate the cost of fuel for a trip.',
+    search_tools_placeholder: 'Search for tools by name or description...',
+    no_tools_found: 'No tools found matching your search',
   },
   hi: {
     welcome: 'जीआरएस मल्टी टूल्स किट हब में आपका स्वागत है',
@@ -159,6 +161,8 @@ const translations = {
     pressure_converter_description: 'दबाव की विभिन्न इकाइयों के बीच कनवर्ट करें।',
     fuel_cost_calculator_label: 'ईंधन लागत कैलक्यूलेटर',
     fuel_cost_calculator_description: 'एक यात्रा के लिए ईंधन की लागत का अनुमान लगाएं।',
+    search_tools_placeholder: 'नाम या विवरण द्वारा टूल खोजें...',
+    no_tools_found: 'आपकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
   },
   es: {
     welcome: 'Bienvenido a GRs Multi Tools Kit hub',
@@ -233,6 +237,8 @@ const translations = {
     pressure_converter_description: 'Convierte entre diferentes unidades de presión.',
     fuel_cost_calculator_label: 'Calculadora de Costo de Combustible',
     fuel_cost_calculator_description: 'Estime el costo del combustible para un viaje.',
+    search_tools_placeholder: 'Buscar herramientas por nombre o descripción...',
+    no_tools_found: 'No se encontraron herramientas que coincidan con su búsqueda',
   },
 };
 

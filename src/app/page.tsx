@@ -2,6 +2,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import {FeatureCard} from '@/components/feature-card';
 import {
   Tabs,
@@ -9,6 +10,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import {
   Crop,
   FileArchive,
@@ -38,12 +40,14 @@ import {
   Coins,
   Waves,
   Route,
+  Search,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 
 export default function Home() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const validTabs = ['image', 'pdf', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
@@ -261,10 +265,47 @@ export default function Home() {
   ];
 
 
+  const filterFeatures = (features: typeof imageFeatures) => {
+    if (!searchQuery.trim()) {
+      return features;
+    }
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return features.filter(
+      (feature) =>
+        t(feature.labelKey).toLowerCase().includes(lowerCaseQuery) ||
+        t(feature.descriptionKey).toLowerCase().includes(lowerCaseQuery)
+    );
+  };
+
+  const filteredImageFeatures = filterFeatures(imageFeatures);
+  const filteredPdfFeatures = filterFeatures(pdfFeatures);
+  const filteredFileFeatures = filterFeatures(fileFeatures);
+  const filteredCalculatorFeatures = filterFeatures(calculatorFeatures);
+  const filteredConverterFeatures = filterFeatures(converterFeatures);
+
+  const NoResults = () => (
+    <div className="col-span-full text-center py-12 text-muted-foreground">
+      <Search className="mx-auto h-12 w-12 mb-4" />
+      <p className="font-semibold">{t('no_tools_found')}</p>
+      <p className="text-sm">Try a different search term.</p>
+    </div>
+  );
+
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-8 max-w-2xl">
         <p className="mt-2 text-muted-foreground">{t('tagline')}</p>
+      </div>
+
+      <div className="relative mb-12 max-w-xl mx-auto">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+            type="search"
+            placeholder={t('search_tools_placeholder')}
+            className="w-full pl-12 h-14 text-base rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       <Tabs defaultValue={defaultTab}>
@@ -292,7 +333,7 @@ export default function Home() {
         </TabsList>
         <TabsContent value="image">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {imageFeatures.map((feature) => (
+            {filteredImageFeatures.length > 0 ? filteredImageFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
@@ -301,12 +342,12 @@ export default function Home() {
                 icon={feature.icon}
                 color={feature.color}
               />
-            ))}
+            )) : <NoResults />}
           </div>
         </TabsContent>
         <TabsContent value="pdf">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {pdfFeatures.map((feature) => (
+            {filteredPdfFeatures.length > 0 ? filteredPdfFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
@@ -315,12 +356,12 @@ export default function Home() {
                 icon={feature.icon}
                 color={feature.color}
               />
-            ))}
+            )) : <NoResults />}
           </div>
         </TabsContent>
         <TabsContent value="file">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {fileFeatures.map((feature) => (
+            {filteredFileFeatures.length > 0 ? filteredFileFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
@@ -329,12 +370,12 @@ export default function Home() {
                 icon={feature.icon}
                 color={feature.color}
               />
-            ))}
+            )) : <NoResults />}
           </div>
         </TabsContent>
         <TabsContent value="calculator">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {calculatorFeatures.map((feature) => (
+            {filteredCalculatorFeatures.length > 0 ? filteredCalculatorFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
@@ -343,12 +384,12 @@ export default function Home() {
                 icon={feature.icon}
                 color={feature.color}
               />
-            ))}
+            )) : <NoResults />}
           </div>
         </TabsContent>
         <TabsContent value="converters">
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-            {converterFeatures.map((feature) => (
+            {filteredConverterFeatures.length > 0 ? filteredConverterFeatures.map((feature) => (
               <FeatureCard
                 key={feature.href}
                 title={t(feature.labelKey)}
@@ -357,7 +398,7 @@ export default function Home() {
                 icon={feature.icon}
                 color={feature.color}
               />
-            ))}
+            )) : <NoResults />}
           </div>
         </TabsContent>
       </Tabs>
