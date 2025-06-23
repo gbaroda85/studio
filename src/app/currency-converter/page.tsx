@@ -9,7 +9,7 @@ const steps = [
     "Enter Amount: Type the amount of money you want to convert in the 'Amount' field.",
     "Select 'From' Currency: Choose the currency you are converting from.",
     "Select 'To' Currency: Choose the currency you want to convert to.",
-    "View Result: The converted amount is automatically displayed. Note: Rates are for demonstration and not live.",
+    "View Result: The converted amount is automatically displayed. Please note that the rates are for demonstration purposes only and are not live.",
 ];
 
 export default function CurrencyConverterPage() {

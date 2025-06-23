@@ -2,12 +2,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, Coins } from "lucide-react"
+import { ArrowRight, Coins, Info } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // In a real app, you'd fetch this from an API. For this prototype, we use static rates relative to USD.
 const staticRates: Record<string, { name: string, rate: number }> = {
@@ -47,7 +48,7 @@ export default function CurrencyConverter() {
     <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-yellow-500/80 hover:shadow-2xl hover:shadow-yellow-500/20 hover:ring-2 hover:ring-yellow-500/50 dark:hover:shadow-yellow-500/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Coins className="text-yellow-500" /> Currency Converter</CardTitle>
-        <CardDescription>Convert between major world currencies. Rates are for demonstration.</CardDescription>
+        <CardDescription>Convert between major world currencies.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
@@ -83,6 +84,13 @@ export default function CurrencyConverter() {
                 <Input id="result" type="text" value={result} readOnly placeholder="Result" className="font-bold bg-muted/50" />
             </div>
         </div>
+        <Alert variant="default" className="mt-6">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Demonstration Only</AlertTitle>
+          <AlertDescription>
+            The exchange rates used are for demonstration purposes and are not updated in real-time. Do not use for actual financial transactions.
+          </AlertDescription>
+        </Alert>
       </CardContent>
     </Card>
   );
