@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState } from "react"
-import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, addMonths } from "date-fns"
-import { Calendar as CalendarIcon, Calculator } from "lucide-react"
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, addMonths, differenceInCalendarDays } from "date-fns"
+import { Calendar as CalendarIcon, Calculator, Gift, CalendarHeart } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -14,10 +15,19 @@ import {
 } from "@/components/ui/popover"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { Separator } from "./ui/separator"
+
+type AgeDetails = {
+  years: number;
+  months: number;
+  days: number;
+  dayOfWeek: string;
+  daysToNextBirthday: number;
+}
 
 export default function AgeCalculator() {
   const [dateOfBirth, setDateOfBirth] = useState<Date>()
-  const [age, setAge] = useState<{ years: number, months: number, days: number } | null>(null)
+  const [age, setAge] = useState<AgeDetails | null>(null)
   const { toast } = useToast()
 
   const handleCalculateAge = () => {
@@ -45,8 +55,17 @@ export default function AgeCalculator() {
     const months = differenceInMonths(now, pastDateWithYears)
     const pastDateWithMonths = addMonths(pastDateWithYears, months)
     const days = differenceInDays(now, pastDateWithMonths)
+    
+    // Calculate next birthday
+    let nextBirthday = new Date(now.getFullYear(), dateOfBirth.getMonth(), dateOfBirth.getDate());
+    if (now > nextBirthday) {
+      nextBirthday = new Date(now.getFullYear() + 1, dateOfBirth.getMonth(), dateOfBirth.getDate());
+    }
+    const daysToNextBirthday = differenceInCalendarDays(nextBirthday, now);
+    
+    const dayOfWeek = format(dateOfBirth, "EEEE");
 
-    setAge({ years, months, days })
+    setAge({ years, months, days, dayOfWeek, daysToNextBirthday })
   }
   
   const handleReset = () => {
@@ -58,7 +77,7 @@ export default function AgeCalculator() {
     <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
       <CardHeader>
         <CardTitle>Age Calculator</CardTitle>
-        <CardDescription>Select your date of birth to find out your exact age.</CardDescription>
+        <CardDescription>Discover your age and more.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
@@ -90,23 +109,44 @@ export default function AgeCalculator() {
         </div>
         
         {age !== null && (
-           <div className="pt-4 text-center">
-                <p className="text-muted-foreground">You are</p>
-                <div className="flex justify-center items-baseline gap-4 my-2">
-                    <div className="flex flex-col items-center">
-                        <span className="text-5xl font-bold text-cyan-500">{age.years}</span>
-                        <span className="text-sm text-muted-foreground">Years</span>
+           <div className="pt-4 space-y-6">
+                <div className="text-center">
+                    <p className="text-muted-foreground">You are</p>
+                    <div className="flex justify-center items-baseline gap-4 my-2">
+                        <div className="flex flex-col items-center">
+                            <span className="text-5xl font-bold text-cyan-500">{age.years}</span>
+                            <span className="text-sm text-muted-foreground">Years</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-5xl font-bold text-cyan-500">{age.months}</span>
+                            <span className="text-sm text-muted-foreground">Months</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-5xl font-bold text-cyan-500">{age.days}</span>
+                            <span className="text-sm text-muted-foreground">Days</span>
+                        </div>
                     </div>
-                    <div className="flex flex-col items-center">
-                        <span className="text-5xl font-bold text-cyan-500">{age.months}</span>
-                        <span className="text-sm text-muted-foreground">Months</span>
+                     <p className="text-muted-foreground">old</p>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-center gap-4">
+                        <div className="flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+                           <Gift className="h-5 w-5" />
+                           <span className="font-semibold">Next Birthday:</span>
+                           <span className="font-bold">{age.daysToNextBirthday} days</span>
+                        </div>
                     </div>
-                    <div className="flex flex-col items-center">
-                        <span className="text-5xl font-bold text-cyan-500">{age.days}</span>
-                        <span className="text-sm text-muted-foreground">Days</span>
+                     <div className="flex items-center justify-center gap-4">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <CalendarHeart className="h-5 w-5" />
+                            <span className="font-medium">Born on a:</span>
+                            <span className="font-semibold text-foreground">{age.dayOfWeek}</span>
+                        </div>
                     </div>
                 </div>
-                <p className="text-muted-foreground">old</p>
            </div>
         )}
 

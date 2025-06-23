@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "./ui/separator"
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-US', {
@@ -31,7 +33,7 @@ export default function LoanCalculator() {
     const r = parseFloat(rate)
     const t = parseInt(tenure, 10)
 
-    if (isNaN(p) || p <= 0 || isNaN(r) || r <= 0 || isNaN(t) || t <= 0) {
+    if (isNaN(p) || p <= 0 || isNaN(r) || r < 0 || isNaN(t) || t <= 0) {
       toast({
         variant: "destructive",
         title: "Invalid Input",
@@ -43,7 +45,7 @@ export default function LoanCalculator() {
     const monthlyRate = r / (12 * 100)
     const numberOfMonths = tenureUnit === 'years' ? t * 12 : t
     
-    if (monthlyRate === 0) { // Simple interest case if rate is 0
+    if (r === 0) { // Simple interest case if rate is 0
         const emi = p / numberOfMonths;
         setResult({
             emi: emi,
@@ -102,16 +104,18 @@ export default function LoanCalculator() {
         {result && (
             <div className="pt-6 space-y-4">
                 <div className="text-center p-6 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
-                    <p className="text-muted-foreground">Monthly EMI</p>
+                    <p className="text-sm font-medium text-cyan-800 dark:text-cyan-200">Monthly EMI</p>
                     <p className="text-4xl font-bold text-cyan-600 dark:text-cyan-400">{formatCurrency(result.emi)}</p>
                 </div>
-                <div className="flex justify-between text-sm">
-                    <p className="text-muted-foreground">Total Interest</p>
-                    <p className="font-medium">{formatCurrency(result.totalInterest)}</p>
-                </div>
-                <div className="flex justify-between text-sm font-semibold">
-                    <p className="text-muted-foreground">Total Payment</p>
-                    <p className="font-medium">{formatCurrency(result.totalPayment)}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                         <p className="text-sm text-muted-foreground">Total Interest</p>
+                         <p className="text-lg font-semibold">{formatCurrency(result.totalInterest)}</p>
+                    </div>
+                     <div className="p-4 bg-muted/50 rounded-lg">
+                         <p className="text-sm text-muted-foreground">Total Payment</p>
+                         <p className="text-lg font-semibold">{formatCurrency(result.totalPayment)}</p>
+                    </div>
                 </div>
             </div>
         )}
