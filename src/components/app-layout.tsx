@@ -174,7 +174,7 @@ function AppHeader() {
 
 
   return (
-    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 lg:h-20 lg:px-6">
+    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 shadow-md lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="md:hidden text-primary-foreground hover:bg-slate-700" />
       </div>
@@ -198,7 +198,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="font-headline text-2xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-3xl">
+                <span className="font-sans text-2xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-3xl">
                     {title}
                 </span>
             )}
