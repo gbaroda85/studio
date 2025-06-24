@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useSearchParams } from 'next/navigation';
@@ -307,7 +306,7 @@ export default function ToolsPage() {
         <Input
             type="search"
             placeholder={t('search_tools_placeholder')}
-            className="w-full pl-12 h-14 text-base rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2"
+            className="w-full pl-12 h-14 text-base rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2 border border-foreground/20"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
         />
