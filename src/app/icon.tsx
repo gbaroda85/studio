@@ -27,7 +27,7 @@ export default function Icon() {
           justifyContent: 'center',
           color: 'white',
           borderRadius: '6px',
-          fontWeight: 'bold',
+          fontWeight: 700,
         }}
       >
         G
