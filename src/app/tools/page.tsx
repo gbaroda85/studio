@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import {FeatureCard} from '@/components/feature-card';
@@ -41,11 +42,13 @@ import {
   Route,
   Search,
   Receipt,
+  Loader2,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 
-export default function ToolsPage() {
+// This component contains the actual page content and uses the search params.
+function ToolsPageContent() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -372,6 +375,31 @@ export default function ToolsPage() {
           ))}
         </Tabs>
       )}
+    </main>
+  );
+}
+
+// This is the main page component that will be exported.
+export default function ToolsPage() {
+  return (
+    // Wrap the component that uses searchParams in a Suspense boundary.
+    <Suspense fallback={<ToolsPageLoadingFallback />}>
+      <ToolsPageContent />
+    </Suspense>
+  )
+}
+
+// A fallback component to show while the page is loading.
+function ToolsPageLoadingFallback() {
+  return (
+    <main className="flex-1 p-4 md:p-8">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold tracking-tight font-headline">All Tools</h1>
+        <p className="mt-2 text-muted-foreground">Your one-stop-shop for file conversions, calculations, and more.</p>
+      </div>
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
     </main>
   );
 }
