@@ -3,6 +3,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 import {FeatureCard} from '@/components/feature-card';
 import {
   Tabs,
@@ -297,9 +298,20 @@ export default function Page() {
 
   return (
     <main className="flex-1 p-4 md:p-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold tracking-tight font-headline">All Tools</h1>
-        <p className="mt-2 text-muted-foreground">Your one-stop-shop for file conversions, calculations, and more.</p>
+      <div className="mb-12 grid md:grid-cols-2 gap-8 items-center">
+        <div className="text-center md:text-left">
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight font-headline">All Tools</h1>
+            <p className="mt-4 text-lg text-muted-foreground">Your one-stop-shop for file conversions, calculations, and more.</p>
+        </div>
+        <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-2xl">
+            <Image
+                src="https://placehold.co/1200x800.png"
+                alt="A laptop showing various app icons"
+                fill
+                className="object-cover"
+                data-ai-hint="laptop screen"
+            />
+        </div>
       </div>
 
       <div className="relative mb-12 max-w-xl mx-auto">
