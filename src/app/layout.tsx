@@ -6,7 +6,7 @@ import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/contexts/language-context';
 
 export const metadata: Metadata = {
-  title: 'GRs Multi Tools Kit hub',
+  title: 'GRs Multi Tools Kits Hub',
   description: 'Compress and convert images and PDFs with ease.',
 };
 

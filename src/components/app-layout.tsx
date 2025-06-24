@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -170,7 +169,7 @@ function AppHeader() {
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap animate-zoom-in-out">
-            GRs Multi Tools Kit
+            GRs Multi Tools Kits Hub
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">

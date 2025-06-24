@@ -13,7 +13,7 @@ type LanguageContextType = {
 
 const translations = {
   en: {
-    welcome: 'Welcome to GRs Multi Tools Kit hub',
+    welcome: 'Welcome to GRs Multi Tools Kits Hub',
     english: 'English',
     hindi: 'Hindi',
     spanish: 'Spanish',
@@ -60,7 +60,7 @@ const translations = {
     create_zip_description: 'Combine multiple files into a single zip archive.',
     unzip_file_label: 'Unzip File',
     unzip_file_description: 'Extract files from a zip archive.',
-    about_shrinkray_title: 'About GRs Multi Tools Kit hub',
+    about_shrinkray_title: 'About GRs Multi Tools Kits Hub',
     about_detailed_description: 'All processing is done directly in your browser. No data is ever uploaded to our servers, ensuring your files remain completely private.',
     developed_by: 'Developed by',
     send_feedback: 'Send Feedback',
@@ -91,7 +91,7 @@ const translations = {
     no_tools_found: 'No tools found matching your search',
   },
   hi: {
-    welcome: 'जीआरएस मल्टी टूल्स किट हब में आपका स्वागत है',
+    welcome: 'जीआरएस मल्टी टूल्स किट्स हब में आपका स्वागत है',
     english: 'अंग्रेज़ी',
     hindi: 'हिंदी',
     spanish: 'स्पेनिश',
@@ -138,7 +138,7 @@ const translations = {
     create_zip_description: 'कई फ़ाइलों को एक ज़िप संग्रह में मिलाएं।',
     unzip_file_label: 'फ़ाइल अनज़िप करें',
     unzip_file_description: 'एक ज़िप संग्रह से फ़ाइलें निकालें।',
-    about_shrinkray_title: 'जीआरएस मल्टी टूल्स किट हब के बारे में',
+    about_shrinkray_title: 'जीआरएस मल्टी टूल्स किट्स हब के बारे में',
     about_detailed_description: 'सभी प्रोसेसिंग सीधे आपके ब्राउज़र में की जाती है। हमारे सर्वर पर कभी कोई डेटा अपलोड नहीं किया जाता है, यह सुनिश्चित करते हुए कि आपकी फाइलें पूरी तरह से निजी रहें।',
     developed_by: 'द्वारा विकसित',
     send_feedback: 'प्रतिक्रिया भेजें',
@@ -169,7 +169,7 @@ const translations = {
     no_tools_found: 'आपकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
   },
   es: {
-    welcome: 'Bienvenido a GRs Multi Tools Kit hub',
+    welcome: 'Bienvenido a GRs Multi Tools Kits Hub',
     english: 'Inglés',
     hindi: 'Hindi',
     spanish: 'Español',
@@ -216,7 +216,7 @@ const translations = {
     create_zip_description: 'Combina varios archivos en un solo archivo zip.',
     unzip_file_label: 'Descomprimir Archivo',
     unzip_file_description: 'Extrae archivos de un archivo zip.',
-    about_shrinkray_title: 'Acerca de GRs Multi Tools Kit hub',
+    about_shrinkray_title: 'Acerca de GRs Multi Tools Kits Hub',
     about_detailed_description: 'Todo el procesamiento se realiza directamente en su navegador. Nunca se cargan datos en nuestros servidores, lo que garantiza que sus archivos permanezcan completamente privados.',
     developed_by: 'Desarrollado por',
     send_feedback: 'Enviar comentarios',
