@@ -379,16 +379,6 @@ function ToolsPageContent() {
   );
 }
 
-// This is the main page component that will be exported.
-export default function ToolsPage() {
-  return (
-    // Wrap the component that uses searchParams in a Suspense boundary.
-    <Suspense fallback={<ToolsPageLoadingFallback />}>
-      <ToolsPageContent />
-    </Suspense>
-  )
-}
-
 // A fallback component to show while the page is loading.
 function ToolsPageLoadingFallback() {
   return (
@@ -402,4 +392,15 @@ function ToolsPageLoadingFallback() {
       </div>
     </main>
   );
+}
+
+
+// This is the main page component that will be exported.
+export default function ToolsPage() {
+  return (
+    // Wrap the component that uses searchParams in a Suspense boundary.
+    <Suspense fallback={<ToolsPageLoadingFallback />}>
+      <ToolsPageContent />
+    </Suspense>
+  )
 }
