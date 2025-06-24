@@ -122,8 +122,8 @@ function AppSidebar() {
                 className="h-32 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-10", item.color)} />
-                  <span className="text-lg text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-12", item.color)} />
+                  <span className="text-xl text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -147,17 +147,17 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-slate-700 hover:text-primary-foreground">
-          <Settings className="h-[1.2rem] w-[1.2rem]" />
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-slate-700 hover:text-primary-foreground h-12 w-12">
+          <Settings className="h-[1.5rem] w-[1.5rem]" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLanguage('en')}>{t('english')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('hi')}>{t('hindi')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('es')}>{t('spanish')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-base">{t('english')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('hi')} className="text-base">{t('hindi')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('es')} className="text-base">{t('spanish')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -176,7 +176,7 @@ function AppHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 shadow-md lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
-        <SidebarTrigger className="text-primary-foreground hover:bg-slate-700" />
+        <SidebarTrigger className="text-primary-foreground hover:bg-slate-700 h-12 w-12 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="flex items-center gap-4">
@@ -198,7 +198,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="font-sans text-2xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-3xl">
+                <span className="font-sans text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-4xl">
                     {title}
                 </span>
             )}
