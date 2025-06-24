@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
+import { useState, useEffect } from 'react';
 import {
   Crop,
   FileArchive,
@@ -164,8 +165,15 @@ function SettingsMenu() {
 
 function AppHeader() {
   const { t } = useLanguage();
+  const [title, setTitle] = useState('');
+
+  useEffect(() => {
+    setTitle(t('site_title'));
+  }, [t]);
+
+
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-20 lg:px-6">
+    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="md:hidden" />
       </div>
@@ -189,7 +197,7 @@ function AppHeader() {
               </svg>
             </div>
             <span className="font-headline text-2xl font-bold tracking-wider text-foreground whitespace-nowrap lg:text-3xl">
-                {t('site_title')}
+                {title}
             </span>
         </Link>
       </div>
