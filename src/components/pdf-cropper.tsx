@@ -134,20 +134,47 @@ export default function PdfCropper() {
 
     const image = imgRef.current;
     
+    const RENDER_SCALE = 2.0;
+
     // Create the visual preview for the UI
     const previewCanvas = document.createElement('canvas');
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-    previewCanvas.width = completedCrop.width * scaleX;
-    previewCanvas.height = completedCrop.height * scaleY;
+    const { naturalWidth: pngNaturalWidth, naturalHeight: pngNaturalHeight, width: displayContainerWidth, height: displayContainerHeight } = image;
+    
+    // Calculate the actual size and position of the image within its container (due to object-fit: contain)
+    const pngAspectRatio = pngNaturalWidth / pngNaturalHeight;
+    const containerAspectRatio = displayContainerWidth / displayContainerHeight;
+    let displayImgWidth, displayImgHeight, offsetX, offsetY;
+
+    if (pngAspectRatio > containerAspectRatio) {
+        displayImgWidth = displayContainerWidth;
+        displayImgHeight = displayContainerWidth / pngAspectRatio;
+        offsetX = 0;
+        offsetY = (displayContainerHeight - displayImgHeight) / 2;
+    } else {
+        displayImgHeight = displayContainerHeight;
+        displayImgWidth = displayContainerHeight * pngAspectRatio;
+        offsetY = 0;
+        offsetX = (displayContainerWidth - displayImgWidth) / 2;
+    }
+    
+    const scaleToNaturalX = pngNaturalWidth / displayImgWidth;
+    const scaleToNaturalY = pngNaturalHeight / displayImgHeight;
+    
+    const cropX_natural = (completedCrop.x - offsetX) * scaleToNaturalX;
+    const cropY_natural = (completedCrop.y - offsetY) * scaleToNaturalY;
+    const cropWidth_natural = completedCrop.width * scaleToNaturalX;
+    const cropHeight_natural = completedCrop.height * scaleToNaturalY;
+
+    previewCanvas.width = cropWidth_natural;
+    previewCanvas.height = cropHeight_natural;
     const ctx = previewCanvas.getContext('2d');
     if (ctx) {
         ctx.drawImage(
           image,
-          completedCrop.x * scaleX,
-          completedCrop.y * scaleY,
-          completedCrop.width * scaleX,
-          completedCrop.height * scaleY,
+          cropX_natural,
+          cropY_natural,
+          cropWidth_natural,
+          cropHeight_natural,
           0,
           0,
           previewCanvas.width,
@@ -159,40 +186,23 @@ export default function PdfCropper() {
     // Create the actual cropped PDF for download
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       const newPdfDoc = await PDFDocument.create();
       
-      const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
-      newPdfDoc.addPage(copiedPage);
-      const page = newPdfDoc.getPage(0);
-
-      const RENDER_SCALE = 2.0;
-      const {width: pagePointsWidth, height: pagePointsHeight} = page.getSize();
-      const {width: displayWidth, height: displayHeight, naturalWidth, naturalHeight} = image;
+      const [page] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
       
-      const pdfRenderScaleX = naturalWidth / displayWidth;
-      const pdfRenderScaleY = naturalHeight / displayHeight;
+      const { width: pagePointsWidth, height: pagePointsHeight } = page.getSize();
       
-      const canvasCropX = completedCrop.x * pdfRenderScaleX;
-      const canvasCropY = completedCrop.y * pdfRenderScaleY;
-      const canvasCropWidth = completedCrop.width * pdfRenderScaleX;
-      const canvasCropHeight = completedCrop.height * pdfRenderScaleY;
+      // Convert crop area from natural png pixels to pdf points
+      const cropX_pt = cropX_natural / RENDER_SCALE;
+      const cropY_pt = pagePointsHeight - (cropY_natural / RENDER_SCALE) - (cropHeight_natural / RENDER_SCALE);
+      const cropWidth_pt = cropWidth_natural / RENDER_SCALE;
+      const cropHeight_pt = cropHeight_natural / RENDER_SCALE;
+
+      page.setCropBox(cropX_pt, cropY_pt, cropWidth_pt, cropHeight_pt);
+      page.setMediaBox(cropX_pt, cropY_pt, cropWidth_pt, cropHeight_pt);
       
-      const cropBoxX = canvasCropX / RENDER_SCALE;
-      const cropBoxWidth = canvasCropWidth / RENDER_SCALE;
-      const cropBoxHeight = canvasCropHeight / RENDER_SCALE;
-      const cropBoxY = pagePointsHeight - (canvasCropY / RENDER_SCALE) - cropBoxHeight;
-
-      if (page.getRotation().angle !== 0) {
-        toast({
-          variant: 'default',
-          title: 'Rotated Page Warning',
-          description: 'Cropping may not work as expected on rotated pages.',
-        });
-      }
-
-      page.setCropBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
-      page.setMediaBox(cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight);
+      newPdfDoc.addPage(page);
 
       const newPdfBytes = await newPdfDoc.save();
       const blob = new Blob([newPdfBytes], {type: 'application/pdf'});
@@ -205,7 +215,7 @@ export default function PdfCropper() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to crop the PDF.',
+        description: 'Failed to crop the PDF. The file might be encrypted or have an unusual format.',
       });
       setCroppedImagePreview(null);
     } finally {
@@ -243,7 +253,10 @@ export default function PdfCropper() {
 
   const handleRecrop = () => {
     setCroppedImagePreview(null);
-    setCroppedPdfUrl(null);
+    if(croppedPdfUrl) {
+      URL.revokeObjectURL(croppedPdfUrl);
+      setCroppedPdfUrl(null);
+    }
     setCrop(undefined);
     setCompletedCrop(undefined);
   }
