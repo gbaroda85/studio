@@ -122,8 +122,8 @@ function AppSidebar() {
                 className="h-24 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-6", item.color)} />
-                  <span className="text-xs text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-7", item.color)} />
+                  <span className="text-sm text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -168,6 +168,7 @@ function AppHeader() {
   const [title, setTitle] = useState('');
 
   useEffect(() => {
+    // This ensures the title is set only on the client-side, avoiding hydration mismatch.
     setTitle(t('site_title'));
   }, [t]);
 
@@ -196,9 +197,11 @@ function AppHeader() {
                   <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <span className="font-headline text-2xl font-bold tracking-wider text-foreground whitespace-nowrap lg:text-3xl">
-                {title}
-            </span>
+            {title && (
+                <span className="font-headline text-2xl font-bold tracking-wider text-foreground whitespace-nowrap lg:text-3xl">
+                    {title}
+                </span>
+            )}
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">

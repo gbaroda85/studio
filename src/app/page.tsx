@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSearchParams } from 'next/navigation';
@@ -345,10 +346,10 @@ export default function Page() {
         </div>
       ) : (
         <Tabs defaultValue={defaultTab}>
-          <TabsList className="flex h-auto flex-wrap justify-center">
+          <TabsList className="flex h-auto flex-wrap justify-center gap-2">
             {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-              <TabsTrigger key={value} value={value}>
-                <Icon className={cn("mr-2 h-4 w-4", color)} />
+              <TabsTrigger key={value} value={value} className="px-6 py-3 text-base gap-2">
+                <Icon className={cn("h-5 w-5", color)} />
                 {t(categoryKey)}
               </TabsTrigger>
             ))}
