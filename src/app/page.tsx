@@ -9,6 +9,10 @@ import {
   ScanLine,
   Shrink,
   ArrowRight,
+  Lock,
+  Zap,
+  UserCheck,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
@@ -52,6 +56,15 @@ const FeaturedToolCard = ({ icon: Icon, title, description, href, buttonText, po
   </Card>
 );
 
+const FeatureHighlightCard = ({ icon: Icon, title, description }) => (
+  <div className="text-center p-6 rounded-2xl transition-all duration-300 hover:bg-card hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2">
+    <div className="mx-auto mb-6 flex items-center justify-center size-20 rounded-full bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110">
+      <Icon className="h-10 w-10" />
+    </div>
+    <h3 className="text-xl font-bold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
+  </div>
+);
 
 export default function Page() {
   const { t } = useLanguage();
@@ -122,9 +135,32 @@ export default function Page() {
     },
   ];
 
+  const whyUsFeatures = [
+    {
+      icon: Lock,
+      title: "100% Private",
+      description: "All tools process your files directly in your browser. Nothing is ever uploaded to a server."
+    },
+    {
+      icon: Zap,
+      title: "Incredibly Fast",
+      description: "Engineered for performance, our tools deliver results in seconds, not minutes."
+    },
+    {
+      icon: UserCheck,
+      title: "Easy to Use",
+      description: "With a clean and intuitive design, anyone can use our tools without a learning curve."
+    },
+    {
+      icon: Sparkles,
+      title: "Absolutely Free",
+      description: "Enjoy full access to all our tools without any costs, ads, or hidden subscriptions."
+    }
+  ];
+
   return (
     <main className="flex-1 bg-muted/40">
-      <div className="container mx-auto px-4 py-12 space-y-16">
+      <div className="container mx-auto px-4 py-12 space-y-24">
         {/* Category Selection */}
         <section>
           <h2 className="text-3xl font-bold mb-6">Select Tool Category</h2>
@@ -146,6 +182,21 @@ export default function Page() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredTools.map((tool) => (
               <FeaturedToolCard key={tool.href} {...tool} />
+            ))}
+          </div>
+        </section>
+        
+        {/* Why Choose Us Section */}
+        <section>
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">Why GRs Multi Tools Kits Hub?</h2>
+            <p className="text-muted-foreground mb-12 max-w-3xl mx-auto">
+                Our toolkit is designed to be your go-to solution for everyday digital tasks. We prioritize your privacy, speed, and a seamless user experience, all for free.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {whyUsFeatures.map((feature) => (
+              <FeatureHighlightCard key={feature.title} {...feature} />
             ))}
           </div>
         </section>
