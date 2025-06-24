@@ -131,13 +131,7 @@ export default function ScannerToPdf() {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
     setCrop(initialCrop);
-    setCompletedCrop({
-      unit: 'px',
-      x: (width * initialCrop.x) / 100,
-      y: (height * initialCrop.y) / 100,
-      width: (width * initialCrop.width) / 100,
-      height: (height * initialCrop.height) / 100
-    });
+    setCompletedCrop(undefined);
   }
 
   const handleConfirmCrop = () => {
