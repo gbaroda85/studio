@@ -103,14 +103,32 @@ function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="justify-center">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Shrink className="h-6 w-6 text-primary" />
-            <span className="group-data-[collapsible=icon]:hidden">GRs Tools</span>
+      <SidebarHeader className="h-20 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
+        <Link href="/" className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-full w-full text-primary-foreground"
+            >
+                <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="text-2xl font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
+            GRs Tools
+          </span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu className="grid grid-cols-2 flex-row gap-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col">
+        <SidebarMenu className="grid grid-cols-1 gap-2 p-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
@@ -119,11 +137,11 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-40 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
+                className="h-24 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-14", item.color)} />
-                  <span className="text-xl text-center leading-tight break-words group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-8", item.color)} />
+                  <span className="text-base text-center leading-tight break-words group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
