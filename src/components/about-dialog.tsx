@@ -21,8 +21,8 @@ export function AboutDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <SidebarMenuButton size="lg" variant="outline" tooltip={t('about_tooltip')}>
-          <Info className="size-7" />
-          <span className="text-lg">{t('about_tooltip')}</span>
+          <Info className="size-8" />
+          <span className="text-xl">{t('about_tooltip')}</span>
         </SidebarMenuButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] shadow-primary/20 shadow-2xl ring-2 ring-primary/50 dark:shadow-primary/10 rounded-2xl">
