@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -160,8 +161,7 @@ export default function PdfCropper() {
       const existingPdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
       const newPdfDoc = await PDFDocument.create();
-      const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
-      newPdfDoc.addPage(copiedPage);
+      await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
       const page = newPdfDoc.getPage(0); 
 
       const RENDER_SCALE = 2.0;
