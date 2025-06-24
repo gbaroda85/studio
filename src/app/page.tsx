@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -13,6 +12,7 @@ import {
   Zap,
   UserCheck,
   Sparkles,
+  Search,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 const CategoryCard = ({ icon: Icon, title, description, onClick }) => (
   <div onClick={onClick} className="group block cursor-pointer">
@@ -69,6 +71,14 @@ const FeatureHighlightCard = ({ icon: Icon, title, description }) => (
 export default function Page() {
   const { t } = useLanguage();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/tools?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const handleCategoryClick = (tab) => {
     router.push(`/tools?tab=${tab}`);
@@ -161,6 +171,20 @@ export default function Page() {
   return (
     <main className="flex-1 bg-muted/40">
       <div className="container mx-auto px-4 py-12 space-y-24">
+        {/* Search Bar */}
+        <section>
+          <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={t('search_tools_placeholder')}
+              className="w-full pl-16 pr-6 h-16 text-lg rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
+        </section>
+
         {/* Category Selection */}
         <section>
           <h2 className="text-3xl font-bold mb-6">Select Tool Category</h2>

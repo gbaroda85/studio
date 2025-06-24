@@ -49,7 +49,7 @@ import { cn } from '@/lib/utils';
 export default function ToolsPage() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
   const validTabs = ['image', 'pdf', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
