@@ -13,6 +13,7 @@ type LanguageContextType = {
 
 const translations = {
   en: {
+    site_title: 'GRs Multi Tools Kits Hub',
     welcome: 'Welcome to GRs Multi Tools Kits Hub',
     english: 'English',
     hindi: 'Hindi',
@@ -91,6 +92,7 @@ const translations = {
     no_tools_found: 'No tools found matching your search',
   },
   hi: {
+    site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
     welcome: 'जीआरएस मल्टी टूल्स किट्स हब में आपका स्वागत है',
     english: 'अंग्रेज़ी',
     hindi: 'हिंदी',
@@ -169,6 +171,7 @@ const translations = {
     no_tools_found: 'आपकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
   },
   es: {
+    site_title: 'GRs Multi Tools Kits Hub',
     welcome: 'Bienvenido a GRs Multi Tools Kits Hub',
     english: 'Inglés',
     hindi: 'Hindi',

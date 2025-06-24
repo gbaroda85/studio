@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -162,6 +163,7 @@ function SettingsMenu() {
 }
 
 function AppHeader() {
+  const { t } = useLanguage();
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
       <div className="flex flex-1 items-center">
@@ -169,7 +171,7 @@ function AppHeader() {
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap animate-zoom-in-out">
-            GRs Multi Tools Kits Hub
+            {t('site_title')}
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
