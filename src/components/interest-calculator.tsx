@@ -69,7 +69,7 @@ export default function InterestCalculator() {
   }
 
   return (
-    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-yellow-500/80 hover:shadow-2xl hover:shadow-yellow-500/20 hover:ring-2 hover:ring-yellow-500/50 dark:hover:shadow-yellow-500/10">
+    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle>Interest Calculator</CardTitle>
         <CardDescription>Calculate simple or compound interest.</CardDescription>
@@ -123,7 +123,7 @@ export default function InterestCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             <Coins className="mr-2"/>
             Calculate Interest
         </Button>

@@ -53,9 +53,9 @@ export default function FuelCostCalculator() {
   }
 
   return (
-    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-rose-500/80 hover:shadow-2xl hover:shadow-rose-500/20 hover:ring-2 hover:ring-rose-500/50 dark:hover:shadow-rose-500/10">
+    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Route className="text-rose-500"/> Fuel Cost Calculator</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Route className="text-primary"/> Fuel Cost Calculator</CardTitle>
         <CardDescription>Estimate the fuel cost for your trip.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -88,7 +88,7 @@ export default function FuelCostCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-rose-500 hover:bg-rose-600 text-white">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             Calculate Trip Cost
         </Button>
         {result && <Button variant="ghost" onClick={handleReset} className="w-full">Reset</Button>}

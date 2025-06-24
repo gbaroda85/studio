@@ -119,11 +119,11 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-28 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
+                className="h-32 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-8", item.color)} />
-                  <span className="text-base text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-10", item.color)} />
+                  <span className="text-lg text-center leading-tight whitespace-normal group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -147,7 +147,7 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-slate-700 hover:text-primary-foreground">
           <Settings className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">Settings</span>
         </Button>
@@ -174,9 +174,9 @@ function AppHeader() {
 
 
   return (
-    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-20 lg:px-6">
+    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
-        <SidebarTrigger className="md:hidden" />
+        <SidebarTrigger className="md:hidden text-primary-foreground hover:bg-slate-700" />
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="flex items-center gap-4">
@@ -198,7 +198,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="font-headline text-2xl font-bold tracking-wider text-foreground whitespace-nowrap lg:text-3xl">
+                <span className="font-headline text-2xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-3xl">
                     {title}
                 </span>
             )}

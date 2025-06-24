@@ -50,7 +50,7 @@ export default function SalesTaxCalculator() {
   }
 
   return (
-    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-indigo-500/80 hover:shadow-2xl hover:shadow-indigo-500/20 hover:ring-2 hover:ring-indigo-500/50 dark:hover:shadow-indigo-500/10">
+    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle>Sales Tax Calculator</CardTitle>
         <CardDescription>Quickly calculate tax and total price.</CardDescription>
@@ -81,7 +81,7 @@ export default function SalesTaxCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-indigo-500 hover:bg-indigo-600 text-white">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             <Receipt className="mr-2"/>
             Calculate Tax
         </Button>

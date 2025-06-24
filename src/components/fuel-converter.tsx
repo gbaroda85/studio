@@ -58,9 +58,9 @@ export default function FuelConverter() {
   }, [inputValue, fromUnit, toUnit]);
   
   return (
-    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-orange-500/80 hover:shadow-2xl hover:shadow-orange-500/20 hover:ring-2 hover:ring-orange-500/50 dark:hover:shadow-orange-500/10">
+    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Fuel className="text-orange-500" /> Fuel Consumption Converter</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Fuel className="text-primary" /> Fuel Consumption Converter</CardTitle>
         <CardDescription>Convert various fuel economy units.</CardDescription>
       </CardHeader>
       <CardContent>

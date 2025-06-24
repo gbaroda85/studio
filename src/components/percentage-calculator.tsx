@@ -85,13 +85,13 @@ export default function PercentageCalculator() {
     return (
         <div className="pt-6 text-center">
             <p className="text-muted-foreground">Result</p>
-            <p className="text-5xl font-bold text-cyan-500 my-2">{result}</p>
+            <p className="text-5xl font-bold text-primary my-2">{result}</p>
         </div>
     )
   }
 
   return (
-    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle>Percentage Calculator</CardTitle>
         <CardDescription>Perform various percentage calculations.</CardDescription>
@@ -110,7 +110,7 @@ export default function PercentageCalculator() {
                   <Label htmlFor="p1_percentage">What is</Label>
                   <Input id="p1_percentage" type="number" value={p1_percentage} onChange={(e) => setP1_percentage(e.target.value)} placeholder="25" />
                 </div>
-                <span className="pb-2 text-xl font-bold text-cyan-500">%</span>
+                <span className="pb-2 text-xl font-bold text-primary">%</span>
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="p1_base_value">of</Label>
                   <Input id="p1_base_value" type="number" value={p1_baseValue} onChange={(e) => setP1_baseValue(e.target.value)} placeholder="150" />
@@ -164,7 +164,7 @@ export default function PercentageCalculator() {
           </Tabs>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 pt-4">
-        <Button onClick={handleCalculate} className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+        <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           <Percent className="mr-2" />
           Calculate
         </Button>

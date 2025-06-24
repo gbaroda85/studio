@@ -52,9 +52,9 @@ export default function AccelerationConverter() {
   }, [inputValue, fromUnit, toUnit]);
   
   return (
-    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/80 hover:shadow-2xl hover:shadow-emerald-500/20 hover:ring-2 hover:ring-emerald-500/50 dark:hover:shadow-emerald-500/10">
+    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Gauge className="text-emerald-500" /> Acceleration Converter</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Gauge className="text-primary" /> Acceleration Converter</CardTitle>
         <CardDescription>Convert acceleration units instantly.</CardDescription>
       </CardHeader>
       <CardContent>

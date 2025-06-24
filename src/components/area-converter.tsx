@@ -57,9 +57,9 @@ export default function AreaConverter() {
   }, [inputValue, fromUnit, toUnit]);
   
   return (
-    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-lime-500/80 hover:shadow-2xl hover:shadow-lime-500/20 hover:ring-2 hover:ring-lime-500/50 dark:hover:shadow-lime-500/10">
+    <Card className="w-full max-w-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><AreaChart className="text-lime-500" /> Area Converter</CardTitle>
+        <CardTitle className="flex items-center gap-2"><AreaChart className="text-primary" /> Area Converter</CardTitle>
         <CardDescription>Convert area units seamlessly.</CardDescription>
       </CardHeader>
       <CardContent>

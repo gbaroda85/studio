@@ -74,7 +74,7 @@ export default function AgeCalculator() {
   }
 
   return (
-    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle>Age Calculator</CardTitle>
         <CardDescription>Discover your age and more.</CardDescription>
@@ -114,15 +114,15 @@ export default function AgeCalculator() {
                     <p className="text-muted-foreground">You are</p>
                     <div className="flex justify-center items-baseline gap-4 my-2">
                         <div className="flex flex-col items-center">
-                            <span className="text-5xl font-bold text-cyan-500">{age.years}</span>
+                            <span className="text-5xl font-bold text-primary">{age.years}</span>
                             <span className="text-sm text-muted-foreground">Years</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-5xl font-bold text-cyan-500">{age.months}</span>
+                            <span className="text-5xl font-bold text-primary">{age.months}</span>
                             <span className="text-sm text-muted-foreground">Months</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-5xl font-bold text-cyan-500">{age.days}</span>
+                            <span className="text-5xl font-bold text-primary">{age.days}</span>
                             <span className="text-sm text-muted-foreground">Days</span>
                         </div>
                     </div>
@@ -133,7 +133,7 @@ export default function AgeCalculator() {
                 
                 <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-center gap-4">
-                        <div className="flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+                        <div className="flex items-center gap-2 text-primary">
                            <Gift className="h-5 w-5" />
                            <span className="font-semibold">Next Birthday:</span>
                            <span className="font-bold">{age.daysToNextBirthday} days</span>
@@ -152,7 +152,7 @@ export default function AgeCalculator() {
 
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        <Button onClick={handleCalculateAge} className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+        <Button onClick={handleCalculateAge} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           <Calculator className="mr-2" />
           Calculate Age
         </Button>

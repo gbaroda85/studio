@@ -70,7 +70,7 @@ export default function LoanCalculator() {
   }
 
   return (
-    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+    <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle>Loan & EMI Calculator</CardTitle>
         <CardDescription>Calculate your monthly loan payments.</CardDescription>
@@ -103,9 +103,9 @@ export default function LoanCalculator() {
 
         {result && (
             <div className="pt-6 space-y-4">
-                <div className="text-center p-6 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
-                    <p className="text-sm font-medium text-cyan-800 dark:text-cyan-200">Monthly EMI</p>
-                    <p className="text-4xl font-bold text-cyan-600 dark:text-cyan-400">{formatCurrency(result.emi)}</p>
+                <div className="text-center p-6 bg-primary/10 rounded-lg">
+                    <p className="text-sm font-medium text-primary">Monthly EMI</p>
+                    <p className="text-4xl font-bold text-primary">{formatCurrency(result.emi)}</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
                     <div className="p-4 bg-muted/50 rounded-lg">
@@ -121,7 +121,7 @@ export default function LoanCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             <Landmark className="mr-2"/>
             Calculate EMI
         </Button>

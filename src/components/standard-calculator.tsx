@@ -74,29 +74,29 @@ export default function StandardCalculator() {
   }
 
   const buttons = [
-    { label: "AC", handler: handleClearClick, className: "bg-muted hover:bg-muted/80 text-cyan-500" },
-    { label: "+/-", handler: handleSignClick, className: "bg-muted hover:bg-muted/80 text-cyan-500" },
-    { label: "%", handler: handlePercentClick, className: "bg-muted hover:bg-muted/80 text-cyan-500" },
-    { label: "/", handler: () => handleOperatorClick("/"), className: "bg-cyan-500 hover:bg-cyan-600 text-white" },
+    { label: "AC", handler: handleClearClick, className: "bg-muted hover:bg-muted/80 text-primary" },
+    { label: "+/-", handler: handleSignClick, className: "bg-muted hover:bg-muted/80 text-primary" },
+    { label: "%", handler: handlePercentClick, className: "bg-muted hover:bg-muted/80 text-primary" },
+    { label: "/", handler: () => handleOperatorClick("/"), className: "bg-primary hover:bg-primary/90 text-primary-foreground" },
     { label: "7", handler: () => handleNumberClick("7") },
     { label: "8", handler: () => handleNumberClick("8") },
     { label: "9", handler: () => handleNumberClick("9") },
-    { label: "*", handler: () => handleOperatorClick("*"), className: "bg-cyan-500 hover:bg-cyan-600 text-white" },
+    { label: "*", handler: () => handleOperatorClick("*"), className: "bg-primary hover:bg-primary/90 text-primary-foreground" },
     { label: "4", handler: () => handleNumberClick("4") },
     { label: "5", handler: () => handleNumberClick("5") },
     { label: "6", handler: () => handleNumberClick("6") },
-    { label: "-", handler: () => handleOperatorClick("-"), className: "bg-cyan-500 hover:bg-cyan-600 text-white" },
+    { label: "-", handler: () => handleOperatorClick("-"), className: "bg-primary hover:bg-primary/90 text-primary-foreground" },
     { label: "1", handler: () => handleNumberClick("1") },
     { label: "2", handler: () => handleNumberClick("2") },
     { label: "3", handler: () => handleNumberClick("3") },
-    { label: "+", handler: () => handleOperatorClick("+"), className: "bg-cyan-500 hover:bg-cyan-600 text-white" },
+    { label: "+", handler: () => handleOperatorClick("+"), className: "bg-primary hover:bg-primary/90 text-primary-foreground" },
     { label: "0", handler: () => handleNumberClick("0"), className: "col-span-2" },
     { label: ".", handler: () => handleNumberClick(".") },
-    { label: "=", handler: handleEqualsClick, className: "bg-cyan-500 hover:bg-cyan-600 text-white" },
+    { label: "=", handler: handleEqualsClick, className: "bg-primary hover:bg-primary/90 text-primary-foreground" },
   ]
 
   return (
-    <Card className="w-full max-w-md mx-auto transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-cyan-500/80 hover:shadow-2xl hover:shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-500/50 dark:hover:shadow-cyan-500/10">
+    <Card className="w-full max-w-md mx-auto transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10">
       <CardHeader>
         <CardTitle className="sr-only">Standard Calculator</CardTitle>
         <div className="bg-muted text-right p-6 rounded-lg">
