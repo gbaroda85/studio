@@ -90,8 +90,8 @@ body {
 
 /* Custom Thin Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: hsl(var(--background));
@@ -101,11 +101,11 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent));
+  background: hsl(var(--muted-foreground));
 }
 
 /* For Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--accent)) hsl(var(--background));
+  scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--background));
 }
