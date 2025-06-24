@@ -318,11 +318,11 @@ export default function Page() {
           {searchResults.length > 0 ? (
             searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
               <section key={categoryKey}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                  <Icon className={cn("h-7 w-7", color)} />
+                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                  <Icon className={cn("h-8 w-8", color)} />
                   {t(categoryKey)}
                 </h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
                   {features.map((feature) => (
                     <FeatureCard
                       key={feature.href}
@@ -348,7 +348,7 @@ export default function Page() {
         <Tabs defaultValue={defaultTab}>
           <TabsList className="flex h-auto flex-wrap justify-center gap-2">
             {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-              <TabsTrigger key={value} value={value} className="px-6 py-3 text-base gap-2">
+              <TabsTrigger key={value} value={value} className="px-8 py-4 text-lg gap-2">
                 <Icon className={cn("h-5 w-5", color)} />
                 {t(categoryKey)}
               </TabsTrigger>
@@ -357,7 +357,7 @@ export default function Page() {
 
           {allFeatureGroups.map(({ value, features }) => (
             <TabsContent key={value} value={value}>
-              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
                 {features.map((feature) => (
                   <FeatureCard
                     key={feature.href}
