@@ -176,7 +176,7 @@ function AppHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 shadow-md lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
-        <SidebarTrigger className="md:hidden text-primary-foreground hover:bg-slate-700" />
+        <SidebarTrigger className="text-primary-foreground hover:bg-slate-700" />
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="flex items-center gap-4">
@@ -214,7 +214,7 @@ function AppHeader() {
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex flex-1 flex-col">
