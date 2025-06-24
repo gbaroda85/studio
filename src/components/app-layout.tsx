@@ -165,28 +165,32 @@ function SettingsMenu() {
 function AppHeader() {
   const { t } = useLanguage();
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[72px] lg:px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-20 lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="md:hidden" />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <Link href="/" className="flex items-center gap-3 font-headline text-xl font-bold tracking-wider text-foreground lg:text-2xl whitespace-nowrap animate-zoom-in-out">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-7 w-7 text-primary"
-            >
-                <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>{t('site_title')}</span>
+        <Link href="/" className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-full w-full text-primary-foreground"
+              >
+                  <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span className="font-headline text-2xl font-bold tracking-wider text-foreground whitespace-nowrap lg:text-3xl">
+                {t('site_title')}
+            </span>
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
