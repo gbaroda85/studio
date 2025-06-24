@@ -165,12 +165,12 @@ function SettingsMenu() {
 function AppHeader() {
   const { t } = useLanguage();
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[60px] lg:px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm animate-header-glow lg:h-[72px] lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="md:hidden" />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <Link href="/" className="flex items-center gap-3 font-headline text-xl font-bold tracking-wider text-primary lg:text-2xl whitespace-nowrap animate-zoom-in-out">
+        <Link href="/" className="flex items-center gap-3 font-headline text-xl font-bold tracking-wider text-foreground lg:text-2xl whitespace-nowrap animate-zoom-in-out">
             <svg
               width="28"
               height="28"
