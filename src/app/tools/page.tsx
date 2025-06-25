@@ -47,6 +47,8 @@ import {
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 // This component contains the actual page content and uses the search params.
 function ToolsPageContent() {
   const {t} = useLanguage();
