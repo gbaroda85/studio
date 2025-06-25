@@ -8,6 +8,10 @@ To get started, take a look at src/app/page.tsx.
 
 Deploying this application to Vercel is a straightforward process. Follow these steps to get your site live.
 
+### IMPORTANT: Deploying Updates
+
+Every time you make changes to your app, you must **push those changes to your Git repository** before Vercel can see them. If your deployment is failing with an old error, it's likely because the latest code fixes have not been pushed to your repository.
+
 ### Step 1: Push Your Code to a Git Repository
 
 Vercel deploys directly from a Git repository (like GitHub, GitLab, or Bitbucket).
