@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -202,8 +201,9 @@ function AppHeader() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
         <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
           <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-14 lg:w-14" />
-          <h1 className="hidden whitespace-nowrap text-2xl font-bold text-primary-foreground tracking-wide font-headline sm:block md:text-4xl lg:text-6xl">
-            GRs Multi Tools Kits Hub
+          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-6xl">
+            <span className="text-primary-foreground">GRs Multi </span>
+            <span className="text-gradient-cyan">Tools Kits Hub</span>
           </h1>
         </div>
       </div>
