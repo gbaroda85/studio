@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -222,7 +223,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="hidden sm:inline font-sans text-2xl md:text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-5xl">
+                <span className="hidden sm:inline font-sans text-4xl md:text-5xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-5xl">
                     {title}
                 </span>
             )}
