@@ -34,6 +34,7 @@ import {
   Wand2,
   NotebookPen,
   Loader2,
+  LayoutGrid,
 } from 'lucide-react';
 
 import {
@@ -200,10 +201,11 @@ function AppHeader() {
       </div>
       
       <div className="hidden lg:flex flex-1 items-center justify-center">
-        <div className="animate-title-pulse">
-            <h1 className="text-5xl font-bold text-primary-foreground tracking-wider font-headline">
-              GRs Multi Tools Kits Hub
-            </h1>
+        <div className="animate-title-pulse flex items-center gap-4">
+          <LayoutGrid className="h-12 w-12 text-primary-foreground" />
+          <h1 className="text-6xl font-bold text-primary-foreground tracking-wider font-headline">
+            GRs Multi Tools Kits Hub
+          </h1>
         </div>
       </div>
       
