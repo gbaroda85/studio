@@ -223,7 +223,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="hidden sm:inline font-sans text-4xl md:text-5xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-5xl">
+                <span className="hidden sm:inline font-sans text-4xl md:text-5xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-6xl animate-title-pulse">
                     {title}
                 </span>
             )}

@@ -111,6 +111,10 @@ const config: Config = {
           '0%': { 'box-shadow': '-1px 0 3px 0px hsl(var(--primary) / 0.3)' },
           '100%': { 'box-shadow': '-1px 0 5px 2px hsl(var(--primary) / 0.4)' },
         },
+        'title-pulse': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.03)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -119,6 +123,7 @@ const config: Config = {
         'zoom-in-out': 'zoom-in-out 4s ease-in-out infinite',
         'sidebar-border-glow-right': 'sidebar-border-glow-right 3s ease-in-out infinite alternate',
         'sidebar-border-glow-left': 'sidebar-border-glow-left 3s ease-in-out infinite alternate',
+        'title-pulse': 'title-pulse 4s ease-in-out infinite',
       },
     },
   },
