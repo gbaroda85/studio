@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
-import * as pdfjs from 'pdfjs-dist';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Loader2, Download, FileUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+import { convertPdfToDocx } from '@/actions/convert';
 
 export default function PdfToWordConverter() {
     const { toast } = useToast();
@@ -17,6 +15,14 @@ export default function PdfToWordConverter() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [convertedDocxUrl, setConvertedDocxUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        return () => {
+            if (convertedDocxUrl) {
+                URL.revokeObjectURL(convertedDocxUrl);
+            }
+        };
+    }, [convertedDocxUrl]);
 
     const handleFileChange = (file: File | null) => {
         const validTypes = ['application/pdf'];
@@ -45,54 +51,22 @@ export default function PdfToWordConverter() {
     const handleConvert = async (file: File) => {
         if (!file) return;
         setIsProcessing(true);
-        toast({ title: 'Processing PDF...', description: 'Extracting text. This might take a moment.' });
+        setConvertedDocxUrl(null);
+        toast({ title: 'Processing PDF...', description: 'Your file is being converted. This might take a moment.' });
         
         try {
-            const fileReader = new FileReader();
-            fileReader.onload = async (e) => {
-                try {
-                    const typedArray = new Uint8Array(e.target?.result as ArrayBuffer);
-                    const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
-                    let html = '<html><head><meta charset="UTF-8"></head><body>';
+            const arrayBuffer = await file.arrayBuffer();
+            const docxBuffer = await convertPdfToDocx(arrayBuffer);
+            
+            const docxBlob = new Blob([docxBuffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(docxBlob);
+            setConvertedDocxUrl(url);
 
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const textContent = await page.getTextContent();
-                        
-                        if (textContent.items.length === 0) continue;
-
-                        let pageHtml = '';
-                        textContent.items.forEach(item => {
-                            if('str' in item) {
-                                pageHtml += item.str + ' ';
-                            }
-                        });
-                        pageHtml = pageHtml.replace(/\s\n\s/g, '</p><p>').replace(/\n/g, '<br/>');
-                        pageHtml = `<p>${pageHtml}</p>`;
-
-                        html += `<div>${pageHtml}</div>`;
-                        if (i < pdf.numPages) {
-                            html += '<br style="page-break-after: always;" />';
-                        }
-                    }
-                    html += '</body></html>';
-
-                    const { asBlob } = await import('html-to-docx');
-                    const docxBlob = await asBlob(html);
-                    const url = URL.createObjectURL(docxBlob);
-                    setConvertedDocxUrl(url);
-                    toast({ title: 'Success!', description: 'Your PDF has been converted to Word.' });
-                } catch (err) {
-                     console.error(err);
-                     toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to process the PDF. It may be encrypted or corrupted.' });
-                } finally {
-                    setIsProcessing(false);
-                }
-            };
-            fileReader.readAsArrayBuffer(file);
+            toast({ title: 'Success!', description: 'Your PDF has been converted to Word.' });
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not read the file.' });
+            toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to convert the PDF. It may be encrypted, contain only images, or have a complex layout.' });
+        } finally {
             setIsProcessing(false);
         }
     };
