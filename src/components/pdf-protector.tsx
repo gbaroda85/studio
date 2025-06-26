@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -89,12 +88,10 @@ export default function PdfProtector() {
                 return;
             }
 
-            pdfDoc.encrypt({
+            const protectedPdfBytes = await pdfDoc.save({
                 userPassword: password,
                 ownerPassword: password,
             });
-            
-            const protectedPdfBytes = await pdfDoc.save();
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
