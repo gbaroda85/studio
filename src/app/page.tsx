@@ -123,7 +123,7 @@ export default function Page() {
       description: t('image_compress_description'),
       buttonText: 'Compress Image',
       popular: true,
-      buttonClassName: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white',
+      buttonClassName: 'bg-gradient-to-r from-gradient-blue to-gradient-purple hover:from-gradient-blue/90 hover:to-gradient-purple/90 text-white',
     },
     {
       href: '/pdf-to-image',
@@ -132,7 +132,7 @@ export default function Page() {
       description: t('pdf_to_image_description'),
       buttonText: 'Convert Now',
       popular: false,
-      buttonClassName: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white',
+      buttonClassName: 'bg-gradient-to-r from-gradient-green to-gradient-cyan hover:from-gradient-green/90 hover:to-gradient-cyan/90 text-white',
     },
     {
       href: '/create-zip',
@@ -141,7 +141,7 @@ export default function Page() {
       description: t('create_zip_description'),
       buttonText: 'Create Archive',
       popular: false,
-      buttonClassName: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white',
+      buttonClassName: 'bg-gradient-to-r from-gradient-purple to-gradient-magenta hover:from-gradient-purple/90 hover:to-gradient-magenta/90 text-white',
     },
   ];
 
