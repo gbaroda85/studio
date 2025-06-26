@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 const config: Config = {
@@ -65,6 +66,12 @@ const config: Config = {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        'gradient-green': '#3ED88C',
+        'gradient-cyan': '#3FC1D3',
+        'gradient-blue': '#4158D0',
+        'gradient-purple': '#9B5DE5',
+        'gradient-magenta': '#D16BA5',
+        'gradient-navy': '#1A1A40',
       },
       borderRadius: {
         lg: 'var(--radius)',

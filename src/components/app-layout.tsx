@@ -110,7 +110,7 @@ function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="h-20 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
+      <SidebarHeader className="h-24 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
         <Link href="/" className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
             <svg
@@ -172,7 +172,7 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-slate-700 hover:text-primary-foreground h-14 w-14">
+        <Button variant="ghost" size="icon" className="h-14 w-14 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
           <Settings className="h-[1.8rem] w-[1.8rem]" />
           <span className="sr-only">Settings</span>
         </Button>
@@ -199,9 +199,9 @@ function AppHeader() {
 
 
   return (
-    <header className="sticky top-0 z-10 flex h-20 items-center justify-between gap-4 border-b border-b-slate-800 bg-slate-900 px-4 shadow-md lg:h-20 lg:px-6">
+    <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
       <div className="flex flex-1 items-center">
-        <SidebarTrigger className="text-primary-foreground hover:bg-slate-700 h-14 w-14 [&>svg]:h-7 [&>svg]:w-7" />
+        <SidebarTrigger className="h-14 w-14 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-7 [&>svg]:w-7" />
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="flex items-center gap-4">
