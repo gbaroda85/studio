@@ -46,7 +46,8 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
         lines.forEach(line => {
             line.items.sort((a, b) => a.transform[4] - b.transform[4]);
             const lineText = line.items.map(item => item.str).join(' ');
-            html += `<p>${lineText}</p>`;
+            const escapedLineText = lineText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html += `<p>${escapedLineText}</p>`;
         });
 
 

@@ -29,31 +29,29 @@ const EnhancePhotoOutputSchema = z.object({
 export type EnhancePhotoOutput = z.infer<typeof EnhancePhotoOutputSchema>;
 
 export async function enhancePhoto(input: EnhancePhotoInput): Promise<EnhancePhotoOutput> {
+    return enhancePhotoFlow(input);
+}
+
+const enhancePhotoFlow = ai.defineFlow(
+  {
+    name: 'enhancePhotoFlow',
+    inputSchema: EnhancePhotoInputSchema,
+    outputSchema: EnhancePhotoOutputSchema,
+  },
+  async (input) => {
     const {media} = await ai.generate({
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
             {media: {url: input.photoDataUri}},
-            {text: 'Enhance the quality of this image. Improve brightness, contrast, and color saturation. Do not change the composition or content of the image.'},
+            {text: 'Act as a professional photo editor. Your task is to enhance the quality of the provided image. You should improve the brightness, contrast, and color saturation, and increase the sharpness. Do not change the composition or content of the image. The output must only be the final enhanced image.'},
         ],
         config: {
             responseModalities: ['TEXT', 'IMAGE'],
             safetySettings: [
-              {
-                category: 'HARM_CATEGORY_HATE_SPEECH',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_HARASSMENT',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                threshold: 'BLOCK_NONE',
-              },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
             ],
         },
     });
@@ -63,4 +61,5 @@ export async function enhancePhoto(input: EnhancePhotoInput): Promise<EnhancePho
     }
 
     return { imageDataUri: media.url };
-}
+  }
+);
