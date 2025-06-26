@@ -192,30 +192,34 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
+    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
+      {/* Left-aligned items */}
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
         <Link href="/" className="ml-4 lg:hidden">
           <span className="text-xl font-bold text-primary-foreground font-headline">GRs Multi Tools Kits Hub</span>
         </Link>
       </div>
-      
-      <div className="hidden lg:flex flex-1 items-center justify-center">
+
+      {/* Absolutely centered desktop title */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:flex">
         <div className="animate-title-pulse flex items-center gap-4">
           <LayoutGrid className="h-14 w-14 text-primary-foreground" />
-          <h1 className="text-7xl font-bold text-primary-foreground tracking-wide font-headline">
+          <h1 className="whitespace-nowrap text-7xl font-bold text-primary-foreground tracking-wide font-headline">
             GRs Multi Tools Kits Hub
           </h1>
         </div>
       </div>
-      
-      <div className="flex items-center justify-end gap-2">
+
+      {/* Right-aligned items */}
+      <div className="flex items-center justify-end gap-2 ml-auto">
         <SettingsMenu />
         <ThemeToggle />
       </div>
     </header>
   );
 }
+
 
 function AppLayoutSkeleton() {
     return (
