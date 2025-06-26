@@ -131,7 +131,7 @@ function AppSidebar() {
                 <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="text-2xl font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
+          <span className="text-lg font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
             GRs Multi Tools Kits Hub
           </span>
         </Link>
