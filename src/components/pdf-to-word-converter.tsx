@@ -1,9 +1,7 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { asBlob } from 'html-to-docx';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,6 +77,7 @@ export default function PdfToWordConverter() {
                     }
                     html += '</body></html>';
 
+                    const { asBlob } = await import('html-to-docx');
                     const docxBlob = await asBlob(html);
                     const url = URL.createObjectURL(docxBlob);
                     setConvertedDocxUrl(url);

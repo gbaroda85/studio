@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -31,6 +32,8 @@ export default function WordToPdfConverter() {
                 const canvas = await html2canvas(previewRef.current as HTMLDivElement, {
                     scale: 2, // Higher scale for better quality
                     useCORS: true,
+                    width: previewRef.current.scrollWidth,
+                    height: previewRef.current.scrollHeight
                 });
                 const imgData = canvas.toDataURL('image/png');
                 
@@ -126,15 +129,45 @@ export default function WordToPdfConverter() {
         reader.onload = async (e) => {
             try {
                 const arrayBuffer = e.target?.result as ArrayBuffer;
-                const result = await mammoth.convertToHtml({ arrayBuffer });
+
+                const mammothOptions = {
+                    convertImage: mammoth.images.imgElement(function(image) {
+                        return image.read("base64").then(function(imageBuffer) {
+                            return {
+                                src: "data:" + image.contentType + ";base64," + imageBuffer
+                            };
+                        });
+                    })
+                };
+
+                const result = await mammoth.convertToHtml({ arrayBuffer }, mammothOptions);
                 
                 const styledHtml = `
                     <style>
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; margin: 0; }
-                        p, h1, h2, h3, h4, h5, h6, li, table { max-width: 100%; overflow-wrap: break-word; margin: 0 0 1em 0; }
-                        table { border-collapse: collapse; width: 100%; }
-                        td, th { border: 1px solid #ccc; padding: 4px; }
-                        img { max-width: 100%; height: auto; }
+                        body {
+                            font-family: 'Times New Roman', Times, serif;
+                            font-size: 12pt;
+                            line-height: 1.5;
+                            margin: 0;
+                        }
+                        h1 { font-size: 24pt; font-weight: bold; margin-top: 24pt; margin-bottom: 6pt; }
+                        h2 { font-size: 18pt; font-weight: bold; margin-top: 18pt; margin-bottom: 4pt; }
+                        h3 { font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; }
+                        h4 { font-size: 12pt; font-weight: bold; margin-top: 12pt; margin-bottom: 2pt; }
+                        h5 { font-size: 11pt; font-weight: bold; margin-top: 11pt; margin-bottom: 2pt; }
+                        h6 { font-size: 10pt; font-weight: bold; margin-top: 10pt; margin-bottom: 2pt; }
+                        p { margin: 0 0 1em 0; text-align: justify; text-justify: inter-word; }
+                        ul, ol { margin: 0 0 1em 2em; padding: 0; }
+                        li { margin-bottom: 0.5em; }
+                        table { border-collapse: collapse; width: 100%; margin-bottom: 1em; page-break-inside: avoid; }
+                        td, th { border: 1px solid #999; padding: 0.5em; text-align: left; vertical-align: top; }
+                        th { font-weight: bold; background-color: #f2f2f2; }
+                        img { max-width: 100%; height: auto; display: block; margin: 1em 0; }
+                        a { color: #0000ee; text-decoration: underline; }
+                        strong, b { font-weight: bold; }
+                        em, i { font-style: italic; }
+                        blockquote { border-left: 4px solid #ccc; margin: 1em 0 1em 2em; padding-left: 1em; }
+                        div, p, table, ul, ol, blockquote { max-width: 100%; overflow-wrap: break-word; }
                     </style>
                     ${result.value}
                 `;
