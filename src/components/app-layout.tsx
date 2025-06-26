@@ -191,7 +191,7 @@ function SettingsMenu() {
 function AppHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
-      <div className="flex flex-1 items-center">
+      <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
       <div className="flex-1 overflow-x-hidden">
@@ -200,7 +200,7 @@ function AppHeader() {
           <span className="mx-8 text-2xl font-bold text-primary-foreground" aria-hidden="true">GRs Multi Tools Kits Hub, support:- gaurav.thearmy@yahoo.com</span>
         </div>
       </div>
-      <div className="flex flex-1 items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2">
         <SettingsMenu />
         <ThemeToggle />
       </div>
