@@ -131,7 +131,7 @@ function AppSidebar() {
             </svg>
           </div>
           <span className="text-2xl font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
-            GRs Tools
+            GRs Multi Tools Kits Hub
           </span>
         </Link>
       </SidebarHeader>
@@ -195,7 +195,7 @@ function AppHeader() {
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
         <Link href="/" className="ml-4 lg:hidden">
-          <span className="text-xl font-bold text-primary-foreground font-headline">GRs Tools</span>
+          <span className="text-xl font-bold text-primary-foreground font-headline">GRs Multi Tools Kits Hub</span>
         </Link>
       </div>
       
