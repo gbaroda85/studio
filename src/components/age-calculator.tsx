@@ -94,7 +94,7 @@ export default function AgeCalculator() {
                 {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0 border-2 border-primary/20 shadow-xl rounded-2xl">
               <Calendar
                 mode="single"
                 selected={dateOfBirth}
