@@ -32,6 +32,7 @@ export default function WordToPdfConverter() {
                 const canvas = await html2canvas(previewRef.current as HTMLDivElement, {
                     scale: 2, // Higher scale for better quality
                     useCORS: true,
+                    logging: false, // Turn off extensive logging
                     width: previewRef.current.scrollWidth,
                     height: previewRef.current.scrollHeight
                 });
@@ -51,7 +52,7 @@ export default function WordToPdfConverter() {
                 const ratio = canvasWidth / canvasHeight;
 
                 const imgWidth = pdfWidth;
-                const imgHeight = imgWidth / ratio;
+                let imgHeight = imgWidth / ratio;
                 
                 let heightLeft = imgHeight;
                 let position = 0;
@@ -79,8 +80,7 @@ export default function WordToPdfConverter() {
             }
         };
 
-        // A small timeout helps ensure the browser has fully painted the HTML before html2canvas runs.
-        const timerId = setTimeout(createPdf, 200);
+        const timerId = setTimeout(createPdf, 250);
         
         return () => clearTimeout(timerId);
 
@@ -98,7 +98,7 @@ export default function WordToPdfConverter() {
     const handleFileChange = (file: File | null) => {
         const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         if (file && validTypes.includes(file.type)) {
-            resetState(); // Reset everything for the new file
+            resetState();
             setWordFile(file);
             handleConvert(file);
         } else if (file) {
@@ -144,28 +144,27 @@ export default function WordToPdfConverter() {
                 
                 const styledHtml = `
                     <style>
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.4; margin: 0; }
-                        h1, h2, h3, h4, h5, h6 { font-weight: bold; margin-bottom: 0.5em; }
-                        h1 { font-size: 22pt; }
-                        h2 { font-size: 18pt; }
-                        h3 { font-size: 14pt; }
+                        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Arial&family=Courier+New&display=swap');
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; margin: 0; padding: 0; color: #000; }
+                        h1, h2, h3, h4, h5, h6 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; line-height: 1.2; }
+                        h1 { font-size: 24pt; } h2 { font-size: 18pt; } h3 { font-size: 14pt; } h4 { font-size: 12pt; }
                         p { margin: 0 0 1em 0; text-align: justify; }
-                        ul, ol { margin: 0 0 1em 2em; padding: 0; }
+                        ul, ol { margin: 0 0 1em 2.5em; padding: 0; }
                         li { margin-bottom: 0.5em; }
-                        table { border-collapse: collapse; width: 100%; margin-bottom: 1em; page-break-inside: avoid; }
-                        td, th { border: 1px solid #cccccc; padding: 0.5em; text-align: left; }
-                        th { font-weight: bold; background-color: #f0f0f0; }
+                        table { border-collapse: collapse; width: 100% !important; margin-bottom: 1em; page-break-inside: avoid; }
+                        td, th { border: 1px solid #999; padding: 0.5em; text-align: left; vertical-align: top; }
+                        th { font-weight: bold; background-color: #f2f2f2; }
                         img { max-width: 100%; height: auto; display: block; margin: 1em 0; }
                         a { color: #0000ee; text-decoration: underline; }
                         strong, b { font-weight: bold; }
                         em, i { font-style: italic; }
-                        blockquote { border-left: 4px solid #cccccc; margin-left: 1.5em; padding-left: 1em; font-style: italic; }
-                        pre { background-color: #f5f5f5; padding: 1em; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; }
+                        blockquote { border-left: 4px solid #ccc; margin-left: 0; padding-left: 1.5em; color: #555; }
+                        pre { background-color: #f5f5f5; padding: 1em; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; }
                         code { font-family: 'Courier New', Courier, monospace; }
                     </style>
                     ${result.value}
                 `;
-                setPreviewHtml(styledHtml); // This will trigger the useEffect
+                setPreviewHtml(styledHtml);
             } catch (error) {
                 console.error(error);
                 toast({ variant: 'destructive', title: 'Parsing Error', description: 'Could not parse the .docx file. It might be corrupt or unsupported.' });
@@ -208,16 +207,16 @@ export default function WordToPdfConverter() {
                             <UploadCloud className="h-16 w-16 text-muted-foreground" />
                             <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop</p>
                         </div>
-                    ) : isProcessing ? (
+                    ) : isProcessing || !convertedPdfUrl ? (
                         <div className="flex items-center justify-center py-8">
                             <Loader2 className="animate-spin h-8 w-8 text-primary"/>
-                            <span className="ml-4 text-muted-foreground">Converting...</span>
+                            <span className="ml-4 text-muted-foreground">Converting... Please wait.</span>
                         </div>
                     ) : (
                         <div className="w-full h-96 border rounded-md overflow-hidden bg-white">
                            {convertedPdfUrl ? (
                                 <iframe
-                                    src={convertedPdfUrl}
+                                    src={`${convertedPdfUrl}#view=FitH`}
                                     className="w-full h-full"
                                     title="PDF Preview"
                                 />
@@ -243,8 +242,8 @@ export default function WordToPdfConverter() {
 
             {/* Hidden div for rendering HTML for html2canvas */}
             {previewHtml && (
-                <div className="fixed top-0 -left-[9999px] -z-10 opacity-0">
-                    <div ref={previewRef} dangerouslySetInnerHTML={{ __html: previewHtml }} className="w-[210mm] bg-white p-[20mm]" />
+                <div className="fixed top-0 -left-[9999px] -z-10 opacity-0 bg-white">
+                    <div ref={previewRef} dangerouslySetInnerHTML={{ __html: previewHtml }} className="w-[210mm] p-[20mm]" />
                 </div>
             )}
         </>
