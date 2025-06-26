@@ -33,7 +33,7 @@ export async function enhancePhoto(input: EnhancePhotoInput): Promise<EnhancePho
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
             {media: {url: input.photoDataUri}},
-            {text: 'You are a professional photo editor. Your task is to enhance the provided image. Improve its lighting, color balance, and sharpness. Do not add or remove any elements from the original image. The output should be ONLY the enhanced image.'},
+            {text: 'Task: Photo Enhancement. Input: Image. As a professional photo editor, your task is to enhance the provided image. Improve lighting, color balance, and sharpness. DO NOT add, remove, or alter any elements from the original image. The output MUST be only the enhanced image, with no additional text, explanation, or other content.'},
         ],
         config: {
             responseModalities: ['TEXT', 'IMAGE'],
