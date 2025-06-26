@@ -47,6 +47,7 @@ import {
   Eraser,
   Wand2,
   NotebookPen,
+  FileUp,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -129,6 +130,13 @@ function ToolsPageContent() {
       descriptionKey: 'word_to_pdf_description',
       icon: FilePenLine,
       color: 'text-blue-600',
+    },
+    {
+      href: '/pdf-to-word',
+      labelKey: 'pdf_to_word_label',
+      descriptionKey: 'pdf_to_word_description',
+      icon: FileUp,
+      color: 'text-emerald-500',
     },
     {
       href: '/pdf-to-image',
