@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,13 +19,84 @@ export default function WordToPdfConverter() {
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
+    
+    // Effect to run the PDF conversion after the HTML preview is rendered
+    useEffect(() => {
+        if (!isProcessing || !previewHtml || !previewRef.current) {
+            return;
+        }
+
+        const createPdf = async () => {
+            try {
+                const canvas = await html2canvas(previewRef.current as HTMLDivElement, {
+                    scale: 2, // Higher scale for better quality
+                    useCORS: true,
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4',
+                });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const ratio = canvasWidth / canvasHeight;
+
+                const imgWidth = pdfWidth;
+                const imgHeight = imgWidth / ratio;
+                
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight;
+
+                while (heightLeft > 0) {
+                    position -= pdfHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+                }
+
+                const pdfBlob = pdf.output('blob');
+                const url = URL.createObjectURL(pdfBlob);
+                setConvertedPdfUrl(url);
+                toast({ title: 'Success!', description: 'Your Word document has been converted to PDF.' });
+            } catch (error) {
+                console.error("PDF generation error:", error);
+                toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to generate PDF from the document preview.' });
+            } finally {
+                setIsProcessing(false);
+                setPreviewHtml(null); // Clean up the hidden div content
+            }
+        };
+
+        // A small timeout helps ensure the browser has fully painted the HTML before html2canvas runs.
+        const timerId = setTimeout(createPdf, 200);
+        
+        return () => clearTimeout(timerId);
+
+    }, [isProcessing, previewHtml, toast]);
+
+    // Cleanup blob URL
+    useEffect(() => {
+        return () => {
+            if (convertedPdfUrl) {
+                URL.revokeObjectURL(convertedPdfUrl);
+            }
+        };
+    }, [convertedPdfUrl]);
 
     const handleFileChange = (file: File | null) => {
         const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         if (file && validTypes.includes(file.type)) {
+            resetState(); // Reset everything for the new file
             setWordFile(file);
-            setConvertedPdfUrl(null);
-            setPreviewHtml(null);
             handleConvert(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a .docx file.' });
@@ -50,7 +120,8 @@ export default function WordToPdfConverter() {
     const handleConvert = async (file: File) => {
         if (!file) return;
         setIsProcessing(true);
-
+        toast({ title: 'Processing Word File...', description: 'Extracting content. This might take a moment.' });
+        
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
@@ -59,55 +130,25 @@ export default function WordToPdfConverter() {
                 
                 const styledHtml = `
                     <style>
-                        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
-                        p, h1, h2, h3, h4, h5, h6, li { max-width: 100%; overflow-wrap: break-word; }
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; margin: 0; }
+                        p, h1, h2, h3, h4, h5, h6, li, table { max-width: 100%; overflow-wrap: break-word; margin: 0 0 1em 0; }
+                        table { border-collapse: collapse; width: 100%; }
+                        td, th { border: 1px solid #ccc; padding: 4px; }
+                        img { max-width: 100%; height: auto; }
                     </style>
                     ${result.value}
                 `;
-                setPreviewHtml(styledHtml);
-
-                setTimeout(async () => {
-                    if (previewRef.current) {
-                        const canvas = await html2canvas(previewRef.current, { scale: 2 });
-                        const imgData = canvas.toDataURL('image/png');
-                        
-                        const pdf = new jsPDF('p', 'mm', 'a4');
-                        const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const pdfHeight = pdf.internal.pageSize.getHeight();
-                        
-                        const canvasWidth = canvas.width;
-                        const canvasHeight = canvas.height;
-                        const ratio = canvasWidth / canvasHeight;
-                        const imgWidth = pdfWidth;
-                        const imgHeight = imgWidth / ratio;
-                        
-                        let heightLeft = imgHeight;
-                        let position = 0;
-
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pdfHeight;
-
-                        while (heightLeft > 0) {
-                            position -= pdfHeight;
-                            pdf.addPage();
-                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                            heightLeft -= pdfHeight;
-                        }
-
-                        const pdfBlob = pdf.output('blob');
-                        const url = URL.createObjectURL(pdfBlob);
-                        setConvertedPdfUrl(url);
-                        toast({ title: 'Success!', description: 'Your Word document has been converted to PDF.' });
-                    }
-                     setIsProcessing(false);
-                }, 100);
-
+                setPreviewHtml(styledHtml); // This will trigger the useEffect
             } catch (error) {
                 console.error(error);
-                toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to convert the document.' });
+                toast({ variant: 'destructive', title: 'Parsing Error', description: 'Could not parse the .docx file. It might be corrupt or unsupported.' });
                 setIsProcessing(false);
             }
         };
+        reader.onerror = () => {
+            toast({ variant: 'destructive', title: 'File Read Error', description: 'There was an error reading your file.' });
+            setIsProcessing(false);
+        }
         reader.readAsArrayBuffer(file);
     };
     
@@ -146,15 +187,19 @@ export default function WordToPdfConverter() {
                             <span className="ml-4 text-muted-foreground">Converting...</span>
                         </div>
                     ) : (
-                        previewHtml && (
-                            <div className="w-full h-96 border rounded-md overflow-hidden">
+                        <div className="w-full h-96 border rounded-md overflow-hidden bg-white">
+                           {convertedPdfUrl ? (
                                 <iframe
-                                    srcDoc={previewHtml}
+                                    src={convertedPdfUrl}
                                     className="w-full h-full"
                                     title="PDF Preview"
                                 />
-                            </div>
-                        )
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-muted-foreground">
+                                    <p>An error occurred, or conversion is pending.</p>
+                                </div>
+                            )}
+                        </div>
                     )}
                     <input ref={fileInputRef} type="file" className="hidden" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
                 </CardContent>
@@ -169,9 +214,10 @@ export default function WordToPdfConverter() {
                 )}
             </Card>
 
-            {isProcessing && previewHtml && (
-                <div className="absolute -z-10 -left-[9999px] top-0">
-                    <div ref={previewRef} dangerouslySetInnerHTML={{ __html: previewHtml }} className="w-[8.27in] bg-white p-[1in]" />
+            {/* Hidden div for rendering HTML for html2canvas */}
+            {previewHtml && (
+                <div className="fixed top-0 -left-[9999px] -z-10 opacity-0">
+                    <div ref={previewRef} dangerouslySetInnerHTML={{ __html: previewHtml }} className="w-[210mm] bg-white p-[20mm]" />
                 </div>
             )}
         </>
