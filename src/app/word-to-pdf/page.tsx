@@ -18,7 +18,7 @@ export default function WordToPdfPage() {
             <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
                 <Link href="/tools?tab=pdf">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Home
+                    Back to Tools
                 </Link>
             </Button>
         </div>
