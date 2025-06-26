@@ -33,6 +33,7 @@ import {
   Eraser,
   Wand2,
   NotebookPen,
+  Loader2,
 } from 'lucide-react';
 
 import {
@@ -173,7 +174,7 @@ function SettingsMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-10 w-10 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-          <Settings className="h-[2rem] w-[2rem]" />
+          <Settings className="h-[1.8rem] w-[1.8rem]" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
@@ -193,13 +194,19 @@ function AppHeader() {
     <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
+        <Link href="/" className="ml-4 lg:hidden">
+          <span className="text-xl font-bold text-primary-foreground font-headline">GRs Tools</span>
+        </Link>
       </div>
-      <div className="flex-1 overflow-x-hidden">
-        <div className="flex animate-marquee whitespace-nowrap">
-          <span className="mx-8 text-2xl font-bold text-primary-foreground">GRs Multi Tools Kits Hub, support:- gaurav.thearmy@yahoo.com</span>
-          <span className="mx-8 text-2xl font-bold text-primary-foreground" aria-hidden="true">GRs Multi Tools Kits Hub, support:- gaurav.thearmy@yahoo.com</span>
+      
+      <div className="hidden lg:flex flex-1 items-center justify-center">
+        <div className="animate-title-pulse">
+            <h1 className="text-5xl font-bold text-primary-foreground tracking-wider font-headline">
+              GRs Multi Tools Kits Hub
+            </h1>
         </div>
       </div>
+      
       <div className="flex items-center justify-end gap-2">
         <SettingsMenu />
         <ThemeToggle />
@@ -208,7 +215,25 @@ function AppHeader() {
   );
 }
 
+function AppLayoutSkeleton() {
+    return (
+        <div className="flex items-center justify-center min-h-screen w-full bg-background">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        </div>
+    )
+}
+
 export default function AppLayout({children}: {children: React.ReactNode}) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <AppLayoutSkeleton />;
+  }
+  
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full">
