@@ -144,30 +144,24 @@ export default function WordToPdfConverter() {
                 
                 const styledHtml = `
                     <style>
-                        body {
-                            font-family: 'Times New Roman', Times, serif;
-                            font-size: 12pt;
-                            line-height: 1.5;
-                            margin: 0;
-                        }
-                        h1 { font-size: 24pt; font-weight: bold; margin-top: 24pt; margin-bottom: 6pt; }
-                        h2 { font-size: 18pt; font-weight: bold; margin-top: 18pt; margin-bottom: 4pt; }
-                        h3 { font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; }
-                        h4 { font-size: 12pt; font-weight: bold; margin-top: 12pt; margin-bottom: 2pt; }
-                        h5 { font-size: 11pt; font-weight: bold; margin-top: 11pt; margin-bottom: 2pt; }
-                        h6 { font-size: 10pt; font-weight: bold; margin-top: 10pt; margin-bottom: 2pt; }
-                        p { margin: 0 0 1em 0; text-align: justify; text-justify: inter-word; }
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.4; margin: 0; }
+                        h1, h2, h3, h4, h5, h6 { font-weight: bold; margin-bottom: 0.5em; }
+                        h1 { font-size: 22pt; }
+                        h2 { font-size: 18pt; }
+                        h3 { font-size: 14pt; }
+                        p { margin: 0 0 1em 0; text-align: justify; }
                         ul, ol { margin: 0 0 1em 2em; padding: 0; }
                         li { margin-bottom: 0.5em; }
                         table { border-collapse: collapse; width: 100%; margin-bottom: 1em; page-break-inside: avoid; }
-                        td, th { border: 1px solid #999; padding: 0.5em; text-align: left; vertical-align: top; }
-                        th { font-weight: bold; background-color: #f2f2f2; }
+                        td, th { border: 1px solid #cccccc; padding: 0.5em; text-align: left; }
+                        th { font-weight: bold; background-color: #f0f0f0; }
                         img { max-width: 100%; height: auto; display: block; margin: 1em 0; }
                         a { color: #0000ee; text-decoration: underline; }
                         strong, b { font-weight: bold; }
                         em, i { font-style: italic; }
-                        blockquote { border-left: 4px solid #ccc; margin: 1em 0 1em 2em; padding-left: 1em; }
-                        div, p, table, ul, ol, blockquote { max-width: 100%; overflow-wrap: break-word; }
+                        blockquote { border-left: 4px solid #cccccc; margin-left: 1.5em; padding-left: 1em; font-style: italic; }
+                        pre { background-color: #f5f5f5; padding: 1em; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; }
+                        code { font-family: 'Courier New', Courier, monospace; }
                     </style>
                     ${result.value}
                 `;

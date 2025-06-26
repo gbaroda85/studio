@@ -2,8 +2,12 @@
 
 import * as pdfjs from 'pdfjs-dist';
 
+// Set the worker source for pdfjs-dist. This is crucial for it to work in a non-browser environment like a server action.
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+
 export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> {
-  // Use the default export as suggested by the build error hint.
+  // Dynamically import 'html-to-docx' as it's a server-only library and this prevents bundling issues.
+  // Use the default export as suggested by build errors.
   const asBlob = (await import('html-to-docx')).default;
 
   try {
@@ -20,7 +24,8 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
         let pageHtml = '';
         let currentY = -1;
         textContent.items.forEach(item => {
-            if('str' in item) {
+            if('str' in item) { // Check if it is a TextItem and not TextMarkedContent
+                // A simple check for new lines based on Y-coordinate.
                 if (currentY !== -1 && item.transform[5] < currentY - 5) {
                     pageHtml += '<br/>';
                 }
@@ -32,10 +37,12 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
             }
         });
 
+        // Wrap extracted text in a paragraph tag.
         pageHtml = `<p>${pageHtml.replace(/\s+/g, ' ').trim()}</p>`;
         
         html += `<div>${pageHtml}</div>`;
         if (i < pdf.numPages) {
+            // Add a page break for multi-page PDFs
             html += '<br style="page-break-after: always;" />';
         }
     }
@@ -48,6 +55,6 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
 
   } catch (error) {
     console.error("Error during PDF to DOCX conversion:", error);
-    throw new Error("Failed to convert PDF to DOCX.");
+    throw new Error("Failed to convert PDF to DOCX. The file might be encrypted or have a complex structure.");
   }
 }
