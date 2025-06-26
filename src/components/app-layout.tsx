@@ -114,7 +114,7 @@ function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="h-24 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
-        <Link href="/" className="flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
             <svg
               width="28"
@@ -132,7 +132,7 @@ function AppSidebar() {
                 <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="text-lg font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
+          <span className="text-base font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
             GRs Multi Tools Kits Hub
           </span>
         </Link>
@@ -202,8 +202,8 @@ function AppHeader() {
       {/* Absolutely centered title for ALL screens */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
         <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
-          <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-14 lg:w-14" />
-          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-7xl">
+          <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
+          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-5xl">
             <span className="text-primary-foreground">GRs Multi </span>
             <span className="text-gradient-cyan">Tools Kits Hub</span>
           </h1>
@@ -211,15 +211,17 @@ function AppHeader() {
       </div>
 
       {/* Right-aligned items */}
-      <div className="flex items-center justify-end gap-2 ml-auto">
-        <Button asChild variant="ghost" className="h-12 px-3 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-            <a href="mailto:gaurav.thearmy@yahoo.com">
-                <Mail className="h-8 w-8" />
-                <span className="hidden lg:inline ml-2 text-lg">gaurav.thearmy@yahoo.com</span>
+      <div className="flex flex-col items-end justify-center gap-1 ml-auto">
+        <div className="flex items-center gap-2">
+            <SettingsMenu />
+            <ThemeToggle />
+        </div>
+        <Button asChild variant="ghost" className="h-auto px-2 py-1 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
+            <a href="mailto:gaurav.thearmy@yahoo.com" className="flex items-center gap-1.5">
+                <Mail className="h-5 w-5" />
+                <span className="hidden text-sm lg:inline">gaurav.thearmy@yahoo.com</span>
             </a>
         </Button>
-        <SettingsMenu />
-        <ThemeToggle />
       </div>
     </header>
   );
