@@ -43,6 +43,8 @@ import {
   Search,
   Receipt,
   Loader2,
+  Eraser,
+  Wand2,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -80,6 +82,20 @@ function ToolsPageContent() {
       descriptionKey: 'crop_image_description',
       icon: Crop,
       color: 'text-blue-500',
+    },
+    {
+      href: '/remove-background',
+      labelKey: 'remove_background_label',
+      descriptionKey: 'remove_background_description',
+      icon: Eraser,
+      color: 'text-rose-500',
+    },
+    {
+      href: '/enhance-photo',
+      labelKey: 'enhance_photo_label',
+      descriptionKey: 'enhance_photo_description',
+      icon: Wand2,
+      color: 'text-violet-500',
     },
     {
       href: '/image-to-jpg',

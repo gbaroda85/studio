@@ -30,6 +30,8 @@ import {
   Route,
   Coins,
   Receipt,
+  Eraser,
+  Wand2,
 } from 'lucide-react';
 
 import {
@@ -68,6 +70,8 @@ function AppSidebar() {
     {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-green-500'},
     {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-fuchsia-500'},
     {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-blue-500'},
+    {href: '/remove-background', labelKey: 'remove_background_label', icon: Eraser, color: 'text-rose-500'},
+    {href: '/enhance-photo', labelKey: 'enhance_photo_label', icon: Wand2, color: 'text-violet-500'},
     {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
     {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},

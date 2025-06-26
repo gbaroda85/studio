@@ -90,6 +90,10 @@ const translations = {
     sales_tax_calculator_description: 'Quickly calculate sales tax and total price.',
     search_tools_placeholder: 'Search for tools by name or description...',
     no_tools_found: 'No tools found matching your search',
+    remove_background_label: 'Remove Background',
+    remove_background_description: 'Use AI to remove the background from any image.',
+    enhance_photo_label: 'Enhance Photo',
+    enhance_photo_description: 'Improve photo quality, colors, and lighting with AI.',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -169,6 +173,10 @@ const translations = {
     sales_tax_calculator_description: 'बिक्री कर और कुल कीमत की तुरंत गणना करें।',
     search_tools_placeholder: 'नाम या विवरण द्वारा टूल खोजें...',
     no_tools_found: 'आपकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
+    remove_background_label: 'पृष्ठभूमि हटाएं',
+    remove_background_description: 'किसी भी छवि से पृष्ठभूमि हटाने के लिए AI का उपयोग करें।',
+    enhance_photo_label: 'फोटो बढ़ाएं',
+    enhance_photo_description: 'AI के साथ फोटो की गुणवत्ता, रंग और प्रकाश में सुधार करें।',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -248,6 +256,10 @@ const translations = {
     sales_tax_calculator_description: 'Calcula rápidamente el impuesto sobre las ventas y el precio total.',
     search_tools_placeholder: 'Buscar herramientas por nombre o descripción...',
     no_tools_found: 'No se encontraron herramientas que coincidan con su búsqueda',
+    remove_background_label: 'Quitar fondo',
+    remove_background_description: 'Usa IA para quitar el fondo de cualquier imagen.',
+    enhance_photo_label: 'Mejorar foto',
+    enhance_photo_description: 'Mejora la calidad, los colores y la iluminación de las fotos con IA.',
   },
 };
 
