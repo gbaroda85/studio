@@ -35,6 +35,7 @@ import {
   NotebookPen,
   Loader2,
   LayoutGrid,
+  Mail,
 } from 'lucide-react';
 
 import {
@@ -174,8 +175,8 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-          <Settings className="h-[1.8rem] w-[1.8rem]" />
+        <Button variant="ghost" size="icon" className="h-12 w-12 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
+          <Settings className="h-8 w-8" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
@@ -211,6 +212,12 @@ function AppHeader() {
 
       {/* Right-aligned items */}
       <div className="flex items-center justify-end gap-2 ml-auto">
+        <Button asChild variant="ghost" className="h-12 px-3 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
+            <a href="mailto:gaurav.thearmy@yahoo.com">
+                <Mail className="h-8 w-8" />
+                <span className="hidden lg:inline ml-2 text-lg">gaurav.thearmy@yahoo.com</span>
+            </a>
+        </Button>
         <SettingsMenu />
         <ThemeToggle />
       </div>
