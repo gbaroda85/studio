@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense } from 'react';
@@ -45,6 +46,7 @@ import {
   Loader2,
   Eraser,
   Wand2,
+  NotebookPen,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -183,6 +185,13 @@ function ToolsPageContent() {
       descriptionKey: 'add_watermark_description',
       icon: Copyright,
       color: 'text-rose-500',
+    },
+    {
+      href: '/add-page-numbers',
+      labelKey: 'add_page_numbers_label',
+      descriptionKey: 'add_page_numbers_description',
+      icon: NotebookPen,
+      color: 'text-lime-500',
     },
   ];
 

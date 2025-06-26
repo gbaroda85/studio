@@ -32,6 +32,7 @@ import {
   Receipt,
   Eraser,
   Wand2,
+  NotebookPen,
 } from 'lucide-react';
 
 import {
@@ -84,6 +85,7 @@ function AppSidebar() {
     {href: '/protect-pdf', labelKey: 'protect_pdf_label', icon: Lock, color: 'text-gray-500'},
     {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-teal-500'},
     {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
+    {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-500'},
     {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-500'},
     {href: '/unzip-file', labelKey: 'unzip_file_label', icon: ArchiveRestore, color: 'text-stone-500'},
     {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-cyan-500'},
