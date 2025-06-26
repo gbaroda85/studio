@@ -76,6 +76,7 @@ function AppSidebar() {
     {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
     {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
+    {href: '/word-to-pdf', labelKey: 'word_to_pdf_label', icon: FilePenLine, color: 'text-blue-600'},
     {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
     {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
     {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
@@ -222,7 +223,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="font-sans text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-4xl">
+                <span className="hidden sm:inline font-sans text-2xl md:text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-4xl">
                     {title}
                 </span>
             )}

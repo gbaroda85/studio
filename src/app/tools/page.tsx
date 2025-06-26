@@ -124,6 +124,13 @@ function ToolsPageContent() {
 
   const pdfFeatures = [
     {
+      href: '/word-to-pdf',
+      labelKey: 'word_to_pdf_label',
+      descriptionKey: 'word_to_pdf_description',
+      icon: FilePenLine,
+      color: 'text-blue-600',
+    },
+    {
       href: '/pdf-to-image',
       labelKey: 'pdf_to_image_label',
       descriptionKey: 'pdf_to_image_description',
