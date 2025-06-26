@@ -189,45 +189,16 @@ function SettingsMenu() {
 }
 
 function AppHeader() {
-  const { t } = useLanguage();
-  const [title, setTitle] = useState('');
-
-  useEffect(() => {
-    // This ensures the title is set only on the client-side, avoiding hydration mismatch.
-    setTitle(t('site_title'));
-  }, [t]);
-
-
   return (
     <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
       <div className="flex flex-1 items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
-      <div className="flex flex-1 items-center justify-center">
-        <Link href="/" className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-full w-full text-primary-foreground"
-              >
-                  <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            {title && (
-                <span className="hidden sm:inline font-sans text-4xl md:text-5xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-6xl animate-title-pulse">
-                    {title}
-                </span>
-            )}
-        </Link>
+      <div className="flex-1 overflow-x-hidden">
+        <div className="flex animate-marquee whitespace-nowrap">
+          <span className="mx-8 text-2xl font-bold text-primary-foreground">GRs Multi Tools Kits Hub, support:- gaurav.thearmy@yahoo.com</span>
+          <span className="mx-8 text-2xl font-bold text-primary-foreground" aria-hidden="true">GRs Multi Tools Kits Hub, support:- gaurav.thearmy@yahoo.com</span>
+        </div>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
         <SettingsMenu />

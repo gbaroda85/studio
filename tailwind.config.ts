@@ -115,6 +115,10 @@ const config: Config = {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.03)' },
         },
+        'marquee': {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -124,6 +128,7 @@ const config: Config = {
         'sidebar-border-glow-right': 'sidebar-border-glow-right 3s ease-in-out infinite alternate',
         'sidebar-border-glow-left': 'sidebar-border-glow-left 3s ease-in-out infinite alternate',
         'title-pulse': 'title-pulse 4s ease-in-out infinite',
+        'marquee': 'marquee 25s linear infinite',
       },
     },
   },
