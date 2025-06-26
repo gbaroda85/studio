@@ -196,16 +196,13 @@ function AppHeader() {
       {/* Left-aligned items */}
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
-        <Link href="/" className="ml-4 lg:hidden">
-          <span className="text-xl font-bold text-primary-foreground font-headline">GRs Multi Tools Kits Hub</span>
-        </Link>
       </div>
 
-      {/* Absolutely centered desktop title */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:flex">
-        <div className="animate-title-pulse flex items-center gap-4">
-          <LayoutGrid className="h-14 w-14 text-primary-foreground" />
-          <h1 className="whitespace-nowrap text-7xl font-bold text-primary-foreground tracking-wide font-headline">
+      {/* Absolutely centered title for ALL screens */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
+        <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
+          <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-14 lg:w-14" />
+          <h1 className="hidden whitespace-nowrap text-2xl font-bold text-primary-foreground tracking-wide font-headline sm:block md:text-4xl lg:text-6xl">
             GRs Multi Tools Kits Hub
           </h1>
         </div>
