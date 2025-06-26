@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -172,8 +171,8 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-14 w-14 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-          <Settings className="h-[1.8rem] w-[1.8rem]" />
+        <Button variant="ghost" size="icon" className="h-10 w-10 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
+          <Settings className="h-[2rem] w-[2rem]" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
@@ -201,7 +200,7 @@ function AppHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
       <div className="flex flex-1 items-center">
-        <SidebarTrigger className="h-14 w-14 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-7 [&>svg]:w-7" />
+        <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Link href="/" className="flex items-center gap-4">
@@ -223,7 +222,7 @@ function AppHeader() {
               </svg>
             </div>
             {title && (
-                <span className="hidden sm:inline font-sans text-2xl md:text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-4xl">
+                <span className="hidden sm:inline font-sans text-2xl md:text-3xl font-bold tracking-wider text-primary-foreground whitespace-nowrap lg:text-5xl">
                     {title}
                 </span>
             )}
