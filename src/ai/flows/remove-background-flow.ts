@@ -33,7 +33,7 @@ export async function removeBackground(input: RemoveBackgroundInput): Promise<Re
     model: 'googleai/gemini-2.0-flash-preview-image-generation',
     prompt: [
         {media: {url: input.photoDataUri}},
-        {text: 'You are an expert at image editing. Your task is to remove the background from the provided image. The main subject must be perfectly preserved. The output must be a PNG image with a transparent background.'},
+        {text: 'Remove the background from the provided image. Preserve the main subject perfectly. The output must be a PNG image with a transparent background.'},
     ],
     config: {
         responseModalities: ['TEXT', 'IMAGE'],
