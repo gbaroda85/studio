@@ -22,23 +22,34 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
         if (textContent.items.length === 0) continue;
 
         totalTextLength += textContent.items.reduce((acc, item) => acc + ('str' in item ? item.str.length : 0), 0);
+        
+        // More robust line detection
+        const lines: { y: number, items: any[] }[] = [];
+        const Y_TOLERANCE = 5;
 
-        let lastY: number | undefined;
-        let pageText = '';
-        // A simple heuristic to group text into lines based on Y-coordinate.
-        textContent.items.forEach(item => {
-            if('str' in item) {
-                if (lastY !== undefined && (item.transform[5] < lastY - 5)) {
-                    pageText += '<br/>';
-                }
-                pageText += item.str;
-                lastY = item.transform[5];
+        textContent.items.forEach((item: any) => {
+            if (!('str' in item) || item.str.trim() === '') return;
+
+            const y = item.transform[5];
+            const line = lines.find(l => Math.abs(l.y - y) < Y_TOLERANCE);
+            if (line) {
+                line.items.push(item);
+            } else {
+                lines.push({ y, items: [item] });
             }
         });
+
+        // Sort lines by Y coordinate (top to bottom)
+        lines.sort((a, b) => b.y - a.y);
         
-        // Wrap lines in paragraph tags
-        html += `<p>${pageText.replace(/<br\/>/g, '</p><p>')}</p>`;
-        
+        // Sort items within each line by X coordinate (left to right) and build HTML
+        lines.forEach(line => {
+            line.items.sort((a, b) => a.transform[4] - b.transform[4]);
+            const lineText = line.items.map(item => item.str).join(' ');
+            html += `<p>${lineText}</p>`;
+        });
+
+
         if (i < pdf.numPages) {
             html += '<br style="page-break-after: always;" />';
         }
@@ -63,6 +74,6 @@ export async function convertPdfToDocx(pdfBuffer: ArrayBuffer): Promise<Buffer> 
     if (error.message.includes("PDF appears to contain no text")) {
         throw error;
     }
-    throw new Error("Failed to convert PDF to DOCX. The file might be encrypted or have a complex structure.");
+    throw new Error("Failed to convert PDF to DOCX. The file might be encrypted, contain only images, or have a complex structure.");
   }
 }

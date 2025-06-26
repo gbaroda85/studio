@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import PdfToWordConverter from '@/components/pdf-to-word-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
+export const dynamic = 'force-dynamic';
+
 const steps = [
     "Upload PDF: Click the upload area or drag and drop your PDF file.",
     "Automatic Conversion: The tool will automatically start converting the file to a DOCX document.",
