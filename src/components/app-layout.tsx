@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -201,7 +202,7 @@ function AppHeader() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
         <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
           <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-14 lg:w-14" />
-          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-6xl">
+          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-7xl">
             <span className="text-primary-foreground">GRs Multi </span>
             <span className="text-gradient-cyan">Tools Kits Hub</span>
           </h1>
@@ -221,7 +222,30 @@ function AppHeader() {
 function AppLayoutSkeleton() {
     return (
         <div className="flex items-center justify-center min-h-screen w-full bg-background">
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            <div className="flex flex-col items-center gap-6 animate-pulse">
+                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary p-3">
+                    <svg
+                      width="40"
+                      height="40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-full w-full text-primary-foreground"
+                    >
+                        <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
+                    </svg>
+                </div>
+                 <h1 className="text-center whitespace-nowrap text-3xl font-bold tracking-wide font-headline sm:text-4xl">
+                    <span className="text-foreground">GRs Multi </span>
+                    <span className="text-primary">Tools Kits Hub</span>
+                 </h1>
+                <Loader2 className="h-8 w-8 animate-spin text-primary mt-4" />
+            </div>
         </div>
     )
 }
