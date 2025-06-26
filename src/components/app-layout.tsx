@@ -202,8 +202,8 @@ function AppHeader() {
       
       <div className="hidden lg:flex flex-1 items-center justify-center">
         <div className="animate-title-pulse flex items-center gap-4">
-          <LayoutGrid className="h-12 w-12 text-primary-foreground" />
-          <h1 className="text-6xl font-bold text-primary-foreground tracking-wider font-headline">
+          <LayoutGrid className="h-14 w-14 text-primary-foreground" />
+          <h1 className="text-7xl font-bold text-primary-foreground tracking-wide font-headline">
             GRs Multi Tools Kits Hub
           </h1>
         </div>
