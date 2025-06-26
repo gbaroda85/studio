@@ -1,24 +1,24 @@
-import * as React from "react"
+import { useState, useEffect } from "react"
 
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     
-    const onChange = () => {
-      setIsMobile(mql.matches)
+    // Set the initial value on the client to avoid hydration mismatch
+    setIsMobile(mediaQuery.matches)
+
+    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches)
     }
 
-    // Set the initial value on the client
-    onChange()
-
-    mql.addEventListener("change", onChange)
+    mediaQuery.addEventListener("change", handleMediaQueryChange)
 
     return () => {
-      mql.removeEventListener("change", onChange)
+      mediaQuery.removeEventListener("change", handleMediaQueryChange)
     }
   }, [])
 
