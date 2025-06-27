@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -102,6 +101,10 @@ const translations = {
     remove_background_description: 'Use AI to remove the background from any image.',
     enhance_photo_label: 'Enhance Photo',
     enhance_photo_description: 'Improve photo quality, colors, and lighting with AI.',
+    image_to_text_label: 'Image to Text (OCR)',
+    image_to_text_description: 'Extract text from any image using AI.',
+    text_to_pdf_label: 'Text to PDF',
+    text_to_pdf_description: 'Convert plain text into a PDF document.',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -193,6 +196,10 @@ const translations = {
     remove_background_description: 'किसी भी छवि से पृष्ठभूमि हटाने के लिए AI का उपयोग करें।',
     enhance_photo_label: 'फोटो बढ़ाएं',
     enhance_photo_description: 'AI के साथ फोटो की गुणवत्ता, रंग और प्रकाश में सुधार करें।',
+    image_to_text_label: 'छवि से टेक्स्ट (ओसीआर)',
+    image_to_text_description: 'AI का उपयोग करके किसी भी छवि से टेक्स्ट निकालें।',
+    text_to_pdf_label: 'टेक्स्ट से पीडीएफ',
+    text_to_pdf_description: 'सादे टेक्स्ट को पीडीएफ दस्तावेज़ में बदलें।',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -284,6 +291,10 @@ const translations = {
     remove_background_description: 'Usa IA para quitar el fondo de cualquier imagen.',
     enhance_photo_label: 'Mejorar foto',
     enhance_photo_description: 'Mejora la calidad, los colores y la iluminación de las fotos con IA.',
+    image_to_text_label: 'Imagen a Texto (OCR)',
+    image_to_text_description: 'Extrae texto de cualquier imagen usando IA.',
+    text_to_pdf_label: 'Texto a PDF',
+    text_to_pdf_description: 'Convierte texto sin formato en un documento PDF.',
   },
 };
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense } from 'react';
@@ -49,6 +48,7 @@ import {
   NotebookPen,
   FileUp,
   FileCode,
+  FileScan,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -102,6 +102,13 @@ function ToolsPageContent() {
       color: 'text-violet-500',
     },
     {
+      href: '/image-to-text',
+      labelKey: 'image_to_text_label',
+      descriptionKey: 'image_to_text_description',
+      icon: FileScan,
+      color: 'text-teal-500',
+    },
+    {
       href: '/image-to-jpg',
       labelKey: 'image_to_jpg_label',
       descriptionKey: 'image_to_jpg_description',
@@ -125,6 +132,13 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/text-to-pdf',
+      labelKey: 'text_to_pdf_label',
+      descriptionKey: 'text_to_pdf_description',
+      icon: FileText,
+      color: 'text-gray-500',
+    },
     {
       href: '/html-to-pdf',
       labelKey: 'html_to_pdf_label',
