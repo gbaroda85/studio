@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Loader2, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import mammoth from 'mammoth';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -125,14 +124,16 @@ export default function WordToPdfConverter() {
         setIsProcessing(true);
         toast({ title: 'Processing Word File...', description: 'Extracting content. This might take a moment.' });
         
+        const mammoth = (await import('mammoth')).default;
+
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
                 const arrayBuffer = e.target?.result as ArrayBuffer;
 
                 const mammothOptions = {
-                    convertImage: mammoth.images.imgElement(function(image) {
-                        return image.read("base64").then(function(imageBuffer) {
+                    convertImage: mammoth.images.imgElement(function(image: any) {
+                        return image.read("base64").then(function(imageBuffer: string) {
                             return {
                                 src: "data:" + image.contentType + ";base64," + imageBuffer
                             };
