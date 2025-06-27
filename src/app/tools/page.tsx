@@ -48,6 +48,7 @@ import {
   Wand2,
   NotebookPen,
   FileUp,
+  FileCode,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -124,6 +125,13 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/html-to-pdf',
+      labelKey: 'html_to_pdf_label',
+      descriptionKey: 'html_to_pdf_description',
+      icon: FileCode,
+      color: 'text-orange-600',
+    },
     {
       href: '/word-to-pdf',
       labelKey: 'word_to_pdf_label',

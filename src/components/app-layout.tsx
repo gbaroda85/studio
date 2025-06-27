@@ -36,6 +36,7 @@ import {
   Loader2,
   LayoutGrid,
   Mail,
+  FileCode,
 } from 'lucide-react';
 
 import {
@@ -79,6 +80,7 @@ function AppSidebar() {
     {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
     {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
+    {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
     {href: '/word-to-pdf', labelKey: 'word_to_pdf_label', icon: FilePenLine, color: 'text-blue-600'},
     {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
     {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
