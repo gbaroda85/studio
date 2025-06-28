@@ -5,7 +5,6 @@ import {
   ImageIcon,
   FileText,
   Archive,
-  ScanLine,
   Shrink,
   ArrowRight,
   Lock,
@@ -13,6 +12,7 @@ import {
   UserCheck,
   Sparkles,
   Search,
+  Calculator,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
@@ -109,9 +109,9 @@ export default function Page() {
     },
     {
       onClick: () => handleCategoryClick('calculator'),
-      icon: ScanLine,
-      title: 'Scan & More',
-      description: 'Scan documents and other utilities',
+      icon: Calculator,
+      title: 'Calculators & More',
+      description: 'Calculators and other utilities',
     },
   ];
 
@@ -183,6 +183,17 @@ export default function Page() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </form>
+        </section>
+
+        {/* Flashing Link Section */}
+        <section className="text-center">
+          <Link href="https://grsnewss.blogspot.com" target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-gradient-to-r from-gradient-purple to-gradient-magenta p-1 animate-pulse">
+            <div className="rounded-md bg-background px-6 py-3">
+              <span className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-gradient-purple to-gradient-magenta">
+                Visit our News Blog for the latest updates!
+              </span>
+            </div>
+          </Link>
         </section>
 
         {/* Category Selection */}
