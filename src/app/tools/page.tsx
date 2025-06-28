@@ -24,7 +24,6 @@ import {
   Unlock,
   Scissors,
   Maximize,
-  FilePenLine,
   Copyright,
   Archive,
   ArchiveRestore,
@@ -46,7 +45,6 @@ import {
   Eraser,
   Wand2,
   NotebookPen,
-  FileUp,
   FileCode,
   FileScan,
 } from 'lucide-react';
@@ -145,20 +143,6 @@ function ToolsPageContent() {
       descriptionKey: 'html_to_pdf_description',
       icon: FileCode,
       color: 'text-orange-600',
-    },
-    {
-      href: '/word-to-pdf',
-      labelKey: 'word_to_pdf_label',
-      descriptionKey: 'word_to_pdf_description',
-      icon: FilePenLine,
-      color: 'text-blue-600',
-    },
-    {
-      href: '/pdf-to-word',
-      labelKey: 'pdf_to_word_label',
-      descriptionKey: 'pdf_to_word_description',
-      icon: FileUp,
-      color: 'text-emerald-500',
     },
     {
       href: '/pdf-to-image',

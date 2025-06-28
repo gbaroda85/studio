@@ -16,7 +16,6 @@ import {
   Unlock,
   Scissors,
   Maximize,
-  FilePenLine,
   Info,
   Copyright,
   Settings,
@@ -84,7 +83,6 @@ function AppSidebar() {
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
     {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-gray-500'},
     {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
-    {href: '/word-to-pdf', labelKey: 'word_to_pdf_label', icon: FilePenLine, color: 'text-blue-600'},
     {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
     {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
     {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
@@ -198,7 +196,7 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900 lg:px-6">
+    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
       {/* Left-aligned items */}
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
