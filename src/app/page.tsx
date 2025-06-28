@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 
 const CategoryCard = ({ icon: Icon, title, description, onClick }) => (
   <div onClick={onClick} className="group block cursor-pointer">
-    <Card className="h-full text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+    <Card className="h-full text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 border-foreground/20">
       <CardContent className="p-6">
         <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Icon className="h-8 w-8" />
@@ -41,7 +41,7 @@ const CategoryCard = ({ icon: Icon, title, description, onClick }) => (
 );
 
 const FeaturedToolCard = ({ icon: Icon, title, description, href, buttonText, popular, buttonClassName }) => (
-  <Card className="flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
+  <Card className="flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 border-foreground/20">
     <div>
       <div className="flex items-start justify-between">
         <div className="mb-4 grid size-14 place-items-center rounded-xl bg-primary/10 text-primary">
