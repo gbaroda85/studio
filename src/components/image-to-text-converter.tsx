@@ -123,6 +123,7 @@ export default function ImageToTextConverter() {
               className="flex-1 text-base resize-none"
               placeholder={isProcessing ? "Extracting text..." : "Extracted text will appear here."}
               value={extractedText || ""}
+              onChange={(e) => setExtractedText(e.target.value)}
               readOnly={isProcessing}
             />
             <Button onClick={handleCopyToClipboard} disabled={!extractedText || hasCopied}>
