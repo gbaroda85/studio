@@ -37,6 +37,7 @@ import {
   Mail,
   FileCode,
   FileScan,
+  FileText,
 } from 'lucide-react';
 
 import {
