@@ -63,9 +63,10 @@ export default function PdfToWordConverter() {
             setConvertedDocxUrl(url);
 
             toast({ title: 'Success!', description: 'Your PDF has been converted to Word.' });
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to convert the PDF. It may be encrypted, contain only images, or have a complex layout.' });
+            const errorMessage = error.message || 'An unknown error occurred during conversion.';
+            toast({ variant: 'destructive', title: 'Conversion Error', description: errorMessage });
         } finally {
             setIsProcessing(false);
         }
