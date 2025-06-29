@@ -170,7 +170,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-muted/40">
-      <div className="container mx-auto px-4 py-12 space-y-16">
+      <div className="container mx-auto px-4 py-12 space-y-6">
         {/* Search Bar */}
         <section>
           <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto">
