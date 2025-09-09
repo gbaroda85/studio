@@ -203,19 +203,22 @@ function AppHeader() {
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
 
-      {/* Absolutely centered title for ALL screens */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
-        <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
-          <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
-          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-5xl">
-            <span className="text-primary-foreground">GRs Multi </span>
-            <span className="text-gradient-cyan">Tools Kits Hub</span>
-          </h1>
-        </div>
+      {/* Centered Title */}
+      <div className="flex-1 flex justify-center items-center overflow-hidden">
+        <Link href="/" className="pointer-events-auto">
+            <div className="animate-title-pulse flex items-center gap-2">
+                <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground" />
+                <h1 className="whitespace-nowrap text-xl sm:text-2xl font-bold tracking-wide font-headline">
+                    <span className="text-primary-foreground">GRs Multi </span>
+                    <span className="text-gradient-cyan">Tools Kits Hub</span>
+                </h1>
+            </div>
+        </Link>
       </div>
 
+
       {/* Right-aligned items */}
-      <div className="flex flex-col items-end justify-center gap-1 ml-auto">
+      <div className="flex flex-col items-end justify-center gap-1">
         <div className="flex items-center gap-2">
             <SettingsMenu />
             <ThemeToggle />
