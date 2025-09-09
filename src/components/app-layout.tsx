@@ -197,18 +197,18 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
+    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-2 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-2 sm:px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
       {/* Left-aligned items */}
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
 
       {/* Centered Title */}
-      <div className="flex-1 flex justify-center items-center overflow-hidden">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Link href="/" className="pointer-events-auto">
             <div className="animate-title-pulse flex items-center gap-2">
                 <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground" />
-                <h1 className="whitespace-nowrap text-xl sm:text-2xl font-bold tracking-wide font-headline">
+                <h1 className="hidden sm:block whitespace-nowrap text-xl sm:text-2xl font-bold tracking-wide font-headline">
                     <span className="text-primary-foreground">GRs Multi </span>
                     <span className="text-gradient-cyan">Tools Kits Hub</span>
                 </h1>
