@@ -40,7 +40,7 @@ const enhancePhotoFlow = ai.defineFlow(
   },
   async (input) => {
     const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        model: 'googleai/gemini-2.0-flash',
         prompt: [
             {media: {url: input.photoDataUri}},
             {text: 'Act as a professional photo editor. Your task is to enhance the quality of the provided image. You should improve the brightness, contrast, and color saturation, and increase the sharpness. Do not change the composition or content of the image. The output must only be the final enhanced image.'},
