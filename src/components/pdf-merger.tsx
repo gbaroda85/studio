@@ -35,10 +35,9 @@ export default function PdfMerger() {
 
     const handleFilesChange = (files: FileList | null) => {
         clearMergedFile();
+        // Remove forced sorting to preserve selection order as provided by the browser
         const newFiles = Array.from(files || [])
-            .filter(file => file.type === 'application/pdf')
-            // Sort files by name numerically to ensure correct order (e.g., 1, 2, 10 instead of 1, 10, 2)
-            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+            .filter(file => file.type === 'application/pdf');
 
         if (newFiles.length === 0 && files && files.length > 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
@@ -75,6 +74,9 @@ export default function PdfMerger() {
     const handleReset = () => {
         setPdfFiles([]);
         clearMergedFile();
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     }
 
     const handleMergePdfs = async () => {
