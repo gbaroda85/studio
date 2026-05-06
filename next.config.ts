@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  analytics: {
+    disabled: true,
+  },
+  speedInsights: {
+    disabled: true,
+  },
 };
 
 export default nextConfig;

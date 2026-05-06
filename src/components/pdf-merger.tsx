@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Loader2, Download, Merge, FileText, X } from 'lucide-react';
+import { UploadCloud, Loader2, Download, Merge, FileText, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function PdfMerger() {
@@ -34,7 +35,11 @@ export default function PdfMerger() {
 
     const handleFilesChange = (files: FileList | null) => {
         clearMergedFile();
-        const newFiles = Array.from(files || []).filter(file => file.type === 'application/pdf');
+        const newFiles = Array.from(files || [])
+            .filter(file => file.type === 'application/pdf')
+            // Sort files by name numerically to ensure correct order (e.g., 1, 2, 10 instead of 1, 10, 2)
+            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
         if (newFiles.length === 0 && files && files.length > 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
             return;
@@ -50,6 +55,21 @@ export default function PdfMerger() {
     const handleRemoveFile = (index: number) => {
         clearMergedFile();
         setPdfFiles(files => files.filter((_, i) => i !== index));
+    };
+
+    const moveFile = (index: number, direction: 'up' | 'down') => {
+        const newFiles = [...pdfFiles];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        
+        if (targetIndex < 0 || targetIndex >= newFiles.length) return;
+        
+        // Swap positions
+        const temp = newFiles[index];
+        newFiles[index] = newFiles[targetIndex];
+        newFiles[targetIndex] = temp;
+        
+        setPdfFiles(newFiles);
+        clearMergedFile();
     };
     
     const handleReset = () => {
@@ -102,7 +122,7 @@ export default function PdfMerger() {
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
             <CardHeader>
                 <CardTitle>Merge PDFs</CardTitle>
-                <CardDescription>Upload multiple PDF files to combine them into one.</CardDescription>
+                <CardDescription>Upload multiple PDF files, rearrange them, and combine them into one.</CardDescription>
             </CardHeader>
             <CardContent>
                 {pdfFiles.length === 0 ? (
@@ -113,17 +133,41 @@ export default function PdfMerger() {
                 ) : (
                     <div className="space-y-3">
                         {pdfFiles.map((file, index) => (
-                             <div key={index} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
-                                 <div className="flex items-center gap-3">
-                                    <FileText className="h-6 w-6 text-primary" />
-                                    <span className="text-sm font-medium">{file.name}</span>
+                             <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
+                                 <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="flex flex-col gap-1 shrink-0">
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="h-6 w-6" 
+                                            onClick={() => moveFile(index, 'up')}
+                                            disabled={index === 0}
+                                            title="Move Up"
+                                        >
+                                            <ChevronUp className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="h-6 w-6" 
+                                            onClick={() => moveFile(index, 'down')}
+                                            disabled={index === pdfFiles.length - 1}
+                                            title="Move Down"
+                                        >
+                                            <ChevronDown className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    <FileText className="h-6 w-6 text-primary shrink-0" />
+                                    <span className="text-sm font-medium truncate">{file.name}</span>
                                  </div>
-                                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRemoveFile(index)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
                              </div>
                         ))}
                         <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-4 flex items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
                             <UploadCloud className="h-6 w-6 text-muted-foreground mr-2" />
-                            <span className="text-sm">Add more files...</span>
+                            <span className="text-sm font-medium">Add more files...</span>
                         </div>
                     </div>
                 )}
