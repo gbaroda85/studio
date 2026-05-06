@@ -6,7 +6,22 @@ import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Loader2, Download, Merge, FileText, X, ChevronUp, ChevronDown, SortAsc, SortDesc, Trash2 } from 'lucide-react';
+import { 
+    UploadCloud, 
+    Loader2, 
+    Download, 
+    Merge, 
+    FileText, 
+    X, 
+    ChevronUp, 
+    ChevronDown, 
+    SortAsc, 
+    SortDesc, 
+    Trash2,
+    ArrowUpToLine,
+    ArrowDownToLine,
+    ArrowUpDown
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function PdfMerger() {
@@ -35,7 +50,6 @@ export default function PdfMerger() {
     const handleFilesChange = (files: FileList | null) => {
         clearMergedFile();
         
-        // Convert FileList to array and filter PDFs
         const newFiles = Array.from(files || [])
             .filter(file => file.type === 'application/pdf');
 
@@ -44,9 +58,7 @@ export default function PdfMerger() {
             return;
         }
 
-        // Sort the incoming batch alphabetically to fix the OS picker "last focused first" behavior
-        newFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
+        // We don't auto-sort here anymore to respect the browser/user's initial selection
         setPdfFiles(prev => [...prev, ...newFiles]);
     };
 
@@ -60,28 +72,32 @@ export default function PdfMerger() {
         setPdfFiles(files => files.filter((_, i) => i !== index));
     };
 
-    const moveFile = (index: number, direction: 'up' | 'down') => {
+    const moveFile = (index: number, direction: 'up' | 'down' | 'top' | 'bottom') => {
         const newFiles = [...pdfFiles];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        const file = newFiles.splice(index, 1)[0];
         
-        if (targetIndex < 0 || targetIndex >= newFiles.length) return;
-        
-        const temp = newFiles[index];
-        newFiles[index] = newFiles[targetIndex];
-        newFiles[targetIndex] = temp;
+        if (direction === 'up') newFiles.splice(Math.max(0, index - 1), 0, file);
+        else if (direction === 'down') newFiles.splice(Math.min(pdfFiles.length - 1, index + 1), 0, file);
+        else if (direction === 'top') newFiles.unshift(file);
+        else if (direction === 'bottom') newFiles.push(file);
         
         setPdfFiles(newFiles);
         clearMergedFile();
     };
 
-    const sortFiles = (order: 'asc' | 'desc') => {
-        const sorted = [...pdfFiles].sort((a, b) => {
-            const cmp = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
-            return order === 'asc' ? cmp : -cmp;
-        });
+    const sortFiles = (order: 'asc' | 'desc' | 'reverse') => {
+        let sorted = [...pdfFiles];
+        if (order === 'reverse') {
+            sorted.reverse();
+        } else {
+            sorted.sort((a, b) => {
+                const cmp = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+                return order === 'asc' ? cmp : -cmp;
+            });
+        }
         setPdfFiles(sorted);
         clearMergedFile();
-        toast({ title: order === 'asc' ? "Sorted A-Z" : "Sorted Z-A" });
+        toast({ title: order === 'reverse' ? "Order Reversed" : order === 'asc' ? "Sorted A-Z" : "Sorted Z-A" });
     }
     
     const handleReset = () => {
@@ -142,7 +158,10 @@ export default function PdfMerger() {
                         <CardDescription>Combine multiple PDF files into a single document.</CardDescription>
                     </div>
                     {pdfFiles.length > 1 && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => sortFiles('reverse')} title="Reverse List">
+                                <ArrowUpDown className="h-4 w-4 mr-1" /> Reverse
+                            </Button>
                             <Button variant="outline" size="sm" onClick={() => sortFiles('asc')} title="Sort A-Z">
                                 <SortAsc className="h-4 w-4 mr-1" /> A-Z
                             </Button>
@@ -172,24 +191,46 @@ export default function PdfMerger() {
                         {pdfFiles.map((file, index) => (
                              <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 rounded-lg border border-foreground/10 bg-card hover:bg-accent/50 transition-colors group">
                                  <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button 
                                             size="icon" 
                                             variant="ghost" 
-                                            className="h-8 w-8" 
+                                            className="h-7 w-7" 
+                                            onClick={() => moveFile(index, 'top')}
+                                            disabled={index === 0}
+                                            title="Move to top"
+                                        >
+                                            <ArrowUpToLine className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="h-7 w-7" 
                                             onClick={() => moveFile(index, 'up')}
                                             disabled={index === 0}
+                                            title="Move up"
                                         >
                                             <ChevronUp className="h-4 w-4" />
                                         </Button>
                                         <Button 
                                             size="icon" 
                                             variant="ghost" 
-                                            className="h-8 w-8" 
+                                            className="h-7 w-7" 
                                             onClick={() => moveFile(index, 'down')}
                                             disabled={index === pdfFiles.length - 1}
+                                            title="Move down"
                                         >
                                             <ChevronDown className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="h-7 w-7" 
+                                            onClick={() => moveFile(index, 'bottom')}
+                                            disabled={index === pdfFiles.length - 1}
+                                            title="Move to bottom"
+                                        >
+                                            <ArrowDownToLine className="h-3.5 w-3.5" />
                                         </Button>
                                     </div>
                                     <div className="flex items-center gap-2 truncate">
@@ -197,7 +238,7 @@ export default function PdfMerger() {
                                             {index + 1}
                                         </div>
                                         <FileText className="h-5 w-5 text-red-500 shrink-0" />
-                                        <span className="text-sm font-medium truncate">{file.name}</span>
+                                        <span className="text-sm font-medium truncate max-w-[200px] md:max-w-md" title={file.name}>{file.name}</span>
                                     </div>
                                  </div>
                                 <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleRemoveFile(index)}>
