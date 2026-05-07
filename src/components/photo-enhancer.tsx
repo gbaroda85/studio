@@ -2,7 +2,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import Image from "next/image";
-import { UploadCloud, Loader2, Download, X, FileImage, Wand2, Sparkles } from "lucide-react";
+import { UploadCloud, Loader2, Download, X, FileImage, Wand2, Sparkles, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,9 +49,16 @@ export default function PhotoEnhancer() {
       const result = await enhancePhoto({ photoDataUri: originalImageSrc });
       setResultImageSrc(result.imageDataUri);
       toast({ title: "Success!", description: "Photo enhanced. Check the preview and download." });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "AI Error", description: "Failed to enhance the photo. Please try again." });
+      const isQuotaError = error.message?.includes("429") || error.message?.includes("quota");
+      toast({ 
+        variant: "destructive", 
+        title: isQuotaError ? "AI Quota Exceeded" : "AI Error", 
+        description: isQuotaError 
+          ? "You've reached the free limit for this AI tool. Please try again later or check your API quota." 
+          : "Failed to enhance the photo. Please try again." 
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -128,7 +135,7 @@ export default function PhotoEnhancer() {
               <Image src={resultImageSrc} alt="Enhanced photo" fill className="object-contain transition-opacity duration-500" style={{ opacity: resultImageSrc ? 1 : 0 }} />
             ) : (<div className="flex h-full w-full items-center justify-center"><Sparkles className="h-16 w-16 text-muted-foreground/50" /></div>)}
           </CardContent>
-        </Card>
+        </div>
       </div>
        <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
         <Button variant="outline" onClick={handleReset}><X className="mr-2 h-4 w-4" />Start Over</Button>

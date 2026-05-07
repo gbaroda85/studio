@@ -2,7 +2,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import Image from "next/image";
-import { UploadCloud, Loader2, Download, X, FileImage, Eraser, PictureInPicture } from "lucide-react";
+import { UploadCloud, Loader2, Download, X, FileImage, Eraser, PictureInPicture, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,9 +56,16 @@ export default function BackgroundRemover() {
       const result = await removeBackground({ photoDataUri: originalImageSrc });
       setResultImageSrc(result.imageDataUri);
       toast({ title: "Success!", description: "Background removed. Check the preview and download." });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "AI Error", description: "Failed to remove background. Please try again." });
+      const isQuotaError = error.message?.includes("429") || error.message?.includes("quota");
+      toast({ 
+        variant: "destructive", 
+        title: isQuotaError ? "AI Quota Exceeded" : "AI Error", 
+        description: isQuotaError 
+          ? "You've reached the free limit for this AI tool. Please try again later or check your API quota." 
+          : "Failed to remove background. Please try again with a clearer image." 
+      });
     } finally {
       setIsProcessing(false);
     }
