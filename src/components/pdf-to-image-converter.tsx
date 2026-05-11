@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Bundle-safe worker URL
+// Bundle-safe worker URL with stable versioning
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 type OutputFormat = 'png' | 'jpeg';

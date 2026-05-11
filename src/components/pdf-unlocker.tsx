@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Bundle-safe worker URL for stable loading
+// Bundle-safe worker URL with stable versioning
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export default function PdfUnlocker() {
@@ -125,7 +125,7 @@ export default function PdfUnlocker() {
             if (error.name === 'PasswordException' || error.message.includes('password')) {
                 setErrorDetails("Incorrect Password. Please double check.");
             } else {
-                setErrorDetails("Decryption failed. The file might be using a security standard that is blocked by the browser.");
+                setErrorDetails("Decryption failed. Browser memory limits might be reached for this file size.");
             }
         }
     };
