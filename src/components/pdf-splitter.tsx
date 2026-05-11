@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { 
     UploadCloud, 
     Loader2, 
@@ -21,7 +22,6 @@ import {
     MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { ScrollArea } from './ui/scroll-area';
 
 // Bundle-safe worker URL
@@ -97,19 +97,16 @@ export default function PdfSplitter() {
         }
     }, [splitPdfUrl]);
 
-    // Handle manual text input change
     const handleRangeInputChange = (value: string) => {
         setPageRanges(value);
         if (splitPdfUrl) {
             URL.revokeObjectURL(splitPdfUrl);
             setSplitPdfUrl(null);
         }
-        // Sync visual selection with manual input
         const parsed = parsePageRanges(value, totalPages);
         setSelectedPages(parsed);
     };
 
-    // Handle visual page click
     const togglePageSelection = (pageNum: number) => {
         if (splitPdfUrl) {
             URL.revokeObjectURL(splitPdfUrl);
@@ -139,7 +136,6 @@ export default function PdfSplitter() {
                 setTotalPages(pdf.numPages);
 
                 const newPreviews: string[] = [];
-                // Render first 50 pages maximum for performance
                 const pagesToRender = Math.min(pdf.numPages, 50);
                 
                 for (let i = 1; i <= pagesToRender; i++) {
@@ -258,8 +254,6 @@ export default function PdfSplitter() {
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
             <div className="grid lg:grid-cols-12 gap-8 items-start">
-                
-                {/* Left Side: Controls */}
                 <div className="lg:col-span-4 space-y-6">
                     <Card className="shadow-xl border-primary/10">
                         <CardHeader className="bg-muted/30 border-b">
@@ -300,13 +294,6 @@ export default function PdfSplitter() {
                                     </p>
                                 </div>
                             )}
-
-                            {splitPdfUrl && (
-                                <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20 flex flex-col items-center gap-3 animate-bounce-short">
-                                    <CheckCircle2 className="h-8 w-8 text-green-600" />
-                                    <p className="text-xs font-bold text-green-700 uppercase">Ready for Download</p>
-                                </div>
-                            )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-3 border-t bg-muted/10 p-6">
                             {!splitPdfUrl ? (
@@ -330,7 +317,6 @@ export default function PdfSplitter() {
                     </Card>
                 </div>
 
-                {/* Right Side: Visual Preview Grid */}
                 <div className="lg:col-span-8">
                     <Card className="border-2 border-foreground/5 shadow-2xl overflow-hidden h-[calc(100vh-200px)] flex flex-col">
                         <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
@@ -374,15 +360,12 @@ export default function PdfSplitter() {
                                                         isSelected ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/20" : "border-transparent hover:border-muted-foreground/30 hover:shadow-xl"
                                                     )}
                                                 >
-                                                    {/* Page Number Badge */}
                                                     <div className={cn(
                                                         "absolute top-2 left-2 z-20 size-7 rounded-lg flex items-center justify-center text-[10px] font-black transition-colors",
                                                         isSelected ? "bg-primary text-white" : "bg-black/10 text-black/60 backdrop-blur-md"
                                                     )}>
                                                         {pageNum}
                                                     </div>
-
-                                                    {/* Selection Overlay */}
                                                     {isSelected && (
                                                         <div className="absolute inset-0 z-10 bg-primary/10 flex items-center justify-center animate-in fade-in zoom-in-50 duration-200">
                                                             <div className="size-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg border-2 border-white">
@@ -390,8 +373,6 @@ export default function PdfSplitter() {
                                                             </div>
                                                         </div>
                                                     )}
-
-                                                    {/* Preview Image */}
                                                     <div className="aspect-[3/4] relative bg-muted/20 flex items-center justify-center">
                                                         {hasPreview ? (
                                                             <img 
