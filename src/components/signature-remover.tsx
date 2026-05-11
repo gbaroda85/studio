@@ -53,12 +53,12 @@ export default function SignatureRemover() {
       toast({ title: "Success!", description: "Signature removed successfully." });
     } catch (error: any) {
       console.error(error);
-      const isQuotaError = error.message?.includes("429") || error.message?.includes("quota");
+      const isQuotaError = error.message?.includes("429") || error.message?.includes("quota") || error.message?.includes("limit");
       toast({ 
         variant: "destructive", 
         title: isQuotaError ? "AI Quota Exceeded" : "AI Error", 
         description: isQuotaError 
-          ? "You've reached the free limit for this AI tool. Please try again later." 
+          ? "You've reached the free limit for this experimental tool. Google limits requests to 2-3 per day. Please try again after 24 hours." 
           : "Failed to remove signature. Please try again with a clearer image." 
       });
     } finally {
@@ -135,7 +135,7 @@ export default function SignatureRemover() {
             {isProcessing && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-background/50 gap-4">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                    <p className="text-xs font-bold animate-pulse">Removing signature...</p>
+                    <p className="text-xs font-bold animate-pulse text-foreground">Removing signature...</p>
                 </div>
             )}
             {!isProcessing && resultImageSrc ? (
