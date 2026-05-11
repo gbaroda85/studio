@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -102,6 +101,11 @@ const translations = {
     image_to_text_description: 'Extract text from any image using AI.',
     text_to_pdf_label: 'Text to PDF',
     text_to_pdf_description: 'Convert plain text into a PDF document.',
+    compression_mode: 'Compression Mode',
+    manual_quality: 'Manual Quality',
+    target_size: 'Target File Size',
+    target_size_kb: 'Target Size (KB)',
+    calculating_quality: 'Optimizing quality...',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -193,6 +197,11 @@ const translations = {
     image_to_text_description: 'AI का उपयोग करके किसी भी छवि से टेक्स्ट निकालें।',
     text_to_pdf_label: 'टेक्स्ट से पीडीएफ',
     text_to_pdf_description: 'सादे टेक्स्ट को पीडीएफ दस्तावेज़ में बदलें।',
+    compression_mode: 'संपीड़न मोड',
+    manual_quality: 'मैनुअल गुणवत्ता',
+    target_size: 'लक्ष्य फ़ाइल आकार',
+    target_size_kb: 'लक्ष्य आकार (KB)',
+    calculating_quality: 'गुणवत्ता का अनुकूलन किया जा रहा है...',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -284,6 +293,11 @@ const translations = {
     image_to_text_description: 'Extrae texto de cualquier imagen usando IA.',
     text_to_pdf_label: 'Texto a PDF',
     text_to_pdf_description: 'Convierte texto sin formato en un documento PDF.',
+    compression_mode: 'Modo de compresión',
+    manual_quality: 'Calidad manual',
+    target_size: 'Tamaño de archivo objetivo',
+    target_size_kb: 'Tamaño objetivo (KB)',
+    calculating_quality: 'Optimizando calidad...',
   },
 };
 
