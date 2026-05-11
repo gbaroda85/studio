@@ -9,7 +9,6 @@ import {
   FileDigit,
   FileOutput,
   Image as ImageIcon,
-  Lock,
   Merge,
   ScanLine,
   Shrink,
@@ -91,7 +90,6 @@ function AppSidebar() {
     {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-500'},
     {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-amber-500'},
     {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-indigo-500'},
-    {href: '/protect-pdf', labelKey: 'protect_pdf_label', icon: Lock, color: 'text-gray-500'},
     {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-teal-500'},
     {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
     {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-500'},
@@ -199,12 +197,10 @@ function SettingsMenu() {
 function AppHeader() {
   return (
     <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-2 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-2 sm:px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
-      {/* Left-aligned items */}
       <div className="flex items-center">
         <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
       </div>
 
-      {/* Centered Title */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Link href="/" className="pointer-events-auto">
             <div className="animate-title-pulse flex items-center gap-2">
@@ -217,8 +213,6 @@ function AppHeader() {
         </Link>
       </div>
 
-
-      {/* Right-aligned items */}
       <div className="flex flex-col items-end justify-center gap-1">
         <div className="flex items-center gap-2">
             <SettingsMenu />
@@ -234,7 +228,6 @@ function AppHeader() {
     </header>
   );
 }
-
 
 function AppLayoutSkeleton() {
     return (

@@ -52,10 +52,8 @@ const translations = {
     crop_pdf_description: 'Crop the visible area of PDF pages.',
     scan_to_pdf_label: 'Scan to PDF',
     scan_to_pdf_description: 'Scan documents directly to a PDF file.',
-    protect_pdf_label: 'Protect PDF',
-    protect_pdf_description: 'Add a password to your PDF.',
     unlock_pdf_label: 'Unlock PDF',
-    unlock_pdf_description: 'Remove password protection from a PDF.',
+    unlock_pdf_description: 'Remove password protection from a PDF (Supports Aadhaar).',
     add_watermark_label: 'Add Watermark',
     add_watermark_description: 'Add a text or image watermark to your PDF.',
     add_page_numbers_label: 'Add Page Numbers',
@@ -150,10 +148,8 @@ const translations = {
     crop_pdf_description: 'पीडीएफ पृष्ठों के दृश्य क्षेत्र को काटें।',
     scan_to_pdf_label: 'पीडीएफ में स्कैन करें',
     scan_to_pdf_description: 'दस्तावेजों को सीधे पीडीएफ फाइल में स्कैन करें।',
-    protect_pdf_label: 'पीडीएफ सुरक्षित करें',
-    protect_pdf_description: 'अपने पीडीएफ में एक पासवर्ड जोड़ें।',
     unlock_pdf_label: 'पीडीएफ अनलॉक करें',
-    unlock_pdf_description: 'पीडीएफ से पासवर्ड सुरक्षा हटाएं।',
+    unlock_pdf_description: 'पीडीएफ से पासवर्ड सुरक्षा हटाएं (आधार कार्ड सपोर्ट)।',
     add_watermark_label: 'वॉटरमार्क जोड़ें',
     add_watermark_description: 'अपने पीडीएफ में टेक्स्ट या छवि वॉटरमार्क जोड़ें।',
     add_page_numbers_label: 'पृष्ठ संख्याएँ जोड़ें',
@@ -248,10 +244,8 @@ const translations = {
     crop_pdf_description: 'Recorta el área visible de las páginas PDF.',
     scan_to_pdf_label: 'Escanear a PDF',
     scan_to_pdf_description: 'Escanea documentos directamente a un archivo PDF.',
-    protect_pdf_label: 'Proteger PDF',
-    protect_pdf_description: 'Agrega una contraseña a tu PDF.',
     unlock_pdf_label: 'Desbloquear PDF',
-    unlock_pdf_description: 'Elimina la protección por contraseña de un PDF.',
+    unlock_pdf_description: 'Elimina la protección por contraseña de un PDF (Soporta Aadhaar).',
     add_watermark_label: 'Añadir marca de agua',
     add_watermark_description: 'Agrega una marca de agua de texto o imagen a tu PDF.',
     add_page_numbers_label: 'Agregar números de página',
@@ -306,7 +300,6 @@ const translations = {
     calculating_quality: 'Optimizando calidad...',
   },
 };
-
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -14,7 +13,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 // Bundle-safe worker URL with stable versioning
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type OutputFormat = 'png' | 'jpeg';
 

@@ -17,7 +17,6 @@ import {
   FileDigit,
   FileOutput,
   Image as ImageIcon,
-  Lock,
   Merge,
   ScanLine,
   Shrink,
@@ -54,7 +53,6 @@ import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
-// This component contains the actual page content and uses the search params.
 function ToolsPageContent() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
@@ -195,13 +193,6 @@ function ToolsPageContent() {
       color: 'text-indigo-500',
     },
     {
-      href: '/protect-pdf',
-      labelKey: 'protect_pdf_label',
-      descriptionKey: 'protect_pdf_description',
-      icon: Lock,
-      color: 'text-gray-500',
-    },
-    {
       href: '/unlock-pdf',
       labelKey: 'unlock_pdf_label',
       descriptionKey: 'unlock_pdf_description',
@@ -324,7 +315,7 @@ function ToolsPageContent() {
     },
   ];
 
-  const filterFeatures = (features: typeof imageFeatures) => {
+  const filterFeatures = (features: any[]) => {
     if (!searchQuery.trim()) {
       return features;
     }
@@ -435,7 +426,6 @@ function ToolsPageContent() {
   );
 }
 
-// A fallback component to show while the page is loading.
 function ToolsPageLoadingFallback() {
   return (
     <main className="flex-1 p-4 md:p-8">
@@ -450,11 +440,8 @@ function ToolsPageLoadingFallback() {
   );
 }
 
-
-// This is the main page component that will be exported.
 export default function ToolsPage() {
   return (
-    // Wrap the component that uses searchParams in a Suspense boundary.
     <Suspense fallback={<ToolsPageLoadingFallback />}>
       <ToolsPageContent />
     </Suspense>
