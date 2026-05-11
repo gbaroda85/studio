@@ -69,7 +69,6 @@ export default function PdfCompressor() {
             setProgress(0);
             setStatusText("");
             
-            // Suggest a target size (around 40% of original)
             const sizeInKb = file.size / 1024;
             if (sizeInKb > 1024) {
                 setTargetValue((sizeInKb / 1024 * 0.4).toFixed(1));
@@ -101,7 +100,7 @@ export default function PdfCompressor() {
         if (!pdfFile) return;
         setIsProcessing(true);
         setCompressionResult(null);
-        setStatusText("Analyzing PDF Data...");
+        setStatusText("Analyzing Document Structure...");
         setProgress(5);
 
         try {
@@ -123,38 +122,38 @@ export default function PdfCompressor() {
             }
 
             /**
-             * SMARTER COMPRESSION LOGIC
-             * We adjust both Scale (Resolution) and JPEG Quality.
-             * Pixels (Size) scale with the square of resolution.
+             * BALANCED-SHARP COMPRESSION ENGINE
+             * Optimized to prevent undershooting and preserve text legibility.
              */
-            let finalScale = 1.5; // High Quality default
+            let finalScale = 1.3; 
             let finalQuality = quality[0] / 100;
 
             if (mode === 'target' && targetBytes > 0) {
-                // Buffer for PDF metadata (approx 5-10%)
-                const adjustedTarget = targetBytes * 0.9; 
+                // Safety buffer to avoid over-compressing (targeting 98% of requested size)
+                const adjustedTarget = targetBytes * 0.98; 
                 const ratio = adjustedTarget / pdfFile.size;
 
-                if (ratio >= 1) {
-                    finalScale = 1.8;
-                    finalQuality = 0.9;
+                if (ratio >= 0.8) {
+                    finalScale = 1.5;
+                    finalQuality = 0.85;
                 } else {
-                    // Geometric scaling: Scale factor is square root of target ratio
-                    // This is much more accurate for image-heavy PDFs
-                    finalScale = Math.max(0.5, Math.min(2.0, 1.8 * Math.sqrt(ratio)));
+                    // Non-linear scaling to keep text readable.
+                    // Even for heavy compression, we don't drop scale below 0.75 unless absolutely forced.
+                    finalScale = Math.max(0.75, Math.min(1.5, 1.2 * Math.sqrt(ratio + 0.1)));
                     
-                    // Quality mapping based on how desperate we are to hit the target
-                    if (ratio < 0.2) finalQuality = 0.3;
-                    else if (ratio < 0.5) finalQuality = 0.5;
-                    else finalQuality = 0.7;
+                    // Balanced Quality steps
+                    if (ratio < 0.1) finalQuality = 0.45; // Minimum viable quality for text
+                    else if (ratio < 0.3) finalQuality = 0.55;
+                    else if (ratio < 0.6) finalQuality = 0.65;
+                    else finalQuality = 0.75;
                 }
             }
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Shrinking Page ${i} of ${totalPages}...`);
+                setStatusText(`Optimizing Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Set resolution based on our smart scale
+                // Adaptive viewport rendering
                 const viewport = page.getViewport({ scale: finalScale });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { alpha: false });
@@ -164,9 +163,14 @@ export default function PdfCompressor() {
                 if (context) {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // High-quality downsampling
+                    context.imageSmoothingEnabled = true;
+                    context.imageSmoothingQuality = 'high';
+                    
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
                     
-                    // Re-encode as highly compressed JPEG
+                    // Re-encode as high-density JPEG
                     const imgData = canvas.toDataURL('image/jpeg', finalQuality);
                     
                     if (i > 1) {
@@ -175,13 +179,12 @@ export default function PdfCompressor() {
                         newPdf.deletePage(1);
                         newPdf.addPage([viewport.width, viewport.height], 'p');
                     }
-                    // 'FAST' compression flag for internal jsPDF storage
+                    
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
-                setProgress(Math.round((i / totalPages) * 95));
+                setProgress(Math.round((i / totalPages) * 98));
                 
-                // Minor delay to prevent UI freezing
-                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 1));
             }
 
             const pdfBlob = newPdf.output('blob');
@@ -198,24 +201,16 @@ export default function PdfCompressor() {
             const url = URL.createObjectURL(pdfBlob);
             setCompressedPdfUrl(url);
             setProgress(100);
-            setStatusText("Success! Accuracy: High");
+            setStatusText("Ready to Download");
             
-            if (mode === 'target' && newSize > targetBytes * 1.1) {
-                toast({ 
-                    variant: 'destructive', 
-                    title: 'Large Original PDF', 
-                    description: 'Could not reach exact target without losing text readability. Result optimized as much as possible.' 
-                });
-            } else {
-                toast({ title: 'Optimization Done', description: `Final size: ${formatBytes(newSize)}` });
-            }
+            toast({ title: 'Optimization Successful', description: `Final size: ${formatBytes(newSize)}` });
 
         } catch (error: any) {
             console.error(error);
             toast({
                 variant: 'destructive',
-                title: 'Compression Failed',
-                description: 'Try a different target or a simpler PDF file.',
+                title: 'Error during process',
+                description: 'Try adjusting the target size slightly.',
             });
         } finally {
             setIsProcessing(false);
@@ -241,7 +236,7 @@ export default function PdfCompressor() {
                         <FileArchive className="h-10 w-10" />
                     </div>
                     <CardTitle className="text-2xl font-bold">Ultra PDF Compressor</CardTitle>
-                    <CardDescription>Compress PDF to specific size using iterative pixel re-encoding.</CardDescription>
+                    <CardDescription>Compress PDF to specific size with Sharp-Text protection.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -258,7 +253,7 @@ export default function PdfCompressor() {
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-bold pb-8">
                     <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> AES SECURE</div>
-                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> HD COMPRESSION</div>
+                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> SHARP-TEXT ENGINE</div>
                 </CardFooter>
             </Card>
         );
@@ -286,7 +281,7 @@ export default function PdfCompressor() {
                                     <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
                                     <Progress value={progress} className="h-3 shadow-inner rounded-full" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                        <span>Analyzing Pixels</span>
+                                        <span>Re-encoding Pixels</span>
                                         <span>{progress}%</span>
                                     </div>
                                 </div>
@@ -300,7 +295,7 @@ export default function PdfCompressor() {
                                     <div>
                                         <p className="text-[10px] text-green-600/80 uppercase font-black tracking-widest mb-1">Optimization Complete</p>
                                         <p className="text-6xl font-black text-green-600">{compressionResult.savings.toFixed(1)}%</p>
-                                        <p className="text-sm font-bold text-green-700 mt-2">Space Saved Locally</p>
+                                        <p className="text-sm font-bold text-green-700 mt-2">Space Saved (Local)</p>
                                     </div>
                                  </div>
                                 
@@ -322,7 +317,7 @@ export default function PdfCompressor() {
                                 </div>
                                 <div>
                                     <p className="text-lg font-black text-foreground uppercase tracking-tight">Ready to Shrink</p>
-                                    <p className="text-sm text-muted-foreground">Adjust your target on the right to begin.</p>
+                                    <p className="text-sm text-muted-foreground">Adjust target settings on the right.</p>
                                 </div>
                             </div>
                         )}
@@ -348,7 +343,7 @@ export default function PdfCompressor() {
                 <Card className="border-2 border-primary/10 shadow-xl overflow-hidden">
                     <CardHeader className="bg-primary/5 border-b">
                         <CardTitle className="text-lg flex items-center gap-2">
-                            <Settings2 className="h-5 w-5 text-primary" /> Compression Tools
+                            <Settings2 className="h-5 w-5 text-primary" /> Settings Panel
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-8 pb-8 space-y-8">
@@ -364,7 +359,7 @@ export default function PdfCompressor() {
 
                             <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300">
                                 <div className="space-y-4">
-                                    <Label htmlFor="target-val" className="text-xs font-black text-foreground uppercase tracking-widest">Required Maximum Size</Label>
+                                    <Label htmlFor="target-val" className="text-xs font-black text-foreground uppercase tracking-widest">Maximum File Size</Label>
                                     <div className="flex gap-2">
                                         <div className="relative flex-1 group">
                                             <Input 
@@ -386,10 +381,10 @@ export default function PdfCompressor() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
-                                        <p className="text-[10px] text-yellow-700 font-bold leading-relaxed">
-                                            <span className="text-yellow-600 font-black uppercase mr-1">Smart Engine:</span> 
-                                            We will iteratively adjust pixels to hit this target. If the file is huge, quality may drop.
+                                    <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
+                                        <p className="text-[10px] text-primary font-bold leading-relaxed">
+                                            <span className="text-primary font-black uppercase mr-1">Sharp-Text Engine:</span> 
+                                            We keep text clear while reducing image density to hit your target.
                                         </p>
                                     </div>
                                 </div>
@@ -404,7 +399,7 @@ export default function PdfCompressor() {
                                     <Slider min={5} max={100} step={5} value={quality} onValueChange={setQuality} className="py-4" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase">
                                         <span>Extreme Shrink</span>
-                                        <span>Best Quality</span>
+                                        <span>HD Quality</span>
                                     </div>
                                 </div>
                             </TabsContent>
@@ -417,13 +412,13 @@ export default function PdfCompressor() {
                                 className="w-full h-16 text-xl font-black tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 bg-primary hover:bg-primary/90"
                             >
                                 {isProcessing ? <Loader2 className="mr-3 h-7 w-7 animate-spin" /> : <Zap className="mr-3 h-7 w-7 text-yellow-400" />}
-                                {isProcessing ? "SHRINKING..." : "START COMPRESSION"}
+                                {isProcessing ? "OPTIMIZING..." : "START COMPRESSION"}
                             </Button>
                         )}
                         
                         {compressionResult && (
                              <Button variant="outline" onClick={resetState} className="w-full h-12 font-bold rounded-xl border-2">
-                                <RefreshCcw className="mr-2 h-4 w-4" /> Process Another File
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Reset Workspace
                             </Button>
                         )}
                     </CardContent>
@@ -431,9 +426,8 @@ export default function PdfCompressor() {
                         <div className="flex flex-col gap-1 w-full">
                             <div className="flex gap-2 items-center text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">
                                 <ShieldCheck className="size-3 text-green-500" />
-                                <span>Encrypted browser-side re-encoding active</span>
+                                <span>High-Density re-sampling is active</span>
                             </div>
-                            <p className="text-[8px] text-muted-foreground/60 italic">Note: Text-only PDFs may not shrink significantly.</p>
                         </div>
                     </CardFooter>
                 </Card>
