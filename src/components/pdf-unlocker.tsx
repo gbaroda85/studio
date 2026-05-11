@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Loader2, Download, Unlock, AlertCircle, ShieldAlert } from 'lucide-react';
+import { UploadCloud, Loader2, Download, Unlock, AlertCircle, ShieldAlert, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -21,6 +21,9 @@ export default function PdfUnlocker() {
     const [unlockedPdfUrl, setUnlockedPdfUrl] = useState<string | null>(null);
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Detect if the file is likely an Aadhaar card based on name
+    const isAadhaar = pdfFile?.name.toLowerCase().includes('aadhaar') || pdfFile?.name.toLowerCase().includes('eaadhaar');
     
     useEffect(() => {
         return () => {
@@ -85,20 +88,26 @@ export default function PdfUnlocker() {
                     userPassword: password,
                 });
             } catch (loadError: any) {
-                // Check for specific decryption errors
-                if (loadError.message?.includes('AES-256') || loadError.message?.includes('unsupported')) {
+                const errMsg = loadError.message?.toLowerCase() || "";
+                
+                // Specific checks for Aadhaar and modern encryption
+                if (errMsg.includes('aes-256') || errMsg.includes('unsupported') || errMsg.includes('encryption')) {
                     throw new Error("UNSUPPORTED_ENCRYPTION");
                 }
+                
+                if (errMsg.includes('password')) {
+                    throw new Error("WRONG_PASSWORD");
+                }
+                
                 throw loadError;
             }
 
             // To "unlock", we create a brand new document and copy pages
-            // This strips all security and permission settings
             const unlockedDoc = await PDFDocument.create();
             const pageIndices = pdfDoc.getPageIndices();
             
             if (pageIndices.length === 0) {
-                throw new Error("No pages found in document.");
+                throw new Error("NO_PAGES");
             }
 
             const copiedPages = await unlockedDoc.copyPages(pdfDoc, pageIndices);
@@ -115,17 +124,19 @@ export default function PdfUnlocker() {
             console.error("Unlock Error:", error);
             
             if (error.message === "UNSUPPORTED_ENCRYPTION") {
-                setErrorDetails("This PDF uses modern AES-256 encryption which is too strong for browser-based unlocking. Try a desktop tool.");
-            } else if (error.message?.includes('password') || error.constructor.name === 'EncryptedPDFError') {
-                setErrorDetails("The password you entered is incorrect for this file.");
+                setErrorDetails("This file uses advanced encryption (AES-256) which is often not supported in standard browsers. EAadhaar files are difficult to unlock via web tools.");
+            } else if (error.message === "WRONG_PASSWORD") {
+                setErrorDetails("The password you entered is incorrect. Please check and try again.");
+            } else if (error.message === "NO_PAGES") {
+                setErrorDetails("The document was loaded but no pages were found. It might be corrupt.");
             } else {
-                setErrorDetails("Could not process this PDF. It might be heavily restricted or corrupted.");
+                setErrorDetails("A technical error occurred while processing this secure file. It might be using a non-standard security format.");
             }
             
             toast({ 
                 variant: 'destructive', 
                 title: 'Unlock Failed', 
-                description: 'Please check the error message below.' 
+                description: 'We encountered a problem with this file.' 
             });
         } finally {
             setIsUnlocking(false);
@@ -162,7 +173,7 @@ export default function PdfUnlocker() {
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center text-xs text-muted-foreground">
-                    <ShieldAlert className="h-3 w-3 mr-1" /> All processing is local. We don't see your password.
+                    <ShieldAlert className="h-3 w-3 mr-1" /> All processing is local. Your privacy is guaranteed.
                 </CardFooter>
             </Card>
         );
@@ -184,22 +195,38 @@ export default function PdfUnlocker() {
                                 type="password" 
                                 value={password} 
                                 onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
-                                placeholder="Password required to open"
+                                placeholder="Enter password to unlock"
                                 disabled={isUnlocking}
                                 className="h-12 text-lg border-2 focus-visible:ring-primary"
                             />
                         </div>
-                        <p className="text-[10px] text-muted-foreground italic">
-                            Note: This tool works best for standard encryption. High-security corporate PDFs might fail.
-                        </p>
+                        
+                        {isAadhaar && (
+                            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 flex gap-3">
+                                <Info className="h-5 w-5 text-blue-500 shrink-0" />
+                                <div className="space-y-1">
+                                    <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase">Aadhaar Password Tip</p>
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400">
+                                        Use FIRST 4 LETTERS of your name (CAPITAL) and YEAR of birth. 
+                                        <br/>Example: <span className="font-mono font-bold">ANIS1990</span>
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {!isAadhaar && (
+                            <p className="text-[10px] text-muted-foreground italic leading-relaxed">
+                                Note: High-security corporate or government PDFs (like Aadhaar) often use encryption that isn't supported by web-based unlockers.
+                            </p>
+                        )}
                     </div>
                 )}
 
                 {errorDetails && (
                     <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Problem</AlertTitle>
-                        <AlertDescription className="text-xs font-medium">
+                        <AlertTitle>Unlock Error</AlertTitle>
+                        <AlertDescription className="text-[11px] font-medium leading-relaxed">
                             {errorDetails}
                         </AlertDescription>
                     </Alert>
@@ -212,7 +239,7 @@ export default function PdfUnlocker() {
                         </div>
                         <div className="text-center">
                             <p className="font-bold text-green-700">Decryption Successful!</p>
-                            <p className="text-xs text-green-600/80">All restrictions have been removed.</p>
+                            <p className="text-xs text-green-600/80">Security removed. You can now download the file.</p>
                         </div>
                     </div>
                 )}
@@ -230,7 +257,7 @@ export default function PdfUnlocker() {
                     </Button>
                 )}
                 <Button variant="ghost" onClick={resetState} className="w-full" disabled={isUnlocking}>
-                    Choose another file
+                    {unlockedPdfUrl ? "Upload Another" : "Choose different file"}
                 </Button>
             </CardFooter>
         </Card>
