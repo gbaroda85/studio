@@ -8,7 +8,6 @@ import {
     Download, 
     X, 
     Eraser, 
-    PictureInPicture, 
     Zap, 
     ShieldCheck, 
     Sparkles, 
@@ -23,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const PRESET_COLORS = [
     "#ffffff", "#000000", "#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#6366f1", "#ec4899", "#f3f4f6"
@@ -80,7 +80,6 @@ export default function BackgroundRemover() {
     }
   };
 
-  // Handle Background Removal Logic
   const handleRemoveBackground = async () => {
     if (!originalImageSrc) return;
     setIsProcessing(true);
@@ -104,7 +103,7 @@ export default function BackgroundRemover() {
 
       const url = URL.createObjectURL(blob);
       setSubjectImageSrc(url);
-      setFinalImageSrc(url); // Initially, final is just the subject
+      setFinalImageSrc(url); 
       setProgress(100);
       setStatusText("Done!");
     } catch (error: any) {
@@ -114,7 +113,6 @@ export default function BackgroundRemover() {
     }
   };
 
-  // Logic to composite subject over new background
   useEffect(() => {
     if (!subjectImageSrc) return;
 
@@ -131,15 +129,10 @@ export default function BackgroundRemover() {
             canvas.width = subjectImg.width;
             canvas.height = subjectImg.height;
 
-            // 1. Draw Background
             if (bgType === "color" && bgValue) {
                 ctx.fillStyle = bgValue;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else if (bgType === "gradient" && bgValue) {
-                // Parsing basic gradients for canvas is complex, so we'll use a trick
-                // or just stick to solid colors for now if it's too buggy.
-                // For MVP, we can simulate the gradient by drawing it on a temp div and capturing
-                // but let's try a simple linear fill.
                 const grd = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
                 if (bgValue.includes("#")) {
                     const colors = bgValue.match(/#[a-fA-F0-0]{6}/g) || ["#ffffff", "#000000"];
@@ -152,22 +145,18 @@ export default function BackgroundRemover() {
                 const bgImg = new window.Image();
                 bgImg.src = customBgSrc;
                 bgImg.onload = () => {
-                    // Draw background image (cover mode)
                     const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
                     const x = (canvas.width / 2) - (bgImg.width / 2) * scale;
                     const y = (canvas.height / 2) - (bgImg.height / 2) * scale;
                     ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
-                    // Draw subject after background image loads
                     ctx.drawImage(subjectImg, 0, 0);
                     setFinalImageSrc(canvas.toDataURL("image/png"));
                 };
-                return; // Stop here, the onload callback will finish
+                return;
             } else {
-                // Transparent
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
 
-            // 2. Draw Subject
             ctx.drawImage(subjectImg, 0, 0);
             setFinalImageSrc(canvas.toDataURL("image/png"));
         };
@@ -244,7 +233,6 @@ export default function BackgroundRemover() {
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
-        {/* Main Preview Area */}
         <div className="lg:col-span-8 space-y-6">
             <Card className="overflow-hidden border-2 shadow-2xl">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
@@ -291,7 +279,6 @@ export default function BackgroundRemover() {
             </div>
         </div>
 
-        {/* Sidebar: Background Controls */}
         <div className={cn("lg:col-span-4 space-y-6 transition-all duration-500", !subjectImageSrc && "opacity-20 pointer-events-none grayscale")}>
             <Card className="border-2 shadow-xl border-primary/10">
                 <CardHeader className="bg-primary/5 border-b">
@@ -373,7 +360,6 @@ export default function BackgroundRemover() {
         </div>
       </div>
       
-      {/* Hidden canvas for compositing */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
