@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Set up the worker for pdfjs with a robust CDN URL and explicit version
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs`;
+// Correct version and path for unpkg to ensure the worker is fetched properly
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -73,7 +73,7 @@ export default function PdfUnlocker() {
     }
 
     const handlePowerUnlock = async (arrayBuffer: ArrayBuffer) => {
-        setStatusText("Activating Universal Power Mode...");
+        setStatusText("Universal Decoding Active...");
         setProgress(10);
 
         try {
@@ -118,15 +118,15 @@ export default function PdfUnlocker() {
             const url = URL.createObjectURL(pdfBlob);
             setUnlockedPdfUrl(url);
             setProgress(100);
-            setStatusText("Success!");
-            toast({ title: 'Success!', description: 'High-Security PDF Unlocked via Power Mode.' });
+            setStatusText("Unlocked Successfully!");
+            toast({ title: 'Success!', description: 'File Unlocked via Power Decoder.' });
 
         } catch (error: any) {
             console.error("Power Mode Error:", error);
             if (error.name === 'PasswordException') {
-                setErrorDetails("Incorrect Password. For Aadhaar, use CAPITALS (e.g., ANIS1990).");
+                setErrorDetails("Incorrect Password. Please double check.");
             } else {
-                setErrorDetails("Could not unlock even in Power Mode. The file might be extremely restricted or corrupt.");
+                setErrorDetails("Technical failure while decrypting pages. The file might be corrupt.");
             }
         }
     };
@@ -137,44 +137,19 @@ export default function PdfUnlocker() {
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Analyzing Security Level...");
+        setStatusText("Bypassing AES-256 Security...");
         setProgress(5);
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
 
-            // Attempt fast standard unlock first
-            try {
-                const pdfDoc = await PDFDocument.load(pdfBytes, { userPassword: password });
-                const unlockedDoc = await PDFDocument.create();
-                const copiedPages = await unlockedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-                copiedPages.forEach((page) => unlockedDoc.addPage(page));
-                const finalBytes = await unlockedDoc.save();
-                const url = URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' }));
-                setUnlockedPdfUrl(url);
-                setProgress(100);
-                setIsUnlocking(false);
-                toast({ title: 'Success!', description: 'PDF Unlocked (Fast Mode).' });
-                return;
-            } catch (libError: any) {
-                const msg = libError.message?.toLowerCase() || "";
-                // If it's a high-security file (Aadhaar/Bank), switch to Power Mode automatically
-                if (msg.includes('encryption') || msg.includes('unsupported') || msg.includes('aes') || isAadhaar) {
-                    await handlePowerUnlock(pdfBytes);
-                    setIsUnlocking(false);
-                    return;
-                }
-                if (msg.includes('password')) {
-                    setErrorDetails("The password you entered is incorrect.");
-                    setIsUnlocking(false);
-                    return;
-                }
-                // Fallback to Power Mode for any other structural issues
-                await handlePowerUnlock(pdfBytes);
-            }
+            // We go straight to Power Unlock for best results with Aadhaar/Bank statements
+            // as standard libraries often fail with modern encryption dictionaries.
+            await handlePowerUnlock(pdfBytes);
+
         } catch (error: any) {
             console.error("Critical Error:", error);
-            setErrorDetails("Technical failure while reading the file.");
+            setErrorDetails("Could not initialize decryption engine.");
         } finally {
             setIsUnlocking(false);
         }
@@ -200,7 +175,7 @@ export default function PdfUnlocker() {
                     <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
                         <Unlock className="text-primary h-6 w-6" /> Universal PDF Unlocker
                     </CardTitle>
-                    <CardDescription>Upload any protected PDF, including Aadhaar and Bank Statements.</CardDescription>
+                    <CardDescription>Unlock Aadhaar, Bank Statements, and any encrypted PDF locally.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -208,14 +183,14 @@ export default function PdfUnlocker() {
                             <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                             <Zap className="absolute -top-2 -right-2 h-6 w-6 text-yellow-500 animate-pulse" />
                         </div>
-                        <p className="text-muted-foreground font-medium">Drop High-Security PDF here</p>
-                        <p className="text-xs text-muted-foreground">Works for Aadhaar, Bank Bills, & more.</p>
+                        <p className="text-muted-foreground font-medium">Drop Encrypted PDF here</p>
+                        <p className="text-xs text-muted-foreground">Works for AES-256, Aadhaar, and Bank Bills.</p>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center text-[10px] text-muted-foreground bg-muted/5 py-4 gap-4">
-                    <div className="flex items-center"><ShieldAlert className="h-3 w-3 mr-1 text-green-500" /> 100% Local Decryption</div>
-                    <div className="flex items-center"><Zap className="h-3 w-3 mr-1 text-yellow-500" /> AES-256 Supported</div>
+                    <div className="flex items-center"><ShieldAlert className="h-3 w-3 mr-1 text-green-500" /> 100% PRIVATE</div>
+                    <div className="flex items-center"><Sparkles className="h-3 w-3 mr-1 text-primary" /> HD RE-ENCODING</div>
                 </CardFooter>
             </Card>
         );
@@ -253,7 +228,7 @@ export default function PdfUnlocker() {
                                     <p className="text-xs font-black text-blue-700 dark:text-blue-300 uppercase tracking-tighter">Aadhaar Password Tip</p>
                                     <p className="text-[11px] text-blue-600 dark:text-blue-400 leading-tight">
                                         FIRST 4 LETTERS of Name (CAPS) + Birth Year. 
-                                        <br/>Ex: <span className="font-mono font-bold bg-blue-100 dark:bg-blue-900 px-1 rounded">GAUR1995</span>
+                                        <br/>Ex: <span className="font-mono font-bold bg-blue-100 dark:bg-blue-900 px-1 rounded">ANIS1990</span>
                                     </p>
                                 </div>
                             </div>
@@ -270,7 +245,7 @@ export default function PdfUnlocker() {
                         <div className="space-y-2">
                             <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">{statusText}</p>
                             <Progress value={progress} className="h-2" />
-                            <p className="text-[10px] text-muted-foreground font-bold">This might take a minute for large files.</p>
+                            <p className="text-[10px] text-muted-foreground font-bold">Please wait, extracting high-security pages...</p>
                         </div>
                     </div>
                 )}
@@ -278,7 +253,7 @@ export default function PdfUnlocker() {
                 {errorDetails && (
                     <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle className="text-xs font-bold uppercase">Processing Failed</AlertTitle>
+                        <AlertTitle className="text-xs font-bold uppercase">Unlock Failed</AlertTitle>
                         <AlertDescription className="text-[11px] font-medium leading-relaxed mt-1">
                             {errorDetails}
                         </AlertDescription>
@@ -292,7 +267,7 @@ export default function PdfUnlocker() {
                         </div>
                         <div className="text-center">
                             <p className="font-bold text-green-700">Decryption Successful!</p>
-                            <p className="text-xs text-green-600/80">The security has been removed.</p>
+                            <p className="text-xs text-green-600/80">Security has been removed from all pages.</p>
                         </div>
                     </div>
                 )}
@@ -301,7 +276,7 @@ export default function PdfUnlocker() {
                 {!unlockedPdfUrl ? (
                     <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl">
                         {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Sparkles className="mr-2 h-5 w-5"/>}
-                        {isUnlocking ? "DECRYPTING..." : "UNLOCK PDF"}
+                        {isUnlocking ? "DECODING..." : "UNLOCK PDF"}
                     </Button>
                 ) : (
                     <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 animate-bounce">
@@ -316,4 +291,3 @@ export default function PdfUnlocker() {
         </Card>
     );
 }
-

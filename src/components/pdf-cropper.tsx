@@ -15,7 +15,7 @@ import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Scissors } f
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Set up the worker for pdfjs with a robust CDN URL
+// Stable worker loading for browser environment
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfCropper() {
