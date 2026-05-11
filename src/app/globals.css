@@ -59,6 +59,12 @@ body {
   }
   body {
     @apply bg-background text-foreground selection:bg-primary/20;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(199, 89%, 48%, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
@@ -94,4 +100,15 @@ body {
 /* Card Glow Effect */
 .card-glow:hover {
   box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+}
+
+@keyframes gradient-bg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-slow {
+  background-size: 200% 200%;
+  animation: gradient-bg 15s ease infinite;
 }

@@ -262,7 +262,7 @@ export default function PdfCompressor() {
                         </div>
                         <div>
                             <p className="text-xl font-bold">Drop PDF here to Optimize</p>
-                            <p className="text-sm text-muted-foreground mt-2">Private local processing. No data leaves your device.</p>
+                            <p className="text-sm text-muted-foreground mt-2">100% Private local processing. No data leaves your device.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
