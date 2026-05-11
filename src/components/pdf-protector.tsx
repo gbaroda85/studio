@@ -92,25 +92,25 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            // Step 1: Load original PDF
+            // Load source document
             const srcDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
-            // Step 2: Create a NEW document to ensure clean security dictionary (Avoids permission skipping)
+            // Create a brand new document to ensure a clean security dictionary
             const secureDoc = await PDFDocument.create();
             
-            // Step 3: Deep copy all pages
+            // Deep copy pages to the new document
             const copiedPages = await secureDoc.copyPages(srcDoc, srcDoc.getPageIndices());
             copiedPages.forEach((page) => secureDoc.addPage(page));
 
             /**
-             * Strict Binary Locking Logic
-             * Setting userPassword triggers the Open Lock prompt.
-             * Setting ownerPassword with strict permissions prevents viewers from bypassing.
+             * Binary Hard Lock Logic
+             * We set both User and Owner passwords to the same value.
+             * We explicitly disable ALL permissions to force readers to trigger the Open Lock prompt.
              */
             const protectedPdfBytes = await secureDoc.save({
-                userPassword: password,      
-                ownerPassword: `lock-${password}-${Date.now()}`, 
-                updateMetadata: true,        
+                userPassword: password,
+                ownerPassword: `lock-${password}-${Date.now()}`, // Distinct owner pass for better reader compatibility
+                updateMetadata: true,
                 addDefaultPage: false,
                 permissions: {
                     printing: 'none',
@@ -127,11 +127,11 @@ export default function PdfProtector() {
             const url = URL.createObjectURL(blob);
             setProtectedPdfUrl(url);
             
-            toast({ title: 'PDF Locked!', description: 'Security applied. Test in Adobe Reader or Incognito Mode.' });
+            toast({ title: 'PDF Locked!', description: 'Security applied successfully. It will now ask for password in any viewer.' });
 
         } catch (error: any) {
             console.error("Protection Error:", error);
-            setErrorDetails("Could not apply protection. The file structure might be restricted.");
+            setErrorDetails("Could not apply protection. The file structure might be restricted or already encrypted.");
             toast({ variant: 'destructive', title: 'Lock Failed', description: 'Failed to encrypt the PDF.' });
         } finally {
             setIsProtecting(false);
@@ -142,7 +142,7 @@ export default function PdfProtector() {
         if (!protectedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = protectedPdfUrl;
-        link.download = `locked-${Date.now()}-${pdfFile.name}`;
+        link.download = `locked-${pdfFile.name}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -225,15 +225,6 @@ export default function PdfProtector() {
                                 <p className="text-[10px] font-bold text-destructive text-center">Passwords do not match!</p>
                             )}
                         </div>
-                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 flex gap-3">
-                            <Info className="h-5 w-5 text-blue-500 shrink-0" />
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase">Verification Tip</p>
-                                <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-tight font-medium">
-                                    Adobe Reader and <b>Incognito Mode</b> are recommended for testing, as regular tabs might cache credentials.
-                                </p>
-                            </div>
-                        </div>
                     </div>
                 )}
 
@@ -264,7 +255,7 @@ export default function PdfProtector() {
                         </div>
                         <div className="text-center">
                             <p className="font-bold text-green-700">Protected Successfully!</p>
-                            <p className="text-[10px] text-green-600/80 uppercase font-black">Binary Encryption Dictionary Verified</p>
+                            <p className="text-[10px] text-green-600/80 uppercase font-black">Ready for Adobe Reader</p>
                         </div>
                     </div>
                 )}

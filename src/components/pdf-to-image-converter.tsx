@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Robust worker fetching for browser environment using a versioned minified bundle
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Bundle-safe worker URL
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 type OutputFormat = 'png' | 'jpeg';
 
@@ -41,7 +41,7 @@ export default function PdfToImageConverter() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
 
     const handlePdfToImage = async (file: File) => {
         setIsProcessing(true);

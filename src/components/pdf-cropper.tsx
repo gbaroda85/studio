@@ -15,8 +15,8 @@ import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Scissors } f
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Robust worker loading for browser environment using versioned minified bundle
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Bundle-safe worker URL
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export default function PdfCropper() {
   const { toast } = useToast();

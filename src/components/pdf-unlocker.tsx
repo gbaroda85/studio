@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Correct versioned bundle URL for stable worker loading
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Bundle-safe worker URL for stable loading
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -122,10 +122,10 @@ export default function PdfUnlocker() {
 
         } catch (error: any) {
             console.error("Power Mode Error:", error);
-            if (error.name === 'PasswordException') {
+            if (error.name === 'PasswordException' || error.message.includes('password')) {
                 setErrorDetails("Incorrect Password. Please double check.");
             } else {
-                setErrorDetails("Technical failure while decrypting pages. The file might be corrupt.");
+                setErrorDetails("Decryption failed. The file might be using a security standard that is blocked by the browser.");
             }
         }
     };
@@ -136,7 +136,7 @@ export default function PdfUnlocker() {
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Bypassing Security...");
+        setStatusText("Initializing Decryption...");
         setProgress(5);
 
         try {
@@ -144,7 +144,7 @@ export default function PdfUnlocker() {
             await handlePowerUnlock(pdfBytes);
         } catch (error: any) {
             console.error("Critical Error:", error);
-            setErrorDetails("Could not initialize decryption engine.");
+            setErrorDetails("Decryption Engine could not start. Please refresh the page.");
         } finally {
             setIsUnlocking(false);
         }
