@@ -16,7 +16,9 @@ import {
     Layers,
     Move,
     Maximize,
-    RotateCcw
+    RotateCcw,
+    FlipHorizontal,
+    FlipVertical
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -62,6 +64,8 @@ export default function BackgroundRemover() {
   const [scale, setScale] = useState([100]);
   const [posX, setPosX] = useState([0]);
   const [posY, setPosY] = useState([0]);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
@@ -94,6 +98,8 @@ export default function BackgroundRemover() {
     setScale([100]);
     setPosX([0]);
     setPosY([0]);
+    setFlipH(false);
+    setFlipV(false);
   };
 
   const handleRemoveBackground = async () => {
@@ -143,11 +149,9 @@ export default function BackgroundRemover() {
         subjectImg.src = subjectImageSrc;
         
         subjectImg.onload = () => {
-            // Set canvas size to match subject original resolution or a standard studio ratio
             canvas.width = subjectImg.width;
             canvas.height = subjectImg.height;
 
-            // 1. Draw Background
             if (bgType === "color" && bgValue) {
                 ctx.fillStyle = bgValue;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -158,7 +162,6 @@ export default function BackgroundRemover() {
                     grd.addColorStop(0, preset.colors[0]);
                     grd.addColorStop(1, preset.colors[1]);
                 } else {
-                    // Fallback regex parsing
                     const hexMatches = bgValue.match(/#[a-fA-F0-9]{6}/g);
                     if (hexMatches && hexMatches.length >= 2) {
                         grd.addColorStop(0, hexMatches[0]);
@@ -196,20 +199,24 @@ export default function BackgroundRemover() {
         const dw = img.width * s;
         const dh = img.height * s;
         
-        // Offset in pixels based on percentage of canvas size
         const dx = (posX[0] / 100) * canvas.width;
         const dy = (posY[0] / 100) * canvas.height;
 
-        // Draw centered with offsets
         const x = (canvas.width - dw) / 2 + dx;
         const y = (canvas.height - dh) / 2 + dy;
 
-        ctx.drawImage(img, x, y, dw, dh);
+        ctx.save();
+        // Move origin to the center of the drawing area for flipping
+        ctx.translate(x + dw / 2, y + dh / 2);
+        ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+        ctx.restore();
+
         setFinalImageSrc(canvas.toDataURL("image/png"));
     };
 
     composite();
-  }, [subjectImageSrc, bgType, bgValue, customBgSrc, scale, posX, posY]);
+  }, [subjectImageSrc, bgType, bgValue, customBgSrc, scale, posX, posY, flipH, flipV]);
 
   const handleCustomBgUpload = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -317,7 +324,7 @@ export default function BackgroundRemover() {
                 {!subjectImageSrc ? (
                     <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={handleRemoveBackground} disabled={isProcessing}>
                         {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Eraser className="mr-3 h-6 w-6" />}
-                        REOVE BACKGROUND
+                        REMOVE BACKGROUND
                     </Button>
                 ) : (
                     <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/20" onClick={handleDownload}>
@@ -428,7 +435,26 @@ export default function BackgroundRemover() {
                                 <Slider min={-100} max={100} step={1} value={posY} onValueChange={setPosY} />
                             </div>
 
-                            <Button variant="outline" size="sm" className="w-full text-[10px] h-8 font-bold" onClick={resetTransforms}>
+                            <div className="grid grid-cols-2 gap-2 pt-2">
+                                <Button 
+                                    variant={flipH ? "default" : "outline"} 
+                                    size="sm" 
+                                    className="text-[10px] h-8 font-bold" 
+                                    onClick={() => setFlipH(!flipH)}
+                                >
+                                    <FlipHorizontal className="size-3 mr-1.5" /> FLIP H
+                                </Button>
+                                <Button 
+                                    variant={flipV ? "default" : "outline"} 
+                                    size="sm" 
+                                    className="text-[10px] h-8 font-bold" 
+                                    onClick={() => setFlipV(!flipV)}
+                                >
+                                    <FlipVertical className="size-3 mr-1.5" /> FLIP V
+                                </Button>
+                            </div>
+
+                            <Button variant="outline" size="sm" className="w-full text-[10px] h-8 font-bold mt-2" onClick={resetTransforms}>
                                 RESET POSITION
                             </Button>
                         </TabsContent>
@@ -436,7 +462,7 @@ export default function BackgroundRemover() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 border-t py-3">
                     <p className="text-[9px] text-muted-foreground text-center w-full italic">
-                        Tip: Use white background for ID photos. Move subject for artistic posters.
+                        Tip: Use white background for ID photos. Use flip for artistic symmetry.
                     </p>
                 </CardFooter>
             </Card>
