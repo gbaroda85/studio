@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -18,7 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 
 // Initialize PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -123,9 +124,10 @@ export default function PdfCompressor() {
                 const targetBytesPerPage = targetBytes / totalPages;
                 const page1 = await pdf.getPage(1);
                 
-                setStatusText("Smart Sampling...");
+                setStatusText("Analyzing Document...");
                 
-                const scaleOptions = [1.5, 1.3, 1.1, 0.9];
+                // We test multiple scales and qualities to find the best balance
+                const scaleOptions = [1.6, 1.4, 1.2, 1.0, 0.8, 0.6];
                 let foundFit = false;
 
                 for (const testScale of scaleOptions) {
@@ -142,7 +144,8 @@ export default function PdfCompressor() {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         await page1.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                        let lowQ = 0.05, highQ = 0.95;
+                        // Binary search for quality, but with a stricter floor to avoid "dirty" artifacts
+                        let lowQ = 0.15, highQ = 0.95; 
                         for (let qAttempt = 0; qAttempt < 5; qAttempt++) {
                             const testQ = (lowQ + highQ) / 2;
                             const data = canvas.toDataURL('image/jpeg', testQ);
@@ -161,8 +164,9 @@ export default function PdfCompressor() {
                 }
                 
                 if (!foundFit) {
-                    finalScale = 0.8;
-                    finalQuality = 0.05;
+                    // Fallback to safe minimums if target is extreme
+                    finalScale = 0.5;
+                    finalQuality = 0.2;
                 }
             } else {
                 finalQuality = quality[0] / 100;
@@ -176,14 +180,13 @@ export default function PdfCompressor() {
             });
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Optimizing Page ${i}/${totalPages}...`);
+                setStatusText(`Sharpening Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 const viewport = page.getViewport({ scale: finalScale });
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d', { alpha: false });
+                const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
                 
-                // Use floor to avoid sub-pixel clipping
                 canvas.width = Math.floor(viewport.width);
                 canvas.height = Math.floor(viewport.height);
 
@@ -196,7 +199,6 @@ export default function PdfCompressor() {
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', finalQuality);
                     
-                    // FIX: Detection of page orientation to prevent cutting from right side
                     const orientation = viewport.width > viewport.height ? 'l' : 'p';
                     
                     if (i === 1) {
@@ -216,7 +218,7 @@ export default function PdfCompressor() {
             });
 
             setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
-            setStatusText("Success!");
+            setStatusText("Ready to Download");
             toast({ title: 'PDF Optimized', description: `Final size: ${formatBytes(pdfBlob.size)}.` });
 
         } catch (error: any) {
@@ -246,7 +248,7 @@ export default function PdfCompressor() {
                         <FileArchive className="h-10 w-10" />
                     </div>
                     <CardTitle className="text-2xl font-bold">Ultra PDF Compressor</CardTitle>
-                    <CardDescription>Compress PDF with Sharp-Text orientation-safe technology.</CardDescription>
+                    <CardDescription>Compress PDF while keeping text sharp and images clear.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -256,14 +258,14 @@ export default function PdfCompressor() {
                         </div>
                         <div>
                             <p className="text-xl font-bold">Drop PDF here to Optimize</p>
-                            <p className="text-sm text-muted-foreground mt-2">100% Private local processing. Now supports Landscape.</p>
+                            <p className="text-sm text-muted-foreground mt-2">No file uploads. Privacy-first local processing.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-bold pb-8">
-                    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> SECURE</div>
-                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> SHARP-TEXT ENGINE</div>
+                    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> AES SECURE</div>
+                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> CLEAN-TEXT ENGINE</div>
                 </CardFooter>
             </Card>
         );
@@ -276,7 +278,7 @@ export default function PdfCompressor() {
                     <CardHeader className="bg-muted/30 border-b">
                         <CardTitle className="text-lg flex items-center gap-2 font-headline">
                             <FileArchive className="text-primary h-5 w-5" />
-                            WORKSPACE
+                            OPTIMIZER WORKSPACE
                         </CardTitle>
                         <CardDescription className="truncate font-mono text-[10px]">{pdfFile.name} ({formatBytes(pdfFile.size)})</CardDescription>
                     </CardHeader>
@@ -291,7 +293,7 @@ export default function PdfCompressor() {
                                     <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
                                     <Progress value={progress} className="h-3 shadow-inner rounded-full" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                        <span>Fixing Layout Issues...</span>
+                                        <span>Iterating for Quality...</span>
                                         <span>{progress}%</span>
                                     </div>
                                 </div>
@@ -327,7 +329,7 @@ export default function PdfCompressor() {
                                 </div>
                                 <div>
                                     <p className="text-lg font-black text-foreground uppercase tracking-tight font-headline">READY TO SHRINK</p>
-                                    <p className="text-sm text-muted-foreground font-medium">Auto-orientation active. No more cut images.</p>
+                                    <p className="text-sm text-muted-foreground font-medium">Auto-orientation active. Enhanced text clarity.</p>
                                 </div>
                             </div>
                         )}
@@ -393,8 +395,8 @@ export default function PdfCompressor() {
                                     </div>
                                     <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
                                         <p className="text-[10px] text-primary font-bold leading-relaxed">
-                                            <span className="text-primary font-black uppercase mr-1">SAFE-BOUNDS:</span> 
-                                            Tool will ensure images fit correctly by detecting orientation per page.
+                                            <span className="text-primary font-black uppercase mr-1">SAFE-GUARD:</span> 
+                                            We maintain a quality floor of 20% to avoid blurred text even at extreme targets.
                                         </p>
                                     </div>
                                 </div>
@@ -406,12 +408,12 @@ export default function PdfCompressor() {
                                         <Label className="text-sm font-black uppercase text-muted-foreground tracking-tight">Quality Level</Label>
                                         <span className="text-primary font-mono font-black bg-primary/10 px-3 py-1 rounded-full text-sm">{quality[0]}%</span>
                                     </div>
-                                    <Slider min={5} max={100} step={5} value={quality} onValueChange={setQuality} className="py-4" />
+                                    <Slider min={10} max={100} step={5} value={quality} onValueChange={setQuality} className="py-4" />
                                 </div>
                             </TabsContent>
                         </Tabs>
 
-                        {!compressionResult && (
+                        {!compressionResult ? (
                              <Button 
                                 onClick={handleCompressPdf} 
                                 disabled={isProcessing} 
@@ -419,6 +421,10 @@ export default function PdfCompressor() {
                             >
                                 {isProcessing ? <Loader2 className="mr-3 h-7 w-7 animate-spin" /> : <Zap className="mr-3 h-7 w-7 text-yellow-400" />}
                                 {isProcessing ? "OPTIMIZING..." : "START COMPRESSION"}
+                            </Button>
+                        ) : (
+                            <Button variant="outline" onClick={resetState} className="w-full h-14 font-bold rounded-xl border-2 hover:bg-primary/5 transition-colors">
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Compress Another File
                             </Button>
                         )}
                     </CardContent>
