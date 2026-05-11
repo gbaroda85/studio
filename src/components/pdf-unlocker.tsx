@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Set up the worker for pdfjs with a robust CDN URL
+// Fixed worker path with direct unpkg URL
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfUnlocker() {
@@ -30,7 +30,6 @@ export default function PdfUnlocker() {
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Detect if the file is likely an Aadhaar card based on name
     const isAadhaar = pdfFile?.name.toLowerCase().includes('aadhaar') || pdfFile?.name.toLowerCase().includes('eaadhaar');
     
     useEffect(() => {
@@ -73,11 +72,6 @@ export default function PdfUnlocker() {
         }
     }
 
-    /**
-     * POWER MODE: The Universal Decoder
-     * Uses PDF.js to render pages and jsPDF to reconstruct the document.
-     * This works for AES-256 (Aadhaar/Bank) when everything else fails.
-     */
     const handlePowerUnlock = async (arrayBuffer: ArrayBuffer) => {
         setStatusText("Activating Universal Power Mode...");
         setProgress(10);
@@ -98,8 +92,6 @@ export default function PdfUnlocker() {
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decrypting Page ${i} of ${totalPages}...`);
                 const page = await pdf.getPage(i);
-                
-                // Render at high resolution
                 const viewport = page.getViewport({ scale: 2.0 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
@@ -110,19 +102,15 @@ export default function PdfUnlocker() {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
                     const imgData = canvas.toDataURL('image/jpeg', 0.8);
                     
                     if (i > 1) newPdf.addPage([viewport.width, viewport.height], 'p');
                     else {
-                        // Resize first page if needed
                         newPdf.deletePage(1);
                         newPdf.addPage([viewport.width, viewport.height], 'p');
                     }
-                    
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height);
                 }
-                
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
 
@@ -155,7 +143,6 @@ export default function PdfUnlocker() {
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
 
-            // Attempt 1: Standard pdf-lib (keeps text, fast)
             try {
                 const pdfDoc = await PDFDocument.load(pdfBytes, { userPassword: password });
                 const unlockedDoc = await PDFDocument.create();
@@ -170,21 +157,16 @@ export default function PdfUnlocker() {
                 return;
             } catch (libError: any) {
                 const msg = libError.message?.toLowerCase() || "";
-                
-                // If it's an encryption issue, or a potential Aadhaar/Bank file, switch to Power Mode
                 if (msg.includes('encryption') || msg.includes('unsupported') || msg.includes('aes') || isAadhaar) {
                     await handlePowerUnlock(pdfBytes);
                     setIsUnlocking(false);
                     return;
                 }
-                
                 if (msg.includes('password')) {
                     setErrorDetails("The password you entered is incorrect.");
                     setIsUnlocking(false);
                     return;
                 }
-                
-                // Fallback to Power Mode anyway for any other error
                 await handlePowerUnlock(pdfBytes);
             }
         } catch (error: any) {

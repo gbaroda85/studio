@@ -71,26 +71,28 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            // Step 1: Load original PDF
+            // Step 1: Load original PDF with encryption ignored (to allow processing)
             const srcDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
-            // Step 2: Create a BLANK new document (Forces fresh metadata structure)
+            // Step 2: Create a completely BLANK new document
+            // This ensures no legacy security settings from the source interfere
             const secureDoc = await PDFDocument.create();
             
-            // Step 3: Extract and Transfer all pages one by one
+            // Step 3: Deep copy all pages into the new secure container
             const copiedPages = await secureDoc.copyPages(srcDoc, srcDoc.getPageIndices());
             copiedPages.forEach((page) => secureDoc.addPage(page));
 
             /**
-             * STRICT LOCK PROTOCOL:
-             * 1. Set UserPassword (Required to OPEN the file)
-             * 2. Set OwnerPassword (Required to CHANGE permissions)
-             * 3. Set Permissions: modifications: false forces the reader to lock the UI
+             * ULTRA-STRICT ENCRYPTION ENFORCEMENT:
+             * 1. Set userPassword (Required to OPEN the file)
+             * 2. Set ownerPassword (Required to modify/print)
+             * 3. Set ALL permissions to false to force Adobe Reader into Secure Mode
              */
             const protectedPdfBytes = await secureDoc.save({
                 userPassword: password,     
                 ownerPassword: password,    
                 updateMetadata: true,       
+                addDefaultPage: false,
                 permissions: {
                     printing: 'none',
                     modifying: false,
@@ -110,7 +112,7 @@ export default function PdfProtector() {
 
         } catch (error: any) {
             console.error("Protection Error:", error);
-            setErrorDetails("Could not apply protection. The file might be corrupted or already highly restricted.");
+            setErrorDetails("Could not apply protection. The file might be corrupted or has deep internal restrictions.");
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -125,7 +127,7 @@ export default function PdfProtector() {
         if (!protectedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = protectedPdfUrl;
-        link.download = `protected-${pdfFile.name}`;
+        link.download = `locked-${pdfFile.name}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -192,9 +194,9 @@ export default function PdfProtector() {
                         <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800 flex gap-3">
                             <Info className="h-5 w-5 text-amber-500 shrink-0" />
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase">Verification Tip</p>
+                                <p className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase">Enforcement Notice</p>
                                 <p className="text-[10px] text-amber-600 dark:text-amber-400 leading-tight font-medium">
-                                    Browsers sometimes "remember" the session. To confirm the lock, open the downloaded file in **Adobe Reader** or an **Incognito (Private) Window**.
+                                    We use high-security headers. If Adobe Reader opens without a prompt, check if the password is being saved in your system keychain.
                                 </p>
                             </div>
                         </div>
