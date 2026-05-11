@@ -37,7 +37,7 @@ export default function BackgroundRemover() {
       reader.readAsDataURL(file);
       setResultImageSrc(null);
       setProgress(0);
-    setStatusText("");
+      setStatusText("");
     } else if (file) {
       toast({
         variant: "destructive",
@@ -60,16 +60,21 @@ export default function BackgroundRemover() {
     setStatusText("Initializing Smart Engine...");
 
     try {
-      // Dynamic import to keep initial bundle small and avoid SSR issues
-      const imglyRemoveBackground = (await import("@imgly/background-removal")).default;
+      // Robust dynamic import to handle different module formats
+      const imglyModule = await import("@imgly/background-removal");
+      const removeBackground = imglyModule.removeBackground || imglyModule.default;
+      
+      if (typeof removeBackground !== 'function') {
+          throw new Error("Background removal engine failed to load properly.");
+      }
       
       setStatusText("Processing Image locally...");
       
-      const blob = await imglyRemoveBackground(originalImageSrc, {
+      const blob = await removeBackground(originalImageSrc, {
         progress: (item, index, total) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
-            if (item.includes("model")) setStatusText("Loading AI Model (one-time)...");
+            if (item.includes("model")) setStatusText("Loading AI Model...");
             else setStatusText("Removing Background...");
         },
         output: {
@@ -88,7 +93,7 @@ export default function BackgroundRemover() {
       toast({ 
         variant: "destructive", 
         title: "Processing Error", 
-        description: "Failed to remove background. Please try a clearer image." 
+        description: error.message || "Failed to remove background. Please try a clearer image." 
       });
     } finally {
       setIsProcessing(false);
