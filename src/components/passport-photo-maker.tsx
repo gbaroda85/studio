@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
+import React, { useState, useRef, useEffect, type SyntheticEvent } from 'react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -20,26 +20,28 @@ import {
     Settings2, 
     CheckCircle2, 
     ShieldCheck,
-    Printer,
-    User,
     Eraser,
     Palette,
     Shirt,
     Loader2,
     Move,
-    RotateCcw,
+    ZoomIn,
+    ZoomOut,
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    User,
+    UserCircle,
+    Baby,
     Sparkles,
     X,
-    Sun,
-    Contrast,
-    Zap,
-    Droplets
+    LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { Slider } from '@/components/ui/slider';
-import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Unit = 'cm' | 'mm' | 'inch' | 'px';
 
@@ -60,530 +62,479 @@ const PRESETS: PhotoSize[] = [
 
 const BG_COLORS = [
     { name: "White", value: "#FFFFFF" },
-    { name: "Off White", value: "#F5F5F5" },
     { name: "Light Blue", value: "#ADD8E6" },
+    { name: "Off White", value: "#F5F5F5" },
     { name: "Navy Blue", value: "#000080" },
     { name: "Light Grey", value: "#D3D3D3" },
 ];
 
-// High-quality SVG paths for suit overlays
-const SUIT_OVERLAYS = [
-    { id: 'none', label: 'Original', path: '' },
-    { id: 'suit1', label: 'Classic Black Suit', path: 'M120,400 Q120,350 200,320 L300,300 L300,350 L200,380 Z M480,400 Q480,350 400,320 L300,300 L300,350 L400,380 Z' },
-    { id: 'suit2', label: 'Formal Blazer', path: 'M150,450 L250,350 L350,350 L450,450 L450,600 L150,600 Z' },
+// Realistic Clothing Assets (Transparent PNGs)
+const CLOTH_CATEGORIES = [
+    { id: 'men', label: 'Men', icon: UserCircle },
+    { id: 'women', label: 'Women', icon: User },
+    { id: 'kids', label: 'Kids', icon: Baby },
 ];
 
+const CLOTH_ITEMS: Record<string, { id: string; url: string; label: string }[]> = {
+    men: [
+        { id: 'm1', label: 'Black Suit Red Tie', url: 'https://pi7.org/assets/img/clothes/men/m1.png' },
+        { id: 'm2', label: 'Navy Suit Blue Tie', url: 'https://pi7.org/assets/img/clothes/men/m2.png' },
+        { id: 'm3', label: 'Grey Suit Stripe Tie', url: 'https://pi7.org/assets/img/clothes/men/m3.png' },
+        { id: 'm4', label: 'Formal Blue Shirt', url: 'https://pi7.org/assets/img/clothes/men/m4.png' },
+        { id: 'm5', label: 'Black Formal Shirt', url: 'https://pi7.org/assets/img/clothes/men/m5.png' },
+        { id: 'm6', label: 'Suit with Bow', url: 'https://pi7.org/assets/img/clothes/men/m6.png' },
+    ],
+    women: [
+        { id: 'w1', label: 'Black Blazer', url: 'https://pi7.org/assets/img/clothes/women/w1.png' },
+        { id: 'w2', label: 'Navy Blue Suit', url: 'https://pi7.org/assets/img/clothes/women/w2.png' },
+        { id: 'w3', label: 'Formal White Shirt', url: 'https://pi7.org/assets/img/clothes/women/w3.png' },
+    ],
+    kids: [
+        { id: 'k1', label: 'Tiny Suit', url: 'https://pi7.org/assets/img/clothes/kids/k1.png' },
+        { id: 'k2', label: 'School Uniform', url: 'https://pi7.org/assets/img/clothes/kids/k2.png' },
+    ]
+};
+
+type Stage = 'size' | 'crop' | 'background' | 'cloth' | 'download';
+
 export default function PassportPhotoMaker() {
-  const { toast } = useToast();
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
-  const [progress, setProgress] = useState(0);
-  
-  // Size Settings
-  const [dpi, setDPI] = useState(300);
-  const [selectedPreset, setSelectedPreset] = useState<number | 'custom'>(0);
-  const [customWidth, setCustomWidth] = useState("3.5");
-  const [customHeight, setCustomHeight] = useState("4.5");
-  const [customUnit, setCustomUnit] = useState<Unit>('cm');
+    const { toast } = useToast();
+    const [imgSrc, setImgSrc] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [stage, setStage] = useState<Stage>('size');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [progress, setProgress] = useState(0);
 
-  // Manual Adjustment States
-  const [brightness, setBrightness] = useState([100]);
-  const [contrast, setContrast] = useState([100]);
-  const [saturation, setSaturation] = useState([100]);
-  const [sharpness, setSharpness] = useState([0]);
+    // Settings
+    const [dpi, setDPI] = useState(300);
+    const [selectedPreset, setSelectedPreset] = useState<number | 'custom'>(0);
+    const [customWidth, setCustomWidth] = useState("3.5");
+    const [customHeight, setCustomHeight] = useState("4.5");
+    const [customUnit, setCustomUnit] = useState<Unit>('cm');
 
-  // Studio States
-  const [stage, setStage] = useState<'upload' | 'crop' | 'studio'>('upload');
-  const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
-  const [bgColor, setBgColor] = useState("#FFFFFF");
-  const [selectedSuit, setSelectedSuit] = useState('none');
-  
-  const [subjectScale, setSubjectScale] = useState([100]);
-  const [subjectX, setSubjectX] = useState([0]);
-  const [subjectY, setSubjectY] = useState([0]);
+    // Studio Canvas States
+    const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); // This is the user's face (no BG)
+    const [bgColor, setBgColor] = useState("#FFFFFF");
+    const [selectedClothUrl, setSelectedClothUrl] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState('men');
 
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
-  const [finalResult, setFinalResult] = useState<string | null>(null);
-  
-  const imgRef = useRef<HTMLImageElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const studioCanvasRef = useRef<HTMLCanvasElement>(null);
+    // Fine-tune Alignment States
+    const [scale, setScale] = useState(100);
+    const [posX, setPosX] = useState(0);
+    const [posY, setPosY] = useState(0);
 
-  const getAspectRatio = () => {
-      let w, h;
-      if (selectedPreset === 'custom') {
-          w = parseFloat(customWidth);
-          h = parseFloat(customHeight);
-      } else {
-          w = PRESETS[selectedPreset as number].width;
-          h = PRESETS[selectedPreset as number].height;
-      }
-      return (w || 3.5) / (h || 4.5);
-  };
+    // Cropping States
+    const [crop, setCrop] = useState<Crop>();
+    const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+    const [originalCroppedData, setOriginalCroppedData] = useState<string | null>(null);
 
-  const handleFileChange = (file: File | null) => {
-    if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-          setImgSrc(reader.result?.toString() || null);
-          setStage('crop');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    const imgRef = useRef<HTMLImageElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const mainCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const { width, height } = e.currentTarget;
-    const aspect = getAspectRatio();
-    const initialCrop = centerCrop(
-        makeAspectCrop({ unit: '%', width: 80 }, aspect, width, height),
-        width,
-        height
-    );
-    setCrop(initialCrop);
-  }
-
-  const handleProceedToStudio = async () => {
-    if (!imgRef.current || !completedCrop) return;
-    setIsProcessing(true);
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const targetW = 1200;
-    const targetH = targetW / getAspectRatio();
-
-    canvas.width = targetW;
-    canvas.height = targetH;
-
-    const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
-    const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
-
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(
-      imgRef.current,
-      completedCrop.x * scaleX,
-      completedCrop.y * scaleY,
-      completedCrop.width * scaleX,
-      completedCrop.height * scaleY,
-      0, 0, targetW, targetH
-    );
-
-    const croppedData = canvas.toDataURL('image/jpeg', 0.95);
-    setCroppedImage(croppedData);
-    setSubjectImageSrc(croppedData);
-    setStage('studio');
-    setIsProcessing(false);
-  };
-
-  const handleRemoveBackground = async () => {
-    if (!croppedImage) return;
-    setIsRemovingBg(true);
-    setProgress(10);
-
-    try {
-      const imglyModule = await import("@imgly/background-removal");
-      const removeBackgroundFunc = imglyModule.removeBackground || imglyModule.default;
-      
-      const blob = await removeBackgroundFunc(croppedImage, {
-        progress: (item, index, total) => {
-            setProgress(Math.round((index / total) * 100));
-        },
-        output: { format: "image/png", quality: 0.95 }
-      });
-
-      const url = URL.createObjectURL(blob);
-      setSubjectImageSrc(url);
-      toast({ title: "Background Removed!", description: "AI successfully extracted the subject." });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "AI Error", description: "Could not remove background." });
-    } finally {
-      setIsRemovingBg(false);
-    }
-  };
-
-  // Advanced sharpness filter using a convolution matrix
-  const applySharpness = (ctx: CanvasRenderingContext2D, width: number, height: number, level: number) => {
-    if (level === 0) return;
-    const weights = [
-      0, -level, 0,
-      -level, 1 + (4 * level), -level,
-      0, -level, 0
-    ];
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    const output = ctx.createImageData(width, height);
-    const outData = output.data;
-
-    for (let y = 1; y < height - 1; y++) {
-      for (let x = 1; x < width - 1; x++) {
-        for (let c = 0; c < 3; c++) {
-          let sum = 0;
-          for (let ky = -1; ky <= 1; ky++) {
-            for (let kx = -1; kx <= 1; kx++) {
-              sum += data[((y + ky) * width + (x + kx)) * 4 + c] * weights[(ky + 1) * 3 + (kx + 1)];
-            }
-          }
-          outData[(y * width + x) * 4 + c] = sum;
+    const getAspectRatio = () => {
+        let w, h;
+        if (selectedPreset === 'custom') {
+            w = parseFloat(customWidth);
+            h = parseFloat(customHeight);
+        } else {
+            w = PRESETS[selectedPreset as number].width;
+            h = PRESETS[selectedPreset as number].height;
         }
-        outData[(y * width + x) * 4 + 3] = data[(y * width + x) * 4 + 3];
-      }
-    }
-    ctx.putImageData(output, 0, 0);
-  };
+        return (w || 3.5) / (h || 4.5);
+    };
 
-  useEffect(() => {
-    if (stage !== 'studio' || !subjectImageSrc) return;
+    const handleFileChange = (file: File | null) => {
+        if (file && file.type.startsWith('image/')) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onload = () => {
+                setImgSrc(reader.result?.toString() || null);
+                setStage('crop');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-    const compose = () => {
-        const canvas = studioCanvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const handleInitialCrop = async () => {
+        if (!imgRef.current || !completedCrop) return;
+        setIsProcessing(true);
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const targetW = 1000; 
+        const targetW = 1000;
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. Background
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
+        const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
 
-        const subjImg = new window.Image();
-        subjImg.src = subjectImageSrc;
-        subjImg.onload = () => {
-            const s = subjectScale[0] / 100;
-            const dw = canvas.width * s;
-            const dh = (subjImg.height * (canvas.width / subjImg.width)) * s;
-            
-            const dx = (subjectX[0] / 100) * canvas.width;
-            const dy = (subjectY[0] / 100) * canvas.height;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(
+            imgRef.current,
+            completedCrop.x * scaleX,
+            completedCrop.y * scaleY,
+            completedCrop.width * scaleX,
+            completedCrop.height * scaleY,
+            0, 0, targetW, targetH
+        );
 
-            const x = (canvas.width - dw) / 2 + dx;
-            const y = (canvas.height - dh) / 2 + dy;
-
-            // 2. Draw Subject with Filters
-            ctx.save();
-            ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`;
-            ctx.drawImage(subjImg, x, y, dw, dh);
-            ctx.restore();
-
-            // 3. Apply Sharpness if needed
-            if (sharpness[0] > 0) {
-              applySharpness(ctx, canvas.width, canvas.height, sharpness[0] / 10);
-            }
-
-            // 4. Draw Suit Overlay if selected
-            if (selectedSuit !== 'none') {
-                const suit = SUIT_OVERLAYS.find(s => s.id === selectedSuit);
-                if (suit) {
-                    ctx.save();
-                    ctx.fillStyle = "#1a1a1a"; // Dark formal color
-                    ctx.beginPath();
-                    const p = new Path2D(suit.path);
-                    // Scale suit path to canvas size
-                    ctx.translate(canvas.width / 2 - 300, canvas.height - 400);
-                    ctx.scale(1.2, 1.2);
-                    ctx.fill(p);
-                    ctx.restore();
-                }
-            }
-
-            setFinalResult(canvas.toDataURL('image/jpeg', 0.95));
-        };
+        const data = canvas.toDataURL('image/jpeg', 0.95);
+        setOriginalCroppedData(data);
+        setSubjectImageSrc(data);
+        setStage('background');
+        setIsProcessing(false);
     };
 
-    const debounceTimer = setTimeout(compose, 100);
-    return () => clearTimeout(debounceTimer);
-  }, [stage, subjectImageSrc, bgColor, subjectScale, subjectX, subjectY, selectedSuit, selectedPreset, customWidth, customHeight, brightness, contrast, saturation, sharpness]);
+    const handleRemoveBackground = async () => {
+        if (!originalCroppedData) return;
+        setIsProcessing(true);
+        setProgress(10);
 
-  const handleDownload = () => {
-      if (!finalResult) return;
-      const link = document.createElement('a');
-      link.href = finalResult;
-      link.download = `passport-photo-${Date.now()}.jpg`;
-      link.click();
-  };
+        try {
+            const imglyModule = await import("@imgly/background-removal");
+            const removeBackgroundFunc = imglyModule.removeBackground || imglyModule.default;
 
-  const handleReset = () => {
-      setStage('upload');
-      setImgSrc(null);
-      setImageFile(null);
-      setCroppedImage(null);
-      setSubjectImageSrc(null);
-      setFinalResult(null);
-      setSubjectScale([100]);
-      setSubjectX([0]);
-      setSubjectY([0]);
-      setBrightness([100]);
-      setContrast([100]);
-      setSaturation([100]);
-      setSharpness([0]);
-  };
+            const blob = await removeBackgroundFunc(originalCroppedData, {
+                progress: (item, index, total) => setProgress(Math.round((index / total) * 100)),
+                output: { format: "image/png", quality: 0.95 }
+            });
 
-  if (stage === 'upload') {
-    return (
-      <Card className="w-full max-w-2xl text-center transition-all duration-300 hover:border-primary/80 hover:shadow-2xl">
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Contact className="h-8 w-8" />
-          </div>
-          <CardTitle className="text-3xl font-black font-headline">Passport Studio Pro</CardTitle>
-          <CardDescription>AI-powered background change & formal cloth editor.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border-2 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-            <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
-            <div>
-                <p className="text-xl font-bold">Drop photo or Click to start</p>
-                <p className="text-sm text-muted-foreground mt-2">Formalize your look in seconds.</p>
-            </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
-        </CardContent>
-        <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black pb-8">
-            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> 100% PRIVATE AI</div>
-            <div className="flex items-center gap-2"><Shirt className="h-4 w-4 text-primary" /> CLOTH OVERLAYS</div>
-            <div className="flex items-center gap-2"><Eraser className="h-4 w-4 text-rose-500" /> BG REMOVER</div>
-        </CardFooter>
-      </Card>
-    );
-  }
+            const url = URL.createObjectURL(blob);
+            setSubjectImageSrc(url);
+            setStage('cloth');
+            toast({ title: "Background Cleaned", description: "AI successfully extracted your face." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "AI Error", description: "Could not remove background. Procceding to manual." });
+            setStage('cloth');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
-  if (stage === 'crop') {
-      return (
-          <Card className="w-full max-w-4xl shadow-2xl animate-in zoom-in-95">
-              <CardHeader className="bg-muted/30 border-b">
-                  <CardTitle className="flex items-center gap-2"><CropIcon className="text-primary" /> Step 1: Crop Face</CardTitle>
-                  <CardDescription>Select the face area. The ratio is locked based on country rules.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 flex items-center justify-center min-h-[400px]">
-                  <div className="max-w-full overflow-hidden border-4 border-white shadow-xl rounded-lg">
-                    {imgSrc && (
-                        <ReactCrop
-                            crop={crop}
-                            onChange={(c) => setCrop(c)}
-                            onComplete={(c) => setCompletedCrop(c)}
-                            aspect={getAspectRatio()}
-                            keepSelection
-                        >
-                            <img ref={imgRef} src={imgSrc} alt="Source" onLoad={onImageLoad} className="max-h-[60vh] w-auto object-contain" />
-                        </ReactCrop>
-                    )}
-                  </div>
-              </CardContent>
-              <CardFooter className="justify-between bg-primary/5 p-6 border-t">
-                  <div className="w-48">
-                      <Label className="text-[10px] font-black uppercase">Country Preset</Label>
-                      <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(v === 'custom' ? 'custom' : Number(v))}>
-                          <SelectTrigger className="h-10 font-bold"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                              {PRESETS.map((p, i) => <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>)}
-                              <SelectItem value="custom">Custom Size</SelectItem>
-                          </SelectContent>
-                      </Select>
-                  </div>
-                  <div className="flex gap-3">
-                      <Button variant="outline" onClick={handleReset} className="h-12 px-6 border-2 font-black">CANCEL</Button>
-                      <Button onClick={handleProceedToStudio} disabled={!completedCrop || isProcessing} className="h-12 px-10 font-black bg-primary shadow-xl">
-                          {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Maximize className="mr-2" />}
-                          PROCEED TO STUDIO
-                      </Button>
-                  </div>
-              </CardFooter>
-          </Card>
-      );
-  }
+    // Composite Final Image on Canvas
+    useEffect(() => {
+        const render = async () => {
+            const canvas = mainCanvasRef.current;
+            if (!canvas || !subjectImageSrc) return;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
 
-  return (
-    <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-7 space-y-6">
-            <Card className="overflow-hidden border-2 shadow-2xl">
-                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-primary" /> Studio Workspace
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                         <Button variant="outline" size="sm" onClick={() => setStage('crop')} className="h-8 text-[10px] font-black">
-                            <RotateCcw className="mr-1 h-3 w-3" /> RE-CROP
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleReset} className="h-8 text-[10px] font-black text-rose-500">
-                            <X className="mr-1 h-3 w-3" /> START OVER
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-8 bg-slate-100 flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden">
-                    {isRemovingBg && (
-                         <div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-12 text-center gap-4">
-                            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                            <div className="w-full max-w-xs space-y-2">
-                                <p className="font-black text-primary uppercase tracking-tighter">AI REMOVING BACKGROUND...</p>
-                                <Progress value={progress} className="h-2" />
-                            </div>
-                        </div>
-                    )}
+            const targetW = 800;
+            const targetH = targetW / getAspectRatio();
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            // 1. Draw Background Color
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw Subject (User's face) with transforms
+            const faceImg = new window.Image();
+            faceImg.src = subjectImageSrc;
+            
+            await new Promise((resolve) => {
+                faceImg.onload = () => {
+                    const s = scale / 100;
+                    const dw = canvas.width * s;
+                    const dh = (faceImg.height * (canvas.width / faceImg.width)) * s;
                     
-                    <div className="relative p-2 bg-white shadow-2xl rounded ring-1 ring-black/5" style={{ aspectRatio: String(getAspectRatio()) }}>
-                         <canvas ref={studioCanvasRef} className="max-h-[60vh] w-auto h-auto shadow-inner border" />
-                    </div>
+                    const dx = (posX / 100) * canvas.width;
+                    const dy = (posY / 100) * canvas.height;
 
-                    <div className="mt-8 flex gap-4 w-full justify-center">
-                         <Button size="lg" onClick={handleDownload} className="h-14 px-16 bg-green-600 hover:bg-green-700 text-white font-black shadow-xl">
-                            <Download className="mr-3 h-6 w-6" /> DOWNLOAD OFFICIAL PHOTO
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                    const x = (canvas.width - dw) / 2 + dx;
+                    const y = (canvas.height - dh) / 2 + dy;
 
-        <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10">
-                <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg flex items-center gap-2 font-headline">
-                        <Settings2 className="h-5 w-5 text-primary" /> Studio Panel
-                    </CardTitle>
+                    ctx.drawImage(faceImg, x, y, dw, dh);
+                    resolve(null);
+                };
+            });
+
+            // 3. Draw Clothing Overlay (If selected)
+            if (selectedClothUrl) {
+                const clothImg = new window.Image();
+                clothImg.crossOrigin = "anonymous";
+                clothImg.src = selectedClothUrl;
+                await new Promise((resolve) => {
+                    clothImg.onload = () => {
+                        // Cloth usually fills the bottom of the frame
+                        const clothAspect = clothImg.width / clothImg.height;
+                        const dw = canvas.width;
+                        const dh = dw / clothAspect;
+                        ctx.drawImage(clothImg, 0, canvas.height - dh, dw, dh);
+                        resolve(null);
+                    };
+                });
+            }
+        };
+
+        const timer = setTimeout(render, 50);
+        return () => clearTimeout(timer);
+    }, [subjectImageSrc, bgColor, selectedClothUrl, scale, posX, posY, selectedPreset, customWidth, customHeight]);
+
+    const handleDownload = () => {
+        const canvas = mainCanvasRef.current;
+        if (!canvas) return;
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.download = `passport-photo-${Date.now()}.jpg`;
+        link.click();
+    };
+
+    const reset = () => {
+        setStage('size');
+        setImgSrc(null);
+        setSubjectImageSrc(null);
+        setSelectedClothUrl(null);
+        setScale(100);
+        setPosX(0);
+        setPosY(0);
+    };
+
+    // Helper for navigation
+    const move = (dir: 'up' | 'down' | 'left' | 'right') => {
+        if (dir === 'up') setPosY(p => p - 2);
+        if (dir === 'down') setPosY(p => p + 2);
+        if (dir === 'left') setPosX(p => p - 2);
+        if (dir === 'right') setPosX(p => p + 2);
+    };
+
+    if (stage === 'size') {
+        return (
+            <Card className="w-full max-w-2xl transition-all duration-500 hover:shadow-2xl border-foreground/10">
+                <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+                        <Contact className="h-8 w-8" />
+                    </div>
+                    <CardTitle className="text-3xl font-black font-headline">Passport Studio</CardTitle>
+                    <CardDescription>Step 1: Choose Photo Size & Dimensions</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
-                    <Tabs defaultValue="bg" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 mb-6">
-                            <TabsTrigger value="bg" className="text-[10px] font-bold">BG</TabsTrigger>
-                            <TabsTrigger value="cloth" className="text-[10px] font-bold">CLOTH</TabsTrigger>
-                            <TabsTrigger value="adjust" className="text-[10px] font-bold">ADJUST</TabsTrigger>
-                            <TabsTrigger value="fit" className="text-[10px] font-bold">FIT</TabsTrigger>
-                        </TabsList>
+                <CardContent className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            <Label className="font-black text-xs uppercase text-muted-foreground tracking-widest">Select Country Preset</Label>
+                            <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(v === 'custom' ? 'custom' : Number(v))}>
+                                <SelectTrigger className="h-14 font-bold text-lg"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {PRESETS.map((p, i) => <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>)}
+                                    <SelectItem value="custom">Custom Dimensions</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-3">
+                            <Label className="font-black text-xs uppercase text-muted-foreground tracking-widest">Resolution (DPI)</Label>
+                            <Select value={String(dpi)} onValueChange={(v) => setDPI(Number(v))}>
+                                <SelectTrigger className="h-14 font-bold text-lg"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="300">300 DPI (Standard)</SelectItem>
+                                    <SelectItem value="600">600 DPI (Ultra HD)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
 
-                        <TabsContent value="bg" className="space-y-6">
-                            <Button className="w-full h-12 bg-primary/10 text-primary border-2 border-primary/20 font-black" onClick={handleRemoveBackground} disabled={isRemovingBg}>
-                                <Eraser className="mr-2 h-4 w-4" /> AUTO-REMOVE BACKGROUND
-                            </Button>
-                            
-                            <div className="space-y-4 pt-2">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2">
-                                    <Palette className="h-3 w-3" /> Select Official Color
-                                </Label>
-                                <div className="grid grid-cols-5 gap-3">
-                                    {BG_COLORS.map(c => (
-                                        <button 
-                                            key={c.value} 
-                                            onClick={() => setBgColor(c.value)}
-                                            className={cn(
-                                                "size-10 rounded-xl border-2 transition-all",
-                                                bgColor === c.value ? "border-primary ring-4 ring-primary/10 scale-110" : "border-transparent shadow-md"
-                                            )}
-                                            style={{ backgroundColor: c.value }}
-                                            title={c.name}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="cloth" className="space-y-6">
-                            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3 items-center">
-                                <Shirt className="h-5 w-5 text-amber-600 shrink-0" />
-                                <p className="text-[11px] font-medium text-amber-800 leading-tight">
-                                    <strong>Formal Overlay:</strong> Select a suit below. Use the "FIT" tab to align your face correctly.
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-1 gap-2">
-                                {SUIT_OVERLAYS.map(suit => (
-                                    <Button 
-                                        key={suit.id} 
-                                        variant={selectedSuit === suit.id ? "default" : "outline"}
-                                        className="justify-start h-14 px-4 font-bold"
-                                        onClick={() => setSelectedSuit(suit.id)}
-                                    >
-                                        <Shirt className={cn("mr-3 h-5 w-5", selectedSuit === suit.id ? "text-white" : "text-primary")} /> {suit.label}
-                                    </Button>
-                                ))}
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="adjust" className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Sun className="size-3 text-yellow-500" /> Brightness</Label>
-                                    <span className="text-[10px] font-mono font-bold">{brightness[0]}%</span>
-                                </div>
-                                <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Contrast className="size-3 text-orange-500" /> Contrast</Label>
-                                    <span className="text-[10px] font-mono font-bold">{contrast[0]}%</span>
-                                </div>
-                                <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Droplets className="size-3 text-blue-500" /> Saturation</Label>
-                                    <span className="text-[10px] font-mono font-bold">{saturation[0]}%</span>
-                                </div>
-                                <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Zap className="size-3 text-primary" /> Sharpness</Label>
-                                    <span className="text-[10px] font-mono font-bold">Level {sharpness[0]}</span>
-                                </div>
-                                <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} />
-                            </div>
-                            
-                            <Button variant="outline" className="w-full font-bold h-10 border-2" onClick={() => { setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }}>
-                                RESET ADJUSTMENTS
-                            </Button>
-                        </TabsContent>
-
-                        <TabsContent value="fit" className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Maximize className="size-3" /> Zoom Subject</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{subjectScale[0]}%</span>
-                                </div>
-                                <Slider min={50} max={200} step={1} value={subjectScale} onValueChange={setSubjectScale} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Move className="size-3" /> Horizontal Move</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{subjectX[0]}%</span>
-                                </div>
-                                <Slider min={-100} max={100} step={1} value={subjectX} onValueChange={setSubjectX} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Move className="size-3" /> Vertical Move</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{subjectY[0]}%</span>
-                                </div>
-                                <Slider min={-100} max={100} step={1} value={subjectY} onValueChange={setSubjectY} />
-                            </div>
-                            
-                            <Button variant="outline" className="w-full font-bold h-10 border-2" onClick={() => { setSubjectScale([100]); setSubjectX([0]); setSubjectY([0]); }}>
-                                RESET POSITION
-                            </Button>
-                        </TabsContent>
-                    </Tabs>
+                    <div className="border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                        <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <div className="text-center">
+                            <p className="text-xl font-bold">Select Photo to Start</p>
+                            <p className="text-sm text-muted-foreground mt-2">Works for people, kids, and babies.</p>
+                        </div>
+                    </div>
+                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                 </CardContent>
-                <CardFooter className="bg-muted/10 border-t py-4 text-center">
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest w-full">
-                        Tip: White background is recommended for most official passports.
-                    </p>
-                </CardFooter>
             </Card>
+        );
+    }
+
+    return (
+        <div className="w-full max-w-5xl animate-in fade-in duration-500">
+            {/* Header Tabs */}
+            <div className="flex justify-center mb-8">
+                <div className="bg-card/80 backdrop-blur-xl border-2 rounded-2xl p-1 flex gap-2 shadow-xl">
+                    {[
+                        { id: 'size', label: 'Size', icon: LayoutGrid },
+                        { id: 'crop', label: 'Crop', icon: CropIcon },
+                        { id: 'background', label: 'Background', icon: Eraser },
+                        { id: 'cloth', label: 'Cloth', icon: Shirt },
+                        { id: 'download', label: 'Download', icon: Download },
+                    ].map((t) => (
+                        <button
+                            key={t.id}
+                            disabled={true} // Only visual breadcrumbs
+                            className={cn(
+                                "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all",
+                                stage === t.id ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-muted-foreground opacity-60"
+                            )}
+                        >
+                            <t.icon className="size-4" /> {t.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-12 gap-8 items-start">
+                {/* Main Interaction Area */}
+                <div className="lg:col-span-8 flex flex-col gap-6">
+                    <Card className="overflow-hidden border-2 shadow-2xl relative bg-slate-900/5 min-h-[500px] flex items-center justify-center">
+                        {stage === 'crop' && imgSrc ? (
+                            <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()} keepSelection>
+                                <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[60vh] w-auto object-contain" onLoad={(e) => {
+                                    const { width, height } = e.currentTarget;
+                                    setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
+                                }} />
+                            </ReactCrop>
+                        ) : (
+                            <div className="relative p-2 bg-white shadow-inner ring-8 ring-white/50 rounded-lg">
+                                <canvas ref={mainCanvasRef} className="max-h-[60vh] w-auto h-auto rounded shadow-2xl" />
+                                {isProcessing && (
+                                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4">
+                                        <Loader2 className="size-12 animate-spin text-primary" />
+                                        <p className="font-black uppercase tracking-tighter text-primary">{progress}% AI Processing...</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* Interactive HUD Controls (Only in Studio Stages) */}
+                        {(stage === 'background' || stage === 'cloth') && !isProcessing && (
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md rounded-2xl border-2 shadow-2xl">
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => setScale(s => s + 5)}><ZoomIn /></Button>
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => setScale(s => s - 5)}><ZoomOut /></Button>
+                                <div className="w-px h-6 bg-border mx-2" />
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => move('left')}><ChevronLeft /></Button>
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => move('right')}><ChevronRight /></Button>
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => move('up')}><ChevronUp /></Button>
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => move('down')}><ChevronDown /></Button>
+                                <Button variant="ghost" size="icon" className="size-10 rounded-xl text-destructive" onClick={() => { setPosX(0); setPosY(0); setScale(100); }}><RefreshCcw /></Button>
+                            </div>
+                        )}
+                    </Card>
+
+                    {/* Navigation Bar */}
+                    <div className="flex justify-center items-center gap-4">
+                        <Button variant="outline" size="lg" className="h-14 px-8 border-2 font-black" onClick={reset}>
+                            <RefreshCcw className="mr-2" /> START OVER
+                        </Button>
+
+                        {stage === 'crop' && (
+                            <Button size="lg" className="h-14 px-12 bg-primary font-black shadow-xl" onClick={handleInitialCrop}>
+                                NEXT: BACKGROUND <ChevronRight className="ml-2" />
+                            </Button>
+                        )}
+                        {stage === 'background' && (
+                            <Button size="lg" className="h-14 px-12 bg-primary font-black shadow-xl" onClick={handleRemoveBackground} disabled={isProcessing}>
+                                {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Eraser className="mr-2" />}
+                                AUTO-REMOVE BG & NEXT
+                            </Button>
+                        )}
+                        {stage === 'cloth' && (
+                            <Button size="lg" className="h-14 px-12 bg-green-600 hover:bg-green-700 font-black shadow-xl" onClick={handleDownload}>
+                                <Download className="mr-2" /> DOWNLOAD FINAL
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Side Panel */}
+                <div className="lg:col-span-4 flex flex-col gap-6">
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
+                        <CardHeader className="bg-primary/5 border-b p-4">
+                            <CardTitle className="text-lg font-headline flex items-center gap-2">
+                                <Shirt className="size-5 text-primary" /> 
+                                {stage === 'background' ? 'Official Background' : 'Change Clothes'}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {stage === 'background' && (
+                                <div className="p-6 space-y-6">
+                                    <div className="p-4 bg-primary/5 rounded-2xl flex gap-3 items-center border border-primary/10">
+                                        <Palette className="size-6 text-primary" />
+                                        <p className="text-xs font-bold text-primary uppercase">Select Official Background Color</p>
+                                    </div>
+                                    <div className="grid grid-cols-5 gap-3">
+                                        {BG_COLORS.map(c => (
+                                            <button 
+                                                key={c.value} 
+                                                onClick={() => setBgColor(c.value)}
+                                                className={cn(
+                                                    "size-12 rounded-2xl border-4 transition-all hover:scale-110",
+                                                    bgColor === c.value ? "border-primary ring-4 ring-primary/20 scale-110" : "border-transparent shadow-lg"
+                                                )}
+                                                style={{ backgroundColor: c.value }}
+                                                title={c.name}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {stage === 'cloth' && (
+                                <div className="flex flex-col h-[500px]">
+                                    <div className="flex bg-muted/50 p-2 gap-2 border-b">
+                                        {CLOTH_CATEGORIES.map(cat => (
+                                            <Button 
+                                                key={cat.id} 
+                                                variant={activeCategory === cat.id ? "default" : "ghost"} 
+                                                className="flex-1 rounded-xl h-12 font-black"
+                                                onClick={() => setActiveCategory(cat.id)}
+                                            >
+                                                <cat.icon className="mr-2 size-4" /> {cat.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <ScrollArea className="flex-1 p-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <button 
+                                                className={cn(
+                                                    "aspect-[3/4] rounded-2xl border-4 bg-muted/30 flex flex-col items-center justify-center gap-2 transition-all",
+                                                    !selectedClothUrl ? "border-primary bg-primary/5" : "border-transparent"
+                                                )}
+                                                onClick={() => setSelectedClothUrl(null)}
+                                            >
+                                                <X className="size-8 text-muted-foreground" />
+                                                <span className="text-[10px] font-black uppercase">None</span>
+                                            </button>
+                                            {CLOTH_ITEMS[activeCategory].map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => setSelectedClothUrl(item.url)}
+                                                    className={cn(
+                                                        "aspect-[3/4] relative rounded-2xl border-4 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-white shadow-md",
+                                                        selectedClothUrl === item.url ? "border-primary ring-4 ring-primary/20" : "border-transparent"
+                                                    )}
+                                                >
+                                                    <Image src={item.url} alt={item.label} fill className="object-contain p-2" />
+                                                    <div className="absolute inset-x-0 bottom-0 bg-black/60 py-1">
+                                                        <p className="text-[8px] text-white text-center font-bold uppercase truncate px-1">{item.label}</p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                    <div className="p-4 bg-muted/30 border-t">
+                                        <p className="text-[9px] font-bold text-muted-foreground text-center uppercase tracking-widest">
+                                            Tip: Use the HUD controls on the left to align face
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-2 border-green-500/10 bg-green-500/5">
+                        <CardContent className="p-4 flex gap-4 items-center">
+                            <ShieldCheck className="size-8 text-green-600 shrink-0" />
+                            <div>
+                                <p className="text-[10px] font-black text-green-700 uppercase">Secure Studio Active</p>
+                                <p className="text-[9px] text-green-600/80 font-medium">All face-fitting and AI processing is done locally. Your photos never leave this browser.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
