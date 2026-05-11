@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Set up the worker for pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+// Set up the worker for pdfjs with a robust CDN URL
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -250,14 +250,14 @@ export default function PdfUnlocker() {
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="password">Document Password</Label>
-                            <Input 
+                            <input 
                                 id="password" 
                                 type="password" 
                                 value={password} 
                                 onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
                                 placeholder="Enter password..."
                                 disabled={isUnlocking}
-                                className="h-12 text-lg border-2 focus-visible:ring-primary shadow-inner font-bold tracking-widest"
+                                className="flex h-12 w-full rounded-md border-2 border-input bg-background px-3 py-2 text-lg font-bold tracking-widest ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-inner disabled:opacity-50"
                             />
                         </div>
                         
