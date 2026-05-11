@@ -29,7 +29,11 @@ import {
     Move,
     RotateCcw,
     Sparkles,
-    X
+    X,
+    Sun,
+    Contrast,
+    Zap,
+    Droplets
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -62,10 +66,11 @@ const BG_COLORS = [
     { name: "Light Grey", value: "#D3D3D3" },
 ];
 
+// High-quality SVG paths for suit overlays
 const SUIT_OVERLAYS = [
     { id: 'none', label: 'Original', path: '' },
-    { id: 'suit1', label: 'Formal Suit 1', path: 'M12,2L4,10V22H20V10L12,2M12,4.5L18.5,10.5V20.5H15.5V14.5H8.5V20.5H5.5V10.5L12,4.5M10.5,11.5V13H13.5V11.5H10.5Z' },
-    { id: 'suit2', label: 'Formal Suit 2', path: 'M12,2L2,12H5V22H19V12H22L12,2M12,4.5L19.5,12H17V20H7V12H4.5L12,4.5Z' },
+    { id: 'suit1', label: 'Classic Black Suit', path: 'M120,400 Q120,350 200,320 L300,300 L300,350 L200,380 Z M480,400 Q480,350 400,320 L300,300 L300,350 L400,380 Z' },
+    { id: 'suit2', label: 'Formal Blazer', path: 'M150,450 L250,350 L350,350 L450,450 L450,600 L150,600 Z' },
 ];
 
 export default function PassportPhotoMaker() {
@@ -76,12 +81,18 @@ export default function PassportPhotoMaker() {
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [progress, setProgress] = useState(0);
   
-  // Settings
+  // Size Settings
   const [dpi, setDPI] = useState(300);
   const [selectedPreset, setSelectedPreset] = useState<number | 'custom'>(0);
   const [customWidth, setCustomWidth] = useState("3.5");
   const [customHeight, setCustomHeight] = useState("4.5");
   const [customUnit, setCustomUnit] = useState<Unit>('cm');
+
+  // Manual Adjustment States
+  const [brightness, setBrightness] = useState([100]);
+  const [contrast, setContrast] = useState([100]);
+  const [saturation, setSaturation] = useState([100]);
+  const [sharpness, setSharpness] = useState([0]);
 
   // Studio States
   const [stage, setStage] = useState<'upload' | 'crop' | 'studio'>('upload');
@@ -197,13 +208,43 @@ export default function PassportPhotoMaker() {
     }
   };
 
+  // Advanced sharpness filter using a convolution matrix
+  const applySharpness = (ctx: CanvasRenderingContext2D, width: number, height: number, level: number) => {
+    if (level === 0) return;
+    const weights = [
+      0, -level, 0,
+      -level, 1 + (4 * level), -level,
+      0, -level, 0
+    ];
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    const output = ctx.createImageData(width, height);
+    const outData = output.data;
+
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        for (let c = 0; c < 3; c++) {
+          let sum = 0;
+          for (let ky = -1; ky <= 1; ky++) {
+            for (let kx = -1; kx <= 1; kx++) {
+              sum += data[((y + ky) * width + (x + kx)) * 4 + c] * weights[(ky + 1) * 3 + (kx + 1)];
+            }
+          }
+          outData[(y * width + x) * 4 + c] = sum;
+        }
+        outData[(y * width + x) * 4 + 3] = data[(y * width + x) * 4 + 3];
+      }
+    }
+    ctx.putImageData(output, 0, 0);
+  };
+
   useEffect(() => {
     if (stage !== 'studio' || !subjectImageSrc) return;
 
     const compose = () => {
         const canvas = studioCanvasRef.current;
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
         const targetW = 1000; 
@@ -211,6 +252,7 @@ export default function PassportPhotoMaker() {
         canvas.width = targetW;
         canvas.height = targetH;
 
+        // 1. Background
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -227,13 +269,40 @@ export default function PassportPhotoMaker() {
             const x = (canvas.width - dw) / 2 + dx;
             const y = (canvas.height - dh) / 2 + dy;
 
+            // 2. Draw Subject with Filters
+            ctx.save();
+            ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`;
             ctx.drawImage(subjImg, x, y, dw, dh);
+            ctx.restore();
+
+            // 3. Apply Sharpness if needed
+            if (sharpness[0] > 0) {
+              applySharpness(ctx, canvas.width, canvas.height, sharpness[0] / 10);
+            }
+
+            // 4. Draw Suit Overlay if selected
+            if (selectedSuit !== 'none') {
+                const suit = SUIT_OVERLAYS.find(s => s.id === selectedSuit);
+                if (suit) {
+                    ctx.save();
+                    ctx.fillStyle = "#1a1a1a"; // Dark formal color
+                    ctx.beginPath();
+                    const p = new Path2D(suit.path);
+                    // Scale suit path to canvas size
+                    ctx.translate(canvas.width / 2 - 300, canvas.height - 400);
+                    ctx.scale(1.2, 1.2);
+                    ctx.fill(p);
+                    ctx.restore();
+                }
+            }
+
             setFinalResult(canvas.toDataURL('image/jpeg', 0.95));
         };
     };
 
-    compose();
-  }, [stage, subjectImageSrc, bgColor, subjectScale, subjectX, subjectY, selectedSuit, selectedPreset, customWidth, customHeight]);
+    const debounceTimer = setTimeout(compose, 100);
+    return () => clearTimeout(debounceTimer);
+  }, [stage, subjectImageSrc, bgColor, subjectScale, subjectX, subjectY, selectedSuit, selectedPreset, customWidth, customHeight, brightness, contrast, saturation, sharpness]);
 
   const handleDownload = () => {
       if (!finalResult) return;
@@ -253,6 +322,10 @@ export default function PassportPhotoMaker() {
       setSubjectScale([100]);
       setSubjectX([0]);
       setSubjectY([0]);
+      setBrightness([100]);
+      setContrast([100]);
+      setSaturation([100]);
+      setSharpness([0]);
   };
 
   if (stage === 'upload') {
@@ -380,10 +453,11 @@ export default function PassportPhotoMaker() {
                 </CardHeader>
                 <CardContent className="pt-6">
                     <Tabs defaultValue="bg" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 mb-6">
-                            <TabsTrigger value="bg" className="text-xs font-bold">BACKGROUND</TabsTrigger>
-                            <TabsTrigger value="cloth" className="text-xs font-bold">CLOTHES</TabsTrigger>
-                            <TabsTrigger value="adjust" className="text-xs font-bold">FIT</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-4 mb-6">
+                            <TabsTrigger value="bg" className="text-[10px] font-bold">BG</TabsTrigger>
+                            <TabsTrigger value="cloth" className="text-[10px] font-bold">CLOTH</TabsTrigger>
+                            <TabsTrigger value="adjust" className="text-[10px] font-bold">ADJUST</TabsTrigger>
+                            <TabsTrigger value="fit" className="text-[10px] font-bold">FIT</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="bg" className="space-y-6">
@@ -416,7 +490,7 @@ export default function PassportPhotoMaker() {
                             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3 items-center">
                                 <Shirt className="h-5 w-5 text-amber-600 shrink-0" />
                                 <p className="text-[11px] font-medium text-amber-800 leading-tight">
-                                    <strong>Formal Overlay:</strong> Use the "FIT" tab to align your photo inside the suit. 
+                                    <strong>Formal Overlay:</strong> Select a suit below. Use the "FIT" tab to align your face correctly.
                                 </p>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
@@ -427,13 +501,51 @@ export default function PassportPhotoMaker() {
                                         className="justify-start h-14 px-4 font-bold"
                                         onClick={() => setSelectedSuit(suit.id)}
                                     >
-                                        <Shirt className="mr-3 h-5 w-5" /> {suit.label}
+                                        <Shirt className={cn("mr-3 h-5 w-5", selectedSuit === suit.id ? "text-white" : "text-primary")} /> {suit.label}
                                     </Button>
                                 ))}
                             </div>
                         </TabsContent>
 
                         <TabsContent value="adjust" className="space-y-6">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Sun className="size-3 text-yellow-500" /> Brightness</Label>
+                                    <span className="text-[10px] font-mono font-bold">{brightness[0]}%</span>
+                                </div>
+                                <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Contrast className="size-3 text-orange-500" /> Contrast</Label>
+                                    <span className="text-[10px] font-mono font-bold">{contrast[0]}%</span>
+                                </div>
+                                <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Droplets className="size-3 text-blue-500" /> Saturation</Label>
+                                    <span className="text-[10px] font-mono font-bold">{saturation[0]}%</span>
+                                </div>
+                                <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Zap className="size-3 text-primary" /> Sharpness</Label>
+                                    <span className="text-[10px] font-mono font-bold">Level {sharpness[0]}</span>
+                                </div>
+                                <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} />
+                            </div>
+                            
+                            <Button variant="outline" className="w-full font-bold h-10 border-2" onClick={() => { setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }}>
+                                RESET ADJUSTMENTS
+                            </Button>
+                        </TabsContent>
+
+                        <TabsContent value="fit" className="space-y-6">
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
                                     <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Maximize className="size-3" /> Zoom Subject</Label>
