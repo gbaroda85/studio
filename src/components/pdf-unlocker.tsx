@@ -6,6 +6,7 @@ import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { UploadCloud, Loader2, Download, Unlock, AlertCircle, ShieldAlert, Info, RefreshCcw, Zap, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
