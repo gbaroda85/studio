@@ -62,15 +62,15 @@ export default function BackgroundRemover() {
     try {
       // Robust dynamic import to handle different module formats
       const imglyModule = await import("@imgly/background-removal");
-      const removeBackground = imglyModule.removeBackground || imglyModule.default;
+      const removeBackgroundFunc = imglyModule.removeBackground || imglyModule.default;
       
-      if (typeof removeBackground !== 'function') {
+      if (typeof removeBackgroundFunc !== 'function') {
           throw new Error("Background removal engine failed to load properly.");
       }
       
       setStatusText("Processing Image locally...");
       
-      const blob = await removeBackground(originalImageSrc, {
+      const blob = await removeBackgroundFunc(originalImageSrc, {
         progress: (item, index, total) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
@@ -171,7 +171,7 @@ export default function BackgroundRemover() {
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Original Image</CardTitle>
           </CardHeader>
           <CardContent className="aspect-square relative bg-white">
-            <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" data-ai-hint="portrait person" />
+            <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" />
           </CardContent>
         </Card>
         <Card className="overflow-hidden border-2 border-primary/20 shadow-xl">
