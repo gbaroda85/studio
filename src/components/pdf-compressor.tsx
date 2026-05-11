@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -112,56 +113,68 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) - (totalPages * 1500); // 1.5KB buffer per page for PDF overhead
+                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024);
             }
 
             /**
-             * PRECISION SEARCH ALGORITHM
-             * We do a quick trial on the first page to find parameters that hit the target.
+             * SHARP-TEXT PRECISION ENGINE
+             * Instead of dropping resolution, we prioritize quality compression.
              */
-            let finalScale = 1.3;
+            let finalScale = 1.4; // Base scale for good text clarity
             let finalQuality = 0.7;
 
             if (mode === 'target' && targetBytes > 0) {
                 const targetBytesPerPage = targetBytes / totalPages;
                 const page1 = await pdf.getPage(1);
                 
-                // Trial Loop (Max 5 attempts to find sweet spot)
-                let lowScale = 0.4, highScale = 1.6;
-                let lowQuality = 0.3, highQuality = 0.9;
+                setStatusText("Smart Sampling for Sharpness...");
                 
-                setStatusText("Smart Sampling...");
-                
-                for (let attempt = 0; attempt < 4; attempt++) {
-                    const testScale = (lowScale + highScale) / 2;
-                    const testQuality = (lowQuality + highQuality) / 2;
+                // Trial Loop: Prioritize scale (resolution) to keep text sharp
+                // Try to keep scale >= 1.2 if possible
+                const scaleOptions = [1.5, 1.3, 1.1, 0.9];
+                let foundFit = false;
+
+                for (const testScale of scaleOptions) {
+                    if (foundFit) break;
                     
                     const viewport = page1.getViewport({ scale: testScale });
                     const canvas = document.createElement('canvas');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
                     const ctx = canvas.getContext('2d');
+                    
                     if (ctx) {
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         await page1.render({ canvasContext: ctx, viewport: viewport }).promise;
-                        const data = canvas.toDataURL('image/jpeg', testQuality);
-                        const size = Math.round((data.length - 22) * 3 / 4); // Base64 to binary estimation
 
-                        if (size > targetBytesPerPage) {
-                            highScale = testScale;
-                            highQuality = testQuality;
-                        } else {
-                            lowScale = testScale;
-                            lowQuality = testQuality;
+                        // Binary search for quality at this scale
+                        let lowQ = 0.05, highQ = 0.95;
+                        for (let qAttempt = 0; qAttempt < 5; qAttempt++) {
+                            const testQ = (lowQ + highQ) / 2;
+                            const data = canvas.toDataURL('image/jpeg', testQ);
+                            const estimatedSize = Math.round((data.length - 22) * 3 / 4);
+
+                            if (estimatedSize <= targetBytesPerPage) {
+                                finalScale = testScale;
+                                finalQuality = testQ;
+                                lowQ = testQ; // Try better quality
+                                foundFit = true;
+                            } else {
+                                highQ = testQ; // Go lower
+                            }
                         }
                     }
                 }
-                finalScale = lowScale;
-                finalQuality = lowQuality;
+                
+                // Absolute fallback if 100KB is extremely aggressive
+                if (!foundFit) {
+                    finalScale = 0.8;
+                    finalQuality = 0.05;
+                }
             } else {
                 finalQuality = quality[0] / 100;
-                finalScale = 1.5;
+                finalScale = 1.6; // High quality fixed mode
             }
 
             const newPdf = new jsPDF({
@@ -183,6 +196,8 @@ export default function PdfCompressor() {
                 if (context) {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Essential for text sharpness
                     context.imageSmoothingEnabled = true;
                     context.imageSmoothingQuality = 'high';
                     
@@ -207,7 +222,7 @@ export default function PdfCompressor() {
             });
 
             setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
-            setStatusText("Success!");
+            setStatusText("Optimization Success!");
             toast({ title: 'PDF Optimized', description: `Final size is ${formatBytes(pdfBlob.size)}.` });
 
         } catch (error: any) {
@@ -282,7 +297,7 @@ export default function PdfCompressor() {
                                     <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
                                     <Progress value={progress} className="h-3 shadow-inner rounded-full" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                        <span>Re-encoding Pixels</span>
+                                        <span>Protecting Text Quality</span>
                                         <span>{progress}%</span>
                                     </div>
                                 </div>
@@ -384,8 +399,8 @@ export default function PdfCompressor() {
                                     </div>
                                     <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
                                         <p className="text-[10px] text-primary font-bold leading-relaxed">
-                                            <span className="text-primary font-black uppercase mr-1">ITERATIVE ENGINE:</span> 
-                                            The tool will auto-calibrate settings to strictly hit your target size.
+                                            <span className="text-primary font-black uppercase mr-1">SHARP-TEXT ENGINE:</span> 
+                                            Tool will try to hit target while keeping text clear. Scale floor is locked.
                                         </p>
                                     </div>
                                 </div>
