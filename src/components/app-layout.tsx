@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -38,6 +37,7 @@ import {
   FileCode,
   FileScan,
   FileText,
+  PenLine,
 } from 'lucide-react';
 
 import {
@@ -77,6 +77,7 @@ function AppSidebar() {
     {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-fuchsia-500'},
     {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-blue-500'},
     {href: '/remove-background', labelKey: 'remove_background_label', icon: Eraser, color: 'text-rose-500'},
+    {href: '/remove-signature', labelKey: 'remove_signature_label', icon: PenLine, color: 'text-orange-500'},
     {href: '/enhance-photo', labelKey: 'enhance_photo_label', icon: Wand2, color: 'text-violet-500'},
     {href: '/image-to-text', labelKey: 'image_to_text_label', icon: FileScan, color: 'text-teal-500'},
     {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},

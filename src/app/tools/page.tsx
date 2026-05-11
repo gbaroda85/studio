@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense } from 'react';
@@ -48,6 +47,7 @@ import {
   NotebookPen,
   FileCode,
   FileScan,
+  PenLine,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -92,6 +92,13 @@ function ToolsPageContent() {
       descriptionKey: 'remove_background_description',
       icon: Eraser,
       color: 'text-rose-500',
+    },
+    {
+      href: '/remove-signature',
+      labelKey: 'remove_signature_label',
+      descriptionKey: 'remove_signature_description',
+      icon: PenLine,
+      color: 'text-orange-500',
     },
     {
       href: '/enhance-photo',
