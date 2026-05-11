@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react";
 import Image from "next/image";
 import { 
   UploadCloud, 
@@ -12,18 +12,21 @@ import {
   Zap,
   ScanSearch,
   CheckCircle2,
-  FileType
+  FileType,
+  Settings2,
+  Eraser,
+  RefreshCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useLanguage } from "@/contexts/language-context";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 export default function SignatureRemover() {
   const { toast } = useToast();
-  const { t } = useLanguage();
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
@@ -32,7 +35,12 @@ export default function SignatureRemover() {
   const [progress, setProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   
+  // Controls for better cleaning
+  const [sensitivity, setSensitivity] = useState([40]);
+  const [boostInk, setBoostInk] = useState([20]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -42,6 +50,8 @@ export default function SignatureRemover() {
         setOriginalImageSrc(e.target?.result as string);
         setResultImageSrc(null);
         setProgress(0);
+        // Reset settings for new image
+        setSensitivity([40]);
       };
       reader.readAsDataURL(file);
     } else if (file) {
@@ -59,17 +69,20 @@ export default function SignatureRemover() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   /**
-   * High-Precision Local Extraction Algorithm
-   * Runs 100% in-browser. No API calls = No Quota Limits.
+   * Ultra-Clean Local Extraction Algorithm
+   * Processes image on canvas to distinguish ink from paper noise.
    */
-  const processLocally = async (src: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.src = src;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d", { willowReadFrequently: true });
-        if (!ctx) return resolve(src);
+  const processLocally = async () => {
+    if (!originalImageSrc) return;
+    
+    const img = new window.Image();
+    img.src = originalImageSrc;
+    
+    img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return;
 
         canvas.width = img.width;
         canvas.height = img.height;
@@ -78,87 +91,65 @@ export default function SignatureRemover() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        // Smart Background Sampling: Check multiple points to handle shadows/lighting
-        const getMultiPointBg = () => {
-            let r=0, g=0, b=0, count=0;
-            const samples = [
-                [5,5], [canvas.width-5, 5], 
-                [5, canvas.height-5], [canvas.width-5, canvas.height-5],
-                [Math.floor(canvas.width/2), 2]
-            ];
-            for(const [sx, sy] of samples) {
-                const i = (sy * canvas.width + sx) * 4;
-                r += data[i]; g += data[i+1]; b += data[i+2];
-                count++;
-            }
-            return { r: r/count, g: g/count, b: b/count };
-        };
-        const bg = getMultiPointBg();
+        // Step 1: Detect brightest point (usually paper) to set a reference
+        let maxLuma = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            if (luma > maxLuma) maxLuma = luma;
+        }
 
-        // Threshold logic: Euclidean distance to identify ink
-        // Adjusted to be sensitive enough for light strokes but clean for paper
-        const threshold = 35; 
-        
+        const threshValue = sensitivity[0];
+        const inkBoostFactor = 1 + (boostInk[0] / 100);
+
+        // Step 2: Remove background based on distance from reference white and local darkness
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i + 1], b = data[i + 2];
+          const luma = 0.299 * r + 0.587 * g + 0.114 * b;
 
-          const diff = Math.sqrt(
-            Math.pow(r - bg.r, 2) + 
-            Math.pow(g - bg.g, 2) + 
-            Math.pow(b - bg.b, 2)
-          );
+          // How different is this pixel from the estimated 'paper' brightness?
+          const diffFromWhite = maxLuma - luma;
 
-          if (diff > threshold) {
-            // Keep Ink - Preserve original color exactly
+          if (diffFromWhite > threshValue) {
+            // This is INK
             data[i + 3] = 255; 
             
-            // Subtle Contrast Boost for better visibility in docs
-            const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-            if (luma > 160) { // If it's a very light stroke
-                data[i] = Math.max(0, r * 0.85);
-                data[i+1] = Math.max(0, g * 0.85);
-                data[i+2] = Math.max(0, b * 0.85);
-            }
+            // Optional: Make ink darker/vibrant if boosted
+            data[i] = Math.max(0, r / inkBoostFactor);
+            data[i+1] = Math.max(0, g / inkBoostFactor);
+            data[i+2] = Math.max(0, b / inkBoostFactor);
           } else {
-            // Remove Paper - Full transparency
+            // This is PAPER / NOISE
             data[i + 3] = 0; 
           }
         }
 
         ctx.putImageData(imageData, 0, 0);
-        resolve(canvas.toDataURL("image/png"));
-      };
-    });
+        setResultImageSrc(canvas.toDataURL("image/png"));
+    };
   };
 
-  const handleAutoExtract = async () => {
+  // Re-process when sensitivity changes
+  useEffect(() => {
+    if (originalImageSrc) {
+        const timer = setTimeout(() => {
+            processLocally();
+        }, 100);
+        return () => clearTimeout(timer);
+    }
+  }, [sensitivity, boostInk, originalImageSrc]);
+
+  const handleStartExtraction = async () => {
     if (!originalImageSrc) return;
     setIsProcessing(true);
-    setResultImageSrc(null);
-    setProgress(10);
-
-    // Fake progress for UX
-    const interval = setInterval(() => {
-        setProgress(prev => (prev < 90 ? prev + 10 : prev));
-    }, 150);
-
-    try {
-      const processed = await processLocally(originalImageSrc);
-      
-      setTimeout(() => {
-        setResultImageSrc(processed);
+    setProgress(20);
+    
+    // UI feedback delay
+    setTimeout(() => {
         setProgress(100);
-        toast({ 
-            title: "Success!", 
-            description: "Signature extracted with original colors. Background is now transparent." 
-        });
-      }, 400);
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: "Could not process image." });
-    } finally {
-      clearInterval(interval);
-      setTimeout(() => setIsProcessing(false), 500);
-    }
+        processLocally();
+        setIsProcessing(false);
+        toast({ title: "Extraction Active", description: "Use sliders to fine-tune the result." });
+    }, 600);
   };
 
   const handleDownload = () => {
@@ -167,7 +158,7 @@ export default function SignatureRemover() {
     link.href = resultImageSrc;
     const nameParts = imageFile.name.split(".");
     const name = nameParts.slice(0, -1).join(".");
-    link.download = `${name}-signature.png`;
+    link.download = `${name}-clean-signature.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -179,6 +170,7 @@ export default function SignatureRemover() {
     setResultImageSrc(null);
     setIsProcessing(false);
     setProgress(0);
+    setSensitivity([40]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -192,8 +184,8 @@ export default function SignatureRemover() {
           <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
             <ScanSearch className="h-10 w-10" />
           </div>
-          <CardTitle>Signature Extractor Pro</CardTitle>
-          <CardDescription>Extract signatures from papers and make them transparent for Word or PDF documents.</CardDescription>
+          <CardTitle className="text-2xl font-black">Signature Extractor Pro</CardTitle>
+          <CardDescription>Extract clean signatures from paper photos. Ideal for digital docs.</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -205,8 +197,8 @@ export default function SignatureRemover() {
                 <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
             </div>
             <div>
-                <p className="text-xl font-bold">Drop document or photo here</p>
-                <p className="text-sm text-muted-foreground mt-2">Best for clear signatures on white/plain paper</p>
+                <p className="text-xl font-bold">Drop photo or Click to select</p>
+                <p className="text-sm text-muted-foreground mt-2">Works best with black/blue ink on plain paper</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -216,90 +208,113 @@ export default function SignatureRemover() {
   }
 
   return (
-    <div className="w-full max-w-6xl animate-in fade-in duration-500">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Side: Original */}
-        <div className="flex-1 space-y-4">
-            <Card className="overflow-hidden border-2 border-foreground/5 shadow-lg">
-                <CardHeader className="bg-muted/30 p-4 border-b">
-                    <CardTitle className="text-sm font-bold uppercase tracking-tight">Source Image</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 aspect-[3/2] relative bg-white">
-                    <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" />
-                </CardContent>
-            </Card>
-            
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <h4 className="font-bold text-sm text-primary mb-1">Zero-Quota Logic</h4>
-                <p className="text-xs text-muted-foreground">
-                    This tool uses 100% local processing. It will never show "Limit Reached" errors and works even with slow internet.
-                </p>
+    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Comparison Area */}
+        <div className="lg:col-span-8 space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+                <Card className="overflow-hidden border-2 shadow-lg">
+                    <CardHeader className="bg-muted/30 p-3 border-b flex flex-row items-center justify-between">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</CardTitle>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleReset}><RefreshCcw className="h-3 w-3" /></Button>
+                    </CardHeader>
+                    <CardContent className="p-0 aspect-square relative bg-white">
+                        <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" />
+                    </CardContent>
+                </Card>
+
+                <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl relative">
+                    <CardHeader className="bg-primary/5 p-3 border-b flex flex-row items-center justify-between">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5">
+                            <Sparkles className="h-3 w-3" /> Result (Transparent)
+                        </CardTitle>
+                        {resultImageSrc && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                    </CardHeader>
+                    <CardContent className="p-0 aspect-square relative flex items-center justify-center bg-white" 
+                                 style={{ 
+                                    backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)', 
+                                    backgroundSize: '20px 20px' 
+                                 }}>
+                        {isProcessing ? (
+                            <div className="flex flex-col items-center gap-4">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                                <Progress value={progress} className="w-32 h-1" />
+                            </div>
+                        ) : resultImageSrc ? (
+                            <Image src={resultImageSrc} alt="Processed" fill className="object-contain p-4 animate-in zoom-in-95 duration-300" />
+                        ) : (
+                            <div className="text-center p-8 opacity-20">
+                                <Eraser className="h-12 w-12 mx-auto mb-2" />
+                                <p className="text-xs font-bold uppercase">Ready to Clean</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                {!resultImageSrc ? (
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl" onClick={handleStartExtraction}>
+                        <Zap className="mr-2 h-5 w-5" /> START CLEANING
+                    </Button>
+                ) : (
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
+                        <Download className="mr-2 h-6 w-6" /> DOWNLOAD PNG
+                    </Button>
+                )}
             </div>
         </div>
 
-        {/* Right Side: Result */}
-        <div className="flex-1">
-            <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl relative h-full flex flex-col">
-                <CardHeader className="bg-primary/5 p-4 border-b">
-                    <CardTitle className="text-sm font-bold uppercase tracking-tight text-primary flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" /> Transparent Result
+        {/* Studio Controls */}
+        <div className={cn("lg:col-span-4 space-y-6 transition-all", !originalImageSrc && "opacity-20 pointer-events-none")}>
+            <Card className="border-2 shadow-xl border-primary/10">
+                <CardHeader className="bg-primary/5 border-b">
+                    <CardTitle className="text-lg flex items-center gap-2 font-bold">
+                        <Settings2 className="h-5 w-5 text-primary" /> Fine-Tune Panel
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 flex-1 relative flex items-center justify-center bg-white" 
-                             style={{ 
-                                backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)', 
-                                backgroundSize: '20px 20px', 
-                                backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' 
-                             }}>
+                <CardContent className="pt-6 space-y-8">
                     
-                    {isProcessing ? (
-                        <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center gap-6">
-                            <div className="relative">
-                                <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                                <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
-                            </div>
-                            <div className="space-y-4 w-full max-w-xs">
-                                <p className="font-black text-xl text-primary animate-pulse uppercase">Extracting Ink...</p>
-                                <Progress value={progress} className="h-2" />
-                            </div>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">
+                                <Eraser className="size-3" /> Background Sensitivity
+                            </Label>
+                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{sensitivity[0]}</span>
                         </div>
-                    ) : resultImageSrc ? (
-                        <Image src={resultImageSrc} alt="Processed" fill className="object-contain p-4 animate-in zoom-in-95 duration-500" />
-                    ) : (
-                        <div className="flex flex-col items-center gap-4 text-muted-foreground opacity-20 py-20">
-                            <FileType className="h-20 w-20" />
-                            <p className="font-bold text-lg uppercase tracking-widest">Ready to Extract</p>
+                        <Slider min={5} max={150} step={1} value={sensitivity} onValueChange={setSensitivity} />
+                        <p className="text-[9px] text-muted-foreground italic">Increase this if you see dots or "grit" in the background.</p>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                        <div className="flex justify-between items-center">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">
+                                <FileType className="size-3" /> Ink Darkness
+                            </Label>
+                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">+{boostInk[0]}%</span>
                         </div>
-                    )}
+                        <Slider min={0} max={100} step={1} value={boostInk} onValueChange={setBoostInk} />
+                        <p className="text-[9px] text-muted-foreground italic">Makes the signature strokes darker and clearer.</p>
+                    </div>
+
+                    <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3">
+                        <FileType className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Tip</p>
+                            <p className="text-[9px] text-green-600/80 font-medium leading-relaxed">
+                                Use the sensitivity slider to wipe out shadows. The background is now 100% transparent for documents.
+                            </p>
+                        </div>
+                    </div>
                 </CardContent>
-                <CardFooter className="p-4 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
-                    <Button variant="outline" className="flex-1" onClick={handleReset} disabled={isProcessing}>
-                        <X className="mr-2 h-4 w-4" /> Start Over
-                    </Button>
-                    {!resultImageSrc ? (
-                        <Button className="flex-[2] h-12 font-black bg-primary hover:bg-primary/90 shadow-lg" 
-                                onClick={handleAutoExtract} disabled={isProcessing}>
-                            <Zap className="mr-2 h-4 w-4" /> AUTO-EXTRACT SIGNATURE
-                        </Button>
-                    ) : (
-                        <Button className="flex-[2] h-12 font-black bg-green-600 hover:bg-green-700 shadow-lg" 
-                                onClick={handleDownload}>
-                            <Download className="mr-2 h-5 w-5" /> DOWNLOAD PNG
-                        </Button>
-                    )}
-                </CardFooter>
             </Card>
         </div>
       </div>
       
-      {resultImageSrc && !isProcessing && (
-         <div className="mt-8 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg max-w-2xl mx-auto flex gap-3 items-center animate-in slide-in-from-bottom-4">
-            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-            <p className="text-sm text-green-800 dark:text-green-400 font-bold">
-                Perfect! Your signature is extracted with original colors and is ready to be used in Word or PDF documents.
-            </p>
-         </div>
-      )}
+      {/* Offscreen rendering canvas */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
+
