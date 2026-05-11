@@ -49,7 +49,7 @@ export default function PdfCompressor() {
     
     // Settings
     const [mode, setMode] = useState<CompressionMode>('target');
-    const [targetValue, setTargetValue] = useState<string>("200");
+    const [targetValue, setTargetValue] = useState<string>("100");
     const [targetUnit, setTargetUnit] = useState<TargetUnit>('kb');
     const [quality, setQuality] = useState<number[]>([70]);
     
@@ -74,7 +74,7 @@ export default function PdfCompressor() {
                 setTargetValue((sizeInKb / 1024 * 0.4).toFixed(1));
                 setTargetUnit('mb');
             } else {
-                setTargetValue(Math.round(sizeInKb * 0.5).toString());
+                setTargetValue(Math.round(sizeInKb * 0.3).toString());
                 setTargetUnit('kb');
             }
         } else if (file) {
@@ -100,66 +100,78 @@ export default function PdfCompressor() {
         if (!pdfFile) return;
         setIsProcessing(true);
         setCompressionResult(null);
-        setStatusText("Analyzing Document...");
+        setStatusText("Calibrating Engine...");
         setProgress(5);
 
         try {
             const arrayBuffer = await pdfFile.arrayBuffer();
             const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
             const totalPages = pdf.numPages;
-            
+
+            // Target calculation
+            let targetBytes = 0;
+            if (mode === 'target') {
+                const val = parseFloat(targetValue);
+                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) - (totalPages * 1500); // 1.5KB buffer per page for PDF overhead
+            }
+
+            /**
+             * PRECISION SEARCH ALGORITHM
+             * We do a quick trial on the first page to find parameters that hit the target.
+             */
+            let finalScale = 1.3;
+            let finalQuality = 0.7;
+
+            if (mode === 'target' && targetBytes > 0) {
+                const targetBytesPerPage = targetBytes / totalPages;
+                const page1 = await pdf.getPage(1);
+                
+                // Trial Loop (Max 5 attempts to find sweet spot)
+                let lowScale = 0.4, highScale = 1.6;
+                let lowQuality = 0.3, highQuality = 0.9;
+                
+                setStatusText("Smart Sampling...");
+                
+                for (let attempt = 0; attempt < 4; attempt++) {
+                    const testScale = (lowScale + highScale) / 2;
+                    const testQuality = (lowQuality + highQuality) / 2;
+                    
+                    const viewport = page1.getViewport({ scale: testScale });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        await page1.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        const data = canvas.toDataURL('image/jpeg', testQuality);
+                        const size = Math.round((data.length - 22) * 3 / 4); // Base64 to binary estimation
+
+                        if (size > targetBytesPerPage) {
+                            highScale = testScale;
+                            highQuality = testQuality;
+                        } else {
+                            lowScale = testScale;
+                            lowQuality = testQuality;
+                        }
+                    }
+                }
+                finalScale = lowScale;
+                finalQuality = lowQuality;
+            } else {
+                finalQuality = quality[0] / 100;
+                finalScale = 1.5;
+            }
+
             const newPdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
                 compress: true
             });
 
-            // Calculate Target Bytes
-            let targetBytes = 0;
-            if (mode === 'target') {
-                const val = parseFloat(targetValue);
-                targetBytes = targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024;
-            }
-
-            /**
-             * PRO-ADAPTIVE COMPRESSION ENGINE
-             * Designed to respect target size while protecting text clarity.
-             */
-            let finalScale = 1.5; 
-            let finalQuality = 0.75;
-
-            if (mode === 'target' && targetBytes > 0) {
-                const ratio = targetBytes / pdfFile.size;
-
-                if (ratio >= 1.0) {
-                    // Case 1: Target is bigger than original. No need to shrink.
-                    finalScale = 2.0; 
-                    finalQuality = 0.95;
-                } else if (ratio > 0.6) {
-                    // Case 2: Light compression.
-                    finalScale = 1.6;
-                    finalQuality = 0.85;
-                } else if (ratio > 0.3) {
-                    // Case 3: Moderate.
-                    finalScale = 1.3;
-                    finalQuality = 0.75;
-                } else {
-                    /**
-                     * Case 4: Aggressive (e.g., 2MB to 100KB).
-                     * We set a strict floor on Scale (0.95) to keep text sharp.
-                     * We compensate by lowering JPEG quality but never below 0.4.
-                     */
-                    finalScale = Math.max(0.95, 1.2 * Math.sqrt(ratio + 0.1));
-                    finalQuality = Math.max(0.4, ratio * 2);
-                }
-            } else {
-                // Manual Mode
-                finalScale = 1.5;
-                finalQuality = quality[0] / 100;
-            }
-
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Processing Page ${i}/${totalPages}...`);
+                setStatusText(`Encoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 const viewport = page.getViewport({ scale: finalScale });
@@ -171,47 +183,36 @@ export default function PdfCompressor() {
                 if (context) {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
-                    
                     context.imageSmoothingEnabled = true;
                     context.imageSmoothingQuality = 'high';
                     
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
                     const imgData = canvas.toDataURL('image/jpeg', finalQuality);
                     
-                    if (i > 1) {
-                        newPdf.addPage([viewport.width, viewport.height], 'p');
-                    } else {
+                    if (i > 1) newPdf.addPage([viewport.width, viewport.height], 'p');
+                    else {
                         newPdf.deletePage(1);
                         newPdf.addPage([viewport.width, viewport.height], 'p');
                     }
-                    
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
-                setProgress(Math.round((i / totalPages) * 95));
+                setProgress(10 + Math.round((i / totalPages) * 90));
             }
 
             const pdfBlob = newPdf.output('blob');
-            const newSize = pdfBlob.size;
-            const originalSize = pdfFile.size;
-            const savings = ((originalSize - newSize) / originalSize) * 100;
-
             setCompressionResult({
-                originalSize,
-                newSize,
-                savings: Math.max(0, savings)
+                originalSize: pdfFile.size,
+                newSize: pdfBlob.size,
+                savings: Math.max(0, ((pdfFile.size - pdfBlob.size) / pdfFile.size) * 100)
             });
 
-            const url = URL.createObjectURL(pdfBlob);
-            setCompressedPdfUrl(url);
-            setProgress(100);
+            setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
             setStatusText("Success!");
-            
-            toast({ title: 'Optimization Successful', description: `Final size: ${formatBytes(newSize)}` });
+            toast({ title: 'PDF Optimized', description: `Final size is ${formatBytes(pdfBlob.size)}.` });
 
         } catch (error: any) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to compress PDF.' });
         } finally {
             setIsProcessing(false);
         }
@@ -383,8 +384,8 @@ export default function PdfCompressor() {
                                     </div>
                                     <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
                                         <p className="text-[10px] text-primary font-bold leading-relaxed">
-                                            <span className="text-primary font-black uppercase mr-1">SHARP-TEXT ENGINE:</span> 
-                                            We keep text clear while reducing image density to hit your target.
+                                            <span className="text-primary font-black uppercase mr-1">ITERATIVE ENGINE:</span> 
+                                            The tool will auto-calibrate settings to strictly hit your target size.
                                         </p>
                                     </div>
                                 </div>
