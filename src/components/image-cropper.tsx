@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -98,7 +97,6 @@ export default function ImageCropper() {
             setCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
         }
     } else {
-        // Perspective initial points
         setPoints([
             { x: 15, y: 15 }, { x: 85, y: 15 },
             { x: 85, y: 85 }, { x: 15, y: 85 }
@@ -106,7 +104,6 @@ export default function ImageCropper() {
     }
   }
 
-  // --- PERSPECTIVE MATH ---
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -114,7 +111,6 @@ export default function ImageCropper() {
         p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     
-    // Simple Gaussian Elimination to solve AX = B
     const n = 8;
     for (let i = 0; i < n; i++) {
         let max = i;
@@ -145,14 +141,13 @@ export default function ImageCropper() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Determine target width/height based on top edge and side edge of the selected area
     const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
     const w2 = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
     const h1 = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
     const h2 = Math.hypot(points[2].x - points[1].x, points[2].y - points[1].y);
     
-    const targetWidth = Math.max(w1, w2) * (image.naturalWidth / 100);
-    const targetHeight = Math.max(h1, h2) * (image.naturalHeight / 100);
+    const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
+    const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
 
     canvas.width = targetWidth;
     canvas.height = targetHeight;
@@ -163,7 +158,7 @@ export default function ImageCropper() {
         { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }
     ];
 
-    const h = solvePerspective(dstPoints, srcPoints); // We want mapping from dst to src for inverse lookup
+    const h = solvePerspective(dstPoints, srcPoints);
 
     const imgData = ctx.createImageData(targetWidth, targetHeight);
     const srcCanvas = document.createElement('canvas');
@@ -175,8 +170,8 @@ export default function ImageCropper() {
 
     if (!srcData) return;
 
-    for (let y = 0; j < targetHeight; y++) {
-        for (let x = 0; i < targetWidth; x++) {
+    for (let y = 0; y < targetHeight; y++) {
+        for (let x = 0; x < targetWidth; x++) {
             const z = h[6] * x + h[7] * y + 1;
             const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
             const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
@@ -198,7 +193,6 @@ export default function ImageCropper() {
     setIsProcessing(false);
   };
 
-  // --- RECTANGULAR CROP MATH ---
   async function handleRectCrop() {
     const image = imgRef.current;
     if (!image || !completedCrop?.width) return;
@@ -210,7 +204,7 @@ export default function ImageCropper() {
 
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    const pixelRatio = window.devicePixelRatio;
+    const pixelRatio = window.devicePixelRatio || 1;
 
     canvas.width = completedCrop.width * scaleX * pixelRatio;
     canvas.height = completedCrop.height * scaleY * pixelRatio;
@@ -257,8 +251,8 @@ export default function ImageCropper() {
     document.body.removeChild(link);
   }
 
-  // --- INTERACTION LOGIC FOR DOTS ---
   const handlePointMouseDown = (index: number) => setPointIndex(index);
+  
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     
@@ -375,7 +369,7 @@ export default function ImageCropper() {
                                 <Grid3X3 className="h-4 w-4" /> SCANNER MODE
                             </p>
                             <p className="text-xs text-muted-foreground leading-relaxed">
-                                Drag the 4 corner dots to the edges of your document. The AI logic will flatten the perspective.
+                                Drag the 4 corner dots to the edges of your document. The logic will flatten the perspective.
                             </p>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -409,7 +403,7 @@ export default function ImageCropper() {
                 {croppedImageSrc ? (
                      <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-300">
                         <div className="relative shadow-2xl ring-4 ring-white rounded-lg overflow-hidden max-h-[60vh] bg-white">
-                            <Image src={croppedImageSrc} alt="Result" width={800} height={800} className="object-contain w-auto h-auto" />
+                            <img src={croppedImageSrc} alt="Result" className="object-contain max-w-full max-h-[60vh] w-auto h-auto" />
                         </div>
                         <div className="flex gap-4">
                             <Button variant="outline" size="lg" onClick={() => setCroppedImageSrc(null)}>
@@ -461,11 +455,8 @@ export default function ImageCropper() {
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <polygon 
                                         points={points.map(p => `${p.x},${p.y}`).join(' ')} 
-                                        className="fill-primary/20 stroke-primary stroke-[0.5] stroke-dasharray-1" 
+                                        className="fill-primary/20 stroke-primary stroke-[0.5]" 
                                     />
-                                    {/* Grid inside polygon */}
-                                    <line x1={points[0].x + (points[1].x - points[0].x)/3} y1={points[0].y + (points[1].y - points[0].y)/3} x2={points[3].x + (points[2].x - points[3].x)/3} y2={points[3].y + (points[2].y - points[3].y)/3} className="stroke-white/30 stroke-[0.2]" />
-                                    <line x1={points[0].x + (points[1].x - points[0].x)*2/3} y1={points[0].y + (points[1].y - points[0].y)*2/3} x2={points[3].x + (points[2].x - points[3].x)*2/3} y2={points[3].y + (points[2].y - points[3].y)*2/3} className="stroke-white/30 stroke-[0.2]" />
                                 </svg>
                                 {points.map((p, i) => (
                                     <div 
@@ -486,7 +477,6 @@ export default function ImageCropper() {
                     </div>
                 )}
                 
-                {/* Visual Guide */}
                 {!croppedImageSrc && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-medium">
                         <Move className="h-3 w-3" /> {cropMode === 'rectangular' ? "Drag corners to resize" : "Drag the 4 dots to object corners"}
