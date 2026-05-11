@@ -2,41 +2,36 @@
 "use client";
 
 import React, { useState, useRef, useEffect, type SyntheticEvent } from 'react';
-import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
     UploadCloud, 
     Download, 
     Crop as CropIcon, 
     RefreshCcw, 
     Contact, 
-    Maximize, 
-    Settings2, 
-    CheckCircle2, 
+    Eraser, 
+    Palette, 
+    Shirt, 
+    Loader2, 
+    ZoomIn, 
+    ZoomOut, 
+    ChevronUp, 
+    ChevronDown, 
+    ChevronLeft, 
+    ChevronRight, 
+    User, 
+    UserCircle, 
+    Baby, 
+    X, 
+    LayoutGrid,
+    CheckCircle2,
     ShieldCheck,
-    Eraser,
-    Palette,
-    Shirt,
-    Loader2,
-    Move,
-    ZoomIn,
-    ZoomOut,
-    ChevronUp,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    User,
-    UserCircle,
-    Baby,
-    Sparkles,
-    X,
-    LayoutGrid
+    ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -68,7 +63,6 @@ const BG_COLORS = [
     { name: "Light Grey", value: "#D3D3D3" },
 ];
 
-// Realistic Clothing Assets (Transparent PNGs)
 const CLOTH_CATEGORIES = [
     { id: 'men', label: 'Men', icon: UserCircle },
     { id: 'women', label: 'Women', icon: User },
@@ -113,7 +107,7 @@ export default function PassportPhotoMaker() {
     const [customUnit, setCustomUnit] = useState<Unit>('cm');
 
     // Studio Canvas States
-    const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); // This is the user's face (no BG)
+    const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
     const [bgColor, setBgColor] = useState("#FFFFFF");
     const [selectedClothUrl, setSelectedClothUrl] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState('men');
@@ -192,7 +186,7 @@ export default function PassportPhotoMaker() {
     const handleRemoveBackground = async () => {
         if (!originalCroppedData) return;
         setIsProcessing(true);
-        setProgress(10);
+        setProgress(5);
 
         try {
             const imglyModule = await import("@imgly/background-removal");
@@ -208,14 +202,14 @@ export default function PassportPhotoMaker() {
             setStage('cloth');
             toast({ title: "Background Cleaned", description: "AI successfully extracted your face." });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "AI Error", description: "Could not remove background. Procceding to manual." });
+            console.error(error);
+            toast({ variant: "destructive", title: "AI Error", description: "Could not remove background automatically." });
             setStage('cloth');
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // Composite Final Image on Canvas
     useEffect(() => {
         const render = async () => {
             const canvas = mainCanvasRef.current;
@@ -251,6 +245,7 @@ export default function PassportPhotoMaker() {
                     ctx.drawImage(faceImg, x, y, dw, dh);
                     resolve(null);
                 };
+                faceImg.onerror = () => resolve(null);
             });
 
             // 3. Draw Clothing Overlay (If selected)
@@ -260,13 +255,13 @@ export default function PassportPhotoMaker() {
                 clothImg.src = selectedClothUrl;
                 await new Promise((resolve) => {
                     clothImg.onload = () => {
-                        // Cloth usually fills the bottom of the frame
                         const clothAspect = clothImg.width / clothImg.height;
                         const dw = canvas.width;
                         const dh = dw / clothAspect;
                         ctx.drawImage(clothImg, 0, canvas.height - dh, dw, dh);
                         resolve(null);
                     };
+                    clothImg.onerror = () => resolve(null);
                 });
             }
         };
@@ -292,9 +287,9 @@ export default function PassportPhotoMaker() {
         setScale(100);
         setPosX(0);
         setPosY(0);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    // Helper for navigation
     const move = (dir: 'up' | 'down' | 'left' | 'right') => {
         if (dir === 'up') setPosY(p => p - 2);
         if (dir === 'down') setPosY(p => p + 2);
@@ -351,9 +346,8 @@ export default function PassportPhotoMaker() {
 
     return (
         <div className="w-full max-w-5xl animate-in fade-in duration-500">
-            {/* Header Tabs */}
-            <div className="flex justify-center mb-8">
-                <div className="bg-card/80 backdrop-blur-xl border-2 rounded-2xl p-1 flex gap-2 shadow-xl">
+            <div className="flex justify-center mb-8 overflow-x-auto">
+                <div className="bg-card/80 backdrop-blur-xl border-2 rounded-2xl p-1 flex gap-2 shadow-xl whitespace-nowrap">
                     {[
                         { id: 'size', label: 'Size', icon: LayoutGrid },
                         { id: 'crop', label: 'Crop', icon: CropIcon },
@@ -361,30 +355,34 @@ export default function PassportPhotoMaker() {
                         { id: 'cloth', label: 'Cloth', icon: Shirt },
                         { id: 'download', label: 'Download', icon: Download },
                     ].map((t) => (
-                        <button
+                        <div
                             key={t.id}
-                            disabled={true} // Only visual breadcrumbs
                             className={cn(
                                 "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-all",
                                 stage === t.id ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-muted-foreground opacity-60"
                             )}
                         >
                             <t.icon className="size-4" /> {t.label}
-                        </button>
+                        </div>
                     ))}
                 </div>
             </div>
 
             <div className="grid lg:grid-cols-12 gap-8 items-start">
-                {/* Main Interaction Area */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-2xl relative bg-slate-900/5 min-h-[500px] flex items-center justify-center">
                         {stage === 'crop' && imgSrc ? (
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()} keepSelection>
-                                <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[60vh] w-auto object-contain" onLoad={(e) => {
-                                    const { width, height } = e.currentTarget;
-                                    setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
-                                }} />
+                                <img 
+                                    ref={imgRef} 
+                                    src={imgSrc} 
+                                    alt="source" 
+                                    className="max-h-[60vh] w-auto object-contain" 
+                                    onLoad={(e) => {
+                                        const { width, height } = e.currentTarget;
+                                        setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
+                                    }} 
+                                />
                             </ReactCrop>
                         ) : (
                             <div className="relative p-2 bg-white shadow-inner ring-8 ring-white/50 rounded-lg">
@@ -398,9 +396,8 @@ export default function PassportPhotoMaker() {
                             </div>
                         )}
                         
-                        {/* Interactive HUD Controls (Only in Studio Stages) */}
                         {(stage === 'background' || stage === 'cloth') && !isProcessing && (
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md rounded-2xl border-2 shadow-2xl">
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md rounded-2xl border-2 shadow-2xl z-20">
                                 <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => setScale(s => s + 5)}><ZoomIn /></Button>
                                 <Button variant="ghost" size="icon" className="size-10 rounded-xl" onClick={() => setScale(s => s - 5)}><ZoomOut /></Button>
                                 <div className="w-px h-6 bg-border mx-2" />
@@ -413,7 +410,6 @@ export default function PassportPhotoMaker() {
                         )}
                     </Card>
 
-                    {/* Navigation Bar */}
                     <div className="flex justify-center items-center gap-4">
                         <Button variant="outline" size="lg" className="h-14 px-8 border-2 font-black" onClick={reset}>
                             <RefreshCcw className="mr-2" /> START OVER
@@ -421,7 +417,7 @@ export default function PassportPhotoMaker() {
 
                         {stage === 'crop' && (
                             <Button size="lg" className="h-14 px-12 bg-primary font-black shadow-xl" onClick={handleInitialCrop}>
-                                NEXT: BACKGROUND <ChevronRight className="ml-2" />
+                                NEXT: BACKGROUND <ChevronRightIcon className="ml-2" />
                             </Button>
                         )}
                         {stage === 'background' && (
@@ -438,7 +434,6 @@ export default function PassportPhotoMaker() {
                     </div>
                 </div>
 
-                {/* Right Side Panel */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
                         <CardHeader className="bg-primary/5 border-b p-4">
@@ -452,7 +447,7 @@ export default function PassportPhotoMaker() {
                                 <div className="p-6 space-y-6">
                                     <div className="p-4 bg-primary/5 rounded-2xl flex gap-3 items-center border border-primary/10">
                                         <Palette className="size-6 text-primary" />
-                                        <p className="text-xs font-bold text-primary uppercase">Select Official Background Color</p>
+                                        <p className="text-xs font-bold text-primary uppercase">Select Background Color</p>
                                     </div>
                                     <div className="grid grid-cols-5 gap-3">
                                         {BG_COLORS.map(c => (
@@ -473,7 +468,7 @@ export default function PassportPhotoMaker() {
 
                             {stage === 'cloth' && (
                                 <div className="flex flex-col h-[500px]">
-                                    <div className="flex bg-muted/50 p-2 gap-2 border-b">
+                                    <div className="flex bg-muted/50 p-2 gap-2 border-b overflow-x-auto">
                                         {CLOTH_CATEGORIES.map(cat => (
                                             <Button 
                                                 key={cat.id} 
@@ -506,7 +501,12 @@ export default function PassportPhotoMaker() {
                                                         selectedClothUrl === item.url ? "border-primary ring-4 ring-primary/20" : "border-transparent"
                                                     )}
                                                 >
-                                                    <Image src={item.url} alt={item.label} fill className="object-contain p-2" />
+                                                    <img 
+                                                        src={item.url} 
+                                                        alt={item.label} 
+                                                        className="w-full h-full object-contain p-2" 
+                                                        loading="lazy"
+                                                    />
                                                     <div className="absolute inset-x-0 bottom-0 bg-black/60 py-1">
                                                         <p className="text-[8px] text-white text-center font-bold uppercase truncate px-1">{item.label}</p>
                                                     </div>
@@ -516,7 +516,7 @@ export default function PassportPhotoMaker() {
                                     </ScrollArea>
                                     <div className="p-4 bg-muted/30 border-t">
                                         <p className="text-[9px] font-bold text-muted-foreground text-center uppercase tracking-widest">
-                                            Tip: Use the HUD controls on the left to align face
+                                            Tip: Use alignment keys to fit chehre to suit
                                         </p>
                                     </div>
                                 </div>
@@ -529,7 +529,7 @@ export default function PassportPhotoMaker() {
                             <ShieldCheck className="size-8 text-green-600 shrink-0" />
                             <div>
                                 <p className="text-[10px] font-black text-green-700 uppercase">Secure Studio Active</p>
-                                <p className="text-[9px] text-green-600/80 font-medium">All face-fitting and AI processing is done locally. Your photos never leave this browser.</p>
+                                <p className="text-[9px] text-green-600/80 font-medium">All AI processing is done 100% locally in your browser.</p>
                             </div>
                         </CardContent>
                     </Card>
