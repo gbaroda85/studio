@@ -27,17 +27,20 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block">
-      <Card className="h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:border-primary/80 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:ring-2 group-hover:ring-primary/50 dark:group-hover:shadow-primary/10">
-        <CardHeader className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="mb-3 grid size-14 place-items-center rounded-lg bg-primary/10">
-              <Icon className={cn("h-8 w-8", color)} />
+      <Card className="h-full relative overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl border-border/50 bg-card group-hover:border-primary/50 group-hover:ring-1 group-hover:ring-primary/20">
+        <CardHeader className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className={cn("grid size-14 place-items-center rounded-2xl bg-muted/50 transition-all group-hover:scale-110 group-hover:bg-primary/10", color)}>
+              <Icon className="h-8 w-8" />
             </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            <div className="size-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary text-primary group-hover:text-white transition-all">
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+            </div>
           </div>
-          <CardTitle className="text-xl font-semibold">{title}</CardTitle>
-          <CardDescription className="text-base">{description}</CardDescription>
+          <CardTitle className="text-xl font-black mb-2 leading-tight">{title}</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground leading-relaxed font-medium">{description}</CardDescription>
         </CardHeader>
+        <div className="absolute -bottom-6 -right-6 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-xl" />
       </Card>
     </Link>
   );

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -15,7 +16,6 @@ import {
   Unlock,
   Scissors,
   Maximize,
-  Info,
   Copyright,
   Settings,
   Archive,
@@ -72,101 +72,73 @@ function AppSidebar() {
   const { t } = useLanguage();
 
   const menuItems = [
-    {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-green-500'},
-    {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-fuchsia-500'},
-    {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-blue-500'},
+    {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-blue-500'},
+    {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-indigo-500'},
+    {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-cyan-500'},
     {href: '/remove-background', labelKey: 'remove_background_label', icon: Eraser, color: 'text-rose-500'},
     {href: '/remove-signature', labelKey: 'remove_signature_label', icon: PenLine, color: 'text-orange-500'},
     {href: '/enhance-photo', labelKey: 'enhance_photo_label', icon: Wand2, color: 'text-violet-500'},
     {href: '/image-to-text', labelKey: 'image_to_text_label', icon: FileScan, color: 'text-teal-500'},
-    {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
+    {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-amber-500'},
     {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
-    {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-gray-500'},
+    {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-slate-500'},
     {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
     {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
     {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
     {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
-    {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-500'},
-    {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-amber-500'},
-    {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-indigo-500'},
-    {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-teal-500'},
-    {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
-    {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-500'},
-    {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-500'},
+    {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-600'},
+    {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-yellow-600'},
+    {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-emerald-500'},
+    {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-green-500'},
+    {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-600'},
+    {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-600'},
+    {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-600'},
     {href: '/unzip-file', labelKey: 'unzip_file_label', icon: ArchiveRestore, color: 'text-stone-500'},
-    {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-cyan-500'},
-    {href: '/loan-calculator', labelKey: 'loan_emi_calculator_label', icon: Landmark, color: 'text-sky-500'},
-    {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-teal-500'},
+    {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-blue-600'},
+    {href: '/loan-calculator', labelKey: 'loan_emi_calculator_label', icon: Landmark, color: 'text-indigo-600'},
+    {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-rose-500'},
     {href: '/percentage-calculator', labelKey: 'percentage_calculator_label', icon: Percent, color: 'text-blue-500'},
-    {href: '/fuel-cost-calculator', labelKey: 'fuel_cost_calculator_label', icon: Route, color: 'text-rose-500'},
-    {
-      href: '/interest-calculator',
-      labelKey: 'interest_calculator_label',
-      icon: Coins,
-      color: 'text-yellow-500',
-    },
-    {
-      href: '/sales-tax-calculator',
-      labelKey: 'sales_tax_calculator_label',
-      icon: Receipt,
-      color: 'text-indigo-500',
-    },
+    {href: '/fuel-cost-calculator', labelKey: 'fuel_cost_calculator_label', icon: Route, color: 'text-amber-600'},
+    {href: '/interest-calculator', labelKey: 'interest_calculator_label', icon: Coins, color: 'text-yellow-600'},
+    {href: '/sales-tax-calculator', labelKey: 'sales_tax_calculator_label', icon: Receipt, color: 'text-emerald-600'},
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="h-24 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-full w-full text-primary-foreground"
-            >
-                <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
-            </svg>
+    <Sidebar className="border-r-0 bg-slate-950">
+      <SidebarHeader className="h-28 justify-center border-0 px-6">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-premium p-3 shadow-xl shadow-primary/20 animate-pulse-subtle">
+            <LayoutGrid className="h-full w-full text-white" />
           </div>
-          <span className="text-base font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
-            GRs Multi Tools Kits Hub
-          </span>
+          <div className="flex flex-col">
+              <span className="text-lg font-black font-headline text-white leading-none tracking-tighter">GRs HUB</span>
+              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
+          </div>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu className="grid grid-cols-1 gap-2 p-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col">
+      <SidebarContent className="px-4">
+        <SidebarMenu className="gap-2">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 size="lg"
-                variant="outline"
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-24 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
+                className="h-14 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/5 transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
               >
-                <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-8", item.color)} />
-                  <span className="text-base text-center leading-tight break-words group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
+                <Link href={item.href} onClick={() => setOpenMobile(false)} className="flex items-center gap-4">
+                  <item.icon className={cn("size-6 shrink-0 transition-transform group-hover:scale-110", item.color)} />
+                  <span className="text-sm font-bold text-slate-300 group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <AboutDialog />
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="p-4 bg-slate-900/50">
+        <AboutDialog />
       </SidebarFooter>
     </Sidebar>
   );
@@ -178,17 +150,17 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-12 w-12 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-          <Settings className="h-8 w-8" />
+        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-primary/10">
+          <Settings className="h-6 w-6 text-foreground" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{t('language')}</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl">
+        <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-lg">{t('english')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('hi')} className="text-lg">{t('hindi')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('es')} className="text-lg">{t('spanish')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3">🇺🇸 {t('english')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('hi')} className="rounded-xl font-bold py-3">🇮🇳 {t('hindi')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('es')} className="rounded-xl font-bold py-3">🇪🇸 {t('spanish')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -196,34 +168,30 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-2 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-2 sm:px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
-      <div className="flex items-center">
-        <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
-      </div>
-
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <Link href="/" className="pointer-events-auto">
-            <div className="animate-title-pulse flex items-center gap-2">
-                <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground" />
-                <h1 className="hidden sm:block whitespace-nowrap text-xl sm:text-2xl font-bold tracking-wide font-headline">
-                    <span className="text-primary-foreground">GRs Multi </span>
-                    <span className="text-gradient-cyan">Tools Kits Hub</span>
+    <header className="sticky top-0 z-50 h-24 glass-panel border-b-0 shadow-lg px-4 md:px-8">
+      <div className="flex h-full items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+            <SidebarTrigger className="h-12 w-12 rounded-xl hover:bg-primary/10" />
+            <div className="h-8 w-px bg-border hidden sm:block" />
+            <Link href="/" className="hidden sm:flex items-center gap-2 group">
+                <h1 className="text-xl font-black tracking-tighter transition-colors group-hover:text-primary">
+                    <span className="text-foreground">GRs </span>
+                    <span className="text-gradient-primary">Tools</span>
                 </h1>
-            </div>
-        </Link>
-      </div>
+            </Link>
+        </div>
 
-      <div className="flex flex-col items-end justify-center gap-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" className="hidden lg:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-12">
+                <a href="mailto:gaurav.thearmy@yahoo.com">
+                    <Mail className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-black text-muted-foreground uppercase tracking-widest">Support</span>
+                </a>
+            </Button>
+            <div className="h-8 w-px bg-border mx-2" />
             <SettingsMenu />
             <ThemeToggle />
         </div>
-        <Button asChild variant="ghost" className="h-auto px-2 py-1 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-            <a href="mailto:gaurav.thearmy@yahoo.com" className="flex items-center gap-1.5">
-                <Mail className="h-5 w-5" />
-                <span className="hidden text-sm lg:inline">gaurav.thearmy@yahoo.com</span>
-            </a>
-        </Button>
       </div>
     </header>
   );
@@ -231,30 +199,16 @@ function AppHeader() {
 
 function AppLayoutSkeleton() {
     return (
-        <div className="flex items-center justify-center min-h-screen w-full bg-background">
-            <div className="flex flex-col items-center gap-6 animate-pulse">
-                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary p-3">
-                    <svg
-                      width="40"
-                      height="40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-full w-full text-primary-foreground"
-                    >
-                        <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
-                    </svg>
+        <div className="flex items-center justify-center min-h-screen w-full bg-slate-950">
+            <div className="flex flex-col items-center gap-8 animate-fade-in-up">
+                 <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-premium p-4 shadow-2xl animate-pulse">
+                    <LayoutGrid className="h-full w-full text-white" />
                 </div>
-                 <h1 className="text-center whitespace-nowrap text-3xl font-bold tracking-wide font-headline sm:text-4xl">
-                    <span className="text-foreground">GRs Multi </span>
-                    <span className="text-primary">Tools Kits Hub</span>
-                 </h1>
-                <Loader2 className="h-8 w-8 animate-spin text-primary mt-4" />
+                 <div className="text-center space-y-2">
+                    <h1 className="text-4xl font-black tracking-tighter text-white font-headline">GRs HUB</h1>
+                    <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Initializing Core...</p>
+                 </div>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         </div>
     )
@@ -275,9 +229,13 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col overflow-hidden">
           <AppHeader />
-          <SidebarInset>{children}</SidebarInset>
+          <SidebarInset className="bg-background relative">
+             <div className="absolute top-0 right-0 size-[500px] bg-primary/5 blur-[150px] -z-10 rounded-full" />
+             <div className="absolute bottom-0 left-0 size-[500px] bg-accent/5 blur-[150px] -z-10 rounded-full" />
+             {children}
+          </SidebarInset>
         </div>
       </div>
     </SidebarProvider>
