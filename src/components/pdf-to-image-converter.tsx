@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Robust worker fetching for browser environment
+// Robust worker fetching for browser environment using a versioned minified bundle
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type OutputFormat = 'png' | 'jpeg';

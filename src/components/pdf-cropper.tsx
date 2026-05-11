@@ -15,7 +15,7 @@ import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Scissors } f
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Stable worker loading for browser environment
+// Stable worker loading for browser environment using versioned minified bundle
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfCropper() {
@@ -275,7 +275,7 @@ export default function PdfCropper() {
         <CardContent>
           <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-16 w-16 text-muted-foreground" />
-            <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop</p>
+            <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop a PDF</p>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </CardContent>
