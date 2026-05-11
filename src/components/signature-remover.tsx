@@ -66,14 +66,14 @@ export default function SignatureRemover() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  // --- Pro-Grade Local Algorithm (No Ghosting) ---
+  // --- Ultra-Precision Local Algorithm (No Color Loss) ---
   const processLocally = async (src: string, targetMode: ProcessingMode): Promise<string> => {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.src = src;
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d", { willowReadFrequently: true });
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
         if (!ctx) return resolve(src);
 
         canvas.width = img.width;
@@ -83,50 +83,65 @@ export default function SignatureRemover() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        // 1. Better Background Sampling (Average of corners)
-        const getCornerAvg = (startX: number, startY: number) => {
+        // 1. Advanced Background Sampling (Average of 4 corners to handle uneven lighting)
+        const getMultiPointBg = () => {
             let r=0, g=0, b=0, count=0;
-            for(let y=startY; y<startY+10 && y<canvas.height; y++) {
-                for(let x=startX; x<startX+10 && x<canvas.width; x++) {
-                    const i = (y * canvas.width + x) * 4;
-                    r += data[i]; g += data[i+1]; b += data[i+2];
-                    count++;
+            const points = [
+                [0,0], [canvas.width-10, 0], 
+                [0, canvas.height-10], [canvas.width-10, canvas.height-10],
+                [Math.floor(canvas.width/2), 0]
+            ];
+            for(const [startX, startY] of points) {
+                const sx = Math.max(0, startX);
+                const sy = Math.max(0, startY);
+                for(let y=sy; y<sy+10 && y<canvas.height; y++) {
+                    for(let x=sx; x<sx+10 && x<canvas.width; x++) {
+                        const i = (y * canvas.width + x) * 4;
+                        r += data[i]; g += data[i+1]; b += data[i+2];
+                        count++;
+                    }
                 }
             }
             return { r: r/count, g: g/count, b: b/count };
         };
-        const bg = getCornerAvg(0,0);
+        const bg = getMultiPointBg();
 
-        // 2. High-Precision Masking & Processing
+        // 2. High-Precision Masking (Low threshold to preserve faded ink)
+        const threshold = 32; // Optimized for delicate signatures
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i + 1], b = data[i + 2];
 
-          // Color distance from sampled paper background
+          // Euclidean distance from paper background
           const diff = Math.sqrt(
             Math.pow(r - bg.r, 2) + 
             Math.pow(g - bg.g, 2) + 
             Math.pow(b - bg.b, 2)
           );
 
-          // If it's NOT the paper background (it's Ink)
-          if (diff > 45) { // Sensitivity threshold
+          if (diff > threshold) {
+            // This is INK
             if (targetMode === 'erase') {
-                // ERASE: Blend with background to eliminate ghosting
-                // We use a slight blur effect by sampling nearby pixels for a perfect match
+                // ERASE: Match exactly with paper color
                 data[i] = bg.r;
                 data[i + 1] = bg.g;
                 data[i + 2] = bg.b;
             } else {
-                // TRANSPARENT: Keep the ink, but maybe darken it for clarity
+                // EXTRACT: Preserve original ink color and transparency
+                // We keep original R,G,B to prevent "removing color"
+                data[i + 3] = 255; 
+                
+                // Subtle darkening to make faded ink look professional in documents
                 const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-                if (luma > 200) { // It's too bright to be ink
-                    data[i + 3] = 0; // Make transparent
+                if (luma > 150) { // If it's a very light part of ink
+                    data[i] = Math.max(0, r * 0.9);
+                    data[i+1] = Math.max(0, g * 0.9);
+                    data[i+2] = Math.max(0, b * 0.9);
                 }
             }
           } else {
-            // It IS the paper background
+            // This is PAPER
             if (targetMode === 'transparent') {
-                data[i + 3] = 0; // Remove paper, keep only ink
+                data[i + 3] = 0; // Make background invisible
             }
           }
         }
@@ -145,26 +160,24 @@ export default function SignatureRemover() {
 
     const interval = setInterval(() => {
         setProgress(prev => (prev < 90 ? prev + 5 : prev));
-    }, 400);
+    }, 300);
 
     try {
-      // We use the local algorithm as it's now highly optimized for both modes
-      // and avoids the "Limit Reached" problem while giving better results than the ghosting AI.
       const processed = await processLocally(originalImageSrc, mode);
       
       setTimeout(() => {
         setResultImageSrc(processed);
         setProgress(100);
         toast({ 
-            title: mode === 'erase' ? "Signature Erased" : "Signature Extracted", 
-            description: mode === 'erase' ? "Document cleaned perfectly." : "Ready to use in Word/PDF." 
+            title: mode === 'erase' ? "Document Cleaned" : "Signature Ready", 
+            description: mode === 'erase' ? "All marks removed perfectly." : "Colors preserved for Word/PDF." 
         });
-      }, 800);
+      }, 600);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to process image." });
+      toast({ variant: "destructive", title: "Error", description: "Processing failed." });
     } finally {
       clearInterval(interval);
-      setTimeout(() => setIsProcessing(false), 1000);
+      setTimeout(() => setIsProcessing(false), 800);
     }
   };
 
@@ -238,23 +251,23 @@ export default function SignatureRemover() {
             
             <Card className="border-primary/20 bg-primary/5">
                 <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-bold">Select Task</CardTitle>
+                    <CardTitle className="text-sm font-bold">Action Mode</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                     <Tabs value={mode} onValueChange={(v) => {setMode(v as ProcessingMode); setResultImageSrc(null);}} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 h-14 bg-background border">
                             <TabsTrigger value="erase" className="data-[state=active]:bg-primary data-[state=active]:text-white font-bold gap-2">
-                                <Eraser className="h-4 w-4" /> Erase Signature
+                                <Eraser className="h-4 w-4" /> Clean Paper
                             </TabsTrigger>
                             <TabsTrigger value="transparent" className="data-[state=active]:bg-primary data-[state=active]:text-white font-bold gap-2">
-                                <Layers className="h-4 w-4" /> Extract (Transparent)
+                                <Layers className="h-4 w-4" /> Extract Sign
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
                     <p className="text-[11px] text-muted-foreground mt-3 font-medium">
                         {mode === 'erase' 
-                            ? "Removes the ink and restores the paper background perfectly." 
-                            : "Keeps only the signature ink. Ideal for pasting into Word or PDF documents."}
+                            ? "Removes the signature while keeping the paper background intact." 
+                            : "Preserves the signature ink colors and makes the paper transparent."}
                     </p>
                 </CardContent>
             </Card>
@@ -265,7 +278,7 @@ export default function SignatureRemover() {
             <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl relative h-full flex flex-col">
                 <CardHeader className="bg-primary/5 p-4 border-b">
                     <CardTitle className="text-sm font-bold uppercase tracking-tight text-primary flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" /> Studio Output
+                        <Sparkles className="h-4 w-4" /> High-Resolution Output
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 flex-1 relative flex items-center justify-center bg-white" 
@@ -278,16 +291,16 @@ export default function SignatureRemover() {
                                 <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
                             </div>
                             <div className="space-y-4 w-full max-w-xs">
-                                <p className="font-black text-xl text-primary animate-pulse uppercase">Processing...</p>
+                                <p className="font-black text-xl text-primary animate-pulse uppercase">Refining Edges...</p>
                                 <Progress value={progress} className="h-2" />
                             </div>
                         </div>
                     ) : resultImageSrc ? (
-                        <Image src={resultImageSrc} alt="Cleaned" fill className="object-contain p-4 animate-in zoom-in-95 duration-500" />
+                        <Image src={resultImageSrc} alt="Processed" fill className="object-contain p-4 animate-in zoom-in-95 duration-500" />
                     ) : (
                         <div className="flex flex-col items-center gap-4 text-muted-foreground opacity-20 py-20">
                             <FileType className="h-20 w-20" />
-                            <p className="font-bold text-lg uppercase tracking-widest">Preview Ready</p>
+                            <p className="font-bold text-lg uppercase tracking-widest">Process to Preview</p>
                         </div>
                     )}
                 </CardContent>
@@ -298,7 +311,7 @@ export default function SignatureRemover() {
                     {!resultImageSrc ? (
                         <Button className="flex-[2] h-12 font-black bg-primary hover:bg-primary/90 shadow-lg" 
                                 onClick={handleAutoProcess} disabled={isProcessing}>
-                            <Zap className="mr-2 h-4 w-4" /> START AUTO-PROCESS
+                            <Zap className="mr-2 h-4 w-4" /> RUN AUTO-PROCESS
                         </Button>
                     ) : (
                         <Button className="flex-[2] h-12 font-black bg-green-600 hover:bg-green-700 shadow-lg animate-in fade-in" 
@@ -315,10 +328,11 @@ export default function SignatureRemover() {
          <div className="mt-8 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg max-w-2xl mx-auto flex gap-3 items-center animate-in slide-in-from-bottom-4">
             <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
             <p className="text-sm text-green-800 dark:text-green-400 font-bold">
-                {mode === 'erase' ? "Ghosting removed! The document is now clean." : "Background removed! Your signature is ready for digital use."}
+                {mode === 'erase' ? "Signature erased perfectly. The paper background is restored." : "Colors preserved! Your signature is extracted and ready for digital documents."}
             </p>
          </div>
       )}
     </div>
   );
 }
+
