@@ -16,13 +16,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pi7.org',
+        port: '',
+        pathname: '/**',
+      },
     ],
-  },
-  analytics: {
-    disabled: true,
-  },
-  speedInsights: {
-    disabled: true,
   },
 };
 
