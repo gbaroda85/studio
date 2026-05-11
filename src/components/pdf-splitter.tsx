@@ -105,7 +105,7 @@ export default function PdfSplitter() {
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             const newPdfDoc = await PDFDocument.create();
 
             const pageIndices = pagesToExtract.map(p => p - 1); // convert to 0-based index
@@ -122,7 +122,7 @@ export default function PdfSplitter() {
 
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error Splitting PDF', description: 'Could not split the PDF. It might be corrupted or encrypted.' });
+            toast({ variant: 'destructive', title: 'Error Splitting PDF', description: 'Could not split the PDF. It might be corrupted or have strict encryption permissions.' });
         } finally {
             setIsSplitting(false);
         }
