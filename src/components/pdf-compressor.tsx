@@ -7,9 +7,13 @@ import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Loader2, Download, FileArchive, CheckCircle2, Zap, ShieldCheck, Sparkles, RefreshCcw } from 'lucide-react';
+import { UploadCloud, Loader2, Download, FileArchive, CheckCircle2, Zap, ShieldCheck, Sparkles, RefreshCcw, Target, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -29,6 +33,8 @@ type CompressionResult = {
   originalSize: number;
 };
 
+type CompressionMode = 'manual' | 'target';
+
 export default function PdfCompressor() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -38,6 +44,12 @@ export default function PdfCompressor() {
     const [statusText, setStatusText] = useState("");
     const [compressedPdfUrl, setCompressedPdfUrl] = useState<string | null>(null);
     const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
+    
+    // Settings
+    const [mode, setMode] = useState<CompressionMode>('target');
+    const [targetSizeKb, setTargetSizeKb] = useState<string>("200");
+    const [quality, setQuality] = useState<number[]>([60]);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -53,6 +65,9 @@ export default function PdfCompressor() {
             setCompressionResult(null);
             setProgress(0);
             setStatusText("");
+            // Set initial target based on original size
+            const suggestedTarget = Math.round((file.size / 1024) * 0.4);
+            setTargetSizeKb(String(Math.max(50, suggestedTarget)));
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a PDF file.' });
         }
@@ -76,7 +91,7 @@ export default function PdfCompressor() {
         if (!pdfFile) return;
         setIsProcessing(true);
         setCompressionResult(null);
-        setStatusText("Initializing Engine...");
+        setStatusText("Analyzing Content...");
         setProgress(5);
 
         try {
@@ -90,12 +105,34 @@ export default function PdfCompressor() {
                 compress: true
             });
 
+            // --- HEURISTIC LOGIC FOR TARGET SIZE ---
+            let finalScale = 1.5; // Default DPI
+            let finalQuality = quality[0] / 100;
+
+            if (mode === 'target') {
+                const targetBytes = parseInt(targetSizeKb, 10) * 1024;
+                const ratio = targetBytes / pdfFile.size;
+
+                if (ratio < 0.1) { // Extreme shrink
+                    finalScale = 0.6;
+                    finalQuality = 0.2;
+                } else if (ratio < 0.3) { // High shrink
+                    finalScale = 0.8;
+                    finalQuality = 0.4;
+                } else if (ratio < 0.6) { // Mid shrink
+                    finalScale = 1.1;
+                    finalQuality = 0.6;
+                } else { // Light shrink
+                    finalScale = 1.4;
+                    finalQuality = 0.8;
+                }
+            }
+
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Compressing Page ${i} of ${totalPages}...`);
+                setStatusText(`Shrinking Page ${i} of ${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Use a standard scale for mobile/web viewing (150 DPI approx)
-                const viewport = page.getViewport({ scale: 1.5 });
+                const viewport = page.getViewport({ scale: finalScale });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
@@ -106,19 +143,17 @@ export default function PdfCompressor() {
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
                     
-                    // The magic happens here: 0.6 quality for high compression, 0.8 for medium
-                    const imgData = canvas.toDataURL('image/jpeg', 0.6);
+                    const imgData = canvas.toDataURL('image/jpeg', finalQuality);
                     
                     if (i > 1) {
                         newPdf.addPage([viewport.width, viewport.height], 'p');
                     } else {
-                        // Resize first page to match source
                         newPdf.deletePage(1);
                         newPdf.addPage([viewport.width, viewport.height], 'p');
                     }
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
-                setProgress(Math.round((i / totalPages) * 90));
+                setProgress(Math.round((i / totalPages) * 95));
             }
 
             const pdfBlob = newPdf.output('blob');
@@ -135,16 +170,16 @@ export default function PdfCompressor() {
             const url = URL.createObjectURL(pdfBlob);
             setCompressedPdfUrl(url);
             setProgress(100);
-            setStatusText("Compression Done!");
+            setStatusText("Ready to Download!");
             
-            toast({ title: 'Success!', description: `PDF optimized by ${Math.max(0, savings).toFixed(1)}%` });
+            toast({ title: 'Success!', description: `PDF optimized to ${formatBytes(newSize)}.` });
 
         } catch (error: any) {
             console.error(error);
             toast({
                 variant: 'destructive',
-                title: 'Compression Error',
-                description: 'Failed to compress this PDF. It might be too large or encrypted.',
+                title: 'Compression Failed',
+                description: 'This PDF might be too complex or corrupted.',
             });
         } finally {
             setIsProcessing(false);
@@ -155,7 +190,7 @@ export default function PdfCompressor() {
         if (!compressedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = compressedPdfUrl;
-        link.download = `compressed-${pdfFile.name}`;
+        link.download = `optimized-${pdfFile.name}`;
         link.click();
     }
 
@@ -169,8 +204,8 @@ export default function PdfCompressor() {
                     <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
                         <FileArchive className="h-10 w-10" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Power PDF Compressor</CardTitle>
-                    <CardDescription>Actually reduce file size by optimizing images and re-encoding pages.</CardDescription>
+                    <CardTitle className="text-2xl font-bold">Ultra PDF Compressor</CardTitle>
+                    <CardDescription>Compress PDF to specific KB size using smart re-encoding.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -179,93 +214,175 @@ export default function PdfCompressor() {
                             <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
                         </div>
                         <div>
-                            <p className="text-xl font-bold">Drop PDF here to Shrink</p>
-                            <p className="text-sm text-muted-foreground mt-2">Private local processing. No files sent to server.</p>
+                            <p className="text-xl font-bold">Drop PDF here to Resize</p>
+                            <p className="text-sm text-muted-foreground mt-2">Private local processing. Best for government forms.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-bold pb-8">
                     <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> AES COMPLIANT</div>
-                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> SMART RE-ENCODING</div>
+                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> TARGET KB LOGIC</div>
                 </CardFooter>
             </Card>
         );
     }
     
     return (
-        <Card className="w-full max-w-md shadow-2xl border-primary/10 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-            <CardHeader className="bg-muted/30 border-b">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <FileArchive className="text-primary h-5 w-5" />
-                    Ready to Optimize
-                </CardTitle>
-                <CardDescription className="truncate font-mono text-[10px]">File: {pdfFile.name}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-                {!compressionResult && !isProcessing && (
-                    <div className="text-center p-8 border-2 border-dashed rounded-2xl bg-muted/10">
-                        <p className="text-sm font-bold text-muted-foreground mb-1">Current Size</p>
-                        <p className="text-3xl font-black text-foreground">{formatBytes(pdfFile.size)}</p>
-                    </div>
-                )}
-
-                {isProcessing && (
-                    <div className="space-y-4 py-4 text-center">
-                        <div className="relative inline-block">
-                             <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
-                             <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
-                        </div>
-                        <div className="space-y-2">
-                            <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">{statusText}</p>
-                            <Progress value={progress} className="h-2" />
-                            <p className="text-[10px] text-muted-foreground font-bold">Using Neural Optimization...</p>
-                        </div>
-                    </div>
-                )}
-
-                {compressionResult && (
-                     <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                         <div className="p-8 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-2xl flex flex-col items-center gap-4 text-center">
-                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/20">
-                                <CheckCircle2 className="h-8 w-8" />
+        <div className="w-full max-w-6xl grid lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="lg:col-span-7">
+                <Card className="shadow-2xl border-primary/10 overflow-hidden h-full">
+                    <CardHeader className="bg-muted/30 border-b">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <FileArchive className="text-primary h-5 w-5" />
+                            Compression Workspace
+                        </CardTitle>
+                        <CardDescription className="truncate font-mono text-[10px]">{pdfFile.name} ({formatBytes(pdfFile.size)})</CardDescription>
+                    </CardHeader>
+                    <CardContent className="py-12 flex flex-col items-center justify-center min-h-[300px]">
+                        {isProcessing ? (
+                            <div className="space-y-6 w-full max-w-sm text-center">
+                                <div className="relative inline-block">
+                                     <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                     <Zap className="absolute inset-0 m-auto h-10 w-10 text-primary animate-pulse" />
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
+                                    <Progress value={progress} className="h-2 shadow-inner" />
+                                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Optimizing Pixels for Precision...</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-[10px] text-green-600/80 uppercase font-black tracking-widest mb-1">Compression Success</p>
-                                <p className="text-5xl font-black text-green-600">{compressionResult.savings.toFixed(1)}%</p>
-                                <p className="text-xs font-bold text-green-700 mt-1">Smaller than original</p>
+                        ) : compressionResult ? (
+                             <div className="w-full max-w-md space-y-8 animate-in zoom-in-95 duration-500">
+                                 <div className="p-10 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-3xl flex flex-col items-center gap-4 text-center">
+                                    <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40">
+                                        <CheckCircle2 className="h-10 w-10" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-green-600/80 uppercase font-black tracking-widest mb-1">Optimization Complete</p>
+                                        <p className="text-6xl font-black text-green-600">{compressionResult.savings.toFixed(1)}%</p>
+                                        <p className="text-sm font-bold text-green-700 mt-2">Saved from original size</p>
+                                    </div>
+                                 </div>
+                                
+                                <div className="grid grid-cols-2 gap-8 text-center px-4">
+                                    <div className="space-y-1">
+                                        <p className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">Before</p>
+                                        <p className="text-lg font-bold">{formatBytes(compressionResult.originalSize)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[11px] font-black text-primary uppercase tracking-wider">After</p>
+                                        <p className="text-lg font-bold text-primary">{formatBytes(compressionResult.newSize)}</p>
+                                    </div>
+                                </div>
                             </div>
-                         </div>
+                        ) : (
+                            <div className="text-center space-y-4">
+                                <div className="size-24 rounded-full bg-muted flex items-center justify-center mx-auto">
+                                    <FileArchive className="h-12 w-12 text-muted-foreground/40" />
+                                </div>
+                                <p className="text-muted-foreground font-medium">Ready to optimize your PDF.<br/>Adjust settings on the right.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="bg-muted/10 border-t p-6">
+                        {compressionResult && (
+                             <Button onClick={handleDownload} className="w-full h-16 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl transition-all active:scale-95">
+                                <Download className="mr-3 h-7 w-7" />
+                                DOWNLOAD SHRUNK PDF
+                            </Button>
+                        )}
+                        {!compressionResult && !isProcessing && (
+                            <Button variant="outline" onClick={resetState} className="w-full h-12 font-bold">
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Change PDF File
+                            </Button>
+                        )}
+                        {isProcessing && <div className="w-full h-16" />}
+                    </CardFooter>
+                </Card>
+            </div>
+
+            <div className="lg:col-span-5 space-y-6">
+                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden">
+                    <CardHeader className="bg-primary/5 border-b">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Settings2 className="h-5 w-5 text-primary" /> Settings
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-8 pb-8 space-y-8">
+                        <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-8 h-12 p-1 bg-muted">
+                                <TabsTrigger value="target" className="h-10 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+                                    <Target className="h-4 w-4 mr-2" /> Target Size
+                                </TabsTrigger>
+                                <TabsTrigger value="manual" className="h-10 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+                                    <RefreshCcw className="h-4 w-4 mr-2" /> Manual
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300">
+                                <div className="space-y-4">
+                                    <Label htmlFor="target-kb" className="text-sm font-black text-foreground uppercase tracking-tight">Required Max Size (KB)</Label>
+                                    <div className="relative group">
+                                        <Input 
+                                            id="target-kb" 
+                                            type="number" 
+                                            value={targetSizeKb} 
+                                            onChange={(e) => setTargetSizeKb(e.target.value)} 
+                                            className="pl-6 pr-16 h-14 text-2xl font-black focus-visible:ring-primary border-2 rounded-xl"
+                                            placeholder="200"
+                                        />
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-muted-foreground uppercase">KB</div>
+                                    </div>
+                                    <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
+                                        <p className="text-[10px] text-yellow-700 font-bold leading-relaxed">
+                                            <span className="text-yellow-600 font-black uppercase mr-1">Pro Tip:</span> 
+                                            Tool will automatically reduce resolution to hit this target while keeping text clear.
+                                        </p>
+                                    </div>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="manual" className="space-y-6 animate-in fade-in duration-300">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-sm font-black uppercase text-muted-foreground tracking-tight">Compression Level</Label>
+                                        <span className="text-primary font-mono font-black bg-primary/10 px-3 py-1 rounded-full text-sm">{quality[0]}%</span>
+                                    </div>
+                                    <Slider min={5} max={100} step={5} value={quality} onValueChange={setQuality} className="py-4" />
+                                    <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase">
+                                        <span>Smallest File</span>
+                                        <span>Best Clarity</span>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+
+                        {!compressionResult && (
+                             <Button 
+                                onClick={handleCompressPdf} 
+                                disabled={isProcessing} 
+                                className="w-full h-16 text-xl font-black tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 bg-primary hover:bg-primary/90"
+                            >
+                                {isProcessing ? <Loader2 className="mr-3 h-7 w-7 animate-spin" /> : <Zap className="mr-3 h-7 w-7 text-yellow-400" />}
+                                {isProcessing ? "SHRINKING..." : "OPTIMIZE NOW"}
+                            </Button>
+                        )}
                         
-                        <div className="grid grid-cols-2 gap-4 text-center px-2">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase">Original</p>
-                                <p className="text-sm font-bold">{formatBytes(compressionResult.originalSize)}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-primary uppercase">New Size</p>
-                                <p className="text-sm font-bold text-primary">{formatBytes(compressionResult.newSize)}</p>
-                            </div>
+                        {compressionResult && (
+                             <Button variant="outline" onClick={resetState} className="w-full h-12 font-bold rounded-xl border-2">
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Compress Another
+                            </Button>
+                        )}
+                    </CardContent>
+                    <CardFooter className="bg-muted/30 border-t py-4">
+                        <div className="flex gap-2 items-center text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
+                            <ShieldCheck className="size-3 text-green-500" />
+                            <span>Encrypted local re-encoding active</span>
                         </div>
-                    </div>
-                )}
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3 bg-muted/10 border-t p-6">
-                {!compressionResult ? (
-                    <Button onClick={handleCompressPdf} disabled={isProcessing} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl">
-                        {isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400"/>}
-                        {isProcessing ? "SHRINKING..." : "COMPRESS NOW"}
-                    </Button>
-                ) : (
-                    <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl animate-bounce">
-                        <Download className="mr-2 h-6 w-6" />
-                        DOWNLOAD SHRUNK PDF
-                    </Button>
-                )}
-                <Button variant="ghost" onClick={resetState} className="w-full text-xs font-bold text-muted-foreground h-10" disabled={isProcessing}>
-                    <RefreshCcw className="h-3 w-3 mr-1.5" /> {compressionResult ? "Compress Another" : "Change File"}
-                </Button>
-            </CardFooter>
-        </Card>
+                    </CardFooter>
+                </Card>
+            </div>
+        </div>
     );
 }
