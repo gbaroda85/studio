@@ -103,7 +103,7 @@ export default function PdfProtector() {
             copiedPages.forEach((page) => secureDoc.addPage(page));
 
             /**
-             * iLovePDF Style Hard Locking
+             * Strict Binary Locking Logic
              * Setting userPassword triggers the Open Lock prompt.
              * Setting ownerPassword with strict permissions prevents viewers from bypassing.
              */
@@ -142,7 +142,7 @@ export default function PdfProtector() {
         if (!protectedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = protectedPdfUrl;
-        link.download = `locked-${pdfFile.name}`;
+        link.download = `locked-${Date.now()}-${pdfFile.name}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -175,7 +175,7 @@ export default function PdfProtector() {
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-bold pb-8">
-                    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> AES-256 READY</div>
+                    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> AES-128 READY</div>
                     <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> ADOBE COMPATIBLE</div>
                 </CardFooter>
             </Card>
@@ -228,9 +228,9 @@ export default function PdfProtector() {
                         <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 flex gap-3">
                             <Info className="h-5 w-5 text-blue-500 shrink-0" />
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase">Pro Tip</p>
+                                <p className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase">Verification Tip</p>
                                 <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-tight font-medium">
-                                    Browsers sometimes cache decrypted files. For a real test, open your downloaded file in <b>Incognito Mode</b> or <b>Adobe Reader</b>.
+                                    Adobe Reader and <b>Incognito Mode</b> are recommended for testing, as regular tabs might cache credentials.
                                 </p>
                             </div>
                         </div>
