@@ -6,7 +6,6 @@ import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UploadCloud, Loader2, Download, Lock, ShieldCheck, Zap, AlertCircle, RefreshCcw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -72,18 +71,24 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            // First load to check if already encrypted
-            const pdfDoc = await PDFDocument.load(existingPdfBytes, { 
-                ignoreEncryption: true 
-            });
-
-            // Note: isEncrypted might be false if loaded with ignoreEncryption, 
-            // but we double check metadata or try to save.
+            // Step 1: Load the existing document
+            // We use ignoreEncryption to handle cases where it might have owner-only locks
+            const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
-            const protectedPdfBytes = await pdfDoc.save({
+            // Step 2: Create a BRAND NEW document
+            // This is the key: copying pages to a new doc strips away old permission metadata 
+            // that might prevent the new password from triggering correctly.
+            const newPdfDoc = await PDFDocument.create();
+            
+            // Copy all pages from original to the new one
+            const copiedPages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach((page) => newPdfDoc.addPage(page));
+
+            // Step 3: Save with high-security encryption parameters
+            // Both userPassword (to open) and ownerPassword (to edit) are set.
+            const protectedPdfBytes = await newPdfDoc.save({
                 userPassword: password,
                 ownerPassword: password,
-                // Ensure high level of protection
                 updateMetadata: true,
             });
 
@@ -95,7 +100,7 @@ export default function PdfProtector() {
 
         } catch (error: any) {
             console.error("Protection Error:", error);
-            setErrorDetails("Could not apply protection. The file might be corrupted or restricted by owner permissions.");
+            setErrorDetails("Could not apply protection. Ensure the file is not corrupted.");
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -137,14 +142,14 @@ export default function PdfProtector() {
                         </div>
                         <div>
                             <p className="text-xl font-bold">Drop PDF to Lock</p>
-                            <p className="text-sm text-muted-foreground mt-2">Best for Bills, Passwords, and Private Documents.</p>
+                            <p className="text-sm text-muted-foreground mt-2">Works for Bills, Passwords, and Private Documents.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-xs text-muted-foreground font-bold pb-8">
                     <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> 100% DEVICE ONLY</div>
-                    <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> SECURE HASHING</div>
+                    <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> FORCE PASSWORD PROMPT</div>
                 </CardFooter>
             </Card>
         );
@@ -173,7 +178,7 @@ export default function PdfProtector() {
                                 disabled={isProtecting}
                                 className="flex h-12 w-full rounded-md border-2 border-input bg-background px-3 py-2 text-lg font-bold tracking-widest ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-inner disabled:opacity-50"
                             />
-                            <p className="text-[10px] text-muted-foreground">This password will be required to open the PDF in any viewer.</p>
+                            <p className="text-[10px] text-muted-foreground">This password will be <strong>strictly required</strong> to open the file.</p>
                         </div>
                     </div>
                 )}
@@ -181,7 +186,7 @@ export default function PdfProtector() {
                 {isProtecting && (
                     <div className="space-y-4 py-8 text-center">
                         <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto opacity-20" />
-                        <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">Encrypting Document...</p>
+                        <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">Building Secure Vault...</p>
                     </div>
                 )}
 
@@ -202,7 +207,7 @@ export default function PdfProtector() {
                         </div>
                         <div className="text-center">
                             <p className="font-bold text-green-700">Security Vault Created!</p>
-                            <p className="text-xs text-green-600/80">Your file is now password protected.</p>
+                            <p className="text-xs text-green-600/80">The file is now fully encrypted.</p>
                         </div>
                     </div>
                 )}
@@ -211,7 +216,7 @@ export default function PdfProtector() {
                 {!protectedPdfUrl ? (
                     <Button onClick={handleProtectPdf} disabled={isProtecting || !password} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl">
                         {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2 h-5 w-5"/>}
-                        {isProtecting ? "LOCKING..." : "PROTECT PDF"}
+                        {isProtecting ? "ENCRYPTING..." : "PROTECT PDF"}
                     </Button>
                 ) : (
                     <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 animate-bounce">
