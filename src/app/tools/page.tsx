@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense } from 'react';
@@ -47,6 +48,7 @@ import {
   FileCode,
   FileScan,
   PenLine,
+  Contact,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -63,6 +65,13 @@ function ToolsPageContent() {
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
   const imageFeatures = [
+    {
+      href: '/passport-photo',
+      labelKey: 'passport_photo_label',
+      descriptionKey: 'passport_photo_description',
+      icon: Contact,
+      color: 'text-indigo-600',
+    },
     {
       href: '/image-compress',
       labelKey: 'image_compress_label',

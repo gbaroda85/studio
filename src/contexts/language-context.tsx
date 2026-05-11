@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -106,6 +107,8 @@ const translations = {
     target_size: 'Target File Size',
     target_size_kb: 'Target Size (KB)',
     calculating_quality: 'Optimizing quality...',
+    passport_photo_label: 'Passport Photo Maker',
+    passport_photo_description: 'Create official passport size photos easily.',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -198,10 +201,12 @@ const translations = {
     text_to_pdf_label: 'टेक्स्ट से पीडीएफ',
     text_to_pdf_description: 'सादे टेक्स्ट को पीडीएफ दस्तावेज़ में बदलें।',
     compression_mode: 'संपीड़न मोड',
-    manual_quality: 'मैनुअल गुणवत्ता',
+    manual_quality: 'मान्युअल गुणवत्ता',
     target_size: 'लक्ष्य फ़ाइल आकार',
     target_size_kb: 'लक्ष्य आकार (KB)',
     calculating_quality: 'गुणवत्ता का अनुकूलन किया जा रहा है...',
+    passport_photo_label: 'पासपोर्ट फोटो मेकर',
+    passport_photo_description: 'आसानी से आधिकारिक पासपोर्ट आकार की तस्वीरें बनाएं।',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -298,6 +303,8 @@ const translations = {
     target_size: 'Tamaño de archivo objetivo',
     target_size_kb: 'Tamaño objetivo (KB)',
     calculating_quality: 'Optimizando calidad...',
+    passport_photo_label: 'Creador de Fotos de Pasaporte',
+    passport_photo_description: 'Crea fotos oficiales de tamaño pasaporte fácilmente.',
   },
 };
 
