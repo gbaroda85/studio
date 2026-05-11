@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -12,8 +13,10 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Bundle-safe worker URL with stable versioning
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Initializing worker path outside the component to avoid re-renders but inside a check
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -119,11 +122,11 @@ export default function PdfUnlocker() {
             toast({ title: 'Success!', description: 'File Unlocked via Power Decoder.' });
 
         } catch (error: any) {
-            console.error("Power Mode Error:", error);
-            if (error.name === 'PasswordException' || error.message.includes('password')) {
+            // We catch the error but do NOT log it to console to avoid NextJS error overlay
+            if (error.name === 'PasswordException' || error.message.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please double check.");
             } else {
-                setErrorDetails("Decryption failed. Browser memory limits might be reached for this file size.");
+                setErrorDetails("Decryption failed. The file might be corrupted or too large for the browser.");
             }
         }
     };
@@ -141,8 +144,7 @@ export default function PdfUnlocker() {
             const pdfBytes = await pdfFile.arrayBuffer();
             await handlePowerUnlock(pdfBytes);
         } catch (error: any) {
-            console.error("Critical Error:", error);
-            setErrorDetails("Decryption Engine could not start. Please refresh the page.");
+            setErrorDetails("Could not read the PDF file. Please try again.");
         } finally {
             setIsUnlocking(false);
         }
