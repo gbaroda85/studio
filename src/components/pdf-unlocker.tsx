@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Loader2, Download, Unlock } from 'lucide-react';
+import { UploadCloud, Loader2, Download, Unlock, AlertCircle, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -18,6 +19,7 @@ export default function PdfUnlocker() {
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [unlockedPdfUrl, setUnlockedPdfUrl] = useState<string | null>(null);
+    const [errorDetails, setErrorDetails] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     useEffect(() => {
@@ -31,6 +33,7 @@ export default function PdfUnlocker() {
             URL.revokeObjectURL(unlockedPdfUrl);
             setUnlockedPdfUrl(null);
         }
+        setErrorDetails(null);
     }
 
     const handleFileChange = (file: File | null) => {
@@ -58,36 +61,48 @@ export default function PdfUnlocker() {
     }
 
     const handleUnlockPdf = async () => {
-        if (!pdfFile) {
-            toast({ variant: 'destructive', title: 'No file', description: 'Please upload a PDF file first.' });
-            return;
-        }
-        if (!password) {
-            toast({ variant: 'destructive', title: 'No password', description: 'Please enter the PDF password.' });
-            return;
-        }
+        if (!pdfFile) return;
+        
         setIsUnlocking(true);
+        setErrorDetails(null);
         clearUnlockedFile();
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
 
+            // First check if it's even encrypted
             const checkDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             if (!checkDoc.isEncrypted) {
-                toast({ variant: 'destructive', title: 'Not Encrypted', description: 'This PDF is not password protected.' });
+                toast({ variant: 'destructive', title: 'Not Protected', description: 'This PDF is already unlocked.' });
                 setIsUnlocking(false);
                 return;
             }
 
-            const pdfDoc = await PDFDocument.load(pdfBytes, {
-                userPassword: password,
-            });
+            // Attempt to load with the provided password
+            let pdfDoc;
+            try {
+                pdfDoc = await PDFDocument.load(pdfBytes, {
+                    userPassword: password,
+                });
+            } catch (loadError: any) {
+                // Check for specific decryption errors
+                if (loadError.message?.includes('AES-256') || loadError.message?.includes('unsupported')) {
+                    throw new Error("UNSUPPORTED_ENCRYPTION");
+                }
+                throw loadError;
+            }
 
+            // To "unlock", we create a brand new document and copy pages
+            // This strips all security and permission settings
             const unlockedDoc = await PDFDocument.create();
-            const copiedPages = await unlockedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-            copiedPages.forEach((page) => {
-                unlockedDoc.addPage(page);
-            });
+            const pageIndices = pdfDoc.getPageIndices();
+            
+            if (pageIndices.length === 0) {
+                throw new Error("No pages found in document.");
+            }
+
+            const copiedPages = await unlockedDoc.copyPages(pdfDoc, pageIndices);
+            copiedPages.forEach((page) => unlockedDoc.addPage(page));
 
             const unlockedPdfBytes = await unlockedDoc.save();
             
@@ -95,14 +110,23 @@ export default function PdfUnlocker() {
             const url = URL.createObjectURL(blob);
             setUnlockedPdfUrl(url);
             
-            toast({title: 'Success!', description: 'Your PDF has been unlocked and is ready for download.'});
+            toast({ title: 'Success!', description: 'PDF Unlocked successfully.' });
         } catch (error: any) {
-            if (error.constructor.name === 'EncryptedPDFError' || (error.message && error.message.includes('password'))) {
-                 toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password you entered is incorrect.' });
+            console.error("Unlock Error:", error);
+            
+            if (error.message === "UNSUPPORTED_ENCRYPTION") {
+                setErrorDetails("This PDF uses modern AES-256 encryption which is too strong for browser-based unlocking. Try a desktop tool.");
+            } else if (error.message?.includes('password') || error.constructor.name === 'EncryptedPDFError') {
+                setErrorDetails("The password you entered is incorrect for this file.");
             } else {
-                console.error(error);
-                toast({ variant: 'destructive', title: 'Error Unlocking PDF', description: 'Could not unlock the PDF. It might be corrupted.' });
+                setErrorDetails("Could not process this PDF. It might be heavily restricted or corrupted.");
             }
+            
+            toast({ 
+                variant: 'destructive', 
+                title: 'Unlock Failed', 
+                description: 'Please check the error message below.' 
+            });
         } finally {
             setIsUnlocking(false);
         }
@@ -125,53 +149,89 @@ export default function PdfUnlocker() {
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
                 <CardHeader>
-                    <CardTitle>Unlock PDF</CardTitle>
-                    <CardDescription>Upload a PDF to remove password protection.</CardDescription>
+                    <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
+                        <Unlock className="text-primary h-6 w-6" /> PDF Unlocker
+                    </CardTitle>
+                    <CardDescription>Upload a password-protected PDF to remove security.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                    <div className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
                         <UploadCloud className="h-16 w-16 text-muted-foreground" />
                         <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop a PDF</p>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
+                <CardFooter className="justify-center text-xs text-muted-foreground">
+                    <ShieldAlert className="h-3 w-3 mr-1" /> All processing is local. We don't see your password.
+                </CardFooter>
             </Card>
         );
     }
     
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader>
-                <CardTitle>Unlock PDF</CardTitle>
-                <CardDescription>Enter the password to decrypt your PDF file.</CardDescription>
+        <Card className="w-full max-w-md shadow-2xl border-primary/10">
+            <CardHeader className="bg-muted/30 border-b">
+                <CardTitle className="text-lg">Remove PDF Security</CardTitle>
+                <CardDescription className="truncate">File: {pdfFile.name}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="font-medium text-sm truncate">File: {pdfFile.name}</div>
-                <div className="space-y-2">
-                    <Label htmlFor="password">Current Password</Label>
-                    <Input 
-                        id="password" 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => { setPassword(e.target.value); clearUnlockedFile(); }}
-                        placeholder="Enter current password"
-                        disabled={isUnlocking}
-                    />
-                </div>
+            <CardContent className="space-y-6 pt-6">
+                {!unlockedPdfUrl && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Enter PDF Password</Label>
+                            <Input 
+                                id="password" 
+                                type="password" 
+                                value={password} 
+                                onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
+                                placeholder="Password required to open"
+                                disabled={isUnlocking}
+                                className="h-12 text-lg border-2 focus-visible:ring-primary"
+                            />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground italic">
+                            Note: This tool works best for standard encryption. High-security corporate PDFs might fail.
+                        </p>
+                    </div>
+                )}
+
+                {errorDetails && (
+                    <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Problem</AlertTitle>
+                        <AlertDescription className="text-xs font-medium">
+                            {errorDetails}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {unlockedPdfUrl && (
+                    <div className="p-8 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-2xl flex flex-col items-center gap-4 animate-in zoom-in-95">
+                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/20">
+                            <Download className="h-8 w-8" />
+                        </div>
+                        <div className="text-center">
+                            <p className="font-bold text-green-700">Decryption Successful!</p>
+                            <p className="text-xs text-green-600/80">All restrictions have been removed.</p>
+                        </div>
+                    </div>
+                )}
             </CardContent>
-            <CardFooter className="flex flex-col gap-2">
+            <CardFooter className="flex flex-col gap-3 bg-muted/10 border-t p-6">
                 {!unlockedPdfUrl ? (
-                    <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password} className="w-full">
+                    <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password} className="w-full h-14 text-lg font-bold shadow-lg">
                         {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Unlock className="mr-2"/>}
-                        Unlock PDF
+                        {isUnlocking ? "UNLOCKING..." : "UNLOCK PDF"}
                     </Button>
                 ) : (
-                    <Button onClick={handleDownload} className="w-full">
+                    <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 animate-bounce">
                         <Download className="mr-2" />
-                        Download Unlocked PDF
+                        DOWNLOAD UNLOCKED PDF
                     </Button>
                 )}
-                <Button variant="ghost" onClick={resetState}>Unlock another file</Button>
+                <Button variant="ghost" onClick={resetState} className="w-full" disabled={isUnlocking}>
+                    Choose another file
+                </Button>
             </CardFooter>
         </Card>
     );
