@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
@@ -137,16 +136,12 @@ export default function PdfUnlocker() {
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Bypassing AES-256 Security...");
+        setStatusText("Bypassing Security...");
         setProgress(5);
 
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
-
-            // We go straight to Power Unlock for best results with Aadhaar/Bank statements
-            // as standard libraries often fail with modern encryption dictionaries.
             await handlePowerUnlock(pdfBytes);
-
         } catch (error: any) {
             console.error("Critical Error:", error);
             setErrorDetails("Could not initialize decryption engine.");

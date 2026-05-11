@@ -92,24 +92,24 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            // Step 1: Load original PDF (ignoring any existing owner-locks)
+            // Step 1: Load original PDF
             const srcDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
-            // Step 2: Create a completely NEW document to ensure clean security dictionary
+            // Step 2: Create a NEW document to ensure clean security dictionary (Avoids permission skipping)
             const secureDoc = await PDFDocument.create();
             
-            // Step 3: Deep copy all pages to the new document
+            // Step 3: Deep copy all pages
             const copiedPages = await secureDoc.copyPages(srcDoc, srcDoc.getPageIndices());
             copiedPages.forEach((page) => secureDoc.addPage(page));
 
             /**
-             * ULTRA-STRICT ENCRYPTION ENFORCEMENT
-             * Setting userPassword is what forces the "Open Password" prompt in Adobe.
-             * ownerPassword is used for managing permissions.
+             * iLovePDF Style Hard Locking
+             * Setting userPassword triggers the Open Lock prompt.
+             * Setting ownerPassword with strict permissions prevents viewers from bypassing.
              */
             const protectedPdfBytes = await secureDoc.save({
-                userPassword: password,      // Password required to OPEN the file
-                ownerPassword: `owner-${password}-${Date.now()}`, // Separate owner pass to force encryption dict
+                userPassword: password,      
+                ownerPassword: `lock-${password}-${Date.now()}`, 
                 updateMetadata: true,        
                 addDefaultPage: false,
                 permissions: {
@@ -127,16 +127,12 @@ export default function PdfProtector() {
             const url = URL.createObjectURL(blob);
             setProtectedPdfUrl(url);
             
-            toast({ title: 'Strict Lock Applied!', description: 'Your PDF is now protected. Please test in Adobe or Incognito.' });
+            toast({ title: 'PDF Locked!', description: 'Security applied. Test in Adobe Reader or Incognito Mode.' });
 
         } catch (error: any) {
             console.error("Protection Error:", error);
-            setErrorDetails("Could not apply protection. The file might be corrupted or extremely restricted.");
-            toast({
-                variant: 'destructive',
-                title: 'Lock Failed',
-                description: 'Failed to encrypt the PDF.',
-            });
+            setErrorDetails("Could not apply protection. The file structure might be restricted.");
+            toast({ variant: 'destructive', title: 'Lock Failed', description: 'Failed to encrypt the PDF.' });
         } finally {
             setIsProtecting(false);
         }
@@ -162,8 +158,8 @@ export default function PdfProtector() {
                     <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
                         <Lock className="h-10 w-10" />
                     </div>
-                    <CardTitle className="text-2xl font-bold font-headline">Secure PDF Locker</CardTitle>
-                    <CardDescription>Lock your documents with professional-grade encryption like iLovePDF.</CardDescription>
+                    <CardTitle className="text-2xl font-bold">PDF Security Locker</CardTitle>
+                    <CardDescription>Lock your documents with professional AES encryption like iLovePDF.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -172,8 +168,8 @@ export default function PdfProtector() {
                             <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
                         </div>
                         <div>
-                            <p className="text-xl font-bold text-foreground">Select PDF to Lock</p>
-                            <p className="text-sm text-muted-foreground mt-2">100% Private local encryption.</p>
+                            <p className="text-xl font-bold">Select PDF to Lock</p>
+                            <p className="text-sm text-muted-foreground mt-2">Privacy focused local encryption.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -191,21 +187,21 @@ export default function PdfProtector() {
             <CardHeader className="bg-muted/30 border-b">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <Lock className="text-primary h-5 w-5" />
-                    Setup Encryption
+                    Secure Setup
                 </CardTitle>
-                <CardDescription className="truncate font-mono text-[10px] text-muted-foreground">File: {pdfFile.name}</CardDescription>
+                <CardDescription className="truncate font-mono text-[10px]">File: {pdfFile.name}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
                 {!protectedPdfUrl && (
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="password">Enter Open Password</Label>
+                            <Label htmlFor="password">Create Password</Label>
                             <Input 
                                 id="password" 
                                 type="password" 
                                 value={password} 
                                 onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
-                                placeholder="Create a strong password..."
+                                placeholder="Enter open password..."
                                 disabled={isProtecting}
                                 className="h-12 text-lg font-bold tracking-widest focus-visible:ring-primary border-2"
                             />
@@ -221,20 +217,20 @@ export default function PdfProtector() {
                                 disabled={isProtecting}
                                 className={cn(
                                     "h-12 text-lg font-bold tracking-widest border-2",
-                                    confirmPassword && password !== confirmPassword && "border-destructive focus-visible:ring-destructive",
-                                    confirmPassword && password === confirmPassword && "border-green-500 focus-visible:ring-green-500"
+                                    confirmPassword && password !== confirmPassword && "border-destructive",
+                                    confirmPassword && password === confirmPassword && "border-green-500"
                                 )}
                             />
                             {confirmPassword && password !== confirmPassword && (
-                                <p className="text-[10px] font-bold text-destructive animate-in slide-in-from-top-1 text-center">Passwords do not match!</p>
+                                <p className="text-[10px] font-bold text-destructive text-center">Passwords do not match!</p>
                             )}
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 flex gap-3">
                             <Info className="h-5 w-5 text-blue-500 shrink-0" />
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase">Verification Tip</p>
+                                <p className="text-[10px] font-black text-blue-700 dark:text-blue-300 uppercase">Pro Tip</p>
                                 <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-tight font-medium">
-                                    After downloading, open the file in <b>Adobe Reader</b> or <b>Incognito Mode</b>. Browsers often remember passwords for the current session.
+                                    Browsers sometimes cache decrypted files. For a real test, open your downloaded file in <b>Incognito Mode</b> or <b>Adobe Reader</b>.
                                 </p>
                             </div>
                         </div>
@@ -247,7 +243,7 @@ export default function PdfProtector() {
                              <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
                              <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
                         </div>
-                        <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">Strict Binary Locking...</p>
+                        <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">Binary Locking Engine Active...</p>
                     </div>
                 )}
 
@@ -263,12 +259,12 @@ export default function PdfProtector() {
 
                 {protectedPdfUrl && (
                     <div className="p-8 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-2xl flex flex-col items-center gap-4 animate-in zoom-in-95">
-                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/20">
+                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
                             <CheckCircle2 className="h-8 w-8" />
                         </div>
                         <div className="text-center">
-                            <p className="font-bold text-green-700">PDF Successfully Locked!</p>
-                            <p className="text-[10px] text-green-600/80 uppercase font-black">Encryption Dictionary Verified</p>
+                            <p className="font-bold text-green-700">Protected Successfully!</p>
+                            <p className="text-[10px] text-green-600/80 uppercase font-black">Binary Encryption Dictionary Verified</p>
                         </div>
                     </div>
                 )}
@@ -281,10 +277,10 @@ export default function PdfProtector() {
                         className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl"
                     >
                         {isProtecting ? <Loader2 className="animate-spin mr-2"/> : <Lock className="mr-2 h-5 w-5"/>}
-                        {isProtecting ? "PROTECTING..." : "PROTECT PDF"}
+                        {isProtecting ? "LOCKING..." : "PROTECT PDF"}
                     </Button>
                 ) : (
-                    <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 animate-bounce">
+                    <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl animate-bounce">
                         <Download className="mr-2" />
                         DOWNLOAD LOCKED PDF
                     </Button>
