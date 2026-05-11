@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -39,7 +40,7 @@ interface Point {
 
 export default function ImageCropper() {
   const { toast } = useToast();
-  const [imgSrc, setImgSrc] = useState('');
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [croppedImageSrc, setCroppedImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -76,7 +77,7 @@ export default function ImageCropper() {
       setFlipH(false);
       setFlipV(false);
       const reader = new FileReader();
-      reader.addEventListener('load', () => setImgSrc(reader.result?.toString() || ''));
+      reader.addEventListener('load', () => setImgSrc(reader.result?.toString() || null));
       reader.readAsDataURL(file);
     } else if (file) {
       toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select an image file.' });
@@ -322,14 +323,13 @@ export default function ImageCropper() {
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
-                <Button variant="ghost" size="icon" onClick={() => setImgSrc('')} className="text-destructive"><X /></Button>
+                <Button variant="ghost" size="icon" onClick={() => setImgSrc(null)} className="text-destructive"><X /></Button>
             </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-4 min-h-[500px]">
-            {/* Sidebar Controls */}
             <div className="lg:col-span-1 border-r bg-muted/20 p-6 space-y-8">
                 {cropMode === 'rectangular' ? (
                     <div className="space-y-6">
@@ -398,7 +398,6 @@ export default function ImageCropper() {
                 </Button>
             </div>
 
-            {/* Main Editor Area */}
             <div className="lg:col-span-3 bg-black/5 flex items-center justify-center p-8 relative overflow-hidden select-none">
                 {croppedImageSrc ? (
                      <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-300">
@@ -414,7 +413,7 @@ export default function ImageCropper() {
                             </Button>
                         </div>
                     </div>
-                ) : (
+                ) : imgSrc && (
                     <div 
                         ref={containerRef}
                         className="relative max-w-full max-h-full"
@@ -477,7 +476,7 @@ export default function ImageCropper() {
                     </div>
                 )}
                 
-                {!croppedImageSrc && (
+                {!croppedImageSrc && imgSrc && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-medium">
                         <Move className="h-3 w-3" /> {cropMode === 'rectangular' ? "Drag corners to resize" : "Drag the 4 dots to object corners"}
                     </div>

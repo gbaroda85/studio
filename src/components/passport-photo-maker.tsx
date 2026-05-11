@@ -28,7 +28,8 @@ import {
     Loader2,
     Move,
     RotateCcw,
-    Sparkles
+    Sparkles,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -61,16 +62,15 @@ const BG_COLORS = [
     { name: "Light Grey", value: "#D3D3D3" },
 ];
 
-// Formal Suit Overlay SVGs (Representing professional clothes)
 const SUIT_OVERLAYS = [
     { id: 'none', label: 'Original', path: '' },
-    { id: 'suit1', label: 'Formal Suit 1', path: 'M12,2L4,10V22H20V10L12,2M12,4.5L18.5,10.5V20.5H15.5V14.5H8.5V20.5H5.5V10.5L12,4.5M10.5,11.5V13H13.5V11.5H10.5Z' }, // Simplified silhouette
+    { id: 'suit1', label: 'Formal Suit 1', path: 'M12,2L4,10V22H20V10L12,2M12,4.5L18.5,10.5V20.5H15.5V14.5H8.5V20.5H5.5V10.5L12,4.5M10.5,11.5V13H13.5V11.5H10.5Z' },
     { id: 'suit2', label: 'Formal Suit 2', path: 'M12,2L2,12H5V22H19V12H22L12,2M12,4.5L19.5,12H17V20H7V12H4.5L12,4.5Z' },
 ];
 
 export default function PassportPhotoMaker() {
   const { toast } = useToast();
-  const [imgSrc, setImgSrc] = useState('');
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
@@ -85,16 +85,14 @@ export default function PassportPhotoMaker() {
 
   // Studio States
   const [stage, setStage] = useState<'upload' | 'crop' | 'studio'>('upload');
-  const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); // Image with background removed
+  const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
   const [bgColor, setBgColor] = useState("#FFFFFF");
   const [selectedSuit, setSelectedSuit] = useState('none');
   
-  // Transformation for fitting subject into suit
   const [subjectScale, setSubjectScale] = useState([100]);
   const [subjectX, setSubjectX] = useState([0]);
   const [subjectY, setSubjectY] = useState([0]);
 
-  // Crop States
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
@@ -110,8 +108,8 @@ export default function PassportPhotoMaker() {
           w = parseFloat(customWidth);
           h = parseFloat(customHeight);
       } else {
-          w = PRESETS[selectedPreset].width;
-          h = PRESETS[selectedPreset].height;
+          w = PRESETS[selectedPreset as number].width;
+          h = PRESETS[selectedPreset as number].height;
       }
       return (w || 3.5) / (h || 4.5);
   };
@@ -119,9 +117,11 @@ export default function PassportPhotoMaker() {
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
-      setStage('crop');
       const reader = new FileReader();
-      reader.onload = () => setImgSrc(reader.result?.toString() || '');
+      reader.onload = () => {
+          setImgSrc(reader.result?.toString() || null);
+          setStage('crop');
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -137,7 +137,6 @@ export default function PassportPhotoMaker() {
     setCrop(initialCrop);
   }
 
-  // Handle Cropping and Moving to Studio
   const handleProceedToStudio = async () => {
     if (!imgRef.current || !completedCrop) return;
     setIsProcessing(true);
@@ -146,7 +145,6 @@ export default function PassportPhotoMaker() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // We use a high-res base for the studio
     const targetW = 1200;
     const targetH = targetW / getAspectRatio();
 
@@ -173,7 +171,6 @@ export default function PassportPhotoMaker() {
     setIsProcessing(false);
   };
 
-  // AI Background Removal Logic
   const handleRemoveBackground = async () => {
     if (!croppedImage) return;
     setIsRemovingBg(true);
@@ -194,13 +191,12 @@ export default function PassportPhotoMaker() {
       setSubjectImageSrc(url);
       toast({ title: "Background Removed!", description: "AI successfully extracted the subject." });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "AI Error", description: "Could not remove background. Using original cropped image." });
+      toast({ variant: "destructive", title: "AI Error", description: "Could not remove background." });
     } finally {
       setIsRemovingBg(false);
     }
   };
 
-  // Compose Studio Result
   useEffect(() => {
     if (stage !== 'studio' || !subjectImageSrc) return;
 
@@ -210,16 +206,14 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const targetW = 1000; // Base studio width
+        const targetW = 1000; 
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. Draw Background
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Draw Subject
         const subjImg = new window.Image();
         subjImg.src = subjectImageSrc;
         subjImg.onload = () => {
@@ -234,17 +228,12 @@ export default function PassportPhotoMaker() {
             const y = (canvas.height - dh) / 2 + dy;
 
             ctx.drawImage(subjImg, x, y, dw, dh);
-            
-            // 3. Draw Suit Overlay (If any)
-            // Note: In a production app, these would be high-res transparent PNGs.
-            // For this demo, we can show a placeholder or just use the subject's clothes.
-            
             setFinalResult(canvas.toDataURL('image/jpeg', 0.95));
         };
     };
 
     compose();
-  }, [stage, subjectImageSrc, bgColor, subjectScale, subjectX, subjectY, selectedSuit]);
+  }, [stage, subjectImageSrc, bgColor, subjectScale, subjectX, subjectY, selectedSuit, selectedPreset, customWidth, customHeight]);
 
   const handleDownload = () => {
       if (!finalResult) return;
@@ -256,7 +245,8 @@ export default function PassportPhotoMaker() {
 
   const handleReset = () => {
       setStage('upload');
-      setImgSrc('');
+      setImgSrc(null);
+      setImageFile(null);
       setCroppedImage(null);
       setSubjectImageSrc(null);
       setFinalResult(null);
@@ -303,15 +293,17 @@ export default function PassportPhotoMaker() {
               </CardHeader>
               <CardContent className="p-8 flex items-center justify-center min-h-[400px]">
                   <div className="max-w-full overflow-hidden border-4 border-white shadow-xl rounded-lg">
-                    <ReactCrop
-                        crop={crop}
-                        onChange={(c) => setCrop(c)}
-                        onComplete={(c) => setCompletedCrop(c)}
-                        aspect={getAspectRatio()}
-                        keepSelection
-                    >
-                        <img ref={imgRef} src={imgSrc} alt="Source" onLoad={onImageLoad} className="max-h-[60vh] w-auto object-contain" />
-                    </ReactCrop>
+                    {imgSrc && (
+                        <ReactCrop
+                            crop={crop}
+                            onChange={(c) => setCrop(c)}
+                            onComplete={(c) => setCompletedCrop(c)}
+                            aspect={getAspectRatio()}
+                            keepSelection
+                        >
+                            <img ref={imgRef} src={imgSrc} alt="Source" onLoad={onImageLoad} className="max-h-[60vh] w-auto object-contain" />
+                        </ReactCrop>
+                    )}
                   </div>
               </CardContent>
               <CardFooter className="justify-between bg-primary/5 p-6 border-t">
@@ -340,8 +332,6 @@ export default function PassportPhotoMaker() {
   return (
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Workspace Area */}
         <div className="lg:col-span-7 space-y-6">
             <Card className="overflow-hidden border-2 shadow-2xl">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
@@ -368,7 +358,7 @@ export default function PassportPhotoMaker() {
                         </div>
                     )}
                     
-                    <div className="relative p-2 bg-white shadow-2xl rounded ring-1 ring-black/5" style={{ aspectRatio: getAspectRatio() }}>
+                    <div className="relative p-2 bg-white shadow-2xl rounded ring-1 ring-black/5" style={{ aspectRatio: String(getAspectRatio()) }}>
                          <canvas ref={studioCanvasRef} className="max-h-[60vh] w-auto h-auto shadow-inner border" />
                     </div>
 
@@ -381,7 +371,6 @@ export default function PassportPhotoMaker() {
             </Card>
         </div>
 
-        {/* Studio Controls */}
         <div className="lg:col-span-5 space-y-6">
             <Card className="border-2 shadow-xl border-primary/10">
                 <CardHeader className="bg-primary/5 border-b">
@@ -428,7 +417,6 @@ export default function PassportPhotoMaker() {
                                 <Shirt className="h-5 w-5 text-amber-600 shrink-0" />
                                 <p className="text-[11px] font-medium text-amber-800 leading-tight">
                                     <strong>Formal Overlay:</strong> Use the "FIT" tab to align your photo inside the suit. 
-                                    (Professional PNG Suits Coming Soon - using high-res original for now).
                                 </p>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
