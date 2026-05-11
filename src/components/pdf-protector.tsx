@@ -71,11 +71,10 @@ export default function PdfProtector() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             
-            // Step 1: Load original PDF with encryption ignored (to allow processing)
+            // Step 1: Load original PDF
             const srcDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
-            // Step 2: Create a completely BLANK new document
-            // This ensures no legacy security settings from the source interfere
+            // Step 2: Create a completely BLANK new document to ensure fresh security dictionary
             const secureDoc = await PDFDocument.create();
             
             // Step 3: Deep copy all pages into the new secure container
@@ -83,15 +82,14 @@ export default function PdfProtector() {
             copiedPages.forEach((page) => secureDoc.addPage(page));
 
             /**
-             * ULTRA-STRICT ENCRYPTION ENFORCEMENT:
-             * 1. Set userPassword (Required to OPEN the file)
-             * 2. Set ownerPassword (Required to modify/print)
-             * 3. Set ALL permissions to false to force Adobe Reader into Secure Mode
+             * STRICT ENCRYPTION ENFORCEMENT:
+             * We set both user and owner passwords and disable ALL permissions.
+             * This forces even basic viewers and Adobe Reader to prompt for the password.
              */
             const protectedPdfBytes = await secureDoc.save({
-                userPassword: password,     
-                ownerPassword: password,    
-                updateMetadata: true,       
+                userPassword: password,     // The password to OPEN the file
+                ownerPassword: password,    // The password to change settings
+                updateMetadata: true,       // Critical: Rewrite metadata to include encryption info
                 addDefaultPage: false,
                 permissions: {
                     printing: 'none',

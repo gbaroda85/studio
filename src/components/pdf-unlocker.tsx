@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Fixed worker path with direct unpkg URL
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Set up the worker for pdfjs with a robust CDN URL and explicit version
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs`;
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
@@ -143,6 +143,7 @@ export default function PdfUnlocker() {
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
 
+            // Attempt fast standard unlock first
             try {
                 const pdfDoc = await PDFDocument.load(pdfBytes, { userPassword: password });
                 const unlockedDoc = await PDFDocument.create();
@@ -157,6 +158,7 @@ export default function PdfUnlocker() {
                 return;
             } catch (libError: any) {
                 const msg = libError.message?.toLowerCase() || "";
+                // If it's a high-security file (Aadhaar/Bank), switch to Power Mode automatically
                 if (msg.includes('encryption') || msg.includes('unsupported') || msg.includes('aes') || isAadhaar) {
                     await handlePowerUnlock(pdfBytes);
                     setIsUnlocking(false);
@@ -167,6 +169,7 @@ export default function PdfUnlocker() {
                     setIsUnlocking(false);
                     return;
                 }
+                // Fallback to Power Mode for any other structural issues
                 await handlePowerUnlock(pdfBytes);
             }
         } catch (error: any) {
@@ -273,7 +276,7 @@ export default function PdfUnlocker() {
                 )}
 
                 {errorDetails && (
-                    <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20 animate-in shake-1">
+                    <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle className="text-xs font-bold uppercase">Processing Failed</AlertTitle>
                         <AlertDescription className="text-[11px] font-medium leading-relaxed mt-1">

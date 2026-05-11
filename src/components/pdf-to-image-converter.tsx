@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-// Set up the worker for pdfjs with a robust CDN URL
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Set up the worker for pdfjs with a robust CDN URL and explicit version
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs`;
 
 type OutputFormat = 'png' | 'jpeg';
 
@@ -57,7 +57,7 @@ export default function PdfToImageConverter() {
 
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 2.0 }); // Increased scale for better quality
+                    const viewport = page.getViewport({ scale: 2.0 }); 
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
