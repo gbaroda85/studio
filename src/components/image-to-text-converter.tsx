@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -16,7 +15,8 @@ import {
     RefreshCcw,
     CheckCircle2,
     SearchCode,
-    FileText
+    FileText,
+    Image as ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,6 @@ export default function ImageToTextConverter() {
   const [hasCopied, setHasCopied] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -97,8 +96,6 @@ export default function ImageToTextConverter() {
                 let gray = 0.299 * r + 0.587 * g + 0.114 * b;
                 
                 // Simple threshold/contrast boost
-                // If light, make it white. If dark, make it pitch black.
-                // This makes text much clearer for Tesseract
                 if (gray > 128) {
                     gray = Math.min(255, gray * 1.1);
                 } else {
@@ -129,7 +126,6 @@ export default function ImageToTextConverter() {
       setStatusText("Initializing Local Engine...");
 
       // Step 2: Run Tesseract Worker
-      // Using 'eng+hin' for dual language support
       const worker = await createWorker('eng+hin', 1, {
         logger: m => {
             if (m.status === 'recognizing text') {
@@ -144,7 +140,7 @@ export default function ImageToTextConverter() {
       const { data: { text } } = await worker.recognize(processedSrc);
       await worker.terminate();
 
-      // Clean up text (remove excessive newlines)
+      // Clean up text
       const cleanedText = text.replace(/\n\s*\n/g, '\n').trim();
 
       if (!cleanedText) {
@@ -228,7 +224,6 @@ export default function ImageToTextConverter() {
     <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500 px-4">
       <div className="grid lg:grid-cols-12 gap-8 items-stretch">
         
-        {/* Source Image - Pro Look */}
         <div className="lg:col-span-5 flex flex-col gap-4">
             <Card className="overflow-hidden border-2 shadow-lg flex flex-col">
               <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
@@ -249,12 +244,11 @@ export default function ImageToTextConverter() {
                 </div>
                 <div>
                     <p className="text-[11px] font-black text-primary uppercase tracking-tight">Privacy Guard Active</p>
-                    <p className="text-[10px] text-muted-foreground font-medium">Text extraction is happening 100% on your device. No data is sent to AI servers.</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">Text extraction is happening 100% on your device. No data is sent to servers.</p>
                 </div>
             </div>
         </div>
 
-        {/* Text Result - Pro Editor Look */}
         <div className="lg:col-span-7">
             <Card className="overflow-hidden border-2 shadow-2xl flex flex-col relative border-primary/20 h-full">
               <CardHeader className="bg-primary/5 border-b py-4 flex flex-row items-center justify-between">
@@ -318,4 +312,3 @@ export default function ImageToTextConverter() {
     </div>
   );
 }
-
