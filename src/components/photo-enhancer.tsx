@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from "react";
 import Image from "next/image";
 import { 
     UploadCloud, 
@@ -13,13 +12,21 @@ import {
     Zap, 
     CheckCircle2,
     ShieldCheck,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Settings2,
+    Sun,
+    Contrast,
+    Droplets,
+    ZapOff,
+    RefreshCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 export default function PhotoEnhancer() {
   const { toast } = useToast();
@@ -29,25 +36,41 @@ export default function PhotoEnhancer() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
+  
+  // Manual Adjustment States
+  const [brightness, setBrightness] = useState([100]);
+  const [contrast, setContrast] = useState([100]);
+  const [saturation, setSaturation] = useState([100]);
+  const [sharpness, setSharpness] = useState([0]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setOriginalImageSrc(e.target?.result as string);
-        setResultImageSrc(null);
-        setProgress(0);
+        const src = e.target?.result as string;
+        setOriginalImageSrc(src);
+        setResultImageSrc(src);
+        resetAdjustments();
       };
       reader.readAsDataURL(file);
     } else if (file) {
       toast({
         variant: "destructive",
         title: "Invalid File Type",
-        description: "Please select a valid image file (PNG, JPG, etc.).",
+        description: "Please select a valid image file.",
       });
     }
+  };
+
+  const resetAdjustments = () => {
+    setBrightness([100]);
+    setContrast([100]);
+    setSaturation([100]);
+    setSharpness([0]);
   };
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
@@ -56,98 +79,105 @@ export default function PhotoEnhancer() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   /**
-   * High-Performance Local Photo Enhancement Algorithm
-   * Performs Contrast normalization, Color boosting, and Sharpness enhancement.
+   * Apply Adjustments to Canvas
    */
-  const enhanceLocally = async (src: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.src = src;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
+  const applyAdjustments = async () => {
+    if (!originalImageSrc) return;
+
+    const img = new window.Image();
+    img.src = originalImageSrc;
+    img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return resolve(src);
+        if (!ctx) return;
 
         canvas.width = img.width;
         canvas.height = img.height;
         
-        // 1. Draw original to canvas
+        // 1. Clear and Draw Original
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 2. Apply Filters (Brightness, Contrast, Saturation)
+        ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`;
         ctx.drawImage(img, 0, 0);
-
-        // 2. Apply Image Filters (Browser Native for speed)
-        // Brightness +10%, Contrast +20%, Saturate +30%
-        ctx.filter = 'brightness(1.05) contrast(1.15) saturate(1.25)';
-        ctx.drawImage(canvas, 0, 0);
         ctx.filter = 'none';
 
-        // 3. Smart Sharpening (Unsharp Mask via Convolution)
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        const width = canvas.width;
-        const height = canvas.height;
+        // 3. Apply Sharpness (Convolution)
+        if (sharpness[0] > 0) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+            const factor = sharpness[0] / 10; // Normalized factor
+            
+            const kernel = [
+                0, -factor, 0,
+                -factor, 1 + (4 * factor), -factor,
+                0, -factor, 0
+            ];
+            
+            const output = ctx.createImageData(w, h);
+            const dst = output.data;
 
-        // Simplified Sharpen Kernel
-        // [ 0, -1,  0 ]
-        // [-1,  5, -1 ]
-        // [ 0, -1,  0 ]
-        const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
-        const side = Math.round(Math.sqrt(kernel.length));
-        const halfSide = Math.floor(side / 2);
-        const output = ctx.createImageData(width, height);
-        const dst = output.data;
-
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const dstOff = (y * width + x) * 4;
-                let r = 0, g = 0, b = 0;
-                
-                for (let cy = 0; y + cy - halfSide >= 0 && y + cy - halfSide < height && cy < side; cy++) {
-                    for (let cx = 0; x + cx - halfSide >= 0 && x + cx - halfSide < width && cx < side; cx++) {
-                        const scy = y + cy - halfSide;
-                        const scx = x + cx - halfSide;
-                        const srcOff = (scy * width + scx) * 4;
-                        const wt = kernel[cy * side + cx];
-                        r += data[srcOff] * wt;
-                        g += data[srcOff + 1] * wt;
-                        b += data[srcOff + 2] * wt;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = (y * w + x) * 4;
+                    let r = 0, g = 0, b = 0;
+                    
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const scy = Math.min(h - 1, Math.max(0, y + ky));
+                            const scx = Math.min(w - 1, Math.max(0, x + kx));
+                            const srcOff = (scy * w + scx) * 4;
+                            const wt = kernel[(ky + 1) * 3 + (kx + 1)];
+                            r += data[srcOff] * wt;
+                            g += data[srcOff + 1] * wt;
+                            b += data[srcOff + 2] * wt;
+                        }
                     }
+                    dst[i] = r;
+                    dst[i + 1] = g;
+                    dst[i + 2] = b;
+                    dst[i + 3] = data[i + 3];
                 }
-                dst[dstOff] = r;
-                dst[dstOff + 1] = g;
-                dst[dstOff + 2] = b;
-                dst[dstOff + 3] = data[dstOff + 3];
             }
+            ctx.putImageData(output, 0, 0);
         }
 
-        ctx.putImageData(output, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg", 0.95));
-      };
-    });
+        setResultImageSrc(canvas.toDataURL("image/jpeg", 0.95));
+    };
   };
 
-  const handleEnhance = async () => {
+  // Auto-apply adjustments when sliders change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        applyAdjustments();
+    }, 50); // Small debounce for performance
+    return () => clearTimeout(timer);
+  }, [brightness, contrast, saturation, sharpness]);
+
+  const handleAutoEnhance = async () => {
     if (!originalImageSrc) return;
     setIsProcessing(true);
-    setResultImageSrc(null);
     setProgress(15);
 
     const interval = setInterval(() => {
         setProgress(prev => (prev < 90 ? prev + 15 : prev));
     }, 100);
 
-    try {
-      const enhanced = await enhanceLocally(originalImageSrc);
-      setTimeout(() => {
-        setResultImageSrc(enhanced);
+    // AI-like Auto Preset Values
+    setTimeout(() => {
+        setBrightness([105]);
+        setContrast([115]);
+        setSaturation([120]);
+        setSharpness([2]);
+        
+        clearInterval(interval);
         setProgress(100);
-        toast({ title: "Enhancement Complete!", description: "Lighting, colors, and sharpness improved." });
-      }, 300);
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Processing Error", description: "Could not enhance photo." });
-    } finally {
-      clearInterval(interval);
-      setTimeout(() => setIsProcessing(false), 400);
-    }
+        setIsProcessing(false);
+        toast({ title: "Auto-Enhance Applied", description: "Brightness, Colors, and Sharpness optimized." });
+    }, 500);
   };
 
   const handleDownload = () => {
@@ -168,6 +198,7 @@ export default function PhotoEnhancer() {
     setResultImageSrc(null);
     setIsProcessing(false);
     setProgress(0);
+    resetAdjustments();
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -182,7 +213,7 @@ export default function PhotoEnhancer() {
             <Wand2 className="h-10 w-10" />
           </div>
           <CardTitle>AI Photo Enhancer</CardTitle>
-          <CardDescription>Automatically fix lighting, sharpen details, and boost colors in one click.</CardDescription>
+          <CardDescription>Automatically fix lighting, sharpen details, and boost colors or adjust manually.</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -195,14 +226,14 @@ export default function PhotoEnhancer() {
             </div>
             <div>
                 <p className="text-xl font-bold">Drop photo here or Click to select</p>
-                <p className="text-sm text-muted-foreground mt-2">Works for portraits, landscapes, and screenshots.</p>
+                <p className="text-sm text-muted-foreground mt-2">Works locally. Fast & Private.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
         </CardContent>
         <CardFooter className="justify-center gap-6 text-xs text-muted-foreground font-medium pb-8 border-t pt-6 bg-muted/20">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> No Quota Limits</div>
-            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Instant Processing</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> Unlimited Uses</div>
+            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Instant Local Engine</div>
             <div className="flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" /> HD Output</div>
         </CardFooter>
       </Card>
@@ -211,84 +242,109 @@ export default function PhotoEnhancer() {
 
   return (
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-        {/* Original Side */}
-        <div className="space-y-4">
-            <Card className="overflow-hidden border-2 shadow-lg h-full flex flex-col">
-                <CardHeader className="bg-muted/30 border-b py-3">
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Preview Area */}
+        <div className="lg:col-span-8 space-y-6">
+            <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col relative">
+                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4" /> Original Image
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 flex-1 relative bg-white min-h-[400px]">
-                    <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" />
-                </CardContent>
-            </Card>
-        </div>
-
-        {/* Enhanced Side */}
-        <div className="space-y-4">
-            <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl h-full flex flex-col relative">
-                <CardHeader className="bg-primary/5 border-b py-3 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" /> Enhanced HD Result
+                        <Sparkles className="h-4 w-4 text-primary" /> HD Result Preview
                     </CardTitle>
                     {resultImageSrc && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                 </CardHeader>
-                <CardContent className="p-0 flex-1 relative bg-muted/10 flex items-center justify-center min-h-[400px]">
-                    {isProcessing ? (
+                <CardContent className="p-0 flex-1 relative bg-white min-h-[450px] flex items-center justify-center">
+                    {isProcessing && (
                         <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center gap-6">
-                            <div className="relative">
-                                <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                                <Wand2 className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
-                            </div>
+                            <Loader2 className="h-16 w-16 animate-spin text-primary" />
                             <div className="space-y-4 w-full max-w-xs">
-                                <p className="font-black text-xl text-primary animate-pulse uppercase tracking-tight">Improving Quality...</p>
+                                <p className="font-black text-xl text-primary animate-pulse uppercase">Applying Optimization...</p>
                                 <Progress value={progress} className="h-2" />
                             </div>
                         </div>
-                    ) : resultImageSrc ? (
-                        <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 animate-in zoom-in-95 duration-500" />
+                    )}
+                    {resultImageSrc ? (
+                        <Image src={resultImageSrc} alt="Enhanced" fill className="object-contain p-4" />
                     ) : (
-                        <div className="flex flex-col items-center gap-4 text-muted-foreground opacity-20 py-20">
-                            <Sparkles className="h-20 w-20" />
-                            <p className="font-bold text-lg uppercase tracking-widest">Ready to Enhance</p>
-                        </div>
+                        <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 opacity-50" />
                     )}
                 </CardContent>
                 <CardFooter className="bg-muted/10 border-t p-4 flex flex-col sm:flex-row gap-3">
-                    <Button variant="outline" className="flex-1 border-2 font-bold" onClick={handleReset} disabled={isProcessing}>
+                    <Button variant="outline" className="flex-1 border-2 font-bold" onClick={handleReset}>
                         <X className="mr-2 h-4 w-4" /> Start Over
                     </Button>
-                    {!resultImageSrc ? (
-                        <Button className="flex-[2] h-12 font-black bg-primary hover:bg-primary/90 shadow-lg text-lg" 
-                                onClick={handleEnhance} disabled={isProcessing}>
-                            <Zap className="mr-2 h-5 w-5" /> AUTO-ENHANCE PHOTO
-                        </Button>
-                    ) : (
-                        <Button className="flex-[2] h-12 font-black bg-green-600 hover:bg-green-700 shadow-lg text-lg" 
-                                onClick={handleDownload}>
-                            <Download className="mr-2 h-5 w-5" /> DOWNLOAD HD IMAGE
-                        </Button>
-                    )}
+                    <Button className="flex-[2] h-12 font-black bg-green-600 hover:bg-green-700 shadow-lg text-lg" 
+                            onClick={handleDownload}>
+                        <Download className="mr-2 h-5 w-5" /> DOWNLOAD HD PHOTO
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+
+        {/* Manual Controls Area */}
+        <div className="lg:col-span-4 space-y-6">
+            <Card className="border-2 shadow-xl border-primary/10">
+                <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Settings2 className="h-5 w-5 text-primary" /> Adjustments
+                    </CardTitle>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={resetAdjustments} title="Reset sliders">
+                        <RefreshCcw className="h-4 w-4" />
+                    </Button>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-8">
+                    
+                    <Button className="w-full h-12 font-black bg-primary hover:bg-primary/90 shadow-md group" onClick={handleAutoEnhance} disabled={isProcessing}>
+                        <Zap className="mr-2 h-5 w-5 text-yellow-400 group-hover:scale-125 transition-transform" />
+                        AUTO-ENHANCE PRESET
+                    </Button>
+
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Sun className="size-3 text-yellow-500" /> Brightness</Label>
+                                <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{brightness[0]}%</span>
+                            </div>
+                            <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Contrast className="size-3 text-orange-500" /> Contrast</Label>
+                                <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{contrast[0]}%</span>
+                            </div>
+                            <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Droplets className="size-3 text-blue-500" /> Saturation</Label>
+                                <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{saturation[0]}%</span>
+                            </div>
+                            <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5"><Zap className="size-3 text-primary" /> Sharpness</Label>
+                                <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">Level {sharpness[0]}</span>
+                            </div>
+                            <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} />
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 border-t py-4">
+                    <div className="flex gap-2 items-center text-[10px] text-muted-foreground">
+                        <ShieldCheck className="size-3 text-green-500" />
+                        <span>All edits are performed locally in 100% HD.</span>
+                    </div>
                 </CardFooter>
             </Card>
         </div>
       </div>
       
-      {resultImageSrc && !isProcessing && (
-         <div className="mt-8 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-xl max-w-3xl mx-auto flex gap-4 items-center animate-in slide-in-from-bottom-4">
-            <div className="size-10 rounded-full bg-green-600 flex items-center justify-center text-white shrink-0 shadow-lg">
-                <CheckCircle2 className="h-6 w-6" />
-            </div>
-            <div>
-                <p className="text-sm text-green-900 dark:text-green-300 font-black uppercase tracking-tight">Optimization Success</p>
-                <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-                    Photo details sharpened and colors balanced locally. No cloud limits applied.
-                </p>
-            </div>
-         </div>
-      )}
+      {/* Hidden canvas for processing */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
