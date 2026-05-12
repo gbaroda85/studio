@@ -47,6 +47,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from '@/components/ui/slider';
 
 type Unit = 'cm' | 'mm' | 'inch' | 'px';
 
@@ -79,7 +80,6 @@ const CLOTH_CATEGORIES = [
     { id: 'kids', label: 'Kids', icon: Baby },
 ];
 
-// Using high-quality suit sources with more robust labels
 const CLOTH_ITEMS: Record<string, { id: string; url: string; label: string }[]> = {
     men: [
         { id: 'm1', label: 'Dark Suit Red Tie', url: 'https://pi7.org/assets/img/clothes/men/m1.png' },
@@ -599,4 +599,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-
