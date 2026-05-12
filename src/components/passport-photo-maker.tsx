@@ -31,12 +31,14 @@ import {
     LayoutGrid,
     CheckCircle2,
     ShieldCheck,
-    ChevronRight as ChevronRightIcon
+    ChevronRight as ChevronRightIcon,
+    Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 
 type Unit = 'cm' | 'mm' | 'inch' | 'px';
 
@@ -98,13 +100,13 @@ export default function PassportPhotoMaker() {
     const [stage, setStage] = useState<Stage>('size');
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [statusText, setStatusText] = useState("");
 
     // Settings
     const [dpi, setDPI] = useState(300);
     const [selectedPreset, setSelectedPreset] = useState<number | 'custom'>(0);
     const [customWidth, setCustomWidth] = useState("3.5");
     const [customHeight, setCustomHeight] = useState("4.5");
-    const [customUnit, setCustomUnit] = useState<Unit>('cm');
 
     // Studio Canvas States
     const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
@@ -143,8 +145,9 @@ export default function PassportPhotoMaker() {
             setImageFile(file);
             const reader = new FileReader();
             reader.onload = () => {
-                setImgSrc(reader.result?.toString() || null);
-                setStage('crop');
+                const result = reader.result?.toString() || null;
+                setImgSrc(result);
+                if (result) setStage('crop');
             };
             reader.readAsDataURL(file);
         }
@@ -153,6 +156,7 @@ export default function PassportPhotoMaker() {
     const handleInitialCrop = async () => {
         if (!imgRef.current || !completedCrop) return;
         setIsProcessing(true);
+        setStatusText("Preparing for AI Studio...");
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -187,26 +191,37 @@ export default function PassportPhotoMaker() {
         if (!originalCroppedData) return;
         setIsProcessing(true);
         setProgress(5);
+        setStatusText("Initializing AI Engine...");
 
         try {
             const imglyModule = await import("@imgly/background-removal");
-            const removeBackgroundFunc = imglyModule.removeBackground || imglyModule.default;
+            
+            // Using a config that specifies model path or just default behavior
+            // Dynamic import ensures the heavy library only loads when needed
+            const removeBackgroundFunc = imglyModule.default;
 
             const blob = await removeBackgroundFunc(originalCroppedData, {
-                progress: (item, index, total) => setProgress(Math.round((index / total) * 100)),
+                progress: (item, index, total) => {
+                    const p = Math.round((index / total) * 100);
+                    setProgress(p);
+                    if (item.includes("model")) setStatusText(`Loading AI Model... (${p}%)`);
+                    else setStatusText(`Removing Background... (${p}%)`);
+                },
                 output: { format: "image/png", quality: 0.95 }
             });
 
             const url = URL.createObjectURL(blob);
             setSubjectImageSrc(url);
             setStage('cloth');
-            toast({ title: "Background Cleaned", description: "AI successfully extracted your face." });
+            toast({ title: "Success!", description: "Background removed successfully." });
         } catch (error: any) {
-            console.error(error);
-            toast({ variant: "destructive", title: "AI Error", description: "Could not remove background automatically." });
-            setStage('cloth');
+            console.error("AI BG Removal Error:", error);
+            toast({ variant: "destructive", title: "AI Scan Failed", description: "Could not remove background automatically. Skipping to manual mode." });
+            setStage('cloth'); // Fallback: just move on
         } finally {
             setIsProcessing(false);
+            setProgress(0);
+            setStatusText("");
         }
     };
 
@@ -340,20 +355,24 @@ export default function PassportPhotoMaker() {
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                 </CardContent>
+                <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black pb-8 uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> 100% Private</div>
+                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> AI Powered</div>
+                </CardFooter>
             </Card>
         );
     }
 
     return (
-        <div className="w-full max-w-5xl animate-in fade-in duration-500">
-            <div className="flex justify-center mb-8 overflow-x-auto">
+        <div className="w-full max-w-5xl animate-in fade-in duration-500 px-4">
+            <div className="flex justify-center mb-8 overflow-x-auto pb-2">
                 <div className="bg-card/80 backdrop-blur-xl border-2 rounded-2xl p-1 flex gap-2 shadow-xl whitespace-nowrap">
                     {[
                         { id: 'size', label: 'Size', icon: LayoutGrid },
                         { id: 'crop', label: 'Crop', icon: CropIcon },
                         { id: 'background', label: 'Background', icon: Eraser },
-                        { id: 'cloth', label: 'Cloth', icon: Shirt },
-                        { id: 'download', label: 'Download', icon: Download },
+                        { id: 'cloth', label: 'Edit', icon: Shirt },
+                        { id: 'download', label: 'Done', icon: Download },
                     ].map((t) => (
                         <div
                             key={t.id}
@@ -388,9 +407,15 @@ export default function PassportPhotoMaker() {
                             <div className="relative p-2 bg-white shadow-inner ring-8 ring-white/50 rounded-lg">
                                 <canvas ref={mainCanvasRef} className="max-h-[60vh] w-auto h-auto rounded shadow-2xl" />
                                 {isProcessing && (
-                                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4">
-                                        <Loader2 className="size-12 animate-spin text-primary" />
-                                        <p className="font-black uppercase tracking-tighter text-primary">{progress}% AI Processing...</p>
+                                    <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-30 flex flex-col items-center justify-center gap-6 p-8 text-center">
+                                        <div className="relative">
+                                            <Loader2 className="size-16 animate-spin text-primary stroke-[3]" />
+                                            <Sparkles className="absolute inset-0 m-auto size-6 text-primary animate-pulse" />
+                                        </div>
+                                        <div className="space-y-4 w-full max-w-xs">
+                                            <p className="font-black uppercase tracking-tighter text-primary text-xl animate-pulse">{statusText}</p>
+                                            <Progress value={progress} className="h-2 shadow-inner" />
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -417,13 +442,13 @@ export default function PassportPhotoMaker() {
 
                         {stage === 'crop' && (
                             <Button size="lg" className="h-14 px-12 bg-primary font-black shadow-xl" onClick={handleInitialCrop}>
-                                NEXT: BACKGROUND <ChevronRightIcon className="ml-2" />
+                                NEXT: STUDIO <ChevronRightIcon className="ml-2" />
                             </Button>
                         )}
                         {stage === 'background' && (
                             <Button size="lg" className="h-14 px-12 bg-primary font-black shadow-xl" onClick={handleRemoveBackground} disabled={isProcessing}>
                                 {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <Eraser className="mr-2" />}
-                                AUTO-REMOVE BG & NEXT
+                                AI REMOVE BACKGROUND
                             </Button>
                         )}
                         {stage === 'cloth' && (
@@ -438,8 +463,8 @@ export default function PassportPhotoMaker() {
                     <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
                         <CardHeader className="bg-primary/5 border-b p-4">
                             <CardTitle className="text-lg font-headline flex items-center gap-2">
-                                <Shirt className="size-5 text-primary" /> 
-                                {stage === 'background' ? 'Official Background' : 'Change Clothes'}
+                                {stage === 'background' ? <Palette className="size-5 text-primary" /> : <Shirt className="size-5 text-primary" />}
+                                {stage === 'background' ? 'Official Colors' : 'Change Clothes'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
@@ -447,7 +472,7 @@ export default function PassportPhotoMaker() {
                                 <div className="p-6 space-y-6">
                                     <div className="p-4 bg-primary/5 rounded-2xl flex gap-3 items-center border border-primary/10">
                                         <Palette className="size-6 text-primary" />
-                                        <p className="text-xs font-bold text-primary uppercase">Select Background Color</p>
+                                        <p className="text-xs font-bold text-primary uppercase">Official BG Colors</p>
                                     </div>
                                     <div className="grid grid-cols-5 gap-3">
                                         {BG_COLORS.map(c => (
@@ -463,12 +488,17 @@ export default function PassportPhotoMaker() {
                                             />
                                         ))}
                                     </div>
+                                    <div className="pt-4">
+                                        <Button variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary" onClick={() => setStage('cloth')}>
+                                            Skip AI Background Removal <ChevronRightIcon className="ml-1 size-3" />
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
 
                             {stage === 'cloth' && (
                                 <div className="flex flex-col h-[500px]">
-                                    <div className="flex bg-muted/50 p-2 gap-2 border-b overflow-x-auto">
+                                    <div className="flex bg-muted/50 p-2 gap-2 border-b overflow-x-auto no-scrollbar">
                                         {CLOTH_CATEGORIES.map(cat => (
                                             <Button 
                                                 key={cat.id} 
@@ -515,8 +545,8 @@ export default function PassportPhotoMaker() {
                                         </div>
                                     </ScrollArea>
                                     <div className="p-4 bg-muted/30 border-t">
-                                        <p className="text-[9px] font-bold text-muted-foreground text-center uppercase tracking-widest">
-                                            Tip: Use alignment keys to fit chehre to suit
+                                        <p className="text-[9px] font-bold text-muted-foreground text-center uppercase tracking-widest leading-relaxed">
+                                            Tip: Use alignment keys below the photo to fit your face into the suit.
                                         </p>
                                     </div>
                                 </div>
@@ -529,7 +559,7 @@ export default function PassportPhotoMaker() {
                             <ShieldCheck className="size-8 text-green-600 shrink-0" />
                             <div>
                                 <p className="text-[10px] font-black text-green-700 uppercase">Secure Studio Active</p>
-                                <p className="text-[9px] text-green-600/80 font-medium">All AI processing is done 100% locally in your browser.</p>
+                                <p className="text-[9px] text-green-600/80 font-medium leading-tight">All processing happens locally in your browser. Your photo is never uploaded to any server.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -538,3 +568,4 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
+
