@@ -32,7 +32,8 @@ import {
     CheckCircle2,
     ShieldCheck,
     ChevronRight as ChevronRightIcon,
-    Sparkles
+    Sparkles,
+    AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -195,9 +196,6 @@ export default function PassportPhotoMaker() {
 
         try {
             const imglyModule = await import("@imgly/background-removal");
-            
-            // Using a config that specifies model path or just default behavior
-            // Dynamic import ensures the heavy library only loads when needed
             const removeBackgroundFunc = imglyModule.default;
 
             const blob = await removeBackgroundFunc(originalCroppedData, {
@@ -216,8 +214,8 @@ export default function PassportPhotoMaker() {
             toast({ title: "Success!", description: "Background removed successfully." });
         } catch (error: any) {
             console.error("AI BG Removal Error:", error);
-            toast({ variant: "destructive", title: "AI Scan Failed", description: "Could not remove background automatically. Skipping to manual mode." });
-            setStage('cloth'); // Fallback: just move on
+            toast({ variant: "destructive", title: "AI Scan Failed", description: "Could not remove background automatically. Switching to manual adjust." });
+            setStage('cloth');
         } finally {
             setIsProcessing(false);
             setProgress(0);
@@ -243,6 +241,7 @@ export default function PassportPhotoMaker() {
 
             // 2. Draw Subject (User's face) with transforms
             const faceImg = new window.Image();
+            faceImg.crossOrigin = "anonymous";
             faceImg.src = subjectImageSrc;
             
             await new Promise((resolve) => {
@@ -488,10 +487,14 @@ export default function PassportPhotoMaker() {
                                             />
                                         ))}
                                     </div>
-                                    <div className="pt-4">
+                                    <div className="pt-4 space-y-2">
                                         <Button variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary" onClick={() => setStage('cloth')}>
-                                            Skip AI Background Removal <ChevronRightIcon className="ml-1 size-3" />
+                                            Skip Background Removal <ChevronRightIcon className="ml-1 size-3" />
                                         </Button>
+                                        <div className="p-3 bg-amber-500/10 rounded-lg flex items-start gap-2 border border-amber-500/20">
+                                            <AlertCircle className="size-4 text-amber-600 shrink-0" />
+                                            <p className="text-[10px] text-amber-700 font-medium leading-tight">If removal looks wrong, skip and use alignment keys to hide old background behind the suit.</p>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -536,6 +539,10 @@ export default function PassportPhotoMaker() {
                                                         alt={item.label} 
                                                         className="w-full h-full object-contain p-2" 
                                                         loading="lazy"
+                                                        referrerPolicy="no-referrer"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = `https://placehold.co/300x400?text=${item.label}`;
+                                                        }}
                                                     />
                                                     <div className="absolute inset-x-0 bottom-0 bg-black/60 py-1">
                                                         <p className="text-[8px] text-white text-center font-bold uppercase truncate px-1">{item.label}</p>
@@ -559,7 +566,7 @@ export default function PassportPhotoMaker() {
                             <ShieldCheck className="size-8 text-green-600 shrink-0" />
                             <div>
                                 <p className="text-[10px] font-black text-green-700 uppercase">Secure Studio Active</p>
-                                <p className="text-[9px] text-green-600/80 font-medium leading-tight">All processing happens locally in your browser. Your photo is never uploaded to any server.</p>
+                                <p className="text-[9px] text-green-600/80 font-medium leading-tight">All processing happens locally in your browser. Thumbnails may take a moment to load from the secure source.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -568,4 +575,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-
