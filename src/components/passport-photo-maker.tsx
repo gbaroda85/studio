@@ -196,10 +196,15 @@ export default function PassportPhotoMaker() {
 
         try {
             const imglyModule = await import("@imgly/background-removal");
-            const removeBackgroundFunc = imglyModule.default;
+            // Fix: more robust check for function name
+            const removeBackgroundFunc = (imglyModule as any).removeBackground || (imglyModule as any).default;
+
+            if (typeof removeBackgroundFunc !== 'function') {
+                throw new Error("Could not find background removal function in module.");
+            }
 
             const blob = await removeBackgroundFunc(originalCroppedData, {
-                progress: (item, index, total) => {
+                progress: (item: string, index: number, total: number) => {
                     const p = Math.round((index / total) * 100);
                     setProgress(p);
                     if (item.includes("model")) setStatusText(`Loading AI Model... (${p}%)`);
@@ -266,6 +271,8 @@ export default function PassportPhotoMaker() {
             if (selectedClothUrl) {
                 const clothImg = new window.Image();
                 clothImg.crossOrigin = "anonymous";
+                // Note: CORS issues might still persist with pi7 directly in canvas if they don't allow it.
+                // Using referrerPolicy on thumbnails works but canvas requires server-side CORS headers.
                 clothImg.src = selectedClothUrl;
                 await new Promise((resolve) => {
                     clothImg.onload = () => {
@@ -275,7 +282,10 @@ export default function PassportPhotoMaker() {
                         ctx.drawImage(clothImg, 0, canvas.height - dh, dw, dh);
                         resolve(null);
                     };
-                    clothImg.onerror = () => resolve(null);
+                    clothImg.onerror = () => {
+                        console.warn("Failed to load cloth image for canvas rendering.");
+                        resolve(null);
+                    };
                 });
             }
         };
