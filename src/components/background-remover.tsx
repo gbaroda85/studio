@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { 
     UploadCloud, 
@@ -17,11 +17,11 @@ import {
     Move,
     Maximize,
     RotateCcw,
-    FlipHorizontal,
-    FlipVertical,
-    Cpu,
-    CloudLightning,
-    AlertCircle
+    Paintbrush,
+    Undo2,
+    CheckCircle2,
+    MousePointer2,
+    Eye
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -32,20 +32,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { removeBackground as removeBackgroundAI } from "@/ai/flows/remove-background-flow";
-
-const PRESET_COLORS = [
-    "#ffffff", "#000000", "#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#6366f1", "#ec4899", "#f3f4f6"
-];
-
-const PRESET_GRADIENTS = [
-    { label: "Sunset", value: "linear-gradient(to right, #ff7e5f, #feb47b)", colors: ["#ff7e5f", "#feb47b"] },
-    { label: "Ocean", value: "linear-gradient(to right, #6a11cb, #2575fc)", colors: ["#6a11cb", "#2575fc"] },
-    { label: "Nature", value: "linear-gradient(to right, #00b09b, #96c93d)", colors: ["#00b09b", "#96c93d"] },
-    { label: "Fire", value: "linear-gradient(to right, #f83600, #f9d423)", colors: ["#f83600", "#f9d423"] },
-    { label: "Love", value: "linear-gradient(to right, #ee0979, #ff6a00)", colors: ["#ee0979", "#ff6a00"] },
-    { label: "Sky", value: "linear-gradient(to right, #4facfe, #00f2fe)", colors: ["#4facfe", "#00f2fe"] },
-];
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
@@ -58,23 +44,16 @@ export default function BackgroundRemover() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
-  const [removalMode, setRemovalMode] = useState<"local" | "cloud">("cloud");
   
-  // Background Options State
-  const [bgType, setBgType] = useState<"none" | "color" | "gradient" | "image">("none");
-  const [bgValue, setBgValue] = useState<string>("");
-  const [customBgSrc, setCustomBgSrc] = useState<string | null>(null);
+  // Refinement States
+  const [isRefining, setIsRefining] = useState(false);
+  const [brushMode, setBrushMode] = useState<"restore" | "erase">("restore");
+  const [brushSize, setBrushSize] = useState([20]);
 
-  // Transform States
-  const [scale, setScale] = useState([100]);
-  const [posX, setPosX] = useState([0]);
-  const [posY, setPosY] = useState([0]);
-  const [flipH, setFlipH] = useState(false);
-  const [flipV, setFlipV] = useState(false);
-  
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bgInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
+  const refineCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
@@ -92,19 +71,10 @@ export default function BackgroundRemover() {
       setSubjectImageSrc(null);
       setFinalImageSrc(null);
       setProgress(0);
-      setBgType("none");
-      resetTransforms();
+      setIsRefining(false);
     } else if (file) {
       toast({ variant: "destructive", title: "Invalid File", description: "Please select an image file." });
     }
-  };
-
-  const resetTransforms = () => {
-    setScale([100]);
-    setPosX([0]);
-    setPosY([0]);
-    setFlipH(false);
-    setFlipV(false);
   };
 
   const handleRemoveBackgroundLocal = async () => {
@@ -112,18 +82,18 @@ export default function BackgroundRemover() {
     setIsProcessing(true);
     setSubjectImageSrc(null);
     setProgress(5);
-    setStatusText("Initializing Local AI...");
+    setStatusText("Initializing Engine...");
 
     try {
       const imglyModule = await import("@imgly/background-removal");
-      const removeBackgroundFunc = imglyModule.removeBackground || imglyModule.default;
+      const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
       
       const blob = await removeBackgroundFunc(originalImageSrc, {
-        progress: (item, index, total) => {
+        progress: (item: string, index: number, total: number) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
-            if (item.includes("model")) setStatusText("Loading Model...");
-            else setStatusText("Extracting Subject...");
+            if (item.includes("model")) setStatusText("Loading Local AI...");
+            else setStatusText("Scanning Anatomy...");
         },
         output: { format: "image/png", quality: 0.95 }
       });
@@ -133,140 +103,94 @@ export default function BackgroundRemover() {
       setFinalImageSrc(url); 
       setProgress(100);
       setStatusText("Done!");
-      toast({ title: "Success!", description: "Background removed locally." });
+      toast({ title: "Extraction Complete", description: "If limbs are cut, use 'Refine Brush' to fix." });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Local Processing Error", description: "Could not remove background. Try Cloud AI mode." });
+      console.error(error);
+      toast({ variant: "destructive", title: "Processing Error", description: "Could not remove background locally." });
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleRemoveBackgroundCloud = async () => {
-      if (!originalImageSrc) return;
-      setIsProcessing(true);
-      setSubjectImageSrc(null);
-      setProgress(20);
-      setStatusText("Connecting to AI Cloud...");
+  // --- Manual Refinement Logic ---
+  const startRefining = () => {
+      if (!subjectImageSrc || !originalImageSrc) return;
+      setIsRefining(true);
+      
+      const canvas = refineCanvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-      try {
-          const result = await removeBackgroundAI({ photoDataUri: originalImageSrc });
-          if (result.imageDataUri) {
-              setSubjectImageSrc(result.imageDataUri);
-              setFinalImageSrc(result.imageDataUri);
-              setProgress(100);
-              setStatusText("Precision Removal Complete");
-              toast({ title: "Precision Removal Success!", description: "Hand and limbs preserved perfectly." });
+      const img = new window.Image();
+      img.src = subjectImageSrc;
+      img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+      };
+  };
+
+  const handleRefineMove = (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isRefining) return;
+      const canvas = refineCanvasRef.current;
+      if (!canvas || e.buttons !== 1 && !('touches' in e)) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      let x, y;
+      if ('touches' in e) {
+          x = (e.touches[0].clientX - rect.left) * scaleX;
+          y = (e.touches[0].clientY - rect.top) * scaleY;
+      } else {
+          x = (e.clientX - rect.left) * scaleX;
+          y = (e.clientY - rect.top) * scaleY;
+      }
+
+      ctx.globalCompositeOperation = brushMode === 'restore' ? 'source-over' : 'destination-out';
+      
+      if (brushMode === 'restore') {
+          // To restore, we need to draw from original photo but masked by brush
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tCtx = tempCanvas.getContext('2d');
+          if (tCtx) {
+              const origImg = new window.Image();
+              origImg.src = originalImageSrc!;
+              tCtx.drawImage(origImg, 0, 0, canvas.width, canvas.height);
+              
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(x, y, brushSize[0], 0, Math.PI * 2);
+              ctx.clip();
+              ctx.drawImage(tempCanvas, 0, 0);
+              ctx.restore();
           }
-      } catch (error: any) {
-          toast({ variant: "destructive", title: "Cloud AI Error", description: error.message || "Failed to process image. Use Local mode as fallback." });
-      } finally {
-          setIsProcessing(false);
+      } else {
+          ctx.beginPath();
+          ctx.arc(x, y, brushSize[0], 0, Math.PI * 2);
+          ctx.fill();
       }
+      
+      setFinalImageSrc(canvas.toDataURL("image/png"));
   };
 
-  const handleAction = () => {
-      if (removalMode === 'cloud') handleRemoveBackgroundCloud();
-      else handleRemoveBackgroundLocal();
-  };
-
-  useEffect(() => {
-    if (!subjectImageSrc) return;
-
-    const composite = async () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        const subjectImg = new window.Image();
-        subjectImg.src = subjectImageSrc;
-        
-        subjectImg.onload = () => {
-            canvas.width = subjectImg.width;
-            canvas.height = subjectImg.height;
-
-            if (bgType === "color" && bgValue) {
-                ctx.fillStyle = bgValue;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else if (bgType === "gradient" && bgValue) {
-                const preset = PRESET_GRADIENTS.find(g => g.value === bgValue);
-                const grd = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                if (preset) {
-                    grd.addColorStop(0, preset.colors[0]);
-                    grd.addColorStop(1, preset.colors[1]);
-                } else {
-                    const hexMatches = bgValue.match(/#[a-fA-F0-9]{6}/g);
-                    if (hexMatches && hexMatches.length >= 2) {
-                        grd.addColorStop(0, hexMatches[0]);
-                        grd.addColorStop(1, hexMatches[1]);
-                    } else {
-                        ctx.fillStyle = "#ffffff";
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-                }
-                ctx.fillStyle = grd;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else if (bgType === "image" && customBgSrc) {
-                const bgImg = new window.Image();
-                bgImg.src = customBgSrc;
-                bgImg.onload = () => {
-                    const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
-                    const x = (canvas.width / 2) - (bgImg.width / 2) * scale;
-                    const y = (canvas.height / 2) - (bgImg.height / 2) * scale;
-                    ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
-                    drawSubject(ctx, subjectImg, canvas);
-                };
-                return;
-            } else {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-
-            if (bgType !== 'image') {
-                drawSubject(ctx, subjectImg, canvas);
-            }
-        };
-    };
-
-    const drawSubject = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, canvas: HTMLCanvasElement) => {
-        const s = scale[0] / 100;
-        const dw = img.width * s;
-        const dh = img.height * s;
-        
-        const dx = (posX[0] / 100) * canvas.width;
-        const dy = (posY[0] / 100) * canvas.height;
-
-        const x = (canvas.width - dw) / 2 + dx;
-        const y = (canvas.height - dh) / 2 + dy;
-
-        ctx.save();
-        ctx.translate(x + dw / 2, y + dh / 2);
-        ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
-        ctx.restore();
-
-        setFinalImageSrc(canvas.toDataURL("image/png"));
-    };
-
-    composite();
-  }, [subjectImageSrc, bgType, bgValue, customBgSrc, scale, posX, posY, flipH, flipV]);
-
-  const handleCustomBgUpload = (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-              setCustomBgSrc(e.target?.result as string);
-              setBgType("image");
-          };
-          reader.readAsDataURL(file);
-      }
+  const saveRefinement = () => {
+      setSubjectImageSrc(finalImageSrc);
+      setIsRefining(false);
+      toast({ title: "Changes Saved" });
   };
 
   const handleDownload = () => {
     if (!finalImageSrc) return;
     const link = document.createElement("a");
     link.href = finalImageSrc;
-    link.download = `background-removed-${Date.now()}.png`;
+    link.download = `bg-removed-${Date.now()}.png`;
     link.click();
   };
 
@@ -275,42 +199,37 @@ export default function BackgroundRemover() {
     setOriginalImageSrc(null);
     setSubjectImageSrc(null);
     setFinalImageSrc(null);
-    setCustomBgSrc(null);
-    setBgType("none");
-    resetTransforms();
+    setIsRefining(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (!originalImageSrc) {
     return (
       <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
+        className={cn("w-full max-w-2xl text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0]); }}
       >
         <CardHeader>
-          <CardTitle className="text-2xl font-black flex items-center justify-center gap-2 text-gradient-primary uppercase tracking-tighter">
-            <Eraser className="text-primary h-8 w-8" /> Precision AI Remover
-          </CardTitle>
-          <CardDescription>Advanced background removal that preserves human limbs, hair, and edges.</CardDescription>
+          <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
+            <Eraser className="h-10 w-10" />
+          </div>
+          <CardTitle className="text-3xl font-black">Pro Background Remover</CardTitle>
+          <CardDescription>Privacy-first local AI extraction with Manual Refinement Brush to fix cut limbs.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative overflow-hidden" onClick={() => fileInputRef.current?.click()}>
-            <div className="relative z-10">
-                <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
-            </div>
-            <div className="z-10">
+          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+            <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div>
                 <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">Best for complex poses, groups, and detailed fashion photos.</p>
+                <p className="text-sm text-muted-foreground mt-2">No API Limits. 100% Free & Secure.</p>
             </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </CardContent>
-        <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 border-t pt-8 bg-muted/5">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> Limb Preservation</div>
-            <div className="flex items-center gap-1.5"><Layers className="h-4 w-4 text-primary" /> HD Rendering</div>
-            <div className="flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-purple-500" /> AI Cloud Engine</div>
+        <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 border-t pt-8">
+            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> No Data Uploads</div>
+            <div className="flex items-center gap-1.5"><Paintbrush className="h-4 w-4 text-primary" /> Manual Fix Tool</div>
+            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Unlimited Uses</div>
         </CardFooter>
       </Card>
     );
@@ -325,30 +244,40 @@ export default function BackgroundRemover() {
             <Card className="overflow-hidden border-2 shadow-2xl relative">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        {subjectImageSrc ? <Sparkles className="h-3 w-3 text-primary" /> : <Cpu className="h-3 w-3" />}
-                        {subjectImageSrc ? "Precision Render Result" : "Source Preview"}
+                        {isRefining ? <Paintbrush className="h-3 w-3 text-primary animate-pulse" /> : <ImageIcon className="h-3 w-3" />}
+                        {isRefining ? "Refinement Studio (Paint to Restore)" : subjectImageSrc ? "AI Render Result" : "Source Preview"}
                     </CardTitle>
-                    {subjectImageSrc && <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-[9px] font-black">AI OPTIMIZED</Badge>}
+                    {subjectImageSrc && !isRefining && <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-[9px] font-black">AI EXTRACTED</Badge>}
                 </CardHeader>
-                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[400px]" style={!finalImageSrc || (bgType === 'none') ? checkerboardStyle : {}}>
+                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={subjectImageSrc ? checkerboardStyle : {}}>
                     {isProcessing ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8">
                             <div className="relative">
                                 <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
-                                <CloudLightning className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
                             </div>
                             <div className="space-y-4 w-full max-w-sm">
                                 <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
                                 <Progress value={progress} className="h-2 shadow-inner" />
-                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                                    {removalMode === 'cloud' ? "Analyzing anatomy to preserve hands and edges..." : "Processing locally on your device..."}
-                                </p>
                             </div>
                         </div>
+                    ) : isRefining ? (
+                        <canvas 
+                            ref={refineCanvasRef} 
+                            className="max-w-full h-auto cursor-crosshair shadow-2xl border-4 border-primary/20 rounded-lg"
+                            onMouseMove={handleRefineMove}
+                            onTouchMove={handleRefineMove}
+                        />
                     ) : finalImageSrc ? (
                         <Image src={finalImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
                     ) : (
                         <Image src={originalImageSrc} alt="Original" fill className="object-contain p-8" />
+                    )}
+                    
+                    {!isProcessing && isRefining && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-primary/90 text-white rounded-full text-xs font-black uppercase shadow-xl">
+                            <MousePointer2 className="size-3" /> Painting to {brushMode}
+                        </div>
                     )}
                 </CardContent>
             </Card>
@@ -358,180 +287,110 @@ export default function BackgroundRemover() {
                     <RotateCcw className="mr-2 h-4 w-4" /> Start Over
                 </Button>
                 {!subjectImageSrc ? (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20" onClick={handleAction} disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : removalMode === 'cloud' ? <CloudLightning className="mr-3 h-6 w-6 text-yellow-400" /> : <Cpu className="mr-3 h-6 w-6" />}
-                        {removalMode === 'cloud' ? "PRECISION REMOVAL" : "LOCAL REMOVAL"}
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20" onClick={handleRemoveBackgroundLocal} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Zap className="mr-3 h-6 w-6 text-yellow-400" />}
+                        START LOCAL AI REMOVAL
+                    </Button>
+                ) : isRefining ? (
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={saveRefinement}>
+                        <CheckCircle2 className="mr-3 h-6 w-6" /> SAVE REFINEMENT
                     </Button>
                 ) : (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20" onClick={handleDownload}>
-                        <Download className="mr-3 h-6 w-6" /> DOWNLOAD STUDIO HD
-                    </Button>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                        <Button variant="secondary" size="lg" className="flex-1 h-14 px-8 font-black uppercase text-xs border-2 border-primary/20" onClick={startRefining}>
+                            <Paintbrush className="mr-2 h-4 w-4 text-primary" /> Refine Brush (Fix Hand)
+                        </Button>
+                        <Button size="lg" className="flex-1 h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
+                            <Download className="mr-3 h-6 w-6" /> DOWNLOAD PNG
+                        </Button>
+                    </div>
                 )}
             </div>
         </div>
 
         {/* Controls Area */}
-        <div className={cn("lg:col-span-4 space-y-6 transition-all duration-500", !originalImageSrc && "opacity-20 pointer-events-none grayscale")}>
-            
-            {/* Mode Selector - ONLY if not processed yet */}
-            {!subjectImageSrc && (
-                <Card className="border-2 shadow-xl border-primary/20 bg-primary/5">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
-                            <CloudLightning className="size-4 text-primary" /> Accuracy Level
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Tabs value={removalMode} onValueChange={(v) => setRemovalMode(v as any)} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 h-12 p-1">
-                                <TabsTrigger value="cloud" className="text-[10px] font-black">PRECISION (AI)</TabsTrigger>
-                                <TabsTrigger value="local" className="text-[10px] font-black">STANDARD (FAST)</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-                        <div className="mt-4 flex gap-3 items-start p-3 bg-white/50 rounded-xl border border-primary/10">
-                            <AlertCircle className="size-4 text-primary shrink-0 mt-0.5" />
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                                <strong>Precision AI:</strong> Recommended for humans. Best at preserving fingers, limbs, and hair. No limbs will be cut.
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            <Card className="border-2 shadow-xl border-primary/10">
+        <div className="lg:col-span-4 space-y-6">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg flex items-center gap-2 font-headline">
-                        <Palette className="h-5 w-5 text-primary" /> STUDIO PANEL
+                    <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Paintbrush className="h-5 w-5 text-primary" /> {isRefining ? "BRUSH SETTINGS" : "REFINEMENT PANEL"}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                    <Tabs defaultValue="bg" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 p-1 rounded-xl">
-                            <TabsTrigger value="bg" className="text-[10px] font-black uppercase">Colors</TabsTrigger>
-                            <TabsTrigger value="upload" className="text-[10px] font-black uppercase">Custom</TabsTrigger>
-                            <TabsTrigger value="transform" className="text-[10px] font-black uppercase">Adjust</TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="bg" className="space-y-6">
-                            <div className="space-y-4">
-                                <Label className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Solid Canvas</Label>
-                                <div className="grid grid-cols-5 gap-2.5">
-                                    <button 
-                                        className={cn("size-9 rounded-xl border-2 transition-all hover:scale-105", bgType === 'none' && "border-primary ring-2 ring-primary/20")}
-                                        style={checkerboardStyle}
-                                        onClick={() => setBgType("none")}
-                                    />
-                                    {PRESET_COLORS.map(color => (
-                                        <button 
-                                            key={color}
-                                            className={cn("size-9 rounded-xl border-2 transition-all hover:scale-105 active:scale-95 shadow-sm", bgType === 'color' && bgValue === color && "border-primary ring-2 ring-primary/20")}
-                                            style={{ backgroundColor: color }}
-                                            onClick={() => { setBgType("color"); setBgValue(color); }}
-                                        />
-                                    ))}
+                <CardContent className="pt-8 pb-8 space-y-8">
+                    {!subjectImageSrc ? (
+                        <div className="p-6 bg-muted/20 rounded-2xl border-2 border-dashed flex flex-col items-center gap-4 text-center">
+                            <Zap className="size-10 text-primary opacity-20" />
+                            <p className="text-xs font-bold text-muted-foreground">Click "START LOCAL AI" to begin processing without any limits.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-8">
+                            <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/20 flex gap-3">
+                                <CheckCircle2 className="size-5 text-green-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-[10px] font-black text-green-700 uppercase">AI Pass Complete</p>
+                                    <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
+                                        If the AI cut any part (like hands), use the **Refine Brush** to paint it back from the original.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 pt-4 border-t">
-                                <Label className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Gradients</Label>
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    {PRESET_GRADIENTS.map((grad) => (
-                                        <button 
-                                            key={grad.label}
-                                            className={cn("h-11 rounded-xl border-2 transition-all hover:scale-[1.02] flex items-center justify-center text-[8px] font-black text-white shadow-inner uppercase tracking-tighter", bgType === 'gradient' && bgValue === grad.value && "border-primary ring-2 ring-primary/20")}
-                                            style={{ backgroundImage: grad.value }}
-                                            onClick={() => { setBgType("gradient"); setBgValue(grad.value); }}
+                            <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Brush Action</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button 
+                                            variant={brushMode === 'restore' ? "default" : "outline"}
+                                            className="h-14 flex-col gap-1 rounded-2xl border-2"
+                                            onClick={() => setBrushMode('restore')}
+                                            disabled={!isRefining}
                                         >
-                                            {grad.label}
-                                        </button>
-                                    ))}
+                                            <Undo2 className="size-5" />
+                                            <span className="text-[8px] font-black uppercase">Restore (Fix)</span>
+                                        </Button>
+                                        <Button 
+                                            variant={brushMode === 'erase' ? "default" : "outline"}
+                                            className="h-14 flex-col gap-1 rounded-2xl border-2"
+                                            onClick={() => setBrushMode('erase')}
+                                            disabled={!isRefining}
+                                        >
+                                            <Eraser className="size-5" />
+                                            <span className="text-[8px] font-black uppercase">Erase (Cleanup)</span>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Brush Size</Label>
+                                        <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{brushSize[0]}px</span>
+                                    </div>
+                                    <Slider min={5} max={100} step={1} value={brushSize} onValueChange={setBrushSize} disabled={!isRefining} />
                                 </div>
                             </div>
-                        </TabsContent>
-
-                        <TabsContent value="upload" className="space-y-4">
-                             <Label className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Upload Backdrop</Label>
-                             <div 
-                                className="border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-primary/5 transition-colors group"
-                                onClick={() => bgInputRef.current?.click()}
-                             >
-                                 <ImageIcon className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
-                                 <p className="text-[10px] font-black uppercase text-center text-muted-foreground">Select New Background</p>
-                             </div>
-                             <input ref={bgInputRef} type="file" className="hidden" accept="image/*" onChange={handleCustomBgUpload} />
-                             {customBgSrc && (
-                                 <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-2xl border border-primary/20">
-                                     <div className="size-12 relative rounded-lg overflow-hidden border">
-                                         <Image src={customBgSrc} alt="custom" fill className="object-cover" />
-                                     </div>
-                                     <span className="text-[10px] font-black uppercase truncate flex-1 text-primary tracking-tighter">Custom Scene Active</span>
-                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { setCustomBgSrc(null); setBgType("none"); }}>
-                                         <X className="h-4 w-4" />
-                                     </Button>
-                                 </div>
-                             )}
-                        </TabsContent>
-
-                        <TabsContent value="transform" className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground"><Maximize className="size-3" /> Zoom Subject</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{scale[0]}%</span>
-                                </div>
-                                <Slider min={10} max={200} step={1} value={scale} onValueChange={setScale} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground"><Move className="size-3" /> Horizontal</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{posX[0]}%</span>
-                                </div>
-                                <Slider min={-100} max={100} step={1} value={posX} onValueChange={setPosX} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground"><Move className="size-3" /> Vertical</Label>
-                                    <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{posY[0]}%</span>
-                                </div>
-                                <Slider min={-100} max={100} step={1} value={posY} onValueChange={setPosY} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 pt-2">
-                                <Button 
-                                    variant={flipH ? "default" : "outline"} 
-                                    size="sm" 
-                                    className="text-[10px] h-10 font-black uppercase rounded-xl border-2" 
-                                    onClick={() => setFlipH(!flipH)}
-                                >
-                                    <FlipHorizontal className="size-3 mr-1.5" /> Flip H
+                            
+                            {!isRefining ? (
+                                <Button variant="secondary" className="w-full h-12 font-black border-2" onClick={startRefining}>
+                                    ACTIVATE REFINE BRUSH
                                 </Button>
-                                <Button 
-                                    variant={flipV ? "default" : "outline"} 
-                                    size="sm" 
-                                    className="text-[10px] h-10 font-black uppercase rounded-xl border-2" 
-                                    onClick={() => setFlipV(!flipV)}
-                                >
-                                    <FlipVertical className="size-3 mr-1.5" /> Flip V
-                                </Button>
-                            </div>
-
-                            <Button variant="outline" size="sm" className="w-full text-[10px] h-10 font-black uppercase mt-2 rounded-xl border-2" onClick={resetTransforms}>
-                                <RotateCcw className="size-3 mr-1.5" /> Reset Transforms
-                            </Button>
-                        </TabsContent>
-                    </Tabs>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-2">
+                                     <Button className="w-full h-14 bg-green-600 font-black text-lg" onClick={saveRefinement}>APPLY BRUSH FIX</Button>
+                                     <Button variant="ghost" className="w-full text-xs font-bold" onClick={() => setIsRefining(false)}>CANCEL</Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </CardContent>
-                <CardFooter className="bg-muted/5 border-t py-4">
-                    <p className="text-[9px] text-muted-foreground text-center w-full font-medium leading-relaxed italic">
-                        All cloud processing is secure. Use Precision mode for official documents and portfolio shots.
+                <CardFooter className="bg-muted/5 border-t py-4 text-center">
+                    <p className="text-[9px] text-muted-foreground w-full font-medium italic">
+                        All processing is 100% private. No cloud limits. No data sent to servers.
                     </p>
                 </CardFooter>
             </Card>
         </div>
       </div>
       
-      {/* Offscreen rendering canvas */}
+      {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
