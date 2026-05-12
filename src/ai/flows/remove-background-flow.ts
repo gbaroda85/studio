@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview An AI flow to remove the background from an image.
+ * @fileOverview An AI flow to remove the background from an image with high precision.
  *
  * - removeBackground - A function that handles the background removal process.
  * - RemoveBackgroundInput - The input type for the removeBackground function.
@@ -43,7 +43,7 @@ const removeBackgroundFlow = ai.defineFlow(
       model: 'googleai/gemini-2.5-flash-image',
       prompt: [
           {media: {url: input.photoDataUri}},
-          {text: 'You are an expert image editor. Your task is to remove the background from the provided image. The output must be a PNG image with a transparent background, containing only the main subject of the original photo. Do not add any extra elements or text.'},
+          {text: 'You are an elite professional image editor. Your task is to remove the background from this image with 100% precision. CRITICAL: Preserve all parts of the human subject, especially hands, fingers, and hair edges. Do not cut off any limbs. The output MUST be a high-quality PNG with a transparent background. Return ONLY the final image.'},
       ],
       config: {
           responseModalities: ['TEXT', 'IMAGE'],
@@ -57,7 +57,7 @@ const removeBackgroundFlow = ai.defineFlow(
     });
 
     if (!media?.url) {
-        throw new Error('Failed to generate image with removed background.');
+        throw new Error('Cloud AI failed to generate image. Please try a clearer photo.');
     }
 
     return { imageDataUri: media.url };
