@@ -107,6 +107,8 @@ const translations = {
     target_size: 'Target File Size',
     target_size_kb: 'Target Size (KB)',
     calculating_quality: 'Optimizing quality...',
+    passport_photo_label: 'Passport Photo Studio',
+    passport_photo_description: 'Create professional passport photos with AI background removal and clothes changer.',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -187,7 +189,7 @@ const translations = {
     sales_tax_calculator_label: 'बिक्री कर कैलकुलेटर',
     sales_tax_calculator_description: 'बिक्री कर और कुल कीमत की तुरंत गणना करें।',
     search_tools_placeholder: 'नाम या विवरण द्वारा टूल खोजें...',
-    no_tools_found: 'आपकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
+    no_tools_found: 'यापकी खोज से मेल खाने वाला कोई उपकरण नहीं मिला',
     remove_background_label: 'पृष्ठभूमि हटाएं',
     remove_background_description: 'किसी भी छवि से पृष्ठभूमि हटाने के लिए AI का उपयोग करें।',
     remove_signature_label: 'हस्ताक्षर हटाएं',
@@ -203,6 +205,8 @@ const translations = {
     target_size: 'लक्ष्य फ़ाइल आकार',
     target_size_kb: 'लक्ष्य आकार (KB)',
     calculating_quality: 'गुणवत्ता का अनुकूलन किया जा रहा है...',
+    passport_photo_label: 'पासपोर्ट फोटो स्टूडियो',
+    passport_photo_description: 'AI बैकग्राउंड हटाने और कपड़े बदलने के साथ पेशेवर पासपोर्ट फोटो बनाएं।',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -299,6 +303,8 @@ const translations = {
     target_size: 'Tamaño de archivo objetivo',
     target_size_kb: 'Tamaño objetivo (KB)',
     calculating_quality: 'Optimizando calidad...',
+    passport_photo_label: 'Estudio de Fotos de Pasaporte',
+    passport_photo_description: 'Cree fotos de pasaporte profesionales con eliminación de fondo por IA y cambiador de ropa.',
   },
 };
 

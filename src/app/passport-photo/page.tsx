@@ -7,11 +7,12 @@ import { HowToGuide } from '@/components/how-to-guide';
 
 export default function PassportPhotoPage() {
   const steps = [
-    "Upload Photo: Select a clear photo of your face with a plain background.",
-    "Select Size: Choose a country preset (like India 3.5x4.5cm) or enter custom dimensions.",
-    "Adjust DPI: Keep it at 300 DPI for standard high-quality printing.",
-    "Crop: Use the visual tool to frame your face correctly. The aspect ratio is locked automatically.",
-    "Download: Click 'Generate' and then 'Download JPG' to save your official passport photo."
+    "Upload Photo: Select a clear photo of your face.",
+    "Select Size: Choose a country preset (like India 3.5x4.5cm).",
+    "AI Background: Click 'AI REMOVE' to clear the background locally.",
+    "Change Clothes: Select from professional suits or shirts (Always visible).",
+    "Manual Fix: If AI cuts any part, use the 'Refine' brush to restore it.",
+    "Download: Save your high-quality passport photo."
   ];
 
   return (
@@ -20,14 +21,14 @@ export default function PassportPhotoPage() {
             <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
                 <Link href="/tools?tab=image">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
+                    Back to Tools
                 </Link>
             </Button>
         </div>
         <div className="w-full flex justify-center">
             <PassportPhotoMaker />
         </div>
-        <HowToGuide title="Passport Size Photo Maker" steps={steps} />
+        <HowToGuide title="Professional Passport Maker" steps={steps} />
     </main>
   );
 }
