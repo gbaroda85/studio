@@ -37,7 +37,6 @@ import {
   FileScan,
   FileText,
   PenLine,
-  Contact,
 } from 'lucide-react';
 
 import {
@@ -73,7 +72,6 @@ function AppSidebar() {
   const { t } = useLanguage();
 
   const menuItems = [
-    {href: '/passport-photo', labelKey: 'passport_photo_label', icon: Contact, color: 'text-indigo-600'},
     {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-blue-500'},
     {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-indigo-500'},
     {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-cyan-500'},
