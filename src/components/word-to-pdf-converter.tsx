@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -36,14 +35,14 @@ export default function WordToPdfConverter() {
             setPdfUrl(null);
             setIsParsing(true);
             
-            // Short delay to ensure DOM is ready
+            // Allow state to update
             setTimeout(async () => {
                 try {
                     const arrayBuffer = await file.arrayBuffer();
                     const container = previewRef.current;
                     
                     if (container) {
-                        container.innerHTML = ""; // Clear existing
+                        container.innerHTML = ""; 
                         
                         await renderAsync(arrayBuffer, container, undefined, {
                             className: "docx-viewer",
@@ -53,30 +52,28 @@ export default function WordToPdfConverter() {
                             useBase64URL: true,
                         });
                         
-                        // Force STRICT A4 ALIGNMENT & TAB PRESERVATION
-                        const renderedPages = container.querySelectorAll('.docx, section, [className*="docx"]');
-                        renderedPages.forEach((page: any) => {
-                            page.style.width = '210mm';
-                            page.style.minHeight = '297mm';
-                            page.style.padding = '15mm 20mm'; // Standard Word margins
-                            page.style.margin = '0 auto 20px auto';
-                            page.style.backgroundColor = 'white';
-                            page.style.boxShadow = '0 15px 50px rgba(0,0,0,0.1)';
-                            page.style.position = 'relative';
-                            page.style.boxSizing = 'border-box';
-                            
-                            // CRITICAL: Grid-Fidelity Spacing
-                            page.style.whiteSpace = "break-spaces"; 
-                            page.style.wordBreak = "normal";
-                            page.style.tabSize = "8";
-                            page.style.fontFamily = "'Times New Roman', Times, serif";
-                            page.style.fontVariantLigatures = "none";
+                        // Apply Strict Grid Fidelity Styles
+                        const docxElements = container.querySelectorAll('.docx');
+                        docxElements.forEach((el: any) => {
+                            el.style.width = '210mm';
+                            el.style.minHeight = '297mm';
+                            el.style.padding = '20mm';
+                            el.style.backgroundColor = 'white';
+                            el.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                            el.style.position = 'relative';
+                            el.style.margin = '0 auto 30px auto';
+                            // Forced Alignment Logic
+                            el.style.whiteSpace = "break-spaces";
+                            el.style.tabSize = "8";
+                            el.style.fontFamily = "'Times New Roman', Times, serif";
+                            el.style.textRendering = "geometricPrecision";
+                            el.style.fontVariantLigatures = "none";
                         });
 
-                        toast({ title: "Grid Lock Active", description: "Layout synchronized with A4 precision." });
+                        toast({ title: "Alignment Locked", description: "Document grid is synchronized." });
                     }
                 } catch (error) {
-                    console.error("Word rendering error:", error);
+                    console.error("Word preview error:", error);
                     toast({ variant: 'destructive', title: 'Parsing Error', description: 'Could not render file layout.' });
                     setWordFile(null);
                 } finally {
@@ -95,18 +92,15 @@ export default function WordToPdfConverter() {
         if (pdfUrl) URL.revokeObjectURL(pdfUrl);
         setPdfUrl(null);
         
-        toast({ title: 'Capturing High-Fidelity PDF', description: 'Syncing colons and signatures...' });
+        toast({ title: 'Extracting High-Fidelity PDF', description: 'Capturing exact character positions...' });
 
         try {
             const container = previewRef.current;
-            // Robust Page Selection
-            let pages = Array.from(container.querySelectorAll('.docx, section, [className*="page"]'));
+            // Robust selection for multiple pages
+            let pages = Array.from(container.querySelectorAll('.docx, section, .docx-wrapper > div'));
             
-            // Fallback for different rendering outputs
-            if (pages.length === 0 && container.firstChild) {
-                pages = Array.from(container.querySelectorAll('.docx-wrapper > div'));
-            }
             if (pages.length === 0) {
+                // Fallback for some docx-preview outputs
                 pages = Array.from(container.children) as HTMLElement[];
             }
 
@@ -119,20 +113,26 @@ export default function WordToPdfConverter() {
             for (let i = 0; i < pages.length; i++) {
                 const pageElement = pages[i] as HTMLElement;
                 
-                // Ensure width is hard-locked during capture
+                // Hard-lock width during high-res scan
                 const originalWidth = pageElement.style.width;
                 const originalMargin = pageElement.style.margin;
-                
                 pageElement.style.width = '210mm';
                 pageElement.style.margin = '0';
 
                 const canvas = await html2canvas(pageElement, {
-                    scale: 3.5, // Ultra-HD resolution for clear text/lines
+                    scale: 3.5, // Ultra-HD scale for sharp text and alignment
                     useCORS: true,
                     logging: false,
                     backgroundColor: "#ffffff",
                     width: pageElement.offsetWidth,
                     height: pageElement.offsetHeight,
+                    onclone: (clonedDoc) => {
+                        const clonedPage = clonedDoc.body.querySelector('.docx-viewer') as HTMLElement;
+                        if (clonedPage) {
+                            clonedPage.style.display = 'block';
+                            clonedPage.style.width = '210mm';
+                        }
+                    }
                 });
 
                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
@@ -140,7 +140,7 @@ export default function WordToPdfConverter() {
                 if (i > 0) pdf.addPage();
                 pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
                 
-                // Restore style for UI visibility
+                // Restore for UI
                 pageElement.style.width = originalWidth;
                 pageElement.style.margin = originalMargin;
             }
@@ -149,9 +149,9 @@ export default function WordToPdfConverter() {
             const url = URL.createObjectURL(pdfBlob);
             setPdfUrl(url);
 
-            toast({ title: 'Success!', description: 'Your PDF matches the original Word grid.' });
+            toast({ title: 'Success!', description: 'Your PDF is perfectly aligned.' });
         } catch (error: any) {
-            console.error("PDF engine error:", error);
+            console.error("PDF generation failed:", error);
             toast({ variant: 'destructive', title: 'System Error', description: error.message || 'Failed to capture aligned layout.' });
         } finally {
             setIsConverting(false);
@@ -178,7 +178,7 @@ export default function WordToPdfConverter() {
     return (
         <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 pb-20">
             
-            {/* Left Controls */}
+            {/* Control Sidebar */}
             <div className="lg:col-span-4 flex flex-col gap-6">
                 {!wordFile ? (
                     <Card
@@ -191,8 +191,8 @@ export default function WordToPdfConverter() {
                             <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-blue-500/10 text-blue-600">
                                 <FileType className="h-10 w-10" />
                             </div>
-                            <CardTitle className="text-3xl font-black font-headline uppercase tracking-tighter">Word to PDF <span className="text-blue-600 text-gradient-primary">Pro</span></CardTitle>
-                            <CardDescription>Maintains exact alignments, colons, and tabs.</CardDescription>
+                            <CardTitle className="text-3xl font-black font-headline uppercase tracking-tighter">Word to PDF <span className="text-blue-600">PRO</span></CardTitle>
+                            <CardDescription>Maintains exact alignments, colons, and tabs locally.</CardDescription>
                         </CardHeader>
                         <CardContent className="pb-12">
                             <div
@@ -210,7 +210,7 @@ export default function WordToPdfConverter() {
                         <Card className="border-2 shadow-xl overflow-hidden bg-card/80">
                             <CardHeader className="bg-muted/30 border-b py-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Grid fidelity Active</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Character Sync Active</span>
                                     <Button variant="ghost" size="sm" onClick={reset} className="h-7 text-[9px] font-black hover:text-destructive">
                                         <RefreshCcw className="mr-1 h-2.5 w-3" /> CHANGE FILE
                                     </Button>
@@ -223,7 +223,7 @@ export default function WordToPdfConverter() {
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-sm font-black truncate">{wordFile.name}</p>
-                                        <p className="text-[10px] font-bold text-primary uppercase">Precision Engine Ready</p>
+                                        <p className="text-[10px] font-bold text-primary uppercase">Aligned Engine Ready</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -239,19 +239,19 @@ export default function WordToPdfConverter() {
                                 <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3">
                                     <ShieldCheck className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
                                     <p className="text-[10px] font-black text-green-700 uppercase leading-tight">
-                                        Alignment Lock: Vertical spacing fixed for Certificates.
+                                        Grid Fidelity Mode: Spaces and tabs are strictly preserved.
                                     </p>
                                 </div>
                                 
                                 {!pdfUrl ? (
                                     <Button onClick={handleConvert} disabled={isConverting || isParsing} className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl transition-all active:scale-95">
                                         {isConverting ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <FileDigit className="mr-3 h-6 w-6 text-yellow-400" />}
-                                        {isConverting ? "SYNCING LAYOUT..." : "GENERATE PERFECT PDF"}
+                                        {isConverting ? "LOCKING GRID..." : "DOWNLOAD PRO PDF"}
                                     </Button>
                                 ) : (
                                     <div className="space-y-4">
-                                        <Button onClick={handleDownload} className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-2xl animate-pulse">
-                                            <Download className="mr-3 h-6 w-6" /> DOWNLOAD PDF
+                                        <Button onClick={handleDownload} className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-2xl animate-bounce">
+                                            <Download className="mr-3 h-6 w-6" /> SAVE PDF NOW
                                         </Button>
                                         <Button variant="outline" onClick={() => setPdfUrl(null)} className="w-full h-12 font-bold border-2 rounded-xl">
                                             <RefreshCcw className="mr-2 h-4 w-4" /> RE-CONVERT
@@ -264,37 +264,34 @@ export default function WordToPdfConverter() {
                 )}
             </div>
 
-            {/* Right Preview */}
-            <div className="lg:col-span-8 flex flex-col">
-                <Card className="border-2 shadow-2xl flex-1 overflow-hidden flex flex-col bg-slate-200 dark:bg-slate-900 rounded-[2.5rem] min-h-[850px]">
+            {/* Document Preview Area */}
+            <div className="lg:col-span-8">
+                <Card className="border-2 shadow-2xl overflow-hidden flex flex-col bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] min-h-[850px]">
                     <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between shrink-0">
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                            <Eye className="h-4 w-4 text-primary" /> LIVE DOCUMENT GRID
+                            <Eye className="h-4 w-4 text-primary" /> FIDELITY PREVIEW (A4)
                         </CardTitle>
                         <div className="flex gap-2">
-                             <Badge variant="outline" className="text-[9px] font-black bg-white shadow-sm uppercase">Tab-Lock: Active</Badge>
-                             <Badge variant="outline" className="text-[9px] font-black bg-white shadow-sm uppercase">Format: 210mm</Badge>
+                             <Badge variant="outline" className="text-[9px] font-black bg-white shadow-sm uppercase">Grid-Lock: Active</Badge>
+                             <Badge variant="outline" className="text-[9px] font-black bg-white shadow-sm uppercase">Fidelity: 100%</Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-0 overflow-auto custom-scrollbar flex justify-center bg-slate-400/20">
-                        <div className="my-12 w-full flex flex-col items-center">
+                    <CardContent className="flex-1 p-0 overflow-auto custom-scrollbar bg-slate-300/30">
+                        <div className="py-12 w-full flex flex-col items-center">
                             {isParsing && (
                                 <div className="absolute inset-0 z-20 bg-white/95 flex flex-col items-center justify-center gap-6">
                                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
                                     <div className="text-center space-y-1">
-                                        <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">Locking Tab-Stops...</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase">Calibrating Character Widths...</p>
+                                        <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">Syncing Tabs...</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase">Calibrating Vertical Grid...</p>
                                     </div>
                                 </div>
                             )}
-                            <div 
-                                ref={previewRef}
-                                className="docx-output-container"
-                            />
+                            <div ref={previewRef} className="docx-output-container" />
                             {!wordFile && !isParsing && (
                                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground/10 py-64 select-none">
                                     <FileType className="h-40 w-40 mb-4" />
-                                    <p className="text-4xl font-black font-headline uppercase tracking-tighter">Awaiting Doc...</p>
+                                    <p className="text-4xl font-black font-headline uppercase tracking-tighter">Awaiting Document</p>
                                 </div>
                             )}
                         </div>
@@ -314,34 +311,35 @@ export default function WordToPdfConverter() {
                     padding: 0 !important;
                     display: flex !important;
                     flex-direction: column !important;
-                    gap: 40px !important;
+                    gap: 30px !important;
                 }
                 .docx {
-                    box-shadow: 0 25px 80px rgba(0,0,0,0.2) !important;
+                    box-shadow: 0 25px 60px rgba(0,0,0,0.1) !important;
                     background: white !important;
                     width: 210mm !important;
                     min-height: 297mm !important;
-                    padding: 15mm 20mm !important;
+                    padding: 20mm !important;
                     box-sizing: border-box !important;
                     overflow: hidden !important;
                     position: relative !important;
-                    /* HARD GRID FIX FOR TABS */
+                    /* THE GRID LOCK FIX */
                     white-space: break-spaces !important;
                     tab-size: 8 !important;
                     font-variant-ligatures: none !important;
                     text-rendering: geometricPrecision !important;
                     font-family: 'Times New Roman', serif !important;
+                    line-height: 1.5 !important;
                 }
                 .docx p {
-                    margin-bottom: 0.15em !important;
-                    line-height: 1.45 !important;
+                    margin-bottom: 0.1em !important;
                 }
                 .docx span {
                     display: inline-block !important;
+                    /* Prevents character squeeze */
                 }
                 .custom-scrollbar::-webkit-scrollbar { width: 8px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 20px; }
             `}</style>
         </div>
     );
