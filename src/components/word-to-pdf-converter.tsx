@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -98,15 +99,22 @@ export default function WordToPdfConverter() {
 
         try {
             const container = previewRef.current;
-            // Robust selection for multiple pages
+            // Robust selection for multiple pages: check for .docx or any direct child sections
             let pages = Array.from(container.querySelectorAll('.docx, section, .docx-wrapper > div'));
             
             if (pages.length === 0) {
-                // Fallback selector
-                pages = Array.from(container.children) as HTMLElement[];
+                // Final fallback: use the container's immediate children if they look like pages
+                pages = Array.from(container.children).filter(child => (child as HTMLElement).offsetHeight > 100) as HTMLElement[];
             }
 
-            if (pages.length === 0) throw new Error("No document content found to convert.");
+            if (pages.length === 0) {
+                // If still nothing, maybe it's a single page wrapped differently
+                if (container.innerHTML.trim().length > 0) {
+                    pages = [container];
+                } else {
+                    throw new Error("No document content found to convert.");
+                }
+            }
 
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pageWidth = pdf.internal.pageSize.getWidth();
@@ -115,7 +123,7 @@ export default function WordToPdfConverter() {
             for (let i = 0; i < pages.length; i++) {
                 const pageElement = pages[i] as HTMLElement;
                 
-                // Temporarily force exact A4 width for the screenshot scan
+                // Temporarily force exact A4 width for the screenshot scan to preserve tabs
                 const originalWidth = pageElement.style.width;
                 const originalMargin = pageElement.style.margin;
                 pageElement.style.width = '210mm';
@@ -328,6 +336,7 @@ export default function WordToPdfConverter() {
                 }
                 .docx p {
                     margin-bottom: 0.1em !important;
+                    line-height: 1.5 !important;
                 }
                 .docx span {
                     display: inline-block !important;
