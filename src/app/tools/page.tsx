@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -443,7 +444,7 @@ function ToolsPageLoadingFallback() {
 export default function ToolsPage() {
   return (
     <Suspense fallback={<ToolsPageLoadingFallback />}>
-      <ToolsPageContent />
+      ToolsPageContent
     </Suspense>
   )
 }
