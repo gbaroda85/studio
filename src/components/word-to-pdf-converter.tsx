@@ -50,7 +50,7 @@ export default function WordToPdfConverter() {
                             inWrapper: true,
                             ignoreWidth: false,
                             ignoreHeight: false,
-                            useBase64URL: true, // Fix for signatures (CORS bypass)
+                            useBase64URL: true, // IMPORTANT: Fixes disappearing signatures
                         });
                         
                         // APPLY RIGID GRID FIDELITY STYLES
