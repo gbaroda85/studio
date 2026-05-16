@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -39,6 +38,8 @@ const translations = {
     image_to_pdf_description: 'Convert images into a single PDF file.',
     html_to_pdf_label: 'HTML to PDF',
     html_to_pdf_description: 'Convert raw HTML code into a PDF document.',
+    word_to_pdf_label: 'Word to PDF',
+    word_to_pdf_description: 'Convert Word documents (.docx) to PDF files instantly.',
     pdf_to_image_label: 'PDF to Image',
     pdf_to_image_description: 'Extract all pages from a PDF as images.',
     compress_pdf_label: 'Compress PDF',
@@ -107,8 +108,6 @@ const translations = {
     target_size: 'Target File Size',
     target_size_kb: 'Target Size (KB)',
     calculating_quality: 'Optimizing quality...',
-    passport_photo_label: 'Passport Photo Studio',
-    passport_photo_description: 'Create professional passport photos with AI background removal and clothes changer.',
   },
   hi: {
     site_title: 'जीआरएस मल्टी टूल्स किट्स हब',
@@ -137,6 +136,8 @@ const translations = {
     image_to_pdf_description: 'छवियों को एक ही पीडीएफ फाइल में बदलें।',
     html_to_pdf_label: 'HTML से PDF',
     html_to_pdf_description: 'HTML कोड को सीधे PDF दस्तावेज़ में बदलें।',
+    word_to_pdf_label: 'Word से PDF',
+    word_to_pdf_description: 'Word दस्तावेज़ (.docx) को तुरंत PDF फ़ाइलों में बदलें।',
     pdf_to_image_label: 'पीडीएफ को छवि में बदलें',
     pdf_to_image_description: 'पीडीएफ से सभी पृष्ठों को छवियों के रूप में निकालें।',
     compress_pdf_label: 'पीडीएफ संपीड़ित करें',
@@ -205,8 +206,6 @@ const translations = {
     target_size: 'लक्ष्य फ़ाइल आकार',
     target_size_kb: 'लक्ष्य आकार (KB)',
     calculating_quality: 'गुणवत्ता का अनुकूलन किया जा रहा है...',
-    passport_photo_label: 'पासपोर्ट फोटो स्टूडियो',
-    passport_photo_description: 'AI बैकग्राउंड हटाने और कपड़े बदलने के साथ पेशेवर पासपोर्ट फोटो बनाएं।',
   },
   es: {
     site_title: 'GRs Multi Tools Kits Hub',
@@ -235,6 +234,8 @@ const translations = {
     image_to_pdf_description: 'Convierte imágenes en un solo archivo PDF.',
     html_to_pdf_label: 'HTML a PDF',
     html_to_pdf_description: 'Convierte código HTML sin procesar en un documento PDF.',
+    word_to_pdf_label: 'Word a PDF',
+    word_to_pdf_description: 'Convierte documentos de Word (.docx) a archivos PDF al instante.',
     pdf_to_image_label: 'PDF a imagen',
     pdf_to_image_description: 'Extrae todas las páginas de un PDF como imágenes.',
     compress_pdf_label: 'Comprimir PDF',
@@ -303,8 +304,6 @@ const translations = {
     target_size: 'Tamaño de archivo objetivo',
     target_size_kb: 'Tamaño objetivo (KB)',
     calculating_quality: 'Optimizando calidad...',
-    passport_photo_label: 'Estudio de Fotos de Pasaporte',
-    passport_photo_description: 'Cree fotos de pasaporte profesionales con eliminación de fondo por IA y cambiador de ropa.',
   },
 };
 

@@ -47,6 +47,7 @@ import {
   FileCode,
   FileScan,
   PenLine,
+  FileType,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -136,6 +137,13 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/word-to-pdf',
+      labelKey: 'word_to_pdf_label',
+      descriptionKey: 'word_to_pdf_description',
+      icon: FileType,
+      color: 'text-blue-600',
+    },
     {
       href: '/text-to-pdf',
       labelKey: 'text_to_pdf_label',

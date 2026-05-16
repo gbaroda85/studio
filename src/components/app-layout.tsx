@@ -36,6 +36,7 @@ import {
   FileScan,
   FileText,
   PenLine,
+  FileType,
 } from 'lucide-react';
 
 import {
@@ -81,6 +82,7 @@ function AppSidebar() {
     {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-amber-500'},
     {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
     {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
+    {href: '/word-to-pdf', labelKey: 'word_to_pdf_label', icon: FileType, color: 'text-blue-600'},
     {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-slate-500'},
     {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
     {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
