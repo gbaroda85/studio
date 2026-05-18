@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
@@ -11,6 +12,10 @@ export const metadata: Metadata = {
     template: '%s | GRs Multi Tools',
   },
   description: 'Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security. Professional suite including Image to PDF, PDF to Image, Image to Text OCR, HTML to PDF, Passport Photo Maker, SSC/UPSC Photo Resizer, Aadhaar PDF Unlocker, and financial calculators. 100% private and secure.',
+  metadataBase: new URL('https://pi7csctools.vercel.app/'),
+  alternates: {
+    canonical: '/',
+  },
   keywords: [
     'image to pdf converter',
     'pdf to image converter',
@@ -57,6 +62,8 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Gaurav S' }],
   creator: 'Gaurav S',
+  manifest: '/manifest.json',
+  themeColor: '#4F46E5',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -106,8 +113,29 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter&family=Orbitron:wght@700&display=swap"
           rel="stylesheet"
         />
-        {/* Canonical link to help Google understand the main URL */}
-        <link rel="canonical" href="https://pi7csctools.vercel.app/" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "GRs Multi Tools Kits Hub",
+              "url": "https://pi7csctools.vercel.app/",
+              "description": "Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security.",
+              "applicationCategory": "UtilitiesApplication",
+              "operatingSystem": "Any",
+              "author": {
+                "@type": "Person",
+                "name": "Gaurav S"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "INR"
+              }
+            }),
+          }}
+        />
       </head>
       <body className="font-body antialiased">
         <ThemeProvider

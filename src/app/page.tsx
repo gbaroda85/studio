@@ -15,6 +15,8 @@ import {
   Search,
   Calculator,
   LayoutGrid,
+  ShieldCheck,
+  CheckCircle,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
@@ -236,6 +238,55 @@ export default function Page() {
                 <p className="text-muted-foreground text-sm leading-relaxed px-4">{f.desc}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* SEO Content Section - Added for Ranking */}
+        <section className="py-20 border-t border-border/50">
+          <div className="max-w-4xl mx-auto space-y-16">
+            <div className="text-center">
+              <h2 className="text-3xl font-black font-headline mb-4 uppercase tracking-tighter">Comprehensive Online Toolkit</h2>
+              <p className="text-muted-foreground">The most powerful and private tool hub for all your daily digital needs.</p>
+            </div>
+
+            <div className="grid gap-12 text-sm">
+               <div className="space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-5" /> Professional PDF Management
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Our <strong>PDF Factory</strong> offers a complete suite for handling documents. Use our <strong>Image to PDF converter</strong> to combine scanned images, or the <strong>PDF to Image</strong> tool to extract high-quality PNGs. Need to organize? Use <strong>Split PDF</strong> to extract pages or <strong>Merge PDF</strong> to combine reports. We also provide secure options like <strong>Aadhaar PDF Unlocker</strong> and <strong>PDF Protector</strong> to manage your document security locally.
+                  </p>
+               </div>
+
+               <div className="space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-5" /> Advanced Image Optimization
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Stop using cloud converters that steal your data. Our <strong>Ultra Image Compressor</strong> and <strong>Smart Image Resizer</strong> run 100% on your device. We specialize in <strong>Govt Job Photo Resizing</strong>, offering one-click presets for <strong>SSC, UPSC, and IBPS</strong> forms. You can also <strong>Remove Backgrounds with AI</strong>, extract text using <strong>OCR</strong>, and create <strong>Passport Photos</strong> instantly.
+                  </p>
+               </div>
+
+               <div className="space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-5" /> Instant Smart Calculators
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    From <strong>Loan EMI Calculators</strong> to <strong>Age and Percentage calculators</strong>, our hub provides precise results without any delay. We also offer specialized <strong>Unit Converters</strong> for area, pressure, fuel consumption, and acceleration to help professionals and students alike.
+                  </p>
+               </div>
+            </div>
+
+            <div className="bg-primary/5 rounded-2xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-6">
+                <ShieldCheck className="size-16 text-primary shrink-0" />
+                <div className="space-y-2">
+                    <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                        Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
+                    </p>
+                </div>
+            </div>
           </div>
         </section>
       </div>
