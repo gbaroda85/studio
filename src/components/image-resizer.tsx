@@ -261,8 +261,9 @@ export default function ImageResizer() {
   }
 
   return (
-    <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in duration-500 px-4">
-        <div className="lg:col-span-4 space-y-6">
+    <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 animate-in fade-in duration-500 px-4">
+        {/* Left Side: Controls */}
+        <div className="space-y-6">
           <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
@@ -270,7 +271,7 @@ export default function ImageResizer() {
                   </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {GOVT_PRESETS.map((preset) => (
                       <Button
                         key={preset.label}
@@ -278,12 +279,12 @@ export default function ImageResizer() {
                         className="h-auto flex-row items-center justify-start p-3 gap-3 hover:border-primary hover:bg-primary/5 border-2 rounded-xl transition-all"
                         onClick={() => applyPreset(preset)}
                       >
-                        <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <preset.icon className="h-5 w-5 text-primary" />
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <preset.icon className="h-4 w-4 text-primary" />
                         </div>
-                        <div className="text-left">
-                            <div className="text-xs font-black uppercase tracking-tight">{preset.label}</div>
-                            <span className="text-[10px] text-muted-foreground font-mono">{preset.width}x{preset.height} px</span>
+                        <div className="text-left overflow-hidden">
+                            <div className="text-[10px] font-black uppercase tracking-tight truncate">{preset.label}</div>
+                            <span className="text-[9px] text-muted-foreground font-mono">{preset.width}x{preset.height} px</span>
                         </div>
                       </Button>
                     ))}
@@ -358,7 +359,8 @@ export default function ImageResizer() {
           </Card>
         </div>
 
-        <div className="lg:col-span-8 space-y-6">
+        {/* Right Side: Preview */}
+        <div className="space-y-6">
             <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -366,27 +368,27 @@ export default function ImageResizer() {
                     </CardTitle>
                     {resizedImageSrc && <Badge className="bg-green-500 text-white font-black animate-pulse">PROCESSED</Badge>}
                 </CardHeader>
-                <CardContent className="p-0 flex-1 relative bg-white min-h-[500px] flex items-center justify-center">
+                <CardContent className="p-0 flex-1 relative bg-white min-h-[350px] lg:min-h-[400px] flex items-center justify-center">
                     {isProcessing ? (
                         <div className="flex flex-col items-center gap-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary stroke-[3]" />
                             <p className="text-sm font-black text-primary uppercase tracking-tighter animate-pulse">Re-sampling Pixels...</p>
                         </div>
                     ) : resizedImageSrc ? (
-                        <div className="relative w-full h-full p-8 flex items-center justify-center">
-                            <img src={resizedImageSrc} alt="Resized" className="max-w-full max-h-full object-contain shadow-2xl rounded-lg" />
+                        <div className="relative w-full h-full p-4 flex items-center justify-center">
+                            <img src={resizedImageSrc} alt="Resized" className="max-w-full max-h-[350px] object-contain shadow-2xl rounded-lg" />
                         </div>
                     ) : originalImageSrc ? (
-                        <div className="relative w-full h-full p-8 flex items-center justify-center opacity-40 grayscale">
-                            <img src={originalImageSrc} alt="Original" className="max-w-full max-h-full object-contain" />
+                        <div className="relative w-full h-full p-4 flex items-center justify-center opacity-40 grayscale">
+                            <img src={originalImageSrc} alt="Original" className="max-w-full max-h-[350px] object-contain" />
                         </div>
                     ) : (
                         <FileImage className="h-20 w-20 text-muted-foreground/20" />
                     )}
                 </CardContent>
                 <CardFooter className="bg-muted/10 border-t p-6">
-                    <Button className="w-full h-16 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
-                        <Download className="mr-3 h-7 w-7" /> DOWNLOAD RESIZED PHOTO
+                    <Button className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
+                        <Download className="mr-3 h-7 w-7" /> DOWNLOAD PHOTO
                     </Button>
                 </CardFooter>
             </Card>
