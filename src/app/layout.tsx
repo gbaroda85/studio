@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://pi7csctools.netlify.app/',
+    url: 'https://pi7csctools.vercel.app/',
     siteName: 'GRs Multi Tools Kits Hub',
     title: 'GRs Multi Tools Kits Hub - Fast, Private & Secure Online Tools',
     description: 'Compress and convert images and PDFs with ease. Pro tools for SSC/UPSC forms, Aadhaar unlocking, Image to PDF, PDF to Image, and AI background removal. No file uploads - everything stays in your browser.',
@@ -107,7 +107,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
         {/* Canonical link to help Google understand the main URL */}
-        <link rel="canonical" href="https://pi7csctools.netlify.app/" />
+        <link rel="canonical" href="https://pi7csctools.vercel.app/" />
       </head>
       <body className="font-body antialiased">
         <ThemeProvider
