@@ -10,8 +10,12 @@ export const metadata: Metadata = {
     default: 'GRs Multi Tools Kits Hub - Free Online Image & PDF Tools',
     template: '%s | GRs Multi Tools',
   },
-  description: 'Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security. Professional suite including Image to Text OCR, HTML to PDF, Passport Photo Maker, SSC/UPSC Photo Resizer, Aadhaar PDF Unlocker, and financial calculators. 100% private and secure.',
+  description: 'Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security. Professional suite including Image to PDF, PDF to Image, Image to Text OCR, HTML to PDF, Passport Photo Maker, SSC/UPSC Photo Resizer, Aadhaar PDF Unlocker, and financial calculators. 100% private and secure.',
   keywords: [
+    'image to pdf converter',
+    'pdf to image converter',
+    'split pdf pages',
+    'merge multiple pdfs',
     'image compressor',
     'pdf merger',
     'passport photo maker',
@@ -26,9 +30,7 @@ export const metadata: Metadata = {
     'image to text converter',
     'extract text from image',
     'html to pdf online',
-    'split pdf pages',
     'compress pdf to 100kb',
-    'merge multiple pdfs',
     'scan document to pdf',
     'online photo enhancer',
     'remove signature from image',
@@ -49,7 +51,9 @@ export const metadata: Metadata = {
     'convert image to png',
     'text to pdf converter',
     'add watermark to pdf',
-    'add page numbers to pdf'
+    'add page numbers to pdf',
+    'crop pdf online',
+    'crop image free'
   ],
   authors: [{ name: 'Gaurav S' }],
   creator: 'Gaurav S',
@@ -59,7 +63,7 @@ export const metadata: Metadata = {
     url: 'https://pi7csctools.netlify.app/',
     siteName: 'GRs Multi Tools Kits Hub',
     title: 'GRs Multi Tools Kits Hub - Fast, Private & Secure Online Tools',
-    description: 'Compress and convert images and PDFs with ease. Pro tools for SSC/UPSC forms, Aadhaar unlocking, and AI background removal. No file uploads - everything stays in your browser.',
+    description: 'Compress and convert images and PDFs with ease. Pro tools for SSC/UPSC forms, Aadhaar unlocking, Image to PDF, PDF to Image, and AI background removal. No file uploads - everything stays in your browser.',
     images: [
       {
         url: 'https://picsum.photos/seed/toolshub/1200/630',
@@ -72,7 +76,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GRs Multi Tools Kits Hub - All-in-One Utility Suite',
-    description: 'Professional suite for merging, splitting, and securing documents and images. Private local processing.',
+    description: 'Professional suite for Image to PDF, Split PDF, merging, and securing documents. Private local processing.',
     images: ['https://picsum.photos/seed/toolshub/1200/630'],
   },
   robots: {
