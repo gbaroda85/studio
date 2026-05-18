@@ -10,6 +10,9 @@ import {
   X,
   FileImage,
   Maximize,
+  Briefcase,
+  User,
+  PenTool,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +33,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
+
+const GOVT_PRESETS = [
+  { label: 'Photo (SSC/UPSC)', width: 200, height: 230, format: 'jpeg' as OutputFormat, icon: User },
+  { label: 'Signature (SSC)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool },
+  { label: 'Photo (IBPS)', width: 212, height: 272, format: 'jpeg' as OutputFormat, icon: User },
+  { label: 'Signature (IBPS)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool },
+];
 
 export default function ImageResizer() {
   const { toast } = useToast();
@@ -70,6 +80,16 @@ export default function ImageResizer() {
     }
   };
   
+  const applyPreset = (preset: typeof GOVT_PRESETS[0]) => {
+    setNewDimensions({ width: String(preset.width), height: String(preset.height) });
+    setOutputFormat(preset.format);
+    setMaintainAspectRatio(false);
+    toast({
+      title: "Preset Applied",
+      description: `${preset.label} dimensions set to ${preset.width}x${preset.height} px.`,
+    });
+  };
+
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
@@ -182,52 +202,83 @@ export default function ImageResizer() {
 
   return (
     <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
-        <Card>
-            <CardHeader>
-                <CardTitle>Resize Options</CardTitle>
-                <CardDescription>Enter new dimensions and choose format.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                {originalDimensions && (
-                    <Badge variant="secondary">Original: {originalDimensions.width} x {originalDimensions.height} px</Badge>
-                )}
-                <div className="grid grid-cols-2 gap-4 items-center">
-                    <div className="space-y-2">
-                        <Label htmlFor="width">Width (px)</Label>
-                        <Input id="width" name="width" type="number" placeholder="e.g., 1920" value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="height">Height (px)</Label>
-                        <Input id="height" name="height" type="number" placeholder="e.g., 1080" value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} />
-                    </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} />
-                    <Label htmlFor="aspect-ratio" className="font-normal">Maintain aspect ratio</Label>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="format">Output Format</Label>
-                    <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isProcessing}>
-                        <SelectTrigger id="format"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="png">PNG</SelectItem>
-                            <SelectItem value="jpeg">JPEG</SelectItem>
-                            <SelectItem value="webp">WEBP</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2">
-                 <Button className="w-full" onClick={handleResize} disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Maximize className="mr-2 h-4 w-4" />}
-                    {isProcessing ? "Resizing..." : "Resize Image"}
-                </Button>
-                 <Button variant="ghost" onClick={handleReset} className="w-full">
-                    <X className="mr-2 h-4 w-4" />
-                    Reset
-                 </Button>
-            </CardFooter>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    Govt Job Presets
+                  </CardTitle>
+                  <CardDescription>One-click sizing for common application portals.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {GOVT_PRESETS.map((preset) => (
+                      <Button
+                        key={preset.label}
+                        variant="outline"
+                        className="h-auto flex-col items-start p-3 gap-1 hover:border-primary hover:bg-primary/5"
+                        onClick={() => applyPreset(preset)}
+                      >
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-tight">
+                          <preset.icon className="h-3.5 w-3.5 text-primary" />
+                          {preset.label}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{preset.width} x {preset.height} px • {preset.format.toUpperCase()}</span>
+                      </Button>
+                    ))}
+                  </div>
+              </CardContent>
+          </Card>
+
+          <Card>
+              <CardHeader>
+                  <CardTitle>Resize Options</CardTitle>
+                  <CardDescription>Enter custom dimensions or adjust settings.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                  {originalDimensions && (
+                      <Badge variant="secondary">Original: {originalDimensions.width} x {originalDimensions.height} px</Badge>
+                  )}
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                      <div className="space-y-2">
+                          <Label htmlFor="width">Width (px)</Label>
+                          <Input id="width" name="width" type="number" placeholder="e.g., 1920" value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="height">Height (px)</Label>
+                          <Input id="height" name="height" type="number" placeholder="e.g., 1080" value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} />
+                      </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                      <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} />
+                      <Label htmlFor="aspect-ratio" className="font-normal">Maintain aspect ratio</Label>
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="format">Output Format</Label>
+                      <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isProcessing}>
+                          <SelectTrigger id="format"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="png">PNG</SelectItem>
+                              <SelectItem value="jpeg">JPEG</SelectItem>
+                              <SelectItem value="webp">WEBP</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-2">
+                  <Button className="w-full" onClick={handleResize} disabled={isProcessing}>
+                      {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Maximize className="mr-2 h-4 w-4" />}
+                      {isProcessing ? "Resizing..." : "Resize Image"}
+                  </Button>
+                  <Button variant="ghost" onClick={handleReset} className="w-full">
+                      <X className="mr-2 h-4 w-4" />
+                      Reset
+                  </Button>
+              </CardFooter>
+          </Card>
+        </div>
+
         <Card className="overflow-hidden">
             <CardHeader>
                 <CardTitle>Preview</CardTitle>
