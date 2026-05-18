@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
@@ -63,7 +62,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'Gaurav S' }],
   creator: 'Gaurav S',
   manifest: '/manifest.json',
-  themeColor: '#4F46E5',
+  appleWebApp: {
+    title: 'GRs Tools',
+    statusBarStyle: 'default',
+    capable: true,
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

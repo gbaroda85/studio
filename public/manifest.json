@@ -1,16 +1,20 @@
-
 {
   "name": "GRs Multi Tools Kits Hub",
-  "short_name": "GRs Hub",
-  "description": "Free Online Image & PDF Tools - Private & Fast",
+  "short_name": "GRs Tools",
+  "description": "Professional suite of online image and PDF tools.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
+  "background_color": "#ffffff",
   "theme_color": "#4F46E5",
   "icons": [
     {
-      "src": "/icon",
-      "sizes": "32x32",
+      "src": "https://picsum.photos/seed/toolshub/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/toolshub/512/512",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
