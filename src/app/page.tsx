@@ -26,7 +26,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 
-const CategoryCard = ({ icon: Icon, title, description, onClick, colorClass }) => (
+const CategoryCard = ({ icon: Icon, title, description, onClick, colorClass }: any) => (
   <div onClick={onClick} className="group block cursor-pointer">
     <Card className="h-full relative overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl border-border/50 bg-card/50 backdrop-blur-sm">
       <CardContent className="p-8">
@@ -44,7 +44,7 @@ const CategoryCard = ({ icon: Icon, title, description, onClick, colorClass }) =
   </div>
 );
 
-const FeaturedToolCard = ({ icon: Icon, title, description, href, buttonText, popular, gradient }) => (
+const FeaturedToolCard = ({ icon: Icon, title, description, href, buttonText, popular, gradient }: any) => (
   <Card className="flex flex-col justify-between p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl border-border/50 bg-card overflow-hidden group">
     <div className="relative z-10">
       <div className="flex items-start justify-between mb-6">
@@ -74,7 +74,7 @@ export default function Page() {
     }
   };
 
-  const handleCategoryClick = (tab) => {
+  const handleCategoryClick = (tab: string) => {
     router.push(`/tools?tab=${tab}`);
   };
 
@@ -143,21 +143,6 @@ export default function Page() {
       {/* Main Content */}
       <div className="container mx-auto px-4 -mt-16 space-y-24 pb-20">
         
-        {/* News Flash */}
-        <section className="text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <Link href="https://grsnewss.blogspot.com" target="_blank" rel="noopener noreferrer" className="inline-block group">
-            <div className="p-[2px] rounded-2xl bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient-flow shadow-xl shadow-primary/20">
-              <div className="rounded-[14px] bg-background px-8 py-4 flex items-center gap-3">
-                <Zap className="h-5 w-5 text-amber-500 animate-bounce" />
-                <span className="font-black text-lg text-foreground group-hover:text-primary transition-colors">
-                  Check our News Blog for updates!
-                </span>
-                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          </Link>
-        </section>
-
         {/* Categories */}
         <section>
           <div className="flex items-center gap-3 mb-10">
