@@ -226,11 +226,11 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden relative">
           <AppHeader />
-          <SidebarInset className="bg-transparent relative">
+          <SidebarInset className="bg-transparent relative overflow-y-auto flex-1">
              <div className="absolute top-0 right-0 size-[500px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse" />
              <div className="absolute bottom-0 left-0 size-[500px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
              {children}
