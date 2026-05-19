@@ -104,14 +104,14 @@ function AppSidebar() {
   ];
 
   return (
-    <Sidebar className="border-r-0 bg-slate-950">
+    <Sidebar className="border-r border-border/50 bg-background dark:bg-slate-950">
       <SidebarHeader className="h-28 justify-center border-0 px-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-premium p-3 shadow-xl shadow-primary/20 animate-pulse-subtle">
             <LayoutGrid className="h-full w-full text-white" />
           </div>
           <div className="flex flex-col">
-              <span className="text-lg font-black font-headline text-white leading-none tracking-tighter">GRs HUB</span>
+              <span className="text-lg font-black font-headline text-foreground dark:text-white leading-none tracking-tighter">GRs HUB</span>
               <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
           </div>
         </Link>
@@ -125,18 +125,18 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-14 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/5 transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
+                className="h-14 rounded-xl border border-transparent hover:border-border/50 hover:bg-muted/50 dark:hover:bg-white/5 transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)} className="flex items-center gap-4">
                   <item.icon className={cn("size-6 shrink-0 transition-transform group-hover:scale-110", item.color)} />
-                  <span className="text-sm font-bold text-slate-300 group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
+                  <span className="text-sm font-bold text-foreground dark:text-slate-300 group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4 bg-slate-900/50">
+      <SidebarFooter className="p-4 bg-muted/20 dark:bg-slate-900/50">
         <AboutDialog />
       </SidebarFooter>
     </Sidebar>

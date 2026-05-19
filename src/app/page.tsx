@@ -111,10 +111,10 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-32 bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/20 blur-[120px] rounded-full" />
+      {/* Hero Section - Fixed background for theme awareness */}
+      <section className="relative overflow-hidden pt-20 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-20" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 dark:bg-primary/20 blur-[120px] rounded-full" />
         
         <div className="container mx-auto px-4 relative z-10 text-center">
             <Badge variant="outline" className="mb-6 py-1.5 px-4 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
@@ -123,16 +123,16 @@ export default function Page() {
             <h1 className="text-5xl md:text-7xl font-black font-headline mb-8 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 Simplify Your <span className="text-gradient-primary">Digital Workflow</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 All the tools you need to convert, compress, and calculate. 100% private, browser-based, and lightning fast.
             </p>
 
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500 group-focus-within:text-primary transition-colors" />
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                 type="search"
                 placeholder={t('search_tools_placeholder')}
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-2xl"
+                className="w-full pl-16 pr-6 h-18 text-lg rounded-2xl bg-muted/50 dark:bg-white/5 border-border/50 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground focus-visible:ring-primary focus-visible:border-primary transition-all shadow-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 />
