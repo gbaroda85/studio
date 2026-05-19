@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -111,10 +112,10 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section - Fixed background for theme awareness */}
+      {/* Hero Section - Improved for Light Theme */}
       <section className="relative overflow-hidden pt-20 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-20" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 dark:bg-primary/20 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-20 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="container mx-auto px-4 relative z-10 text-center">
             <Badge variant="outline" className="mb-6 py-1.5 px-4 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
@@ -132,7 +133,7 @@ export default function Page() {
                 <Input
                 type="search"
                 placeholder={t('search_tools_placeholder')}
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-2xl bg-muted/50 dark:bg-white/5 border-border/50 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground focus-visible:ring-primary focus-visible:border-primary transition-all shadow-xl"
+                className="w-full pl-16 pr-6 h-18 text-lg rounded-2xl bg-muted/30 dark:bg-white/5 border-border/50 dark:border-white/10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus-visible:border-primary transition-all shadow-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 />
