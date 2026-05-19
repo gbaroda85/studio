@@ -5,6 +5,7 @@ import {ThemeProvider} from '@/components/theme-provider';
 import AppLayout from '@/components/app-layout';
 import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/contexts/language-context';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: {
@@ -101,6 +102,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  other: {
+    'google-adsense-account': 'ca-pub-5160508482904207',
+  },
 };
 
 export default function RootLayout({
@@ -139,6 +143,12 @@ export default function RootLayout({
               }
             }),
           }}
+        />
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5160508482904207"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
       </head>
       <body className="font-body antialiased">
