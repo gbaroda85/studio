@@ -105,7 +105,7 @@ function AppSidebar() {
   ];
 
   return (
-    <Sidebar className="border-r border-border/50 bg-sidebar">
+    <Sidebar className="border-r border-border/50 bg-white dark:bg-sidebar transition-colors">
       <SidebarHeader className="h-20 justify-center border-0 px-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 animate-pulse-subtle">
@@ -126,7 +126,7 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-12 rounded-xl border border-transparent hover:border-border/50 hover:bg-sidebar-accent transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
+                className="h-12 rounded-xl border border-transparent hover:border-border/50 hover:bg-muted transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)} className="flex items-center gap-4">
                   <item.icon className={cn("size-5 shrink-0 transition-transform group-hover:scale-110", item.color)} />
@@ -215,7 +215,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
           <SidebarInset className="bg-transparent relative overflow-y-auto flex-1 outline-none">
              <div className="absolute top-0 right-0 size-[400px] bg-primary/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" />
              <div className="absolute bottom-0 left-0 size-[400px] bg-accent/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
-             <div className="flex-1 pb-24">
+             <div className="flex-1 pb-40">
                 {children}
              </div>
           </SidebarInset>

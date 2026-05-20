@@ -1,12 +1,10 @@
 
-import { MetadataRoute } from 'next'
-
-export default function robots(): MetadataRoute.Robots {
+// This file is being replaced by a static file in public/robots.txt.
+export default function robots() {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://pi7csctools.vercel.app/sitemap.xml',
   }
 }
