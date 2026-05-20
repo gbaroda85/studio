@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -105,19 +106,19 @@ function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-border/50 bg-sidebar">
-      <SidebarHeader className="h-28 justify-center border-0 px-6">
+      <SidebarHeader className="h-20 justify-center border-0 px-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-premium p-3 shadow-xl shadow-primary/20 animate-pulse-subtle">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 animate-pulse-subtle">
             <LayoutGrid className="h-full w-full text-white" />
           </div>
           <div className="flex flex-col">
-              <span className="text-lg font-black font-headline text-foreground leading-none tracking-tighter">GRs HUB</span>
-              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
+              <span className="text-base font-black font-headline text-foreground leading-none tracking-tighter">GRs HUB</span>
+              <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
           </div>
         </Link>
       </SidebarHeader>
-      <SidebarContent className="px-4">
-        <SidebarMenu className="gap-2">
+      <SidebarContent className="px-4 pb-10">
+        <SidebarMenu className="gap-1.5">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
@@ -125,11 +126,11 @@ function AppSidebar() {
                 isActive={pathname === item.href}
                 tooltip={t(item.labelKey)}
                 asChild
-                className="h-14 rounded-xl border border-transparent hover:border-border/50 hover:bg-sidebar-accent transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
+                className="h-12 rounded-xl border border-transparent hover:border-border/50 hover:bg-sidebar-accent transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
               >
                 <Link href={item.href} onClick={() => setOpenMobile(false)} className="flex items-center gap-4">
-                  <item.icon className={cn("size-6 shrink-0 transition-transform group-hover:scale-110", item.color)} />
-                  <span className="text-sm font-bold text-sidebar-foreground group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
+                  <item.icon className={cn("size-5 shrink-0 transition-transform group-hover:scale-110", item.color)} />
+                  <span className="text-[13px] font-bold text-sidebar-foreground group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -149,8 +150,8 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-primary/10">
-          <Settings className="h-6 w-6 text-foreground" />
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10">
+          <Settings className="h-5 w-5 text-foreground" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
@@ -167,13 +168,13 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="h-24 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-lg px-4 md:px-8 z-50 shrink-0">
+    <header className="h-16 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm px-4 md:px-8 z-50 shrink-0">
       <div className="flex h-full items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-            <SidebarTrigger className="h-12 w-12 rounded-xl hover:bg-primary/10" />
-            <div className="h-8 w-px bg-border hidden sm:block" />
+            <SidebarTrigger className="h-10 w-10 rounded-xl hover:bg-primary/10" />
+            <div className="h-6 w-px bg-border hidden sm:block" />
             <Link href="/" className="hidden sm:flex items-center gap-2 group">
-                <h1 className="text-xl font-black tracking-tighter transition-colors group-hover:text-primary">
+                <h1 className="text-lg font-black tracking-tighter transition-colors group-hover:text-primary">
                     <span className="text-foreground">GRs </span>
                     <span className="text-gradient-primary">Tools</span>
                 </h1>
@@ -181,13 +182,13 @@ function AppHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" className="hidden lg:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-12">
+            <Button asChild variant="ghost" className="hidden lg:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
                 <a href="mailto:gaurav.thearmy@yahoo.com">
-                    <Mail className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-black text-muted-foreground uppercase tracking-widest">Support</span>
+                    <Mail className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Support</span>
                 </a>
             </Button>
-            <div className="h-8 w-px bg-border mx-2" />
+            <div className="h-6 w-px bg-border mx-2" />
             <SettingsMenu />
             <ThemeToggle />
         </div>
@@ -212,9 +213,9 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
         <div className="flex flex-1 flex-col overflow-hidden relative">
           <AppHeader />
           <SidebarInset className="bg-transparent relative overflow-y-auto flex-1 outline-none">
-             <div className="absolute top-0 right-0 size-[500px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
-             <div className="absolute bottom-0 left-0 size-[500px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
-             <div className="flex-1">
+             <div className="absolute top-0 right-0 size-[400px] bg-primary/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" />
+             <div className="absolute bottom-0 left-0 size-[400px] bg-accent/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+             <div className="flex-1 pb-24">
                 {children}
              </div>
           </SidebarInset>

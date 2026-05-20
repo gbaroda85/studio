@@ -112,28 +112,28 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-20 pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+      {/* Hero Section - Reduced height for better visibility */}
+      <section className="relative overflow-hidden pt-12 pb-20 bg-white dark:bg-slate-950 text-foreground border-b border-border/50">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-20 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="container mx-auto px-4 relative z-10 text-center">
-            <Badge variant="outline" className="mb-6 py-1.5 px-4 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
+            <Badge variant="outline" className="mb-4 py-1 px-3 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
                 NEXT-GEN UTILITY SUITE
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black font-headline mb-8 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-4xl md:text-6xl font-black font-headline mb-6 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 Simplify Your <span className="text-gradient-primary">Digital Workflow</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 All the tools you need to convert, compress, and calculate. 100% private, browser-based, and lightning fast.
             </p>
 
-            <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                 type="search"
                 placeholder={t('search_tools_placeholder')}
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-2xl bg-muted/30 dark:bg-white/5 border-border/50 dark:border-white/10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus-visible:border-primary transition-all shadow-xl"
+                className="w-full pl-14 pr-6 h-14 text-base rounded-2xl bg-muted/30 dark:bg-white/5 border-border/50 dark:border-white/10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus-visible:border-primary transition-all shadow-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -142,15 +142,15 @@ export default function Page() {
       </section>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 -mt-16 space-y-24 pb-20">
+      <div className="container mx-auto px-4 -mt-10 space-y-20 pb-20">
         
         {/* Categories */}
         <section>
-          <div className="flex items-center gap-3 mb-10">
-            <LayoutGrid className="h-8 w-8 text-primary" />
-            <h2 className="text-3xl font-black font-headline">Tool Categories</h2>
+          <div className="flex items-center gap-3 mb-8">
+            <LayoutGrid className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-black font-headline">Tool Categories</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {toolCategories.map((category) => (
               <CategoryCard key={category.title} {...category} />
             ))}
@@ -158,17 +158,17 @@ export default function Page() {
         </section>
 
         {/* Featured Section */}
-        <section className="py-12">
-          <div className="flex justify-between items-end mb-10">
+        <section className="py-8">
+          <div className="flex justify-between items-end mb-8">
             <div>
-                <h2 className="text-4xl font-black font-headline">Featured Apps</h2>
-                <p className="text-muted-foreground mt-2">Most used tools by the community</p>
+                <h2 className="text-3xl font-black font-headline">Featured Apps</h2>
+                <p className="text-muted-foreground mt-1">Most used tools by the community</p>
             </div>
-            <Button variant="link" className="text-primary font-black text-lg group" onClick={() => router.push('/tools')}>
-              View All <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            <Button variant="link" className="text-primary font-black text-base group" onClick={() => router.push('/tools')}>
+              View All <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeaturedToolCard 
                 href="/image-compress"
                 icon={Shrink}
@@ -200,62 +200,62 @@ export default function Page() {
         </section>
         
         {/* Why Us Section */}
-        <section className="bg-primary/5 rounded-[3rem] p-12 md:p-20 border border-primary/10 relative overflow-hidden">
+        <section className="bg-primary/5 rounded-[2.5rem] p-10 md:p-16 border border-primary/10 relative overflow-hidden">
           <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-[100px] rounded-full" />
-          <div className="text-center mb-16 relative z-10">
-            <h2 className="text-4xl md:text-5xl font-black font-headline mb-6">Built for Privacy & Speed</h2>
-            <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+          <div className="text-center mb-12 relative z-10">
+            <h2 className="text-3xl md:text-4xl font-black font-headline mb-4">Built for Privacy & Speed</h2>
+            <p className="text-muted-foreground text-base max-w-2xl mx-auto">
                 We believe your files should stay yours. All our tools run directly on your hardware, not in the cloud.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 relative z-10">
             {[
               { icon: Lock, title: "100% Private", desc: "No file uploads. Everything happens on your device locally." },
-              { icon: Zap, title: "Instant Power", desc: "Built with WASM and Web Workers for multithreaded performance." },
+              { icon: Zap, title: "Instant Power", desc: "Built with WASM and Web Workers for performance." },
               { icon: UserCheck, title: "Pure UI", desc: "Clean, distraction-free interface optimized for productivity." },
               { icon: Sparkles, title: "Forever Free", desc: "No subscriptions, no watermarks, no hidden costs." }
             ].map((f, i) => (
               <div key={i} className="text-center group">
-                <div className="mx-auto mb-6 flex items-center justify-center size-20 rounded-3xl bg-white dark:bg-slate-900 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <f.icon className="h-10 w-10 text-primary" />
+                <div className="mx-auto mb-4 flex items-center justify-center size-16 rounded-2xl bg-white dark:bg-slate-900 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                  <f.icon className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed px-4">{f.desc}</p>
+                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                <p className="text-muted-foreground text-xs leading-relaxed px-4">{f.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* SEO Content Section */}
-        <section className="py-20 border-t border-border/50">
-          <div className="max-w-4xl mx-auto space-y-16">
+        <section className="py-16 border-t border-border/50">
+          <div className="max-w-4xl mx-auto space-y-12">
             <div className="text-center">
-              <h2 className="text-3xl font-black font-headline mb-4 uppercase tracking-tighter">Comprehensive Online Toolkit</h2>
-              <p className="text-muted-foreground">The most powerful and private tool hub for all your daily digital needs.</p>
+              <h2 className="text-2xl font-black font-headline mb-3 uppercase tracking-tighter">Comprehensive Online Toolkit</h2>
+              <p className="text-muted-foreground text-sm">The most powerful and private tool hub for all your daily digital needs.</p>
             </div>
 
-            <div className="grid gap-12 text-sm">
-               <div className="space-y-4">
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-5" /> Professional PDF Management
+            <div className="grid gap-8 text-xs sm:text-sm">
+               <div className="space-y-3">
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-4" /> Professional PDF Management
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     Our <strong>PDF Factory</strong> offers a complete suite for handling documents. Use our <strong>Image to PDF converter</strong> to combine scanned images, or the <strong>PDF to Image</strong> tool to extract high-quality PNGs. Need to organize? Use <strong>Split PDF</strong> to extract pages or <strong>Merge PDF</strong> to combine reports. We also provide secure options like <strong>Aadhaar PDF Unlocker</strong> and <strong>PDF Protector</strong> to manage your document security locally.
                   </p>
                </div>
 
-               <div className="space-y-4">
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-5" /> Advanced Image Optimization
+               <div className="space-y-3">
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-4" /> Advanced Image Optimization
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     Stop using cloud converters that steal your data. Our <strong>Ultra Image Compressor</strong> and <strong>Smart Image Resizer</strong> run 100% on your device. We specialize in <strong>Govt Job Photo Resizing</strong>, offering one-click presets for <strong>SSC, UPSC, and IBPS</strong> forms. You can also <strong>Remove Backgrounds with AI</strong>, extract text using <strong>OCR</strong>, and create <strong>Passport Photos</strong> instantly.
                   </p>
                </div>
 
-               <div className="space-y-4">
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-5" /> Instant Smart Calculators
+               <div className="space-y-3">
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                    <CheckCircle className="size-4" /> Instant Smart Calculators
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     From <strong>Loan EMI Calculators</strong> to <strong>Age and Percentage calculators</strong>, our hub provides precise results without any delay. We also offer specialized <strong>Unit Converters</strong> for area, pressure, fuel consumption, and acceleration to help professionals and students alike.
@@ -263,11 +263,11 @@ export default function Page() {
                </div>
             </div>
 
-            <div className="bg-primary/5 rounded-2xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-6">
-                <ShieldCheck className="size-16 text-primary shrink-0" />
-                <div className="space-y-2">
-                    <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+            <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10 flex flex-col md:flex-row items-center gap-4">
+                <ShieldCheck className="size-12 text-primary shrink-0" />
+                <div className="space-y-1">
+                    <h4 className="text-base font-black uppercase tracking-tight">Privacy First Architecture</h4>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
                         Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
                     </p>
                 </div>
