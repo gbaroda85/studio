@@ -18,14 +18,15 @@ import {
     Paintbrush,
     RotateCcw,
     CheckCircle2,
-    MousePointer2,
     Undo2,
-    Square,
     Maximize,
     Crop as CropIcon,
     ChevronRight,
     Settings2,
-    Scaling
+    Scaling,
+    MoveHorizontal,
+    ArrowRightLeft,
+    Type
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,35 +39,38 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
-type Stage = 'upload' | 'crop' | 'process' | 'studio';
+type Stage = 'upload' | 'preview' | 'crop' | 'process' | 'studio';
 
 const COLOR_PRESETS = [
     { name: 'Transparent', value: 'transparent', icon: X },
-    { name: 'White', value: '#FFFFFF' },
-    { name: 'Light Blue', value: '#ADD8E6' },
-    { name: 'Passport Blue', value: '#000080' },
-    { name: 'Green Screen', value: '#00FF00' },
-    { name: 'Light Grey', value: '#F5F5F5' },
+    { name: 'Pure White', value: '#FFFFFF' },
+    { name: 'Off White', value: '#F5F5F5' },
+    { name: 'Royal Blue', value: '#003399' },
+    { name: 'Navy Blue', value: '#000080' },
+    { name: 'Sky Blue', value: '#ADD8E6' },
+    { name: 'Light Grey', value: '#D3D3D3' },
+    { name: 'Passport Red', value: '#8B0000' },
 ];
 
-const PASSPORT_PRESETS = [
+const SIZE_PRESETS = [
     { name: 'India Passport (35x45mm)', width: 35, height: 45, unit: 'mm' },
     { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
     { name: 'PAN Card (25x35mm)', width: 25, height: 35, unit: 'mm' },
-    { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
+    { name: 'SSC/UPSC (200x230px)', width: 200, height: 230, unit: 'px' },
+    { name: 'Custom Size', width: 0, height: 0, unit: 'mm' },
 ];
 
 const BORDER_COLOR_PRESETS = [
     { name: 'White', value: '#FFFFFF' },
     { name: 'Black', value: '#000000' },
     { name: 'Grey', value: '#808080' },
-    { name: 'Gold', value: '#FFD700' },
 ];
 
-const DPI = 300; // Standard for printing passport photos
+const DPI = 300; 
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
@@ -96,6 +100,9 @@ export default function BackgroundRemover() {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [selectedSizeIndex, setSelectedSizeIndex] = useState<string>("0");
+  const [customWidth, setCustomWidth] = useState<string>("35");
+  const [customHeight, setCustomHeight] = useState<string>("45");
+  const [customUnit, setCustomUnit] = useState<string>("mm");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -115,26 +122,42 @@ export default function BackgroundRemover() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setOriginalImageSrc(e.target?.result as string);
-        setStage('crop');
+        setStage('preview');
       };
       reader.readAsDataURL(file);
-      setSubjectImageSrc(null);
-      setPreviewImageSrc(null);
-      setBgColor("transparent");
-      setBorderWidth([0]);
-      setProgress(0);
-      setIsRefining(false);
     } else if (file) {
       toast({ variant: "destructive", title: "Invalid File", description: "Please select an image file." });
     }
   };
 
-  const onCropImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    const preset = PASSPORT_PRESETS[parseInt(selectedSizeIndex)];
-    const aspect = preset.width / preset.height;
-    setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height));
-  };
+  // Logic to update crop immediately when size settings change
+  const updateCropFromSize = useCallback(() => {
+    if (!imgRef.current) return;
+    const { width: imgW, height: imgH } = imgRef.current;
+    
+    let aspect;
+    if (selectedSizeIndex === '4') { // Custom
+        aspect = parseFloat(customWidth) / parseFloat(customHeight);
+    } else {
+        const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
+        aspect = preset.width / preset.height;
+    }
+
+    if (isNaN(aspect) || aspect <= 0) return;
+
+    const newCrop = centerCrop(
+        makeAspectCrop({ unit: '%', width: 90 }, aspect, imgW, imgH),
+        imgW,
+        imgH
+    );
+    setCrop(newCrop);
+  }, [selectedSizeIndex, customWidth, customHeight]);
+
+  useEffect(() => {
+    if (stage === 'crop') {
+        updateCropFromSize();
+    }
+  }, [selectedSizeIndex, customWidth, customHeight, stage, updateCropFromSize]);
 
   const handleApplyCrop = () => {
     if (!imgRef.current || !completedCrop) return;
@@ -170,7 +193,7 @@ export default function BackgroundRemover() {
     setIsProcessing(true);
     setSubjectImageSrc(null);
     setProgress(5);
-    setStatusText("Initializing AI...");
+    setStatusText("Loading AI Engine...");
 
     try {
       const imglyModule = await import("@imgly/background-removal");
@@ -189,11 +212,11 @@ export default function BackgroundRemover() {
       const url = URL.createObjectURL(blob);
       setSubjectImageSrc(url);
       setStage('studio');
-      toast({ title: "Background Removed", description: "You can now customize colors and size." });
+      toast({ title: "Ready!", description: "Background removed. Now customize colors." });
     } catch (error: any) {
       console.error(error);
       toast({ variant: "destructive", title: "AI Error", description: "Local background removal failed." });
-      setSubjectImageSrc(source); // Fallback to cropped original
+      setSubjectImageSrc(source);
       setStage('studio');
     } finally {
       setIsProcessing(false);
@@ -208,19 +231,28 @@ export default function BackgroundRemover() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const preset = PASSPORT_PRESETS[parseInt(selectedSizeIndex)];
-    
-    // Target resolution based on preset units
-    let targetW, targetH;
-    if (preset.unit === 'mm') {
-        targetW = Math.round((preset.width / 25.4) * DPI);
-        targetH = Math.round((preset.height / 25.4) * DPI);
-    } else if (preset.unit === 'inch') {
-        targetW = Math.round(preset.width * DPI);
-        targetH = Math.round(preset.height * DPI);
+    let w, h, u;
+    if (selectedSizeIndex === '4') {
+        w = parseFloat(customWidth);
+        h = parseFloat(customHeight);
+        u = customUnit;
     } else {
-        targetW = preset.width;
-        targetH = preset.height;
+        const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
+        w = preset.width;
+        h = preset.height;
+        u = preset.unit;
+    }
+
+    let targetW, targetH;
+    if (u === 'mm') {
+        targetW = Math.round((w / 25.4) * DPI);
+        targetH = Math.round((h / 25.4) * DPI);
+    } else if (u === 'inch') {
+        targetW = Math.round(w * DPI);
+        targetH = Math.round(h * DPI);
+    } else {
+        targetW = w || 600;
+        targetH = h || 800;
     }
 
     const img = new window.Image();
@@ -229,7 +261,6 @@ export default function BackgroundRemover() {
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. Draw Background
         if (bgColor !== 'transparent') {
             ctx.fillStyle = bgColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -237,14 +268,12 @@ export default function BackgroundRemover() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Draw Subject (Fit to height, centered)
         const scale = canvas.height / img.height;
         const dw = img.width * scale;
         const dh = canvas.height;
         const dx = (canvas.width - dw) / 2;
         ctx.drawImage(img, dx, 0, dw, dh);
         
-        // 3. Draw Border
         if (borderWidth[0] > 0) {
             ctx.strokeStyle = borderColor;
             ctx.lineWidth = (borderWidth[0] / 100) * canvas.width; 
@@ -253,84 +282,17 @@ export default function BackgroundRemover() {
 
         setPreviewImageSrc(canvas.toDataURL("image/png"));
     };
-  }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex]);
+  }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex, customWidth, customHeight, customUnit]);
 
   useEffect(() => {
     updateComposite();
   }, [updateComposite]);
 
-  const startRefining = () => {
-      if (!subjectImageSrc || !croppedImageSrc) return;
-      setIsRefining(true);
-      
-      const canvas = refineCanvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const img = new window.Image();
-      img.src = subjectImageSrc;
-      img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-      };
-  };
-
-  const handleRefineMove = (e: React.MouseEvent | React.TouchEvent) => {
-      if (!isRefining) return;
-      const canvas = refineCanvasRef.current;
-      if (!canvas || (e.buttons !== 1 && !('touches' in e))) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      
-      let x, y;
-      if ('touches' in e) {
-          x = (e.touches[0].clientX - rect.left) * scaleX;
-          y = (e.touches[0].clientY - rect.top) * scaleY;
-      } else {
-          x = (e.clientX - rect.left) * scaleX;
-          y = (e.clientY - rect.top) * scaleY;
-      }
-
-      ctx.globalCompositeOperation = brushMode === 'restore' ? 'source-over' : 'destination-out';
-      
-      if (brushMode === 'restore') {
-          const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = canvas.width;
-          tempCanvas.height = canvas.height;
-          const tCtx = tempCanvas.getContext('2d');
-          if (tCtx) {
-              const origImg = new window.Image();
-              origImg.src = croppedImageSrc!;
-              tCtx.drawImage(origImg, 0, 0, canvas.width, canvas.height);
-              
-              ctx.save();
-              ctx.beginPath();
-              ctx.arc(x, y, brushSize[0], 0, Math.PI * 2);
-              ctx.clip();
-              ctx.drawImage(tempCanvas, 0, 0);
-              ctx.restore();
-          }
-      } else {
-          ctx.beginPath();
-          ctx.arc(x, y, brushSize[0], 0, Math.PI * 2);
-          ctx.fill();
-      }
-      
-      const refinedUrl = canvas.toDataURL("image/png");
-      setSubjectImageSrc(refinedUrl);
-  };
-
   const handleDownload = () => {
     if (!previewImageSrc) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    link.download = `passport-photo-${Date.now()}.png`;
+    link.download = `pro-id-photo-${Date.now()}.png`;
     link.click();
   };
 
@@ -355,47 +317,94 @@ export default function BackgroundRemover() {
       >
         <CardHeader>
           <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
-            <Eraser className="h-10 w-10" />
+            <Layers className="h-10 w-10" />
           </div>
-          <CardTitle className="text-3xl font-black">Pro Passport Studio</CardTitle>
-          <CardDescription>AI background removal, precise cropping to Passport/ID sizes, and color matching.</CardDescription>
+          <CardTitle className="text-3xl font-black">ID Photo Studio Pro</CardTitle>
+          <CardDescription>Professional Passport and ID photo creator with AI background removal.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">No file uploads. 100% Private local processing.</p>
+                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </CardContent>
-        <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 border-t pt-8">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> SECURE</div>
-            <div className="flex items-center gap-1.5"><Scaling className="h-4 w-4 text-primary" /> PASSPORT SIZES</div>
-            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> AI POWERED</div>
-        </CardFooter>
       </Card>
     );
   }
 
+  if (stage === 'preview') {
+      return (
+          <Card className="w-full max-w-4xl shadow-2xl">
+              <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+                  <div>
+                      <CardTitle className="text-xl font-black">Review Original Photo</CardTitle>
+                      <CardDescription>Click below to crop for passport or remove background directly.</CardDescription>
+                  </div>
+              </CardHeader>
+              <CardContent className="p-8 flex justify-center bg-black/5">
+                  <div className="relative max-h-[60vh]">
+                      <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
+                  </div>
+              </CardContent>
+              <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row gap-4 justify-between">
+                  <Button variant="outline" onClick={handleReset} className="font-bold"><RotateCcw className="mr-2" /> Change Photo</Button>
+                  <div className="flex gap-3">
+                      <Button variant="outline" className="font-black border-2 border-primary text-primary" onClick={() => setStage('crop')}>
+                          <CropIcon className="mr-2" /> SET SIZE & CROP
+                      </Button>
+                      <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); handleRemoveBackgroundLocal(originalImageSrc!); }}>
+                          REMOVE BACKGROUND <ChevronRight className="ml-2" />
+                      </Button>
+                  </div>
+              </CardFooter>
+          </Card>
+      );
+  }
+
   if (stage === 'crop') {
     return (
-        <Card className="w-full max-w-4xl shadow-2xl animate-in fade-in duration-500">
-            <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="text-xl font-black">Step 1: Align & Crop</CardTitle>
-                    <CardDescription>Select your target passport size and align your face.</CardDescription>
-                </div>
-                <div className="w-64">
-                    <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {PASSPORT_PRESETS.map((p, i) => (
-                                <SelectItem key={i} value={String(i)}>{p.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+        <Card className="w-full max-w-5xl shadow-2xl animate-in fade-in duration-500">
+            <CardHeader className="bg-muted/30 border-b">
+                <div className="grid lg:grid-cols-2 gap-6 items-end">
+                    <div className="space-y-4">
+                        <CardTitle className="text-xl font-black">Step 1: Size & Alignment</CardTitle>
+                        <Label className="text-xs font-black uppercase text-primary tracking-widest">Select ID Preset</Label>
+                        <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
+                            <SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {SIZE_PRESETS.map((p, i) => (
+                                    <SelectItem key={i} value={String(i)}>{p.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {selectedSizeIndex === '4' && (
+                        <div className="grid grid-cols-3 gap-3 animate-in slide-in-from-top-2">
+                            <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold">Width</Label>
+                                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} className="h-10 font-bold" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold">Height</Label>
+                                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} className="h-10 font-bold" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold">Unit</Label>
+                                <Select value={customUnit} onValueChange={setCustomUnit}>
+                                    <SelectTrigger className="h-10 font-bold"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="mm">MM</SelectItem>
+                                        <SelectItem value="inch">Inch</SelectItem>
+                                        <SelectItem value="px">PX</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </CardHeader>
             <CardContent className="p-8 flex justify-center bg-black/5">
@@ -403,22 +412,21 @@ export default function BackgroundRemover() {
                     crop={crop}
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    aspect={PASSPORT_PRESETS[parseInt(selectedSizeIndex)].width / PASSPORT_PRESETS[parseInt(selectedSizeIndex)].height}
+                    aspect={selectedSizeIndex === '4' ? (parseFloat(customWidth)/parseFloat(customHeight)) : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}
                     className="max-h-[60vh]"
                 >
                     <img
                         ref={imgRef}
                         alt="Crop source"
                         src={originalImageSrc!}
-                        onLoad={onCropImageLoad}
                         style={{ maxHeight: '60vh', objectFit: 'contain' }}
                     />
                 </ReactCrop>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between">
-                <Button variant="outline" onClick={handleReset}><RotateCcw className="mr-2" /> Start Over</Button>
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-bold"><RotateCcw className="mr-2" /> Back</Button>
                 <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={handleApplyCrop}>
-                    CONTINUE TO AI REMOVAL <ChevronRight className="ml-2" />
+                    START AI PROCESSING <ChevronRight className="ml-2" />
                 </Button>
             </CardFooter>
         </Card>
@@ -438,7 +446,7 @@ export default function BackgroundRemover() {
                         {isRefining ? "Refinement Studio" : stage === 'studio' ? "Result Preview" : "Processing..."}
                     </CardTitle>
                     {stage === 'studio' && <Badge className="text-[9px] font-black bg-green-500/10 text-green-600">
-                        HD OUTPUT READY
+                        HD 300DPI READY
                     </Badge>}
                 </CardHeader>
                 <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
@@ -453,13 +461,6 @@ export default function BackgroundRemover() {
                                 <Progress value={progress} className="h-2 shadow-inner" />
                             </div>
                         </div>
-                    ) : isRefining ? (
-                        <canvas 
-                            ref={refineCanvasRef} 
-                            className="max-w-full h-auto cursor-crosshair shadow-2xl border-4 border-primary/20 rounded-lg"
-                            onMouseMove={handleRefineMove}
-                            onTouchMove={handleRefineMove}
-                        />
                     ) : previewImageSrc ? (
                         <Image src={previewImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
                     ) : (
@@ -472,9 +473,9 @@ export default function BackgroundRemover() {
                 <Button variant="outline" size="lg" onClick={handleReset} disabled={isProcessing} className="w-full sm:w-auto h-14 px-8 border-2 font-black uppercase text-xs">
                     <RotateCcw className="mr-2 h-4 w-4" /> Start Over
                 </Button>
-                {stage === 'studio' && !isRefining && (
+                {stage === 'studio' && (
                     <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
-                        <Download className="mr-3 h-6 w-6" /> DOWNLOAD {PASSPORT_PRESETS[parseInt(selectedSizeIndex)].unit.toUpperCase()} PHOTO
+                        <Download className="mr-3 h-6 w-6" /> DOWNLOAD HD PHOTO
                     </Button>
                 )}
             </div>
@@ -482,10 +483,10 @@ export default function BackgroundRemover() {
 
         {/* Studio Panel */}
         <div className="lg:col-span-4 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden bg-card/50">
                 <CardHeader className="bg-primary/5 border-b">
                     <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="h-5 w-5 text-primary" /> STUDIO SETTINGS
+                        <Settings2 className="h-5 w-5 text-primary" /> FINALIZE ID PHOTO
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -494,33 +495,33 @@ export default function BackgroundRemover() {
                             <TabsTrigger value="colors" className="font-bold text-[10px] uppercase">
                                 <Palette className="size-3 mr-2" /> Style & Border
                             </TabsTrigger>
-                            <TabsTrigger value="refine" className="font-bold text-[10px] uppercase">
-                                <Paintbrush className="size-3 mr-2" /> Touch Up
+                            <TabsTrigger value="border" className="font-bold text-[10px] uppercase">
+                                <Maximize className="size-3 mr-2" /> Frame Settings
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="colors" className="p-6 space-y-8 animate-in fade-in duration-300">
-                             <div className="space-y-8">
+                             <div className="space-y-6">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                       1. Background Color
+                                       Professional Background Colors
                                     </Label>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-4 gap-3">
                                         {COLOR_PRESETS.map((preset) => (
                                             <button
                                                 key={preset.value}
                                                 onClick={() => setBgColor(preset.value)}
                                                 className={cn(
-                                                    "group h-16 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all",
+                                                    "group h-12 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all",
                                                     bgColor === preset.value ? "border-primary ring-2 ring-primary/10 shadow-lg scale-105" : "border-transparent bg-muted/20 hover:bg-muted/40"
                                                 )}
+                                                title={preset.name}
                                             >
                                                 {preset.icon ? (
                                                     <preset.icon className="size-4 text-muted-foreground" />
                                                 ) : (
-                                                    <div className="size-4 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: preset.value }} />
+                                                    <div className="size-6 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: preset.value }} />
                                                 )}
-                                                <span className="text-[8px] font-black uppercase truncate px-1">{preset.name}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -528,9 +529,31 @@ export default function BackgroundRemover() {
 
                                 <Separator />
 
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                        2. Passport Border
+                                        Custom Color Picker
+                                    </Label>
+                                    <div className="flex items-center gap-3">
+                                        <Input 
+                                            type="color" 
+                                            value={bgColor === 'transparent' ? '#ffffff' : bgColor} 
+                                            onChange={(e) => setBgColor(e.target.value)} 
+                                            className="w-12 h-12 p-1 rounded-lg cursor-pointer"
+                                        />
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-bold">Pick precise shade</p>
+                                            <p className="text-[9px] text-muted-foreground uppercase font-mono">{bgColor}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                        </TabsContent>
+
+                        <TabsContent value="border" className="p-6 space-y-8 animate-in fade-in duration-300">
+                             <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                                        Passport Frame/Border
                                     </Label>
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center text-[10px] font-bold">
@@ -539,68 +562,38 @@ export default function BackgroundRemover() {
                                         </div>
                                         <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} />
                                     </div>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-3">
                                         {BORDER_COLOR_PRESETS.map((p) => (
                                             <button
                                                 key={p.value}
                                                 onClick={() => setBorderColor(p.value)}
                                                 className={cn(
-                                                    "size-8 rounded-full border-2 transition-all",
-                                                    borderColor === p.value ? "border-primary scale-110 shadow-md" : "border-transparent"
+                                                    "size-10 rounded-xl border-2 transition-all flex items-center justify-center shadow-sm",
+                                                    borderColor === p.value ? "border-primary scale-110 shadow-md ring-2 ring-primary/10" : "border-muted"
                                                 )}
                                                 style={{ backgroundColor: p.value }}
                                             />
                                         ))}
                                     </div>
                                 </div>
+                                <Separator />
+                                <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                                    <p className="text-[10px] font-black text-primary uppercase flex items-center gap-1.5 mb-1.5">
+                                        <ShieldCheck className="size-3" /> PRINT QUALITY TIPS
+                                    </p>
+                                    <ul className="text-[9px] text-muted-foreground space-y-1 list-disc pl-3">
+                                        <li>Use **35x45mm Off-White** for Indian Passport.</li>
+                                        <li>Use **2x2 inch Pure White** for US Visa.</li>
+                                        <li>Keep border at **1%** for clean edges.</li>
+                                    </ul>
+                                </div>
                              </div>
-                        </TabsContent>
-
-                        <TabsContent value="refine" className="p-6 space-y-6 animate-in fade-in duration-300">
-                            <div className="space-y-8">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button 
-                                        variant={brushMode === 'restore' ? "default" : "outline"}
-                                        className="h-14 flex-col gap-1 rounded-2xl border-2"
-                                        onClick={() => setBrushMode('restore')}
-                                        disabled={!isRefining}
-                                    >
-                                        <Undo2 className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Restore</span>
-                                    </Button>
-                                    <Button 
-                                        variant={brushMode === 'erase' ? "default" : "outline"}
-                                        className="h-14 flex-col gap-1 rounded-2xl border-2"
-                                        onClick={() => setBrushMode('erase')}
-                                        disabled={!isRefining}
-                                    >
-                                        <Eraser className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Erase</span>
-                                    </Button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase text-muted-foreground">
-                                        <span>Brush Size</span>
-                                        <span>{brushSize[0]}px</span>
-                                    </div>
-                                    <Slider min={5} max={100} step={1} value={brushSize} onValueChange={setBrushSize} disabled={!isRefining} />
-                                </div>
-
-                                {!isRefining ? (
-                                    <Button variant="secondary" className="w-full h-12 font-black border-2" onClick={startRefining}>
-                                        ACTIVATE TOUCH-UP BRUSH
-                                    </Button>
-                                ) : (
-                                    <Button className="w-full h-12 bg-green-600 font-black" onClick={() => setIsRefining(false)}>STOP REFINING</Button>
-                                )}
-                            </div>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
                 <CardFooter className="bg-muted/5 border-t py-4 text-center">
                     <p className="text-[9px] text-muted-foreground w-full font-medium italic">
-                        Processing at 300 DPI for high-quality printing.
+                        Automatic DPI scaling applied for high-resolution printing.
                     </p>
                 </CardFooter>
             </Card>
