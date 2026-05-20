@@ -58,7 +58,7 @@ const SIZE_PRESETS = [
     { name: 'Custom Size', width: 0, height: 0, unit: 'mm' },
 ];
 
-const DPI = 300; // Professional print quality
+const DPI = 300; // Professional print quality (300 DPI)
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
@@ -303,25 +303,30 @@ export default function BackgroundRemover() {
     return (
       <Card
         className={cn("w-full max-w-2xl text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0]); }}
+        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
       >
         <CardHeader>
           <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
             <Layers className="h-10 w-10" />
           </div>
-          <CardTitle className="text-3xl font-black">Professional ID Photo Maker</CardTitle>
-          <CardDescription>High-Definition background removal & physical size control.</CardDescription>
+          <CardTitle className="text-3xl font-black uppercase tracking-tight">AI Remove Background & HD ID Studio</CardTitle>
+          <CardDescription>Professional background removal with 100% precision & physical size control (MM/Inch).</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing at 300 DPI.</p>
+                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing. Output at 300 DPI.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </CardContent>
+        <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8">
+            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> NO SERVER UPLOADS</div>
+            <div className="flex items-center gap-2"><Maximize className="h-4 w-4 text-primary" /> CUSTOM SIZE SUPPORT</div>
+            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-purple-500" /> HD PNG EXPORT</div>
+        </CardFooter>
       </Card>
     );
   }
@@ -431,7 +436,7 @@ export default function BackgroundRemover() {
             <Card className="overflow-hidden border-2 shadow-2xl relative">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <ImageIcon className="h-3 w-3" /> Result Preview (300 DPI)
+                        <ImageIcon className="h-3 w-3" /> Result Preview (300 DPI HD)
                     </CardTitle>
                     {stage === 'studio' && <Badge className="text-[9px] font-black bg-green-500/10 text-green-600">HD QUALITY READY</Badge>}
                 </CardHeader>
@@ -566,7 +571,7 @@ export default function BackgroundRemover() {
                                         <ShieldCheck className="size-3" /> PRINT QUALITY ACTIVE
                                     </p>
                                     <p className="text-[9px] text-muted-foreground leading-relaxed">
-                                        Output is rendered at <strong>300 DPI</strong>. Perfect for physical printing on 4x6 photo paper.
+                                        Output is rendered at <strong>300 DPI</strong>. Perfect for physical printing on 4x6 photo paper or application forms.
                                     </p>
                                 </div>
                              </div>
@@ -581,3 +586,4 @@ export default function BackgroundRemover() {
     </div>
   );
 }
+

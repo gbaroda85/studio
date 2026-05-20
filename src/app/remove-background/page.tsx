@@ -1,4 +1,5 @@
 
+
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,10 @@ export const dynamic = 'force-dynamic';
 
 const steps = [
   "Upload Image: Select an image with a clear subject by clicking the upload area or dragging it in.",
-  "Start Process: Click the 'Remove Background' button to start the AI process.",
-  "Review Result: The AI will generate a new image with the background removed. Preview it next to the original.",
-  "Download: Click 'Download Image' to save your new image with a transparent background (PNG).",
+  "Optional Crop: Use 'Set Size & Crop' to align the face if making a passport photo.",
+  "AI Removal: The tool will automatically extract the subject in high definition.",
+  "Customise: Choose professional background colors (Blue/White) and add a border.",
+  "Download: Click 'Download HD Photo' to save as a transparent or solid background PNG.",
 ];
 
 export default function RemoveBackgroundPage() {
@@ -28,7 +30,8 @@ export default function RemoveBackgroundPage() {
         <div className="w-full flex justify-center">
             <BackgroundRemover />
         </div>
-        <HowToGuide title="AI Background Remover" steps={steps} />
+        <HowToGuide title="AI Background Remover & ID Photo Maker" steps={steps} />
     </main>
   );
 }
+
