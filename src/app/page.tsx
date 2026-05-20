@@ -112,7 +112,7 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section */}
+      {/* Hero Section - Fixed background and z-index */}
       <section className="relative overflow-hidden pt-24 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors z-20">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-20 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
