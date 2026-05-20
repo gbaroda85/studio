@@ -14,45 +14,51 @@ import {
     Image as ImageIcon,
     Palette,
     Layers,
-    Move,
-    Maximize,
-    RotateCcw,
     Paintbrush,
-    Undo2,
+    RotateCcw,
     CheckCircle2,
     MousePointer2,
-    Eye
+    Undo2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const COLOR_PRESETS = [
+    { name: 'Transparent', value: 'transparent', icon: X },
+    { name: 'White', value: '#FFFFFF' },
+    { name: 'Light Blue', value: '#ADD8E6' },
+    { name: 'Passport Blue', value: '#000080' },
+    { name: 'Green Screen', value: '#00FF00' },
+    { name: 'Light Grey', value: '#F5F5F5' },
+];
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
-  const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null);
-  const [finalImageSrc, setFinalImageSrc] = useState<string | null>(null);
+  const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); // Just the cut subject
+  const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null); // Composited result
   
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   
-  // Refinement States
+  // Customization States
+  const [bgColor, setBgColor] = useState<string>("transparent");
   const [isRefining, setIsRefining] = useState(false);
   const [brushMode, setBrushMode] = useState<"restore" | "erase">("restore");
   const [brushSize, setBrushSize] = useState([20]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
+  const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
   const refineCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const checkerboardStyle: React.CSSProperties = {
@@ -69,7 +75,8 @@ export default function BackgroundRemover() {
       reader.onload = (e) => setOriginalImageSrc(e.target?.result as string);
       reader.readAsDataURL(file);
       setSubjectImageSrc(null);
-      setFinalImageSrc(null);
+      setPreviewImageSrc(null);
+      setBgColor("transparent");
       setProgress(0);
       setIsRefining(false);
     } else if (file) {
@@ -93,24 +100,57 @@ export default function BackgroundRemover() {
             const p = Math.round((index / total) * 100);
             setProgress(p);
             if (item.includes("model")) setStatusText("Loading Local AI...");
-            else setStatusText("Scanning Anatomy...");
+            else setStatusText("Scanning Image...");
         },
         output: { format: "image/png", quality: 0.95 }
       });
 
       const url = URL.createObjectURL(blob);
       setSubjectImageSrc(url);
-      setFinalImageSrc(url); 
       setProgress(100);
       setStatusText("Done!");
-      toast({ title: "Extraction Complete", description: "If limbs are cut, use 'Refine Brush' to fix." });
+      toast({ title: "Background Removed", description: "You can now change colors or refine the edges." });
     } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "Processing Error", description: "Could not remove background locally." });
+      toast({ variant: "destructive", title: "Error", description: "Could not remove background locally." });
     } finally {
       setIsProcessing(false);
     }
   };
+
+  // --- Compositing Logic (Subject + BG Color) ---
+  const updateComposite = useCallback(async () => {
+    if (!subjectImageSrc) return;
+
+    const canvas = compositeCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new window.Image();
+    img.src = subjectImageSrc;
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // 1. Draw Background
+        if (bgColor !== 'transparent') {
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 2. Draw Subject
+        ctx.drawImage(img, 0, 0);
+
+        setPreviewImageSrc(canvas.toDataURL("image/png"));
+    };
+  }, [subjectImageSrc, bgColor]);
+
+  useEffect(() => {
+    updateComposite();
+  }, [updateComposite]);
 
   // --- Manual Refinement Logic ---
   const startRefining = () => {
@@ -134,7 +174,7 @@ export default function BackgroundRemover() {
   const handleRefineMove = (e: React.MouseEvent | React.TouchEvent) => {
       if (!isRefining) return;
       const canvas = refineCanvasRef.current;
-      if (!canvas || e.buttons !== 1 && !('touches' in e)) return;
+      if (!canvas || (e.buttons !== 1 && !('touches' in e))) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
@@ -154,7 +194,6 @@ export default function BackgroundRemover() {
       ctx.globalCompositeOperation = brushMode === 'restore' ? 'source-over' : 'destination-out';
       
       if (brushMode === 'restore') {
-          // To restore, we need to draw from original photo but masked by brush
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = canvas.width;
           tempCanvas.height = canvas.height;
@@ -177,20 +216,15 @@ export default function BackgroundRemover() {
           ctx.fill();
       }
       
-      setFinalImageSrc(canvas.toDataURL("image/png"));
-  };
-
-  const saveRefinement = () => {
-      setSubjectImageSrc(finalImageSrc);
-      setIsRefining(false);
-      toast({ title: "Changes Saved" });
+      const refinedUrl = canvas.toDataURL("image/png");
+      setSubjectImageSrc(refinedUrl);
   };
 
   const handleDownload = () => {
-    if (!finalImageSrc) return;
+    if (!previewImageSrc) return;
     const link = document.createElement("a");
-    link.href = finalImageSrc;
-    link.download = `bg-removed-${Date.now()}.png`;
+    link.href = previewImageSrc;
+    link.download = `bg-changed-${Date.now()}.png`;
     link.click();
   };
 
@@ -198,7 +232,8 @@ export default function BackgroundRemover() {
     setImageFile(null);
     setOriginalImageSrc(null);
     setSubjectImageSrc(null);
-    setFinalImageSrc(null);
+    setPreviewImageSrc(null);
+    setBgColor("transparent");
     setIsRefining(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -213,23 +248,23 @@ export default function BackgroundRemover() {
           <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
             <Eraser className="h-10 w-10" />
           </div>
-          <CardTitle className="text-3xl font-black">Pro Background Remover</CardTitle>
-          <CardDescription>Privacy-first local AI extraction with Manual Refinement Brush to fix cut limbs.</CardDescription>
+          <CardTitle className="text-3xl font-black">Background Studio</CardTitle>
+          <CardDescription>Remove background with AI and change to any solid color instantly.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">No API Limits. 100% Free & Secure.</p>
+                <p className="text-sm text-muted-foreground mt-2">No file uploads. 100% Private local processing.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </CardContent>
         <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 border-t pt-8">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> No Data Uploads</div>
-            <div className="flex items-center gap-1.5"><Paintbrush className="h-4 w-4 text-primary" /> Manual Fix Tool</div>
-            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Unlimited Uses</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-green-500" /> SECURE</div>
+            <div className="flex items-center gap-1.5"><Palette className="h-4 w-4 text-primary" /> COLOR CHANGE</div>
+            <div className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> AI POWERED</div>
         </CardFooter>
       </Card>
     );
@@ -245,11 +280,13 @@ export default function BackgroundRemover() {
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                         {isRefining ? <Paintbrush className="h-3 w-3 text-primary animate-pulse" /> : <ImageIcon className="h-3 w-3" />}
-                        {isRefining ? "Refinement Studio (Paint to Restore)" : subjectImageSrc ? "AI Render Result" : "Source Preview"}
+                        {isRefining ? "Refinement Studio" : subjectImageSrc ? "Result Preview" : "Source Preview"}
                     </CardTitle>
-                    {subjectImageSrc && !isRefining && <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-[9px] font-black">AI EXTRACTED</Badge>}
+                    {subjectImageSrc && <Badge className={cn("text-[9px] font-black", bgColor === 'transparent' ? "bg-amber-500/10 text-amber-600" : "bg-green-500/10 text-green-600")}>
+                        {bgColor === 'transparent' ? 'TRANSPARENT' : 'COLOR APPLIED'}
+                    </Badge>}
                 </CardHeader>
-                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={subjectImageSrc ? checkerboardStyle : {}}>
+                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
                     {isProcessing ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8">
                             <div className="relative">
@@ -268,16 +305,10 @@ export default function BackgroundRemover() {
                             onMouseMove={handleRefineMove}
                             onTouchMove={handleRefineMove}
                         />
-                    ) : finalImageSrc ? (
-                        <Image src={finalImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
+                    ) : previewImageSrc ? (
+                        <Image src={previewImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
                     ) : (
                         <Image src={originalImageSrc} alt="Original" fill className="object-contain p-8" />
-                    )}
-                    
-                    {!isProcessing && isRefining && (
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-primary/90 text-white rounded-full text-xs font-black uppercase shadow-xl">
-                            <MousePointer2 className="size-3" /> Painting to {brushMode}
-                        </div>
                     )}
                 </CardContent>
             </Card>
@@ -287,23 +318,17 @@ export default function BackgroundRemover() {
                     <RotateCcw className="mr-2 h-4 w-4" /> Start Over
                 </Button>
                 {!subjectImageSrc ? (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20" onClick={handleRemoveBackgroundLocal} disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Zap className="mr-3 h-6 w-6 text-yellow-400" />}
-                        START LOCAL AI REMOVAL
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl" onClick={handleRemoveBackgroundLocal} disabled={isProcessing}>
+                        <Zap className="mr-3 h-6 w-6 text-yellow-400" /> START AI REMOVAL
                     </Button>
                 ) : isRefining ? (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={saveRefinement}>
-                        <CheckCircle2 className="mr-3 h-6 w-6" /> SAVE REFINEMENT
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={() => setIsRefining(false)}>
+                        <CheckCircle2 className="mr-3 h-6 w-6" /> SAVE EDITS
                     </Button>
                 ) : (
-                    <div className="flex gap-3 w-full sm:w-auto">
-                        <Button variant="secondary" size="lg" className="flex-1 h-14 px-8 font-black uppercase text-xs border-2 border-primary/20" onClick={startRefining}>
-                            <Paintbrush className="mr-2 h-4 w-4 text-primary" /> Refine Brush (Fix Hand)
-                        </Button>
-                        <Button size="lg" className="flex-1 h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
-                            <Download className="mr-3 h-6 w-6" /> DOWNLOAD PNG
-                        </Button>
-                    </div>
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
+                        <Download className="mr-3 h-6 w-6" /> DOWNLOAD RESULT
+                    </Button>
                 )}
             </div>
         </div>
@@ -313,30 +338,73 @@ export default function BackgroundRemover() {
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b">
                     <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Paintbrush className="h-5 w-5 text-primary" /> {isRefining ? "BRUSH SETTINGS" : "REFINEMENT PANEL"}
+                        <Palette className="h-5 w-5 text-primary" /> CUSTOMIZE RESULT
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-8 pb-8 space-y-8">
-                    {!subjectImageSrc ? (
-                        <div className="p-6 bg-muted/20 rounded-2xl border-2 border-dashed flex flex-col items-center gap-4 text-center">
-                            <Zap className="size-10 text-primary opacity-20" />
-                            <p className="text-xs font-bold text-muted-foreground">Click "START LOCAL AI" to begin processing without any limits.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-8">
-                            <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/20 flex gap-3">
-                                <CheckCircle2 className="size-5 text-green-600 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-[10px] font-black text-green-700 uppercase">AI Pass Complete</p>
-                                    <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                                        If the AI cut any part (like hands), use the **Refine Brush** to paint it back from the original.
-                                    </p>
-                                </div>
-                            </div>
+                <CardContent className="p-0">
+                    <Tabs defaultValue="colors" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/20 border-b">
+                            <TabsTrigger value="colors" className="font-bold text-[10px] uppercase">
+                                <Palette className="size-3 mr-2" /> BG Color
+                            </TabsTrigger>
+                            <TabsTrigger value="refine" className="font-bold text-[10px] uppercase">
+                                <Paintbrush className="size-3 mr-2" /> Refine
+                            </TabsTrigger>
+                        </TabsList>
 
-                            <div className="space-y-6">
-                                <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Brush Action</Label>
+                        <TabsContent value="colors" className="p-6 space-y-6 animate-in fade-in duration-300">
+                             {!subjectImageSrc ? (
+                                <p className="text-xs text-center text-muted-foreground py-8">Remove background first to enable color options.</p>
+                             ) : (
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Select Background</Label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {COLOR_PRESETS.map((preset) => (
+                                                <button
+                                                    key={preset.value}
+                                                    onClick={() => setBgColor(preset.value)}
+                                                    className={cn(
+                                                        "group h-16 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all",
+                                                        bgColor === preset.value ? "border-primary ring-2 ring-primary/10 shadow-lg scale-105" : "border-transparent bg-muted/20 hover:bg-muted/40"
+                                                    )}
+                                                >
+                                                    {preset.icon ? (
+                                                        <preset.icon className="size-4 text-muted-foreground" />
+                                                    ) : (
+                                                        <div className="size-4 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: preset.value }} />
+                                                    )}
+                                                    <span className="text-[8px] font-black uppercase truncate px-1">{preset.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Custom Color</Label>
+                                        <div className="flex gap-2">
+                                            <div className="size-12 rounded-xl border-2 overflow-hidden shadow-inner flex-shrink-0" style={{ backgroundColor: bgColor !== 'transparent' ? bgColor : '#FFFFFF' }}>
+                                                <input 
+                                                    type="color" 
+                                                    value={bgColor !== 'transparent' ? bgColor : '#FFFFFF'} 
+                                                    onChange={(e) => setBgColor(e.target.value)}
+                                                    className="size-full scale-150 cursor-pointer"
+                                                />
+                                            </div>
+                                            <div className="flex-1 px-4 border-2 rounded-xl flex items-center bg-muted/10">
+                                                <span className="font-mono text-xs font-bold uppercase">{bgColor}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             )}
+                        </TabsContent>
+
+                        <TabsContent value="refine" className="p-6 space-y-6 animate-in fade-in duration-300">
+                            {!subjectImageSrc ? (
+                                <p className="text-xs text-center text-muted-foreground py-8">Remove background first to enable refinement brush.</p>
+                            ) : (
+                                <div className="space-y-8">
                                     <div className="grid grid-cols-2 gap-3">
                                         <Button 
                                             variant={brushMode === 'restore' ? "default" : "outline"}
@@ -345,7 +413,7 @@ export default function BackgroundRemover() {
                                             disabled={!isRefining}
                                         >
                                             <Undo2 className="size-5" />
-                                            <span className="text-[8px] font-black uppercase">Restore (Fix)</span>
+                                            <span className="text-[8px] font-black uppercase">Restore</span>
                                         </Button>
                                         <Button 
                                             variant={brushMode === 'erase' ? "default" : "outline"}
@@ -354,36 +422,33 @@ export default function BackgroundRemover() {
                                             disabled={!isRefining}
                                         >
                                             <Eraser className="size-5" />
-                                            <span className="text-[8px] font-black uppercase">Erase (Cleanup)</span>
+                                            <span className="text-[8px] font-black uppercase">Erase</span>
                                         </Button>
                                     </div>
-                                </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Brush Size</Label>
-                                        <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{brushSize[0]}px</span>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Brush Size</Label>
+                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{brushSize[0]}px</span>
+                                        </div>
+                                        <Slider min={5} max={100} step={1} value={brushSize} onValueChange={setBrushSize} disabled={!isRefining} />
                                     </div>
-                                    <Slider min={5} max={100} step={1} value={brushSize} onValueChange={setBrushSize} disabled={!isRefining} />
-                                </div>
-                            </div>
-                            
-                            {!isRefining ? (
-                                <Button variant="secondary" className="w-full h-12 font-black border-2" onClick={startRefining}>
-                                    ACTIVATE REFINE BRUSH
-                                </Button>
-                            ) : (
-                                <div className="grid grid-cols-1 gap-2">
-                                     <Button className="w-full h-14 bg-green-600 font-black text-lg" onClick={saveRefinement}>APPLY BRUSH FIX</Button>
-                                     <Button variant="ghost" className="w-full text-xs font-bold" onClick={() => setIsRefining(false)}>CANCEL</Button>
+
+                                    {!isRefining ? (
+                                        <Button variant="secondary" className="w-full h-12 font-black border-2" onClick={startRefining}>
+                                            ACTIVATE REFINE BRUSH
+                                        </Button>
+                                    ) : (
+                                        <Button className="w-full h-12 bg-green-600 font-black" onClick={() => setIsRefining(false)}>STOP REFINING</Button>
+                                    )}
                                 </div>
                             )}
-                        </div>
-                    )}
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
                 <CardFooter className="bg-muted/5 border-t py-4 text-center">
                     <p className="text-[9px] text-muted-foreground w-full font-medium italic">
-                        All processing is 100% private. No cloud limits. No data sent to servers.
+                        Everything happens locally. Privacy guaranteed.
                     </p>
                 </CardFooter>
             </Card>
@@ -391,7 +456,7 @@ export default function BackgroundRemover() {
       </div>
       
       {/* Hidden processing canvas */}
-      <canvas ref={canvasRef} className="hidden" />
+      <canvas ref={compositeCanvasRef} className="hidden" />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -197,23 +196,6 @@ function AppHeader() {
   );
 }
 
-function AppLayoutSkeleton() {
-    return (
-        <div className="flex items-center justify-center min-h-screen w-full bg-slate-950">
-            <div className="flex flex-col items-center gap-8 animate-fade-in-up">
-                 <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-premium p-4 shadow-2xl animate-pulse">
-                    <LayoutGrid className="h-full w-full text-white" />
-                </div>
-                 <div className="text-center space-y-2">
-                    <h1 className="text-4xl font-black tracking-tighter text-white font-headline">GRs HUB</h1>
-                    <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Initializing Core...</p>
-                 </div>
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        </div>
-    )
-}
-
 export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -221,9 +203,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
-    return <AppLayoutSkeleton />;
-  }
+  if (!isMounted) return null;
   
   return (
     <SidebarProvider defaultOpen={false}>
