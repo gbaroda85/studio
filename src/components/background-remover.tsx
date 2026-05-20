@@ -15,18 +15,12 @@ import {
     Image as ImageIcon,
     Palette,
     Layers,
-    Paintbrush,
     RotateCcw,
-    CheckCircle2,
-    Undo2,
-    Maximize,
-    Crop as CropIcon,
     ChevronRight,
     Settings2,
-    Scaling,
-    MoveHorizontal,
-    ArrowRightLeft,
-    Type
+    Crop as CropIcon,
+    Maximize,
+    Scaling
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -53,24 +47,18 @@ const COLOR_PRESETS = [
     { name: 'Navy Blue', value: '#000080' },
     { name: 'Sky Blue', value: '#ADD8E6' },
     { name: 'Light Grey', value: '#D3D3D3' },
-    { name: 'Passport Red', value: '#8B0000' },
+    { name: 'Red', value: '#FF0000' },
 ];
 
 const SIZE_PRESETS = [
     { name: 'India Passport (35x45mm)', width: 35, height: 45, unit: 'mm' },
     { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
     { name: 'PAN Card (25x35mm)', width: 25, height: 35, unit: 'mm' },
-    { name: 'SSC/UPSC (200x230px)', width: 200, height: 230, unit: 'px' },
+    { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
     { name: 'Custom Size', width: 0, height: 0, unit: 'mm' },
 ];
 
-const BORDER_COLOR_PRESETS = [
-    { name: 'White', value: '#FFFFFF' },
-    { name: 'Black', value: '#000000' },
-    { name: 'Grey', value: '#808080' },
-];
-
-const DPI = 300; 
+const DPI = 300; // Professional print quality
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
@@ -88,11 +76,6 @@ export default function BackgroundRemover() {
   
   // Customization States
   const [bgColor, setBgColor] = useState<string>("transparent");
-  const [isRefining, setIsRefining] = useState(false);
-  const [brushMode, setBrushMode] = useState<"restore" | "erase">("restore");
-  const [brushSize, setBrushSize] = useState([20]);
-  
-  // Border States
   const [borderWidth, setBorderWidth] = useState([0]);
   const [borderColor, setBorderColor] = useState("#FFFFFF");
 
@@ -106,7 +89,6 @@ export default function BackgroundRemover() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
-  const refineCanvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const checkerboardStyle: React.CSSProperties = {
@@ -130,20 +112,21 @@ export default function BackgroundRemover() {
     }
   };
 
-  // Logic to update crop immediately when size settings change
-  const updateCropFromSize = useCallback(() => {
+  // Logic to update crop box immediately when preset or values change
+  const updateCropFromSettings = useCallback(() => {
     if (!imgRef.current) return;
-    const { width: imgW, height: imgH } = imgRef.current;
     
-    let aspect;
+    const { width: imgW, height: imgH } = imgRef.current;
+    let aspect = 1;
+
     if (selectedSizeIndex === '4') { // Custom
-        aspect = parseFloat(customWidth) / parseFloat(customHeight);
+        const w = parseFloat(customWidth);
+        const h = parseFloat(customHeight);
+        if (w > 0 && h > 0) aspect = w / h;
     } else {
         const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
         aspect = preset.width / preset.height;
     }
-
-    if (isNaN(aspect) || aspect <= 0) return;
 
     const newCrop = centerCrop(
         makeAspectCrop({ unit: '%', width: 90 }, aspect, imgW, imgH),
@@ -154,10 +137,10 @@ export default function BackgroundRemover() {
   }, [selectedSizeIndex, customWidth, customHeight]);
 
   useEffect(() => {
-    if (stage === 'crop') {
-        updateCropFromSize();
+    if (stage === 'crop' && imgRef.current) {
+        updateCropFromSettings();
     }
-  }, [selectedSizeIndex, customWidth, customHeight, stage, updateCropFromSize]);
+  }, [selectedSizeIndex, customWidth, customHeight, stage, updateCropFromSettings]);
 
   const handleApplyCrop = () => {
     if (!imgRef.current || !completedCrop) return;
@@ -183,7 +166,7 @@ export default function BackgroundRemover() {
       canvas.height
     );
 
-    const croppedData = canvas.toDataURL('image/jpeg', 0.95);
+    const croppedData = canvas.toDataURL('image/png'); // Use PNG for quality
     setCroppedImageSrc(croppedData);
     setStage('process');
     handleRemoveBackgroundLocal(croppedData);
@@ -193,7 +176,7 @@ export default function BackgroundRemover() {
     setIsProcessing(true);
     setSubjectImageSrc(null);
     setProgress(5);
-    setStatusText("Loading AI Engine...");
+    setStatusText("Loading Local Engine...");
 
     try {
       const imglyModule = await import("@imgly/background-removal");
@@ -203,19 +186,19 @@ export default function BackgroundRemover() {
         progress: (item: string, index: number, total: number) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
-            if (item.includes("model")) setStatusText("Loading Local Engine...");
-            else setStatusText("Extracting Subject...");
+            if (item.includes("model")) setStatusText("Loading AI Model...");
+            else setStatusText("Removing Background...");
         },
-        output: { format: "image/png", quality: 0.95 }
+        output: { format: "image/png", quality: 1.0 } // 1.0 for zero blur
       });
 
       const url = URL.createObjectURL(blob);
       setSubjectImageSrc(url);
       setStage('studio');
-      toast({ title: "Ready!", description: "Background removed. Now customize colors." });
+      toast({ title: "Done!", description: "Background removed with high precision." });
     } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "AI Error", description: "Local background removal failed." });
+      toast({ variant: "destructive", title: "AI Error", description: "Could not remove background locally." });
       setSubjectImageSrc(source);
       setStage('studio');
     } finally {
@@ -228,13 +211,14 @@ export default function BackgroundRemover() {
 
     const canvas = compositeCanvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    // Calculate dimensions based on 300 DPI for sharp output
     let w, h, u;
     if (selectedSizeIndex === '4') {
-        w = parseFloat(customWidth);
-        h = parseFloat(customHeight);
+        w = parseFloat(customWidth) || 35;
+        h = parseFloat(customHeight) || 45;
         u = customUnit;
     } else {
         const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
@@ -243,23 +227,27 @@ export default function BackgroundRemover() {
         u = preset.unit;
     }
 
-    let targetW, targetH;
+    let targetW_px, targetH_px;
     if (u === 'mm') {
-        targetW = Math.round((w / 25.4) * DPI);
-        targetH = Math.round((h / 25.4) * DPI);
+        targetW_px = Math.round((w / 25.4) * DPI);
+        targetH_px = Math.round((h / 25.4) * DPI);
     } else if (u === 'inch') {
-        targetW = Math.round(w * DPI);
-        targetH = Math.round(h * DPI);
+        targetW_px = Math.round(w * DPI);
+        targetH_px = Math.round(h * DPI);
     } else {
-        targetW = w || 600;
-        targetH = h || 800;
+        targetW_px = w || 600;
+        targetH_px = h || 800;
     }
+
+    canvas.width = targetW_px;
+    canvas.height = targetH_px;
 
     const img = new window.Image();
     img.src = subjectImageSrc;
     img.onload = () => {
-        canvas.width = targetW;
-        canvas.height = targetH;
+        // High quality drawing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         if (bgColor !== 'transparent') {
             ctx.fillStyle = bgColor;
@@ -268,19 +256,22 @@ export default function BackgroundRemover() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        // Draw subject fitting the height (typical for passport)
         const scale = canvas.height / img.height;
         const dw = img.width * scale;
         const dh = canvas.height;
         const dx = (canvas.width - dw) / 2;
         ctx.drawImage(img, dx, 0, dw, dh);
         
+        // Draw Border if any
         if (borderWidth[0] > 0) {
             ctx.strokeStyle = borderColor;
-            ctx.lineWidth = (borderWidth[0] / 100) * canvas.width; 
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            const strokePx = (borderWidth[0] / 100) * canvas.width;
+            ctx.lineWidth = strokePx; 
+            ctx.strokeRect(strokePx/2, strokePx/2, canvas.width - strokePx, canvas.height - strokePx);
         }
 
-        setPreviewImageSrc(canvas.toDataURL("image/png"));
+        setPreviewImageSrc(canvas.toDataURL("image/png", 1.0));
     };
   }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex, customWidth, customHeight, customUnit]);
 
@@ -292,7 +283,7 @@ export default function BackgroundRemover() {
     if (!previewImageSrc) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    link.download = `pro-id-photo-${Date.now()}.png`;
+    link.download = `hd-photo-${Date.now()}.png`;
     link.click();
   };
 
@@ -305,7 +296,6 @@ export default function BackgroundRemover() {
     setPreviewImageSrc(null);
     setBgColor("transparent");
     setBorderWidth([0]);
-    setIsRefining(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -319,15 +309,15 @@ export default function BackgroundRemover() {
           <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
             <Layers className="h-10 w-10" />
           </div>
-          <CardTitle className="text-3xl font-black">ID Photo Studio Pro</CardTitle>
-          <CardDescription>Professional Passport and ID photo creator with AI background removal.</CardDescription>
+          <CardTitle className="text-3xl font-black">Professional ID Photo Maker</CardTitle>
+          <CardDescription>High-Definition background removal & physical size control.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing.</p>
+                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing at 300 DPI.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
@@ -341,17 +331,15 @@ export default function BackgroundRemover() {
           <Card className="w-full max-w-4xl shadow-2xl">
               <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                   <div>
-                      <CardTitle className="text-xl font-black">Review Original Photo</CardTitle>
-                      <CardDescription>Click below to crop for passport or remove background directly.</CardDescription>
+                      <CardTitle className="text-xl font-black">Photo Preview</CardTitle>
+                      <CardDescription>Choose to crop for specific size or remove background directly.</CardDescription>
                   </div>
               </CardHeader>
               <CardContent className="p-8 flex justify-center bg-black/5">
-                  <div className="relative max-h-[60vh]">
-                      <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
-                  </div>
+                  <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
               </CardContent>
               <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row gap-4 justify-between">
-                  <Button variant="outline" onClick={handleReset} className="font-bold"><RotateCcw className="mr-2" /> Change Photo</Button>
+                  <Button variant="ghost" onClick={handleReset} className="font-bold"><RotateCcw className="mr-2" /> Change Photo</Button>
                   <div className="flex gap-3">
                       <Button variant="outline" className="font-black border-2 border-primary text-primary" onClick={() => setStage('crop')}>
                           <CropIcon className="mr-2" /> SET SIZE & CROP
@@ -371,7 +359,7 @@ export default function BackgroundRemover() {
             <CardHeader className="bg-muted/30 border-b">
                 <div className="grid lg:grid-cols-2 gap-6 items-end">
                     <div className="space-y-4">
-                        <CardTitle className="text-xl font-black">Step 1: Size & Alignment</CardTitle>
+                        <CardTitle className="text-xl font-black">Step 1: Alignment & Size</CardTitle>
                         <Label className="text-xs font-black uppercase text-primary tracking-widest">Select ID Preset</Label>
                         <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
                             <SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
@@ -420,13 +408,14 @@ export default function BackgroundRemover() {
                         alt="Crop source"
                         src={originalImageSrc!}
                         style={{ maxHeight: '60vh', objectFit: 'contain' }}
+                        onLoad={updateCropFromSettings}
                     />
                 </ReactCrop>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between">
                 <Button variant="ghost" onClick={() => setStage('preview')} className="font-bold"><RotateCcw className="mr-2" /> Back</Button>
                 <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={handleApplyCrop}>
-                    START AI PROCESSING <ChevronRight className="ml-2" />
+                    APPLY & REMOVE BG <ChevronRight className="ml-2" />
                 </Button>
             </CardFooter>
         </Card>
@@ -442,14 +431,11 @@ export default function BackgroundRemover() {
             <Card className="overflow-hidden border-2 shadow-2xl relative">
                 <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        {isRefining ? <Paintbrush className="h-3 w-3 text-primary animate-pulse" /> : <ImageIcon className="h-3 w-3" />}
-                        {isRefining ? "Refinement Studio" : stage === 'studio' ? "Result Preview" : "Processing..."}
+                        <ImageIcon className="h-3 w-3" /> Result Preview (300 DPI)
                     </CardTitle>
-                    {stage === 'studio' && <Badge className="text-[9px] font-black bg-green-500/10 text-green-600">
-                        HD 300DPI READY
-                    </Badge>}
+                    {stage === 'studio' && <Badge className="text-[9px] font-black bg-green-500/10 text-green-600">HD QUALITY READY</Badge>}
                 </CardHeader>
-                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
+                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[500px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
                     {isProcessing ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8">
                             <div className="relative">
@@ -463,9 +449,7 @@ export default function BackgroundRemover() {
                         </div>
                     ) : previewImageSrc ? (
                         <Image src={previewImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
-                    ) : (
-                        <div className="text-muted-foreground animate-pulse">Initializing result...</div>
-                    )}
+                    ) : null}
                 </CardContent>
             </Card>
 
@@ -486,17 +470,17 @@ export default function BackgroundRemover() {
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden bg-card/50">
                 <CardHeader className="bg-primary/5 border-b">
                     <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="h-5 w-5 text-primary" /> FINALIZE ID PHOTO
+                        <Settings2 className="h-5 w-5 text-primary" /> STUDIO CONTROLS
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Tabs defaultValue="colors" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/20 border-b">
                             <TabsTrigger value="colors" className="font-bold text-[10px] uppercase">
-                                <Palette className="size-3 mr-2" /> Style & Border
+                                <Palette className="size-3 mr-2" /> BG Color
                             </TabsTrigger>
                             <TabsTrigger value="border" className="font-bold text-[10px] uppercase">
-                                <Maximize className="size-3 mr-2" /> Frame Settings
+                                <Maximize className="size-3 mr-2" /> Frame & Border
                             </TabsTrigger>
                         </TabsList>
 
@@ -504,7 +488,7 @@ export default function BackgroundRemover() {
                              <div className="space-y-6">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                       Professional Background Colors
+                                       Standard Backgrounds
                                     </Label>
                                     <div className="grid grid-cols-4 gap-3">
                                         {COLOR_PRESETS.map((preset) => (
@@ -531,7 +515,7 @@ export default function BackgroundRemover() {
 
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                        Custom Color Picker
+                                        Pick Custom Color
                                     </Label>
                                     <div className="flex items-center gap-3">
                                         <Input 
@@ -541,7 +525,7 @@ export default function BackgroundRemover() {
                                             className="w-12 h-12 p-1 rounded-lg cursor-pointer"
                                         />
                                         <div className="flex-1">
-                                            <p className="text-[10px] font-bold">Pick precise shade</p>
+                                            <p className="text-[10px] font-bold">Manual Color Selector</p>
                                             <p className="text-[9px] text-muted-foreground uppercase font-mono">{bgColor}</p>
                                         </div>
                                     </div>
@@ -553,7 +537,7 @@ export default function BackgroundRemover() {
                              <div className="space-y-6">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                        Passport Frame/Border
+                                        Border Thickness
                                     </Label>
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center text-[10px] font-bold">
@@ -563,15 +547,15 @@ export default function BackgroundRemover() {
                                         <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} />
                                     </div>
                                     <div className="flex flex-wrap gap-3">
-                                        {BORDER_COLOR_PRESETS.map((p) => (
+                                        {['#FFFFFF', '#000000', '#D3D3D3'].map((c) => (
                                             <button
-                                                key={p.value}
-                                                onClick={() => setBorderColor(p.value)}
+                                                key={c}
+                                                onClick={() => setBorderColor(c)}
                                                 className={cn(
                                                     "size-10 rounded-xl border-2 transition-all flex items-center justify-center shadow-sm",
-                                                    borderColor === p.value ? "border-primary scale-110 shadow-md ring-2 ring-primary/10" : "border-muted"
+                                                    borderColor === c ? "border-primary scale-110 shadow-md ring-2 ring-primary/10" : "border-muted"
                                                 )}
-                                                style={{ backgroundColor: p.value }}
+                                                style={{ backgroundColor: c }}
                                             />
                                         ))}
                                     </div>
@@ -579,23 +563,16 @@ export default function BackgroundRemover() {
                                 <Separator />
                                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
                                     <p className="text-[10px] font-black text-primary uppercase flex items-center gap-1.5 mb-1.5">
-                                        <ShieldCheck className="size-3" /> PRINT QUALITY TIPS
+                                        <ShieldCheck className="size-3" /> PRINT QUALITY ACTIVE
                                     </p>
-                                    <ul className="text-[9px] text-muted-foreground space-y-1 list-disc pl-3">
-                                        <li>Use **35x45mm Off-White** for Indian Passport.</li>
-                                        <li>Use **2x2 inch Pure White** for US Visa.</li>
-                                        <li>Keep border at **1%** for clean edges.</li>
-                                    </ul>
+                                    <p className="text-[9px] text-muted-foreground leading-relaxed">
+                                        Output is rendered at <strong>300 DPI</strong>. Perfect for physical printing on 4x6 photo paper.
+                                    </p>
                                 </div>
                              </div>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
-                <CardFooter className="bg-muted/5 border-t py-4 text-center">
-                    <p className="text-[9px] text-muted-foreground w-full font-medium italic">
-                        Automatic DPI scaling applied for high-resolution printing.
-                    </p>
-                </CardFooter>
             </Card>
         </div>
       </div>
