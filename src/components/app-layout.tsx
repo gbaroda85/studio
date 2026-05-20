@@ -168,7 +168,7 @@ function SettingsMenu() {
 
 function AppHeader() {
   return (
-    <header className="h-24 glass-panel border-b border-border/50 shadow-lg px-4 md:px-8 z-50 shrink-0">
+    <header className="h-24 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-lg px-4 md:px-8 z-50 shrink-0">
       <div className="flex h-full items-center justify-between gap-4">
         <div className="flex items-center gap-4">
             <SidebarTrigger className="h-12 w-12 rounded-xl hover:bg-primary/10" />

@@ -112,7 +112,7 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section - Improved for Light Theme */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-20 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
@@ -226,7 +226,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* SEO Content Section - Added for Ranking */}
+        {/* SEO Content Section */}
         <section className="py-20 border-t border-border/50">
           <div className="max-w-4xl mx-auto space-y-16">
             <div className="text-center">
