@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -18,7 +19,9 @@ import {
     RotateCcw,
     CheckCircle2,
     MousePointer2,
-    Undo2
+    Undo2,
+    Square,
+    Maximize
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -29,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 const COLOR_PRESETS = [
     { name: 'Transparent', value: 'transparent', icon: X },
@@ -37,6 +41,13 @@ const COLOR_PRESETS = [
     { name: 'Passport Blue', value: '#000080' },
     { name: 'Green Screen', value: '#00FF00' },
     { name: 'Light Grey', value: '#F5F5F5' },
+];
+
+const BORDER_COLOR_PRESETS = [
+    { name: 'White', value: '#FFFFFF' },
+    { name: 'Black', value: '#000000' },
+    { name: 'Grey', value: '#808080' },
+    { name: 'Gold', value: '#FFD700' },
 ];
 
 export default function BackgroundRemover() {
@@ -56,6 +67,10 @@ export default function BackgroundRemover() {
   const [isRefining, setIsRefining] = useState(false);
   const [brushMode, setBrushMode] = useState<"restore" | "erase">("restore");
   const [brushSize, setBrushSize] = useState([20]);
+  
+  // Border States
+  const [borderWidth, setBorderWidth] = useState([0]);
+  const [borderColor, setBorderColor] = useState("#FFFFFF");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,6 +92,7 @@ export default function BackgroundRemover() {
       setSubjectImageSrc(null);
       setPreviewImageSrc(null);
       setBgColor("transparent");
+      setBorderWidth([0]);
       setProgress(0);
       setIsRefining(false);
     } else if (file) {
@@ -109,7 +125,7 @@ export default function BackgroundRemover() {
       setSubjectImageSrc(url);
       setProgress(100);
       setStatusText("Done!");
-      toast({ title: "Background Removed", description: "You can now change colors or refine the edges." });
+      toast({ title: "Background Removed", description: "You can now change colors, add borders or refine the edges." });
     } catch (error: any) {
       console.error(error);
       toast({ variant: "destructive", title: "Error", description: "Could not remove background locally." });
@@ -118,7 +134,7 @@ export default function BackgroundRemover() {
     }
   };
 
-  // --- Compositing Logic (Subject + BG Color) ---
+  // --- Compositing Logic (Subject + BG Color + Border) ---
   const updateComposite = useCallback(async () => {
     if (!subjectImageSrc) return;
 
@@ -143,10 +159,18 @@ export default function BackgroundRemover() {
 
         // 2. Draw Subject
         ctx.drawImage(img, 0, 0);
+        
+        // 3. Draw Border (Frame around entire image)
+        if (borderWidth[0] > 0) {
+            ctx.strokeStyle = borderColor;
+            // Since stroke is centered on edge, we use double width for inner effect
+            ctx.lineWidth = borderWidth[0] * 2; 
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        }
 
         setPreviewImageSrc(canvas.toDataURL("image/png"));
     };
-  }, [subjectImageSrc, bgColor]);
+  }, [subjectImageSrc, bgColor, borderWidth, borderColor]);
 
   useEffect(() => {
     updateComposite();
@@ -234,6 +258,7 @@ export default function BackgroundRemover() {
     setSubjectImageSrc(null);
     setPreviewImageSrc(null);
     setBgColor("transparent");
+    setBorderWidth([0]);
     setIsRefining(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -249,7 +274,7 @@ export default function BackgroundRemover() {
             <Eraser className="h-10 w-10" />
           </div>
           <CardTitle className="text-3xl font-black">Background Studio</CardTitle>
-          <CardDescription>Remove background with AI and change to any solid color instantly.</CardDescription>
+          <CardDescription>Remove background with AI and change to any solid color or add border instantly.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -345,20 +370,23 @@ export default function BackgroundRemover() {
                     <Tabs defaultValue="colors" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/20 border-b">
                             <TabsTrigger value="colors" className="font-bold text-[10px] uppercase">
-                                <Palette className="size-3 mr-2" /> BG Color
+                                <Palette className="size-3 mr-2" /> BG & Border
                             </TabsTrigger>
                             <TabsTrigger value="refine" className="font-bold text-[10px] uppercase">
-                                <Paintbrush className="size-3 mr-2" /> Refine
+                                <Paintbrush className="size-3 mr-2" /> Refine Edges
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="colors" className="p-6 space-y-6 animate-in fade-in duration-300">
+                        <TabsContent value="colors" className="p-6 space-y-8 animate-in fade-in duration-300">
                              {!subjectImageSrc ? (
-                                <p className="text-xs text-center text-muted-foreground py-8">Remove background first to enable color options.</p>
+                                <p className="text-xs text-center text-muted-foreground py-8">Remove background first to enable design options.</p>
                              ) : (
-                                <div className="space-y-6">
+                                <div className="space-y-8">
+                                    {/* BACKGROUND SECTION */}
                                     <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Select Background</Label>
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                                           <Palette className="size-3" /> 1. Background Color
+                                        </Label>
                                         <div className="grid grid-cols-3 gap-3">
                                             {COLOR_PRESETS.map((preset) => (
                                                 <button
@@ -378,21 +406,49 @@ export default function BackgroundRemover() {
                                                 </button>
                                             ))}
                                         </div>
+                                        <div className="flex gap-2 items-center bg-muted/10 p-2 rounded-lg">
+                                            <input type="color" value={bgColor !== 'transparent' ? bgColor : '#FFFFFF'} onChange={(e) => setBgColor(e.target.value)} className="size-8 rounded cursor-pointer" />
+                                            <span className="text-[9px] font-mono font-bold uppercase">{bgColor}</span>
+                                        </div>
                                     </div>
-                                    
-                                    <div className="space-y-3">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Custom Color</Label>
-                                        <div className="flex gap-2">
-                                            <div className="size-12 rounded-xl border-2 overflow-hidden shadow-inner flex-shrink-0" style={{ backgroundColor: bgColor !== 'transparent' ? bgColor : '#FFFFFF' }}>
+
+                                    <Separator />
+
+                                    {/* BORDER SECTION */}
+                                    <div className="space-y-6">
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                                            <Square className="size-3" /> 2. Photo Border (Frame)
+                                        </Label>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] font-bold">Border Width</span>
+                                                <Badge variant="secondary" className="text-[9px] font-mono">{borderWidth[0]}px</Badge>
+                                            </div>
+                                            <Slider min={0} max={50} step={1} value={borderWidth} onValueChange={setBorderWidth} />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <span className="text-[10px] font-bold block">Border Color</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {BORDER_COLOR_PRESETS.map((p) => (
+                                                    <button
+                                                        key={p.value}
+                                                        onClick={() => setBorderColor(p.value)}
+                                                        className={cn(
+                                                            "size-8 rounded-full border-2 transition-all",
+                                                            borderColor === p.value ? "border-primary scale-110 shadow-md" : "border-transparent"
+                                                        )}
+                                                        style={{ backgroundColor: p.value }}
+                                                        title={p.name}
+                                                    />
+                                                ))}
                                                 <input 
                                                     type="color" 
-                                                    value={bgColor !== 'transparent' ? bgColor : '#FFFFFF'} 
-                                                    onChange={(e) => setBgColor(e.target.value)}
-                                                    className="size-full scale-150 cursor-pointer"
+                                                    value={borderColor} 
+                                                    onChange={(e) => setBorderColor(e.target.value)}
+                                                    className="size-8 rounded-full cursor-pointer border-2"
                                                 />
-                                            </div>
-                                            <div className="flex-1 px-4 border-2 rounded-xl flex items-center bg-muted/10">
-                                                <span className="font-mono text-xs font-bold uppercase">{bgColor}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -460,3 +516,4 @@ export default function BackgroundRemover() {
     </div>
   );
 }
+
