@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -111,8 +112,8 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section - Balanced Height */}
-      <section className="relative overflow-hidden pt-24 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-24 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors z-20">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-20 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
@@ -140,141 +141,143 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Main Content - Increased PT to fix overlap */}
-      <div className="container mx-auto px-4 space-y-32 pt-24 pb-20">
-        
-        {/* Categories */}
-        <section>
-          <div className="flex items-center gap-3 mb-10">
-            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <LayoutGrid className="h-6 w-6 text-primary" />
-            </div>
-            <h2 className="text-2xl font-black font-headline">Tool Categories</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {toolCategories.map((category) => (
-              <CategoryCard key={category.title} {...category} />
-            ))}
-          </div>
-        </section>
-
-        {/* Featured Section */}
-        <section className="py-4">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-                <h2 className="text-2xl font-black font-headline">Featured Apps</h2>
-                <p className="text-muted-foreground text-sm mt-1">Most used tools by the community</p>
-            </div>
-            <Button variant="link" className="text-primary font-black text-sm group" onClick={() => router.push('/tools')}>
-              View All <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeaturedToolCard 
-                href="/image-compress"
-                icon={Shrink}
-                title="Ultra Compressor"
-                description="The world's fastest browser-side image shrinker. Supports target KB sizes."
-                buttonText="Compress Now"
-                popular={true}
-                gradient="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600"
-            />
-            <FeaturedToolCard 
-                href="/pdf-to-image"
-                icon={ImageIcon}
-                title="PDF to Image"
-                description="Extract every page of your PDF into high-definition JPEG or PNG files instantly."
-                buttonText="Convert PDF"
-                popular={false}
-                gradient="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500"
-            />
-            <FeaturedToolCard 
-                href="/create-zip"
-                icon={Archive}
-                title="ZIP Creator"
-                description="Bundle multiple files into a secure ZIP archive without uploading to any server."
-                buttonText="Archive Files"
-                popular={false}
-                gradient="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-500 hover:to-pink-600"
-            />
-          </div>
-        </section>
-        
-        {/* Why Us Section */}
-        <section className="bg-primary/5 rounded-[3rem] p-10 md:p-16 border border-primary/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-[100px] rounded-full" />
-          <div className="text-center mb-12 relative z-10">
-            <h2 className="text-2xl md:text-3xl font-black font-headline mb-4">Built for Privacy & Speed</h2>
-            <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-                We believe your files should stay yours. All our tools run directly on your hardware, not in the cloud.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
-            {[
-              { icon: Lock, title: "100% Private", desc: "No file uploads. Everything happens on your device locally." },
-              { icon: Zap, title: "Instant Power", desc: "Built with WASM and Web Workers for performance." },
-              { icon: UserCheck, title: "Pure UI", desc: "Clean, distraction-free interface optimized for productivity." },
-              { icon: Sparkles, title: "Forever Free", desc: "No subscriptions, no watermarks, no hidden costs." }
-            ].map((f, i) => (
-              <div key={i} className="text-center group">
-                <div className="mx-auto mb-4 flex items-center justify-center size-14 rounded-2xl bg-white dark:bg-slate-900 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <f.icon className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-base font-bold mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-[10px] leading-relaxed px-2">{f.desc}</p>
+      {/* Main Content Area - Clearly separated from Hero */}
+      <div className="bg-background relative z-10">
+        <div className="container mx-auto px-4 space-y-32 pt-32 pb-20">
+          
+          {/* Categories */}
+          <section id="categories">
+            <div className="flex items-center gap-3 mb-10">
+              <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <LayoutGrid className="h-6 w-6 text-primary" />
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* SEO Content Section */}
-        <section className="py-12 border-t border-border/50">
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="text-center">
-              <h2 className="text-2xl font-black font-headline mb-3 uppercase tracking-tighter">Comprehensive Online Toolkit</h2>
-              <p className="text-muted-foreground text-sm">The most powerful and private tool hub for all your daily digital needs.</p>
+              <h2 className="text-2xl font-black font-headline">Tool Categories</h2>
             </div>
-
-            <div className="grid gap-10 text-xs sm:text-sm">
-               <div className="space-y-3">
-                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-4" /> Professional PDF Management
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Our <strong>PDF Factory</strong> offers a complete suite for handling documents. Use our <strong>Image to PDF converter</strong> to combine scanned images, or the <strong>PDF to Image</strong> tool to extract high-quality PNGs. Need to organize? Use <strong>Split PDF</strong> to extract pages or <strong>Merge PDF</strong> to combine reports. We also provide secure options like <strong>Aadhaar PDF Unlocker</strong> and <strong>PDF Protector</strong> to manage your document security locally.
-                  </p>
-               </div>
-
-               <div className="space-y-3">
-                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-4" /> Advanced Image Optimization
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Stop using cloud converters that steal your data. Our <strong>Ultra Image Compressor</strong> and <strong>Smart Image Resizer</strong> run 100% on your device. We specialize in <strong>Govt Job Photo Resizing</strong>, offering one-click presets for <strong>SSC, UPSC, and IBPS</strong> forms. You can also <strong>Remove Backgrounds with AI</strong>, extract text using <strong>OCR</strong>, and create <strong>Passport Photos</strong> instantly.
-                  </p>
-               </div>
-
-               <div className="space-y-3">
-                  <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
-                    <CheckCircle className="size-4" /> Instant Smart Calculators
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    From <strong>Loan EMI Calculators</strong> to <strong>Age and Percentage calculators</strong>, our hub provides precise results without any delay. We also offer specialized <strong>Unit Converters</strong> for area, pressure, fuel consumption, and acceleration to help professionals and students alike.
-                  </p>
-               </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {toolCategories.map((category) => (
+                <CategoryCard key={category.title} {...category} />
+              ))}
             </div>
+          </section>
 
-            <div className="bg-primary/5 rounded-3xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-6 mt-10">
-                <ShieldCheck className="size-16 text-primary shrink-0" />
-                <div className="space-y-2">
-                    <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
+          {/* Featured Section */}
+          <section className="py-4">
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                  <h2 className="text-2xl font-black font-headline">Featured Apps</h2>
+                  <p className="text-muted-foreground text-sm mt-1">Most used tools by the community</p>
+              </div>
+              <Button variant="link" className="text-primary font-black text-sm group" onClick={() => router.push('/tools')}>
+                View All <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <FeaturedToolCard 
+                  href="/image-compress"
+                  icon={Shrink}
+                  title="Ultra Compressor"
+                  description="The world's fastest browser-side image shrinker. Supports target KB sizes."
+                  buttonText="Compress Now"
+                  popular={true}
+                  gradient="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600"
+              />
+              <FeaturedToolCard 
+                  href="/pdf-to-image"
+                  icon={ImageIcon}
+                  title="PDF to Image"
+                  description="Extract every page of your PDF into high-definition JPEG or PNG files instantly."
+                  buttonText="Convert PDF"
+                  popular={false}
+                  gradient="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500"
+              />
+              <FeaturedToolCard 
+                  href="/create-zip"
+                  icon={Archive}
+                  title="ZIP Creator"
+                  description="Bundle multiple files into a secure ZIP archive without uploading to any server."
+                  buttonText="Archive Files"
+                  popular={false}
+                  gradient="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-500 hover:to-pink-600"
+              />
+            </div>
+          </section>
+          
+          {/* Why Us Section */}
+          <section className="bg-primary/5 rounded-[3rem] p-10 md:p-16 border border-primary/10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-[100px] rounded-full" />
+            <div className="text-center mb-12 relative z-10">
+              <h2 className="text-2xl md:text-3xl font-black font-headline mb-4">Built for Privacy & Speed</h2>
+              <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+                  We believe your files should stay yours. All our tools run directly on your hardware, not in the cloud.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+              {[
+                { icon: Lock, title: "100% Private", desc: "No file uploads. Everything happens on your device locally." },
+                { icon: Zap, title: "Instant Power", desc: "Built with WASM and Web Workers for performance." },
+                { icon: UserCheck, title: "Pure UI", desc: "Clean, distraction-free interface optimized for productivity." },
+                { icon: Sparkles, title: "Forever Free", desc: "No subscriptions, no watermarks, no hidden costs." }
+              ].map((f, i) => (
+                <div key={i} className="text-center group">
+                  <div className="mx-auto mb-4 flex items-center justify-center size-14 rounded-2xl bg-white dark:bg-slate-900 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <f.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold mb-2">{f.title}</h3>
+                  <p className="text-muted-foreground text-[10px] leading-relaxed px-2">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SEO Content Section */}
+          <section className="py-12 border-t border-border/50">
+            <div className="max-w-4xl mx-auto space-y-12">
+              <div className="text-center">
+                <h2 className="text-2xl font-black font-headline mb-3 uppercase tracking-tighter">Comprehensive Online Toolkit</h2>
+                <p className="text-muted-foreground text-sm">The most powerful and private tool hub for all your daily digital needs.</p>
+              </div>
+
+              <div className="grid gap-10 text-xs sm:text-sm">
+                <div className="space-y-3">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                      <CheckCircle className="size-4" /> Professional PDF Management
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Our <strong>PDF Factory</strong> offers a complete suite for handling documents. Use our <strong>Image to PDF converter</strong> to combine scanned images, or the <strong>PDF to Image</strong> tool to extract high-quality PNGs. Need to organize? Use <strong>Split PDF</strong> to extract pages or <strong>Merge PDF</strong> to combine reports. We also provide secure options like <strong>Aadhaar PDF Unlocker</strong> and <strong>PDF Protector</strong> to manage your document security locally.
                     </p>
                 </div>
+
+                <div className="space-y-3">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                      <CheckCircle className="size-4" /> Advanced Image Optimization
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Stop using cloud converters that steal your data. Our <strong>Ultra Image Compressor</strong> and <strong>Smart Image Resizer</strong> run 100% on your device. We specialize in <strong>Govt Job Photo Resizing</strong>, offering one-click presets for <strong>SSC, UPSC, and IBPS</strong> forms. You can also <strong>Remove Backgrounds with AI</strong>, extract text using <strong>OCR</strong>, and create <strong>Passport Photos</strong> instantly.
+                    </p>
+                </div>
+
+                <div className="space-y-3">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
+                      <CheckCircle className="size-4" /> Instant Smart Calculators
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      From <strong>Loan EMI Calculators</strong> to <strong>Age and Percentage calculators</strong>, our hub provides precise results without any delay. We also offer specialized <strong>Unit Converters</strong> for area, pressure, fuel consumption, and acceleration to help professionals and students alike.
+                    </p>
+                </div>
+              </div>
+
+              <div className="bg-primary/5 rounded-3xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-6 mt-10">
+                  <ShieldCheck className="size-16 text-primary shrink-0" />
+                  <div className="space-y-2">
+                      <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                          Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
+                      </p>
+                  </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );
