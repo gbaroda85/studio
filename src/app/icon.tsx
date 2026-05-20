@@ -15,28 +15,28 @@ export const contentType = 'image/png'
 export default function Icon() {
   return new ImageResponse(
     (
-      // ImageResponse JSX element
+      // ImageResponse JSX element to match GR7 logo
       <div
         style={{
-          fontSize: 22,
-          background: '#149954',
+          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'white',
-          borderRadius: '6px',
-          fontWeight: 700,
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          fontWeight: 900,
+          fontSize: '18px',
+          fontFamily: 'sans-serif',
         }}
       >
-        G
+        <span style={{ color: '#006071' }}>GR</span>
+        <span style={{ color: '#f15a4b' }}>7</span>
       </div>
     ),
     // ImageResponse options
     {
-      // For convenience, we can re-use the exported icons size metadata
-      // config to also set the ImageResponse's width and height.
       ...size,
     }
   )
