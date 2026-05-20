@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /api/
-
 Sitemap: https://pi7csctools.vercel.app/sitemap.xml

@@ -111,19 +111,19 @@ export default function Page() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section - Optimized height and spacing */}
-      <section className="relative overflow-hidden pt-20 pb-28 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors">
+      {/* Hero Section - Balanced Height */}
+      <section className="relative overflow-hidden pt-24 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-20 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="container mx-auto px-4 relative z-10 text-center">
-            <Badge variant="outline" className="mb-6 py-1.5 px-4 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
+            <Badge variant="outline" className="mb-8 py-1.5 px-4 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
                 NEXT-GEN UTILITY SUITE
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-black font-headline mb-6 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-4xl md:text-6xl font-black font-headline mb-8 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 Simplify Your <span className="text-gradient-primary">Digital Workflow</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 All tools to convert, compress, and calculate. 100% private, browser-based, and lightning fast.
             </p>
 
@@ -140,13 +140,15 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Main Content - Fixed overlap issue */}
-      <div className="container mx-auto px-4 space-y-24 pt-20 pb-20">
+      {/* Main Content - Increased PT to fix overlap */}
+      <div className="container mx-auto px-4 space-y-32 pt-24 pb-20">
         
         {/* Categories */}
         <section>
-          <div className="flex items-center gap-3 mb-8">
-            <LayoutGrid className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-3 mb-10">
+            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <LayoutGrid className="h-6 w-6 text-primary" />
+            </div>
             <h2 className="text-2xl font-black font-headline">Tool Categories</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -158,7 +160,7 @@ export default function Page() {
 
         {/* Featured Section */}
         <section className="py-4">
-          <div className="flex justify-between items-end mb-8">
+          <div className="flex justify-between items-end mb-10">
             <div>
                 <h2 className="text-2xl font-black font-headline">Featured Apps</h2>
                 <p className="text-muted-foreground text-sm mt-1">Most used tools by the community</p>
@@ -199,9 +201,9 @@ export default function Page() {
         </section>
         
         {/* Why Us Section */}
-        <section className="bg-primary/5 rounded-[2rem] p-8 md:p-12 border border-primary/10 relative overflow-hidden">
+        <section className="bg-primary/5 rounded-[3rem] p-10 md:p-16 border border-primary/10 relative overflow-hidden">
           <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-[100px] rounded-full" />
-          <div className="text-center mb-10 relative z-10">
+          <div className="text-center mb-12 relative z-10">
             <h2 className="text-2xl md:text-3xl font-black font-headline mb-4">Built for Privacy & Speed</h2>
             <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
                 We believe your files should stay yours. All our tools run directly on your hardware, not in the cloud.
@@ -233,7 +235,7 @@ export default function Page() {
               <p className="text-muted-foreground text-sm">The most powerful and private tool hub for all your daily digital needs.</p>
             </div>
 
-            <div className="grid gap-8 text-xs sm:text-sm">
+            <div className="grid gap-10 text-xs sm:text-sm">
                <div className="space-y-3">
                   <h3 className="text-lg font-bold flex items-center gap-2 text-primary">
                     <CheckCircle className="size-4" /> Professional PDF Management
@@ -262,11 +264,11 @@ export default function Page() {
                </div>
             </div>
 
-            <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10 flex flex-col md:flex-row items-center gap-4">
-                <ShieldCheck className="size-12 text-primary shrink-0" />
-                <div className="space-y-1">
-                    <h4 className="text-base font-black uppercase tracking-tight">Privacy First Architecture</h4>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
+            <div className="bg-primary/5 rounded-3xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-6 mt-10">
+                <ShieldCheck className="size-16 text-primary shrink-0" />
+                <div className="space-y-2">
+                    <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
                     </p>
                 </div>
