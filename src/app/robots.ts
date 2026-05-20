@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://pi7csctools.vercel.app/sitemap.xml',
+    sitemap: 'https://gr7imagepdf.com/sitemap.xml',
   }
 }

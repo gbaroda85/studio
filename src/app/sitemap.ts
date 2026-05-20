@@ -2,7 +2,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://pi7csctools.vercel.app';
+  const baseUrl = 'https://gr7imagepdf.com';
   
   const tools = [
     '',

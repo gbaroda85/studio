@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: '%s | GRs Multi Tools',
   },
   description: 'Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security. Professional suite including Image to PDF, PDF to Image, Image to Text OCR, HTML to PDF, Passport Photo Maker, SSC/UPSC Photo Resizer, Aadhaar PDF Unlocker, and financial calculators. 100% private and secure.',
-  metadataBase: new URL('https://pi7csctools.vercel.app/'),
+  metadataBase: new URL('https://gr7imagepdf.com/'),
   alternates: {
     canonical: '/',
   },
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://pi7csctools.vercel.app/',
+    url: 'https://gr7imagepdf.com/',
     siteName: 'GRs Multi Tools Kits Hub',
     title: 'GRs Multi Tools Kits Hub - Fast, Private & Secure Online Tools',
     description: 'Compress and convert images and PDFs with ease. Pro tools for SSC/UPSC forms, Aadhaar unlocking, Image to PDF, PDF to Image, and AI background removal. No file uploads - everything stays in your browser.',
@@ -128,7 +128,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "GRs Multi Tools Kits Hub",
-              "url": "https://pi7csctools.vercel.app/",
+              "url": "https://gr7imagepdf.com/",
               "description": "Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security.",
               "applicationCategory": "UtilitiesApplication",
               "operatingSystem": "Any",
