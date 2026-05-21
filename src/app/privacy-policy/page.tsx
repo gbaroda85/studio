@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
             <CardContent className="p-6 text-sm font-medium text-muted-foreground leading-relaxed">
               We may use minimal cookies to save your language preferences. Third-party advertising partners (like Google AdSense) may use cookies to serve relevant ads based on your site visits.
             </CardContent>
-          </div>
+          </Card>
         </div>
 
         <section className="p-8 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed">
