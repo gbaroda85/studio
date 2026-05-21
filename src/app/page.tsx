@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -112,20 +111,20 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-background">
-      {/* Hero Section - Increased Height for Premium Look */}
-      <section className="relative overflow-hidden pt-32 pb-44 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors z-20">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-20 pointer-events-none" />
+      {/* Hero Section - Prominent & Premium */}
+      <section className="relative overflow-hidden pt-24 pb-32 bg-white dark:bg-slate-950 text-foreground border-b border-border/50 transition-colors z-20">
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 dark:bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="container mx-auto px-4 relative z-10 text-center">
             <Badge variant="outline" className="mb-10 py-2 px-6 border-primary/50 text-primary font-black tracking-widest bg-primary/5 animate-fade-in-up">
-                NEXT-GEN UTILITY SUITE
+                GR7 IMAGE PDF TOOLS
             </Badge>
             <h1 className="text-5xl md:text-7xl font-black font-headline mb-10 tracking-tighter animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                Simplify Your <span className="text-gradient-primary">Digital Workflow</span>
+                Your Privacy-First <span className="text-gradient-primary">Utility Hub</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-14 font-medium animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                All tools to convert, compress, and calculate. 100% private, browser-based, and lightning fast.
+                Convert, compress, and calculate with 100% security. No files leave your device. Fast, local, and free forever.
             </p>
 
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
@@ -141,9 +140,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Main Content Area - Significant padding-top to prevent overlap with larger hero */}
+      {/* Main Content Area - Significant padding-top to prevent overlap */}
       <div className="bg-background relative z-10">
-        <div className="container mx-auto px-4 space-y-32 pt-40 pb-20">
+        <div className="container mx-auto px-4 space-y-32 pt-32 pb-20">
           
           {/* Categories */}
           <section id="categories">
@@ -165,7 +164,7 @@ export default function Page() {
             <div className="flex justify-between items-end mb-10">
               <div>
                   <h2 className="text-2xl font-black font-headline">Featured Apps</h2>
-                  <p className="text-muted-foreground text-sm mt-1">Most used tools by the community</p>
+                  <p className="text-muted-foreground text-sm mt-1">Most used tools for SSC, UPSC & IBPS</p>
               </div>
               <Button variant="link" className="text-primary font-black text-sm group" onClick={() => router.push('/tools')}>
                 View All <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -191,13 +190,13 @@ export default function Page() {
                   gradient="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500"
               />
               <FeaturedToolCard 
-                  href="/create-zip"
-                  icon={Archive}
-                  title="ZIP Creator"
-                  description="Bundle multiple files into a secure ZIP archive without uploading to any server."
-                  buttonText="Archive Files"
+                  href="/unlock-pdf"
+                  icon={Lock}
+                  title="PDF Unlocker"
+                  description="Unlock Aadhaar and password-protected PDF files directly in your browser."
+                  buttonText="Unlock Now"
                   popular={false}
-                  gradient="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-500 hover:to-pink-600"
+                  gradient="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600"
               />
             </div>
           </section>
@@ -271,7 +270,7 @@ export default function Page() {
                   <div className="space-y-2">
                       <h4 className="text-lg font-black uppercase tracking-tight">Privacy First Architecture</h4>
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                          Unlike other tools, GRs HUB does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
+                          Unlike other tools, GR7 IMAGE PDF does not upload your files to any server. All conversions, compressions, and AI processes happen inside your browser using your device's power. Your privacy is not just a policy; it's how our code is built.
                       </p>
                   </div>
               </div>
