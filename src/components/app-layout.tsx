@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -38,24 +39,15 @@ import {
   PenLine,
   ShieldCheck,
   BookOpen,
+  ChevronDown,
+  Menu,
+  X,
+  Languages,
+  Zap,
 } from 'lucide-react';
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
-} from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
-import { AboutDialog } from './about-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -65,101 +57,105 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useLanguage } from '@/contexts/language-context';
+import { ScrollArea } from './ui/scroll-area';
 
-function AppSidebar() {
-  const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
+// Tool categories for the mega menu
+const CATEGORIES = [
+  {
+    name: "image_tools",
+    icon: ImageIcon,
+    color: "text-blue-500",
+    tools: [
+      { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
+      { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
+      { href: '/crop-image', label: 'crop_image_label', icon: Crop },
+      { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
+      { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
+      { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
+      { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
+      { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
+      { href: '/passport-photo', label: 'Passport Photo', icon: Zap },
+    ]
+  },
+  {
+    name: "pdf_tools",
+    icon: FileText,
+    color: "text-rose-500",
+    tools: [
+      { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
+      { href: '/split-pdf', label: 'split_pdf_label', icon: Scissors },
+      { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
+      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
+      { href: '/pdf-to-image', label: 'pdf_to_image_label', icon: ImageIcon },
+      { href: '/html-to-pdf', label: 'html_to_pdf_label', icon: FileCode },
+      { href: '/text-to-pdf', label: 'text_to_pdf_label', icon: FileText },
+      { href: '/add-watermark', label: 'add_watermark_label', icon: Copyright },
+      { href: '/add-page-numbers', label: 'add_page_numbers_label', icon: NotebookPen },
+    ]
+  },
+  {
+    name: "calculator_pro",
+    icon: Calculator,
+    color: "text-emerald-500",
+    tools: [
+      { href: '/loan-calculator', label: 'loan_emi_calculator_label', icon: Landmark },
+      { href: '/age-calculator', label: 'age_calculator_label', icon: Cake },
+      { href: '/percentage-calculator', label: 'percentage_calculator_label', icon: Percent },
+      { href: '/fuel-cost-calculator', label: 'fuel_cost_calculator_label', icon: Route },
+      { href: '/interest-calculator', label: 'interest_calculator_label', icon: Coins },
+      { href: '/sales-tax-calculator', label: 'sales_tax_calculator_label', icon: Receipt },
+    ]
+  },
+  {
+    name: "file_tools",
+    icon: Archive,
+    color: "text-violet-500",
+    tools: [
+      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
+      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
+    ]
+  }
+];
+
+function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
-
-  const menuItems = [
-    {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-blue-500'},
-    {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-indigo-500'},
-    {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-cyan-500'},
-    {href: '/remove-background', labelKey: 'remove_background_label', icon: Eraser, color: 'text-rose-500'},
-    {href: '/remove-signature', labelKey: 'remove_signature_label', icon: PenLine, color: 'text-orange-500'},
-    {href: '/enhance-photo', labelKey: 'enhance_photo_label', icon: Wand2, color: 'text-violet-500'},
-    {href: '/image-to-text', labelKey: 'image_to_text_label', icon: FileScan, color: 'text-teal-500'},
-    {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-amber-500'},
-    {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
-    {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
-    {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-slate-500'},
-    {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
-    {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
-    {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
-    {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
-    {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-600'},
-    {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-yellow-600'},
-    {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-emerald-500'},
-    {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-green-500'},
-    {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-600'},
-    {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-600'},
-    {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-600'},
-    {href: '/unzip-file', labelKey: 'unzip_file_label', icon: ArchiveRestore, color: 'text-stone-500'},
-    {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-blue-600'},
-    {href: '/loan-calculator', labelKey: 'loan_emi_calculator_label', icon: Landmark, color: 'text-indigo-600'},
-    {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-rose-500'},
-    {href: '/percentage-calculator', labelKey: 'percentage_calculator_label', icon: Percent, color: 'text-blue-500'},
-    {href: '/fuel-cost-calculator', labelKey: 'fuel_cost_calculator_label', icon: Route, color: 'text-amber-600'},
-    {href: '/interest-calculator', labelKey: 'interest_calculator_label', icon: Coins, color: 'text-yellow-600'},
-    {href: '/sales-tax-calculator', labelKey: 'sales_tax_calculator_label', icon: Receipt, color: 'text-emerald-600'},
-  ];
+  const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r border-border/50 bg-white dark:bg-sidebar transition-colors">
-      <SidebarHeader className="h-20 justify-center border-0 px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20">
-            <LayoutGrid className="h-full w-full text-white" />
-          </div>
-          <div className="flex flex-col">
-              <span className="text-base font-black font-headline text-foreground leading-none tracking-tighter">GR7 HUB</span>
-              <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
-          </div>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent className="px-4 pb-10">
-        <SidebarMenu className="gap-1.5">
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                size="lg"
-                isActive={pathname === item.href}
-                tooltip={t(item.labelKey)}
-                asChild
-                className="h-12 rounded-xl border border-transparent hover:border-border/50 hover:bg-muted transition-all data-[active=true]:bg-primary/10 data-[active=true]:border-primary/30"
-              >
-                <Link href={item.href} onClick={() => setOpenMobile(false)} className="flex items-center gap-4">
-                  <item.icon className={cn("size-5 shrink-0 transition-transform group-hover:scale-110", item.color)} />
-                  <span className="text-[13px] font-bold text-sidebar-foreground group-data-[collapsible=icon]:hidden leading-tight truncate">{t(item.labelKey)}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-          
-          <DropdownMenuSeparator className="my-4 opacity-50" />
-          <SidebarMenuItem>
-             <SidebarMenuButton asChild size="lg" className="rounded-xl hover:bg-muted" tooltip={t('privacy_policy')}>
-                <Link href="/privacy-policy" onClick={() => setOpenMobile(false)}>
-                   <ShieldCheck className="size-5 text-muted-foreground" />
-                   <span className="text-[13px] font-bold">{t('privacy_policy')}</span>
-                </Link>
-             </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-             <SidebarMenuButton asChild size="lg" className="rounded-xl hover:bg-muted" tooltip={t('terms_of_service')}>
-                <Link href="/terms-of-service" onClick={() => setOpenMobile(false)}>
-                   <BookOpen className="size-5 text-muted-foreground" />
-                   <span className="text-[13px] font-bold">{t('terms_of_service')}</span>
-                </Link>
-             </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter className="p-4 bg-muted/20">
-        <AboutDialog />
-      </SidebarFooter>
-    </Sidebar>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-10 px-4 font-bold text-sm flex items-center gap-2 hover:bg-primary/5 transition-all">
+          <category.icon className={cn("size-4", category.color)} />
+          {t(category.name)}
+          <ChevronDown className="size-3 opacity-50" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1">
+        <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
+          {t(category.name)}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {category.tools.map((tool) => (
+          <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
+            <Link href={tool.href} className={cn(
+              "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors",
+              pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
+            )}>
+              <tool.icon className={cn("size-4", category.color)} />
+              <span className="font-bold text-xs">{t(tool.label)}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -185,29 +181,97 @@ function SettingsMenu() {
   );
 }
 
-function AppHeader() {
+function MobileNav() {
+  const { t } = useLanguage();
+  const [open, setOpen] = useState(false);
+
   return (
-    <header className="h-16 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm px-4 md:px-8 z-50 shrink-0">
-      <div className="flex h-full items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-            <SidebarTrigger className="h-10 w-10 rounded-xl hover:bg-primary/10" />
-            <div className="h-6 w-px bg-border hidden sm:block" />
-            <Link href="/" className="hidden sm:flex items-center gap-2 group">
-                <h1 className="text-lg font-black tracking-tighter transition-colors group-hover:text-primary">
-                    <span className="text-foreground">GR7 </span>
-                    <span className="text-gradient-primary">Tools</span>
-                </h1>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl">
+          <Menu className="size-6" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[300px] p-0 border-r-2">
+        <SheetHeader className="p-6 border-b text-left">
+          <SheetTitle className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
+                <LayoutGrid className="size-full text-white" />
+            </div>
+            <span className="text-xl font-black font-headline tracking-tighter">GR7 HUB</span>
+          </SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-80px)] p-6">
+          <div className="space-y-8 pb-20">
+            {CATEGORIES.map((cat) => (
+              <div key={cat.name} className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <cat.icon className="size-3" /> {t(cat.name)}
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {cat.tools.map((tool) => (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm transition-all border border-transparent hover:border-border"
+                    >
+                      <tool.icon className={cn("size-4", cat.color)} />
+                      {t(tool.label)}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            <div className="pt-4 border-t space-y-2">
+               <Link href="/privacy-policy" onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm">
+                  <ShieldCheck className="size-4 text-muted-foreground" /> {t('privacy_policy')}
+               </Link>
+               <Link href="/terms-of-service" onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm">
+                  <BookOpen className="size-4 text-muted-foreground" /> {t('terms_of_service')}
+               </Link>
+            </div>
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function AppHeader() {
+  const { t } = useLanguage();
+  return (
+    <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0">
+      <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-8">
+        <div className="flex items-center gap-4 lg:gap-8">
+            <MobileNav />
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform">
+                <LayoutGrid className="h-full w-full text-white" />
+              </div>
+              <div className="flex flex-col">
+                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter">GR7 TOOLS</span>
+                  <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
+              </div>
             </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-2">
+                {CATEGORIES.map((cat) => (
+                  <NavDropdown key={cat.name} category={cat} />
+                ))}
+            </nav>
         </div>
 
         <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" className="hidden lg:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
+            <Button asChild variant="ghost" className="hidden xl:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
                 <a href="mailto:gaurav.thearmy@yahoo.com">
                     <Mail className="h-4 w-4 text-primary" />
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Support</span>
                 </a>
             </Button>
-            <div className="h-6 w-px bg-border mx-2" />
+            <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
             <SettingsMenu />
             <ThemeToggle />
         </div>
@@ -219,7 +283,7 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 px-4 md:px-8">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 px-4 md:px-8">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="md:col-span-2 space-y-6">
           <Link href="/" className="flex items-center gap-2">
@@ -231,6 +295,14 @@ export function AppFooter() {
           <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
             A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
           </p>
+          <div className="flex items-center gap-4 pt-4">
+             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                <ShieldCheck className="size-3" /> 100% Client-Side
+             </div>
+             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
+                <Zap className="size-3" /> No Server Storage
+             </div>
+          </div>
         </div>
         
         <div>
@@ -269,23 +341,20 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <SidebarProvider defaultOpen={false}>
-      <div className="flex h-screen w-full overflow-hidden bg-background">
-        <AppSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden relative">
-          <AppHeader />
-          <SidebarInset className="bg-transparent relative overflow-y-auto flex-1 outline-none">
-             <div className="absolute top-0 right-0 size-[500px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
-             <div className="absolute bottom-0 left-0 size-[500px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
-             <div className="flex flex-col min-h-full">
-                <div className="flex-1 pb-20">
-                  {children}
-                </div>
-                <AppFooter />
-             </div>
-          </SidebarInset>
-        </div>
-      </div>
-    </SidebarProvider>
+    <div className="flex flex-col min-h-screen bg-background">
+      <AppHeader />
+      <main className="flex-1 relative flex flex-col items-center">
+         {/* Background decorative blobs */}
+         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
+         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+         
+         <div className="w-full flex-1 flex flex-col">
+            <div className="flex-1 pb-20">
+              {children}
+            </div>
+            <AppFooter />
+         </div>
+      </main>
+    </div>
   );
 }
