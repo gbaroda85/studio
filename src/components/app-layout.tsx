@@ -36,7 +36,7 @@ import {
   FileScan,
   FileText,
   PenLine,
-  FileShield,
+  ShieldCheck,
   BookOpen,
 } from 'lucide-react';
 
@@ -109,7 +109,7 @@ function AppSidebar() {
     <Sidebar className="border-r border-border/50 bg-white dark:bg-sidebar transition-colors">
       <SidebarHeader className="h-20 justify-center border-0 px-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 animate-pulse-subtle">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20">
             <LayoutGrid className="h-full w-full text-white" />
           </div>
           <div className="flex flex-col">
@@ -141,7 +141,7 @@ function AppSidebar() {
           <SidebarMenuItem>
              <SidebarMenuButton asChild size="lg" className="rounded-xl hover:bg-muted" tooltip={t('privacy_policy')}>
                 <Link href="/privacy-policy" onClick={() => setOpenMobile(false)}>
-                   <FileShield className="size-5 text-muted-foreground" />
+                   <ShieldCheck className="size-5 text-muted-foreground" />
                    <span className="text-[13px] font-bold">{t('privacy_policy')}</span>
                 </Link>
              </SidebarMenuButton>

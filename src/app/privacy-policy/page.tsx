@@ -1,4 +1,4 @@
-import { FileShield, ShieldCheck, Database, Lock } from 'lucide-react';
+import { ShieldCheck, Database, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function PrivacyPolicyPage() {
@@ -6,7 +6,7 @@ export default function PrivacyPolicyPage() {
     <main className="container mx-auto p-6 md:p-12 max-w-4xl animate-in fade-in duration-500">
       <div className="mb-12 text-center space-y-4">
         <div className="mx-auto size-20 rounded-[2rem] bg-primary/10 flex items-center justify-center shadow-xl mb-6">
-          <FileShield className="size-10 text-primary" />
+          <ShieldCheck className="size-10 text-primary" />
         </div>
         <h1 className="text-4xl md:text-6xl font-black font-headline tracking-tighter uppercase">Privacy Policy</h1>
         <p className="text-xl text-muted-foreground font-semibold">Your Data. Your Browser. Your Privacy.</p>
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
             <CardContent className="p-6 text-sm font-medium text-muted-foreground leading-relaxed">
               We may use minimal cookies to save your language preferences. Third-party advertising partners (like Google AdSense) may use cookies to serve relevant ads based on your site visits.
             </CardContent>
-          </Card>
+          </div>
         </div>
 
         <section className="p-8 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed">
