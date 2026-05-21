@@ -70,7 +70,7 @@ export default function Page() {
   return (
     <main className="flex-1 bg-transparent">
       {/* Ultra-Modern Hero Section */}
-      <section className="relative pt-24 pb-40 overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5">
+      <section className="relative pt-20 pb-32 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5">
         {/* Animated Background Blobs */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -78,17 +78,17 @@ export default function Page() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.25em] mb-10 animate-fade-in-up shadow-sm">
+          <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.25em] mb-8 animate-fade-in-up shadow-sm">
             <Sparkles className="size-4" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-5xl md:text-8xl font-black mb-10 tracking-tighter animate-fade-in-up leading-[0.95]">
-            Supercharge Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Digital Assets</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-10 tracking-tighter animate-fade-in-up leading-[0.95]">
+            Professional Tools for <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Image & PDFs</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-14 font-semibold leading-relaxed opacity-90 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Professional-grade image optimization and PDF tools. 
+          <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-12 font-semibold leading-relaxed opacity-90 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Fast, secure, and private browser-based online tools. 
             Local processing, 100% private, zero server footprint.
           </p>
 
@@ -104,18 +104,18 @@ export default function Page() {
           </div>
 
           {/* Search Bridge - Eliminates gap to next section */}
-          <div className="max-w-3xl mx-auto relative group translate-y-16 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="max-w-3xl mx-auto relative group translate-y-24 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <div className="absolute -inset-2 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-8 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="search"
                 placeholder="What do you want to fix today? (e.g. 'unlock aadhaar', 'resize photo')"
-                className="w-full pl-20 pr-8 h-24 text-xl rounded-[2.5rem] bg-white dark:bg-slate-800 border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:font-semibold"
+                className="w-full pl-20 pr-8 h-20 text-lg rounded-[2.5rem] bg-white dark:bg-slate-800 border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:font-semibold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button type="submit" className="absolute right-5 top-1/2 -translate-y-1/2 h-14 px-8 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-xl">
+              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 px-6 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-transform shadow-xl">
                 Quick Find
               </button>
             </form>
@@ -124,7 +124,7 @@ export default function Page() {
       </section>
 
       {/* Main Tool Grid Section */}
-      <section className="pt-32 pb-32">
+      <section className="pt-40 pb-32 bg-background">
         <div className="container mx-auto px-4">
           {/* Image Tools */}
           <div className="mb-24">
@@ -254,26 +254,26 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Final Premium CTA Section */}
-      <section className="py-40 relative overflow-hidden">
+      {/* Final Premium CTA Section - Light Styled for Light Mode */}
+      <section className="py-40 relative overflow-hidden bg-transparent">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-slate-900 dark:bg-slate-800 rounded-[5rem] p-16 md:p-32 text-center text-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 size-[800px] bg-primary/25 blur-[180px] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
-            <div className="absolute bottom-0 left-0 size-[600px] bg-accent/20 blur-[180px] rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[5rem] p-16 md:p-32 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 size-[800px] bg-primary/10 blur-[180px] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+            <div className="absolute bottom-0 left-0 size-[600px] bg-accent/5 blur-[180px] rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
             
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-8xl font-black mb-10 tracking-tighter leading-tight">
+              <h2 className="text-4xl md:text-8xl font-black mb-10 tracking-tighter leading-tight text-slate-900 dark:text-white">
                 Ready for the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Next Generation?</span>
               </h2>
-              <p className="text-slate-400 text-xl md:text-2xl mb-16 max-w-3xl mx-auto font-semibold leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 text-xl md:text-2xl mb-16 max-w-3xl mx-auto font-semibold leading-relaxed">
                 Join thousands of professionals using GR7 for secure, high-speed digital workflows. 100% Free, Forever.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-                <Button asChild size="lg" className="h-20 px-14 rounded-3xl text-xl font-black bg-white text-slate-900 hover:bg-slate-100 shadow-3xl transition-all hover:scale-105 active:scale-95">
+                <Button asChild size="lg" className="h-20 px-14 rounded-3xl text-xl font-black bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                   <Link href="/tools">Get Started Now</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-20 px-14 rounded-3xl text-xl font-black border-white/30 text-white hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md">
+                <Button asChild variant="outline" size="lg" className="h-20 px-14 rounded-3xl text-xl font-black border-slate-200 dark:border-white/30 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md shadow-lg">
                   <a href="mailto:gaurav.thearmy@yahoo.com">Contact Support</a>
                 </Button>
               </div>
