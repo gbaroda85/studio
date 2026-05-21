@@ -134,11 +134,11 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="h-10 px-3 font-bold text-sm flex items-center gap-2 hover:bg-primary/10 text-slate-700 dark:text-slate-200 data-[state=open]:bg-primary/10 data-[state=open]:text-primary transition-all focus:ring-0"
+          className="h-10 px-4 font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus:ring-0 group"
         >
-          <category.icon className={cn("size-4", category.color)} />
+          <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
           <span className="hidden xl:inline">{t(category.name)}</span>
-          <ChevronDown className="size-3 opacity-50" />
+          <ChevronDown className="size-3 opacity-50 group-hover:rotate-180 transition-transform" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900">
@@ -350,7 +350,6 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     <div className="flex flex-col min-h-screen bg-background">
       <AppHeader />
       <main className="flex-1 relative flex flex-col items-center">
-         {/* Background decorative blobs */}
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
