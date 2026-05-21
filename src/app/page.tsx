@@ -138,8 +138,8 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - ULTRA WIDE */}
-      <section className="relative w-full max-w-[1700px] pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 mx-auto">
+      {/* Hero Section - 2000px WIDTH */}
+      <section className="relative w-full max-w-[2000px] pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -185,9 +185,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Tools Section - ULTRA WIDE */}
+      {/* Tools Section - 2000px WIDTH */}
       <section className="pt-16 pb-20 bg-background w-full flex justify-center">
-        <div className="w-full max-w-[1700px] px-8 md:px-16">
+        <div className="w-full max-w-[2000px] px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -226,6 +226,7 @@ export default function Page() {
                         <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
                         <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
                         <ToolCard icon={PenLine} title="Remove Signature" description="Clean signatures from documents using high-precision local AI." href="/remove-signature" colorClass="bg-orange-500" />
+                        <ToolCard icon={FileDigit} title="Image to PDF" description="Combine multiple images into one professional PDF." href="/image-to-pdf" colorClass="bg-red-500" />
                     </div>
                 </div>
 
@@ -241,11 +242,11 @@ export default function Page() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        <ToolCard icon={FileDigit} title="Image to PDF" description="Combine multiple images into one professional PDF." href="/image-to-pdf" colorClass="bg-red-500" />
                         <ToolCard icon={FileArchive} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
+                        <ToolCard icon={ImageIcon} title="PDF to Image" description="Convert every page of a PDF into high-quality images." href="/pdf-to-image" colorClass="bg-orange-500" />
                         <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
                         <ToolCard icon={Merge} title="Bulk Merge" description="Combine multiple documents into one secure file." href="/merge-pdf" colorClass="bg-emerald-600" />
-                        <ToolCard icon={ImageIcon} title="PDF to Image" description="Convert every page of a PDF into high-quality images." href="/pdf-to-image" colorClass="bg-orange-500" />
+                        <ToolCard icon={Unlock} title="Unlock PDF" description="Remove passwords from Aadhaar or Bank PDFs." href="/unlock-pdf" colorClass="bg-teal-500" />
                     </div>
                 </div>
                 
@@ -259,8 +260,8 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Features Section - ULTRA WIDE */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full max-w-[1700px] flex justify-center mx-auto mb-20">
+      {/* Features Section - 2000px WIDTH */}
+      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full max-w-[2000px] flex justify-center mx-auto mb-20">
         <div className="w-full px-8 md:px-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 uppercase tracking-tighter">The GR7 Standard</h2>

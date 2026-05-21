@@ -233,7 +233,7 @@ function AppHeader() {
   const { t } = useLanguage();
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
-      <div className="w-full max-w-[1700px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
+      <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         {/* Left Side: Mobile Menu + Logo */}
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
@@ -279,7 +279,7 @@ export function AppFooter() {
   const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
-      <div className="w-full max-w-[1700px] px-4 md:px-12 lg:px-16">
+      <div className="w-full max-w-[2000px] px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">

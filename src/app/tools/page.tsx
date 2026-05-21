@@ -347,7 +347,7 @@ function ToolsPageContent() {
 
   return (
     <main className="w-full px-4 md:px-12 lg:px-16 py-8 flex flex-col items-center">
-      <div className="w-full max-w-[1700px]">
+      <div className="w-full max-w-[2000px]">
         <div className="mb-12 text-center">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight font-headline uppercase">All Tools Hub</h1>
             <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto font-medium">Your one-stop-shop for file conversions, calculations, and more. Local processing for maximum speed.</p>
