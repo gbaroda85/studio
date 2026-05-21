@@ -50,7 +50,7 @@ import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Global tool list - PASSPORT MAKER REMOVED
+// Global tool list
 const ALL_TOOLS = [
   // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
@@ -225,7 +225,7 @@ export default function Page() {
                         <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
                         <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
                         <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
-                        <ToolCard icon={FileScan} title="Image to Text" description="Extract text from images using high-precision local OCR." href="/image-to-text" colorClass="bg-teal-600" />
+                        <ToolCard icon={PenLine} title="Remove Signature" description="Clean signatures from documents using high-precision local AI." href="/remove-signature" colorClass="bg-orange-500" />
                     </div>
                 </div>
 
@@ -241,11 +241,11 @@ export default function Page() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <ToolCard icon={FileDigit} title="Image to PDF" description="Combine multiple images into one professional PDF." href="/image-to-pdf" colorClass="bg-red-500" />
                         <ToolCard icon={FileArchive} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
                         <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
                         <ToolCard icon={Merge} title="Bulk Merge" description="Combine multiple documents into one secure file." href="/merge-pdf" colorClass="bg-emerald-600" />
-                        <ToolCard icon={Unlock} title="Aadhaar Unlock" description="Instantly remove passwords from Aadhaar & Bank bills." href="/unlock-pdf" colorClass="bg-teal-500" />
-                        <ToolCard icon={FileCode} title="HTML to PDF" description="Convert raw web code into clean professional PDF." href="/html-to-pdf" colorClass="bg-orange-600" />
+                        <ToolCard icon={ImageIcon} title="PDF to Image" description="Convert every page of a PDF into high-quality images." href="/pdf-to-image" colorClass="bg-orange-500" />
                     </div>
                 </div>
                 

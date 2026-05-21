@@ -64,7 +64,7 @@ import {
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
 
-// Tool categories for the mega menu - PASSPORT PHOTO REMOVED
+// Tool categories for the mega menu
 const CATEGORIES = [
   {
     name: "image_tools",
@@ -130,7 +130,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
+          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
         >
           <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
           <span className="hidden xl:inline">{t(category.name)}</span>
@@ -234,6 +234,7 @@ function AppHeader() {
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full max-w-[1700px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
+        {/* Left Side: Mobile Menu + Logo */}
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
@@ -247,6 +248,7 @@ function AppHeader() {
             </Link>
         </div>
 
+        {/* Right Side: Tools Nav + Settings + Theme Toggle */}
         <div className="flex items-center gap-1 sm:gap-3">
             <nav className="hidden lg:flex items-center gap-1 mr-2">
                 {CATEGORIES.map((cat) => (
@@ -256,15 +258,17 @@ function AppHeader() {
 
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
-            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
-                <a href="mailto:gaurav.thearmy@yahoo.com">
-                    <Mail className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
-                </a>
-            </Button>
-            
-            <SettingsMenu />
-            <ThemeToggle />
+            <div className="flex items-center gap-1">
+                <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
+                    <a href="mailto:gaurav.thearmy@yahoo.com">
+                        <Mail className="h-4 w-4 text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
+                    </a>
+                </Button>
+                
+                <SettingsMenu />
+                <ThemeToggle />
+            </div>
         </div>
       </div>
     </header>
