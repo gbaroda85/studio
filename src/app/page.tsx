@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -139,7 +140,7 @@ export default function Page() {
   const isSearching = searchQuery.trim().length > 0;
 
   return (
-    <main className="flex-1 bg-transparent">
+    <main className="flex-1 bg-transparent w-full">
       {/* Hero Section - Extremely Compact & Modern */}
       <section className="relative pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">

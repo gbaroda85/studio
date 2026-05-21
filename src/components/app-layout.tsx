@@ -132,13 +132,16 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-10 px-4 font-bold text-sm flex items-center gap-2 hover:bg-primary/5 transition-all">
+        <Button 
+          variant="ghost" 
+          className="h-10 px-3 font-bold text-sm flex items-center gap-2 hover:bg-primary/10 text-foreground transition-all focus:ring-0"
+        >
           <category.icon className={cn("size-4", category.color)} />
-          {t(category.name)}
+          <span className="hidden xl:inline">{t(category.name)}</span>
           <ChevronDown className="size-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1">
+      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1">
         <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
           {t(category.name)}
         </DropdownMenuLabel>
@@ -244,7 +247,7 @@ function AppHeader() {
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0">
       <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-8">
-        <div className="flex items-center gap-4 lg:gap-8">
+        <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform">
@@ -255,23 +258,25 @@ function AppHeader() {
                   <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
               </div>
             </Link>
+        </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-3">
+            {/* Nav shifted to the right before utilities */}
+            <nav className="hidden lg:flex items-center gap-1 mr-2">
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
                 ))}
             </nav>
-        </div>
 
-        <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" className="hidden xl:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
+            <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
+
+            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
                 <a href="mailto:gaurav.thearmy@yahoo.com">
                     <Mail className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Support</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:inline">Support</span>
                 </a>
             </Button>
-            <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
+            
             <SettingsMenu />
             <ThemeToggle />
         </div>
