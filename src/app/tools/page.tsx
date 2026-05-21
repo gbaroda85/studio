@@ -346,83 +346,85 @@ function ToolsPageContent() {
     .filter(group => group.features.length > 0);
 
   return (
-    <main className="w-full px-4 md:px-12 lg:px-16 py-8">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight font-headline uppercase">All Tools Hub</h1>
-        <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto font-medium">Your one-stop-shop for file conversions, calculations, and more. Local processing for maximum speed.</p>
-      </div>
-
-      <div className="relative mb-16 max-w-3xl mx-auto">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
-        <Input
-            type="search"
-            placeholder={t('search_tools_placeholder')}
-            className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
-      {isSearching ? (
-        <div className="mt-8 space-y-16">
-          {searchResults.length > 0 ? (
-            searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-              <section key={categoryKey}>
-                <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
-                  <Icon className={cn("h-8 w-8", color)} />
-                  {t(categoryKey)}
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  {features.map((feature) => (
-                    <FeatureCard
-                      key={feature.href}
-                      title={t(feature.labelKey)}
-                      description={t(feature.descriptionKey)}
-                      href={feature.href}
-                      icon={feature.icon}
-                      color={feature.color}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))
-          ) : (
-            <div className="text-center py-20 bg-muted/10 rounded-3xl border-4 border-dashed">
-              <Search className="mx-auto h-16 w-16 mb-6 text-muted-foreground/30" />
-              <p className="text-xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
-              <p className="text-sm text-muted-foreground mt-2">Try a different search term like 'PDF' or 'Compress'.</p>
-            </div>
-          )}
+    <main className="w-full px-4 md:px-12 lg:px-16 py-8 flex flex-col items-center">
+      <div className="w-full max-w-[1600px]">
+        <div className="mb-12 text-center">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight font-headline uppercase">All Tools Hub</h1>
+            <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto font-medium">Your one-stop-shop for file conversions, calculations, and more. Local processing for maximum speed.</p>
         </div>
-      ) : (
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="flex h-auto flex-wrap justify-center gap-3 bg-transparent p-0 mb-12">
-            {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-              <TabsTrigger key={value} value={value} className="px-8 py-4 text-sm font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg transition-all">
-                <Icon className={cn("mr-2 h-5 w-5", color)} />
-                {t(categoryKey)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
 
-          {allFeatureGroups.map(({ value, features }) => (
-            <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                {features.map((feature) => (
-                  <FeatureCard
-                    key={feature.href}
-                    title={t(feature.labelKey)}
-                    description={t(feature.descriptionKey)}
-                    href={feature.href}
-                    icon={feature.icon}
-                    color={feature.color}
-                  />
+        <div className="relative mb-16 max-w-3xl mx-auto">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder={t('search_tools_placeholder')}
+                className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
+        </div>
+        
+        {isSearching ? (
+            <div className="mt-8 space-y-16">
+            {searchResults.length > 0 ? (
+                searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
+                <section key={categoryKey}>
+                    <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
+                    <Icon className={cn("h-8 w-8", color)} />
+                    {t(categoryKey)}
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                    {features.map((feature) => (
+                        <FeatureCard
+                        key={feature.href}
+                        title={t(feature.labelKey)}
+                        description={t(feature.descriptionKey)}
+                        href={feature.href}
+                        icon={feature.icon}
+                        color={feature.color}
+                        />
+                    ))}
+                    </div>
+                </section>
+                ))
+            ) : (
+                <div className="text-center py-20 bg-muted/10 rounded-3xl border-4 border-dashed">
+                <Search className="mx-auto h-16 w-16 mb-6 text-muted-foreground/30" />
+                <p className="text-xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
+                <p className="text-sm text-muted-foreground mt-2">Try a different search term like 'PDF' or 'Compress'.</p>
+                </div>
+            )}
+            </div>
+        ) : (
+            <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="flex h-auto flex-wrap justify-center gap-3 bg-transparent p-0 mb-12">
+                {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
+                <TabsTrigger key={value} value={value} className="px-8 py-4 text-sm font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg transition-all">
+                    <Icon className={cn("mr-2 h-5 w-5", color)} />
+                    {t(categoryKey)}
+                </TabsTrigger>
                 ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      )}
+            </TabsList>
+
+            {allFeatureGroups.map(({ value, features }) => (
+                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                    {features.map((feature) => (
+                    <FeatureCard
+                        key={feature.href}
+                        title={t(feature.labelKey)}
+                        description={t(feature.descriptionKey)}
+                        href={feature.href}
+                        icon={feature.icon}
+                        color={feature.color}
+                    />
+                    ))}
+                </div>
+                </TabsContent>
+            ))}
+            </Tabs>
+        )}
+      </div>
     </main>
   );
 }
