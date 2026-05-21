@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -37,6 +36,8 @@ import {
   FileScan,
   FileText,
   PenLine,
+  FileShield,
+  BookOpen,
 } from 'lucide-react';
 
 import {
@@ -112,7 +113,7 @@ function AppSidebar() {
             <LayoutGrid className="h-full w-full text-white" />
           </div>
           <div className="flex flex-col">
-              <span className="text-base font-black font-headline text-foreground leading-none tracking-tighter">GRs HUB</span>
+              <span className="text-base font-black font-headline text-foreground leading-none tracking-tighter">GR7 HUB</span>
               <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
           </div>
         </Link>
@@ -135,6 +136,24 @@ function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+          
+          <DropdownMenuSeparator className="my-4 opacity-50" />
+          <SidebarMenuItem>
+             <SidebarMenuButton asChild size="lg" className="rounded-xl hover:bg-muted" tooltip={t('privacy_policy')}>
+                <Link href="/privacy-policy" onClick={() => setOpenMobile(false)}>
+                   <FileShield className="size-5 text-muted-foreground" />
+                   <span className="text-[13px] font-bold">{t('privacy_policy')}</span>
+                </Link>
+             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+             <SidebarMenuButton asChild size="lg" className="rounded-xl hover:bg-muted" tooltip={t('terms_of_service')}>
+                <Link href="/terms-of-service" onClick={() => setOpenMobile(false)}>
+                   <BookOpen className="size-5 text-muted-foreground" />
+                   <span className="text-[13px] font-bold">{t('terms_of_service')}</span>
+                </Link>
+             </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 bg-muted/20">
@@ -175,7 +194,7 @@ function AppHeader() {
             <div className="h-6 w-px bg-border hidden sm:block" />
             <Link href="/" className="hidden sm:flex items-center gap-2 group">
                 <h1 className="text-lg font-black tracking-tighter transition-colors group-hover:text-primary">
-                    <span className="text-foreground">GRs </span>
+                    <span className="text-foreground">GR7 </span>
                     <span className="text-gradient-primary">Tools</span>
                 </h1>
             </Link>
@@ -197,6 +216,49 @@ function AppHeader() {
   );
 }
 
+export function AppFooter() {
+  const { t } = useLanguage();
+  return (
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 px-4 md:px-8">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="md:col-span-2 space-y-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
+                <LayoutGrid className="size-full text-white" />
+            </div>
+            <span className="text-xl font-black font-headline tracking-tighter">GR7 TOOLS</span>
+          </Link>
+          <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
+            A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
+          <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+            <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
+            <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
+            <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
+          <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+            <li><a href="mailto:gaurav.thearmy@yahoo.com" className="hover:text-primary transition-colors">Email Support</a></li>
+            <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
+          </ul>
+        </div>
+      </div>
+      <div className="container mx-auto mt-12 pt-8 border-t border-border/50 text-center">
+         <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
+            © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
+         </p>
+      </div>
+    </footer>
+  );
+}
+
 export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -213,10 +275,13 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
         <div className="flex flex-1 flex-col overflow-hidden relative">
           <AppHeader />
           <SidebarInset className="bg-transparent relative overflow-y-auto flex-1 outline-none">
-             <div className="absolute top-0 right-0 size-[400px] bg-primary/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" />
-             <div className="absolute bottom-0 left-0 size-[400px] bg-accent/5 blur-[120px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
-             <div className="flex-1 pb-40">
-                {children}
+             <div className="absolute top-0 right-0 size-[500px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
+             <div className="absolute bottom-0 left-0 size-[500px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+             <div className="flex flex-col min-h-full">
+                <div className="flex-1 pb-20">
+                  {children}
+                </div>
+                <AppFooter />
              </div>
           </SidebarInset>
         </div>

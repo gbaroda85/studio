@@ -8,7 +8,7 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%;
     --foreground: 224 71% 4%;
     --card: 0 0% 100%;
     --card-foreground: 224 71% 4%;
@@ -75,8 +75,8 @@ body {
   body {
     @apply bg-background text-foreground selection:bg-primary/20;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.03) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
