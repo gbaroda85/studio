@@ -141,46 +141,46 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full">
-      {/* Hero Section - Extremely Compact & Modern */}
-      <section className="relative pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5">
+      {/* Hero Section - Compact & Modern */}
+      <section className="relative pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 w-full">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 text-center">
+        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm">
             <Sparkles className="size-2.5" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-[0.95]">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tighter animate-fade-in-up leading-[0.95]">
             Professional Tools for <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Fast, secure, and private browser-based online tools. <br className="hidden md:block" />
-            Everything happens locally, 100% private.
+            Everything happens locally in your device RAM, 100% private.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <Button asChild size="sm" className="h-10 px-6 rounded-lg text-xs font-black bg-primary hover:bg-primary/90 shadow-xl transition-all hover:scale-105">
-              <Link href="/tools">Start Now</Link>
+            <Button asChild size="sm" className="h-10 px-8 rounded-lg text-xs font-black bg-primary hover:bg-primary/90 shadow-xl transition-all hover:scale-105">
+              <Link href="/tools">Start Processing Now</Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="h-10 px-6 rounded-lg text-xs font-black border-2 transition-all">
-              <Link href="/tools?tab=pdf">PDF Tools</Link>
+            <Button asChild variant="outline" size="sm" className="h-10 px-8 rounded-lg text-xs font-black border-2 transition-all">
+              <Link href="/tools?tab=pdf">View PDF Toolkit</Link>
             </Button>
           </div>
 
           {/* Search Bridge - Compact and overlapping */}
-          <div className="max-w-xl mx-auto relative group translate-y-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="max-w-2xl mx-auto relative group translate-y-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'passport', 'ocr', 'emi')"
-                className="w-full pl-12 pr-4 h-12 text-sm rounded-xl bg-white dark:bg-slate-800 border-none shadow-xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
+                placeholder="Type any tool name... (e.g. 'passport', 'ocr', 'emi', 'unlock')"
+                className="w-full pl-14 pr-4 h-14 text-base rounded-xl bg-white dark:bg-slate-800 border-none shadow-xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -189,72 +189,74 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Tools Section - Dynamic padding for search overlap */}
-      <section className="pt-12 pb-16 bg-background">
-        <div className="container mx-auto px-4">
+      {/* Tools Section */}
+      <section className="pt-16 pb-20 bg-background w-full">
+        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-[0.2em] mb-6">
-                  <div className="w-6 h-1 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                  <div className="w-8 h-1 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 {filteredTools.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                         {filteredTools.map((tool, i) => (
                             <ToolCard key={i} {...tool} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 bg-muted/20 rounded-2xl border-2 border-dashed">
-                        <Search className="size-8 mx-auto mb-2 text-muted-foreground/30" />
-                        <h3 className="text-md font-black text-slate-400 uppercase">No matching tools found</h3>
-                        <p className="text-[10px] text-muted-foreground font-medium mt-1">Try 'PDF', 'Compress', or 'Resize'</p>
+                    <div className="text-center py-16 bg-muted/20 rounded-2xl border-2 border-dashed">
+                        <Search className="size-10 mx-auto mb-4 text-muted-foreground/30" />
+                        <h3 className="text-lg font-black text-slate-400 uppercase">No tools matched your search</h3>
+                        <p className="text-xs text-muted-foreground font-medium mt-2">Try words like 'PDF', 'Compress', 'Resize', or 'Calc'</p>
                     </div>
                 )}
             </div>
           ) : (
             <>
                 {/* Visual Processor */}
-                <div className="mb-12">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+                <div className="mb-16">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-8">
                         <div className="text-left">
                             <div className="flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                                <div className="w-6 h-1 bg-primary rounded-full" /> Image Solutions
+                                <div className="w-8 h-1 bg-primary rounded-full" /> Image Solutions
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
                         <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
                         <ToolCard icon={UserCircle} title="Passport Maker" description="Create professional ID photos with AI background removal." href="/passport-photo" colorClass="bg-orange-500" />
                         <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
+                        <ToolCard icon={FileScan} title="Image to Text" description="Extract text from images using high-precision local OCR." href="/image-to-text" colorClass="bg-teal-600" />
                     </div>
                 </div>
 
                 {/* PDF Toolkit */}
-                <div className="mb-12">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+                <div className="mb-16">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-8">
                         <div className="text-left">
                             <div className="flex items-center gap-2 text-rose-600 font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                                <div className="w-6 h-1 bg-rose-600 rounded-full" /> Document Engine
+                                <div className="w-8 h-1 bg-rose-600 rounded-full" /> Document Engine
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         <ToolCard icon={FileArchive} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
                         <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
                         <ToolCard icon={Merge} title="Bulk Merge" description="Combine multiple documents into one secure file." href="/merge-pdf" colorClass="bg-emerald-600" />
                         <ToolCard icon={Unlock} title="Aadhaar Unlock" description="Instantly remove passwords from Aadhaar & Bank bills." href="/unlock-pdf" colorClass="bg-teal-500" />
+                        <ToolCard icon={FileCode} title="HTML to PDF" description="Convert raw web code into clean professional PDF." href="/html-to-pdf" colorClass="bg-orange-600" />
                     </div>
                 </div>
                 
                 <div className="text-center">
-                    <Button asChild variant="outline" className="h-10 px-6 rounded-lg font-black text-xs text-primary border-2 border-primary/20 shadow-md">
-                        <Link href="/tools">View All 40+ Utilities <ArrowRight className="ml-2 size-3" /></Link>
+                    <Button asChild variant="outline" className="h-12 px-10 rounded-xl font-black text-sm text-primary border-2 border-primary/20 shadow-lg hover:bg-primary/5">
+                        <Link href="/tools">EXPLORE ALL 40+ UTILITIES <ArrowRight className="ml-2 size-4" /></Link>
                     </Button>
                 </div>
             </>
@@ -263,14 +265,14 @@ export default function Page() {
       </section>
 
       {/* Features Section - Compact "GR7 Standard" */}
-      <section className="py-12 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[2rem]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">The GR7 Standard</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold italic">Native speed. 100% Client-side. Zero server footprints.</p>
+      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full">
+        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 uppercase tracking-tighter">The GR7 Standard</h2>
+            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-semibold italic">Native speed. 100% Client-side. No server footprints.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
             <FeatureItem icon={ShieldCheck} title="100% Private" description="Processing happens in your RAM. No server logs, no data risk." iconBg="bg-gradient-to-br from-green-400 to-green-600" />
             <FeatureItem icon={Zap} title="Native Speed" description="Execute tasks 10x faster using browser power." iconBg="bg-gradient-to-br from-blue-400 to-blue-600" />
             <FeatureItem icon={CheckCircle2} title="Verified Safe" description="Industry standard algorithms ensure zero artifacts." iconBg="bg-gradient-to-br from-purple-400 to-purple-600" />
@@ -279,25 +281,25 @@ export default function Page() {
       </section>
 
       {/* CTA Section - Light mode ready */}
-      <section className="py-12 relative overflow-hidden bg-transparent">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-8 md:p-12 text-center shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 size-60 bg-primary/5 blur-[100px] rounded-full" />
+      <section className="py-16 relative overflow-hidden bg-transparent w-full">
+        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16 relative z-10">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] p-10 md:p-20 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-[120px] rounded-full" />
             
             <div className="relative z-10">
-              <h2 className="text-2xl md:text-4xl font-black mb-4 tracking-tighter leading-tight text-slate-900 dark:text-white">
+              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter leading-tight text-slate-900 dark:text-white">
                 Ready for the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Next Generation?</span>
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 max-w-xl mx-auto font-semibold">
+              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg mb-10 max-w-2xl mx-auto font-semibold">
                 Join thousands of users using GR7 for secure, digital-first workflows. Free forever.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button asChild size="lg" className="h-12 px-8 rounded-lg text-sm font-black bg-primary text-white shadow-xl hover:scale-105 transition-transform">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg" className="h-14 px-12 rounded-xl text-base font-black bg-primary text-white shadow-xl hover:scale-105 transition-transform">
                   <Link href="/tools">Get Started Now</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 px-8 rounded-lg text-sm font-black border-2">
-                  <a href="mailto:gaurav.thearmy@yahoo.com">Contact Support</a>
+                <Button asChild variant="outline" size="lg" className="h-14 px-12 rounded-xl text-base font-black border-2 hover:bg-slate-50">
+                  <a href="mailto:gaurav.thearmy@yahoo.com">Connect with Support</a>
                 </Button>
               </div>
             </div>

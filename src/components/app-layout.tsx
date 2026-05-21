@@ -246,7 +246,7 @@ function AppHeader() {
   const { t } = useLanguage();
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0">
-      <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-8">
+      <div className="w-full h-full flex items-center justify-between px-4 md:px-12 lg:px-16">
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
@@ -261,7 +261,6 @@ function AppHeader() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-3">
-            {/* Nav shifted to the right before utilities */}
             <nav className="hidden lg:flex items-center gap-1 mr-2">
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
@@ -288,8 +287,8 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 px-4 md:px-8">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 px-4 md:px-12 lg:px-16">
+      <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="md:col-span-2 space-y-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
@@ -327,7 +326,7 @@ export function AppFooter() {
           </ul>
         </div>
       </div>
-      <div className="container mx-auto mt-12 pt-8 border-t border-border/50 text-center">
+      <div className="w-full mt-12 pt-8 border-t border-border/50 text-center">
          <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
             © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
          </p>
@@ -353,8 +352,8 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
-         <div className="w-full flex-1 flex flex-col">
-            <div className="flex-1 pb-20">
+         <div className="w-full flex-1 flex flex-col items-center">
+            <div className="w-full flex-1 pb-20">
               {children}
             </div>
             <AppFooter />
