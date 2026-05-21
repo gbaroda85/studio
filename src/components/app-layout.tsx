@@ -134,14 +134,14 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="h-10 px-3 font-bold text-sm flex items-center gap-2 hover:bg-primary/10 text-foreground transition-all focus:ring-0"
+          className="h-10 px-3 font-bold text-sm flex items-center gap-2 hover:bg-primary/10 text-slate-700 dark:text-slate-200 data-[state=open]:bg-primary/10 data-[state=open]:text-primary transition-all focus:ring-0"
         >
           <category.icon className={cn("size-4", category.color)} />
           <span className="hidden xl:inline">{t(category.name)}</span>
           <ChevronDown className="size-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1">
+      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900">
         <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
           {t(category.name)}
         </DropdownMenuLabel>
@@ -245,8 +245,8 @@ function MobileNav() {
 function AppHeader() {
   const { t } = useLanguage();
   return (
-    <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0">
-      <div className="w-full h-full flex items-center justify-between px-4 md:px-12 lg:px-16">
+    <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
+      <div className="w-full max-w-[1600px] h-full flex items-center justify-between px-4 md:px-12 lg:px-16">
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
@@ -269,10 +269,10 @@ function AppHeader() {
 
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
-            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10">
+            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200">
                 <a href="mailto:gaurav.thearmy@yahoo.com">
                     <Mail className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:inline">Support</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
                 </a>
             </Button>
             
@@ -287,49 +287,51 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 px-4 md:px-12 lg:px-16">
-      <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-12">
-        <div className="md:col-span-2 space-y-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
-                <LayoutGrid className="size-full text-white" />
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
+      <div className="w-full max-w-[1600px] px-4 md:px-12 lg:px-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="md:col-span-2 space-y-6">
+            <Link href="/" className="flex items-center gap-2">
+                <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
+                    <LayoutGrid className="size-full text-white" />
+                </div>
+                <span className="text-xl font-black font-headline tracking-tighter">GR7 TOOLS</span>
+            </Link>
+            <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
+                A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
+            </p>
+            <div className="flex items-center gap-4 pt-4">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                    <ShieldCheck className="size-3" /> 100% Client-Side
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
+                    <Zap className="size-3" /> No Server Storage
+                </div>
             </div>
-            <span className="text-xl font-black font-headline tracking-tighter">GR7 TOOLS</span>
-          </Link>
-          <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
-            A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
-          </p>
-          <div className="flex items-center gap-4 pt-4">
-             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                <ShieldCheck className="size-3" /> 100% Client-Side
-             </div>
-             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
-                <Zap className="size-3" /> No Server Storage
-             </div>
-          </div>
-        </div>
-        
-        <div>
-          <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
-          <ul className="space-y-4 text-sm font-bold text-muted-foreground">
-            <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
-            <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
-            <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
-          </ul>
-        </div>
+            </div>
+            
+            <div>
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
+            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+                <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
+            </ul>
+            </div>
 
-        <div>
-          <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
-          <ul className="space-y-4 text-sm font-bold text-muted-foreground">
-            <li><a href="mailto:gaurav.thearmy@yahoo.com" className="hover:text-primary transition-colors">Email Support</a></li>
-            <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
-          </ul>
+            <div>
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
+            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+                <li><a href="mailto:gaurav.thearmy@yahoo.com" className="hover:text-primary transition-colors">Email Support</a></li>
+                <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
+            </ul>
+            </div>
         </div>
-      </div>
-      <div className="w-full mt-12 pt-8 border-t border-border/50 text-center">
-         <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
-            © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
-         </p>
+        <div className="w-full mt-12 pt-8 border-t border-border/50 text-center">
+            <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
+                © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
+            </p>
+        </div>
       </div>
     </footer>
   );
@@ -362,3 +364,4 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     </div>
   );
 }
+

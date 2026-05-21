@@ -159,7 +159,6 @@ export default function Page() {
           </h1>
           
           <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Fast, secure, and private browser-based online tools. <br className="hidden md:block" />
             Everything happens locally in your device RAM, 100% private.
           </p>
 
@@ -172,7 +171,7 @@ export default function Page() {
             </Button>
           </div>
 
-          {/* Search Bridge - Compact and overlapping */}
+          {/* Search Bridge */}
           <div className="max-w-2xl mx-auto relative group translate-y-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
@@ -190,8 +189,8 @@ export default function Page() {
       </section>
 
       {/* Tools Section */}
-      <section className="pt-16 pb-20 bg-background w-full">
-        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16">
+      <section className="pt-16 pb-20 bg-background w-full flex justify-center">
+        <div className="w-full max-w-[1600px] px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -264,9 +263,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Features Section - Compact "GR7 Standard" */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full">
-        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16">
+      {/* Features Section */}
+      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full flex justify-center">
+        <div className="w-full max-w-[1600px] px-8 md:px-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 uppercase tracking-tighter">The GR7 Standard</h2>
             <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-semibold italic">Native speed. 100% Client-side. No server footprints.</p>
@@ -280,9 +279,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* CTA Section - Light mode ready */}
-      <section className="py-16 relative overflow-hidden bg-transparent w-full">
-        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16 relative z-10">
+      {/* CTA Section */}
+      <section className="py-16 relative overflow-hidden bg-transparent w-full flex justify-center">
+        <div className="w-full max-w-[1600px] px-8 md:px-16 relative z-10">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] p-10 md:p-20 text-center shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-[120px] rounded-full" />
             
@@ -309,3 +308,4 @@ export default function Page() {
     </main>
   );
 }
+
