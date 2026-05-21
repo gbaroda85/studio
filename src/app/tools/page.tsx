@@ -399,8 +399,8 @@ function ToolsPageContent() {
             <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="flex h-auto flex-wrap justify-center gap-3 bg-transparent p-0 mb-12">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                <TabsTrigger key={value} value={value} className="px-8 py-4 text-sm font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg transition-all">
-                    <Icon className={cn("mr-2 h-5 w-5", color)} />
+                <TabsTrigger key={value} value={value} className="px-6 py-2.5 h-auto text-[10px] font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg hover:border-primary/50 hover:scale-105 transition-all">
+                    <Icon className={cn("mr-2 h-4 w-4", color)} />
                     {t(categoryKey)}
                 </TabsTrigger>
                 ))}

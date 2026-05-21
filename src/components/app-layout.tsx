@@ -134,7 +134,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="h-10 px-4 font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus:ring-0 group"
+          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group"
         >
           <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
           <span className="hidden xl:inline">{t(category.name)}</span>
@@ -226,15 +226,6 @@ function MobileNav() {
                 </div>
               </div>
             ))}
-            
-            <div className="pt-4 border-t space-y-2">
-               <Link href="/privacy-policy" onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm">
-                  <ShieldCheck className="size-4 text-muted-foreground" /> {t('privacy_policy')}
-               </Link>
-               <Link href="/terms-of-service" onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm">
-                  <BookOpen className="size-4 text-muted-foreground" /> {t('terms_of_service')}
-               </Link>
-            </div>
           </div>
         </ScrollArea>
       </SheetContent>
