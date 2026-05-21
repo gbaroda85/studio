@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -50,7 +49,7 @@ import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Global tool list
+// Global tool list for search functionality
 const ALL_TOOLS = [
   // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
@@ -65,7 +64,6 @@ const ALL_TOOLS = [
   
   // PDF Tools
   { icon: FileArchive, title: "PDF Optimizer", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
-  { icon: Languages, title: "AI PDF Translator", description: "Translate PDF documents to any language using AI.", href: "/pdf-translator", colorClass: "bg-blue-500", category: "pdf" },
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
   { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove passwords from Aadhaar or Bank PDFs.", href: "/unlock-pdf", colorClass: "bg-teal-500", category: "pdf" },

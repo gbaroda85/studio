@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/_next/'],
     },
-    sitemap: 'https://gr7imagepdf.com/sitemap.xml',
+    sitemap: 'https://www.gr7imagepdf.com/sitemap.xml',
   }
 }

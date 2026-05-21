@@ -1,8 +1,7 @@
-
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://gr7imagepdf.com';
+  const baseUrl = 'https://www.gr7imagepdf.com';
   
   const tools = [
     '',
@@ -40,8 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/acceleration-converter',
     '/area-converter',
     '/fuel-converter',
-    '/pressure-converter',
-    '/passport-photo'
+    '/pressure-converter'
   ];
 
   return tools.map((route) => ({

@@ -12,9 +12,9 @@ export const metadata: Metadata = {
     template: '%s | GR7 Tools',
   },
   description: 'Fast, secure, and private browser-based online tools. Compress images, resize photos for SSC/UPSC, remove backgrounds, unlock Aadhaar PDF, and calculate EMI. 100% private - No files are uploaded to any server.',
-  metadataBase: new URL('https://gr7imagepdf.com'),
+  metadataBase: new URL('https://www.gr7imagepdf.com'),
   alternates: {
-    canonical: 'https://gr7imagepdf.com',
+    canonical: 'https://www.gr7imagepdf.com',
   },
   keywords: [
     'image to pdf converter',
@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     'merge multiple pdfs',
     'image compressor',
     'pdf merger',
-    'passport photo maker',
     'online image resizer',
     'ocr converter',
     'remove background ai',
@@ -49,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://gr7imagepdf.com',
+    url: 'https://www.gr7imagepdf.com',
     siteName: 'GR7 Image PDF Tools Hub',
     title: 'GR7 Image PDF Tools Hub - Fast, Private & Secure Online Suite',
     description: 'Compress, convert, and edit images/PDFs with 100% privacy. One-click tools for SSC/UPSC/IBPS forms and Aadhaar unlocking.',
@@ -106,7 +105,7 @@ export default function RootLayout({
                 "@context": "https://schema.org",
                 "@type": "WebApplication",
                 "name": "GR7 Image PDF Tools Hub",
-                "url": "https://gr7imagepdf.com",
+                "url": "https://www.gr7imagepdf.com",
                 "description": "Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security.",
                 "applicationCategory": "UtilitiesApplication",
                 "operatingSystem": "Any",
@@ -123,10 +122,10 @@ export default function RootLayout({
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                "url": "https://gr7imagepdf.com",
+                "url": "https://www.gr7imagepdf.com",
                 "potentialAction": {
                   "@type": "SearchAction",
-                  "target": "https://gr7imagepdf.com/tools?search={search_term_string}",
+                  "target": "https://www.gr7imagepdf.com/tools?search={search_term_string}",
                   "query-input": "required name=search_term_string"
                 }
               }
