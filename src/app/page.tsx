@@ -18,14 +18,40 @@ import {
   LayoutGrid,
   CheckCircle2,
   Cpu,
+  Calculator,
+  Landmark,
+  Cake,
+  Percent,
+  Coins,
+  Receipt,
+  Eraser,
+  Wand2,
+  FileScan,
+  PenLine,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+
+const ALL_TOOLS = [
+  { icon: Shrink, title: "AI Image Compress", description: "Intelligent size reduction up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
+  { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
+  { icon: FileOutput, title: "Format Converter", description: "Seamless conversion between WebP, PNG, JPG, and AVIF.", href: "/image-to-jpg", colorClass: "bg-orange-600", category: "image" },
+  { icon: Sparkles, title: "AI HD Enhancer", description: "Fix blurry photos and restore lost details.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
+  { icon: Eraser, title: "Background Remover", description: "Remove background from any image with AI.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
+  { icon: PenLine, title: "Signature Remover", description: "Clean signatures from documents using AI.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
+  { icon: FileScan, title: "Image to Text", description: "Extract text from any image using OCR.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image" },
+  { icon: FileDigit, title: "PDF Optimizer", description: "Shrink massive PDFs for email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
+  { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
+  { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one organized file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
+  { icon: Lock, title: "Vault Protect", description: "Apply AES encryption and password protection.", href: "/protect-pdf", colorClass: "bg-slate-800", category: "pdf" },
+  { icon: Landmark, title: "EMI Calculator", description: "Calculate your monthly loan payments easily.", href: "/loan-calculator", colorClass: "bg-indigo-600", category: "calculator" },
+  { icon: Cake, title: "Age Calculator", description: "Find out your exact age in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", category: "calculator" },
+  { icon: Coins, title: "Interest Calc", description: "Calculate simple and compound interest.", href: "/interest-calculator", colorClass: "bg-yellow-600", category: "calculator" },
+];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
   <Link href={href} className="group">
@@ -56,22 +82,23 @@ const FeatureItem = ({ icon: Icon, title, description, iconBg }: any) => (
 );
 
 export default function Page() {
-  const { t } = useLanguage();
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/tools?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  const filteredTools = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return ALL_TOOLS.filter(tool => 
+      tool.title.toLowerCase().includes(query) || 
+      tool.description.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <main className="flex-1 bg-transparent">
       {/* Ultra-Modern Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5">
-        {/* Animated Background Blobs */}
+      <section className="relative pt-20 pb-20 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -96,17 +123,12 @@ export default function Page() {
             <Button asChild size="lg" className="h-16 px-12 rounded-2xl text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/40 transition-all hover:scale-105 active:scale-95">
               <Link href="/tools">Explore 40+ Tools</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-16 px-12 rounded-2xl text-lg font-black border-2 hover:bg-muted transition-all active:scale-95 shadow-lg">
-              <Link href="/image-compress" className="flex items-center gap-3">
-                <Cpu className="size-6 text-primary" /> Start AI Task
-              </Link>
-            </Button>
           </div>
 
-          {/* Search Bridge - Eliminates gap to next section */}
-          <div className="max-w-3xl mx-auto relative group translate-y-24 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          {/* Search Bridge - Overlaps Hero Bottom */}
+          <div className="max-w-3xl mx-auto relative group translate-y-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <div className="absolute -inset-2 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-            <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="relative">
               <Search className="absolute left-8 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="search"
@@ -115,110 +137,131 @@ export default function Page() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 px-6 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-transform shadow-xl">
-                Quick Find
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Tool Grid Section */}
-      <section className="pt-40 pb-32 bg-background">
+      <section className="pt-24 pb-32 bg-background">
         <div className="container mx-auto px-4">
-          {/* Image Tools */}
-          <div className="mb-24">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-              <div className="text-left">
-                <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-3">
-                  <div className="w-12 h-1.5 bg-primary rounded-full" /> Visual Processor
+          
+          {isSearching ? (
+            <div className="mb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-6">
+                  <div className="w-12 h-1.5 bg-primary rounded-full" /> {filteredTools.length} Result{filteredTools.length !== 1 ? 's' : ''} Found
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Image Solutions</h2>
-              </div>
-              <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Lightning fast visual optimization using browser-side GPU acceleration for professional results.</p>
+                {filteredTools.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {filteredTools.map((tool, i) => (
+                            <ToolCard key={i} {...tool} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-muted/20 rounded-[3rem] border-2 border-dashed">
+                        <Search className="size-16 mx-auto mb-4 text-muted-foreground/30" />
+                        <h3 className="text-2xl font-black text-slate-400 uppercase">No tools matched your search</h3>
+                        <p className="text-muted-foreground font-medium mt-2">Try searching for keywords like 'PDF', 'Compress', or 'Resize'</p>
+                    </div>
+                )}
             </div>
+          ) : (
+            <>
+                {/* Image Tools */}
+                <div className="mb-24">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                    <div className="text-left">
+                        <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-3">
+                        <div className="w-12 h-1.5 bg-primary rounded-full" /> Visual Processor
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Image Solutions</h2>
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Lightning fast visual optimization using browser-side GPU acceleration for professional results.</p>
+                    </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <ToolCard 
-                icon={Shrink}
-                title="AI Image Compress"
-                description="Intelligent size reduction up to 95% with zero visual loss. Perfect for forms."
-                href="/image-compress"
-                colorClass="bg-blue-600"
-              />
-              <ToolCard 
-                icon={Maximize}
-                title="Smart Resize"
-                description="Resize to exact pixels or MM for SSC, UPSC, and IBPS application forms."
-                href="/image-resize"
-                colorClass="bg-indigo-600"
-              />
-              <ToolCard 
-                icon={FileOutput}
-                title="Format Converter"
-                description="Seamless conversion between WebP, PNG, JPG, and AVIF in seconds."
-                href="/image-to-jpg"
-                colorClass="bg-orange-600"
-              />
-              <ToolCard 
-                icon={Sparkles}
-                title="AI HD Enhancer"
-                description="Fix blurry photos and restore lost details using local neural AI models."
-                href="/enhance-photo"
-                colorClass="bg-purple-600"
-              />
-            </div>
-          </div>
-
-          {/* PDF Tools */}
-          <div className="mb-24">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-              <div className="text-left">
-                <div className="flex items-center gap-3 text-rose-600 font-black text-[11px] uppercase tracking-[0.2em] mb-3">
-                  <div className="w-12 h-1.5 bg-rose-600 rounded-full" /> Document Engine
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <ToolCard 
+                        icon={Shrink}
+                        title="AI Image Compress"
+                        description="Intelligent size reduction up to 95% with zero visual loss. Perfect for forms."
+                        href="/image-compress"
+                        colorClass="bg-blue-600"
+                    />
+                    <ToolCard 
+                        icon={Maximize}
+                        title="Smart Resize"
+                        description="Resize to exact pixels or MM for SSC, UPSC, and IBPS application forms."
+                        href="/image-resize"
+                        colorClass="bg-indigo-600"
+                    />
+                    <ToolCard 
+                        icon={FileOutput}
+                        title="Format Converter"
+                        description="Seamless conversion between WebP, PNG, JPG, and AVIF in seconds."
+                        href="/image-to-jpg"
+                        colorClass="bg-orange-600"
+                    />
+                    <ToolCard 
+                        icon={Sparkles}
+                        title="AI HD Enhancer"
+                        description="Fix blurry photos and restore lost details using local neural AI models."
+                        href="/enhance-photo"
+                        colorClass="bg-purple-600"
+                    />
+                    </div>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
-              </div>
-              <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Industrial grade PDF manipulation without ever uploading your sensitive files.</p>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <ToolCard 
-                icon={FileDigit}
-                title="PDF Optimizer"
-                description="Shrink massive PDFs for email and portal uploads instantly with text clarity."
-                href="/compress-pdf"
-                colorClass="bg-rose-600"
-              />
-              <ToolCard 
-                icon={Scissors}
-                title="Split & Extract"
-                description="Visually select and extract specific pages with high precision extraction."
-                href="/split-pdf"
-                colorClass="bg-cyan-600"
-              />
-              <ToolCard 
-                icon={Merge}
-                title="Bulk Merge"
-                description="Combine hundreds of documents into one organized, secure master file."
-                href="/merge-pdf"
-                colorClass="bg-emerald-600"
-              />
-              <ToolCard 
-                icon={Lock}
-                title="Vault Protect"
-                description="Apply military-grade AES encryption and password protection to your files."
-                href="/protect-pdf"
-                colorClass="bg-slate-800"
-              />
-            </div>
-            
-            <div className="mt-20 text-center">
-              <Button asChild variant="outline" className="h-16 px-10 rounded-2xl font-black text-primary hover:bg-primary/5 uppercase tracking-widest text-sm border-2 border-primary/20 shadow-lg">
-                <Link href="/tools" className="flex items-center gap-3">View All 40+ Utilities <ArrowRight className="size-5" /></Link>
-              </Button>
-            </div>
-          </div>
+                {/* PDF Tools */}
+                <div className="mb-24">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                    <div className="text-left">
+                        <div className="flex items-center gap-3 text-rose-600 font-black text-[11px] uppercase tracking-[0.2em] mb-3">
+                        <div className="w-12 h-1.5 bg-rose-600 rounded-full" /> Document Engine
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Industrial grade PDF manipulation without ever uploading your sensitive files.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <ToolCard 
+                        icon={FileDigit}
+                        title="PDF Optimizer"
+                        description="Shrink massive PDFs for email and portal uploads instantly with text clarity."
+                        href="/compress-pdf"
+                        colorClass="bg-rose-600"
+                    />
+                    <ToolCard 
+                        icon={Scissors}
+                        title="Split & Extract"
+                        description="Visually select and extract specific pages with high precision extraction."
+                        href="/split-pdf"
+                        colorClass="bg-cyan-600"
+                    />
+                    <ToolCard 
+                        icon={Merge}
+                        title="Bulk Merge"
+                        description="Combine hundreds of documents into one organized, secure master file."
+                        href="/merge-pdf"
+                        colorClass="bg-emerald-600"
+                    />
+                    <ToolCard 
+                        icon={Lock}
+                        title="Vault Protect"
+                        description="Apply military-grade AES encryption and password protection to your files."
+                        href="/protect-pdf"
+                        colorClass="bg-slate-800"
+                    />
+                    </div>
+                    
+                    <div className="mt-20 text-center">
+                    <Button asChild variant="outline" className="h-16 px-10 rounded-2xl font-black text-primary hover:bg-primary/5 uppercase tracking-widest text-sm border-2 border-primary/20 shadow-lg">
+                        <Link href="/tools" className="flex items-center gap-3">View All 40+ Utilities <ArrowRight className="size-5" /></Link>
+                    </Button>
+                    </div>
+                </div>
+            </>
+          )}
         </div>
       </section>
 
