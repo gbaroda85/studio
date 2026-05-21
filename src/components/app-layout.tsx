@@ -30,7 +30,6 @@ import {
   Eraser,
   Wand2,
   NotebookPen,
-  Loader2,
   LayoutGrid,
   Mail,
   FileCode,
@@ -38,10 +37,8 @@ import {
   FileText,
   PenLine,
   ShieldCheck,
-  BookOpen,
   ChevronDown,
   Menu,
-  X,
   Languages,
   Zap,
 } from 'lucide-react';
@@ -67,7 +64,7 @@ import {
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
 
-// Tool categories for the mega menu
+// Tool categories for the mega menu - PASSPORT PHOTO REMOVED
 const CATEGORIES = [
   {
     name: "image_tools",
@@ -82,7 +79,6 @@ const CATEGORIES = [
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
-      { href: '/passport-photo', label: 'Passport Photo', icon: Zap },
     ]
   },
   {
@@ -134,7 +130,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group"
+          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
         >
           <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
           <span className="hidden xl:inline">{t(category.name)}</span>
@@ -168,12 +164,12 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10">
-          <Settings className="h-5 w-5 text-foreground" />
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none">
+          <Settings className="h-5 w-5 text-slate-800 dark:text-slate-200" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl">
+      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-2">
         <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3">🇺🇸 {t('english')}</DropdownMenuItem>
@@ -237,7 +233,7 @@ function AppHeader() {
   const { t } = useLanguage();
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
-      <div className="w-full max-w-[1600px] h-full flex items-center justify-between px-4 md:px-12 lg:px-16">
+      <div className="w-full max-w-[1700px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
@@ -260,7 +256,7 @@ function AppHeader() {
 
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
-            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200">
+            <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
                 <a href="mailto:gaurav.thearmy@yahoo.com">
                     <Mail className="h-4 w-4 text-primary" />
                     <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
@@ -279,7 +275,7 @@ export function AppFooter() {
   const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
-      <div className="w-full max-w-[1600px] px-4 md:px-12 lg:px-16">
+      <div className="w-full max-w-[1700px] px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">

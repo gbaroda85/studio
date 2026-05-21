@@ -41,7 +41,6 @@ import {
   AreaChart,
   Fuel,
   Waves,
-  UserCircle,
   FileArchive,
   Languages,
 } from 'lucide-react';
@@ -51,12 +50,11 @@ import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Global tool list for homepage search and display
+// Global tool list - PASSPORT MAKER REMOVED
 const ALL_TOOLS = [
   // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
-  { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional ID photos with AI background removal.", href: "/passport-photo", colorClass: "bg-orange-500", category: "image" },
   { icon: Eraser, title: "Background Remover", description: "Extract subjects from any photo in high definition.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
   { icon: Sparkles, title: "AI HD Enhancer", description: "Fix blurry photos and restore lost details instantly.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
   { icon: PenLine, title: "Signature Remover", description: "Clean signatures from documents using AI.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
@@ -139,15 +137,15 @@ export default function Page() {
   const isSearching = searchQuery.trim().length > 0;
 
   return (
-    <main className="flex-1 bg-transparent w-full">
-      {/* Hero Section - Compact & Modern */}
-      <section className="relative pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 w-full">
+    <main className="flex-1 bg-transparent w-full flex flex-col items-center">
+      {/* Hero Section - ULTRA WIDE */}
+      <section className="relative w-full max-w-[1700px] pt-10 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="w-full max-w-[1600px] mx-auto px-8 md:px-16 relative z-10 text-center">
+        <div className="w-full px-8 md:px-16 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm">
             <Sparkles className="size-2.5" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
@@ -177,7 +175,7 @@ export default function Page() {
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
-                placeholder="Type any tool name... (e.g. 'passport', 'ocr', 'emi', 'unlock')"
+                placeholder="Type any tool name... (e.g. 'ocr', 'emi', 'unlock')"
                 className="w-full pl-14 pr-4 h-14 text-base rounded-xl bg-white dark:bg-slate-800 border-none shadow-xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -187,9 +185,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Tools Section */}
+      {/* Tools Section - ULTRA WIDE */}
       <section className="pt-16 pb-20 bg-background w-full flex justify-center">
-        <div className="w-full max-w-[1600px] px-8 md:px-16">
+        <div className="w-full max-w-[1700px] px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -226,7 +224,6 @@ export default function Page() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
                         <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
-                        <ToolCard icon={UserCircle} title="Passport Maker" description="Create professional ID photos with AI background removal." href="/passport-photo" colorClass="bg-orange-500" />
                         <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
                         <ToolCard icon={FileScan} title="Image to Text" description="Extract text from images using high-precision local OCR." href="/image-to-text" colorClass="bg-teal-600" />
                     </div>
@@ -262,9 +259,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full flex justify-center">
-        <div className="w-full max-w-[1600px] px-8 md:px-16">
+      {/* Features Section - ULTRA WIDE */}
+      <section className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem] w-full max-w-[1700px] flex justify-center mx-auto mb-20">
+        <div className="w-full px-8 md:px-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 uppercase tracking-tighter">The GR7 Standard</h2>
             <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-semibold italic">Native speed. 100% Client-side. No server footprints.</p>
@@ -274,33 +271,6 @@ export default function Page() {
             <FeatureItem icon={ShieldCheck} title="100% Private" description="Processing happens in your RAM. No server logs, no data risk." iconBg="bg-gradient-to-br from-green-400 to-green-600" />
             <FeatureItem icon={Zap} title="Native Speed" description="Execute tasks 10x faster using browser power." iconBg="bg-gradient-to-br from-blue-400 to-blue-600" />
             <FeatureItem icon={CheckCircle2} title="Verified Safe" description="Industry standard algorithms ensure zero artifacts." iconBg="bg-gradient-to-br from-purple-400 to-purple-600" />
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 relative overflow-hidden bg-transparent w-full flex justify-center">
-        <div className="w-full max-w-[1600px] px-8 md:px-16 relative z-10">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] p-10 md:p-20 text-center shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-[120px] rounded-full" />
-            
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter leading-tight text-slate-900 dark:text-white">
-                Ready for the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Next Generation?</span>
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg mb-10 max-w-2xl mx-auto font-semibold">
-                Join thousands of users using GR7 for secure, digital-first workflows. Free forever.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button asChild size="lg" className="h-14 px-12 rounded-xl text-base font-black bg-primary text-white shadow-xl hover:scale-105 transition-transform">
-                  <Link href="/tools">Get Started Now</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="h-14 px-12 rounded-xl text-base font-black border-2 hover:bg-slate-50">
-                  <a href="mailto:gaurav.thearmy@yahoo.com">Connect with Support</a>
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </section>

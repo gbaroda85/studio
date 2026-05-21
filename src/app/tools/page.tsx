@@ -347,7 +347,7 @@ function ToolsPageContent() {
 
   return (
     <main className="w-full px-4 md:px-12 lg:px-16 py-8 flex flex-col items-center">
-      <div className="w-full max-w-[1600px]">
+      <div className="w-full max-w-[1700px]">
         <div className="mb-12 text-center">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight font-headline uppercase">All Tools Hub</h1>
             <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto font-medium">Your one-stop-shop for file conversions, calculations, and more. Local processing for maximum speed.</p>
@@ -399,7 +399,7 @@ function ToolsPageContent() {
             <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="flex h-auto flex-wrap justify-center gap-3 bg-transparent p-0 mb-12">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                <TabsTrigger key={value} value={value} className="px-6 py-2.5 h-auto text-[10px] font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg hover:border-primary/50 hover:scale-105 transition-all">
+                <TabsTrigger key={value} value={value} className="px-6 py-2 h-auto text-[10px] font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg hover:border-primary/50 hover:scale-105 transition-all">
                     <Icon className={cn("mr-2 h-4 w-4", color)} />
                     {t(categoryKey)}
                 </TabsTrigger>
