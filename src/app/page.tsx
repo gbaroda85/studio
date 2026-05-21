@@ -17,19 +17,14 @@ import {
   Lock,
   LayoutGrid,
   CheckCircle2,
-  Cpu,
-  Calculator,
   Landmark,
   Cake,
-  Percent,
   Coins,
-  Receipt,
   Eraser,
-  Wand2,
   FileScan,
   PenLine,
+  Wand2,
 } from 'lucide-react';
-import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -56,7 +51,7 @@ const ALL_TOOLS = [
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
   <Link href={href} className="group">
     <Card className="h-full border-border/50 shadow-sm hover:shadow-2xl transition-all duration-500 bg-white dark:bg-slate-900 overflow-hidden relative rounded-2xl">
-      <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass.replace('bg-', 'bg-'))} />
+      <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-6">
         <div className={cn(`size-12 rounded-xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg`, colorClass)}>
           <Icon className="size-6" />
@@ -64,7 +59,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => 
         <h3 className="text-lg font-black mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors">{title}</h3>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2 leading-relaxed font-medium">{description}</p>
         <div className="flex items-center text-primary font-bold text-xs uppercase tracking-widest group-hover:gap-3 transition-all">
-          Launch Tool <ArrowRight className="ml-1 size-3" />
+          Try Tool <ArrowRight className="ml-1 size-3" />
         </div>
       </CardContent>
     </Card>
@@ -85,8 +80,8 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredTools = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
     return ALL_TOOLS.filter(tool => 
       tool.title.toLowerCase().includes(query) || 
       tool.description.toLowerCase().includes(query)
@@ -97,43 +92,46 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent">
-      {/* Ultra-Modern Hero Section */}
-      <section className="relative pt-20 pb-20 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5">
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-20 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.25em] mb-8 animate-fade-in-up shadow-sm">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-8 animate-fade-in-up shadow-sm">
             <Sparkles className="size-4" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-10 tracking-tighter animate-fade-in-up leading-[0.95]">
+          <h1 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter animate-fade-in-up leading-[0.95]">
             Professional Tools for <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Image & PDFs</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-12 font-semibold leading-relaxed opacity-90 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Fast, secure, and private browser-based online tools. 
-            Local processing, 100% private, zero server footprint.
+            Everything happens locally, 100% private.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <Button asChild size="lg" className="h-16 px-12 rounded-2xl text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/40 transition-all hover:scale-105 active:scale-95">
-              <Link href="/tools">Explore 40+ Tools</Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <Button asChild size="lg" className="h-14 px-10 rounded-xl text-md font-black bg-primary hover:bg-primary/90 shadow-xl transition-all hover:scale-105">
+              <Link href="/tools">Start Now</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-14 px-10 rounded-xl text-md font-black border-2 transition-all">
+              <Link href="/tools?tab=pdf">PDF Tools</Link>
             </Button>
           </div>
 
-          {/* Search Bridge - Overlaps Hero Bottom */}
-          <div className="max-w-3xl mx-auto relative group translate-y-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+          {/* Search Bridge */}
+          <div className="max-w-2xl mx-auto relative group translate-y-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-8 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
-                type="search"
-                placeholder="What do you want to fix today? (e.g. 'unlock aadhaar', 'resize photo')"
-                className="w-full pl-20 pr-8 h-20 text-lg rounded-[2.5rem] bg-white dark:bg-slate-800 border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:font-semibold"
+                type="text"
+                placeholder="Search tools... (e.g. 'compress', 'lock')"
+                className="w-full pl-16 pr-6 h-16 text-lg rounded-2xl bg-white dark:bg-slate-800 border-none shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -142,181 +140,114 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Main Tool Grid Section */}
-      <section className="pt-24 pb-32 bg-background">
+      {/* Tools Section */}
+      <section className="pt-16 pb-24 bg-background">
         <div className="container mx-auto px-4">
           
           {isSearching ? (
-            <div className="mb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-6">
-                  <div className="w-12 h-1.5 bg-primary rounded-full" /> {filteredTools.length} Result{filteredTools.length !== 1 ? 's' : ''} Found
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-8">
+                  <div className="w-8 h-1 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 {filteredTools.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filteredTools.map((tool, i) => (
                             <ToolCard key={i} {...tool} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-20 bg-muted/20 rounded-[3rem] border-2 border-dashed">
-                        <Search className="size-16 mx-auto mb-4 text-muted-foreground/30" />
-                        <h3 className="text-2xl font-black text-slate-400 uppercase">No tools matched your search</h3>
-                        <p className="text-muted-foreground font-medium mt-2">Try searching for keywords like 'PDF', 'Compress', or 'Resize'</p>
+                    <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed">
+                        <Search className="size-12 mx-auto mb-4 text-muted-foreground/30" />
+                        <h3 className="text-xl font-black text-slate-400 uppercase">No matching tools found</h3>
+                        <p className="text-muted-foreground font-medium mt-1">Try 'PDF', 'Compress', or 'Resize'</p>
                     </div>
                 )}
             </div>
           ) : (
             <>
-                {/* Image Tools */}
-                <div className="mb-24">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-                    <div className="text-left">
-                        <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-3">
-                        <div className="w-12 h-1.5 bg-primary rounded-full" /> Visual Processor
+                {/* Image Solutions */}
+                <div className="mb-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                        <div className="text-left">
+                            <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.2em] mb-2">
+                                <div className="w-8 h-1 bg-primary rounded-full" /> Image Solutions
+                            </div>
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Image Solutions</h2>
-                    </div>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Lightning fast visual optimization using browser-side GPU acceleration for professional results.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <ToolCard 
-                        icon={Shrink}
-                        title="AI Image Compress"
-                        description="Intelligent size reduction up to 95% with zero visual loss. Perfect for forms."
-                        href="/image-compress"
-                        colorClass="bg-blue-600"
-                    />
-                    <ToolCard 
-                        icon={Maximize}
-                        title="Smart Resize"
-                        description="Resize to exact pixels or MM for SSC, UPSC, and IBPS application forms."
-                        href="/image-resize"
-                        colorClass="bg-indigo-600"
-                    />
-                    <ToolCard 
-                        icon={FileOutput}
-                        title="Format Converter"
-                        description="Seamless conversion between WebP, PNG, JPG, and AVIF in seconds."
-                        href="/image-to-jpg"
-                        colorClass="bg-orange-600"
-                    />
-                    <ToolCard 
-                        icon={Sparkles}
-                        title="AI HD Enhancer"
-                        description="Fix blurry photos and restore lost details using local neural AI models."
-                        href="/enhance-photo"
-                        colorClass="bg-purple-600"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
+                        <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
+                        <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
+                        <ToolCard icon={Sparkles} title="AI HD Enhancer" description="Fix blurry photos and restore lost pixel data instantly." href="/enhance-photo" colorClass="bg-purple-600" />
                     </div>
                 </div>
 
-                {/* PDF Tools */}
-                <div className="mb-24">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-                    <div className="text-left">
-                        <div className="flex items-center gap-3 text-rose-600 font-black text-[11px] uppercase tracking-[0.2em] mb-3">
-                        <div className="w-12 h-1.5 bg-rose-600 rounded-full" /> Document Engine
+                {/* PDF Toolkit */}
+                <div className="mb-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                        <div className="text-left">
+                            <div className="flex items-center gap-3 text-rose-600 font-black text-[11px] uppercase tracking-[0.2em] mb-2">
+                                <div className="w-8 h-1 bg-rose-600 rounded-full" /> Document Engine
+                            </div>
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
-                    </div>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-md font-semibold text-base">Industrial grade PDF manipulation without ever uploading your sensitive files.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <ToolCard 
-                        icon={FileDigit}
-                        title="PDF Optimizer"
-                        description="Shrink massive PDFs for email and portal uploads instantly with text clarity."
-                        href="/compress-pdf"
-                        colorClass="bg-rose-600"
-                    />
-                    <ToolCard 
-                        icon={Scissors}
-                        title="Split & Extract"
-                        description="Visually select and extract specific pages with high precision extraction."
-                        href="/split-pdf"
-                        colorClass="bg-cyan-600"
-                    />
-                    <ToolCard 
-                        icon={Merge}
-                        title="Bulk Merge"
-                        description="Combine hundreds of documents into one organized, secure master file."
-                        href="/merge-pdf"
-                        colorClass="bg-emerald-600"
-                    />
-                    <ToolCard 
-                        icon={Lock}
-                        title="Vault Protect"
-                        description="Apply military-grade AES encryption and password protection to your files."
-                        href="/protect-pdf"
-                        colorClass="bg-slate-800"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <ToolCard icon={FileDigit} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
+                        <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
+                        <ToolCard icon={Merge} title="Bulk Merge" description="Combine multiple documents into one secure file." href="/merge-pdf" colorClass="bg-emerald-600" />
+                        <ToolCard icon={Lock} title="Vault Protect" description="Secure files with AES encryption and passwords." href="/protect-pdf" colorClass="bg-slate-800" />
                     </div>
-                    
-                    <div className="mt-20 text-center">
-                    <Button asChild variant="outline" className="h-16 px-10 rounded-2xl font-black text-primary hover:bg-primary/5 uppercase tracking-widest text-sm border-2 border-primary/20 shadow-lg">
-                        <Link href="/tools" className="flex items-center gap-3">View All 40+ Utilities <ArrowRight className="size-5" /></Link>
+                </div>
+                
+                <div className="text-center">
+                    <Button asChild variant="outline" className="h-14 px-8 rounded-xl font-black text-primary border-2 border-primary/20 shadow-md">
+                        <Link href="/tools">View All 40+ Utilities <ArrowRight className="ml-2 size-4" /></Link>
                     </Button>
-                    </div>
                 </div>
             </>
           )}
         </div>
       </section>
 
-      {/* Feature Highlighting Section */}
-      <section className="py-32 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[4rem]">
-        <div className="absolute top-0 right-0 size-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      {/* Features Section */}
+      <section className="py-24 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800 relative overflow-hidden rounded-[3rem]">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-24">
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-8 uppercase tracking-tighter">The GR7 Standard</h2>
-            <p className="text-xl text-slate-500 dark:text-slate-400 font-semibold max-w-2xl mx-auto">Our "Zero-Server" architecture means your sensitive files never leave your computer RAM.</p>
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tighter">The GR7 Standard</h2>
+            <p className="text-lg text-slate-500 dark:text-slate-400 font-semibold">Native speed. 100% Client-side. Zero server footprints.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
-            <FeatureItem 
-              icon={ShieldCheck}
-              title="100% Private"
-              description="Processing happens in your RAM. No server logs, no cloud storage, zero data risk for sensitive documents."
-              iconBg="bg-gradient-to-br from-green-400 to-green-600 shadow-green-500/40"
-            />
-            <FeatureItem 
-              icon={Zap}
-              title="Native Speed"
-              description="Why wait for uploads? Native browser code executes tasks 10x faster than cloud-based alternatives."
-              iconBg="bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-500/40"
-            />
-            <FeatureItem 
-              icon={CheckCircle2}
-              title="Verified Safe"
-              description="Industry standard algorithms ensure your files are optimized without any quality loss or compression artifacts."
-              iconBg="bg-gradient-to-br from-purple-400 to-purple-600 shadow-purple-500/40"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+            <FeatureItem icon={ShieldCheck} title="100% Private" description="Processing happens in your RAM. No server logs, no data risk." iconBg="bg-gradient-to-br from-green-400 to-green-600" />
+            <FeatureItem icon={Zap} title="Native Speed" description="Execute tasks 10x faster than cloud-based tools using browser power." iconBg="bg-gradient-to-br from-blue-400 to-blue-600" />
+            <FeatureItem icon={CheckCircle2} title="Verified Safe" description="Industry standard algorithms ensure zero artifacts or quality loss." iconBg="bg-gradient-to-br from-purple-400 to-purple-600" />
           </div>
         </div>
       </section>
 
-      {/* Final Premium CTA Section - Light Styled for Light Mode */}
-      <section className="py-40 relative overflow-hidden bg-transparent">
+      {/* CTA Section - Light in Light Mode */}
+      <section className="py-24 relative overflow-hidden bg-transparent">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[5rem] p-16 md:p-32 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 size-[800px] bg-primary/10 blur-[180px] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
-            <div className="absolute bottom-0 left-0 size-[600px] bg-accent/5 blur-[180px] rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3.5rem] p-12 md:p-24 text-center shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 size-96 bg-primary/5 blur-[120px] rounded-full" />
             
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-8xl font-black mb-10 tracking-tighter leading-tight text-slate-900 dark:text-white">
+              <h2 className="text-4xl md:text-6xl font-black mb-8 tracking-tighter leading-tight text-slate-900 dark:text-white">
                 Ready for the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Next Generation?</span>
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xl md:text-2xl mb-16 max-w-3xl mx-auto font-semibold leading-relaxed">
-                Join thousands of professionals using GR7 for secure, high-speed digital workflows. 100% Free, Forever.
+              <p className="text-slate-500 dark:text-slate-400 text-lg mb-12 max-w-2xl mx-auto font-semibold">
+                Join thousands of users using GR7 for secure, digital-first workflows. Free forever.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-                <Button asChild size="lg" className="h-20 px-14 rounded-3xl text-xl font-black bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <Button asChild size="lg" className="h-14 px-10 rounded-xl text-lg font-black bg-primary text-white shadow-xl hover:scale-105 transition-transform">
                   <Link href="/tools">Get Started Now</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-20 px-14 rounded-3xl text-xl font-black border-slate-200 dark:border-white/30 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md shadow-lg">
+                <Button asChild variant="outline" size="lg" className="h-14 px-10 rounded-xl text-lg font-black border-2">
                   <a href="mailto:gaurav.thearmy@yahoo.com">Contact Support</a>
                 </Button>
               </div>
