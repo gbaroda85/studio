@@ -3,9 +3,14 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
   
-  const tools = [
+  // Comprehensive list of all application routes for SEO
+  const routes = [
     '',
     '/tools',
+    '/privacy-policy',
+    '/terms-of-service',
+    
+    // Image Tools
     '/image-compress',
     '/image-resize',
     '/crop-image',
@@ -17,19 +22,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/image-to-jpg',
     '/image-to-png',
     '/image-to-pdf',
-    '/text-to-pdf',
-    '/html-to-pdf',
-    '/pdf-to-image',
+    
+    // PDF Tools
     '/compress-pdf',
     '/merge-pdf',
     '/split-pdf',
     '/crop-pdf',
     '/scan-to-pdf',
     '/unlock-pdf',
+    '/protect-pdf',
+    '/pdf-to-image',
+    '/html-to-pdf',
+    '/text-to-pdf',
     '/add-watermark',
     '/add-page-numbers',
-    '/create-zip',
-    '/unzip-file',
+    
+    // Calculator Tools
     '/standard-calculator',
     '/loan-calculator',
     '/age-calculator',
@@ -37,13 +45,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/fuel-cost-calculator',
     '/interest-calculator',
     '/sales-tax-calculator',
+    
+    // Converter Tools
     '/acceleration-converter',
     '/area-converter',
     '/fuel-converter',
-    '/pressure-converter'
+    '/pressure-converter',
+    
+    // File Tools
+    '/create-zip',
+    '/unzip-file'
   ];
 
-  return tools.map((route) => ({
+  return routes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily',
