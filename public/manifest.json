@@ -1,17 +1,28 @@
-
 {
-  "name": "GRs Multi Tools Kits Hub",
-  "short_name": "GRs Tools",
-  "description": "Free browser-based online tools for image compression, resizing, and PDF management.",
+  "name": "GR7 Image PDF Tools Hub",
+  "short_name": "GR7 Tools",
+  "description": "Fast, private, and secure browser-based online tools. Compress, convert, and edit images/PDFs with 100% privacy.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#7c3aed",
+  "background_color": "#ffffff",
+  "theme_color": "#9333ea",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/icon",
       "sizes": "32x32",
       "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/gr7icon/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/seed/gr7icon/512/512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
