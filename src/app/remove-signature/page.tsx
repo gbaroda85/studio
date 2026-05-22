@@ -7,17 +7,17 @@ import SignatureRemover from '@/components/signature-remover';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'AI Signature Remover - Extract Clean Signatures Online',
-  description: 'Clean signatures from document photos using AI. Create transparent PNG signatures for digital documents instantly and privately.',
+  title: 'AI Signature Extractor - Clean Signatures from Documents Online',
+  description: 'Extract clean, transparent signatures from document photos using local AI. Perfect for digital signing. 100% private and secure.',
 };
 
 export const dynamic = 'force-dynamic';
 
 const steps = [
-  "Upload Document: Select an image of a document or photo that has a signature.",
-  "Start Removal: Click the 'Remove Signature' button to let AI process the image.",
-  "Review: See the original and the cleaned version side-by-side.",
-  "Download: Click 'Download Image' to save your document without the signature.",
+  "Upload Document: Select an image of a signature on paper.",
+  "Start Removal: Click the 'Remove Signature' button to let AI process.",
+  "Fine-tune: Use sensitivity sliders to get a clean transparent result.",
+  "Download: Click 'Download Image' to save your signature as a transparent PNG.",
 ];
 
 export default function RemoveSignaturePage() {

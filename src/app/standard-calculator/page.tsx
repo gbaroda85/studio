@@ -7,16 +7,15 @@ import StandardCalculator from '@/components/standard-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Standard Calculator Online - Simple Math & Calculations',
-  description: 'A clean and simple online calculator for everyday math. Addition, subtraction, multiplication, and division made easy.',
+  title: 'Standard Calculator Online - Simple Math for Daily Use',
+  description: 'A clean and simple online calculator for everyday math. Addition, subtraction, multiplication, and division made easy in your browser.',
 };
 
 const steps = [
-    "Input Numbers: Use the number buttons to enter your first value.",
-    "Select Operator: Click an operator (+, -, *, /).",
-    "Input Second Number: Enter the second value for your calculation.",
-    "Get Result: Click the '=' button to see the result.",
-    "Clear: Use 'AC' to clear the entire calculation and start fresh.",
+    "Input: Type numbers or use on-screen buttons.",
+    "Operators: Select +, -, *, or /.",
+    "Result: Press '=' to get the final calculation.",
+    "AC: Use the clear button to start over.",
 ];
 
 export default function StandardCalculatorPage() {

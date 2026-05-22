@@ -7,15 +7,15 @@ import ZipCreator from '@/components/zip-creator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Create ZIP Online - Compress Multiple Files into Archive',
+  title: 'Create ZIP Archive Online - Bundle Multiple Files Free',
   description: 'Bundle and compress multiple files into a single ZIP archive instantly. Secure, fast, and works entirely in your browser memory.',
 };
 
 const steps = [
-    "Add Files: Drag and drop files into the upload area, or click to select multiple files.",
-    "Review Files: Your selected files will be listed. You can add more or remove them as needed.",
-    "Create Archive: Click the 'Create Zip' button.",
-    "Download: Once the zip archive is created, click 'Download Zip' to save it.",
+    "Add Files: Select or drop multiple files to bundle.",
+    "Review: Check the file list for accuracy.",
+    "Create: Click 'Create Zip' to bundle them in RAM.",
+    "Download: Save your new .zip archive instantly.",
 ];
 
 export default function CreateZipPage() {
@@ -30,7 +30,7 @@ export default function CreateZipPage() {
             </Button>
         </div>
         <div className="w-full flex justify-center">
-            <ZipCreator />
+             ZipCreator />
         </div>
         <HowToGuide title="Zip Creator" steps={steps} />
     </main>

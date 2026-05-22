@@ -7,16 +7,16 @@ import PdfWatermarker from '@/components/pdf-watermarker';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Add Watermark to PDF - Protect Your Documents Online',
-  description: 'Add custom text watermarks to your PDF files. Control opacity, rotation, and position. Secure local processing in your browser.',
+  title: 'Add Watermark to PDF Online - Protect Your Documents Fast',
+  description: 'Add custom text watermarks to your PDF files. Control opacity, rotation, and position. Secure local browser-based processing.',
 };
 
 const steps = [
-  "Upload PDF: Click the upload area or drag and drop your PDF file.",
-  "Enter Text: Type the text you want to use as a watermark.",
-  "Customize: Adjust the position, opacity, font size, and rotation to your liking.",
-  "Apply Watermark: Click the 'Apply Watermark' button.",
-  "Download: Once processed, click 'Download PDF' to save your watermarked file.",
+  "Upload PDF: Select the file you want to protect.",
+  "Enter Text: Type the watermark text (e.g., 'CONFIDENTIAL').",
+  "Customize: Adjust opacity, font size, and position.",
+  "Apply: Click 'Apply Watermark' to process locally.",
+  "Download: Save your watermarked document.",
 ];
 
 export default function AddWatermarkPage() {

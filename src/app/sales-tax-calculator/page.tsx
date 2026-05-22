@@ -7,15 +7,15 @@ import SalesTaxCalculator from '@/components/sales-tax-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Sales Tax Calculator - Calculate GST, VAT & Final Price',
+  title: 'Sales Tax Calculator - Calculate GST, VAT & Final Bill Amount',
   description: 'Quickly calculate sales tax or GST amount and find the final total price of any item. Simple tax calculation tool.',
 };
 
 const steps = [
-    "Enter Initial Price: Input the price of the item before tax.",
-    "Enter Tax Rate: Add the sales tax rate as a percentage.",
-    "Calculate: Click the 'Calculate Tax' button.",
-    "View Results: The calculator will show you the tax amount and the final total price.",
+    "Enter Price: Input the initial price before tax.",
+    "Set Rate: Add the tax percentage (e.g., 18% for GST).",
+    "Calculate: Click 'Calculate Tax' to see the final bill.",
+    "Result: View tax amount and total combined price.",
 ];
 
 export default function SalesTaxCalculatorPage() {

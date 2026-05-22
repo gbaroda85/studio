@@ -7,16 +7,15 @@ import PdfCropper from '@/components/pdf-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Crop PDF Online - Trim PDF Pages Privately',
-  description: 'Remove unwanted margins or select specific areas of your PDF pages. Fast, secure, and works locally in your browser without uploading files.',
+  title: 'Crop PDF Online - Trim PDF Page Margins Privately',
+  description: 'Remove unwanted margins or select specific areas of your PDF pages. Fast, secure, and works locally without uploading files.',
 };
 
 const steps = [
-    "Upload PDF: Select a PDF file from your computer.",
-    "Navigate Pages: Use the arrow buttons to find the page you want to crop.",
-    "Select Area: Drag the selection box over the part of the page you want to keep.",
-    "Crop Page: Click the 'Crop Page' button.",
-    "Download: A new PDF containing only your cropped page will be created. Click 'Download' to save it.",
+    "Upload PDF: Select a file from your device.",
+    "Select Area: Drag handles to crop a specific page.",
+    "Apply: Click 'Crop Page' to process locally.",
+    "Download: Save your cropped PDF document.",
 ];
 
 export default function CropPdfPage() {

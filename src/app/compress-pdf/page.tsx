@@ -7,8 +7,8 @@ import PdfCompressor from '@/components/pdf-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'PDF Compressor - Shrink PDF to 100kb, 200kb, 500kb Online',
-  description: 'Reduce PDF file size without losing text clarity. Target specific file sizes for job portals and email attachments. 100% private local compression.',
+  title: 'PDF Optimizer - Shrink PDF to 100kb, 200kb, 500kb Online',
+  description: 'Reduce PDF file size without losing text clarity. Targeted optimization for job portals and email. 100% secure local browser-based compression.',
 };
 
 const steps = [

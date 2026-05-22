@@ -7,15 +7,15 @@ import AccelerationConverter from '@/components/acceleration-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Acceleration Unit Converter - m/s², km/h², g-force',
+  title: 'Acceleration Converter - m/s², km/h², g-force Units Online',
   description: 'Instant acceleration unit conversion. Convert between meters per second squared, standard gravity, and more. Precise and fast.',
 };
 
 const steps = [
-    "Enter Value: Type the numeric value you want to convert in the 'Value' field.",
-    "Select From Unit: Choose the starting unit of acceleration from the first dropdown.",
-    "Select To Unit: Choose the target unit of acceleration from the second dropdown.",
-    "View Result: The converted value is automatically displayed in the result box.",
+    "Enter Value: Type the numeric value you want to convert.",
+    "Select Units: Choose the 'From' and 'To' acceleration units.",
+    "View Result: The converted value is automatically updated.",
+    "Units: Supports m/s², g-force, ft/s², and more.",
 ];
 
 export default function AccelerationConverterPage() {

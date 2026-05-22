@@ -7,8 +7,8 @@ import LoanCalculator from '@/components/loan-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Loan & EMI Calculator - Home, Car, Personal Loan EMI',
-  description: 'Calculate your monthly EMI, total interest, and total payment for any loan. Simple and accurate financial planning tool for India.',
+  title: 'Loan EMI Calculator - Home, Car, Personal Loan EMI Online',
+  description: 'Calculate your monthly EMI, total interest, and total payment for any loan. Simple and accurate financial planning tool with local processing.',
 };
 
 const steps = [

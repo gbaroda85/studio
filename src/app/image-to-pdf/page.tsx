@@ -7,8 +7,8 @@ import ImageToPdfConverter from '@/components/image-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image to PDF Converter - Convert Photos to PDF Online',
-  description: 'Easily convert JPG, PNG, and WEBP images into a single high-quality PDF document. 100% private, no server uploads, works locally in your browser.',
+  title: 'Image to PDF Converter - Convert Photos to PDF Online Free',
+  description: 'Easily convert JPG, PNG, and WEBP images into a single high-quality PDF document. 100% private, no server uploads, works entirely in your browser.',
 };
 
 const steps = [

@@ -7,8 +7,8 @@ import ImageToTextConverter from '@/components/image-to-text-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image to Text (OCR) - Extract Text from Photos Online',
-  description: 'AI-powered OCR tool to extract text from documents, screenshots, and handwritten notes. Supports English and Hindi.',
+  title: 'Image to Text (OCR) - Extract Text from Photos Online Securely',
+  description: 'AI-powered local OCR tool to extract text from documents, screenshots, and notes. Supports English and Hindi with 100% privacy.',
 };
 
 export const dynamic = 'force-dynamic';

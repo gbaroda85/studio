@@ -7,16 +7,15 @@ import ImageCropper from '@/components/image-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Smart Image Cropper - Crop, Rotate & Fix Perspective',
+  title: 'Smart Image Cropper - Crop, Rotate & Fix Perspective Online',
   description: 'Advanced image cropping tool. Fix tilted documents, crop photos to exact ratios, and export in high quality. 100% secure local processing.',
 };
 
 const steps = [
-    "Upload Image: Select an image from your device by clicking the upload area or dragging it in.",
-    "Select Area: Drag the handles on the image to select the area you want to keep.",
-    "Choose Format: Select your desired output format (JPEG, PNG, or WEBP).",
-    "Crop: Click the 'Crop Image' button.",
-    "Download: Preview your result and click 'Download' to save the cropped image.",
+    "Upload: Select an image from your device.",
+    "Adjust: Drag handles to select area or use scanner mode.",
+    "Edit: Rotate or flip if needed.",
+    "Download: Save your perfectly cropped image.",
 ];
 
 export default function CropImagePage() {

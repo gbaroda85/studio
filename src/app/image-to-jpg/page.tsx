@@ -7,15 +7,15 @@ import ImageConverter from '@/components/image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image to JPG Converter - Convert PNG/WEBP to JPG',
-  description: 'Convert any image format to standard high-quality JPG format. Simple, fast, and secure local image conversion.',
+  title: 'Image to JPG Converter - Convert PNG, WEBP, BMP to JPG Online',
+  description: 'Convert any image format to standard high-quality JPG. Simple, fast, and secure local image conversion in your browser.',
 };
 
 const steps = [
-    "Upload Image: Choose any image file (like PNG, WEBP, etc.) to convert.",
-    "Select Format: The format is pre-selected. You can change it if needed.",
-    "Convert: Click the 'Convert to JPG' button.",
-    "Download: Once the conversion is complete, click 'Download Image' to save your new JPG file.",
+    "Upload: Choose any image (PNG, WEBP, etc.).",
+    "Format: Ensure JPG/JPEG is selected.",
+    "Process: Click convert to transform locally.",
+    "Save: Download your new JPG file.",
 ];
 
 export default function ImageToJpgPage() {

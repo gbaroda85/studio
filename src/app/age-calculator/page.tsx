@@ -8,14 +8,14 @@ import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
   title: 'Age Calculator Online - Exact Age in Years, Months, Days',
-  description: 'Calculate your exact age and find out how many days are left until your next birthday. Simple, accurate, and free online age tool.',
+  description: 'Calculate your exact age and find out days left for your next birthday. Simple, accurate, and free online tool with local calculation.',
 };
 
 const steps = [
-    "Select Date: Click on the date input field to open the calendar.",
-    "Pick Your Birthday: Navigate through the months and years and select your date of birth.",
-    "Calculate: Click the 'Calculate Age' button.",
-    "View Results: Your age in years, months, and days, along with your next birthday and the day you were born, will be displayed.",
+    "Select Date: Click the input to open the calendar.",
+    "Pick Birthday: Choose your birth date and year.",
+    "Calculate: Click 'Calculate Age' to see instant results.",
+    "Review: See your age in years, months, and days.",
 ];
 
 export default function AgeCalculatorPage() {

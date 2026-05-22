@@ -7,15 +7,15 @@ import HtmlToPdfConverter from '@/components/html-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'HTML to PDF Converter - Convert Web Code to Document',
-  description: 'Convert raw HTML code into professional PDF documents instantly. Perfect for developers and designers. Secure local processing.',
+  title: 'HTML to PDF Converter - Convert Web Code to Professional Document',
+  description: 'Convert raw HTML code into professional PDF documents instantly. 100% private local processing for developers and designers.',
 };
 
 const steps = [
   "Paste HTML: Write or paste your HTML code directly into the editor.",
   "Convert: Click the 'Convert to PDF' button to start the process.",
-  "Preview: A preview of your PDF will be generated and displayed.",
-  "Download: Click 'Download PDF' to save your new PDF file.",
+  "Preview: A preview of your PDF will be generated instantly.",
+  "Download: Click 'Download PDF' to save your new file.",
 ];
 
 export default function HtmlToPdfPage() {

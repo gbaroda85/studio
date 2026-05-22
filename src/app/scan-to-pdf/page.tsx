@@ -7,17 +7,15 @@ import ScannerToPdf from '@/components/scanner-to-pdf';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Scan to PDF - Turn Camera into Document Scanner',
-  description: 'Scan physical documents using your mobile or desktop camera and save them as a PDF. Local, secure, and easy to use.',
+  title: 'Scan to PDF - Turn Device Camera into Mobile Document Scanner',
+  description: 'Scan physical documents using your mobile or desktop camera and save as PDF. 100% local, secure, and easy doc scanning.',
 };
 
 const steps = [
-    "Allow Camera: Give your browser permission to use the camera.",
-    "Position Document: Place your document in front of the camera.",
-    "Scan Page: Click the 'Scan Current Page' button. A crop tool will appear.",
-    "Crop & Confirm: Adjust the crop area and click 'Add to Document'.",
-    "Repeat: Scan additional pages as needed. They will be added to the document.",
-    "Create & Download: Once all pages are scanned, click 'Create PDF' and then 'Download PDF'.",
+    "Camera: Allow browser permission to use camera.",
+    "Position: Place document in front of camera.",
+    "Capture: Scan and crop each page.",
+    "Bundle: Create and download your multi-page PDF.",
 ];
 
 export default function ScanToPdfPage() {

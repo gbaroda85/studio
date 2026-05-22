@@ -7,14 +7,14 @@ import Unzipper from '@/components/unzipper';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Unzip File Online - Extract ZIP Archives Safely',
-  description: 'Extract contents from ZIP files instantly in your browser. No file uploads required. 100% private and secure extraction tool.',
+  title: 'Unzip File Online - Extract ZIP Archives Safely and Privately',
+  description: 'Extract contents from ZIP files instantly in your browser. No server uploads. 100% private and secure extraction tool.',
 };
 
 const steps = [
-    "Upload Zip File: Drag and drop your .zip file or click to select it.",
-    "Process: The tool will automatically begin extracting the contents.",
-    "View & Download: The list of extracted files will appear. Click 'Download' next to any file to save it individually.",
+    "Upload: Drag and drop your .zip file.",
+    "Process: The tool extracts contents locally in RAM.",
+    "Download: Save individual files from the archive.",
 ];
 
 export default function UnzipFilePage() {

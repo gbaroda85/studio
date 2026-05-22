@@ -7,18 +7,18 @@ import BackgroundRemover from '@/components/background-remover';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'AI Background Remover - Remove BG from Photos Online',
-  description: 'Professional AI tool to remove background from images instantly. Create high-definition passport photos and transparent PNGs.',
+  title: 'AI Background Remover - Remove BG from Photos Online Instantly',
+  description: 'Professional local AI tool to remove background from images. Create high-definition transparent PNGs or passport photos with custom backgrounds.',
 };
 
 export const dynamic = 'force-dynamic';
 
 const steps = [
-  "Upload Image: Select an image with a clear subject by clicking the upload area or dragging it in.",
-  "Optional Crop: Use 'Set Size & Crop' to align the face if making a passport photo.",
+  "Upload Image: Select an image with a clear subject.",
+  "Optional Crop: Use 'Set Size & Crop' to align for a passport photo.",
   "AI Removal: The tool will automatically extract the subject in high definition.",
-  "Customise: Choose professional background colors (Blue/White) and add a border.",
-  "Download: Click 'Download HD Photo' to save as a transparent or solid background PNG.",
+  "Customise: Choose professional background colors (Blue/White).",
+  "Download: Click 'Download HD Photo' to save as a transparent or solid PNG.",
 ];
 
 export default function RemoveBackgroundPage() {
@@ -35,7 +35,7 @@ export default function RemoveBackgroundPage() {
         <div className="w-full flex justify-center">
             <BackgroundRemover />
         </div>
-        <HowToGuide title="AI Background Remover & ID Photo Maker" steps={steps} />
+        <HowToGuide title="AI Background Remover" steps={steps} />
     </main>
   );
 }

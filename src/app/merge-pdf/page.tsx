@@ -7,8 +7,8 @@ import PdfMerger from '@/components/pdf-merger';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Merge PDF Online - Combine Multiple PDFs into One',
-  description: 'Securely combine hundreds of PDF documents into a single file. 100% private processing locally in your browser.',
+  title: 'Merge PDF Online - Combine Multiple PDFs into One Document',
+  description: 'Securely combine hundreds of PDF documents into a single file. 100% private processing locally in your browser with zero data storage.',
 };
 
 const steps = [

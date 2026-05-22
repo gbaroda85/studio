@@ -7,15 +7,14 @@ import FuelConverter from '@/components/fuel-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Fuel Consumption Converter - km/L to MPG Online',
-  description: 'Convert fuel efficiency units instantly. Support for km/L, MPG (US), MPG (UK), and L/100km. Simple and accurate vehicle tool.',
+  title: 'Fuel Consumption Converter - km/L to MPG Online Free',
+  description: 'Convert fuel efficiency units instantly. Support for km/L, MPG (US), MPG (UK), and L/100km. Simple vehicle mileage tool.',
 };
 
 const steps = [
-    "Enter Value: Type the numeric value you want to convert in the 'Value' field.",
-    "Select From Unit: Choose the starting unit of fuel consumption from the first dropdown.",
-    "Select To Unit: Choose the target unit of fuel consumption from the second dropdown.",
-    "View Result: The converted value is automatically displayed in the result box.",
+    "Enter Value: Input the efficiency number to convert.",
+    "Select Units: Choose between km/L, MPG, or L/100km.",
+    "Instant Result: The tool updates results as you type.",
 ];
 
 export default function FuelConverterPage() {

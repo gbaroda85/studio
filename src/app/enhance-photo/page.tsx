@@ -7,17 +7,17 @@ import PhotoEnhancer from '@/components/photo-enhancer';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'AI Photo Enhancer - Fix Blurry & Dark Photos Online',
-  description: 'Automatically improve photo quality, brightness, and sharpness using local AI. Professional photo enhancement with 100% privacy.',
+  title: 'AI Photo Enhancer - Fix Blurry & Dark Photos Online HD',
+  description: 'Automatically improve photo quality, brightness, and sharpness using local browser-based AI. Professional enhancement with zero data risk.',
 };
 
 export const dynamic = 'force-dynamic';
 
 const steps = [
   "Upload Photo: Select any photo you want to improve.",
-  "Start Enhancing: Click the 'Enhance Photo' button to let the AI work its magic.",
-  "Compare: See a side-by-side comparison of your original and the new, enhanced photo.",
-  "Download: Click 'Download Image' to save the improved version.",
+  "Auto-Enhance: Click 'Auto-Enhance' to optimize lighting and colors.",
+  "Manual Adjust: Use sliders for brightness, contrast, and sharpness.",
+  "Download: Click 'Download Image' to save your HD enhanced photo.",
 ];
 
 export default function EnhancePhotoPage() {

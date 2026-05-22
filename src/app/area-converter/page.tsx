@@ -7,15 +7,15 @@ import AreaConverter from '@/components/area-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Area Converter - Convert Acre, Hectare, Sq Ft, Sq Meter',
-  description: 'Easily convert between different area units like Acres, Hectares, Square Feet, and Square Meters. Perfect for land and real estate measurements.',
+  title: 'Area Converter - Acre, Hectare, Sq Ft, Sq Meter Units Online',
+  description: 'Convert between different area units like Acres, Hectares, Square Feet, and Square Meters. Perfect for land measurements.',
 };
 
 const steps = [
-    "Enter Value: Type the numeric value you want to convert in the 'Value' field.",
-    "Select From Unit: Choose the starting unit of area from the first dropdown.",
-    "Select To Unit: Choose the target unit of area from the second dropdown.",
-    "View Result: The converted value is automatically displayed in the result box.",
+    "Enter Value: Input the area value to be converted.",
+    "Choose Units: Select your 'From' and 'To' units.",
+    "Instant Result: See the converted value automatically.",
+    "Units: Supports Acre, Bigha, Hectare, Sq Ft, and more.",
 ];
 
 export default function AreaConverterPage() {

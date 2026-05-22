@@ -7,8 +7,8 @@ import PdfUnlocker from '@/components/pdf-unlocker';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Unlock PDF - Remove Password from Aadhaar & Bank PDFs',
-  description: 'Remove password protection from encrypted PDFs locally. Works for Aadhaar cards, bank statements, and more.',
+  title: 'Universal PDF Unlocker - Remove Password from Aadhaar & Bank PDFs',
+  description: 'Remove password protection from encrypted PDFs locally. 100% private tool for Aadhaar cards, bank statements, and credit card bills. No data leaves your device.',
 };
 
 const steps = [

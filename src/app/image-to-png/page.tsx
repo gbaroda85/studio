@@ -7,15 +7,15 @@ import ImageConverter from '@/components/image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image to PNG Converter - Convert JPG to Transparent PNG',
-  description: 'Convert JPG, WEBP, or BMP images to high-quality PNG format. Keep your documents clear and professional.',
+  title: 'Image to PNG Converter - Convert JPG to Transparent PNG Online',
+  description: 'Convert JPG, WEBP, or BMP images to high-quality PNG. Keep documents clear and professional with local browser processing.',
 };
 
 const steps = [
-    "Upload Image: Choose any image file (like JPG, WEBP, etc.) to convert.",
-    "Select Format: The format is pre-selected. You can change it if needed.",
-    "Convert: Click the 'Convert to PNG' button.",
-    "Download: Once the conversion is complete, click 'Download Image' to save your new PNG file.",
+    "Upload: Select your image (JPG, BMP, etc.).",
+    "Target: Choose PNG as output format.",
+    "Convert: Click to process instantly in RAM.",
+    "Save: Download your high-quality PNG.",
 ];
 
 export default function ImageToPngPage() {

@@ -7,16 +7,15 @@ import FuelCostCalculator from '@/components/fuel-cost-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Fuel Cost Calculator - Estimate Trip Petrol/Diesel Cost',
-  description: 'Plan your road trip budget. Calculate total fuel required and estimated cost based on distance and vehicle efficiency.',
+  title: 'Fuel Cost Calculator - Estimate Trip Petrol & Diesel Expense',
+  description: 'Plan your road trip budget. Calculate fuel required and estimated total cost based on distance and mileage.',
 };
 
 const steps = [
-    "Enter Trip Distance: Input the total distance of your trip in kilometers.",
-    "Enter Fuel Efficiency: Add your vehicle's average fuel efficiency in kilometers per liter (km/L).",
-    "Enter Fuel Price: Input the current price of fuel per liter in your area.",
-    "Calculate: Click the 'Calculate Trip Cost' button.",
-    "View Results: The calculator will show you the total fuel required for the trip and the estimated total cost.",
+    "Distance: Input the trip distance in Kilometers.",
+    "Efficiency: Add your vehicle's average mileage (km/L).",
+    "Price: Input current fuel price per liter.",
+    "Calculate: Click 'Calculate Trip Cost' to get your estimate.",
 ];
 
 export default function FuelCostCalculatorPage() {

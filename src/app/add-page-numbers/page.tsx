@@ -7,15 +7,15 @@ import PdfPageNumberer from '@/components/pdf-page-numberer';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Add Page Numbers to PDF Online - Customize Style & Position',
-  description: 'Easily insert page numbers into your PDF documents. Choose positions, font sizes, and formats. 100% private browser-based tool.',
+  title: 'Add Page Numbers to PDF Online - Customize Position & Format',
+  description: 'Easily insert page numbers into your PDF documents. Choose positions, font sizes, and ranges. 100% private browser-based tool.',
 };
 
 const steps = [
-  "Upload PDF: Click the upload area or drag and drop your PDF file.",
-  "Customize: Adjust the position, format, font size, and select the pages to number.",
-  "Add Numbers: Click the 'Add Page Numbers' button.",
-  "Download: Once processed, click 'Download PDF' to save your file with page numbers.",
+  "Upload PDF: Select your PDF document.",
+  "Customize: Adjust the position, format, and font size.",
+  "Add Numbers: Click 'Add Page Numbers' to process locally.",
+  "Download: Save your file with page numbers added.",
 ];
 
 export default function AddPageNumbersPage() {

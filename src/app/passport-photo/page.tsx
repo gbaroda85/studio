@@ -7,8 +7,8 @@ import PassportPhotoMaker from '@/components/passport-photo-maker';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Professional Passport Photo Maker - Create ID Photos Online',
-  description: 'Make passport-sized photos for India, USA, and other countries. AI background removal and professional suit change included. 100% private.',
+  title: 'Professional Passport Photo Maker - Create ID Photos Online with Suit Change',
+  description: 'Create passport-sized photos for India, USA, and other countries. Features AI background removal and professional suit change. 100% private local processing.',
 };
 
 export default function PassportPhotoPage() {
@@ -16,8 +16,8 @@ export default function PassportPhotoPage() {
     "Upload Photo: Select a clear photo of your face.",
     "Select Size: Choose a country preset (like India 3.5x4.5cm).",
     "AI Background: Click 'AI REMOVE' to clear the background locally.",
-    "Change Clothes: Select from professional suits or shirts (Always visible).",
-    "Manual Fix: If AI cuts any part, use the 'Refine' brush to restore it.",
+    "Change Clothes: Select from professional suits or shirts.",
+    "Refine: Use the positioning tools to align your face perfectly.",
     "Download: Save your high-quality passport photo."
   ];
 

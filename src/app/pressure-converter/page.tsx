@@ -7,15 +7,14 @@ import PressureConverter from '@/components/pressure-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Pressure Converter - Bar, PSI, Pa, ATM Conversion',
-  description: 'Instant pressure unit conversion. Convert between Pascal, Bar, PSI, and Atmosphere units. Precise and user-friendly.',
+  title: 'Pressure Converter - Bar, PSI, Pa, ATM Units Online',
+  description: 'Instant pressure unit conversion. Convert between Pascal, Bar, PSI, and Atmosphere units. Precise and user-friendly converter.',
 };
 
 const steps = [
-    "Enter Value: Type the numeric value you want to convert in the 'Value' field.",
-    "Select From Unit: Choose the starting unit of pressure from the first dropdown.",
-    "Select To Unit: Choose the target unit of pressure from the second dropdown.",
-    "View Result: The converted value is automatically displayed in the result box.",
+    "Value: Enter the pressure numeric value.",
+    "Units: Choose from Pa, Bar, PSI, ATM, or Torr.",
+    "Result: View accurate conversion results instantly.",
 ];
 
 export default function PressureConverterPage() {

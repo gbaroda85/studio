@@ -7,15 +7,15 @@ import TextToPdfConverter from '@/components/text-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Text to PDF Converter - Create Clean Documents Online',
-  description: 'Convert plain text into professional PDF files. Customize fonts, sizes, and margins. 100% private browser processing.',
+  title: 'Text to PDF Converter - Create Clean PDF Documents Online',
+  description: 'Convert plain text into professional PDF files. Customize fonts, sizes, and margins locally in your browser for 100% privacy.',
 };
 
 const steps = [
   "Enter Text: Paste or type your text into the editor.",
-  "Customize (Optional): Choose your preferred font, font size, and margins.",
-  "Generate PDF: Click the 'Create PDF' button.",
-  "Download: A preview will appear. Click 'Download PDF' to save your file.",
+  "Customize: Choose your preferred font, size, and margins.",
+  "Generate: Click the 'Create PDF' button.",
+  "Download: Preview your document and save it to your device.",
 ];
 
 export default function TextToPdfPage() {

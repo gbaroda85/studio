@@ -7,15 +7,15 @@ import PdfToImageConverter from '@/components/pdf-to-image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'PDF to Image Converter - Extract Pages as JPG/PNG',
-  description: 'Convert every page of your PDF into high-quality JPG or PNG images. Fast extraction without uploading files to any server.',
+  title: 'PDF to Image Converter - Extract PDF Pages as JPG/PNG High Quality',
+  description: 'Convert every page of your PDF into high-quality JPG or PNG images. Fast, secure extraction without uploading files to any server.',
 };
 
 const steps = [
     "Upload PDF: Select the PDF you want to convert.",
     "Choose Format: Select whether you want PNG or JPEG images.",
     "Process: The tool will automatically extract each page as a separate image.",
-    "Download: You can download individual images or click 'Download All (.zip)' to get all images in a single archive.",
+    "Download: Download individual images or 'Download All (.zip)'.",
 ];
 
 export default function PdfToImagePage() {

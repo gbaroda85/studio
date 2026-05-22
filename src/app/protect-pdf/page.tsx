@@ -7,15 +7,15 @@ import PdfProtector from '@/components/pdf-protector';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Vault Protect PDF - Add Password & AES Encryption Online',
-  description: 'Secure your PDF files with strong passwords and AES encryption. 100% private, files never leave your device. Adobe compatible.',
+  title: 'Vault Protect PDF - Add Password & AES Encryption Online Securely',
+  description: 'Secure your PDF files with strong passwords and AES-128 encryption. 100% private, files never leave your device. Adobe Reader compatible.',
 };
 
 const steps = [
     "Upload PDF: Select the PDF file you want to secure.",
-    "Set Password: Enter a strong password in the input field.",
-    "Protect: Click the 'Protect PDF' button to encrypt the file.",
-    "Download: Click 'Download Protected PDF' to save your new password-protected file.",
+    "Set Password: Enter and confirm a strong password.",
+    "Protect: Click 'Protect PDF' to encrypt the file locally.",
+    "Download: Save your new password-protected PDF.",
 ];
 
 export default function ProtectPdfPage() {

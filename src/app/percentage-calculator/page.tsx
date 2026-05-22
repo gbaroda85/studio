@@ -7,15 +7,15 @@ import PercentageCalculator from '@/components/percentage-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Percentage Calculator - Marks, Ratios & Fractions',
-  description: 'Calculate percentages of marks, parts of wholes, and ratios instantly. Perfect for students and everyday calculations.',
+  title: 'Percentage Calculator - Marks, Ratios & School Result Percentages',
+  description: 'Calculate percentages for marks, ratios, and fractions instantly. Perfect for students and professional calculations.',
 };
 
 const steps = [
-    "Choose Mode: Select the type of calculation you need: 'Simple', 'Part/Whole', 'Marks', or 'Ratio'.",
-    "Enter Values: Fill in the required input fields for your chosen mode.",
-    "Calculate: Click the 'Calculate' button.",
-    "See Result: The result will be instantly displayed below the inputs.",
+    "Choose Mode: Select between 'Simple', 'Marks', or 'Ratio'.",
+    "Enter Values: Fill in the numbers required for your calculation.",
+    "Calculate: Click 'Calculate' to see the result instantly.",
+    "Clear: Use the reset button for a fresh calculation.",
 ];
 
 export default function PercentageCalculatorPage() {

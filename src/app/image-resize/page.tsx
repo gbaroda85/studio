@@ -7,13 +7,13 @@ import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image Resizer - Resize for SSC, UPSC, IBPS Application Forms',
-  description: 'Exact pixel and mm resizing for govt job application forms. Resize photos to 200x230px and signatures to 140x60px instantly and privately.',
+  title: 'Smart Image Resizer - Resize for SSC, UPSC, IBPS Application Forms',
+  description: 'Exact pixel and mm resizing for government job forms. Resize photos to 200x230px and signatures to 140x60px instantly and privately.',
 };
 
 const steps = [
     "Upload Image: Select the image you want to resize.",
-    "Enter Dimensions: Input your desired width and/or height in pixels. Check 'Maintain aspect ratio' to avoid distortion.",
+    "Enter Dimensions: Input your desired width/height in pixels or MM.",
     "Choose Format: Select the output format (PNG, JPEG, or WEBP).",
     "Resize: Click the 'Resize Image' button.",
     "Download: Preview your resized image and click 'Download' to save it.",

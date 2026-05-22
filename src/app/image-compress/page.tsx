@@ -7,8 +7,8 @@ import ImageCompressor from '@/components/image-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Image Compressor - Compress JPG/PNG to 20kb, 50kb, 100kb',
-  description: 'Reduce image file size instantly for SSC, UPSC, and IBPS application forms. Professional compression with zero quality loss.',
+  title: 'AI Image Compressor - Compress JPG/PNG to 20kb, 50kb, 100kb Online',
+  description: 'Reduce image file size instantly for SSC, UPSC, and IBPS application forms. Professional local compression with zero quality loss and 100% privacy.',
 };
 
 const steps = [

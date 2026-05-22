@@ -7,17 +7,15 @@ import InterestCalculator from '@/components/interest-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Interest Calculator - Simple & Compound Interest Online',
-  description: 'Calculate simple and compound interest for your savings or loans. Get accurate total amounts and interest breakdowns instantly.',
+  title: 'Interest Calculator - Simple & Compound Interest Online India',
+  description: 'Calculate simple and compound interest for your savings or loans. Get accurate total amounts and breakdowns instantly.',
 };
 
 const steps = [
-    "Select Interest Type: Choose between 'Simple' or 'Compound' interest.",
-    "Enter Principal: Input the initial amount of money.",
-    "Enter Rate: Add the annual interest rate.",
-    "Enter Time Period: Input the duration and select whether it's in years or months.",
-    "Calculate: Click the 'Calculate Interest' button.",
-    "View Results: The calculator will show you the total interest earned and the final total amount.",
+    "Select Type: Choose between 'Simple' or 'Compound'.",
+    "Enter Amount: Input the principal sum (Initial amount).",
+    "Set Rate: Add the annual interest percentage.",
+    "Calculate: Click 'Calculate Interest' to see your earnings.",
 ];
 
 export default function InterestCalculatorPage() {

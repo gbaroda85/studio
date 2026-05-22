@@ -7,13 +7,13 @@ import PdfSplitter from '@/components/pdf-splitter';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const metadata: Metadata = {
-  title: 'Split PDF Online - Extract Pages from PDF Document',
-  description: 'Visually select and extract specific pages from any PDF file. Split large PDFs into smaller ones locally and securely.',
+  title: 'Split PDF Online - Visually Extract Pages from PDF Document',
+  description: 'Visually select and extract specific pages from any PDF file. Split large PDFs into smaller ones locally and securely in your browser.',
 };
 
 const steps = [
     "Upload PDF: Choose the PDF file you want to split. The total number of pages will be shown.",
-    "Enter Ranges: Specify pages to extract. e.g., '1-3' for a range, '5' for a single page, or combine them like '1-3, 5, 8'.",
+    "Enter Ranges: Specify pages to extract. e.g., '1-3' for a range, '5' for a single page.",
     "Split: Click the 'Split PDF' button.",
     "Download: A new PDF with your selected pages will be created. Click 'Download Split PDF' to save it.",
 ];
