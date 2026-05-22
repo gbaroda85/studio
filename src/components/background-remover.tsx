@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -169,7 +168,11 @@ export default function BackgroundRemover() {
     const croppedData = canvas.toDataURL('image/png'); // Use PNG for quality
     setCroppedImageSrc(croppedData);
     setStage('process');
-    handleRemoveBackgroundLocal(croppedData);
+    
+    // Give UI a moment to show the processing state before heavy WASM kicks in
+    setTimeout(() => {
+      handleRemoveBackgroundLocal(croppedData);
+    }, 100);
   };
 
   const handleRemoveBackgroundLocal = async (source: string) => {
@@ -349,7 +352,11 @@ export default function BackgroundRemover() {
                       <Button variant="outline" className="font-black border-2 border-primary text-primary" onClick={() => setStage('crop')}>
                           <CropIcon className="mr-2" /> SET SIZE & CROP
                       </Button>
-                      <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); handleRemoveBackgroundLocal(originalImageSrc!); }}>
+                      <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={() => { 
+                          setCroppedImageSrc(originalImageSrc); 
+                          setStage('process'); 
+                          setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 100);
+                      }}>
                           REMOVE BACKGROUND <ChevronRight className="ml-2" />
                       </Button>
                   </div>
@@ -442,7 +449,7 @@ export default function BackgroundRemover() {
                 </CardHeader>
                 <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[500px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
                     {isProcessing ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8 transform-gpu">
                             <div className="relative">
                                 <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
                                 <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
@@ -586,4 +593,3 @@ export default function BackgroundRemover() {
     </div>
   );
 }
-

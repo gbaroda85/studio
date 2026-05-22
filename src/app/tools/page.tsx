@@ -371,8 +371,8 @@ function ToolsPageContent() {
       </section>
 
       <div className="w-full max-w-[2000px] px-8 md:px-16">
-        {/* Search Bar - Wide Layout */}
-        <div className="relative mb-20 max-w-4xl mx-auto -mt-8 relative z-20">
+        {/* Search Bar - Wide Layout - REDUCED BOTTOM MARGIN */}
+        <div className="relative mb-10 max-w-4xl mx-auto -mt-8 relative z-20">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
