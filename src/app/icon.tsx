@@ -11,32 +11,58 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-// Image generation
 export default function Icon() {
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
-          fontSize: 22,
-          background: '#149954',
+          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'white',
-          borderRadius: '6px',
-          fontWeight: 700,
+          borderRadius: '8px',
+          border: '1.5px solid #e2e8f0',
+          position: 'relative',
         }}
       >
-        G
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 100 100"
+          style={{ display: 'block' }}
+        >
+          {/* GR Text - Teal */}
+          <text 
+            x="4" 
+            y="70" 
+            style={{ 
+              fill: '#0d5a71', 
+              fontSize: '46px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif'
+            }}
+          >
+            GR
+          </text>
+          {/* 7 - Red */}
+          <text 
+            x="62" 
+            y="75" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '68px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif'
+            }}
+          >
+            7
+          </text>
+        </svg>
       </div>
     ),
-    // ImageResponse options
     {
-      // For convenience, we can re-use the exported icons size metadata
-      // config to also set the ImageResponse's width and height.
       ...size,
     }
   )

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -9,14 +10,12 @@ import {
   FileDigit,
   FileOutput,
   Image as ImageIcon,
-  Lock,
   Merge,
   ScanLine,
   Shrink,
   Unlock,
   Scissors,
   Maximize,
-  Info,
   Copyright,
   Settings,
   Archive,
@@ -31,30 +30,21 @@ import {
   Eraser,
   Wand2,
   NotebookPen,
-  Loader2,
   LayoutGrid,
   Mail,
   FileCode,
   FileScan,
   FileText,
+  PenLine,
+  ShieldCheck,
+  ChevronDown,
+  Menu,
+  Languages,
+  Zap,
 } from 'lucide-react';
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
-} from '@/components/ui/sidebar';
 import {ThemeToggle} from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
-import { AboutDialog } from './about-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -64,111 +54,148 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useLanguage } from '@/contexts/language-context';
+import { ScrollArea } from './ui/scroll-area';
 
-function AppSidebar() {
-  const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
+// Tool categories for the mega menu
+const CATEGORIES = [
+  {
+    name: "image_tools",
+    icon: ImageIcon,
+    color: "text-blue-500",
+    tools: [
+      { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
+      { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
+      { href: '/crop-image', label: 'crop_image_label', icon: Crop },
+      { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
+      { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
+      { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
+      { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
+      { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
+    ]
+  },
+  {
+    name: "pdf_tools",
+    icon: FileText,
+    color: "text-rose-500",
+    tools: [
+      { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
+      { href: '/split-pdf', label: 'split_pdf_label', icon: Scissors },
+      { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
+      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
+      { href: '/pdf-to-image', label: 'pdf_to_image_label', icon: ImageIcon },
+      { href: '/html-to-pdf', label: 'html_to_pdf_label', icon: FileCode },
+      { href: '/text-to-pdf', label: 'text_to_pdf_label', icon: FileText },
+      { href: '/add-watermark', label: 'add_watermark_label', icon: Copyright },
+      { href: '/add-page-numbers', label: 'add_page_numbers_label', icon: NotebookPen },
+    ]
+  },
+  {
+    name: "calculator_pro",
+    icon: Calculator,
+    color: "text-emerald-500",
+    tools: [
+      { href: '/loan-calculator', label: 'loan_emi_calculator_label', icon: Landmark },
+      { href: '/age-calculator', label: 'age_calculator_label', icon: Cake },
+      { href: '/percentage-calculator', label: 'percentage_calculator_label', icon: Percent },
+      { href: '/fuel-cost-calculator', label: 'fuel_cost_calculator_label', icon: Route },
+      { href: '/interest-calculator', label: 'interest_calculator_label', icon: Coins },
+      { href: '/sales-tax-calculator', label: 'sales_tax_calculator_label', icon: Receipt },
+    ]
+  },
+  {
+    name: "file_tools",
+    icon: Archive,
+    color: "text-violet-500",
+    tools: [
+      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
+      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
+    ]
+  }
+];
+
+// Custom component to replicate the provided GR7 logo image
+function GR7Logo({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-1.5", className)}>
+      <div className="relative size-10 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <svg viewBox="0 0 100 100" className="w-full h-full p-1">
+          {/* GR Text - Dark Teal */}
+          <text 
+            x="4" 
+            y="70" 
+            style={{ 
+              fill: '#0d5a71', 
+              fontSize: '46px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            GR
+          </text>
+          {/* 7 - Bright Red/Coral */}
+          <text 
+            x="62" 
+            y="75" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '68px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            7
+          </text>
+        </svg>
+      </div>
+      <span className="font-headline font-black text-lg md:text-xl tracking-tighter text-slate-800 dark:text-white uppercase">
+        Tools
+      </span>
+    </div>
+  );
+}
+
+function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
-
-  const menuItems = [
-    {href: '/image-compress', labelKey: 'image_compress_label', icon: Shrink, color: 'text-green-500'},
-    {href: '/image-resize', labelKey: 'resize_image_label', icon: Maximize, color: 'text-fuchsia-500'},
-    {href: '/crop-image', labelKey: 'crop_image_label', icon: Crop, color: 'text-blue-500'},
-    {href: '/remove-background', labelKey: 'remove_background_label', icon: Eraser, color: 'text-rose-500'},
-    {href: '/enhance-photo', labelKey: 'enhance_photo_label', icon: Wand2, color: 'text-violet-500'},
-    {href: '/image-to-text', labelKey: 'image_to_text_label', icon: FileScan, color: 'text-teal-500'},
-    {href: '/image-to-jpg', labelKey: 'image_to_jpg_label', icon: FileOutput, color: 'text-yellow-500'},
-    {href: '/image-to-png', labelKey: 'image_to_png_label', icon: FileOutput, color: 'text-sky-500'},
-    {href: '/image-to-pdf', labelKey: 'image_to_pdf_label', icon: FileDigit, color: 'text-red-500'},
-    {href: '/text-to-pdf', labelKey: 'text_to_pdf_label', icon: FileText, color: 'text-gray-500'},
-    {href: '/html-to-pdf', labelKey: 'html_to_pdf_label', icon: FileCode, color: 'text-orange-600' },
-    {href: '/pdf-to-image', labelKey: 'pdf_to_image_label', icon: ImageIcon, color: 'text-orange-500'},
-    {href: '/compress-pdf', labelKey: 'compress_pdf_label', icon: FileArchive, color: 'text-purple-500'},
-    {href: '/merge-pdf', labelKey: 'merge_pdf_label', icon: Merge, color: 'text-pink-500'},
-    {href: '/split-pdf', labelKey: 'split_pdf_label', icon: Scissors, color: 'text-cyan-500'},
-    {href: '/crop-pdf', labelKey: 'crop_pdf_label', icon: Crop, color: 'text-amber-500'},
-    {href: '/scan-to-pdf', labelKey: 'scan_to_pdf_label', icon: ScanLine, color: 'text-indigo-500'},
-    {href: '/protect-pdf', labelKey: 'protect_pdf_label', icon: Lock, color: 'text-gray-500'},
-    {href: '/unlock-pdf', labelKey: 'unlock_pdf_label', icon: Unlock, color: 'text-teal-500'},
-    {href: '/add-watermark', labelKey: 'add_watermark_label', icon: Copyright, color: 'text-rose-500'},
-    {href: '/add-page-numbers', labelKey: 'add_page_numbers_label', icon: NotebookPen, color: 'text-lime-500'},
-    {href: '/create-zip', labelKey: 'create_zip_label', icon: Archive, color: 'text-violet-500'},
-    {href: '/unzip-file', labelKey: 'unzip_file_label', icon: ArchiveRestore, color: 'text-stone-500'},
-    {href: '/standard-calculator', labelKey: 'standard_calculator_label', icon: Calculator, color: 'text-cyan-500'},
-    {href: '/loan-calculator', labelKey: 'loan_emi_calculator_label', icon: Landmark, color: 'text-sky-500'},
-    {href: '/age-calculator', labelKey: 'age_calculator_label', icon: Cake, color: 'text-teal-500'},
-    {href: '/percentage-calculator', labelKey: 'percentage_calculator_label', icon: Percent, color: 'text-blue-500'},
-    {href: '/fuel-cost-calculator', labelKey: 'fuel_cost_calculator_label', icon: Route, color: 'text-rose-500'},
-    {
-      href: '/interest-calculator',
-      labelKey: 'interest_calculator_label',
-      icon: Coins,
-      color: 'text-yellow-500',
-    },
-    {
-      href: '/sales-tax-calculator',
-      labelKey: 'sales_tax_calculator_label',
-      icon: Receipt,
-      color: 'text-indigo-500',
-    },
-  ];
+  const pathname = usePathname();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="h-24 justify-center border-b border-b-slate-800 bg-slate-900 px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary p-2">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-full w-full text-primary-foreground"
-            >
-                <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className="text-base font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
-            GRs Multi Tools Kits Hub
-          </span>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu className="grid grid-cols-1 gap-2 p-4 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col">
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                size="lg"
-                variant="outline"
-                isActive={pathname === item.href}
-                tooltip={t(item.labelKey)}
-                asChild
-                className="h-24 flex-col justify-center gap-2 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:flex-row transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 hover:ring-2 hover:ring-primary/50 data-[active=true]:ring-2 data-[active=true]:ring-foreground"
-              >
-                <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon className={cn("size-8", item.color)} />
-                  <span className="text-base text-center leading-tight break-words group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <AboutDialog />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
+        >
+          <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
+          <span className="hidden xl:inline">{t(category.name)}</span>
+          <ChevronDown className="size-3 opacity-50 group-hover:rotate-180 transition-transform" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900">
+        <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
+          {t(category.name)}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {category.tools.map((tool) => (
+          <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
+            <Link href={tool.href} className={cn(
+              "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors",
+              pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
+            )}>
+              <tool.icon className={cn("size-4", category.color)} />
+              <span className="font-bold text-xs">{t(tool.label)}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -178,88 +205,158 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-12 w-12 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-          <Settings className="h-8 w-8" />
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none">
+          <Settings className="h-5 w-5 text-slate-800 dark:text-slate-200" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{t('language')}</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-2">
+        <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-lg">{t('english')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('hi')} className="text-lg">{t('hindi')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('es')} className="text-lg">{t('spanish')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3">🇺🇸 {t('english')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('hi')} className="rounded-xl font-bold py-3">🇮🇳 {t('hindi')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('es')} className="rounded-xl font-bold py-3">🇪🇸 {t('spanish')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-function AppHeader() {
+function MobileNav() {
+  const { t } = useLanguage();
+  const [open, setOpen] = useState(false);
+
   return (
-    <header className="relative sticky top-0 z-10 flex h-24 items-center justify-between gap-4 border-b border-b-transparent bg-gradient-to-r from-gradient-green via-gradient-blue to-gradient-purple px-4 shadow-md dark:border-b-slate-800 dark:bg-none dark:bg-slate-900">
-      {/* Left-aligned items */}
-      <div className="flex items-center">
-        <SidebarTrigger className="h-10 w-10 text-primary-foreground hover:bg-white/20 dark:hover:bg-slate-700 [&>svg]:h-6 [&>svg]:w-6" />
-      </div>
-
-      {/* Absolutely centered title for ALL screens */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
-        <div className="animate-title-pulse flex items-center gap-2 lg:gap-4">
-          <LayoutGrid className="h-8 w-8 shrink-0 text-primary-foreground sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
-          <h1 className="hidden whitespace-nowrap text-2xl font-bold tracking-wide font-headline sm:block md:text-4xl lg:text-5xl">
-            <span className="text-primary-foreground">GRs Multi </span>
-            <span className="text-gradient-cyan">Tools Kits Hub</span>
-          </h1>
-        </div>
-      </div>
-
-      {/* Right-aligned items */}
-      <div className="flex flex-col items-end justify-center gap-1 ml-auto">
-        <div className="flex items-center gap-2">
-            <SettingsMenu />
-            <ThemeToggle />
-        </div>
-        <Button asChild variant="ghost" className="h-auto px-2 py-1 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground dark:hover:bg-slate-700">
-            <a href="mailto:gaurav.thearmy@yahoo.com" className="flex items-center gap-1.5">
-                <Mail className="h-5 w-5" />
-                <span className="hidden text-sm lg:inline">gaurav.thearmy@yahoo.com</span>
-            </a>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl">
+          <Menu className="size-6" />
         </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[300px] p-0 border-r-2">
+        <SheetHeader className="p-6 border-b text-left">
+          <SheetTitle>
+            <Link href="/" onClick={() => setOpen(false)}>
+              <GR7Logo />
+            </Link>
+          </SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-80px)] p-6">
+          <div className="space-y-8 pb-20">
+            {CATEGORIES.map((cat) => (
+              <div key={cat.name} className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <cat.icon className="size-3" /> {t(cat.name)}
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {cat.tools.map((tool) => (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm transition-all border border-transparent hover:border-border"
+                    >
+                      <tool.icon className={cn("size-4", cat.color)} />
+                      {t(tool.label)}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function AppHeader() {
+  const { t } = useLanguage();
+  return (
+    <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
+      <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
+        {/* Left Side: Mobile Menu + Logo */}
+        <div className="flex items-center gap-4 lg:gap-8 shrink-0">
+            <MobileNav />
+            <Link href="/" className="flex items-center group">
+              <GR7Logo />
+            </Link>
+        </div>
+
+        {/* Right Side: Tools Nav + Settings + Theme Toggle */}
+        <div className="flex items-center gap-1 sm:gap-3">
+            <nav className="hidden lg:flex items-center gap-1 mr-2">
+                {CATEGORIES.map((cat) => (
+                  <NavDropdown key={cat.name} category={cat} />
+                ))}
+            </nav>
+
+            <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
+
+            <div className="flex items-center gap-1">
+                <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
+                    <a href="mailto:gaurav.thearmy@yahoo.com">
+                        <Mail className="h-4 w-4 text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
+                    </a>
+                </Button>
+                
+                <SettingsMenu />
+                <ThemeToggle />
+            </div>
+        </div>
       </div>
     </header>
   );
 }
 
-
-function AppLayoutSkeleton() {
-    return (
-        <div className="flex items-center justify-center min-h-screen w-full bg-background">
-            <div className="flex flex-col items-center gap-6 animate-pulse">
-                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary p-3">
-                    <svg
-                      width="40"
-                      height="40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-full w-full text-primary-foreground"
-                    >
-                        <path d="M10 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M14 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M5 14h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M5 18h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinejoin="round"/>
-                    </svg>
+export function AppFooter() {
+  const { t } = useLanguage();
+  return (
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
+      <div className="w-full max-w-[2000px] px-4 md:px-12 lg:px-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="md:col-span-2 space-y-6">
+            <Link href="/" className="flex items-center gap-2">
+                <GR7Logo />
+            </Link>
+            <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
+                A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
+            </p>
+            <div className="flex items-center gap-4 pt-4">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                    <ShieldCheck className="size-3" /> 100% Client-Side
                 </div>
-                 <h1 className="text-center whitespace-nowrap text-3xl font-bold tracking-wide font-headline sm:text-4xl">
-                    <span className="text-foreground">GRs Multi </span>
-                    <span className="text-primary">Tools Kits Hub</span>
-                 </h1>
-                <Loader2 className="h-8 w-8 animate-spin text-primary mt-4" />
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
+                    <Zap className="size-3" /> No Server Storage
+                </div>
+            </div>
+            </div>
+            
+            <div>
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
+            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+                <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
+            </ul>
+            </div>
+
+            <div>
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
+            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+                <li><a href="mailto:gaurav.thearmy@yahoo.com" className="hover:text-primary transition-colors">Email Support</a></li>
+                <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
+            </ul>
             </div>
         </div>
-    )
+        <div className="w-full mt-12 pt-8 border-t border-border/50 text-center">
+            <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
+                © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
+            </p>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
@@ -269,19 +366,22 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
-    return <AppLayoutSkeleton />;
-  }
+  if (!isMounted) return null;
   
   return (
-    <SidebarProvider defaultOpen={false}>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <div className="flex flex-1 flex-col">
-          <AppHeader />
-          <SidebarInset>{children}</SidebarInset>
-        </div>
-      </div>
-    </SidebarProvider>
+    <div className="flex flex-col min-h-screen bg-background">
+      <AppHeader />
+      <main className="flex-1 relative flex flex-col items-center">
+         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
+         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+         
+         <div className="w-full flex-1 flex flex-col items-center">
+            <div className="w-full flex-1 pb-20">
+              {children}
+            </div>
+            <AppFooter />
+         </div>
+      </main>
+    </div>
   );
 }

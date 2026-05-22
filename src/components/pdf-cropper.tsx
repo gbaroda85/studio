@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -15,7 +14,8 @@ import { UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, Scissors } f
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+// Bundle-safe worker URL with stable versioning
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfCropper() {
   const { toast } = useToast();
@@ -103,7 +103,7 @@ export default function PdfCropper() {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
     setCrop(initialCrop);
-    setCompletedCrop(undefined); // Reset completed crop on image load
+    setCompletedCrop(undefined); 
   }
 
   const handlePageChange = (newPage: number) => {
@@ -136,11 +136,9 @@ export default function PdfCropper() {
     
     const RENDER_SCALE = 2.0;
 
-    // Create the visual preview for the UI
     const previewCanvas = document.createElement('canvas');
     const { naturalWidth: pngNaturalWidth, naturalHeight: pngNaturalHeight, width: displayContainerWidth, height: displayContainerHeight } = image;
     
-    // Calculate the actual size and position of the image within its container (due to object-fit: contain)
     const pngAspectRatio = pngNaturalWidth / pngNaturalHeight;
     const containerAspectRatio = displayContainerWidth / displayContainerHeight;
     let displayImgWidth, displayImgHeight, offsetX, offsetY;
@@ -183,7 +181,6 @@ export default function PdfCropper() {
         setCroppedImagePreview(previewCanvas.toDataURL('image/png'));
     }
 
-    // Create the actual cropped PDF for download
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
@@ -193,7 +190,6 @@ export default function PdfCropper() {
       
       const { width: pagePointsWidth, height: pagePointsHeight } = page.getSize();
       
-      // Convert crop area from natural png pixels to pdf points
       const cropX_pt = cropX_natural / RENDER_SCALE;
       const cropY_pt = pagePointsHeight - (cropY_natural / RENDER_SCALE) - (cropHeight_natural / RENDER_SCALE);
       const cropWidth_pt = cropWidth_natural / RENDER_SCALE;
@@ -274,7 +270,7 @@ export default function PdfCropper() {
         <CardContent>
           <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-16 w-16 text-muted-foreground" />
-            <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop</p>
+            <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop a PDF</p>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </CardContent>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -17,7 +17,6 @@ import {
   FileDigit,
   FileOutput,
   Image as ImageIcon,
-  Lock,
   Merge,
   ScanLine,
   Shrink,
@@ -47,13 +46,14 @@ import {
   NotebookPen,
   FileCode,
   FileScan,
+  PenLine,
+  LayoutGrid,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
-// This component contains the actual page content and uses the search params.
 function ToolsPageContent() {
   const {t} = useLanguage();
   const searchParams = useSearchParams();
@@ -91,6 +91,13 @@ function ToolsPageContent() {
       descriptionKey: 'remove_background_description',
       icon: Eraser,
       color: 'text-rose-500',
+    },
+    {
+      href: '/remove-signature',
+      labelKey: 'remove_signature_label',
+      descriptionKey: 'remove_signature_description',
+      icon: PenLine,
+      color: 'text-orange-500',
     },
     {
       href: '/enhance-photo',
@@ -185,13 +192,6 @@ function ToolsPageContent() {
       descriptionKey: 'scan_to_pdf_description',
       icon: ScanLine,
       color: 'text-indigo-500',
-    },
-    {
-      href: '/protect-pdf',
-      labelKey: 'protect_pdf_label',
-      descriptionKey: 'protect_pdf_description',
-      icon: Lock,
-      color: 'text-gray-500',
     },
     {
       href: '/unlock-pdf',
@@ -316,7 +316,7 @@ function ToolsPageContent() {
     },
   ];
 
-  const filterFeatures = (features: typeof imageFeatures) => {
+  const filterFeatures = (features: any[]) => {
     if (!searchQuery.trim()) {
       return features;
     }
@@ -346,107 +346,127 @@ function ToolsPageContent() {
     .filter(group => group.features.length > 0);
 
   return (
-    <main className="flex-1 p-4 md:p-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold tracking-tight font-headline">All Tools</h1>
-        <p className="mt-2 text-muted-foreground">Your one-stop-shop for file conversions, calculations, and more.</p>
-      </div>
-
-      <div className="relative mb-12 max-w-xl mx-auto">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-            type="search"
-            placeholder={t('search_tools_placeholder')}
-            className="w-full pl-12 h-14 text-base rounded-full shadow-lg focus-visible:ring-primary/80 focus-visible:ring-2 border border-foreground/20"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
-      {isSearching ? (
-        <div className="mt-8 space-y-10">
-          {searchResults.length > 0 ? (
-            searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-              <section key={categoryKey}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                  <Icon className={cn("h-7 w-7", color)} />
-                  {t(categoryKey)}
-                </h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-                  {features.map((feature) => (
-                    <FeatureCard
-                      key={feature.href}
-                      title={t(feature.labelKey)}
-                      description={t(feature.descriptionKey)}
-                      href={feature.href}
-                      icon={feature.icon}
-                      color={feature.color}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="mx-auto h-12 w-12 mb-4" />
-              <p className="font-semibold">{t('no_tools_found')}</p>
-              <p className="text-sm">Try a different search term.</p>
-            </div>
-          )}
+    <main className="flex-1 bg-transparent w-full flex flex-col items-center">
+      {/* Hero Header Section - MATCHING HOMEPAGE */}
+      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-16">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
-      ) : (
-        <Tabs defaultValue={defaultTab}>
-          <TabsList className="flex h-auto flex-wrap justify-center gap-2">
-            {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-              <TabsTrigger key={value} value={value} className="px-4 py-2 text-base font-semibold md:px-6 md:py-3 md:text-lg">
-                <Icon className={cn("mr-2 h-5 w-5", color)} />
-                {t(categoryKey)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
 
-          {allFeatureGroups.map(({ value, features }) => (
-            <TabsContent key={value} value={value}>
-              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-                {features.map((feature) => (
-                  <FeatureCard
-                    key={feature.href}
-                    title={t(feature.labelKey)}
-                    description={t(feature.descriptionKey)}
-                    href={feature.href}
-                    icon={feature.icon}
-                    color={feature.color}
-                  />
+        <div className="w-full px-8 md:px-16 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-6 animate-fade-in-up shadow-sm">
+            <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
+          </div>
+          
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase whitespace-nowrap overflow-hidden">
+            All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
+          </h1>
+          
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Your one-stop-shop for file conversions, calculations, and more. <br />
+            Everything happens locally in your browser for 100% privacy.
+          </p>
+        </div>
+      </section>
+
+      <div className="w-full max-w-[2000px] px-8 md:px-16">
+        {/* Search Bar - Wide Layout - REDUCED BOTTOM MARGIN */}
+        <div className="relative mb-10 max-w-4xl mx-auto -mt-8 relative z-20">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+            <div className="relative">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
+              <Input
+                  type="search"
+                  placeholder={t('search_tools_placeholder')}
+                  className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+        </div>
+        
+        {isSearching ? (
+            <div className="mt-8 space-y-20">
+            {searchResults.length > 0 ? (
+                searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
+                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex items-center gap-3 mb-10">
+                      <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
+                        <Icon className="size-6" />
+                      </div>
+                      <h2 className="text-3xl font-black uppercase tracking-tighter">
+                        {t(categoryKey)}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                    {features.map((feature) => (
+                        <FeatureCard
+                        key={feature.href}
+                        title={t(feature.labelKey)}
+                        description={t(feature.descriptionKey)}
+                        href={feature.href}
+                        icon={feature.icon}
+                        color={feature.color}
+                        />
+                    ))}
+                    </div>
+                </section>
+                ))
+            ) : (
+                <div className="text-center py-24 bg-muted/10 rounded-[3rem] border-4 border-dashed">
+                <Search className="mx-auto h-20 w-20 mb-6 text-muted-foreground/30" />
+                <p className="text-2xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term like 'PDF', 'Compress', or 'Calc'.</p>
+                </div>
+            )}
+            </div>
+        ) : (
+            <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-16">
+                {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
+                <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 hover:scale-105 transition-all">
+                    <Icon className={cn("mr-2 h-4 w-4", color)} />
+                    {t(categoryKey)}
+                </TabsTrigger>
                 ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      )}
+            </TabsList>
+
+            {allFeatureGroups.map(({ value, features }) => (
+                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                    {features.map((feature) => (
+                    <FeatureCard
+                        key={feature.href}
+                        title={t(feature.labelKey)}
+                        description={t(feature.descriptionKey)}
+                        href={feature.href}
+                        icon={feature.icon}
+                        color={feature.color}
+                    />
+                    ))}
+                </div>
+                </TabsContent>
+            ))}
+            </Tabs>
+        )}
+      </div>
     </main>
   );
 }
 
-// A fallback component to show while the page is loading.
 function ToolsPageLoadingFallback() {
   return (
-    <main className="flex-1 p-4 md:p-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold tracking-tight font-headline">All Tools</h1>
-        <p className="mt-2 text-muted-foreground">Your one-stop-shop for file conversions, calculations, and more.</p>
-      </div>
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+    <main className="w-full px-8 py-20">
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
       </div>
     </main>
   );
 }
 
-
-// This is the main page component that will be exported.
 export default function ToolsPage() {
   return (
-    // Wrap the component that uses searchParams in a Suspense boundary.
     <Suspense fallback={<ToolsPageLoadingFallback />}>
       <ToolsPageContent />
     </Suspense>

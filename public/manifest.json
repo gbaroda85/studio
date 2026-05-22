@@ -1,0 +1,16 @@
+{
+  "name": "GR7 Image PDF Tools",
+  "short_name": "GR7 Tools",
+  "description": "Professional Suite for Image & PDF Tools. 100% Private & Local.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9333ea",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

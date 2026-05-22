@@ -1,22 +1,19 @@
-
-
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import BackgroundRemover from '@/components/background-remover';
+import SignatureRemover from '@/components/signature-remover';
 import { HowToGuide } from '@/components/how-to-guide';
 
 export const dynamic = 'force-dynamic';
 
 const steps = [
-  "Upload Image: Select an image with a clear subject by clicking the upload area or dragging it in.",
-  "Optional Crop: Use 'Set Size & Crop' to align the face if making a passport photo.",
-  "AI Removal: The tool will automatically extract the subject in high definition.",
-  "Customise: Choose professional background colors (Blue/White) and add a border.",
-  "Download: Click 'Download HD Photo' to save as a transparent or solid background PNG.",
+  "Upload Document: Select an image of a document or photo that has a signature.",
+  "Start Removal: Click the 'Remove Signature' button to let AI process the image.",
+  "Review: See the original and the cleaned version side-by-side.",
+  "Download: Click 'Download Image' to save your document without the signature.",
 ];
 
-export default function RemoveBackgroundPage() {
+export default function RemoveSignaturePage() {
   return (
     <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
         <div className="mb-6 self-start">
@@ -28,10 +25,9 @@ export default function RemoveBackgroundPage() {
             </Button>
         </div>
         <div className="w-full flex justify-center">
-            <BackgroundRemover />
+            <SignatureRemover />
         </div>
-        <HowToGuide title="AI Background Remover & ID Photo Maker" steps={steps} />
+        <HowToGuide title="AI Signature Remover" steps={steps} />
     </main>
   );
 }
-
