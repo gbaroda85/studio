@@ -1,10 +1,15 @@
 
-
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BackgroundRemover from '@/components/background-remover';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'AI Background Remover - Remove BG from Photos Online',
+  description: 'Professional AI tool to remove background from images instantly. Create high-definition passport photos and transparent PNGs.',
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -34,4 +39,3 @@ export default function RemoveBackgroundPage() {
     </main>
   );
 }
-

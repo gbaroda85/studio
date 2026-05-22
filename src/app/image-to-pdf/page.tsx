@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageToPdfConverter from '@/components/image-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image to PDF Converter - Convert Photos to PDF Online',
+  description: 'Easily convert JPG, PNG, and WEBP images into a single high-quality PDF document. 100% private, no server uploads, works locally in your browser.',
+};
 
 const steps = [
     "Upload Images: Select one or more image files. You can add more files later.",

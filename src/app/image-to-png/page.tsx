@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageConverter from '@/components/image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image to PNG Converter - Convert JPG to Transparent PNG',
+  description: 'Convert JPG, WEBP, or BMP images to high-quality PNG format. Keep your documents clear and professional.',
+};
 
 const steps = [
     "Upload Image: Choose any image file (like JPG, WEBP, etc.) to convert.",

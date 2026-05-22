@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfUnlocker from '@/components/pdf-unlocker';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Unlock PDF - Remove Password from Aadhaar & Bank PDFs',
+  description: 'Remove password protection from encrypted PDFs locally. Works for Aadhaar cards, bank statements, and more.',
+};
 
 const steps = [
     "Upload PDF: Select your password-protected PDF file.",

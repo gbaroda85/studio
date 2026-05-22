@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfSplitter from '@/components/pdf-splitter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Split PDF Online - Extract Pages from PDF Document',
+  description: 'Visually select and extract specific pages from any PDF file. Split large PDFs into smaller ones locally and securely.',
+};
 
 const steps = [
     "Upload PDF: Choose the PDF file you want to split. The total number of pages will be shown.",

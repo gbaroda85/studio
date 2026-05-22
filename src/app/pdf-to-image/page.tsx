@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'PDF to Image Converter - Extract Pages as JPG/PNG',
+  description: 'Convert every page of your PDF into high-quality JPG or PNG images. Fast extraction without uploading files to any server.',
+};
 
 const steps = [
     "Upload PDF: Select the PDF you want to convert.",

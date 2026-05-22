@@ -1,8 +1,15 @@
+
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageToTextConverter from '@/components/image-to-text-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image to Text (OCR) - Extract Text from Photos Online',
+  description: 'AI-powered OCR tool to extract text from documents, screenshots, and handwritten notes. Supports English and Hindi.',
+};
 
 export const dynamic = 'force-dynamic';
 

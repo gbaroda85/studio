@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageCompressor from '@/components/image-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image Compressor - Compress JPG/PNG to 20kb, 50kb, 100kb',
+  description: 'Reduce image file size instantly for SSC, UPSC, and IBPS application forms. Professional compression with zero quality loss.',
+};
 
 const steps = [
     "Upload Image: Drag and drop an image or click to select one.",

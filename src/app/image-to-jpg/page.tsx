@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageConverter from '@/components/image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image to JPG Converter - Convert PNG/WEBP to JPG',
+  description: 'Convert any image format to standard high-quality JPG format. Simple, fast, and secure local image conversion.',
+};
 
 const steps = [
     "Upload Image: Choose any image file (like PNG, WEBP, etc.) to convert.",
