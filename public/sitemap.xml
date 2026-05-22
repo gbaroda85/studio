@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://pi7csctools.vercel.app/</loc><priority>1.0</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/tools</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/image-compress</loc><priority>0.9</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/remove-background</loc><priority>0.9</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/passport-photo</loc><priority>0.9</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/unlock-pdf</loc><priority>0.9</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/image-to-text</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/pdf-to-image</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/image-to-pdf</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/image-resize</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/crop-image</loc><priority>0.7</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/compress-pdf</loc><priority>0.8</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/merge-pdf</loc><priority>0.7</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/split-pdf</loc><priority>0.7</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/loan-calculator</loc><priority>0.7</priority></url>
-  <url><loc>https://pi7csctools.vercel.app/age-calculator</loc><priority>0.6</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/tools</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/image-compress</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/image-resize</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/crop-image</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/remove-background</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/remove-signature</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/enhance-photo</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/passport-photo</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/image-to-text</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/image-to-pdf</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/pdf-to-image</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/compress-pdf</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/merge-pdf</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/split-pdf</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/unlock-pdf</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/loan-calculator</loc><priority>0.8</priority></url>
+  <url><loc>https://www.gr7imagepdf.com/age-calculator</loc><priority>0.8</priority></url>
 </urlset>

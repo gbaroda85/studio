@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/remove-background',
     '/remove-signature',
     '/enhance-photo',
+    '/passport-photo',
     '/image-to-text',
     '/image-to-jpg',
     '/image-to-png',
