@@ -3,7 +3,6 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
   
-  // Comprehensive list of all application routes for SEO
   const routes = [
     '',
     '/tools',
