@@ -15,7 +15,7 @@ export const contentType = 'image/png'
 export default function Icon() {
   return new ImageResponse(
     (
-      // ImageResponse JSX element to match GR7 logo
+      // ImageResponse JSX element to match the new GR7 brand identity
       <div
         style={{
           background: 'white',
@@ -24,15 +24,21 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
+          borderRadius: '6px',
+          border: '1.5px solid #7c3aed', // Primary purple border
           fontWeight: 900,
-          fontSize: '18px',
+          fontSize: '16px',
           fontFamily: 'sans-serif',
+          letterSpacing: '-1px',
         }}
       >
-        <span style={{ color: '#006071' }}>GR</span>
-        <span style={{ color: '#f15a4b' }}>7</span>
+        <span style={{ color: '#0f172a' }}>GR</span>
+        <span style={{ 
+          color: '#7c3aed', 
+          fontSize: '20px', 
+          fontStyle: 'italic',
+          marginLeft: '-1px'
+        }}>7</span>
       </div>
     ),
     // ImageResponse options
