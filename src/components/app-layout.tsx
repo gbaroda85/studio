@@ -241,8 +241,8 @@ function AppHeader() {
                 <LayoutGrid className="h-full w-full text-white" />
               </div>
               <div className="flex flex-col">
-                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter">
-                    GR<span className="text-primary italic">7</span> TOOLS
+                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
+                    GR<span className="text-3xl md:text-4xl text-primary italic mx-1 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.15)] dark:drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)] inline-block transform -skew-x-6">7</span> TOOLS
                   </span>
                   <span className="text-[7px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] mt-1">Premium Suite</span>
               </div>
