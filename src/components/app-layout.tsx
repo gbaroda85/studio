@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -41,6 +40,7 @@ import {
   Menu,
   Languages,
   Zap,
+  Home,
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -140,7 +140,7 @@ function GR7Logo({ className }: { className?: string }) {
           >
             GR
           </text>
-          {/* 7 - Bright Red/Coral */}
+          {/* 7 - Bright Red */}
           <text 
             x="62" 
             y="75" 
@@ -223,6 +223,7 @@ function SettingsMenu() {
 
 function MobileNav() {
   const { t } = useLanguage();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
@@ -242,6 +243,21 @@ function MobileNav() {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] p-6">
           <div className="space-y-8 pb-20">
+            {/* Added Home Link to Mobile Nav */}
+            <div className="space-y-2">
+              <Link
+                href="/"
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-xl font-black text-sm transition-all border border-transparent",
+                  pathname === '/' ? "bg-primary text-white" : "hover:bg-muted text-slate-800 dark:text-slate-200"
+                )}
+              >
+                <Home className="size-4" />
+                {t('home')}
+              </Link>
+            </div>
+
             {CATEGORIES.map((cat) => (
               <div key={cat.name} className="space-y-4">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
@@ -253,7 +269,10 @@ function MobileNav() {
                       key={tool.href}
                       href={tool.href}
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted font-bold text-sm transition-all border border-transparent hover:border-border"
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl font-bold text-sm transition-all border border-transparent hover:border-border",
+                        pathname === tool.href ? "bg-primary/5 text-primary border-primary/20" : "hover:bg-muted"
+                      )}
                     >
                       <tool.icon className={cn("size-4", cat.color)} />
                       {t(tool.label)}
@@ -271,6 +290,8 @@ function MobileNav() {
 
 function AppHeader() {
   const { t } = useLanguage();
+  const pathname = usePathname();
+
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
@@ -282,9 +303,24 @@ function AppHeader() {
             </Link>
         </div>
 
-        {/* Right Side: Tools Nav + Settings + Theme Toggle */}
+        {/* Right Side: Home + Tools Nav + Settings + Theme Toggle */}
         <div className="flex items-center gap-1 sm:gap-3">
             <nav className="hidden lg:flex items-center gap-1 mr-2">
+                {/* Added Explicit Home Button */}
+                <Button 
+                  asChild
+                  variant="ghost" 
+                  className={cn(
+                    "h-10 px-4 font-black text-xs flex items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
+                    pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
+                  )}
+                >
+                  <Link href="/">
+                    <Home className="size-4" />
+                    <span className="hidden xl:inline">{t('home')}</span>
+                  </Link>
+                </Button>
+
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
                 ))}
@@ -335,6 +371,7 @@ export function AppFooter() {
             <div>
             <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
             <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+                <li><Link href="/" className="hover:text-primary transition-colors">{t('home')}</Link></li>
                 <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
                 <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
                 <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
