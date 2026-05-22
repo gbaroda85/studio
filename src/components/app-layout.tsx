@@ -126,26 +126,33 @@ function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-10 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-1.5">
+        <svg viewBox="0 0 100 100" className="w-full h-full p-1">
           {/* GR Text - Dark Teal */}
           <text 
-            x="8" 
-            y="72" 
+            x="4" 
+            y="70" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '52px', 
+              fontSize: '46px', 
               fontWeight: 900, 
-              fontFamily: 'sans-serif',
-              letterSpacing: '-4px'
+              fontFamily: 'Arial Black, sans-serif'
             }}
           >
             GR
           </text>
-          {/* 7 - Red Triangle Style */}
-          <path 
-            d="M62 25 L92 25 L65 85 Z" 
-            style={{ fill: '#f25858' }}
-          />
+          {/* 7 - Bright Red/Coral */}
+          <text 
+            x="62" 
+            y="75" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '68px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            7
+          </text>
         </svg>
       </div>
       <span className="font-headline font-black text-lg md:text-xl tracking-tighter text-slate-800 dark:text-white uppercase">

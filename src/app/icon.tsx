@@ -11,7 +11,6 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-// Image generation matching the user-provided Teal/Red logo
 export default function Icon() {
   return new ImageResponse(
     (
@@ -36,23 +35,30 @@ export default function Icon() {
         >
           {/* GR Text - Teal */}
           <text 
-            x="5" 
-            y="75" 
+            x="4" 
+            y="70" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '52px', 
+              fontSize: '46px', 
               fontWeight: 900, 
-              fontFamily: 'sans-serif',
-              letterSpacing: '-4px'
+              fontFamily: 'sans-serif'
             }}
           >
             GR
           </text>
-          {/* 7 - Red Triangle Style */}
-          <path 
-            d="M62 25 L92 25 L65 85 Z" 
-            style={{ fill: '#f25858' }}
-          />
+          {/* 7 - Red */}
+          <text 
+            x="62" 
+            y="75" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '68px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif'
+            }}
+          >
+            7
+          </text>
         </svg>
       </div>
     ),
