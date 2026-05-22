@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PassportPhotoMaker from '@/components/passport-photo-maker';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Professional Passport Photo Maker - Create ID Photos Online',
+  description: 'Make passport-sized photos for India, USA, and other countries. AI background removal and professional suit change included. 100% private.',
+};
 
 export default function PassportPhotoPage() {
   const steps = [

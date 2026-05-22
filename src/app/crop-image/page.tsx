@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageCropper from '@/components/image-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Smart Image Cropper - Crop, Rotate & Fix Perspective',
+  description: 'Advanced image cropping tool. Fix tilted documents, crop photos to exact ratios, and export in high quality. 100% secure local processing.',
+};
 
 const steps = [
     "Upload Image: Select an image from your device by clicking the upload area or dragging it in.",

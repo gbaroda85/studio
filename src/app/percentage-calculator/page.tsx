@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PercentageCalculator from '@/components/percentage-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Percentage Calculator - Marks, Ratios & Fractions',
+  description: 'Calculate percentages of marks, parts of wholes, and ratios instantly. Perfect for students and everyday calculations.',
+};
 
 const steps = [
     "Choose Mode: Select the type of calculation you need: 'Simple', 'Part/Whole', 'Marks', or 'Ratio'.",

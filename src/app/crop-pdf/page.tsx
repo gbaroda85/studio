@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfCropper from '@/components/pdf-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Crop PDF Online - Trim PDF Pages Privately',
+  description: 'Remove unwanted margins or select specific areas of your PDF pages. Fast, secure, and works locally in your browser without uploading files.',
+};
 
 const steps = [
     "Upload PDF: Select a PDF file from your computer.",

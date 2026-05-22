@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FuelConverter from '@/components/fuel-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Fuel Consumption Converter - km/L to MPG Online',
+  description: 'Convert fuel efficiency units instantly. Support for km/L, MPG (US), MPG (UK), and L/100km. Simple and accurate vehicle tool.',
+};
 
 const steps = [
     "Enter Value: Type the numeric value you want to convert in the 'Value' field.",

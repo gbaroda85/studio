@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SalesTaxCalculator from '@/components/sales-tax-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Sales Tax Calculator - Calculate GST, VAT & Final Price',
+  description: 'Quickly calculate sales tax or GST amount and find the final total price of any item. Simple tax calculation tool.',
+};
 
 const steps = [
     "Enter Initial Price: Input the price of the item before tax.",

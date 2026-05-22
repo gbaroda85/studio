@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoanCalculator from '@/components/loan-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Loan & EMI Calculator - Home, Car, Personal Loan EMI',
+  description: 'Calculate your monthly EMI, total interest, and total payment for any loan. Simple and accurate financial planning tool for India.',
+};
 
 const steps = [
     "Enter Loan Amount: Input the total amount of the loan you are considering.",

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ScannerToPdf from '@/components/scanner-to-pdf';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Scan to PDF - Turn Camera into Document Scanner',
+  description: 'Scan physical documents using your mobile or desktop camera and save them as a PDF. Local, secure, and easy to use.',
+};
 
 const steps = [
     "Allow Camera: Give your browser permission to use the camera.",

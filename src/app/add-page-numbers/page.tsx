@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfPageNumberer from '@/components/pdf-page-numberer';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Add Page Numbers to PDF Online - Customize Style & Position',
+  description: 'Easily insert page numbers into your PDF documents. Choose positions, font sizes, and formats. 100% private browser-based tool.',
+};
 
 const steps = [
   "Upload PDF: Click the upload area or drag and drop your PDF file.",

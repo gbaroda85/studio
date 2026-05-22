@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AgeCalculator from '@/components/age-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Age Calculator Online - Exact Age in Years, Months, Days',
+  description: 'Calculate your exact age and find out how many days are left until your next birthday. Simple, accurate, and free online age tool.',
+};
 
 const steps = [
     "Select Date: Click on the date input field to open the calendar.",

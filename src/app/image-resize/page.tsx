@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Image Resizer - Resize for SSC, UPSC, IBPS Application Forms',
+  description: 'Exact pixel and mm resizing for govt job application forms. Resize photos to 200x230px and signatures to 140x60px instantly and privately.',
+};
 
 const steps = [
     "Upload Image: Select the image you want to resize.",

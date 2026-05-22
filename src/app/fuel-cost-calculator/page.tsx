@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FuelCostCalculator from '@/components/fuel-cost-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Fuel Cost Calculator - Estimate Trip Petrol/Diesel Cost',
+  description: 'Plan your road trip budget. Calculate total fuel required and estimated cost based on distance and vehicle efficiency.',
+};
 
 const steps = [
     "Enter Trip Distance: Input the total distance of your trip in kilometers.",

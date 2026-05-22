@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Unzipper from '@/components/unzipper';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Unzip File Online - Extract ZIP Archives Safely',
+  description: 'Extract contents from ZIP files instantly in your browser. No file uploads required. 100% private and secure extraction tool.',
+};
 
 const steps = [
     "Upload Zip File: Drag and drop your .zip file or click to select it.",

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ZipCreator from '@/components/zip-creator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Create ZIP Online - Compress Multiple Files into Archive',
+  description: 'Bundle and compress multiple files into a single ZIP archive instantly. Secure, fast, and works entirely in your browser memory.',
+};
 
 const steps = [
     "Add Files: Drag and drop files into the upload area, or click to select multiple files.",

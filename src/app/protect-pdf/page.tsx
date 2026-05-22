@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfProtector from '@/components/pdf-protector';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Vault Protect PDF - Add Password & AES Encryption Online',
+  description: 'Secure your PDF files with strong passwords and AES encryption. 100% private, files never leave your device. Adobe compatible.',
+};
 
 const steps = [
     "Upload PDF: Select the PDF file you want to secure.",

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfCompressor from '@/components/pdf-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'PDF Compressor - Shrink PDF to 100kb, 200kb, 500kb Online',
+  description: 'Reduce PDF file size without losing text clarity. Target specific file sizes for job portals and email attachments. 100% private local compression.',
+};
 
 const steps = [
     "Upload PDF: Drag and drop your PDF or click to select the file you want to compress.",

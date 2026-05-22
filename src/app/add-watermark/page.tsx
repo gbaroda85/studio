@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfWatermarker from '@/components/pdf-watermarker';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Add Watermark to PDF - Protect Your Documents Online',
+  description: 'Add custom text watermarks to your PDF files. Control opacity, rotation, and position. Secure local processing in your browser.',
+};
 
 const steps = [
   "Upload PDF: Click the upload area or drag and drop your PDF file.",

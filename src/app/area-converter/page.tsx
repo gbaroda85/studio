@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AreaConverter from '@/components/area-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Area Converter - Convert Acre, Hectare, Sq Ft, Sq Meter',
+  description: 'Easily convert between different area units like Acres, Hectares, Square Feet, and Square Meters. Perfect for land and real estate measurements.',
+};
 
 const steps = [
     "Enter Value: Type the numeric value you want to convert in the 'Value' field.",

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InterestCalculator from '@/components/interest-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Interest Calculator - Simple & Compound Interest Online',
+  description: 'Calculate simple and compound interest for your savings or loans. Get accurate total amounts and interest breakdowns instantly.',
+};
 
 const steps = [
     "Select Interest Type: Choose between 'Simple' or 'Compound' interest.",

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StandardCalculator from '@/components/standard-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Standard Calculator Online - Simple Math & Calculations',
+  description: 'A clean and simple online calculator for everyday math. Addition, subtraction, multiplication, and division made easy.',
+};
 
 const steps = [
     "Input Numbers: Use the number buttons to enter your first value.",

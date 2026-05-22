@@ -1,8 +1,15 @@
+
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TextToPdfConverter from '@/components/text-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Text to PDF Converter - Create Clean Documents Online',
+  description: 'Convert plain text into professional PDF files. Customize fonts, sizes, and margins. 100% private browser processing.',
+};
 
 const steps = [
   "Enter Text: Paste or type your text into the editor.",

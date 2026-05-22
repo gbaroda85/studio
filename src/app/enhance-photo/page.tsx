@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PhotoEnhancer from '@/components/photo-enhancer';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'AI Photo Enhancer - Fix Blurry & Dark Photos Online',
+  description: 'Automatically improve photo quality, brightness, and sharpness using local AI. Professional photo enhancement with 100% privacy.',
+};
 
 export const dynamic = 'force-dynamic';
 

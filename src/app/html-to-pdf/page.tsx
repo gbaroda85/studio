@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import HtmlToPdfConverter from '@/components/html-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'HTML to PDF Converter - Convert Web Code to Document',
+  description: 'Convert raw HTML code into professional PDF documents instantly. Perfect for developers and designers. Secure local processing.',
+};
 
 const steps = [
   "Paste HTML: Write or paste your HTML code directly into the editor.",

@@ -1,8 +1,15 @@
+
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SignatureRemover from '@/components/signature-remover';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'AI Signature Remover - Extract Clean Signatures Online',
+  description: 'Clean signatures from document photos using AI. Create transparent PNG signatures for digital documents instantly and privately.',
+};
 
 export const dynamic = 'force-dynamic';
 

@@ -1,9 +1,15 @@
 
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AccelerationConverter from '@/components/acceleration-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+
+export const metadata: Metadata = {
+  title: 'Acceleration Unit Converter - m/s², km/h², g-force',
+  description: 'Instant acceleration unit conversion. Convert between meters per second squared, standard gravity, and more. Precise and fast.',
+};
 
 const steps = [
     "Enter Value: Type the numeric value you want to convert in the 'Value' field.",
