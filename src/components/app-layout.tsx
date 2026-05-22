@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -193,10 +194,9 @@ function MobileNav() {
       <SheetContent side="left" className="w-[300px] p-0 border-r-2">
         <SheetHeader className="p-6 border-b text-left">
           <SheetTitle className="flex items-center gap-2">
-            <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
-                <LayoutGrid className="size-full text-white" />
-            </div>
-            <span className="text-xl font-black font-headline tracking-tighter">GR7 HUB</span>
+            <span className="text-xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
+              GR<span className="text-3xl text-primary italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
+            </span>
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] p-6">
@@ -237,12 +237,9 @@ function AppHeader() {
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium p-2 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform">
-                <LayoutGrid className="h-full w-full text-white" />
-              </div>
               <div className="flex flex-col">
-                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
-                    GR<span className="text-3xl md:text-4xl text-primary italic drop-shadow-[4px_4px_0px_rgba(0,0,0,0.15)] dark:drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)] inline-block transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
+                  <span className="text-xl md:text-2xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
+                    GR<span className="text-4xl md:text-5xl text-primary italic drop-shadow-[4px_4px_0px_rgba(0,0,0,0.15)] dark:drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)] inline-block transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
                   </span>
                   <span className="text-[7px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] mt-1">Premium Suite</span>
               </div>
@@ -284,10 +281,9 @@ export function AppFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">
-                <div className="size-8 rounded-lg bg-gradient-premium p-1.5 shadow-lg">
-                    <LayoutGrid className="size-full text-white" />
-                </div>
-                <span className="text-xl font-black font-headline tracking-tighter">GR7 TOOLS</span>
+                <span className="text-xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
+                  GR<span className="text-3xl text-primary italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
+                </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
