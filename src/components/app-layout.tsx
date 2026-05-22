@@ -121,6 +121,40 @@ const CATEGORIES = [
   }
 ];
 
+// Custom component to replicate the provided GR7 logo image
+function GR7Logo({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-1.5", className)}>
+      <div className="relative size-10 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <svg viewBox="0 0 100 100" className="w-full h-full p-1.5">
+          {/* GR Text - Dark Teal */}
+          <text 
+            x="8" 
+            y="72" 
+            style={{ 
+              fill: '#0d5a71', 
+              fontSize: '52px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif',
+              letterSpacing: '-4px'
+            }}
+          >
+            GR
+          </text>
+          {/* 7 - Red Triangle Style */}
+          <path 
+            d="M62 25 L92 25 L65 85 Z" 
+            style={{ fill: '#f25858' }}
+          />
+        </svg>
+      </div>
+      <span className="font-headline font-black text-lg md:text-xl tracking-tighter text-slate-800 dark:text-white uppercase">
+        Tools
+      </span>
+    </div>
+  );
+}
+
 function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -193,10 +227,10 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] p-0 border-r-2">
         <SheetHeader className="p-6 border-b text-left">
-          <SheetTitle className="flex items-center gap-2">
-            <span className="text-xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
-              GR<span className="text-3xl text-primary italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
-            </span>
+          <SheetTitle>
+            <Link href="/" onClick={() => setOpen(false)}>
+              <GR7Logo />
+            </Link>
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] p-6">
@@ -236,13 +270,8 @@ function AppHeader() {
         {/* Left Side: Mobile Menu + Logo */}
         <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <MobileNav />
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="flex flex-col">
-                  <span className="text-xl md:text-2xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
-                    GR<span className="text-4xl md:text-5xl text-primary italic drop-shadow-[4px_4px_0px_rgba(0,0,0,0.15)] dark:drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)] inline-block transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
-                  </span>
-                  <span className="text-[7px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] mt-1">Premium Suite</span>
-              </div>
+            <Link href="/" className="flex items-center group">
+              <GR7Logo />
             </Link>
         </div>
 
@@ -281,9 +310,7 @@ export function AppFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">
-                <span className="text-xl font-black font-headline text-foreground leading-none tracking-tighter flex items-center">
-                  GR<span className="text-3xl text-primary italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] transform -skew-x-6 mr-0.5 -ml-1">7</span>TOOLS
-                </span>
+                <GR7Logo />
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.

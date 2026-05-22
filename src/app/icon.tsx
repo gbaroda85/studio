@@ -11,11 +11,10 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-// Image generation
+// Image generation matching the user-provided Teal/Red logo
 export default function Icon() {
   return new ImageResponse(
     (
-      // ImageResponse JSX element to match the new GR7 brand identity
       <div
         style={{
           background: 'white',
@@ -24,24 +23,39 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '6px',
-          border: '1.5px solid #7c3aed', // Primary purple border
-          fontWeight: 900,
-          fontSize: '16px',
-          fontFamily: 'sans-serif',
-          letterSpacing: '-1px',
+          borderRadius: '8px',
+          border: '1.5px solid #e2e8f0',
+          position: 'relative',
         }}
       >
-        <span style={{ color: '#0f172a' }}>GR</span>
-        <span style={{ 
-          color: '#7c3aed', 
-          fontSize: '20px', 
-          fontStyle: 'italic',
-          marginLeft: '-1px'
-        }}>7</span>
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 100 100"
+          style={{ display: 'block' }}
+        >
+          {/* GR Text - Teal */}
+          <text 
+            x="5" 
+            y="75" 
+            style={{ 
+              fill: '#0d5a71', 
+              fontSize: '52px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif',
+              letterSpacing: '-4px'
+            }}
+          >
+            GR
+          </text>
+          {/* 7 - Red Triangle Style */}
+          <path 
+            d="M62 25 L92 25 L65 85 Z" 
+            style={{ fill: '#f25858' }}
+          />
+        </svg>
       </div>
     ),
-    // ImageResponse options
     {
       ...size,
     }
