@@ -364,29 +364,29 @@ function ToolsPageContent() {
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-8" style={{ animationDelay: '0.1s' }}>
             Your one-stop-shop for file conversions, calculations, and more. <br />
             Everything happens locally in your browser for 100% privacy.
           </p>
+
+          {/* Search Bar - Moved Inside Hero Section & Reduced Width */}
+          <div className="relative max-w-2xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder={t('search_tools_placeholder')}
+                    className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+          </div>
         </div>
       </section>
 
       <div className="w-full max-w-[2000px] px-8 md:px-16">
-        {/* Search Bar - Wide Layout - REDUCED BOTTOM MARGIN FURTHER */}
-        <div className="relative mb-6 max-w-4xl mx-auto -mt-12 relative z-20">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-            <div className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
-              <Input
-                  type="search"
-                  placeholder={t('search_tools_placeholder')}
-                  className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-        </div>
-        
         {isSearching ? (
             <div className="mt-8 space-y-20">
             {searchResults.length > 0 ? (
