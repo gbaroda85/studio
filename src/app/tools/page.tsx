@@ -48,6 +48,7 @@ import {
   FileCode,
   FileScan,
   PenLine,
+  LayoutGrid,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -346,34 +347,61 @@ function ToolsPageContent() {
     .filter(group => group.features.length > 0);
 
   return (
-    <main className="w-full px-4 md:px-12 lg:px-16 py-8 flex flex-col items-center">
-      <div className="w-full max-w-[2000px]">
-        <div className="mb-12 text-center">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight font-headline uppercase">All Tools Hub</h1>
-            <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto font-medium">Your one-stop-shop for file conversions, calculations, and more. Local processing for maximum speed.</p>
+    <main className="flex-1 bg-transparent w-full flex flex-col items-center">
+      {/* Hero Header Section - MATCHING HOMEPAGE */}
+      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-16">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="relative mb-16 max-w-3xl mx-auto">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder={t('search_tools_placeholder')}
-                className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        <div className="w-full px-8 md:px-16 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-6 animate-fade-in-up shadow-sm">
+            <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter animate-fade-in-up leading-[0.9] font-headline uppercase">
+            All Tools <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
+          </h1>
+          
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Your one-stop-shop for file conversions, calculations, and more. <br />
+            Everything happens locally in your browser for 100% privacy.
+          </p>
+        </div>
+      </section>
+
+      <div className="w-full max-w-[2000px] px-8 md:px-16">
+        {/* Search Bar - Wide Layout */}
+        <div className="relative mb-20 max-w-4xl mx-auto -mt-8 relative z-20">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+            <div className="relative">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
+              <Input
+                  type="search"
+                  placeholder={t('search_tools_placeholder')}
+                  className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
         </div>
         
         {isSearching ? (
-            <div className="mt-8 space-y-16">
+            <div className="mt-8 space-y-20">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-                <section key={categoryKey}>
-                    <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
-                    <Icon className={cn("h-8 w-8", color)} />
-                    {t(categoryKey)}
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex items-center gap-3 mb-10">
+                      <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
+                        <Icon className="size-6" />
+                      </div>
+                      <h2 className="text-3xl font-black uppercase tracking-tighter">
+                        {t(categoryKey)}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                     {features.map((feature) => (
                         <FeatureCard
                         key={feature.href}
@@ -388,18 +416,18 @@ function ToolsPageContent() {
                 </section>
                 ))
             ) : (
-                <div className="text-center py-20 bg-muted/10 rounded-3xl border-4 border-dashed">
-                <Search className="mx-auto h-16 w-16 mb-6 text-muted-foreground/30" />
-                <p className="text-xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
-                <p className="text-sm text-muted-foreground mt-2">Try a different search term like 'PDF' or 'Compress'.</p>
+                <div className="text-center py-24 bg-muted/10 rounded-[3rem] border-4 border-dashed">
+                <Search className="mx-auto h-20 w-20 mb-6 text-muted-foreground/30" />
+                <p className="text-2xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term like 'PDF', 'Compress', or 'Calc'.</p>
                 </div>
             )}
             </div>
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="flex h-auto flex-wrap justify-center gap-3 bg-transparent p-0 mb-12">
+            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-16">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                <TabsTrigger key={value} value={value} className="px-6 py-2 h-auto text-[10px] font-black uppercase tracking-widest rounded-xl border-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-sm hover:shadow-lg hover:border-primary/50 hover:scale-105 transition-all">
+                <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 hover:scale-105 transition-all">
                     <Icon className={cn("mr-2 h-4 w-4", color)} />
                     {t(categoryKey)}
                 </TabsTrigger>
@@ -407,8 +435,8 @@ function ToolsPageContent() {
             </TabsList>
 
             {allFeatureGroups.map(({ value, features }) => (
-                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                     {features.map((feature) => (
                     <FeatureCard
                         key={feature.href}
