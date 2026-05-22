@@ -349,35 +349,34 @@ function ToolsPageContent() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       {/* Hero Header Section - MATCHING HOMEPAGE */}
-      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-12">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-6">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-6 animate-fade-in-up shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm">
             <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase whitespace-nowrap overflow-hidden">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase whitespace-nowrap overflow-hidden">
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-8" style={{ animationDelay: '0.1s' }}>
-            Your one-stop-shop for file conversions, calculations, and more. <br />
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          {/* Search Bar - Moved Inside Hero Section & Reduced Width */}
-          <div className="relative max-w-2xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          {/* Search Bar - Sleeker & Within Hero */}
+          <div className="relative max-w-xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
-                <Input
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <input
                     type="search"
                     placeholder={t('search_tools_placeholder')}
-                    className="w-full pl-16 h-16 text-lg rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold"
+                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold outline-none"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -388,7 +387,7 @@ function ToolsPageContent() {
 
       <div className="w-full max-w-[2000px] px-8 md:px-16">
         {isSearching ? (
-            <div className="mt-8 space-y-20">
+            <div className="mt-4 space-y-20">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -424,7 +423,7 @@ function ToolsPageContent() {
             </div>
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-12">
+            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-10">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                 <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 hover:scale-105 transition-all">
                     <Icon className={cn("mr-2 h-4 w-4", color)} />
