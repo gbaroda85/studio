@@ -348,7 +348,7 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Header Section - MATCHING HOMEPAGE */}
+      {/* Hero Header Section - MATCHING HOMEPAGE STYLE */}
       <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-6">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -368,7 +368,7 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          {/* Search Bar - Sleeker & Within Hero */}
+          {/* Search Bar - Sleeker & Within Hero Section */}
           <div className="relative max-w-xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">

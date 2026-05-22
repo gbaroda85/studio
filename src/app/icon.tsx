@@ -16,41 +16,49 @@ export default function Icon() {
     (
       <div
         style={{
-          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '6px',
-          border: '1px solid #e2e8f0',
-          padding: '0',
-          margin: '0',
-          overflow: 'hidden'
+          background: 'transparent',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', height: '100%' }}>
-            {/* G - Teal */}
-            <span style={{ 
-                color: '#0d5a71', 
-                fontSize: '14px', 
-                fontWeight: '900', 
-                fontFamily: 'sans-serif',
-                marginLeft: '-1px'
-            }}>
-                GR
-            </span>
-            {/* 7 - Bright Red */}
-            <span style={{ 
-                color: '#ef4444', 
-                fontSize: '18px', 
-                fontWeight: '900', 
-                fontFamily: 'sans-serif',
-                marginLeft: '1px'
-            }}>
-                7
-            </span>
-        </div>
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 100 100"
+          style={{
+            display: 'flex',
+          }}
+        >
+          {/* GR Text - Dark Teal (Matching Header Logo) */}
+          <text 
+            x="4" 
+            y="70" 
+            style={{ 
+              fill: '#0d5a71', 
+              fontSize: '46px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            GR
+          </text>
+          {/* 7 - Bright Red (Matching Header Logo) */}
+          <text 
+            x="62" 
+            y="75" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '68px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            7
+          </text>
+        </svg>
       </div>
     ),
     {
