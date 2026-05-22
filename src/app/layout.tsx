@@ -132,14 +132,14 @@ export default function RootLayout({
             ]),
           }}
         />
+      </head>
+      <body className="font-body antialiased">
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5160508482904207"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-      </head>
-      <body className="font-body antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
