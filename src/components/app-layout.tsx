@@ -241,8 +241,10 @@ function AppHeader() {
                 <LayoutGrid className="h-full w-full text-white" />
               </div>
               <div className="flex flex-col">
-                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter">GR7 TOOLS</span>
-                  <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Utility Pro</span>
+                  <span className="text-base md:text-lg font-black font-headline text-foreground leading-none tracking-tighter">
+                    GR<span className="text-primary italic">7</span> TOOLS
+                  </span>
+                  <span className="text-[7px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] mt-1">Premium Suite</span>
               </div>
             </Link>
         </div>
