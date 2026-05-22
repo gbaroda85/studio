@@ -44,8 +44,6 @@ const PRESETS = [
     { label: "PAN Card (2.5x3.5cm)", width: 2.5, height: 3.5, unit: 'cm' },
 ];
 
-// High-quality small Base64 placeholders for clothes to ensure they ALWAYS show
-// In a real app, these would be local assets or stable CDNs
 const CLOTH_ITEMS = [
     { id: 'm1', label: 'Grey Suit', url: 'https://pi7.org/assets/img/clothes/men/m1.png' },
     { id: 'm2', label: 'Navy Blazer', url: 'https://pi7.org/assets/img/clothes/men/m2.png' },
@@ -72,7 +70,6 @@ export default function PassportPhotoMaker() {
     const [posY, setPosY] = useState(0);
 
     // Refinement States
-    const [isRefining, setIsRefining] = useState(false);
     const [brushSize, setBrushSize] = useState([20]);
 
     // Crop Logic
@@ -104,37 +101,39 @@ export default function PassportPhotoMaker() {
         if (!originalCroppedData) return;
         setIsProcessing(true);
         setProgress(5);
-        toast({ title: "Initializing AI", description: "Cleaning background locally..." });
+        
+        // Use timeout to yield thread for smooth UI
+        setTimeout(async () => {
+            try {
+                const imglyModule = await import("@imgly/background-removal");
+                const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
 
-        try {
-            const imglyModule = await import("@imgly/background-removal");
-            const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
+                const blob = await removeBackgroundFunc(originalCroppedData, {
+                    progress: (item: string, index: number, total: number) => {
+                        setProgress(Math.round((index / total) * 100));
+                    },
+                    output: { format: "image/png", quality: 0.95 }
+                });
 
-            const blob = await removeBackgroundFunc(originalCroppedData, {
-                progress: (item: string, index: number, total: number) => {
-                    setProgress(Math.round((index / total) * 100));
-                },
-                output: { format: "image/png", quality: 0.95 }
-            });
-
-            const url = URL.createObjectURL(blob);
-            setSubjectImageSrc(url);
-            toast({ title: "Success!", description: "Background removed. If limbs are cut, use 'Refine' tab." });
-            setStage('studio');
-        } catch (error: any) {
-            console.error(error);
-            toast({ variant: "destructive", title: "AI Error", description: "Could not remove background. Using original." });
-            setSubjectImageSrc(originalCroppedData);
-            setStage('studio');
-        } finally {
-            setIsProcessing(false);
-        }
+                const url = URL.createObjectURL(blob);
+                setSubjectImageSrc(url);
+                toast({ title: "Success!", description: "Background removed locally." });
+                setStage('studio');
+            } catch (error: any) {
+                console.error(error);
+                toast({ variant: "destructive", title: "AI Error", description: "Using original photo." });
+                setSubjectImageSrc(originalCroppedData);
+                setStage('studio');
+            } finally {
+                setIsProcessing(false);
+            }
+        }, 300);
     };
 
     const renderPhoto = useCallback(async () => {
         const canvas = mainCanvasRef.current;
         if (!canvas || !subjectImageSrc) return;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
         const targetW = 600;
@@ -142,11 +141,9 @@ export default function PassportPhotoMaker() {
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. BG Color
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Subject
         const faceImg = new Image();
         faceImg.crossOrigin = "anonymous";
         faceImg.src = subjectImageSrc;
@@ -166,7 +163,6 @@ export default function PassportPhotoMaker() {
             faceImg.onerror = () => resolve(null);
         });
 
-        // 3. Cloth Overlay
         if (selectedClothUrl) {
             const clothImg = new Image();
             clothImg.crossOrigin = "anonymous";
@@ -192,7 +188,7 @@ export default function PassportPhotoMaker() {
     const handleInitialCrop = async () => {
         if (!imgRef.current || !completedCrop) return;
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
         const targetW = 800;
@@ -240,7 +236,6 @@ export default function PassportPhotoMaker() {
 
     return (
         <div className="w-full max-w-6xl px-4 py-8 animate-in fade-in duration-500">
-            {/* Header Navigation */}
             <div className="flex justify-center items-center gap-2 mb-8 bg-muted/40 p-1 rounded-2xl border-2 overflow-x-auto no-scrollbar">
                 {(['size', 'crop', 'background', 'studio', 'download'] as Stage[]).map((s) => (
                     <button key={s} onClick={() => originalCroppedData && setStage(s)} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", stage === s ? "bg-primary text-white shadow-lg" : "bg-transparent text-muted-foreground")}>
@@ -250,7 +245,6 @@ export default function PassportPhotoMaker() {
             </div>
 
             <div className="grid lg:grid-cols-12 gap-8 items-start">
-                {/* Visual Workspace */}
                 <div className="lg:col-span-8 flex flex-col items-center gap-6">
                     <div className="relative bg-white shadow-2xl border-4 border-white rounded-[2rem] overflow-hidden flex items-center justify-center min-h-[450px] w-full max-w-[400px]">
                         {stage === 'crop' ? (
@@ -264,7 +258,7 @@ export default function PassportPhotoMaker() {
                             <div className="relative group">
                                 <canvas ref={mainCanvasRef} className="max-w-full h-auto" />
                                 {isProcessing && (
-                                    <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-12 gap-6 z-20">
+                                    <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center p-12 gap-6 z-20 transform-gpu">
                                         <Loader2 className="size-16 animate-spin text-primary" />
                                         <div className="w-full max-w-[200px] space-y-2">
                                             <p className="font-black text-[10px] uppercase text-center text-primary">Cleaning BG... {progress}%</p>
@@ -276,7 +270,6 @@ export default function PassportPhotoMaker() {
                         )}
                     </div>
 
-                    {/* Fit Controls */}
                     {stage !== 'crop' && (
                         <div className="flex bg-card p-3 rounded-2xl border-2 gap-3 shadow-xl items-center flex-wrap justify-center">
                             <Button variant="outline" size="icon" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-5"/></Button>
@@ -290,7 +283,6 @@ export default function PassportPhotoMaker() {
                     )}
                 </div>
 
-                {/* Settings Panel */}
                 <div className="lg:col-span-4 w-full">
                     <Card className="border-2 border-primary/10 shadow-xl rounded-[2rem] overflow-hidden bg-card/50">
                         <CardContent className="p-6 space-y-6">

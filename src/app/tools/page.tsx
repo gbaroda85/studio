@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -348,7 +349,7 @@ function ToolsPageContent() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       {/* Hero Header Section - MATCHING HOMEPAGE */}
-      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-16">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-12">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -371,8 +372,8 @@ function ToolsPageContent() {
       </section>
 
       <div className="w-full max-w-[2000px] px-8 md:px-16">
-        {/* Search Bar - Wide Layout - REDUCED BOTTOM MARGIN */}
-        <div className="relative mb-10 max-w-4xl mx-auto -mt-8 relative z-20">
+        {/* Search Bar - Wide Layout - REDUCED BOTTOM MARGIN FURTHER */}
+        <div className="relative mb-6 max-w-4xl mx-auto -mt-12 relative z-20">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
@@ -423,7 +424,7 @@ function ToolsPageContent() {
             </div>
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-16">
+            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-12">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                 <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 hover:scale-105 transition-all">
                     <Icon className={cn("mr-2 h-4 w-4", color)} />

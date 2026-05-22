@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -111,7 +112,6 @@ export default function BackgroundRemover() {
     }
   };
 
-  // Logic to update crop box immediately when preset or values change
   const updateCropFromSettings = useCallback(() => {
     if (!imgRef.current) return;
     
@@ -150,7 +150,7 @@ export default function BackgroundRemover() {
     
     canvas.width = completedCrop.width * scaleX;
     canvas.height = completedCrop.height * scaleY;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     ctx.drawImage(
@@ -165,14 +165,14 @@ export default function BackgroundRemover() {
       canvas.height
     );
 
-    const croppedData = canvas.toDataURL('image/png'); // Use PNG for quality
+    const croppedData = canvas.toDataURL('image/png');
     setCroppedImageSrc(croppedData);
     setStage('process');
     
-    // Give UI a moment to show the processing state before heavy WASM kicks in
+    // Yielding thread before heavy WASM to prevent freezing
     setTimeout(() => {
       handleRemoveBackgroundLocal(croppedData);
-    }, 100);
+    }, 300);
   };
 
   const handleRemoveBackgroundLocal = async (source: string) => {
@@ -190,9 +190,9 @@ export default function BackgroundRemover() {
             const p = Math.round((index / total) * 100);
             setProgress(p);
             if (item.includes("model")) setStatusText("Loading AI Model...");
-            else setStatusText("Removing Background...");
+            else setStatusText("Extracting Subject...");
         },
-        output: { format: "image/png", quality: 1.0 } // 1.0 for zero blur
+        output: { format: "image/png", quality: 1.0 }
       });
 
       const url = URL.createObjectURL(blob);
@@ -214,10 +214,9 @@ export default function BackgroundRemover() {
 
     const canvas = compositeCanvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: true });
     if (!ctx) return;
 
-    // Calculate dimensions based on 300 DPI for sharp output
     let w, h, u;
     if (selectedSizeIndex === '4') {
         w = parseFloat(customWidth) || 35;
@@ -248,7 +247,6 @@ export default function BackgroundRemover() {
     const img = new window.Image();
     img.src = subjectImageSrc;
     img.onload = () => {
-        // High quality drawing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
@@ -259,14 +257,12 @@ export default function BackgroundRemover() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // Draw subject fitting the height (typical for passport)
         const scale = canvas.height / img.height;
         const dw = img.width * scale;
         const dh = canvas.height;
         const dx = (canvas.width - dw) / 2;
         ctx.drawImage(img, dx, 0, dw, dh);
         
-        // Draw Border if any
         if (borderWidth[0] > 0) {
             ctx.strokeStyle = borderColor;
             const strokePx = (borderWidth[0] / 100) * canvas.width;
@@ -355,7 +351,7 @@ export default function BackgroundRemover() {
                       <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={() => { 
                           setCroppedImageSrc(originalImageSrc); 
                           setStage('process'); 
-                          setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 100);
+                          setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 300);
                       }}>
                           REMOVE BACKGROUND <ChevronRight className="ml-2" />
                       </Button>
@@ -457,6 +453,7 @@ export default function BackgroundRemover() {
                             <div className="space-y-4 w-full max-w-sm">
                                 <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
                                 <Progress value={progress} className="h-2 shadow-inner" />
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Optimizing memory threads...</p>
                             </div>
                         </div>
                     ) : previewImageSrc ? (

@@ -22,24 +22,24 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '8px',
-          border: '1.5px solid #e2e8f0',
+          borderRadius: '6px',
+          border: '1px solid #e2e8f0',
           position: 'relative',
         }}
       >
         <svg
-          width="28"
-          height="28"
+          width="24"
+          height="24"
           viewBox="0 0 100 100"
           style={{ display: 'block' }}
         >
-          {/* GR Text - Teal */}
+          {/* GR Text - Dark Teal */}
           <text 
             x="4" 
-            y="70" 
+            y="65" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '46px', 
+              fontSize: '44px', 
               fontWeight: 900, 
               fontFamily: 'sans-serif'
             }}
@@ -48,11 +48,11 @@ export default function Icon() {
           </text>
           {/* 7 - Red */}
           <text 
-            x="62" 
+            x="58" 
             y="75" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '68px', 
+              fontSize: '65px', 
               fontWeight: 900, 
               fontFamily: 'sans-serif'
             }}
