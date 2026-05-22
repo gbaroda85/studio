@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import type {LucideIcon} from 'lucide-react';
 import {
@@ -26,8 +25,8 @@ export function FeatureCard({
   color,
 }: FeatureCardProps) {
   return (
-    <Link href={href} className="group block">
-      <Card className="h-full relative overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl border-border/50 bg-card group-hover:border-primary/50 group-hover:ring-1 group-hover:ring-primary/20">
+    <Link href={href} className="group block h-full">
+      <Card className="h-full relative overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl border-border/50 bg-card group-hover:border-primary/50 group-hover:ring-1 group-hover:ring-primary/20 bg-gradient-to-br from-white via-white to-primary/10 dark:from-slate-900 dark:via-slate-900 dark:to-primary/20 rounded-2xl">
         <CardHeader className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className={cn("grid size-14 place-items-center rounded-2xl bg-muted/50 transition-all group-hover:scale-110 group-hover:bg-primary/10", color)}>
@@ -37,8 +36,8 @@ export function FeatureCard({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
             </div>
           </div>
-          <CardTitle className="text-xl font-black mb-2 leading-tight">{title}</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground leading-relaxed font-medium">{description}</CardDescription>
+          <CardTitle className="text-2xl font-black mb-3 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors">{title}</CardTitle>
+          <CardDescription className="text-base text-muted-foreground leading-relaxed font-semibold line-clamp-2">{description}</CardDescription>
         </CardHeader>
         <div className="absolute -bottom-6 -right-6 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-xl" />
       </Card>
