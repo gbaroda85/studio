@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -54,14 +53,16 @@ export default function PdfMerger() {
     }
 
     const handleFilesChange = (files: FileList | null) => {
-        if (!files) return;
+        if (!files || files.length === 0) return;
         clearMergedFile();
         const newFiles = Array.from(files).filter(file => file.type === 'application/pdf');
-        if (newFiles.length === 0 && files.length > 0) {
+        if (newFiles.length === 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
             return;
         }
         setPdfFiles(prev => [...prev, ...newFiles]);
+        // Reset input value so same files can be re-uploaded if cleared
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files);

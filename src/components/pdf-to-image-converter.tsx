@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -25,7 +24,8 @@ import {
   AlignEndVertical,
   Maximize,
   MousePointer2,
-  Layout
+  Layout,
+  Loader2
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
