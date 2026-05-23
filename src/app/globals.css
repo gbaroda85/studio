@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -76,9 +77,15 @@ body {
     @apply bg-background text-foreground selection:bg-primary/20;
     background-image: 
       radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(199, 89% , 48%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
+}
+
+/* Fix for forced background color issues in some Shadcn components in Dark Mode */
+.dark .data-\[state\=active\]\:bg-white {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
 .font-headline {
@@ -96,12 +103,6 @@ body {
 
 .bg-gradient-premium {
   @apply bg-gradient-to-br from-gradient-blue via-gradient-purple to-gradient-magenta;
-}
-
-/* Noise Texture Replacement for better GSC Indexing */
-.noise-bg {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.02;
 }
 
 /* Custom Thin Scrollbar */
