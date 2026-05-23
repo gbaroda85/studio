@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -16,7 +17,6 @@ import {
   Zap, 
   CheckCircle2,
   Layers,
-  Settings2,
   FileArchive,
   Eye,
   AlignCenterVertical,

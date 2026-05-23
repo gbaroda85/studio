@@ -27,15 +27,13 @@ import {
     Grid3X3,
     ShieldCheck,
     Zap,
-    FileDigit
+    FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Bundle-safe worker URL with stable versioning
+// Bundle-safe worker URL
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type CropMode = 'rectangular' | 'perspective';
@@ -83,7 +81,7 @@ export default function PdfCropper() {
 
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
-      resetState();
+      handleReset();
       setPdfFile(file);
       setIsProcessing(true);
       try {
@@ -99,7 +97,7 @@ export default function PdfCropper() {
         fileReader.readAsArrayBuffer(file);
       } catch (error) {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not process the PDF file.' });
-        resetState();
+        handleReset();
       } finally {
         setIsProcessing(false);
       }
@@ -112,7 +110,7 @@ export default function PdfCropper() {
       setIsProcessing(true);
       try {
           const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2.5 }); // High res for scanner accuracy
+          const viewport = page.getViewport({ scale: 2.5 }); 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
           canvas.height = viewport.height;
@@ -163,7 +161,6 @@ export default function PdfCropper() {
       }
   }
 
-  // Perspective Homography Solver
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -250,8 +247,9 @@ export default function PdfCropper() {
 
     try {
         const newPdfDoc = await PDFDocument.create();
-        const page = newPdfDoc.addPage([targetWidth * 0.75, targetHeight * 0.75]); // Convert to points
-        const embeddedImg = await newPdfDoc.embedJpg(processedImage);
+        const page = newPdfDoc.addPage([targetWidth * 0.75, targetHeight * 0.75]);
+        const imgBytes = await fetch(processedImage).then(res => res.arrayBuffer());
+        const embeddedImg = await newPdfDoc.embedJpg(imgBytes);
         page.drawImage(embeddedImg, {
             x: 0,
             y: 0,
@@ -277,7 +275,6 @@ export default function PdfCropper() {
     const image = imgRef.current;
     const RENDER_SCALE = 2.5;
 
-    // Calculate natural coordinates
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
     
@@ -294,7 +291,6 @@ export default function PdfCropper() {
       const [page] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
       const { height: pagePointsHeight } = page.getSize();
       
-      // Points conversion (72 DPI vs RENDER_SCALE)
       const cropX_pt = cropX_natural / RENDER_SCALE;
       const cropY_pt = pagePointsHeight - (cropY_natural / RENDER_SCALE) - (cropHeight_natural / RENDER_SCALE);
       const cropWidth_pt = cropWidth_natural / RENDER_SCALE;
@@ -307,7 +303,6 @@ export default function PdfCropper() {
       const bytes = await newPdfDoc.save();
       setCroppedPdfUrl(URL.createObjectURL(new Blob([bytes], {type: 'application/pdf'})));
       
-      // Create a visual result preview for UI
       const previewCanvas = document.createElement('canvas');
       previewCanvas.width = cropWidth_natural;
       previewCanvas.height = cropHeight_natural;
@@ -318,7 +313,7 @@ export default function PdfCropper() {
       toast({ title: "Trimmed!", description: "Margins cropped successfully." });
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Standard crop failed. Try Scanner mode.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Crop failed.' });
     } finally {
       setIsProcessing(false);
     }
@@ -337,7 +332,7 @@ export default function PdfCropper() {
     link.click();
   };
 
-  const resetState = () => {
+  const handleReset = () => {
       setPdfFile(null);
       setNumPages(0);
       setPageImage(null);
@@ -399,7 +394,6 @@ export default function PdfCropper() {
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500">
         <div className="grid lg:grid-cols-12 gap-8 items-start">
             
-            {/* Editor Workspace */}
             <div className="lg:col-span-8 space-y-6">
                 <Card className="border-2 shadow-2xl overflow-hidden bg-card/50">
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
@@ -423,7 +417,7 @@ export default function PdfCropper() {
                         {isProcessing && !resultPreview && (
                             <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
                                 <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
-                                <p className="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Calculating Homography...</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Processing Document...</p>
                             </div>
                         )}
 
@@ -473,7 +467,6 @@ export default function PdfCropper() {
                 </Card>
             </div>
 
-            {/* Controls Sidebar */}
             <div className="lg:col-span-4 space-y-6">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white">
                     <CardHeader className="bg-primary/5 border-b p-6">
