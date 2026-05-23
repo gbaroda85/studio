@@ -11,11 +11,13 @@ import {
   FileImage,
   Settings2,
   Target,
-  Zip,
   CheckCircle2,
   Trash2,
   FileOutput,
   Layers,
+  Sparkles,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -65,8 +66,8 @@ export default function ImageCompressor() {
   const [results, setResults] = useState<CompressionResult[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [compressionMode, setCompressionMode] = useState<CompressionMode>('target');
-  const [targetSizeKb, setTargetSizeKb] = useState<string>("100");
-  const [quality, setQuality] = useState<number[]>([70]);
+  const [targetSizeKb, setTargetSizeKb] = useState<string>("50");
+  const [quality, setQuality] = useState<number[]>([75]);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -81,7 +82,7 @@ export default function ImageCompressor() {
         originalSize: f.size,
         newSize: 0,
         savings: 0,
-        dataUrl: URL.createObjectURL(f), // Temporary preview
+        dataUrl: URL.createObjectURL(f), 
         isProcessing: false
     }));
 
@@ -102,51 +103,56 @@ export default function ImageCompressor() {
             const ctx = canvas.getContext("2d");
             if (!ctx) return resolve(item);
 
+            canvas.width = img.width;
+            canvas.height = img.height;
+
             const mimeType = `image/${outputFormat}`;
             let finalUrl = "";
             let finalSize = 0;
 
-            if (compressionMode === 'manual') {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                if (outputFormat === 'jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+            const renderToCanvas = (q: number) => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // CRITICAL FIX: Fill with white to prevent black background in JPEG
+                if (outputFormat === 'jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
                 ctx.drawImage(img, 0, 0);
-                finalUrl = canvas.toDataURL(mimeType, quality[0] / 100);
+                return canvas.toDataURL(mimeType, q);
+            };
+
+            if (compressionMode === 'manual') {
+                finalUrl = renderToCanvas(quality[0] / 100);
                 const blob = await (await fetch(finalUrl)).blob();
                 finalSize = blob.size;
             } else {
-                // Target Size Logic
+                // Target Size Binary Search Logic
                 const targetBytes = parseInt(targetSizeKb, 10) * 1024;
-                let low = 0.05, high = 1.0, bestQ = 0.5;
-                let bestBlob: Blob | null = null;
+                let low = 0.05, high = 1.0, bestUrl = "";
+                let bestSize = 0;
 
-                canvas.width = img.width;
-                canvas.height = img.height;
-                
                 for (let i = 0; i < 7; i++) {
-                    const q = (low + high) / 2;
-                    const tempUrl = canvas.toDataURL(mimeType, q);
-                    const tempBlob = await (await fetch(tempUrl)).blob();
-                    if (tempBlob.size <= targetBytes) {
-                        bestBlob = tempBlob;
-                        bestQ = q;
-                        low = q;
+                    const mid = (low + high) / 2;
+                    const testUrl = renderToCanvas(mid);
+                    const testBlob = await (await fetch(testUrl)).blob();
+                    
+                    if (testBlob.size <= targetBytes) {
+                        bestUrl = testUrl;
+                        bestSize = testBlob.size;
+                        low = mid;
                     } else {
-                        high = q;
+                        high = mid;
                     }
                 }
                 
-                if (!bestBlob) {
-                   const fallbackUrl = canvas.toDataURL(mimeType, 0.1);
-                   bestBlob = await (await fetch(fallbackUrl)).blob();
+                if (!bestUrl) {
+                   bestUrl = renderToCanvas(0.05);
+                   const fb = await (await fetch(bestUrl)).blob();
+                   bestSize = fb.size;
                 }
                 
-                finalSize = bestBlob.size;
-                finalUrl = await new Promise(r => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => r(reader.result as string);
-                    reader.readAsDataURL(bestBlob!);
-                });
+                finalUrl = bestUrl;
+                finalSize = bestSize;
             }
 
             resolve({
@@ -162,30 +168,37 @@ export default function ImageCompressor() {
 
   const startBulkCompression = async () => {
     setIsBulkProcessing(true);
-    const updatedResults = [...results];
-
-    for (let i = 0; i < updatedResults.length; i++) {
-        if (updatedResults[i].newSize > 0) continue; // Skip already done
-        
-        setResults(prev => prev.map((item, idx) => i === idx ? { ...item, isProcessing: true } : item));
-        const res = await compressSingleFile(updatedResults[i]);
-        setResults(prev => prev.map((item, idx) => i === idx ? res : item));
+    const pending = results.filter(r => r.newSize === 0);
+    
+    for (const item of pending) {
+        setResults(prev => prev.map(r => r.id === item.id ? { ...r, isProcessing: true } : r));
+        const res = await compressSingleFile(item);
+        setResults(prev => prev.map(r => r.id === item.id ? res : r));
     }
 
     setIsBulkProcessing(false);
-    toast({ title: "Bulk Compression Done!", description: `${results.length} images optimized.` });
+    toast({ title: "Done!", description: "All images processed perfectly." });
   };
 
-  const downloadAll = async () => {
+  const downloadFile = (res: CompressionResult) => {
+    const link = document.createElement("a");
+    link.href = res.dataUrl;
+    link.download = `optimized-${res.name.split('.')[0]}.${outputFormat}`;
+    link.click();
+  };
+
+  const downloadAllAsZip = async () => {
     const zip = new JSZip();
     results.forEach(res => {
-        const base64Data = res.dataUrl.split(",")[1];
-        zip.file(`compressed-${res.name.split('.')[0]}.${outputFormat}`, base64Data, { base64: true });
+        if (res.newSize > 0) {
+            const base64Data = res.dataUrl.split(",")[1];
+            zip.file(`optimized-${res.name.split('.')[0]}.${outputFormat}`, base64Data, { base64: true });
+        }
     });
     const content = await zip.generateAsync({ type: "blob" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(content);
-    link.download = "optimized-images-gr7.zip";
+    link.download = "gr7-optimized-batch.zip";
     link.click();
   };
 
@@ -193,56 +206,78 @@ export default function ImageCompressor() {
     setResults(prev => prev.filter(r => r.id !== id));
   };
 
+  const allProcessed = results.length > 0 && results.every(r => r.newSize > 0);
+
   return (
     <div className="w-full max-w-6xl animate-in fade-in duration-500">
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left: List & Upload */}
+        {/* Left: Workspace */}
         <div className="lg:col-span-7 space-y-6">
             <Card 
-                className={cn("border-2 border-dashed transition-all", isDragOver && "border-primary bg-primary/5", results.length > 0 ? "p-4" : "p-20 text-center")}
+                className={cn(
+                    "border-2 border-dashed transition-all relative overflow-hidden", 
+                    isDragOver && "border-primary bg-primary/5", 
+                    results.length > 0 ? "p-4" : "p-24 text-center"
+                )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
                 {results.length === 0 ? (
-                    <div className="flex flex-col items-center gap-4 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary">
-                            <UploadCloud className="size-10" />
+                    <div className="flex flex-col items-center gap-6 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                        <div className="size-24 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                            <UploadCloud className="size-12" />
                         </div>
-                        <div>
-                            <p className="text-xl font-black uppercase">Drop images for Bulk Compression</p>
-                            <p className="text-sm text-muted-foreground">Select up to 50 photos at once. 100% Secure.</p>
+                        <div className="space-y-2">
+                            <p className="text-2xl font-black uppercase tracking-tighter">Click to add or drop images</p>
+                            <p className="text-sm text-muted-foreground font-medium italic">Supports Bulk Mode: Select up to 50 photos at once.</p>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         <div className="flex justify-between items-center px-2">
-                            <Badge variant="secondary" className="font-black text-[10px] uppercase">{results.length} Files Queued</Badge>
-                            <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-bold h-8"><Trash2 className="size-3 mr-1"/> Clear All</Button>
+                            <Badge variant="secondary" className="font-black text-[10px] px-3 py-1 rounded-full uppercase bg-primary/10 text-primary border-primary/20">
+                                {results.length} {results.length === 1 ? 'Image' : 'Images'} Selected
+                            </Badge>
+                            <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-8 text-[10px] uppercase hover:bg-destructive/10">
+                                <Trash2 className="size-3 mr-1.5"/> Clear Workspace
+                            </Button>
                         </div>
-                        <ScrollArea className="h-[400px] pr-4">
+                        <ScrollArea className="h-[450px] pr-4">
                             <div className="grid gap-3">
                                 {results.map((res) => (
-                                    <div key={res.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border group hover:border-primary/30 transition-colors">
+                                    <div key={res.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 hover:border-primary/40 transition-all group">
                                         <div className="flex items-center gap-4 truncate">
-                                            <div className="size-12 rounded-lg overflow-hidden bg-white border shrink-0 relative">
+                                            <div className="size-14 rounded-xl overflow-hidden bg-muted border-2 shrink-0 relative shadow-sm">
                                                 <Image src={res.dataUrl} alt="prev" fill className="object-cover" />
                                             </div>
                                             <div className="truncate">
-                                                <p className="text-xs font-bold truncate max-w-[150px]">{res.name}</p>
-                                                <p className="text-[10px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</p>
+                                                <p className="text-xs font-black truncate max-w-[180px] uppercase tracking-tight">{res.name}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[10px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
+                                                    {res.newSize > 0 && (
+                                                        <>
+                                                            <span className="text-muted-foreground">→</span>
+                                                            <span className="text-[10px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-4 shrink-0">
+                                        <div className="flex items-center gap-3 shrink-0">
                                             {res.isProcessing ? (
-                                                <Loader2 className="size-4 animate-spin text-primary" />
+                                                <Loader2 className="size-5 animate-spin text-primary" />
                                             ) : res.newSize > 0 ? (
-                                                <div className="text-right">
-                                                    <Badge className="bg-green-500 text-white text-[9px] font-black">-{res.savings.toFixed(0)}%</Badge>
-                                                    <p className="text-[10px] font-bold text-green-600 mt-1">{formatBytes(res.newSize)}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge className="bg-green-500 hover:bg-green-500 text-white text-[9px] font-black">-{res.savings.toFixed(0)}%</Badge>
+                                                    <Button size="icon" variant="outline" className="size-9 rounded-xl border-2 hover:bg-primary/5" onClick={() => downloadFile(res)}>
+                                                        <Download className="size-4 text-primary" />
+                                                    </Button>
                                                 </div>
-                                            ) : null}
-                                            <Button variant="ghost" size="icon" className="size-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeFile(res.id)}>
+                                            ) : (
+                                                <Badge variant="outline" className="text-[9px] font-black uppercase opacity-40">Pending</Badge>
+                                            )}
+                                            <Button variant="ghost" size="icon" className="size-8 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
                                                 <X className="size-4" />
                                             </Button>
                                         </div>
@@ -250,7 +285,7 @@ export default function ImageCompressor() {
                                 ))}
                             </div>
                         </ScrollArea>
-                        <Button variant="outline" className="w-full border-2 border-dashed h-12" onClick={() => fileInputRef.current?.click()}>
+                        <Button variant="outline" className="w-full border-2 border-dashed h-14 rounded-2xl font-black text-xs uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
                             <Layers className="size-4 mr-2" /> ADD MORE PHOTOS
                         </Button>
                     </div>
@@ -258,91 +293,122 @@ export default function ImageCompressor() {
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
             </Card>
 
-            {results.some(r => r.newSize > 0) && (
-                <Card className="bg-green-500/5 border-green-500/20">
-                    <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
-                                <CheckCircle2 className="size-6" />
+            {allProcessed && results.length > 1 && (
+                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500">
+                    <CardContent className="p-8 flex flex-col sm:flex-row items-center justify-between gap-8">
+                        <div className="flex items-center gap-5">
+                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl shadow-green-500/30">
+                                <CheckCircle2 className="size-8" />
                             </div>
                             <div>
-                                <p className="text-sm font-black uppercase text-green-700">All Images Optimized</p>
-                                <p className="text-xs text-green-600 font-medium">Ready to download in a single archive.</p>
+                                <p className="text-lg font-black uppercase tracking-tighter text-green-800">Batch Ready!</p>
+                                <p className="text-xs text-green-700 font-medium">All images optimized without quality loss.</p>
                             </div>
                         </div>
-                        <Button size="lg" className="bg-green-600 hover:bg-green-700 font-black shadow-xl" onClick={downloadAll}>
-                            <Download className="mr-2 size-5" /> DOWNLOAD AS ZIP
+                        <Button size="lg" className="h-16 px-10 bg-green-600 hover:bg-green-700 font-black text-lg shadow-2xl rounded-2xl transition-all active:scale-95" onClick={downloadAllAsZip}>
+                            <Download className="mr-3 size-6" /> DOWNLOAD ZIP
                         </Button>
                     </CardContent>
                 </Card>
             )}
         </div>
 
-        {/* Right: Controls */}
+        {/* Right: Tools & Settings */}
         <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24">
-                <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg flex items-center gap-2 font-black uppercase">
-                        <Settings2 className="size-5 text-primary" /> Compression Suite
+            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                <CardHeader className="bg-primary/5 border-b p-6">
+                    <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-6 text-primary" /> Optimizer Suite
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-8">
-                    <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)}>
-                        <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-muted rounded-xl">
-                            <TabsTrigger value="target" className="font-bold text-xs uppercase">Fixed KB (Auto)</TabsTrigger>
-                            <TabsTrigger value="manual" className="font-bold text-xs uppercase">Manual Quality</TabsTrigger>
+                <CardContent className="p-8 space-y-8">
+                    <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 h-14 p-1.5 bg-muted/50 rounded-2xl">
+                            <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-lg">
+                                <Target className="size-3 mr-2" /> Target Size (KB)
+                            </TabsTrigger>
+                            <TabsTrigger value="manual" className="font-black text-[10px] uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-lg">
+                                <Settings2 className="size-3 mr-2" /> Manual Quality
+                            </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="target" className="pt-6 space-y-4 animate-in fade-in duration-300">
-                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Size per image</Label>
-                             <div className="relative group">
-                                <Input 
-                                    type="number" 
-                                    value={targetSizeKb} 
-                                    onChange={(e) => setTargetSizeKb(e.target.value)} 
-                                    className="h-14 text-2xl font-black focus-visible:ring-primary border-2 pl-6 pr-16"
-                                />
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-muted-foreground">KB</div>
+                        <TabsContent value="target" className="pt-8 space-y-6 animate-in fade-in duration-500">
+                             <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                    Target KB per image
+                                </Label>
+                                <div className="relative group">
+                                    <Input 
+                                        type="number" 
+                                        value={targetSizeKb} 
+                                        onChange={(e) => setTargetSizeKb(e.target.value)} 
+                                        className="h-16 text-3xl font-black focus-visible:ring-primary border-2 rounded-2xl pl-8 pr-20 bg-muted/20"
+                                    />
+                                    <div className="absolute right-8 top-1/2 -translate-y-1/2 font-black text-xl text-primary/40 tracking-tighter">KB</div>
+                                </div>
+                                <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10">
+                                    <p className="text-[10px] text-primary/80 font-bold italic leading-relaxed">
+                                        <span className="font-black uppercase mr-1">Batch Pro:</span> Our algorithm iterates 7 times to find the absolute best quality that fits under your limit.
+                                    </p>
+                                </div>
                              </div>
-                             <p className="text-[10px] text-muted-foreground italic leading-relaxed">
-                                <span className="text-primary font-bold">Smart Algorithm:</span> We intelligently adjust quality to fit under {targetSizeKb}KB while keeping edges sharp.
-                             </p>
                         </TabsContent>
 
-                        <TabsContent value="manual" className="pt-6 space-y-6 animate-in fade-in duration-300">
-                            <div className="space-y-4">
-                                <div className="flex justify-between">
-                                    <Label className="text-xs font-black uppercase">Image Quality</Label>
-                                    <span className="text-primary font-mono font-black">{quality[0]}%</span>
+                        <TabsContent value="manual" className="pt-8 space-y-8 animate-in fade-in duration-500">
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-xs font-black uppercase tracking-widest">Quality Factor</Label>
+                                    <Badge className="font-mono font-black text-base px-3 py-1 bg-primary text-white rounded-lg">{quality[0]}%</Badge>
                                 </div>
                                 <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-4" />
+                                <p className="text-[10px] text-muted-foreground font-medium">Higher percentage = better clarity, larger file size.</p>
                             </div>
                         </TabsContent>
                     </Tabs>
 
-                    <div className="space-y-2 pt-4 border-t">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Export Format</Label>
+                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Output Settings</Label>
                         <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
-                            <SelectTrigger className="h-12 font-bold border-2"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="jpeg" className="font-bold">JPEG (Recommended)</SelectItem>
-                                <SelectItem value="webp" className="font-bold">WEBP (Modern)</SelectItem>
-                                <SelectItem value="png" className="font-bold">PNG (Lossless)</SelectItem>
+                            <SelectTrigger className="h-14 font-black text-sm border-2 rounded-2xl focus:ring-primary/20"><SelectValue /></SelectTrigger>
+                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                <SelectItem value="jpeg" className="font-bold py-3">JPEG (Best for Photos)</SelectItem>
+                                <SelectItem value="webp" className="font-bold py-3">WEBP (Modern Web)</SelectItem>
+                                <SelectItem value="png" className="font-bold py-3">PNG (High Clarity)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 border-t">
+                <CardFooter className="bg-muted/10 p-8 border-t-2">
                     <Button 
-                        className="w-full h-16 text-xl font-black bg-primary hover:bg-primary/90 shadow-xl group" 
+                        className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95" 
                         disabled={results.length === 0 || isBulkProcessing}
                         onClick={startBulkCompression}
                     >
-                        {isBulkProcessing ? <Loader2 className="mr-3 size-6 animate-spin" /> : <FileOutput className="mr-3 size-6 group-hover:scale-110 transition-transform" />}
-                        {isBulkProcessing ? "PROCESSING..." : "COMPRESS ALL"}
+                        {isBulkProcessing ? (
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="size-7 animate-spin" />
+                                <span className="uppercase tracking-tighter">OPTIMIZING BATCH...</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <Zap className="size-7 text-yellow-400 fill-yellow-400 group-hover:scale-110 transition-transform" />
+                                <span className="uppercase tracking-tighter">START COMPRESSION</span>
+                            </div>
+                        )}
                     </Button>
                 </CardFooter>
             </Card>
+
+            {/* Privacy Shield Info */}
+            <div className="p-6 bg-green-500/5 rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+                <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="size-6 text-green-600" />
+                </div>
+                <div>
+                    <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Security Lock Active</p>
+                    <p className="text-[10px] text-green-600/80 font-medium leading-tight">All processing occurs in your browser RAM. Your private photos never touch our cloud.</p>
+                </div>
+            </div>
         </div>
       </div>
     </div>
