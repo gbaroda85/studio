@@ -1,4 +1,3 @@
-
 import { ImageResponse } from 'next/og'
 
 // Route segment config
@@ -21,7 +20,8 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'transparent',
+          background: 'white',
+          borderRadius: '8px',
         }}
       >
         <svg
@@ -32,28 +32,28 @@ export default function Icon() {
             display: 'flex',
           }}
         >
-          {/* GR Text - Dark Teal (Matching Header Logo) */}
+          {/* GR Text - Dark Teal (Ultra Bold) */}
           <text 
             x="4" 
-            y="70" 
+            y="65" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '46px', 
+              fontSize: '52px', 
               fontWeight: 900, 
-              fontFamily: 'Arial Black, sans-serif'
+              fontFamily: 'sans-serif'
             }}
           >
             GR
           </text>
-          {/* 7 - Bright Red (Matching Header Logo) */}
+          {/* 7 - Bright Red (Ultra Bold) */}
           <text 
-            x="62" 
-            y="75" 
+            x="64" 
+            y="85" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '68px', 
+              fontSize: '78px', 
               fontWeight: 900, 
-              fontFamily: 'Arial Black, sans-serif'
+              fontFamily: 'sans-serif'
             }}
           >
             7
