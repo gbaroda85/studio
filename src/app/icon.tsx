@@ -21,7 +21,7 @@ export default function Icon() {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'white',
-          borderRadius: '8px',
+          borderRadius: '4px',
         }}
       >
         <svg
@@ -32,27 +32,27 @@ export default function Icon() {
             display: 'flex',
           }}
         >
-          {/* GR Text - Dark Teal (Ultra Bold) */}
+          {/* GR Text - Dark Teal (Ultra Bold) - Moved slightly left to make room for 7 */}
           <text 
-            x="4" 
-            y="65" 
+            x="2" 
+            y="68" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '52px', 
+              fontSize: '56px', 
               fontWeight: 900, 
               fontFamily: 'sans-serif'
             }}
           >
             GR
           </text>
-          {/* 7 - Bright Red (Ultra Bold) */}
+          {/* 7 - Bright Red (Ultra Bold) - Made even bigger and shifted right-down */}
           <text 
-            x="64" 
-            y="85" 
+            x="58" 
+            y="92" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '78px', 
-              fontWeight: 900, 
+              fontSize: '86px', 
+              fontWeight: 950, 
               fontFamily: 'sans-serif'
             }}
           >

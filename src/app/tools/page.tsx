@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -11,7 +10,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import {
   Crop,
   FileArchive,
@@ -348,7 +346,7 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Header Section - MATCHING HOMEPAGE STYLE */}
+      {/* Hero Header Section - Sleeker Search Placement */}
       <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-6">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -385,9 +383,9 @@ function ToolsPageContent() {
         </div>
       </section>
 
-      <div className="w-full max-w-[2000px] px-8 md:px-16">
+      <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4">
         {isSearching ? (
-            <div className="mt-4 space-y-20">
+            <div className="space-y-20">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">

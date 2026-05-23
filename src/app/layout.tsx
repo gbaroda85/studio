@@ -17,8 +17,12 @@ export const metadata: Metadata = {
     canonical: 'https://www.gr7imagepdf.com',
   },
   icons: {
-    icon: '/icon',
-    apple: '/icon',
+    icon: [
+      { url: '/icon?v=4', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon?v=4', type: 'image/png' },
+    ],
   },
   keywords: [
     'image to pdf converter',
