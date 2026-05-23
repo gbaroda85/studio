@@ -117,7 +117,9 @@ export default function PdfMerger() {
             }
             const mergedPdfBytes = await mergedPdf.save();
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-            setMergedPdfUrl(URL.createObjectURL(blob));
+            if (mergedPdfUrl) URL.revokeObjectURL(mergedPdfUrl);
+            const url = URL.createObjectURL(blob);
+            setMergedPdfUrl(url);
             toast({title: 'Merge Success!', description: 'Your PDFs have been combined. Preview below.'});
         } catch (error) {
             console.error(error);
@@ -180,7 +182,7 @@ export default function PdfMerger() {
                                      </div>
                                 ))}
                                 <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-bold text-xs" onClick={() => fileInputRef.current?.click()}>
-                                    <UploadCloud className="size-4 mr-2" /> ADD MORE FILES
+                                    <UploadCloud className="size-4 mr-2" /> <span className="mr-1">Drag or</span> ADD MORE FILES
                                 </Button>
                             </div>
                         )}
@@ -199,14 +201,14 @@ export default function PdfMerger() {
                 </Card>
 
                 {mergedPdfUrl && (
-                    <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
+                    <Card key={mergedPdfUrl} className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
                         <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
                             <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-green-700">
                                 <Eye className="size-4" /> Merged Document Preview
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0 bg-white">
-                            <iframe src={mergedPdfUrl} className="w-full h-[500px]" title="PDF Preview" />
+                            <iframe src={mergedPdfUrl} className="w-full h-[600px] border-0" title="PDF Preview" />
                         </CardContent>
                         <CardFooter className="bg-green-500/10 p-6 flex flex-col sm:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-4 text-center sm:text-left">

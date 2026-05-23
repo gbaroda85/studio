@@ -79,6 +79,41 @@ export default function PdfCropper() {
     };
   }, [croppedPdfUrl]);
 
+  // Defined here to avoid temporal dead zone ReferenceErrors
+  const handleReset = useCallback(() => {
+    setPdfFile(null);
+    setNumPages(0);
+    setPageImage(null);
+    setResultPreview(null);
+    setCroppedPdfUrl(null);
+    pdfDocRef.current = null;
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
+
+  const renderPage = async (pdf: pdfjs.PDFDocumentProxy, pageNum: number) => {
+      setIsProcessing(true);
+      try {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2.5 }); 
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          if (context) {
+            context.fillStyle = '#FFFFFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            setPageImage(canvas.toDataURL('image/png'));
+          }
+      } catch (e) {
+        toast({variant: 'destructive', title: 'Error', description: 'Could not render PDF page.'});
+        setPageImage(null);
+      } finally {
+        setIsProcessing(false);
+      }
+  };
+
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
       handleReset();
@@ -104,30 +139,6 @@ export default function PdfCropper() {
     } else if (file) {
       toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
     }
-  };
-
-  const renderPage = async (pdf: pdfjs.PDFDocumentProxy, pageNum: number) => {
-      setIsProcessing(true);
-      try {
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2.5 }); 
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-
-          if (context) {
-            context.fillStyle = '#FFFFFF';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: context, viewport: viewport }).promise;
-            setPageImage(canvas.toDataURL('image/png'));
-          }
-      } catch (e) {
-        toast({variant: 'destructive', title: 'Error', description: 'Could not render PDF page.'});
-        setPageImage(null);
-      } finally {
-        setIsProcessing(false);
-      }
   };
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
@@ -330,16 +341,6 @@ export default function PdfCropper() {
     link.href = croppedPdfUrl;
     link.download = `cropped-${pdfFile.name}`;
     link.click();
-  };
-
-  const handleReset = () => {
-      setPdfFile(null);
-      setNumPages(0);
-      setPageImage(null);
-      setResultPreview(null);
-      setCroppedPdfUrl(null);
-      pdfDocRef.current = null;
-      if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
