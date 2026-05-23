@@ -17,8 +17,13 @@ export const metadata: Metadata = {
     canonical: 'https://www.gr7imagepdf.com',
   },
   icons: {
-    icon: '/icon',
-    apple: '/icon',
+    icon: [
+      { url: '/icon?v=10', type: 'image/png' },
+      { url: '/icon?v=10', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon?v=10', type: 'image/png' },
+    ],
   },
   keywords: [
     'image to pdf converter',
@@ -101,6 +106,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter&family=Orbitron:wght@700&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" href="/icon?v=10" sizes="any" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -17,7 +16,6 @@ const steps = [
     "Review Results: The tool will show you the compression savings.",
     "Download: Click 'Download Compressed PDF' to get your smaller file.",
 ];
-
 
 export default function CompressPdfPage() {
   return (

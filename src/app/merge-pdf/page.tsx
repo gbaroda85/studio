@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -15,7 +14,7 @@ const steps = [
     "Upload PDFs: Drag and drop two or more PDF files, or click to select them.",
     "Add More (Optional): You can add more files to the list. The merge order is based on the list order.",
     "Merge: Click the 'Merge PDFs' button to combine all the files.",
-    "Download: Click 'Download Merged PDF' to save your single, combined document.",
+    "Download: Click 'Download Merged PDF' to get your single, combined document.",
 ];
 
 export default function MergePdfPage() {

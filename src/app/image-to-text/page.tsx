@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,8 +9,6 @@ export const metadata: Metadata = {
   title: 'Image to Text (OCR) - Extract Text from Photos Online Securely',
   description: 'AI-powered local OCR tool to extract text from documents, screenshots, and notes. Supports English and Hindi with 100% privacy.',
 };
-
-export const dynamic = 'force-dynamic';
 
 const steps = [
   "Upload Image: Select an image containing text (like a screenshot or a scanned document).",

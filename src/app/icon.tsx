@@ -1,9 +1,7 @@
 import { ImageResponse } from 'next/og'
 
-// Route segment config
 export const runtime = 'edge'
 
-// Image metadata
 export const size = {
   width: 32,
   height: 32,
@@ -22,7 +20,7 @@ export default function Icon() {
           justifyContent: 'center',
           backgroundColor: 'white',
           borderRadius: '8px',
-          border: '1.5px solid #e2e8f0', // border-slate-200 to match header logo container
+          border: '1.5px solid #e2e8f0', // Matches Header Logo border
           padding: '1px',
         }}
       >
