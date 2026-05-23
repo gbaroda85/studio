@@ -30,7 +30,7 @@ export default function CreateZipPage() {
             </Button>
         </div>
         <div className="w-full flex justify-center">
-             ZipCreator />
+            <ZipCreator />
         </div>
         <HowToGuide title="Zip Creator" steps={steps} />
     </main>
