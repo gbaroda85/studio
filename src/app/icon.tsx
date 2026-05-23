@@ -32,26 +32,26 @@ export default function Icon() {
             display: 'flex',
           }}
         >
-          {/* GR Text - Dark Teal (Ultra Bold) - Moved slightly left to make room for 7 */}
+          {/* GR Text - Dark Teal (Ultra Bold) - Perfectly visible in small size */}
           <text 
             x="2" 
-            y="68" 
+            y="65" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '56px', 
-              fontWeight: 900, 
+              fontSize: '52px', 
+              fontWeight: 950, 
               fontFamily: 'sans-serif'
             }}
           >
             GR
           </text>
-          {/* 7 - Bright Red (Ultra Bold) - Made even bigger and shifted right-down */}
+          {/* 7 - Bright Red (Ultra Bold) - High contrast against white background */}
           <text 
-            x="58" 
+            x="56" 
             y="92" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '86px', 
+              fontSize: '84px', 
               fontWeight: 950, 
               fontFamily: 'sans-serif'
             }}
