@@ -20,15 +20,29 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#0d5a71',
-          borderRadius: '6px',
-          flexDirection: 'column',
-          padding: '2px',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          border: '1.5px solid #e2e8f0', // border-slate-200 to match header logo container
+          padding: '1px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: 'white', fontSize: '14px', fontWeight: 900, lineHeight: 1 }}>GR</span>
-            <span style={{ color: '#ef4444', fontSize: '18px', fontWeight: 950, lineHeight: 1, marginLeft: '1px' }}>7</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
+            {/* GR Text - Dark Teal (#0d5a71) */}
+            <span style={{ 
+              color: '#0d5a71', 
+              fontSize: '13px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif',
+              letterSpacing: '-0.5px'
+            }}>GR</span>
+            {/* 7 - Bright Red (#ef4444) */}
+            <span style={{ 
+              color: '#ef4444', 
+              fontSize: '17px', 
+              fontWeight: 900, 
+              fontFamily: 'sans-serif',
+              marginLeft: '0px'
+            }}>7</span>
         </div>
       </div>
     ),

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,14 +9,6 @@ export const metadata: Metadata = {
   title: 'Loan EMI Calculator - Home, Car, Personal Loan EMI Online',
   description: 'Calculate your monthly EMI, total interest, and total payment for any loan. Simple and accurate financial planning tool with local processing.',
 };
-
-const steps = [
-    "Enter Loan Amount: Input the total amount of the loan you are considering.",
-    "Enter Interest Rate: Add the annual interest rate for the loan.",
-    "Enter Tenure: Input the duration of the loan and select whether it's in years or months.",
-    "Calculate: Click the 'Calculate EMI' button.",
-    "View Details: The calculator will display your monthly payment (EMI), total interest, and total payment.",
-];
 
 export default function LoanCalculatorPage() {
   return (
@@ -33,7 +24,13 @@ export default function LoanCalculatorPage() {
         <div className="w-full flex justify-center">
             <LoanCalculator />
         </div>
-        <HowToGuide title="Loan & EMI Calculator" steps={steps} />
+        <HowToGuide title="Loan & EMI Calculator" steps={[
+            "Enter Loan Amount: Input the total amount of the loan you are considering.",
+            "Enter Interest Rate: Add the annual interest rate for the loan.",
+            "Enter Tenure: Input the duration of the loan and select whether it's in years or months.",
+            "Calculate: Click the 'Calculate EMI' button.",
+            "View Details: The calculator will display your monthly payment (EMI), total interest, and total payment.",
+        ]} />
     </main>
   );
 }

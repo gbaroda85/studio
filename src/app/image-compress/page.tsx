@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,13 +9,6 @@ export const metadata: Metadata = {
   title: 'AI Image Compressor - Compress JPG/PNG to 20kb, 50kb, 100kb Online',
   description: 'Reduce image file size instantly for SSC, UPSC, and IBPS application forms. Professional local compression with zero quality loss and 100% privacy.',
 };
-
-const steps = [
-    "Upload Image: Drag and drop an image or click to select one.",
-    "Adjust Settings: Use the controls to change the dimensions, format, and quality (for JPEG).",
-    "Compress: Click the 'Apply & Compress' button to process the image.",
-    "Review & Download: Compare the original and compressed images, check the savings, and click 'Download Image'.",
-];
 
 export default function ImageCompressPage() {
   return (
@@ -32,7 +24,12 @@ export default function ImageCompressPage() {
         <div className="w-full flex justify-center">
             <ImageCompressor />
         </div>
-        <HowToGuide title="Image Compressor" steps={steps} />
+        <HowToGuide title="Image Compressor" steps={[
+            "Upload Image: Drag and drop an image or click to select one.",
+            "Adjust Settings: Use the controls to change the dimensions, format, and quality (for JPEG).",
+            "Compress: Click the 'Apply & Compress' button to process the image.",
+            "Review & Download: Compare the original and compressed images, check the savings, and click 'Download Image'.",
+        ]} />
     </main>
   );
 }

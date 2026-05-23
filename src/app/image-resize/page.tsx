@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,14 +9,6 @@ export const metadata: Metadata = {
   title: 'Smart Image Resizer - Resize for SSC, UPSC, IBPS Application Forms',
   description: 'Exact pixel and mm resizing for government job forms. Resize photos to 200x230px and signatures to 140x60px instantly and privately.',
 };
-
-const steps = [
-    "Upload Image: Select the image you want to resize.",
-    "Enter Dimensions: Input your desired width/height in pixels or MM.",
-    "Choose Format: Select the output format (PNG, JPEG, or WEBP).",
-    "Resize: Click the 'Resize Image' button.",
-    "Download: Preview your resized image and click 'Download' to save it.",
-];
 
 export default function ImageResizePage() {
   return (
@@ -33,7 +24,13 @@ export default function ImageResizePage() {
         <div className="w-full flex justify-center">
             <ImageResizer />
         </div>
-        <HowToGuide title="Image Resizer" steps={steps} />
+        <HowToGuide title="Image Resizer" steps={[
+            "Upload Image: Select the image you want to resize.",
+            "Enter Dimensions: Input your desired width/height in pixels or MM.",
+            "Choose Format: Select the output format (PNG, JPEG, or WEBP).",
+            "Resize: Click the 'Resize Image' button.",
+            "Download: Preview your resized image and click 'Download' to save it.",
+        ]} />
     </main>
   );
 }

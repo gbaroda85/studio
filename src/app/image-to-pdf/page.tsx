@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,13 +9,6 @@ export const metadata: Metadata = {
   title: 'Image to PDF Converter - Convert Photos to PDF Online Free',
   description: 'Easily convert JPG, PNG, and WEBP images into a single high-quality PDF document. 100% private, no server uploads, works entirely in your browser.',
 };
-
-const steps = [
-    "Upload Images: Select one or more image files. You can add more files later.",
-    "Review Order: The images will appear in the order they will be in the PDF.",
-    "Convert: Click the 'Convert to PDF' button.",
-    "Download: Click 'Download PDF' to save your combined document.",
-];
 
 export default function ImageToPdfPage() {
   return (
@@ -32,7 +24,12 @@ export default function ImageToPdfPage() {
         <div className="w-full flex justify-center">
             <ImageToPdfConverter />
         </div>
-        <HowToGuide title="Image to PDF Converter" steps={steps} />
+        <HowToGuide title="Image to PDF Converter" steps={[
+            "Upload Images: Select one or more image files. You can add more files later.",
+            "Review Order: The images will appear in the order they will be in the PDF.",
+            "Convert: Click the 'Convert to PDF' button.",
+            "Download: Click 'Download PDF' to save your combined document.",
+        ]} />
     </main>
   );
 }

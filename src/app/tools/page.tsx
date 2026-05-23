@@ -133,6 +133,13 @@ function ToolsPageContent() {
       icon: FileDigit,
       color: 'text-red-500',
     },
+    {
+      href: '/passport-photo',
+      labelKey: 'Passport Photo',
+      descriptionKey: 'Create professional passport photos with AI clothes change.',
+      icon: ImageIcon,
+      color: 'text-primary',
+    },
   ];
 
   const pdfFeatures = [
@@ -198,6 +205,13 @@ function ToolsPageContent() {
       descriptionKey: 'unlock_pdf_description',
       icon: Unlock,
       color: 'text-teal-500',
+    },
+    {
+      href: '/protect-pdf',
+      labelKey: 'Vault Protect',
+      descriptionKey: 'Secure PDFs with strong passwords and AES encryption.',
+      icon: Unlock,
+      color: 'text-slate-800',
     },
     {
       href: '/add-watermark',
@@ -346,7 +360,7 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Header Section - Sleeker Search Placement */}
+      {/* Hero Header Section */}
       <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-6">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -358,7 +372,7 @@ function ToolsPageContent() {
             <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase whitespace-nowrap overflow-hidden">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase">
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           

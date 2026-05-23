@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -10,13 +9,6 @@ export const metadata: Metadata = {
   title: 'Universal PDF Unlocker - Remove Password from Aadhaar & Bank PDFs',
   description: 'Remove password protection from encrypted PDFs locally. 100% private tool for Aadhaar cards, bank statements, and credit card bills. No data leaves your device.',
 };
-
-const steps = [
-    "Upload PDF: Select your password-protected PDF file.",
-    "Enter Password: Type the current password for the PDF.",
-    "Unlock: Click the 'Unlock PDF' button to remove the encryption.",
-    "Download: Click 'Download Unlocked PDF' to save the decrypted file.",
-];
 
 export default function UnlockPdfPage() {
   return (
@@ -32,7 +24,12 @@ export default function UnlockPdfPage() {
         <div className="w-full flex justify-center">
             <PdfUnlocker />
         </div>
-        <HowToGuide title="PDF Unlocker" steps={steps} />
+        <HowToGuide title="PDF Unlocker" steps={[
+            "Upload PDF: Select your password-protected PDF file.",
+            "Enter Password: Type the current password for the PDF.",
+            "Unlock: Click the 'Unlock PDF' button to remove the encryption.",
+            "Download: Click 'Download Unlocked PDF' to save the decrypted file.",
+        ]} />
     </main>
   );
 }
