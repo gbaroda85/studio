@@ -158,7 +158,7 @@ export default function PdfMerger() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-lg font-bold">Drop PDFs here to Combine</p>
-                                    <p className="text-xs text-muted-foreground mt-1">100% Private local processing.</p>
+                                    <p className="text-sm text-muted-foreground mt-1">100% Private local processing.</p>
                                 </div>
                             </div>
                         ) : (

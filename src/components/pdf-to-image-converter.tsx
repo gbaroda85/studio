@@ -37,7 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker with unpkg URL
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
@@ -77,8 +77,6 @@ export default function PdfToImageConverter() {
                 const ctx = canvas.getContext('2d', { alpha: true });
                 if (!ctx) return resolve(originalSrc);
 
-                // For PDF pages, we use a standard "Virtual Canvas" if padding is requested.
-                // If it's a 1:1 extraction, canvas equals image size.
                 if (fitMode === 'original' && vAlign !== 'center') {
                     // Create a taller canvas to simulate positioning (Standard A4 ratio 1:1.41)
                     const targetW = img.width;
