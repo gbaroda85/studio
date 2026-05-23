@@ -20,9 +20,15 @@ import {
     Trash2,
     ArrowUpToLine,
     ArrowDownToLine,
-    ArrowUpDown
+    ArrowUpDown,
+    Eye,
+    CheckCircle2,
+    ShieldCheck,
+    Zap,
+    FileStack
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function PdfMerger() {
     const { toast } = useToast();
@@ -49,16 +55,11 @@ export default function PdfMerger() {
 
     const handleFilesChange = (files: FileList | null) => {
         clearMergedFile();
-        
-        const newFiles = Array.from(files || [])
-            .filter(file => file.type === 'application/pdf');
-
+        const newFiles = Array.from(files || []).filter(file => file.type === 'application/pdf');
         if (newFiles.length === 0 && files && files.length > 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
             return;
         }
-
-        // We don't auto-sort here anymore to respect the browser/user's initial selection
         setPdfFiles(prev => [...prev, ...newFiles]);
     };
 
@@ -75,46 +76,38 @@ export default function PdfMerger() {
     const moveFile = (index: number, direction: 'up' | 'down' | 'top' | 'bottom') => {
         const newFiles = [...pdfFiles];
         const file = newFiles.splice(index, 1)[0];
-        
         if (direction === 'up') newFiles.splice(Math.max(0, index - 1), 0, file);
         else if (direction === 'down') newFiles.splice(Math.min(pdfFiles.length - 1, index + 1), 0, file);
         else if (direction === 'top') newFiles.unshift(file);
         else if (direction === 'bottom') newFiles.push(file);
-        
         setPdfFiles(newFiles);
         clearMergedFile();
     };
 
     const sortFiles = (order: 'asc' | 'desc' | 'reverse') => {
         let sorted = [...pdfFiles];
-        if (order === 'reverse') {
-            sorted.reverse();
-        } else {
-            sorted.sort((a, b) => {
-                const cmp = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
-                return order === 'asc' ? cmp : -cmp;
-            });
+        if (order === 'reverse') sorted.reverse();
+        else {
+            sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+            if (order === 'desc') sorted.reverse();
         }
         setPdfFiles(sorted);
         clearMergedFile();
-        toast({ title: order === 'reverse' ? "Order Reversed" : order === 'asc' ? "Sorted A-Z" : "Sorted Z-A" });
+        toast({ title: "Order Updated" });
     }
     
     const handleReset = () => {
         setPdfFiles([]);
         clearMergedFile();
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     const handleMergePdfs = async () => {
         if (pdfFiles.length < 2) {
-            toast({ variant: 'destructive', title: 'Not enough files', description: 'Please upload at least two PDFs to merge.' });
+            toast({ variant: 'destructive', title: 'Need 2+ Files', description: 'Please upload at least two PDFs to merge.' });
             return;
         }
         setIsMerging(true);
-
         try {
             const mergedPdf = await PDFDocument.create();
             for (const file of pdfFiles) {
@@ -124,15 +117,11 @@ export default function PdfMerger() {
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
             const mergedPdfBytes = await mergedPdf.save();
-            
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            setMergedPdfUrl(url);
-            
-            toast({title: 'Success!', description: 'Your PDFs have been merged and are ready to download.'});
-
+            setMergedPdfUrl(URL.createObjectURL(blob));
+            toast({title: 'Success!', description: 'Your PDFs have been combined. Preview below.'});
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error Merging', description: 'Could not merge the PDFs. One or more files might be corrupt or password-protected.' });
+            toast({ variant: 'destructive', title: 'Merge Error', description: 'Failed to combine documents.' });
         } finally {
             setIsMerging(false);
         }
@@ -142,138 +131,158 @@ export default function PdfMerger() {
         if (!mergedPdfUrl) return;
         const link = document.createElement('a');
         link.href = mergedPdfUrl;
-        link.download = 'merged.pdf';
-        document.body.appendChild(link);
+        link.download = `merged-document-${Date.now()}.pdf`;
         link.click();
-        document.body.removeChild(link);
     }
     
     return (
-        <Card className={cn("w-full max-w-4xl transition-all duration-300 ease-in-out hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 dark:hover:shadow-primary/10 border-foreground/20", isDragOver && "border-primary ring-4 ring-primary/20")}
-            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-            <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Merge PDFs</CardTitle>
-                        <CardDescription>Combine multiple PDF files into a single document.</CardDescription>
-                    </div>
-                    {pdfFiles.length > 1 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => sortFiles('reverse')} title="Reverse List">
-                                <ArrowUpDown className="h-4 w-4 mr-1" /> Reverse
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => sortFiles('asc')} title="Sort A-Z">
-                                <SortAsc className="h-4 w-4 mr-1" /> A-Z
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => sortFiles('desc')} title="Sort Z-A">
-                                <SortDesc className="h-4 w-4 mr-1" /> Z-A
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive hover:text-destructive" title="Clear All">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+        <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-500">
+            {/* Left side: Upload & List */}
+            <div className="lg:col-span-7 space-y-6">
+                <Card className={cn(
+                    "border-2 transition-all duration-300 bg-card/50 shadow-xl overflow-hidden",
+                    isDragOver && "border-primary ring-4 ring-primary/20",
+                    pdfFiles.length === 0 && "hover:border-primary/50"
+                )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+                    <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">Merge Workspace</CardTitle>
+                            <CardDescription>Order matters. Arrange files before merging.</CardDescription>
                         </div>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent>
-                {pdfFiles.length === 0 ? (
-                    <div className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            <UploadCloud className="h-8 w-8" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-lg font-semibold text-foreground">Click to upload or drag and drop PDFs</p>
-                            <p className="text-sm text-muted-foreground">Select multiple files to merge them</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                        {pdfFiles.map((file, index) => (
-                             <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 rounded-lg border border-foreground/10 bg-card hover:bg-accent/50 transition-colors group">
-                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="h-7 w-7" 
-                                            onClick={() => moveFile(index, 'top')}
-                                            disabled={index === 0}
-                                            title="Move to top"
-                                        >
-                                            <ArrowUpToLine className="h-3.5 w-3.5" />
-                                        </Button>
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="h-7 w-7" 
-                                            onClick={() => moveFile(index, 'up')}
-                                            disabled={index === 0}
-                                            title="Move up"
-                                        >
-                                            <ChevronUp className="h-4 w-4" />
-                                        </Button>
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="h-7 w-7" 
-                                            onClick={() => moveFile(index, 'down')}
-                                            disabled={index === pdfFiles.length - 1}
-                                            title="Move down"
-                                        >
-                                            <ChevronDown className="h-4 w-4" />
-                                        </Button>
-                                        <Button 
-                                            size="icon" 
-                                            variant="ghost" 
-                                            className="h-7 w-7" 
-                                            onClick={() => moveFile(index, 'bottom')}
-                                            disabled={index === pdfFiles.length - 1}
-                                            title="Move to bottom"
-                                        >
-                                            <ArrowDownToLine className="h-3.5 w-3.5" />
-                                        </Button>
-                                    </div>
-                                    <div className="flex items-center gap-2 truncate">
-                                        <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                                            {index + 1}
-                                        </div>
-                                        <FileText className="h-5 w-5 text-red-500 shrink-0" />
-                                        <span className="text-sm font-medium truncate max-w-[200px] md:max-w-md" title={file.name}>{file.name}</span>
-                                    </div>
-                                 </div>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleRemoveFile(index)}>
-                                    <X className="h-4 w-4" />
+                        {pdfFiles.length > 0 && <Badge className="bg-primary">{pdfFiles.length} FILES</Badge>}
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        {pdfFiles.length === 0 ? (
+                            <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                    <UploadCloud className="size-10" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-lg font-bold">Drop PDFs here to Combine</p>
+                                    <p className="text-xs text-muted-foreground mt-1">100% Private local processing.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                                {pdfFiles.map((file, index) => (
+                                     <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-sm">
+                                         <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-4 w-4" /></Button>
+                                                <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-4 w-4" /></Button>
+                                            </div>
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="size-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shrink-0">{index + 1}</div>
+                                                <FileText className="h-5 w-5 text-red-500 shrink-0" />
+                                                <span className="text-xs font-bold truncate max-w-[200px]" title={file.name}>{file.name}</span>
+                                            </div>
+                                         </div>
+                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
+                                     </div>
+                                ))}
+                                <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-bold text-xs" onClick={() => fileInputRef.current?.click()}>
+                                    <UploadCloud className="size-4 mr-2" /> ADD MORE FILES
                                 </Button>
-                             </div>
-                        ))}
-                        <div className="pt-2">
-                            <Button variant="ghost" className="w-full border-2 border-dashed border-muted-foreground/20 h-12 hover:border-primary/50 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
-                                <UploadCloud className="h-5 w-5 text-muted-foreground mr-2" />
-                                <span className="text-sm font-medium">Add more files...</span>
+                            </div>
+                        )}
+                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
+                    </CardContent>
+                    {pdfFiles.length > 0 && (
+                        <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
+                            <Button variant="ghost" size="sm" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10">
+                                <Trash2 className="size-3 mr-1.5"/> CLEAR ALL
                             </Button>
-                        </div>
-                    </div>
-                )}
-                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
-            </CardContent>
-            <CardFooter className="flex justify-between items-center border-t pt-6 bg-muted/20 rounded-b-lg">
-                <div className="text-sm text-muted-foreground">
-                    {pdfFiles.length} {pdfFiles.length === 1 ? 'file' : 'files'} selected
-                </div>
-                <div className="flex gap-3">
-                    {!mergedPdfUrl ? (
-                        <Button onClick={handleMergePdfs} disabled={isMerging || pdfFiles.length < 2} size="lg" className="font-bold">
-                            {isMerging ? <Loader2 className="mr-2 animate-spin" /> : <Merge className="mr-2" />}
-                            {isMerging ? 'Merging...' : 'Merge PDFs'}
-                        </Button>
-                    ) : (
-                        <Button onClick={handleDownload} size="lg" className="bg-green-600 hover:bg-green-700 text-white font-bold animate-bounce">
-                            <Download className="mr-2" />
-                            Download Merged PDF
-                        </Button>
+                            <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
+                                <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE LOCAL ENGINE
+                            </div>
+                        </CardFooter>
                     )}
-                </div>
-            </CardFooter>
-        </Card>
-    )
+                </Card>
+
+                {mergedPdfUrl && (
+                    <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
+                        <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
+                            <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-green-700">
+                                <Eye className="size-4" /> Merged Document Preview
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 bg-white">
+                            <iframe src={mergedPdfUrl} className="w-full h-[500px]" title="PDF Preview" />
+                        </CardContent>
+                        <CardFooter className="bg-green-500/10 p-6 flex flex-col sm:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-4 text-center sm:text-left">
+                                <div className="size-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl"><CheckCircle2 className="size-8" /></div>
+                                <div>
+                                    <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">MERGE SUCCESS!</p>
+                                    <p className="text-[10px] text-green-700 font-bold mt-1 uppercase tracking-widest">Combined PDF is ready</p>
+                                </div>
+                            </div>
+                            <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
+                                <Download className="mr-3 size-7" /> DOWNLOAD PDF
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                )}
+            </div>
+
+            {/* Right side: Controls */}
+            <div className="lg:col-span-5 space-y-6">
+                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                    <CardHeader className="bg-primary/5 border-b p-6">
+                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                            <FileStack className="size-6 text-primary" /> Organize & Merge
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 space-y-8">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                                <ArrowUpDown className="size-3" /> Sorting Options
+                            </Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <Button variant="outline" className="h-12 flex-col rounded-xl border-2" onClick={() => sortFiles('asc')}>
+                                    <SortAsc className="size-4 mb-0.5" />
+                                    <span className="text-[8px] font-black uppercase">A-Z</span>
+                                </Button>
+                                <Button variant="outline" className="h-12 flex-col rounded-xl border-2" onClick={() => sortFiles('desc')}>
+                                    <SortDesc className="size-4 mb-0.5" />
+                                    <span className="text-[8px] font-black uppercase">Z-A</span>
+                                </Button>
+                                <Button variant="outline" className="h-12 flex-col rounded-xl border-2" onClick={() => sortFiles('reverse')}>
+                                    <RefreshCcw className="size-4 mb-0.5" />
+                                    <span className="text-[8px] font-black uppercase">REVERSE</span>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                            <Zap className="size-6 text-yellow-500 shrink-0" />
+                            <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
+                                <span className="font-black uppercase block mb-1">PRO BUNDLING:</span>
+                                Combining files happens entirely in RAM. This tool preserves original vectors and links.
+                            </p>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="bg-muted/10 p-8 border-t-2">
+                        <Button className="w-full h-20 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
+                                onClick={handleMergePdfs} disabled={pdfFiles.length < 2 || isMerging}>
+                            {isMerging ? (
+                                <div className="flex items-center gap-3">
+                                    <Loader2 className="size-8 animate-spin" />
+                                    <span className="uppercase tracking-tighter">COMBINING...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-4">
+                                    <Merge className="size-9" />
+                                    <div className="text-left">
+                                        <span className="block uppercase tracking-tighter leading-none">MERGE PDFS</span>
+                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Process {pdfFiles.length} documents</span>
+                                    </div>
+                                </div>
+                            )}
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div>
+        </div>
+    );
 }
