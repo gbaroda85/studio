@@ -17,12 +17,8 @@ export const metadata: Metadata = {
     canonical: 'https://www.gr7imagepdf.com',
   },
   icons: {
-    icon: [
-      { url: '/icon?v=5', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/icon?v=5', type: 'image/png' },
-    ],
+    icon: '/icon',
+    apple: '/icon',
   },
   keywords: [
     'image to pdf converter',
@@ -99,8 +95,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/icon?v=5" type="image/png" />
-        <link rel="apple-touch-icon" href="/icon?v=5" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

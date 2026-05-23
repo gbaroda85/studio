@@ -20,45 +20,16 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'white',
-          borderRadius: '4px',
+          background: '#0d5a71',
+          borderRadius: '6px',
+          flexDirection: 'column',
+          padding: '2px',
         }}
       >
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 100 100"
-          style={{
-            display: 'flex',
-          }}
-        >
-          {/* GR Text - Dark Teal (Ultra Bold) - Perfectly visible in small size */}
-          <text 
-            x="2" 
-            y="65" 
-            style={{ 
-              fill: '#0d5a71', 
-              fontSize: '52px', 
-              fontWeight: 950, 
-              fontFamily: 'sans-serif'
-            }}
-          >
-            GR
-          </text>
-          {/* 7 - Bright Red (Ultra Bold) - High contrast against white background */}
-          <text 
-            x="56" 
-            y="92" 
-            style={{ 
-              fill: '#ef4444', 
-              fontSize: '84px', 
-              fontWeight: 950, 
-              fontFamily: 'sans-serif'
-            }}
-          >
-            7
-          </text>
-        </svg>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'white', fontSize: '14px', fontWeight: 900, lineHeight: 1 }}>GR</span>
+            <span style={{ color: '#ef4444', fontSize: '18px', fontWeight: 950, lineHeight: 1, marginLeft: '1px' }}>7</span>
+        </div>
       </div>
     ),
     {
