@@ -127,33 +127,24 @@ export default function PassportPhotoMaker() {
                 progress: (item: string, index: number, total: number) => {
                     setProgress(Math.round((index / total) * 100));
                 },
-                output: { format: "image/png", quality: 0.98 }
+                output: { format: "image/png", quality: 1.0 }
             });
 
             const url = URL.createObjectURL(blob);
             setSubjectImageSrc(url);
             
-            // Pre-load the image object for canvas drawing
-            const img = new Image();
+            const img = new window.Image();
             img.src = url;
             img.onload = () => {
                 faceImgRef.current = img;
                 renderPhoto();
+                setStage('studio');
             };
 
             toast({ title: "AI Success!", description: "Background isolated locally with HD precision." });
-            setStage('studio');
         } catch (error: any) {
             console.error(error);
-            toast({ variant: "destructive", title: "Offline Limit", description: "Using high-contrast original instead." });
-            setSubjectImageSrc(originalCroppedData);
-            
-            const img = new Image();
-            img.src = originalCroppedData;
-            img.onload = () => {
-                faceImgRef.current = img;
-                renderPhoto();
-            };
+            toast({ variant: "destructive", title: "Offline Limit", description: "Using original cropped image." });
             setStage('studio');
         } finally {
             setIsProcessing(false);
@@ -168,8 +159,8 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // High Resolution (300 DPI equivalent)
-        const targetW = 600; 
+        // ULTRA HD Resolution (approx 1200px width for best print quality)
+        const targetW = 1200; 
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
@@ -211,8 +202,10 @@ export default function PassportPhotoMaker() {
     }, [bgColor, scale, posX, posY, rotation, selectedPreset, borderWidth, borderColor]);
 
     useEffect(() => {
-        renderPhoto();
-    }, [renderPhoto]);
+        if (stage === 'background' || stage === 'studio') {
+            renderPhoto();
+        }
+    }, [renderPhoto, stage]);
 
     const handleInitialCrop = async () => {
         if (!imgRef.current || !completedCrop) return;
@@ -220,7 +213,8 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        const targetW = 800;
+        // High res crop buffer
+        const targetW = 1600;
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
@@ -237,33 +231,35 @@ export default function PassportPhotoMaker() {
             0, 0, targetW, targetH
         );
         
-        const data = canvas.toDataURL('image/jpeg', 0.95);
+        const data = canvas.toDataURL('image/jpeg', 1.0);
         setOriginalCroppedData(data);
         setSubjectImageSrc(data);
         
-        const img = new Image();
+        // Populate faceImgRef immediately so the next stage shows the photo
+        const img = new window.Image();
         img.src = data;
         img.onload = () => {
             faceImgRef.current = img;
+            setStage('background');
+            // Give canvas a moment to register ref
+            setTimeout(renderPhoto, 50);
         };
-
-        setStage('background');
     };
 
     const handleDownload = () => {
         const canvas = mainCanvasRef.current;
         if (!canvas) return;
         
-        // Ensure final render is fresh
+        // Ensure final render is fresh and highest quality
         renderPhoto();
         
         const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/jpeg', 0.98);
-        link.download = `passport-photo-${Date.now()}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 1.0); // 1.0 = Highest Quality
+        link.download = `hd-passport-photo-${Date.now()}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast({ title: 'Download Started', description: 'Your HD passport photo is being saved.' });
+        toast({ title: 'Download Success', description: 'Your Ultra-HD passport photo has been saved.' });
     };
 
     const handleReset = () => {
@@ -342,7 +338,7 @@ export default function PassportPhotoMaker() {
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 {/* Main Preview Container */}
                 <div className="lg:col-span-8 flex flex-col items-center gap-8">
-                    <Card className="relative bg-white shadow-2xl border-4 border-white rounded-[3rem] overflow-hidden flex items-center justify-center min-h-[500px] w-full max-w-[450px] transform transition-transform">
+                    <Card className="relative bg-white shadow-2xl border-4 border-white rounded-[3rem] overflow-hidden flex items-center justify-center min-h-[500px] w-full max-w-[450px]">
                         {stage === 'crop' ? (
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()} className="w-full h-full">
                                 <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[65vh] w-full object-contain" onLoad={(e) => {
@@ -419,7 +415,7 @@ export default function PassportPhotoMaker() {
                             {stage === 'background' && (
                                 <div className="space-y-6">
                                     <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Action Required</Label>
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Optional Action</Label>
                                         <Button className="w-full h-16 font-black bg-primary text-lg rounded-2xl group overflow-hidden relative shadow-2xl" onClick={handleRemoveBackground} disabled={isProcessing}>
                                             <span className="relative z-10 flex items-center justify-center gap-3">
                                                 {isProcessing ? <Loader2 className="size-6 animate-spin" /> : <Zap className="size-6 text-yellow-400 fill-yellow-400" />}
@@ -430,13 +426,10 @@ export default function PassportPhotoMaker() {
                                     </div>
                                     <div className="p-4 bg-muted/20 rounded-xl">
                                         <p className="text-[10px] font-medium text-muted-foreground text-center">
-                                            We use a high-order neural network to extract the person from any background locally.
+                                            Use our neural engine to extract your face from the background for a cleaner result.
                                         </p>
                                     </div>
-                                    <Button variant="outline" className="w-full h-12 font-black text-xs uppercase border-2 rounded-xl" onClick={() => {
-                                        setStage('studio');
-                                        renderPhoto();
-                                    }}>
+                                    <Button variant="outline" className="w-full h-12 font-black text-xs uppercase border-2 rounded-xl" onClick={() => setStage('studio')}>
                                         SKIP TO STUDIO <ChevronRight className="ml-2 size-4" />
                                     </Button>
                                 </div>
@@ -470,7 +463,7 @@ export default function PassportPhotoMaker() {
                                                             onClick={() => setBgColor(c.value)} 
                                                             className={cn(
                                                                 "size-10 rounded-xl border-2 transition-all shadow-sm ring-offset-2", 
-                                                                bgColor === c.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-muted hover:scale-105"
+                                                                bgColor === c.value ? "border-primary ring-2 ring-primary/10 scale-110" : "border-muted hover:scale-105"
                                                             )} 
                                                             style={{ backgroundColor: c.value }} 
                                                             title={c.name}
@@ -499,7 +492,7 @@ export default function PassportPhotoMaker() {
                                                             onClick={() => setBorderColor(c.value)} 
                                                             className={cn(
                                                                 "size-10 rounded-xl border-2 transition-all shadow-sm", 
-                                                                borderColor === c.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-muted hover:scale-105"
+                                                                borderColor === c.value ? "border-primary ring-2 ring-primary/10 scale-110" : "border-muted hover:scale-105"
                                                             )} 
                                                             style={{ backgroundColor: c.value === 'transparent' ? '#fff' : c.value }} 
                                                             title={c.name}
@@ -515,8 +508,8 @@ export default function PassportPhotoMaker() {
                                     <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4">
                                         <ShieldCheck className="size-6 text-green-600 shrink-0" />
                                         <p className="text-[10px] text-green-800 font-bold leading-relaxed">
-                                            <span className="font-black uppercase block mb-0.5 text-green-700">Studio Guarantee:</span>
-                                            All pixels are rendered at 300 DPI (High Definition) for crisp physical printing.
+                                            <span className="font-black uppercase block mb-0.5 text-green-700">Studio Quality Active:</span>
+                                            Pixels are rendered at **300 DPI (Ultra-HD)**. Ready for high-quality glossy photo prints.
                                         </p>
                                     </div>
 
@@ -536,4 +529,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-
