@@ -61,7 +61,6 @@ export default function PdfMerger() {
             return;
         }
         setPdfFiles(prev => [...prev, ...newFiles]);
-        // Reset input value so same files can be re-uploaded if cleared
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -118,8 +117,9 @@ export default function PdfMerger() {
             const mergedPdfBytes = await mergedPdf.save();
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
             setMergedPdfUrl(URL.createObjectURL(blob));
-            toast({title: 'Success!', description: 'Your PDFs have been combined. Preview below.'});
+            toast({title: 'Merge Success!', description: 'Your PDFs have been combined. Preview below.'});
         } catch (error) {
+            console.error(error);
             toast({ variant: 'destructive', title: 'Merge Error', description: 'Failed to combine documents.' });
         } finally {
             setIsMerging(false);

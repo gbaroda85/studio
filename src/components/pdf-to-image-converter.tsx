@@ -156,7 +156,7 @@ export default function PdfToImageConverter() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
 
     const updateSelectedPage = async (updates: Partial<Pick<PageItem, 'vAlign' | 'fitMode'>>) => {
         if (!selectedId) return;
@@ -317,7 +317,7 @@ export default function PdfToImageConverter() {
                 </div>
 
                 <div className="lg:col-span-4 space-y-6">
-                    <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
                                 <Layout className="size-6 text-primary" /> Page Studio
