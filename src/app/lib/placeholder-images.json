@@ -1,0 +1,19 @@
+
+{
+  "image_tools": {
+    "url": "https://picsum.photos/seed/imgtools/800/400",
+    "hint": "photography editing"
+  },
+  "pdf_tools": {
+    "url": "https://picsum.photos/seed/pdftools/800/400",
+    "hint": "document management"
+  },
+  "calculator_tools": {
+    "url": "https://picsum.photos/seed/calctools/800/400",
+    "hint": "finance calculation"
+  },
+  "converter_tools": {
+    "url": "https://picsum.photos/seed/convtools/800/400",
+    "hint": "measurement units"
+  }
+}

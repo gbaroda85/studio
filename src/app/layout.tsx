@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
@@ -8,7 +9,7 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: {
-    default: 'GR7 Image PDF Tools - Free Online Photo & PDF Suite',
+    default: 'GR7 Tools - 100% Private Image & PDF Utility Suite',
     template: '%s | GR7 Tools',
   },
   description: 'Fast, secure, and private browser-based online tools. Compress images, resize photos for SSC/UPSC, remove backgrounds, unlock Aadhaar PDF, and calculate EMI. 100% private - No files are uploaded to any server.',
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://www.gr7imagepdf.com',
-    siteName: 'GR7 Image PDF Tools Hub',
+    siteName: 'GR7 Tools Hub',
     title: 'GR7 Image PDF Tools Hub - Fast, Private & Secure Online Suite',
     description: 'Compress, convert, and edit images/PDFs with 100% privacy. One-click tools for SSC/UPSC/IBPS forms and Aadhaar unlocking.',
     images: [
@@ -69,26 +70,6 @@ export const metadata: Metadata = {
         alt: 'GR7 Tools Hub',
       },
     ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'GR7 Image PDF Tools Hub - All-in-One Utility Suite',
-    description: 'Professional suite for Image to PDF, Split PDF, merging, and securing documents. Private local processing.',
-    images: ['https://picsum.photos/seed/gr7tools/1200/630'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  other: {
-    'google-adsense-account': 'ca-pub-5160508482904207',
   },
 };
 
@@ -106,43 +87,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter&family=Orbitron:wght@700&display=swap"
           rel="stylesheet"
         />
-        {/* Force naya favicon by using the same version tag */}
         <link rel="icon" href="/icon?v=25" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "WebApplication",
-                "name": "GR7 Image PDF Tools Hub",
-                "url": "https://www.gr7imagepdf.com",
-                "description": "Free browser-based online tools for image compression, resizing, background removal, PDF merging, splitting, and security.",
-                "applicationCategory": "UtilitiesApplication",
-                "operatingSystem": "Any",
-                "author": {
-                  "@type": "Person",
-                  "name": "Gaurav S"
-                },
-                "offers": {
-                  "@type": "Offer",
-                  "price": "0",
-                  "priceCurrency": "INR"
-                }
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                "url": "https://www.gr7imagepdf.com",
-                "potentialAction": {
-                  "@type": "SearchAction",
-                  "target": "https://www.gr7imagepdf.com/tools?search={search_term_string}",
-                  "query-input": "required name=search_term_string"
-                }
-              }
-            ]),
-          }}
-        />
       </head>
       <body className="font-body antialiased">
         <Script
