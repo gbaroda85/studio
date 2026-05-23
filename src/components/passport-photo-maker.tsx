@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -26,7 +27,9 @@ import {
     RotateCw,
     Settings2,
     Sparkles,
-    CheckCircle2
+    CheckCircle2,
+    Palette,
+    Square
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -35,6 +38,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 type Stage = 'size' | 'crop' | 'background' | 'studio' | 'download';
 
@@ -54,6 +58,13 @@ const COLORS = [
     { name: "Sky Blue", value: "#ADD8E6" },
 ];
 
+const BORDER_COLORS = [
+    { name: "None", value: "transparent" },
+    { name: "White", value: "#FFFFFF" },
+    { name: "Black", value: "#000000" },
+    { name: "Light Grey", value: "#CCCCCC" },
+];
+
 export default function PassportPhotoMaker() {
     const { toast } = useToast();
     const [imgSrc, setImgSrc] = useState<string | null>(null);
@@ -69,6 +80,8 @@ export default function PassportPhotoMaker() {
     const [posX, setPosX] = useState(0);
     const [posY, setPosY] = useState(0);
     const [rotation, setRotation] = useState(0);
+    const [borderWidth, setBorderWidth] = useState([0]);
+    const [borderColor, setBorderColor] = useState("#000000");
 
     // Crop Logic
     const [crop, setCrop] = useState<Crop>();
@@ -78,6 +91,7 @@ export default function PassportPhotoMaker() {
     const imgRef = useRef<HTMLImageElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const mainCanvasRef = useRef<HTMLCanvasElement>(null);
+    const faceImgRef = useRef<HTMLImageElement | null>(null);
 
     const getAspectRatio = () => {
         const p = PRESETS[selectedPreset];
@@ -90,11 +104,11 @@ export default function PassportPhotoMaker() {
             reader.onload = () => {
                 setImgSrc(reader.result?.toString() || null);
                 setStage('crop');
-                // Reset all transformation states for new photo
                 setScale(100);
                 setPosX(0);
                 setPosY(0);
                 setRotation(0);
+                setBorderWidth([0]);
             };
             reader.readAsDataURL(file);
         }
@@ -105,83 +119,99 @@ export default function PassportPhotoMaker() {
         setIsProcessing(true);
         setProgress(5);
         
-        setTimeout(async () => {
-            try {
-                const imglyModule = await import("@imgly/background-removal");
-                const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
+        try {
+            const imglyModule = await import("@imgly/background-removal");
+            const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
 
-                const blob = await removeBackgroundFunc(originalCroppedData, {
-                    progress: (item: string, index: number, total: number) => {
-                        setProgress(Math.round((index / total) * 100));
-                    },
-                    output: { format: "image/png", quality: 0.98 }
-                });
+            const blob = await removeBackgroundFunc(originalCroppedData, {
+                progress: (item: string, index: number, total: number) => {
+                    setProgress(Math.round((index / total) * 100));
+                },
+                output: { format: "image/png", quality: 0.98 }
+            });
 
-                const url = URL.createObjectURL(blob);
-                setSubjectImageSrc(url);
-                toast({ title: "AI Success!", description: "Background isolated locally with HD precision." });
-                setStage('studio');
-            } catch (error: any) {
-                console.error(error);
-                toast({ variant: "destructive", title: "Offline Limit", description: "Using high-contrast original instead." });
-                setSubjectImageSrc(originalCroppedData);
-                setStage('studio');
-            } finally {
-                setIsProcessing(false);
-            }
-        }, 300);
+            const url = URL.createObjectURL(blob);
+            setSubjectImageSrc(url);
+            
+            // Pre-load the image object for canvas drawing
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+                faceImgRef.current = img;
+                renderPhoto();
+            };
+
+            toast({ title: "AI Success!", description: "Background isolated locally with HD precision." });
+            setStage('studio');
+        } catch (error: any) {
+            console.error(error);
+            toast({ variant: "destructive", title: "Offline Limit", description: "Using high-contrast original instead." });
+            setSubjectImageSrc(originalCroppedData);
+            
+            const img = new Image();
+            img.src = originalCroppedData;
+            img.onload = () => {
+                faceImgRef.current = img;
+                renderPhoto();
+            };
+            setStage('studio');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
-    const renderPhoto = useCallback(async () => {
+    const renderPhoto = useCallback(() => {
         const canvas = mainCanvasRef.current;
-        if (!canvas || !subjectImageSrc) return;
+        const faceImg = faceImgRef.current;
+        if (!canvas || !faceImg) return;
+        
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // Render at 300 DPI equivalent for a 3.5cm wide photo
-        // 3.5cm = 1.37 inches. 1.37 * 300 = ~411px
+        // High Resolution (300 DPI equivalent)
         const targetW = 600; 
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. Fill Background
+        // 1. Draw Background
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const faceImg = new Image();
-        faceImg.src = subjectImageSrc;
+        // 2. Draw Face Image with transformations
+        ctx.save();
         
-        await new Promise((resolve) => {
-            faceImg.onload = () => {
-                ctx.save();
-                
-                const s = scale / 100;
-                const dw = canvas.width * s;
-                const dh = (faceImg.height * (canvas.width / faceImg.width)) * s;
-                const dx = (posX / 100) * canvas.width;
-                const dy = (posY / 100) * canvas.height;
+        const s = scale / 100;
+        const dw = canvas.width * s;
+        // Maintain aspect ratio based on width scaling
+        const dh = (faceImg.height * (dw / faceImg.width));
+        
+        const dx = (posX / 100) * canvas.width;
+        const dy = (posY / 100) * canvas.height;
 
-                // Center of the canvas
-                const cx = canvas.width / 2 + dx;
-                const cy = canvas.height / 2 + dy;
+        const cx = canvas.width / 2 + dx;
+        const cy = canvas.height / 2 + dy;
 
-                ctx.translate(cx, cy);
-                ctx.rotate((rotation * Math.PI) / 180);
-                
-                // Draw image centered at the translated origin
-                ctx.drawImage(faceImg, -dw / 2, -dh / 2, dw, dh);
-                
-                ctx.restore();
-                resolve(null);
-            };
-            faceImg.onerror = () => resolve(null);
-        });
-    }, [subjectImageSrc, bgColor, scale, posX, posY, rotation, selectedPreset]);
+        ctx.translate(cx, cy);
+        ctx.rotate((rotation * Math.PI) / 180);
+        
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(faceImg, -dw / 2, -dh / 2, dw, dh);
+        
+        ctx.restore();
+
+        // 3. Draw Border (Last layer)
+        if (borderWidth[0] > 0) {
+            const bPx = (borderWidth[0] / 100) * canvas.width;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = bPx;
+            ctx.strokeRect(bPx/2, bPx/2, canvas.width - bPx, canvas.height - bPx);
+        }
+    }, [bgColor, scale, posX, posY, rotation, selectedPreset, borderWidth, borderColor]);
 
     useEffect(() => {
-        const timer = setTimeout(renderPhoto, 50);
-        return () => clearTimeout(timer);
+        renderPhoto();
     }, [renderPhoto]);
 
     const handleInitialCrop = async () => {
@@ -210,13 +240,37 @@ export default function PassportPhotoMaker() {
         const data = canvas.toDataURL('image/jpeg', 0.95);
         setOriginalCroppedData(data);
         setSubjectImageSrc(data);
+        
+        const img = new Image();
+        img.src = data;
+        img.onload = () => {
+            faceImgRef.current = img;
+        };
+
         setStage('background');
+    };
+
+    const handleDownload = () => {
+        const canvas = mainCanvasRef.current;
+        if (!canvas) return;
+        
+        // Ensure final render is fresh
+        renderPhoto();
+        
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.98);
+        link.download = `passport-photo-${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast({ title: 'Download Started', description: 'Your HD passport photo is being saved.' });
     };
 
     const handleReset = () => {
         setImgSrc(null);
         setOriginalCroppedData(null);
         setSubjectImageSrc(null);
+        faceImgRef.current = null;
         setStage('size');
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
@@ -228,7 +282,7 @@ export default function PassportPhotoMaker() {
                     <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-inner">
                         <UserCircle className="h-10 w-10" />
                     </div>
-                    <CardTitle className="text-3xl font-black font-headline uppercase tracking-tighter">Professional Passport Maker</CardTitle>
+                    <CardTitle className="text-3xl font-black font-headline uppercase tracking-tighter">PROFESSIONAL PASSPORT PHOTO STUDIO</CardTitle>
                     <CardDescription className="text-base font-bold">100% Secure Local AI Studio. No server uploads.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-12 space-y-10">
@@ -270,7 +324,7 @@ export default function PassportPhotoMaker() {
         <div className="w-full max-w-7xl px-4 py-8 animate-in fade-in duration-500">
             {/* Stage Stepper */}
             <div className="flex justify-center items-center gap-2 mb-10 bg-muted/40 p-1.5 rounded-2xl border-2 overflow-x-auto no-scrollbar shadow-inner max-w-3xl mx-auto">
-                {(['size', 'crop', 'background', 'studio', 'download'] as Stage[]).map((s, i) => (
+                {(['size', 'crop', 'background', 'studio'] as Stage[]).map((s, i) => (
                     <button 
                         key={s} 
                         disabled={!originalCroppedData && i > 1}
@@ -332,7 +386,7 @@ export default function PassportPhotoMaker() {
                             </div>
                             <div className="w-px h-10 bg-border mx-2" />
                             <div className="flex items-center gap-3">
-                                <Button variant="outline" size="icon" className="size-12 rounded-xl text-destructive hover:bg-destructive/5" onClick={() => { setPosX(0); setPosY(0); setScale(100); setRotation(0); }}>
+                                <Button variant="outline" size="icon" className="size-12 rounded-xl text-destructive hover:bg-destructive/5" onClick={() => { setPosX(0); setPosY(0); setScale(100); setRotation(0); setBorderWidth([0]); }}>
                                     <RefreshCcw className="size-5" />
                                 </Button>
                             </div>
@@ -379,7 +433,10 @@ export default function PassportPhotoMaker() {
                                             We use a high-order neural network to extract the person from any background locally.
                                         </p>
                                     </div>
-                                    <Button variant="outline" className="w-full h-12 font-black text-xs uppercase border-2 rounded-xl" onClick={() => setStage('studio')}>
+                                    <Button variant="outline" className="w-full h-12 font-black text-xs uppercase border-2 rounded-xl" onClick={() => {
+                                        setStage('studio');
+                                        renderPhoto();
+                                    }}>
                                         SKIP TO STUDIO <ChevronRight className="ml-2 size-4" />
                                     </Button>
                                 </div>
@@ -387,33 +444,73 @@ export default function PassportPhotoMaker() {
 
                             {stage === 'studio' && (
                                 <div className="space-y-8 animate-in fade-in duration-500">
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
-                                                <RotateCw className="size-3" /> Straighten / Rotate
-                                            </Label>
-                                            <Badge variant="secondary" className="font-mono text-[10px]">{rotation}°</Badge>
-                                        </div>
-                                        <Slider min={-180} max={180} step={0.5} value={[rotation]} onValueChange={(v) => setRotation(v[0])} />
-                                    </div>
+                                    <Tabs defaultValue="adjust" className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2 h-12 bg-muted p-1 rounded-xl">
+                                            <TabsTrigger value="adjust" className="font-bold text-[10px] uppercase">Rotate & Color</TabsTrigger>
+                                            <TabsTrigger value="border" className="font-bold text-[10px] uppercase">Add Border</TabsTrigger>
+                                        </TabsList>
+                                        
+                                        <TabsContent value="adjust" className="pt-6 space-y-6">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <Label className="text-[10px] font-black uppercase text-primary flex items-center gap-2">
+                                                        <RotateCw className="size-3" /> Straighten Face
+                                                    </Label>
+                                                    <Badge variant="secondary" className="font-mono text-[10px]">{rotation}°</Badge>
+                                                </div>
+                                                <Slider min={-180} max={180} step={0.5} value={[rotation]} onValueChange={(v) => setRotation(v[0])} />
+                                            </div>
 
-                                    <div className="space-y-4 pt-6 border-t">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Background Color</Label>
-                                        <div className="grid grid-cols-6 gap-3">
-                                            {COLORS.map(c => (
-                                                <button 
-                                                    key={c.value} 
-                                                    onClick={() => setBgColor(c.value)} 
-                                                    className={cn(
-                                                        "size-10 rounded-xl border-2 transition-all shadow-sm ring-offset-2", 
-                                                        bgColor === c.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-muted hover:scale-105"
-                                                    )} 
-                                                    style={{ backgroundColor: c.value }} 
-                                                    title={c.name}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
+                                            <div className="space-y-4 pt-4 border-t">
+                                                <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Palette className="size-3"/> Background Color</Label>
+                                                <div className="grid grid-cols-6 gap-3">
+                                                    {COLORS.map(c => (
+                                                        <button 
+                                                            key={c.value} 
+                                                            onClick={() => setBgColor(c.value)} 
+                                                            className={cn(
+                                                                "size-10 rounded-xl border-2 transition-all shadow-sm ring-offset-2", 
+                                                                bgColor === c.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-muted hover:scale-105"
+                                                            )} 
+                                                            style={{ backgroundColor: c.value }} 
+                                                            title={c.name}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+
+                                        <TabsContent value="border" className="pt-6 space-y-6">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <Label className="text-[10px] font-black uppercase text-primary flex items-center gap-2">
+                                                        <Square className="size-3" /> Border Thickness
+                                                    </Label>
+                                                    <Badge variant="secondary" className="font-mono text-[10px]">{borderWidth[0]}%</Badge>
+                                                </div>
+                                                <Slider min={0} max={8} step={0.1} value={borderWidth} onValueChange={setBorderWidth} />
+                                            </div>
+                                            <div className="space-y-4 pt-4 border-t">
+                                                <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Border Color</Label>
+                                                <div className="grid grid-cols-5 gap-3">
+                                                    {BORDER_COLORS.map(c => (
+                                                        <button 
+                                                            key={c.value} 
+                                                            onClick={() => setBorderColor(c.value)} 
+                                                            className={cn(
+                                                                "size-10 rounded-xl border-2 transition-all shadow-sm", 
+                                                                borderColor === c.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-muted hover:scale-105"
+                                                            )} 
+                                                            style={{ backgroundColor: c.value === 'transparent' ? '#fff' : c.value }} 
+                                                            title={c.name}
+                                                        >
+                                                            {c.value === 'transparent' && <X className="size-4 text-muted-foreground mx-auto" />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+                                    </Tabs>
 
                                     <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4">
                                         <ShieldCheck className="size-6 text-green-600 shrink-0" />
@@ -423,14 +520,7 @@ export default function PassportPhotoMaker() {
                                         </p>
                                     </div>
 
-                                    <Button className="w-full h-18 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={() => {
-                                        renderPhoto();
-                                        const link = document.createElement('a');
-                                        link.href = mainCanvasRef.current!.toDataURL('image/jpeg', 0.98);
-                                        link.download = `passport-photo-${Date.now()}.jpg`;
-                                        link.click();
-                                        toast({ title: 'Download Started', description: 'Your HD passport photo is being saved.' });
-                                    }}>
+                                    <Button className="w-full h-18 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleDownload}>
                                         <Download className="mr-3 size-7 group-hover:translate-y-1 transition-transform" /> DOWNLOAD HD PHOTO
                                     </Button>
                                 </div>
@@ -446,3 +536,4 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
+
