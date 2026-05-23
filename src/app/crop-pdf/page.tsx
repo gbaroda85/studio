@@ -1,6 +1,7 @@
+
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Scissors, ShieldCheck, Zap, HelpCircle, Scaling, MousePointer2, FileDigit, Crop } from 'lucide-react';
+import { ArrowLeft, Scissors, ShieldCheck, Zap, HelpCircle, Scaling, MousePointer2, FileDigit, Crop, Scan, Grid3X3, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfCropper from '@/components/pdf-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -13,16 +14,16 @@ import {
 
 export const metadata: Metadata = {
   title: 'Precise PDF Cropper - Crop PDF Page Margins & Areas Online Privately',
-  description: 'Select specific areas on your PDF pages and crop them into new documents. Perfect for extracting charts, tables, or removing white margins locally.',
+  description: 'Trim PDF margins or fix perspective with 4-dot scanner mode. Perfect for extracting charts, tables, or cleaning document photos locally in HD.',
 };
 
 export default function CropPdfPage() {
   const steps = [
     "Upload PDF: Select a document from your device.",
-    "Select Page: Use the navigation arrows to find the page you want to crop.",
-    "Draw Crop Area: Click and drag on the page to select the exact area to keep.",
-    "Apply: Click 'Crop Page' to generate the new document in browser RAM.",
-    "Download: Save your cropped PDF instantly with zero data risk."
+    "Choose Mode: Use 'Rect' for margins or 'Scanner' for tilted photos.",
+    "Select Area: Drag handles or 4-dots to cover the content you want to keep.",
+    "Process: Click 'Crop Page' to generate the corrected document.",
+    "Download: Save your perfectly trimmed PDF instantly with zero data risk."
   ];
 
   return (
@@ -41,35 +42,35 @@ export default function CropPdfPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16">
-            <HowToGuide title="Professional PDF Cropper" steps={steps} />
+            <HowToGuide title="Professional PDF Cropper & Scanner" steps={steps} />
 
             {/* AdSense Deep Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
-                        <Scissors className="text-primary size-8" />
-                        Precise Document Trimming
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-gradient-primary">
+                        <Grid3X3 className="text-primary size-8" />
+                        Next-Gen Document Alignment
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Standard PDF readers don't let you extract small parts of a page. Our <strong>PDF Crop Tool</strong> uses a high-density viewport scale to let you zoom into charts, diagrams, or signatures and save them as independent high-quality PDF files.
+                        Standard PDF readers only let you view. Our <strong>Professional PDF Crop Studio</strong> features a built-in <strong>Homography Matrix Engine</strong>. Whether you need to trim white margins for a clean presentation or "scan" a tilted phone photo of a bill, we provide pixel-perfect accuracy.
                     </p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
-                        <Scaling className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Exact Aspect</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Free-form selection handles allow you to crop according to your content's exact dimensions.</p>
+                        <Scan className="text-primary size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest">Scanner Mode</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Fix perspective on document photos. Drag 4 independent dots to the corners of the paper to flatten it instantly.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <MousePointer2 className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Visual Select</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">See what you are cropping in real-time. No more guessing X/Y coordinates in complicated forms.</p>
+                        <Maximize className="text-blue-500 size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest">Margin Trimmer</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Use Rectangular mode to cut unwanted white space from research papers, bank statements, and invoices.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest">100% Private</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Cropping happens 100% locally on your computer. Your sensitive docs never touch our servers.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Processing happens in your browser RAM. Your sensitive legal and financial docs never leave your device.</p>
                     </div>
                 </div>
             </section>
@@ -78,12 +79,12 @@ export default function CropPdfPage() {
             <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
                 <div className="flex flex-col md:flex-row gap-10 items-center">
                     <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileDigit className="size-12 text-primary" />
+                        <Zap className="size-12 text-primary" />
                     </div>
                     <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Lossless Extraction Logic</h2>
+                        <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Why choose our Cropper?</h2>
                         <p className="text-muted-foreground leading-relaxed text-sm">
-                            Unlike basic screenshot tools, our <strong>PDF Cropper</strong> maps the coordinates of your selection directly to the internal PDF media box. This means we preserve the original vector data and text of the PDF, ensuring that your cropped document remains searchable and high-resolution for printing.
+                            Unlike basic converters that rasterize every page to low quality, our **Rect Mode** preserves the original internal PDF vectors whenever possible. For **Scanner Mode**, we use high-density (300 DPI equivalent) rendering to ensure that even after perspective correction, the text remains crisp and readable for OCR and official submissions.
                         </p>
                     </div>
                 </div>
@@ -93,26 +94,33 @@ export default function CropPdfPage() {
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Cropping FAQs</h2>
+                    <h2 className="text-3xl font-black uppercase tracking-tight">Cropping & Scanning FAQs</h2>
+                    <p className="text-muted-foreground font-medium italic">Everything you need to know about local PDF editing.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Does cropping change the file size?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">When should I use "Scanner Mode"?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes! By removing unwanted margins and white space, you can significantly reduce the physical and digital size of your document, making it easier to attach to emails or portals.
+                            Use **Scanner Mode** when you have a photo of a document taken at an angle (like a photo from a phone). Drag the 4 dots to the actual corners of the paper. The tool will "flatten" it so it looks like a professional top-down scan.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I crop all pages at once?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Does cropping reduce the file size?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Currently, our tool allows you to crop one page at a time with extreme precision. This is ideal for extracting specific tables or headers that vary from page to page.
+                            Yes! By removing large white margins or unwanted page clutter, you can often reduce the final PDF size, making it easier to email or upload to portal sites like SSC or UPSC.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for bank statements?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for bank statements and IDs?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. This is the safest way to crop sensitive documents. Because we use **Client-Side JavaScript**, your files never leave your device. All processing happens in temporary memory (RAM).
+                            Absolutely. This tool uses **Client-Side JS Technology**. This means your files are NEVER uploaded to any server. All the cropping math happens inside your browser's memory and is cleared as soon as you close the tab.
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-4" className="border-b-2">
+                        <AccordionTrigger className="text-lg font-bold text-left">Will the text remain sharp in Scanner Mode?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                            Yes. We render the page at **2.5x resolution** before correction. This ensures that the transformed image retains high-fidelity details, making it perfect for documents containing small text or signatures.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
