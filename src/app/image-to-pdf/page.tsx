@@ -1,7 +1,7 @@
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, FileDigit, ShieldCheck, Zap, HelpCircle, Layers, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, FileDigit, ShieldCheck, Zap, HelpCircle, Layers, Image as ImageIcon, Sparkles, Layout, MonitorCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageToPdfConverter from '@/components/image-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Image to PDF Converter - Convert Multiple Photos to PDF Online Free',
-  description: 'Easily combine JPG, PNG, and WEBP images into a single professional PDF document. 100% private, no server uploads, secure local conversion.',
+  title: 'Image to PDF Converter - Convert Multiple Photos with Layout Control Online',
+  description: 'Convert JPG, PNG, and WEBP to PDF with Top, Center, and Bottom alignment. Professional tool to bundle photos into a high-quality A4 PDF document instantly.',
 };
 
 export default function ImageToPdfPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
+    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
+        <div className="w-full max-w-7xl mb-6 self-start">
             <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
                 <Link href="/tools?tab=image">
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -33,36 +33,42 @@ export default function ImageToPdfPage() {
             <ImageToPdfConverter />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
-            <HowToGuide title="Image to PDF Converter" steps={[
-                "Upload Images: Select one or more image files. You can add more files to the list at any time.",
-                "Review Order: The images will appear in the order they will be bundled in the PDF.",
-                "Process: Click the 'CREATE PDF' button to generate the document locally in your RAM.",
-                "Download: Save your combined PDF document to your device instantly."
+        <div className="w-full max-w-4xl space-y-16">
+            <HowToGuide title="Advanced Image to PDF Converter" steps={[
+                "Upload Images: Select one or more image files from your device.",
+                "Choose Layout: Use the sidebar to select alignment (Top, Center, Bottom).",
+                "Scaling Mode: Select 'Fit to Page' or keep 'Original Size' for crisp quality.",
+                "Preview: Click 'CREATE PDF' to see a live preview of your document.",
+                "Download: Save your professional PDF locally with 100% privacy."
             ]} />
 
-            {/* AdSense SEO Content */}
+            {/* AdSense Ready Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Convert & Bundle Document Sets</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">Whether you are scanning a multi-page homework assignment, a medical bill, or a collection of receipts for tax filing, our <strong>Image to PDF</strong> tool is designed for bulk efficiency. It bundles multiple files into a single, professional container instantly.</p>
+                    <h2 className="text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                        <Layout className="text-primary size-8" />
+                        Professional Layout & Positioning
+                    </h2>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                        Standard converters force stretch images, making small photos blurry. Our <strong>Image to PDF Pro</strong> gives you full control over vertical alignment and scaling, ensuring your digital documents look clean and professional.
+                    </p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <Layers className="text-primary size-8" />
-                        <h3 className="font-bold uppercase text-sm">Batch Processing</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Combine up to 50 photos into one secure document in a single click. Ideal for document digitizing.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
+                        <MonitorCheck className="text-primary size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest">Live Preview</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">See your document in a browser-native preview box before you download. No more guesswork or repeated downloads.</p>
                     </div>
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <Sparkles className="text-yellow-500 size-8" />
-                        <h3 className="font-bold uppercase text-sm">High Resolution</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Our engine maintains the source image's DPI, ensuring text and signatures remain perfectly readable for printing.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
+                        <Layers className="text-blue-500 size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest">High-DPI Export</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Our engine renders pages in high-definition (300 DPI equivalent) to ensure scanned text and signatures remain perfectly readable.</p>
                     </div>
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <ShieldCheck className="text-green-500 size-8" />
-                        <h3 className="font-bold uppercase text-sm">Zero Server Risk</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Your personal documents are converted locally in browser memory. No data is stored or seen by us.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-emerald-500/50 transition-all">
+                        <ShieldCheck className="text-emerald-500 size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest">100% Client-Side</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">We respect your data. Every byte of the PDF is generated in your computer's RAM. No files ever leave your device.</p>
                     </div>
                 </div>
             </section>
@@ -72,25 +78,32 @@ export default function ImageToPdfPage() {
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">Image to PDF FAQs</h2>
+                    <p className="text-muted-foreground font-medium">Common questions about local PDF generation.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Which image formats are supported?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
-                            We support all major formats including <strong>JPG, JPEG, PNG, WEBP, and BMP</strong>. You can even mix different formats in a single PDF document.
+                        <AccordionTrigger className="text-lg font-bold text-left">Why should I use "Original Size" mode?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                            When you have small images (like a 200px signature), stretching them to fill an A4 page makes them very blurry. "Original Size" mode keeps them at their natural pixel resolution, making them look sharp on the PDF page.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Is there a limit on the number of pages?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
-                            There is no hard coded limit. However, since the conversion happens in your device's RAM, adding too many high-resolution photos (more than 100) might slow down older mobile devices.
+                        <AccordionTrigger className="text-lg font-bold text-left">Can I change the order of images?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                            Currently, the order is decided by the selection sequence. If you want a specific order, please select your images one by one or click "Clear All" to re-upload in the desired sequence.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Can I rearrange the page order?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
-                            Currently, the order is based on the selection order. If you want a specific order, we recommend clicking 'Clear All' and selecting images one by one in the sequence you desire.
+                        <AccordionTrigger className="text-lg font-bold text-left">What formats are supported?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                            We support all major formats including <strong>JPEG, PNG, WEBP, and BMP</strong>. You can even mix these formats in a single multi-page PDF document.
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-4" className="border-b-2">
+                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for personal ID cards?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                            Yes, it is the safest method available online. Because we use <strong>Client-Side JS</strong>, your sensitive ID photos are never uploaded to any server. The conversion happens 100% offline in your browser.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
