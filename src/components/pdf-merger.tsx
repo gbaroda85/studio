@@ -23,7 +23,8 @@ import {
     CheckCircle2,
     ShieldCheck,
     Zap,
-    FileStack
+    FileStack,
+    RefreshCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +62,7 @@ export default function PdfMerger() {
         setPdfFiles(prev => [...prev, ...newFiles]);
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files);
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
