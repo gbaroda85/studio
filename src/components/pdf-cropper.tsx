@@ -73,14 +73,8 @@ export default function PdfCropper() {
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    return () => {
-      if (croppedPdfUrl) URL.revokeObjectURL(croppedPdfUrl);
-    };
-  }, [croppedPdfUrl]);
-
-  // Defined here to avoid temporal dead zone ReferenceErrors
-  const handleReset = useCallback(() => {
+  // Define handleReset using function keyword to ensure hoisting works safely in this scope
+  function handleReset() {
     setPdfFile(null);
     setNumPages(0);
     setPageImage(null);
@@ -88,7 +82,13 @@ export default function PdfCropper() {
     setCroppedPdfUrl(null);
     pdfDocRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (croppedPdfUrl) URL.revokeObjectURL(croppedPdfUrl);
+    };
+  }, [croppedPdfUrl]);
 
   const renderPage = async (pdf: pdfjs.PDFDocumentProxy, pageNum: number) => {
       setIsProcessing(true);
@@ -543,3 +543,4 @@ export default function PdfCropper() {
     </div>
   );
 }
+

@@ -3,6 +3,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,13 +30,21 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from './ui/scroll-area';
+
+// Initialize PDF.js worker
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
 export default function PdfMerger() {
     const { toast } = useToast();
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [isMerging, setIsMerging] = useState(false);
+    const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -51,6 +60,7 @@ export default function PdfMerger() {
             URL.revokeObjectURL(mergedPdfUrl);
             setMergedPdfUrl(null);
         }
+        setPreviewImages([]);
     }
 
     const handleFilesChange = (files: FileList | null) => {
@@ -101,6 +111,36 @@ export default function PdfMerger() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
+    const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
+        setIsGeneratingPreview(true);
+        try {
+            const loadingTask = pdfjs.getDocument({ data: pdfBytes });
+            const pdf = await loadingTask.promise;
+            const imgs: string[] = [];
+            const pagesToRender = Math.min(pdf.numPages, 10); // Render first 10 pages for visual comfort
+
+            for (let i = 1; i <= pagesToRender; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 0.8 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                if (context) {
+                    context.fillStyle = '#FFFFFF';
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: context, viewport }).promise;
+                    imgs.push(canvas.toDataURL('image/jpeg', 0.8));
+                }
+            }
+            setPreviewImages(imgs);
+        } catch (e) {
+            console.error("Preview generation failed", e);
+        } finally {
+            setIsGeneratingPreview(false);
+        }
+    };
+
     const handleMergePdfs = async () => {
         if (pdfFiles.length < 2) {
             toast({ variant: 'destructive', title: 'Need 2+ Files', description: 'Please upload at least two PDFs to merge.' });
@@ -117,10 +157,15 @@ export default function PdfMerger() {
             }
             const mergedPdfBytes = await mergedPdf.save();
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+            
             if (mergedPdfUrl) URL.revokeObjectURL(mergedPdfUrl);
             const url = URL.createObjectURL(blob);
             setMergedPdfUrl(url);
-            toast({title: 'Merge Success!', description: 'Your PDFs have been combined. Preview below.'});
+            
+            // Generate visual previews for a pro experience
+            await generateVisualPreviews(mergedPdfBytes);
+
+            toast({title: 'Merge Success!', description: 'Your PDFs have been combined. Preview generated.'});
         } catch (error) {
             console.error(error);
             toast({ variant: 'destructive', title: 'Merge Error', description: 'Failed to combine documents.' });
@@ -182,7 +227,7 @@ export default function PdfMerger() {
                                      </div>
                                 ))}
                                 <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-bold text-xs" onClick={() => fileInputRef.current?.click()}>
-                                    <UploadCloud className="size-4 mr-2" /> <span className="mr-1">Drag or</span> ADD MORE FILES
+                                    <UploadCloud className="size-4 mr-2" /> ADD MORE FILES
                                 </Button>
                             </div>
                         )}
@@ -204,11 +249,28 @@ export default function PdfMerger() {
                     <Card key={mergedPdfUrl} className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
                         <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
                             <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-green-700">
-                                <Eye className="size-4" /> Merged Document Preview
+                                <Eye className="size-4" /> Visual Preview (Top Pages)
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0 bg-white">
-                            <iframe src={mergedPdfUrl} className="w-full h-[600px] border-0" title="PDF Preview" />
+                        <CardContent className="p-0 bg-muted/20">
+                            <ScrollArea className="h-[550px] w-full p-8">
+                                <div className="flex flex-col items-center gap-8">
+                                    {isGeneratingPreview ? (
+                                        <div className="flex flex-col items-center gap-4 py-20">
+                                            <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
+                                            <p className="text-[10px] font-black uppercase text-primary animate-pulse">Building Visual Preview...</p>
+                                        </div>
+                                    ) : previewImages.map((img, i) => (
+                                        <div key={i} className="shadow-2xl border-4 border-white rounded-sm overflow-hidden bg-white max-w-full transform transition-transform hover:scale-[1.02]">
+                                            <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto" />
+                                            <div className="bg-muted text-[8px] font-bold py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">Page {i+1}</div>
+                                        </div>
+                                    ))}
+                                    {previewImages.length >= 10 && (
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase py-4">... Previewing first 10 pages ...</p>
+                                    )}
+                                </div>
+                            </ScrollArea>
                         </CardContent>
                         <CardFooter className="bg-green-500/10 p-6 flex flex-col sm:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-4 text-center sm:text-left">
@@ -286,3 +348,4 @@ export default function PdfMerger() {
         </div>
     );
 }
+
