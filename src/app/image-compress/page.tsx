@@ -1,6 +1,7 @@
+
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, ShieldCheck, Zap, HelpCircle, Target, Layers, Download, CheckCircle2, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Zap, HelpCircle, Target, Layers, Download, CheckCircle2, Sparkles, Wand2, Scaling, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageCompressor from '@/components/image-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -15,7 +16,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Bulk AI Image Compressor - Reduce Multiple JPG/PNG to 20kb, 50kb Online',
-  description: 'Professional bulk image compression for SSC, UPSC, IBPS and Bank forms. Reduce hundreds of photos to exact KB size instantly without quality loss. 100% private local browser processing.',
+  description: 'Professional bulk image compression for SSC, UPSC, IBPS and Bank forms. Reduce hundreds of photos to exact KB size instantly without quality loss using smart adaptive scaling.',
 };
 
 export default function ImageCompressPage() {
@@ -42,6 +43,21 @@ export default function ImageCompressPage() {
                 "Processing: Our local AI engine optimizes all photos in one go using browser threads.",
                 "Download: Save individual results instantly or get everything in a secure ZIP file."
             ]} />
+
+            {/* Smart Compression Explanation */}
+            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
+                <div className="flex flex-col md:flex-row gap-8 items-center">
+                    <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Scaling className="size-10 text-primary" />
+                    </div>
+                    <div className="space-y-4">
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Smart Adaptive Compression</h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                            Compressing a 2MB photo to 100KB is mathematically difficult. Standard tools often create "banding" or "pixelation" on faces. Our <strong>GR7 Smart Engine</strong> automatically balances JPEG quality with subtle dimension resizing. If quality drops too low, we slightly reduce the pixels to ensure your photo remains clear, crisp, and acceptable for government portals.
+                        </p>
+                    </div>
+                </div>
+            </section>
 
             {/* In-depth Content - ADSENSE READY */}
             <section className="space-y-10 py-10 border-t">
@@ -74,43 +90,6 @@ export default function ImageCompressPage() {
                 </div>
             </section>
 
-            {/* Technical Details */}
-            <section className="space-y-10 py-10 border-t">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-8 border-white dark:border-slate-800 group">
-                        <Image 
-                            src={placeholderData.image_tools.url} 
-                            alt="Bulk Image Optimization" 
-                            fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            data-ai-hint={placeholderData.image_tools.hint}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
-                            <p className="text-white font-black text-xl uppercase tracking-tighter">Native Browser Performance</p>
-                        </div>
-                    </div>
-                    <div className="space-y-6">
-                        <h2 className="text-3xl font-black uppercase tracking-tight">The GR7 Compression Engine</h2>
-                        <div className="space-y-4">
-                            <div className="flex gap-4 p-4 bg-muted/30 rounded-2xl">
-                                <Zap className="text-yellow-500 size-6 shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-sm">Adaptive Quality Scaling</h4>
-                                    <p className="text-xs text-muted-foreground">Uses a binary search algorithm to find the highest possible JPEG/WebP quality factor that remains under your specified KB limit.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 p-4 bg-muted/30 rounded-2xl">
-                                <Sparkles className="text-purple-500 size-6 shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-sm">Lanczos 3 Re-sampling</h4>
-                                    <p className="text-xs text-muted-foreground">When resizing is needed, we use high-order interpolation to ensure text on documents remains readable even after heavy shrinking.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* FAQs */}
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
@@ -121,9 +100,9 @@ export default function ImageCompressPage() {
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe to upload my signature or ID cards here?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Why does my photo look blurry when I compress it too much?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes, it is 100% safe. Our tool uses <strong>Client-Side Processing</strong>. This means your images are <strong>never uploaded</strong> to any server. All the work happens inside your browser's temporary memory (RAM). Even if you disconnect your internet, the tool will still work.
+                            JPEG compression works by removing data. When you ask for an extremely small size (like 10KB from a 5MB original), the "noise" becomes visible. Our <strong>Smart Resize</strong> logic helps mitigate this by reducing dimensions, but there is always a physical limit to how much data can be removed before quality drops.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
@@ -133,9 +112,9 @@ export default function ImageCompressPage() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Why should I use WebP format instead of JPEG?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe to upload my signature here?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            WebP is a modern image format that provides superior lossless and lossy compression. It can make your images 30% smaller than JPEG without any visible loss in clarity. However, for government forms, always check if they accept WebP or strictly require JPEG.
+                            Yes, it is 100% safe. Our tool uses <strong>Client-Side Processing</strong>. This means your images are <strong>never uploaded</strong> to any server. All the work happens inside your browser's temporary memory (RAM).
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-4" className="border-b-2">

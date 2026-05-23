@@ -75,7 +75,6 @@ export default function ImageCompressor() {
   const [quality, setQuality] = useState<number[]>([75]);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
-  const [previewResult, setPreviewResult] = useState<CompressionResult | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -105,57 +104,86 @@ export default function ImageCompressor() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files); };
 
+  /**
+   * SMART COMPRESSION LOGIC
+   * Uses iterative binary search for quality AND falls back to resizing if quality is too low.
+   * This prevents banding/artifacts in very small targets.
+   */
   const compressSingleFile = async (item: CompressionResult): Promise<CompressionResult> => {
     return new Promise((resolve) => {
         const img = new window.Image();
         img.src = item.originalDataUrl;
         img.onload = async () => {
             const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
             if (!ctx) return resolve(item);
-
-            canvas.width = img.width;
-            canvas.height = img.height;
 
             const mimeType = `image/${outputFormat}`;
             let finalUrl = "";
             let finalSize = 0;
 
-            const renderToCanvas = (q: number) => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const renderToCanvas = (q: number, scale = 1.0) => {
+                const tw = img.width * scale;
+                const th = img.height * scale;
+                canvas.width = tw;
+                canvas.height = th;
+                
+                ctx.clearRect(0, 0, tw, th);
                 if (outputFormat === 'jpeg') {
                     ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillRect(0, 0, tw, th);
                 }
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 0, 0, tw, th);
                 return canvas.toDataURL(mimeType, q);
             };
 
             if (compressionMode === 'manual') {
-                finalUrl = renderToCanvas(quality[0] / 100);
+                finalUrl = renderToCanvas(quality[0] / 100, 1.0);
                 const blob = await (await fetch(finalUrl)).blob();
                 finalSize = blob.size;
             } else {
                 const targetBytes = parseInt(targetSizeKb, 10) * 1024;
-                let low = 0.05, high = 1.0, bestUrl = "";
+                let currentScale = 1.0;
+                
+                // Adaptive initial downscaling for huge images
+                if (img.width > 2500 || img.height > 2500) currentScale = 0.7;
+                if (img.width > 4000 || img.height > 4000) currentScale = 0.5;
+
+                let bestUrl = "";
                 let bestSize = 0;
 
-                for (let i = 0; i < 7; i++) {
-                    const mid = (low + high) / 2;
-                    const testUrl = renderToCanvas(mid);
-                    const testBlob = await (await fetch(testUrl)).blob();
-                    
-                    if (testBlob.size <= targetBytes) {
-                        bestUrl = testUrl;
-                        bestSize = testBlob.size;
-                        low = mid;
+                // Try 3 scale steps to find highest quality possible
+                for (let s = 0; s < 3; s++) {
+                    let low = 0.15, high = 1.0;
+                    let stepBestUrl = "";
+                    let stepBestSize = 0;
+
+                    for (let i = 0; i < 7; i++) {
+                        const mid = (low + high) / 2;
+                        const testUrl = renderToCanvas(mid, currentScale);
+                        const testBlob = await (await fetch(testUrl)).blob();
+                        
+                        if (testBlob.size <= targetBytes) {
+                            stepBestUrl = testUrl;
+                            stepBestSize = testBlob.size;
+                            low = mid; // Try higher quality
+                        } else {
+                            high = mid; // Need lower quality
+                        }
+                    }
+
+                    if (stepBestUrl) {
+                        bestUrl = stepBestUrl;
+                        bestSize = stepBestSize;
+                        break; // Found fit!
                     } else {
-                        high = mid;
+                        // Quality 0.15 was still too large, downscale 25% and retry
+                        currentScale *= 0.75;
                     }
                 }
                 
                 if (!bestUrl) {
-                   bestUrl = renderToCanvas(0.05);
+                   bestUrl = renderToCanvas(0.1, currentScale);
                    const fb = await (await fetch(bestUrl)).blob();
                    bestSize = fb.size;
                 }
@@ -186,7 +214,7 @@ export default function ImageCompressor() {
     }
 
     setIsBulkProcessing(false);
-    toast({ title: "Batch Complete!", description: "All images optimized to perfection." });
+    toast({ title: "Batch Complete!", description: "All images optimized with smart-adaptive scaling." });
   };
 
   const downloadFile = (res: CompressionResult) => {
@@ -282,7 +310,7 @@ export default function ImageCompressor() {
                                                     
                                                     <Dialog>
                                                         <DialogTrigger asChild>
-                                                            <Button size="icon" variant="outline" className="size-9 rounded-xl border-2 hover:bg-primary/5" onClick={() => setPreviewResult(res)}>
+                                                            <Button size="icon" variant="outline" className="size-9 rounded-xl border-2 hover:bg-primary/5">
                                                                 <Eye className="size-4 text-primary" />
                                                             </Button>
                                                         </DialogTrigger>
@@ -376,13 +404,13 @@ export default function ImageCompressor() {
                         <TabsList className="grid w-full grid-cols-2 h-14 p-1.5 bg-muted/50 rounded-2xl border-2">
                             <TabsTrigger 
                                 value="target" 
-                                className="font-black text-[10px] uppercase rounded-xl transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+                                className="font-black text-[10px] uppercase rounded-xl transition-all"
                             >
                                 <Target className="size-3 mr-2" /> Target Size
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="manual" 
-                                className="font-black text-[10px] uppercase rounded-xl transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+                                className="font-black text-[10px] uppercase rounded-xl transition-all"
                             >
                                 <Settings2 className="size-3 mr-2" /> Manual Quality
                             </TabsTrigger>
@@ -404,7 +432,7 @@ export default function ImageCompressor() {
                                 </div>
                                 <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10">
                                     <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                        <span className="font-black uppercase mr-1">Batch Optimizer:</span> Our logic iterates 7 times to hit your target KB while maintaining maximum visual detail.
+                                        <span className="font-black uppercase mr-1">Smart-Adaptive Engline:</span> If target is too small, we intelligently resize pixels to maintain sharp quality without dhabbe/banding.
                                     </p>
                                 </div>
                              </div>

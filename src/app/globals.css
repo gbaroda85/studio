@@ -82,8 +82,8 @@ body {
   }
 }
 
-/* Fix for forced background color issues in some Shadcn components in Dark Mode */
-.dark .data-\[state\=active\]\:bg-white {
+/* Fix for Tab selection colors in Dark Mode */
+.dark [data-state=active] {
   background-color: hsl(var(--primary)) !important;
   color: hsl(var(--primary-foreground)) !important;
 }
@@ -101,10 +101,6 @@ body {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
 }
 
-.bg-gradient-premium {
-  @apply bg-gradient-to-br from-gradient-blue via-gradient-purple to-gradient-magenta;
-}
-
 /* Custom Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -115,24 +111,4 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
-}
-
-@keyframes gradient-bg {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-gradient-slow {
-  background-size: 200% 200%;
-  animation: gradient-bg 15s ease infinite;
-}
-
-@keyframes sidebar-border-glow-right {
-  0%, 100% { border-right-color: hsla(var(--primary), 0.05); }
-  50% { border-right-color: hsla(var(--primary), 0.15); }
-}
-
-.animate-sidebar-border-glow-right {
-  animation: sidebar-border-glow-right 4s ease-in-out infinite;
 }
