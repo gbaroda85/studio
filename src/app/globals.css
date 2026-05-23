@@ -82,8 +82,8 @@ body {
   }
 }
 
-/* Fix for Tab selection colors in Dark Mode */
-.dark [data-state=active] {
+/* Fix for Tab selection colors in Dark Mode - Targeted only to triggers */
+.dark button[data-state=active] {
   background-color: hsl(var(--primary)) !important;
   color: hsl(var(--primary-foreground)) !important;
 }
