@@ -104,11 +104,6 @@ export default function ImageCompressor() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files); };
 
-  /**
-   * SMART COMPRESSION LOGIC
-   * Uses iterative binary search for quality AND falls back to resizing if quality is too low.
-   * Optimized for 20KB targets.
-   */
   const compressSingleFile = async (item: CompressionResult): Promise<CompressionResult> => {
     return new Promise((resolve) => {
         const img = new window.Image();
@@ -144,16 +139,13 @@ export default function ImageCompressor() {
             } else {
                 const targetBytes = parseInt(targetSizeKb, 10) * 1024;
                 let currentScale = 1.0;
-                
-                // Iteratively find balance between resizing and quality
-                // This ensures that even at 20KB, the image is sharp (just smaller)
                 let bestUrl = "";
                 let bestSize = 0;
 
                 const scalesToTry = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
                 
                 for (const scale of scalesToTry) {
-                    let low = 0.2, high = 0.95; // Maintain quality floor at 0.2 for better visual output
+                    let low = 0.2, high = 0.95; 
                     let stepBestUrl = "";
                     let stepBestSize = 0;
 
@@ -179,7 +171,7 @@ export default function ImageCompressor() {
                 }
                 
                 if (!bestUrl) {
-                   bestUrl = renderToCanvas(0.1, 0.1); // Extreme fallback
+                   bestUrl = renderToCanvas(0.1, 0.1); 
                    const fb = await (await fetch(bestUrl)).blob();
                    bestSize = fb.size;
                 }
@@ -263,7 +255,10 @@ export default function ImageCompressor() {
                         </div>
                         <div className="space-y-2">
                             <p className="text-2xl font-black uppercase tracking-tighter">Bulk Compression Workspace</p>
-                            <p className="text-sm text-muted-foreground font-medium italic">Drop up to 50 photos. Private local processing.</p>
+                            <p className="text-sm text-muted-foreground font-medium">
+                                <span className="text-primary font-black">Drag and drop</span> or Click to upload photos
+                            </p>
+                            <p className="text-xs text-muted-foreground italic opacity-70">Up to 50 images at once. Private local processing.</p>
                         </div>
                     </div>
                 ) : (
@@ -361,7 +356,7 @@ export default function ImageCompressor() {
                             </div>
                         </ScrollArea>
                         <Button variant="outline" className="w-full border-2 border-dashed h-14 rounded-2xl font-black text-xs uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
-                            <Layers className="size-4 mr-2" /> ADD MORE FILES
+                            <Layers className="size-4 mr-2" /> <span className="mr-1">Drag or</span> ADD MORE FILES
                         </Button>
                     </div>
                 )}
