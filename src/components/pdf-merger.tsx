@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -6,6 +5,7 @@ import { PDFDocument } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { 
     UploadCloud, 
     Loader2, 
@@ -18,8 +18,6 @@ import {
     SortAsc, 
     SortDesc, 
     Trash2,
-    ArrowUpToLine,
-    ArrowDownToLine,
     ArrowUpDown,
     Eye,
     CheckCircle2,
