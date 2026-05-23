@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -53,16 +54,17 @@ export default function PdfMerger() {
     }
 
     const handleFilesChange = (files: FileList | null) => {
+        if (!files) return;
         clearMergedFile();
-        const newFiles = Array.from(files || []).filter(file => file.type === 'application/pdf');
-        if (newFiles.length === 0 && files && files.length > 0) {
+        const newFiles = Array.from(files).filter(file => file.type === 'application/pdf');
+        if (newFiles.length === 0 && files.length > 0) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only PDF files.' });
             return;
         }
         setPdfFiles(prev => [...prev, ...newFiles]);
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files?.[0] || null);
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
@@ -72,13 +74,11 @@ export default function PdfMerger() {
         setPdfFiles(files => files.filter((_, i) => i !== index));
     };
 
-    const moveFile = (index: number, direction: 'up' | 'down' | 'top' | 'bottom') => {
+    const moveFile = (index: number, direction: 'up' | 'down') => {
         const newFiles = [...pdfFiles];
         const file = newFiles.splice(index, 1)[0];
         if (direction === 'up') newFiles.splice(Math.max(0, index - 1), 0, file);
-        else if (direction === 'down') newFiles.splice(Math.min(pdfFiles.length - 1, index + 1), 0, file);
-        else if (direction === 'top') newFiles.unshift(file);
-        else if (direction === 'bottom') newFiles.push(file);
+        else newFiles.splice(Math.min(pdfFiles.length - 1, index + 1), 0, file);
         setPdfFiles(newFiles);
         clearMergedFile();
     };
@@ -92,7 +92,6 @@ export default function PdfMerger() {
         }
         setPdfFiles(sorted);
         clearMergedFile();
-        toast({ title: "Order Updated" });
     }
     
     const handleReset = () => {
@@ -136,7 +135,6 @@ export default function PdfMerger() {
     
     return (
         <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-500">
-            {/* Left side: Upload & List */}
             <div className="lg:col-span-7 space-y-6">
                 <Card className={cn(
                     "border-2 transition-all duration-300 bg-card/50 shadow-xl overflow-hidden",
@@ -146,7 +144,7 @@ export default function PdfMerger() {
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                         <div>
                             <CardTitle className="text-xl font-black uppercase tracking-tighter">Merge Workspace</CardTitle>
-                            <CardDescription>Order matters. Arrange files before merging.</CardDescription>
+                            <CardDescription>Arrange files before merging. 100% Secure.</CardDescription>
                         </div>
                         {pdfFiles.length > 0 && <Badge className="bg-primary">{pdfFiles.length} FILES</Badge>}
                     </CardHeader>
@@ -158,11 +156,11 @@ export default function PdfMerger() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-lg font-bold">Drop PDFs here to Combine</p>
-                                    <p className="text-sm text-muted-foreground mt-1">100% Private local processing.</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Select multiple files to merge them instantly.</p>
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                            <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2 p-1">
                                 {pdfFiles.map((file, index) => (
                                      <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-sm">
                                          <div className="flex items-center gap-3 overflow-hidden">
@@ -224,7 +222,6 @@ export default function PdfMerger() {
                 )}
             </div>
 
-            {/* Right side: Controls */}
             <div className="lg:col-span-5 space-y-6">
                 <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
@@ -257,7 +254,7 @@ export default function PdfMerger() {
                             <Zap className="size-6 text-yellow-500 shrink-0" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                                 <span className="font-black uppercase block mb-1">PRO BUNDLING:</span>
-                                Combining files happens entirely in RAM. This tool preserves original vectors and links.
+                                Combining files happens entirely in RAM. This tool preserves original vectors and quality.
                             </p>
                         </div>
                     </CardContent>
@@ -274,7 +271,7 @@ export default function PdfMerger() {
                                     <Merge className="size-9" />
                                     <div className="text-left">
                                         <span className="block uppercase tracking-tighter leading-none">MERGE PDFS</span>
-                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Process {pdfFiles.length} documents</span>
+                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Process {pdfFiles.length} docs</span>
                                     </div>
                                 </div>
                             )}
