@@ -107,7 +107,7 @@ export default function ImageCompressor() {
   /**
    * SMART COMPRESSION LOGIC
    * Uses iterative binary search for quality AND falls back to resizing if quality is too low.
-   * This prevents banding/artifacts in very small targets.
+   * Optimized for 20KB targets.
    */
   const compressSingleFile = async (item: CompressionResult): Promise<CompressionResult> => {
     return new Promise((resolve) => {
@@ -145,45 +145,41 @@ export default function ImageCompressor() {
                 const targetBytes = parseInt(targetSizeKb, 10) * 1024;
                 let currentScale = 1.0;
                 
-                // Adaptive initial downscaling for huge images
-                if (img.width > 2500 || img.height > 2500) currentScale = 0.7;
-                if (img.width > 4000 || img.height > 4000) currentScale = 0.5;
-
+                // Iteratively find balance between resizing and quality
+                // This ensures that even at 20KB, the image is sharp (just smaller)
                 let bestUrl = "";
                 let bestSize = 0;
 
-                // Try 3 scale steps to find highest quality possible
-                for (let s = 0; s < 3; s++) {
-                    let low = 0.15, high = 1.0;
+                const scalesToTry = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
+                
+                for (const scale of scalesToTry) {
+                    let low = 0.2, high = 0.95; // Maintain quality floor at 0.2 for better visual output
                     let stepBestUrl = "";
                     let stepBestSize = 0;
 
-                    for (let i = 0; i < 7; i++) {
+                    for (let i = 0; i < 6; i++) {
                         const mid = (low + high) / 2;
-                        const testUrl = renderToCanvas(mid, currentScale);
+                        const testUrl = renderToCanvas(mid, scale);
                         const testBlob = await (await fetch(testUrl)).blob();
                         
                         if (testBlob.size <= targetBytes) {
                             stepBestUrl = testUrl;
                             stepBestSize = testBlob.size;
-                            low = mid; // Try higher quality
+                            low = mid; 
                         } else {
-                            high = mid; // Need lower quality
+                            high = mid; 
                         }
                     }
 
                     if (stepBestUrl) {
                         bestUrl = stepBestUrl;
                         bestSize = stepBestSize;
-                        break; // Found fit!
-                    } else {
-                        // Quality 0.15 was still too large, downscale 25% and retry
-                        currentScale *= 0.75;
+                        break; 
                     }
                 }
                 
                 if (!bestUrl) {
-                   bestUrl = renderToCanvas(0.1, currentScale);
+                   bestUrl = renderToCanvas(0.1, 0.1); // Extreme fallback
                    const fb = await (await fetch(bestUrl)).blob();
                    bestSize = fb.size;
                 }
@@ -253,7 +249,8 @@ export default function ImageCompressor() {
         <div className="lg:col-span-7 space-y-6">
             <Card 
                 className={cn(
-                    "border-2 border-dashed transition-all relative overflow-hidden bg-card/50", 
+                    "border-2 border-dashed transition-all duration-300 relative overflow-hidden bg-card/50",
+                    "hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10",
                     isDragOver && "border-primary bg-primary/5", 
                     results.length > 0 ? "p-4" : "p-24 text-center"
                 )}
@@ -393,7 +390,7 @@ export default function ImageCompressor() {
 
         {/* Right: Settings & Optimizer Suite */}
         <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all duration-300 hover:border-primary/40 hover:shadow-primary/20">
                 <CardHeader className="bg-primary/5 border-b p-6">
                     <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
                         <Settings2 className="size-6 text-primary" /> Optimizer Suite
@@ -432,7 +429,7 @@ export default function ImageCompressor() {
                                 </div>
                                 <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10">
                                     <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                        <span className="font-black uppercase mr-1">Smart-Adaptive Engline:</span> If target is too small, we intelligently resize pixels to maintain sharp quality without dhabbe/banding.
+                                        <span className="font-black uppercase mr-1">Smart-Adaptive Engline:</span> For small targets like 20KB, we intelligently balance resizing and quality to avoid dhabbe/banding.
                                     </p>
                                 </div>
                              </div>
