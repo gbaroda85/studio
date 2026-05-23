@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
@@ -16,9 +15,9 @@ import {
   Layers, 
   RefreshCcw,
   Layout,
-  AlignVerticalCenter,
-  AlignVerticalTop,
-  AlignVerticalBottom,
+  AlignCenterVertical,
+  AlignStartVertical,
+  AlignEndVertical,
   Maximize,
   Minimize,
   Eye
@@ -28,7 +27,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type VAlign = 'top' | 'center' | 'bottom';
@@ -193,7 +191,7 @@ export default function ImageToPdfConverter() {
         
         {/* Workspace Area */}
         <div className="lg:col-span-8 space-y-6">
-            <Card className={cn("border-2 transition-all duration-300 overflow-hidden bg-card/50 shadow-xl", isDragOver && "border-primary ring-4 ring-primary/20")}
+            <Card className={cn("border-2 transition-all duration-300 overflow-hidden bg-card/50 shadow-xl hover:border-primary/40", isDragOver && "border-primary ring-4 ring-primary/20")}
                   onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader className="bg-muted/30 border-b">
                     <CardTitle className="text-xl font-black flex items-center justify-between">
@@ -289,19 +287,19 @@ export default function ImageToPdfConverter() {
 
                     <div className="space-y-4 pt-4 border-t-2 border-dashed">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                           <AlignVerticalCenter className="size-3" /> Page Alignment
+                           <AlignCenterVertical className="size-3" /> Page Alignment
                         </Label>
                         <div className="grid grid-cols-3 gap-2">
                             <Button variant={vAlign === 'top' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl" onClick={() => setVAlign('top')}>
-                                <AlignVerticalTop className="size-4" />
+                                <AlignStartVertical className="size-4" />
                                 <span className="text-[8px] font-black uppercase">Top</span>
                             </Button>
                             <Button variant={vAlign === 'center' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl" onClick={() => setVAlign('center')}>
-                                <AlignVerticalCenter className="size-4" />
+                                <AlignCenterVertical className="size-4" />
                                 <span className="text-[8px] font-black uppercase">Middle</span>
                             </Button>
                             <Button variant={vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl" onClick={() => setVAlign('bottom')}>
-                                <AlignVerticalBottom className="size-4" />
+                                <AlignEndVertical className="size-4" />
                                 <span className="text-[8px] font-black uppercase">Bottom</span>
                             </Button>
                         </div>

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, FileDigit, ShieldCheck, Zap, HelpCircle, Layers, Image as ImageIcon, Sparkles, Layout, MonitorCheck } from 'lucide-react';
