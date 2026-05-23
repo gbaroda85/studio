@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icon?v=10', type: 'image/png' },
-      { url: '/icon?v=10', sizes: '32x32', type: 'image/png' },
+      { url: '/icon?v=25', type: 'image/png' },
+      { url: '/icon?v=25', sizes: '32x32', type: 'image/png' },
     ],
     apple: [
-      { url: '/icon?v=10', type: 'image/png' },
+      { url: '/icon?v=25', type: 'image/png' },
     ],
   },
   keywords: [
@@ -106,7 +106,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter&family=Orbitron:wght@700&display=swap"
           rel="stylesheet"
         />
-        <link rel="icon" href="/icon?v=10" sizes="any" />
+        {/* Force naya favicon by using the same version tag */}
+        <link rel="icon" href="/icon?v=25" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
