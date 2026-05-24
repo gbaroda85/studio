@@ -13,11 +13,12 @@ import {
   FileDigit,
   Scissors,
   Merge,
-  Lock,
   LayoutGrid,
   CheckCircle2,
   Landmark,
   Cake,
+  Percent,
+  Route,
   Coins,
   Eraser,
   FileScan,
@@ -32,16 +33,12 @@ import {
   NotebookPen,
   Archive,
   ArchiveRestore,
-  Calculator,
-  Percent,
-  Route,
   Receipt,
   Gauge,
   AreaChart,
   Fuel,
   Waves,
   FileArchive,
-  Languages,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,7 +46,7 @@ import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Global tool list for search functionality
+// Global tool list for search functionality (Removed Vault Protect)
 const ALL_TOOLS = [
   // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
@@ -67,7 +64,6 @@ const ALL_TOOLS = [
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
   { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove passwords from Aadhaar or Bank PDFs.", href: "/unlock-pdf", colorClass: "bg-teal-500", category: "pdf" },
-  { icon: Lock, title: "Vault Protect", description: "Secure PDFs with AES encryption and passwords.", href: "/protect-pdf", colorClass: "bg-slate-800", category: "pdf" },
   { icon: ScanLine, title: "Scan to PDF", description: "Turn your camera into a professional document scanner.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", category: "pdf" },
   { icon: FileText, title: "Text to PDF", description: "Convert plain text into a clean PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", category: "pdf" },
   { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a professional PDF.", href: "/html-to-pdf", colorClass: "bg-orange-600", category: "pdf" },
@@ -228,7 +224,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* PDF Toolkit */}
+                {/* Document Engine */}
                 <div className="mb-16">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-8">
                         <div className="text-left">

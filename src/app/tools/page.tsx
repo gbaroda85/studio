@@ -133,13 +133,6 @@ function ToolsPageContent() {
       icon: FileDigit,
       color: 'text-red-500',
     },
-    {
-      href: '/passport-photo',
-      labelKey: 'Passport Photo',
-      descriptionKey: 'Create professional passport photos with AI clothes change.',
-      icon: ImageIcon,
-      color: 'text-primary',
-    },
   ];
 
   const pdfFeatures = [
@@ -205,13 +198,6 @@ function ToolsPageContent() {
       descriptionKey: 'unlock_pdf_description',
       icon: Unlock,
       color: 'text-teal-500',
-    },
-    {
-      href: '/protect-pdf',
-      labelKey: 'Vault Protect',
-      descriptionKey: 'Secure PDFs with strong passwords and AES encryption.',
-      icon: Unlock,
-      color: 'text-slate-800',
     },
     {
       href: '/add-watermark',

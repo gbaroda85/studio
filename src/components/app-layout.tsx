@@ -64,7 +64,7 @@ import {
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
 
-// Tool categories for the mega menu
+// Tool categories for the mega menu (Removed Vault Protect)
 const CATEGORIES = [
   {
     name: "image_tools",

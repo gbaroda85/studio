@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -147,6 +146,7 @@ export default function HtmlToPdfConverter() {
                 <div 
                     ref={previewRef} 
                     className="w-[794px] bg-white p-0 m-0 overflow-hidden" 
+                    style={{ minHeight: '1123px' }}
                     dangerouslySetInnerHTML={{ __html: htmlContent }} 
                 />
             </div>
