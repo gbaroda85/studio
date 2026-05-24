@@ -223,11 +223,11 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Literal Top Edge
+                    y = 0; // Absolute Top Edge
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Literal Bottom Edge
+                    y = pageHeight - finalHeight; // Absolute Bottom Edge
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Center
+                    y = (pageHeight - finalHeight) / 2; // Exact Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');

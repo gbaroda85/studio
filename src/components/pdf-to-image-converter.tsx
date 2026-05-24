@@ -90,9 +90,13 @@ export default function PdfToImageConverter() {
                     const dx = (canvas.width - dw) / 2;
                     
                     let dy;
-                    if (vAlign === 'top') dy = 0; // Literal Top Edge
-                    else if (vAlign === 'bottom') dy = canvas.height - dh; // Literal Bottom Edge
-                    else dy = (canvas.height - dh) / 2; // Center
+                    if (vAlign === 'top') {
+                        dy = 0; // Literal Top Edge
+                    } else if (vAlign === 'bottom') {
+                        dy = canvas.height - dh; // Literal Bottom Edge
+                    } else {
+                        dy = (canvas.height - dh) / 2; // Center
+                    }
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
@@ -243,7 +247,7 @@ export default function PdfToImageConverter() {
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="text-xl font-black uppercase tracking-tighter">Extraction Studio</CardTitle>
-                                <CardDescription className="truncate max-w-md font-mono text-[10px] mt-1">{pdfFile.name}</CardDescription>
+                                <CardDescription className="truncate max-w-md font-mono text-[10px] mt-1">{pdfFile?.name}</CardDescription>
                             </div>
                             {pages.length > 0 && <Badge className="bg-primary">{pages.length} PAGES</Badge>}
                         </CardHeader>
