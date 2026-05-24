@@ -125,7 +125,7 @@ export default function Page() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       {/* Hero Section - Compact Height but Big Bold Text */}
-      <section className="relative w-full max-w-[2000px] pt-12 pb-14 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
+      <section className="relative w-full max-w-[2000px] pt-8 pb-8 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />

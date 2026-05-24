@@ -297,32 +297,32 @@ function AppHeader() {
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
-        {/* Left Side: Mobile Menu + Logo */}
-        <div className="flex items-center gap-4 lg:gap-8 shrink-0">
+        {/* Left Side: Mobile Menu + Logo + Home Button */}
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <MobileNav />
-            <Link href="/" className="flex items-center group">
+            <Link href="/" className="flex items-center group mr-2">
               <GR7Logo />
             </Link>
+            
+            {/* Home button moved to Left side for Desktop */}
+            <Button 
+              asChild
+              variant="ghost" 
+              className={cn(
+                "hidden lg:flex h-10 px-4 font-black text-xs items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
+                pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
+              )}
+            >
+              <Link href="/">
+                <Home className="size-4" />
+                <span className="hidden xl:inline">{t('home')}</span>
+              </Link>
+            </Button>
         </div>
 
-        {/* Right Side: Home + Tools Nav + Settings + Theme Toggle */}
+        {/* Right Side: Tools Nav + Support + Settings + Theme Toggle */}
         <div className="flex items-center gap-1 sm:gap-3">
             <nav className="hidden lg:flex items-center gap-1 mr-2">
-                {/* Added Explicit Home Button */}
-                <Button 
-                  asChild
-                  variant="ghost" 
-                  className={cn(
-                    "h-10 px-4 font-black text-xs flex items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
-                    pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
-                  )}
-                >
-                  <Link href="/">
-                    <Home className="size-4" />
-                    <span className="hidden xl:inline">{t('home')}</span>
-                  </Link>
-                </Button>
-
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
                 ))}
