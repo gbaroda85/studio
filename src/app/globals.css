@@ -9,63 +9,47 @@ body {
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 224 71% 4%;
+    --background: 0 0% 95%; /* Minimalist Off-white */
+    --foreground: 0 0% 0%;   /* Pure Black Text */
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8% 46%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 210 20% 98%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;      /* Minimalist Black Buttons */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
-    --radius: 1rem;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 262 83% 58%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 262 83% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 0%;
+    --radius: 1.5rem; /* More rounded as per image */
   }
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 210 20% 98%;
-    --card: 240 10% 6%;
-    --card-foreground: 210 20% 98%;
-    --popover: 240 10% 4%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 240 10% 12%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 240 10% 12%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 240 10% 15%;
-    --input: 240 10% 15%;
+    --background: 222.2 84% 4.9%; /* Rich Navy */
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 6.5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 262 83% 58%;      /* Original Purple */
+    --primary-foreground: 210 40% 98%; /* High contrast text */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
     --ring: 262 83% 58%;
-    --sidebar-background: 240 10% 6%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 10% 15%;
-    --sidebar-ring: 262 83% 58%;
   }
 }
 
@@ -76,13 +60,13 @@ body {
   body {
     @apply bg-background text-foreground selection:bg-primary/20;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(199, 89% , 48%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(199, 89% , 48%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
 
-/* Fix for Tab selection colors in Dark Mode - Targeted only to triggers */
+/* Fix for Tab selection colors in Dark Mode */
 .dark button[data-state=active] {
   background-color: hsl(var(--primary)) !important;
   color: hsl(var(--primary-foreground)) !important;
@@ -95,10 +79,6 @@ body {
 /* Glassmorphism Classes */
 .glass-panel {
   @apply bg-white/80 dark:bg-black/80 backdrop-blur-2xl border border-white/20 dark:border-white/10;
-}
-
-.text-gradient-primary {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
 }
 
 /* Custom Thin Scrollbar */

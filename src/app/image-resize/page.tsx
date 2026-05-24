@@ -32,7 +32,7 @@ export default function ImageResizePage() {
                 "Lock Ratio: Keep 'Maintain Aspect Ratio' checked to avoid stretching.",
                 "Format: Choose JPEG (for forms) or PNG/WebP.",
                 "Download: Save your perfectly sized image locally."
-            ]} [] />
+            ]} />
 
             {/* In-depth Content Section */}
             <section className="space-y-10 py-10 border-t">
