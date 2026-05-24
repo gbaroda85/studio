@@ -86,18 +86,18 @@ export default function PdfToImageConverter() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
                     let dy = (canvas.height - img.height) / 2;
-                    if (vAlign === 'top') dy = 0; // Literal top
-                    else if (vAlign === 'bottom') dy = canvas.height - img.height; // Literal bottom
+                    if (vAlign === 'top') dy = 0; // Literal Top
+                    else if (vAlign === 'bottom') dy = canvas.height - img.height; // Literal Bottom
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, dy);
                     resolve(canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0));
                 } else {
-                    // "Page Only" mode - literal rip, but if aligned we add zero-margin padding
+                    // Literal page content extraction with zero padding logic
                     if (vAlign !== 'center') {
                         const targetW = img.width;
-                        const targetH = Math.round(img.height * 1.25); // 25% room for alignment visibility
+                        const targetH = Math.round(img.height * 1.3); // Add room to move
                         canvas.width = targetW;
                         canvas.height = targetH;
                         
@@ -309,11 +309,20 @@ export default function PdfToImageConverter() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl bg-white" : "bg-white hover:border-primary/30"
                                                 )}>
                                                 <div className={cn(
-                                                    "flex-1 relative flex flex-col p-1", // Strict edges
+                                                    "flex-1 relative flex flex-col", 
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
-                                                    <div className="relative w-full h-[80%] transition-all">
-                                                        <Image src={p.originalSrc} alt={`page-${p.index}`} fill className="object-contain" unoptimized />
+                                                    <div className="relative w-full h-full">
+                                                        <Image 
+                                                            src={p.originalSrc} 
+                                                            alt={`page-${p.index}`} 
+                                                            fill 
+                                                            className={cn(
+                                                                "object-contain transition-all duration-300",
+                                                                p.vAlign === 'top' ? 'object-top' : p.vAlign === 'bottom' ? 'object-bottom' : 'object-center'
+                                                            )}
+                                                            unoptimized 
+                                                        />
                                                     </div>
                                                 </div>
                                                 

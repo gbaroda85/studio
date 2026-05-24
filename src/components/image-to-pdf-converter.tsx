@@ -198,7 +198,7 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 2; // Strict minimal margin (2mm)
+    const margin = 0.5; // Literal edge logic (0.5mm tiny margin)
     const maxWidth = pageWidth - (margin * 2);
     const maxHeight = pageHeight - (margin * 2);
 
@@ -217,8 +217,7 @@ export default function ImageToPdfConverter() {
                 if (imgData.fitMode === 'fit') {
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    // Slightly smaller scaling to allow the image to actually "move" visibly
-                    const ratio = Math.min(widthRatio, heightRatio) * 0.85; 
+                    const ratio = Math.min(widthRatio, heightRatio) * 0.9; // Scale to fit well
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -256,7 +255,7 @@ export default function ImageToPdfConverter() {
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "PDF Created!", description: "Alignment logic strictly applied." });
+    toast({ title: "PDF Created!", description: "Strict alignment applied." });
   };
   
   const handleDownload = () => {
@@ -308,19 +307,18 @@ export default function ImageToPdfConverter() {
                                 )}
                             >
                                 <div className={cn(
-                                    "flex-1 relative flex flex-col p-1", // Minimal padding for strict edge visual
+                                    "flex-1 relative flex flex-col",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <div className={cn(
-                                        "relative w-full transition-all duration-300",
-                                        img.fitMode === 'original' ? 'h-auto' : 'h-[80%]'
-                                    )}>
+                                    <div className="relative w-full h-full">
                                         <Image 
                                             src={img.src} 
                                             alt={`preview-${index}`} 
-                                            width={200}
-                                            height={200}
-                                            className="w-full h-full object-contain" 
+                                            fill 
+                                            className={cn(
+                                                "object-contain transition-all duration-300",
+                                                img.vAlign === 'top' ? 'object-top' : img.vAlign === 'bottom' ? 'object-bottom' : 'object-center'
+                                            )} 
                                             unoptimized 
                                         />
                                     </div>
@@ -432,7 +430,7 @@ export default function ImageToPdfConverter() {
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignVerticalJustifyCenter className="size-3" /> Vertical Position
+                                    <AlignVerticalJustifyCenter className="size-3" /> Strict Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button 
