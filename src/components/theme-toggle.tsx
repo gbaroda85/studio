@@ -1,26 +1,49 @@
-
 "use client";
 
 import * as React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="h-9 w-16 bg-muted rounded-full" />;
+
+  const isDark = theme === 'dark';
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-10 w-10 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all shadow-sm group overflow-hidden"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    <button
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className={cn(
+        "relative inline-flex h-9 w-16 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        isDark ? "bg-slate-800" : "bg-slate-200"
+      )}
     >
-      <div className="relative h-6 w-6">
-        <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500 absolute inset-0" />
-        <Moon className="h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-primary absolute inset-0" />
-      </div>
       <span className="sr-only">Toggle theme</span>
-    </Button>
+      <div
+        className={cn(
+          "pointer-events-none flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-lg ring-0 transition-transform duration-300",
+          isDark ? "translate-x-7 bg-slate-950" : "translate-x-0"
+        )}
+      >
+        {isDark ? (
+          <Moon className="h-4 w-4 text-primary" />
+        ) : (
+          <Sun className="h-4 w-4 text-amber-500" />
+        )}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
+        <Sun className={cn("h-3.5 w-3.5 text-amber-500/40", isDark ? "opacity-100" : "opacity-0")} />
+        <Moon className={cn("h-3.5 w-3.5 text-primary/40", isDark ? "opacity-0" : "opacity-100")} />
+      </div>
+    </button>
   );
 }
+
+import { useEffect } from 'react';

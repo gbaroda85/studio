@@ -123,13 +123,11 @@ const CATEGORIES = [
   }
 ];
 
-// Custom component to replicate the provided GR7 logo image
 function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-10 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <svg viewBox="0 0 100 100" className="w-full h-full p-1">
-          {/* GR Text - Dark Teal */}
           <text 
             x="4" 
             y="70" 
@@ -142,7 +140,6 @@ function GR7Logo({ className }: { className?: string }) {
           >
             GR
           </text>
-          {/* 7 - Bright Red */}
           <text 
             x="62" 
             y="75" 
@@ -167,37 +164,57 @@ function GR7Logo({ className }: { className?: string }) {
 function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 150);
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
+          >
+            <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
+            <span className="hidden xl:inline">{t(category.name)}</span>
+            <ChevronDown className="size-3 opacity-50 group-hover:rotate-180 transition-transform" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
-          <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
-          <span className="hidden xl:inline">{t(category.name)}</span>
-          <ChevronDown className="size-3 opacity-50 group-hover:rotate-180 transition-transform" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900">
-        <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
-          {t(category.name)}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {category.tools.map((tool) => (
-          <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
-            <Link href={tool.href} className={cn(
-              "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors",
-              pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
-            )}>
-              <tool.icon className={cn("size-4", category.color)} />
-              <span className="font-bold text-xs">{t(tool.label)}</span>
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
+            {t(category.name)}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {category.tools.map((tool) => (
+            <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
+              <Link href={tool.href} className={cn(
+                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors",
+                pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
+              )}>
+                <tool.icon className={cn("size-4", category.color)} />
+                <span className="font-bold text-xs">{t(tool.label)}</span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
@@ -245,7 +262,6 @@ function MobileNav() {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)] p-6">
           <div className="space-y-8 pb-20">
-            {/* Added Home Link to Mobile Nav */}
             <div className="space-y-2">
               <Link
                 href="/"
@@ -297,14 +313,12 @@ function AppHeader() {
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
-        {/* Left Side: Mobile Menu + Logo + Home Button */}
         <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center group mr-2">
               <GR7Logo />
             </Link>
             
-            {/* Home button moved to Left side for Desktop */}
             <Button 
               asChild
               variant="ghost" 
@@ -320,7 +334,6 @@ function AppHeader() {
             </Button>
         </div>
 
-        {/* Right Side: Tools Nav + Support + Settings + Theme Toggle */}
         <div className="flex items-center gap-1 sm:gap-3">
             <nav className="hidden lg:flex items-center gap-1 mr-2">
                 {CATEGORIES.map((cat) => (
