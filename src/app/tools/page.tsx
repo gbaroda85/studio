@@ -47,6 +47,7 @@ import {
   FileScan,
   PenLine,
   LayoutGrid,
+  UserCircle,
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -76,6 +77,13 @@ function ToolsPageContent() {
       descriptionKey: 'resize_image_description',
       icon: Maximize,
       color: 'text-fuchsia-500',
+    },
+    {
+      href: '/passport-photo',
+      labelKey: 'passport_photo_label',
+      descriptionKey: 'passport_photo_description',
+      icon: UserCircle,
+      color: 'text-emerald-500',
     },
     {
       href: '/crop-image',

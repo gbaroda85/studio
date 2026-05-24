@@ -41,6 +41,7 @@ import {
   Languages,
   Zap,
   Home,
+  UserCircle,
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -64,7 +65,7 @@ import {
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
 
-// Tool categories for the mega menu (Removed Vault Protect)
+// Tool categories for the mega menu
 const CATEGORIES = [
   {
     name: "image_tools",
@@ -73,6 +74,7 @@ const CATEGORIES = [
     tools: [
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
       { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
+      { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
       { href: '/crop-image', label: 'crop_image_label', icon: Crop },
       { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
       { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
