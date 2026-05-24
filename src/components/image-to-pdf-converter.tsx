@@ -4,6 +4,7 @@ import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallb
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
+import * as pdfjs from 'pdfjs-dist';
 import { 
   UploadCloud, 
   Download, 
@@ -33,6 +34,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// Initialize PDF.js worker
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
+
 type VAlign = 'top' | 'center' | 'bottom';
 type FitMode = 'fit' | 'original';
 
@@ -49,8 +55,10 @@ export default function ImageToPdfConverter() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +74,7 @@ export default function ImageToPdfConverter() {
     if (convertedPdfUrl) {
         URL.revokeObjectURL(convertedPdfUrl);
         setConvertedPdfUrl(null);
+        setPreviewImages([]);
     }
     const newFilesList = Array.from(files || []).filter(file => file.type.startsWith('image/'));
     if (newFilesList.length === 0 && files && files.length > 0) {
@@ -109,6 +118,7 @@ export default function ImageToPdfConverter() {
     if (convertedPdfUrl) {
         URL.revokeObjectURL(convertedPdfUrl);
         setConvertedPdfUrl(null);
+        setPreviewImages([]);
     }
     setImages(prev => {
         const filtered = prev.filter(img => img.id !== id);
@@ -122,6 +132,7 @@ export default function ImageToPdfConverter() {
     setSelectedId(null);
     if (convertedPdfUrl) URL.revokeObjectURL(convertedPdfUrl);
     setConvertedPdfUrl(null);
+    setPreviewImages([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -131,6 +142,7 @@ export default function ImageToPdfConverter() {
       if (convertedPdfUrl) {
           URL.revokeObjectURL(convertedPdfUrl);
           setConvertedPdfUrl(null);
+          setPreviewImages([]);
       }
   };
 
@@ -141,10 +153,42 @@ export default function ImageToPdfConverter() {
       toast({ title: "Settings Applied", description: "Layout copied to all images in the queue." });
   };
 
+  const generateVisualPreviews = async (pdfBlob: Blob) => {
+    setIsGeneratingPreview(true);
+    try {
+        const arrayBuffer = await pdfBlob.arrayBuffer();
+        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+        const pdf = await loadingTask.promise;
+        const imgs: string[] = [];
+        const pagesToRender = Math.min(pdf.numPages, 10); // Render first 10 for performance
+
+        for (let i = 1; i <= pagesToRender; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.0 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            if (context) {
+                context.fillStyle = '#FFFFFF';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                await page.render({ canvasContext: context, viewport }).promise;
+                imgs.push(canvas.toDataURL('image/jpeg', 0.8));
+            }
+        }
+        setPreviewImages(imgs);
+    } catch (e) {
+        console.error("Preview generation failed", e);
+    } finally {
+        setIsGeneratingPreview(false);
+    }
+  };
+
   const handleConvertToPdf = async () => {
     if (images.length === 0) return;
     setIsConverting(true);
     setConvertedPdfUrl(null);
+    setPreviewImages([]);
 
     const pdf = new jsPDF({
         orientation: 'p',
@@ -206,7 +250,12 @@ export default function ImageToPdfConverter() {
     }
 
     const pdfBlob = pdf.output('blob');
-    setConvertedPdfUrl(URL.createObjectURL(pdfBlob));
+    const url = URL.createObjectURL(pdfBlob);
+    setConvertedPdfUrl(url);
+    
+    // Generate visual previews for a perfect mobile experience
+    await generateVisualPreviews(pdfBlob);
+
     setIsConverting(false);
     toast({ title: "PDF Created!", description: "High-quality document is ready for download." });
   };
@@ -260,7 +309,7 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "bg-white hover:border-primary/30"
                                 )}
                             >
-                                <Image src={img.src} alt={`preview-${index}`} fill className="object-contain p-2" />
+                                <Image src={img.src} alt={`preview-${index}`} fill className="object-contain p-2" unoptimized />
                                 
                                 {selectedId === img.id && (
                                     <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
@@ -302,11 +351,30 @@ export default function ImageToPdfConverter() {
                 <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
                     <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
                         <CardTitle className="text-sm font-black uppercase flex items-center gap-2 text-green-700">
-                            <Eye className="size-4" /> Final Document Preview
+                            <Eye className="size-4" /> Visual Preview (Top 10 Pages)
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 bg-white">
-                        <iframe src={convertedPdfUrl} className="w-full h-[550px]" title="PDF Preview" />
+                    <CardContent className="p-0 bg-muted/20">
+                        <ScrollArea className="h-[550px] w-full p-8">
+                            <div className="flex flex-col items-center gap-8">
+                                {isGeneratingPreview ? (
+                                    <div className="flex flex-col items-center gap-4 py-20">
+                                        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
+                                        <p className="text-[10px] font-black uppercase text-primary animate-pulse">Rendering Document Preview...</p>
+                                    </div>
+                                ) : (
+                                    previewImages.map((img, i) => (
+                                        <div key={i} className="shadow-2xl border-4 border-white rounded-sm overflow-hidden bg-white max-w-full">
+                                            <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto" />
+                                            <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">Page {i+1}</div>
+                                        </div>
+                                    ))
+                                )}
+                                {previewImages.length >= 10 && !isGeneratingPreview && (
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase py-4">... Previewing first 10 pages ...</p>
+                                )}
+                            </div>
+                        </ScrollArea>
                     </CardContent>
                     <CardFooter className="bg-green-500/10 p-8 flex flex-col sm:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-4 text-center sm:text-left">
