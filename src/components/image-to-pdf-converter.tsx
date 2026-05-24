@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
@@ -217,8 +218,8 @@ export default function ImageToPdfConverter() {
                 if (imgData.fitMode === 'fit') {
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    // Provide a bit of vertical wiggle room for alignment visibility
-                    const ratio = Math.min(widthRatio, heightRatio * 0.95);
+                    // Reduced ratio to 0.85 to ensure alignment is clearly visible on the A4 page
+                    const ratio = Math.min(widthRatio, heightRatio * 0.85);
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -308,10 +309,10 @@ export default function ImageToPdfConverter() {
                                 )}
                             >
                                 <div className={cn(
-                                    "flex-1 relative flex items-center justify-center p-2",
-                                    img.vAlign === 'top' ? 'items-start' : img.vAlign === 'bottom' ? 'items-end' : 'items-center'
+                                    "flex-1 relative flex flex-col p-2",
+                                    img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <div className="relative w-full h-full">
+                                    <div className="relative w-full h-[85%]">
                                         <Image 
                                             src={img.src} 
                                             alt={`preview-${index}`} 
@@ -463,7 +464,7 @@ export default function ImageToPdfConverter() {
                                     </Button>
                                 </div>
                                 <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                    Note: Portrait photos may fill the full height in "Fit" mode, leaving no room for vertical move.
+                                    Tip: In "Fit Page" mode, we reduced the image size to 85% to make Top/Bottom alignment clearly visible.
                                 </p>
                             </div>
 
@@ -520,3 +521,4 @@ export default function ImageToPdfConverter() {
     </div>
   );
 }
+

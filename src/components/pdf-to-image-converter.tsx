@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -76,6 +77,7 @@ export default function PdfToImageConverter() {
 
                 // For PDF to Image, "Original" mode means placing the page content on a standard A4 canvas ratio
                 if (fitMode === 'original') {
+                    // Use standard A4 aspect ratio (1:1.414)
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -91,8 +93,26 @@ export default function PdfToImageConverter() {
                     ctx.drawImage(img, 0, dy);
                     resolve(canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0));
                 } else {
-                    // "Exact Rip" mode just takes the page pixels as is
-                    resolve(originalSrc);
+                    // "Page Only" mode just takes the page pixels as is. 
+                    // To show alignment in "Fit" mode, we add small padding if alignment is not center
+                    if (vAlign !== 'center') {
+                        const targetW = img.width;
+                        const targetH = Math.round(img.height * 1.15); // Add 15% height padding
+                        canvas.width = targetW;
+                        canvas.height = targetH;
+                        
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        let dy = (canvas.height - img.height) / 2;
+                        if (vAlign === 'top') dy = 0;
+                        else if (vAlign === 'bottom') dy = canvas.height - img.height;
+                        
+                        ctx.drawImage(img, 0, dy);
+                        resolve(canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0));
+                    } else {
+                        resolve(originalSrc);
+                    }
                 }
             };
         });
@@ -288,12 +308,9 @@ export default function PdfToImageConverter() {
                                                     "group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl bg-white" : "bg-white hover:border-primary/30"
                                                 )}>
-                                                <div className={cn(
-                                                    "flex-1 relative flex flex-col justify-center",
-                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                                )}>
-                                                    <div className="relative w-full h-full">
-                                                        <Image src={p.finalSrc} alt={`page-${p.index}`} fill className="object-contain p-2" unoptimized />
+                                                <div className="flex-1 relative flex flex-col justify-center bg-muted/5">
+                                                    <div className="relative w-full h-full p-2">
+                                                        <Image src={p.finalSrc} alt={`page-${p.index}`} fill className="object-contain" unoptimized />
                                                     </div>
                                                 </div>
                                                 
@@ -312,6 +329,7 @@ export default function PdfToImageConverter() {
                                                         <Download className="size-4" />
                                                     </Button>
                                                 </div>
+                                                <div className="bg-muted/30 text-[7px] font-black py-0.5 text-center uppercase tracking-widest text-muted-foreground border-t">{p.vAlign}</div>
                                             </div>
                                         ))}
                                     </div>
@@ -348,16 +366,16 @@ export default function PdfToImageConverter() {
                                         </Label>
                                         <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
                                             <TabsList className="grid grid-cols-2 h-12 bg-muted p-1 rounded-xl">
-                                                <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Exact Rip</TabsTrigger>
+                                                <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Page Only</TabsTrigger>
                                                 <TabsTrigger value="original" className="font-bold text-[10px] uppercase">A4 Canvas</TabsTrigger>
                                             </TabsList>
                                         </Tabs>
                                         <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                            "A4 Canvas" creates a standard document ratio, allowing you to use alignment features.
+                                            "A4 Canvas" adds padding to create a standard document ratio, perfect for consistent layouts.
                                         </p>
                                     </div>
 
-                                    <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-opacity", selectedPage?.fitMode === 'fit' && "opacity-30 pointer-events-none")}>
+                                    <div className="space-y-4 pt-4 border-t-2 border-dashed transition-opacity">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                             <AlignVerticalJustifyCenter className="size-3" /> Vertical Position
                                         </Label>
@@ -397,7 +415,7 @@ export default function PdfToImageConverter() {
                             <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-1">PRO EXTRACTION:</span>
+                                    <span className="font-black uppercase block mb-1 text-primary">PRO EXTRACTION:</span>
                                     Pages are rendered at high-density (300 DPI) for perfect text clarity and professional use.
                                 </p>
                             </div>
