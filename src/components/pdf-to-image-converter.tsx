@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -73,7 +74,7 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // A4 standard ratio
+                    // Standard A4 Ratio Coordinate System
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -82,15 +83,16 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Render 90% scale to allow Top/Bottom visibility
+                    // Strict 90% scaling for visual alignment clarity
                     const scale = 0.9;
                     const dw = img.width * scale;
                     const dh = img.height * scale;
                     const dx = (canvas.width - dw) / 2;
                     
-                    let dy = (canvas.height - dh) / 2;
-                    if (vAlign === 'top') dy = 0;
-                    else if (vAlign === 'bottom') dy = canvas.height - dh;
+                    let dy;
+                    if (vAlign === 'top') dy = 0; // Literal Top Pixel
+                    else if (vAlign === 'bottom') dy = canvas.height - dh; // Literal Bottom Pixel
+                    else dy = (canvas.height - dh) / 2; // Mathematical Center
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
@@ -191,7 +193,7 @@ export default function PdfToImageConverter() {
         
         setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Strict Layout Sync", description: "Extreme extraction applied to all pages." });
+        toast({ title: "Strict Layout Sync", description: "Literal extraction applied to all pages." });
     };
 
     const handleDownloadSingle = (url: string, index: number) => {
@@ -294,22 +296,22 @@ export default function PdfToImageConverter() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
-                                                <div className={cn(
-                                                    "flex-1 relative flex flex-col bg-white overflow-hidden w-full h-full",
-                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                                )}>
-                                                    <div className="relative w-full h-[90%] flex items-center justify-center">
-                                                        <Image 
-                                                            src={p.finalSrc} 
-                                                            alt={`page-${p.index}`} 
-                                                            fill 
-                                                            className={cn(
-                                                                "transition-all duration-300 pointer-events-none object-contain",
-                                                                p.vAlign === 'top' ? "object-top" : 
-                                                                p.vAlign === 'bottom' ? "object-bottom" : "object-center"
-                                                            )}
-                                                            unoptimized 
-                                                        />
+                                                <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
+                                                    <div className={cn(
+                                                        "absolute inset-0 flex flex-col p-0",
+                                                        p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                    )}>
+                                                        <div className="relative w-full h-[90%] flex flex-col">
+                                                            <img 
+                                                                src={p.finalSrc} 
+                                                                alt={`page-${p.index}`} 
+                                                                className={cn(
+                                                                    "w-full h-auto max-h-full transition-all duration-300 pointer-events-none object-contain",
+                                                                    p.vAlign === 'top' ? "mt-0" : 
+                                                                    p.vAlign === 'bottom' ? "mb-0" : ""
+                                                                )}
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 
@@ -406,7 +408,7 @@ export default function PdfToImageConverter() {
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                                     <span className="font-black uppercase block mb-1 text-primary">STRICT EXTRACTION:</span>
-                                    Pages are pushed to the literal border of the canvas. 0-pixel gap logic enabled.
+                                    Pages are pushed to the literal boundary of the canvas. 0-pixel gap logic enabled.
                                 </p>
                             </div>
                         </CardContent>

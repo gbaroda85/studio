@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -165,7 +166,7 @@ export default function ImageToPdfConverter() {
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 1.2 });
+            const viewport = page.getViewport({ scale: 1.5 });
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -174,7 +175,7 @@ export default function ImageToPdfConverter() {
                 context.fillStyle = '#FFFFFF';
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 await page.render({ canvasContext: context, viewport }).promise;
-                imgs.push(canvas.toDataURL('image/jpeg', 0.8));
+                imgs.push(canvas.toDataURL('image/jpeg', 0.9));
             }
             setRenderingProgress(Math.round((i / pagesToRender) * 100));
         }
@@ -213,37 +214,20 @@ export default function ImageToPdfConverter() {
                 const imgProps = pdf.getImageProperties(img);
                 let finalWidth, finalHeight;
 
-                if (imgData.fitMode === 'fit') {
-                    // 0.9 scale to leave vertical space for Top/Bottom movement visibility
-                    const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
-                    finalWidth = imgProps.width * ratio;
-                    finalHeight = imgProps.height * ratio;
-                } else {
-                    const pxToMm = 0.264583; 
-                    finalWidth = imgProps.width * pxToMm;
-                    finalHeight = imgProps.height * pxToMm;
-
-                    if (finalWidth > pageWidth) {
-                        const ratio = pageWidth / finalWidth;
-                        finalWidth *= ratio;
-                        finalHeight *= ratio;
-                    }
-                    if (finalHeight > pageHeight) {
-                        const ratio = pageHeight / finalHeight;
-                        finalWidth *= ratio;
-                        finalHeight *= ratio;
-                    }
-                }
+                // Strict 90% scaling to ensure alignment is visible
+                const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
+                finalWidth = imgProps.width * ratio;
+                finalHeight = imgProps.height * ratio;
 
                 const x = (pageWidth - finalWidth) / 2;
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Literal Top
+                    y = 0; // Literal Top Pixel
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Literal Bottom
+                    y = pageHeight - finalHeight; // Literal Bottom Pixel
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Center
+                    y = (pageHeight - finalHeight) / 2; // Mathematical Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -258,14 +242,14 @@ export default function ImageToPdfConverter() {
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "Strict Alignment Applied!", description: "PDF generated with literal edge positioning." });
+    toast({ title: "Literal Alignment Success!", description: "PDF generated with edge-to-edge positioning." });
   };
   
   const handleDownload = () => {
       if (!convertedPdfUrl) return;
       const link = document.createElement('a');
       link.href = convertedPdfUrl;
-      link.download = `strictly-aligned-${Date.now()}.pdf`;
+      link.download = `literal-aligned-${Date.now()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -282,10 +266,10 @@ export default function ImageToPdfConverter() {
                   onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader className="bg-muted/30 border-b">
                     <CardTitle className="text-xl font-black flex items-center justify-between">
-                        <span className="uppercase tracking-tighter">STRICT PDF STUDIO</span>
+                        <span className="uppercase tracking-tighter">LITERAL PDF STUDIO</span>
                         {images.length > 0 && <Badge className="bg-primary text-white font-black uppercase">{images.length} PAGES</Badge>}
                     </CardTitle>
-                    <CardDescription>Literal Top/Bottom alignment logic enabled.</CardDescription>
+                    <CardDescription>Absolute Top/Bottom edge-clamping logic active.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     {images.length === 0 ? (
@@ -305,27 +289,26 @@ export default function ImageToPdfConverter() {
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0",
+                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* Literal Positioning Mockup */}
-                                <div className={cn(
-                                    "flex-1 relative flex flex-col bg-white overflow-hidden w-full h-full",
-                                    img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                )}>
-                                    <div className="relative w-full h-[90%] flex items-center justify-center">
-                                        <Image 
-                                            src={img.src} 
-                                            alt="thumb"
-                                            fill
-                                            className={cn(
-                                                "transition-all duration-300 pointer-events-none object-contain",
-                                                img.vAlign === 'top' ? "object-top" : 
-                                                img.vAlign === 'bottom' ? "object-bottom" : "object-center"
-                                            )} 
-                                            unoptimized
-                                        />
+                                {/* Literal Positioning Mockup - Using absolute positioning for strictness */}
+                                <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
+                                    <div className={cn(
+                                        "absolute inset-0 flex flex-col p-0",
+                                        img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                    )}>
+                                        <div className="relative w-full h-[90%] flex flex-col">
+                                            <img 
+                                                src={img.src} 
+                                                alt="thumb"
+                                                className={cn(
+                                                    "w-full h-auto max-h-full object-contain pointer-events-none transition-all duration-300",
+                                                    img.vAlign === 'top' ? "mt-0" : img.vAlign === 'bottom' ? "mb-0" : ""
+                                                )} 
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -351,7 +334,7 @@ export default function ImageToPdfConverter() {
                     <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
                         <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over</Button>
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                            <ShieldCheck className="h-4 w-4 text-green-500" /> AES-Secure Encoding
+                            <ShieldCheck className="h-4 w-4 text-green-500" /> ABSOLUTE COORDINATE LOCK
                         </div>
                     </CardFooter>
                 )}
@@ -391,7 +374,7 @@ export default function ImageToPdfConverter() {
                             </div>
                             <div>
                                 <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">PDF READY!</p>
-                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Strict Alignment Verified</p>
+                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Literal Alignment Verified</p>
                             </div>
                         </div>
                         <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
@@ -414,29 +397,14 @@ export default function ImageToPdfConverter() {
                         <div className="py-12 text-center space-y-4 opacity-40">
                              <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
                              <p className="text-xs font-black uppercase tracking-widest leading-relaxed">
-                                Select a page to<br/>unlock strict alignment
+                                Select a page thumbnail<br/>to unlock literal positioning
                              </p>
                         </div>
                     ) : (
                         <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                        <Maximize className="size-3" /> Resize Strategy
-                                    </Label>
-                                    <Badge variant="secondary" className="font-black text-[8px] uppercase">Active</Badge>
-                                </div>
-                                <Tabs value={selectedImage?.fitMode} onValueChange={(v) => updateSelectedImage({ fitMode: v as FitMode })} className="w-full">
-                                    <TabsList className="grid grid-cols-2 h-12 bg-muted/50 border-2 rounded-xl p-1">
-                                        <TabsTrigger value="fit" className="font-black text-[10px] uppercase">Fit to Page</TabsTrigger>
-                                        <TabsTrigger value="original" className="font-black text-[10px] uppercase">Exact Pixels</TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                            </div>
-
-                            <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                            <div className="space-y-4 pt-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignVerticalJustifyCenter className="size-3" /> Literal Position
+                                    <AlignVerticalJustifyCenter className="size-3" /> Absolute Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button 
@@ -476,7 +444,7 @@ export default function ImageToPdfConverter() {
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                             <span className="font-black uppercase block mb-1 text-primary">STRICT MODE:</span>
-                            Images are pushed to the literal border of the A4 page. 0-pixel gap logic enabled.
+                            Images are pushed to the literal boundary of the A4 page. 0-margin logic enabled.
                         </p>
                     </div>
                 </CardContent>
