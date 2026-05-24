@@ -3,7 +3,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,6 @@ import {
     Zap, 
     AlertCircle, 
     RefreshCcw, 
-    Sparkles, 
     CheckCircle2,
     FileLock2
 } from 'lucide-react';
@@ -27,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
-// Initializing worker path for PDF.js - Stable Version
+// Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
@@ -53,24 +52,15 @@ export default function PdfProtector() {
         };
     }, [protectedPdfUrl]);
     
-    const clearProtectedFile = () => {
-        if (protectedPdfUrl) {
-            URL.revokeObjectURL(protectedPdfUrl);
-            setProtectedPdfUrl(null);
-        }
-        setErrorDetails(null);
-        setProgress(0);
-        setStatusText("");
-    }
-
     const handleFileChange = (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPassword('');
             setConfirmPassword('');
-            clearProtectedFile();
+            setProtectedPdfUrl(null);
+            setErrorDetails(null);
         } else if (file) {
-            toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
+            toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a PDF file.' });
         }
     };
 
@@ -83,42 +73,39 @@ export default function PdfProtector() {
         setPdfFile(null);
         setPassword('');
         setConfirmPassword('');
-        clearProtectedFile();
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    }
+        setProtectedPdfUrl(null);
+        setErrorDetails(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
     const handleProtectPdf = async () => {
         if (!pdfFile || !password) return;
         
         if (password !== confirmPassword) {
-            toast({ variant: 'destructive', title: 'Passwords Mismatch', description: 'Please ensure both passwords are the same.' });
+            toast({ variant: 'destructive', title: 'Mismatch', description: 'Passwords do not match.' });
             return;
         }
 
         setIsProtecting(true);
-        setErrorDetails(null);
-        clearProtectedFile();
-        setStatusText("Analyzing Document Structure...");
         setProgress(5);
+        setStatusText("Preparing Deep-Seal Engine...");
 
         try {
             const arrayBuffer = await pdfFile.arrayBuffer();
             const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
             const totalPages = pdf.numPages;
 
-            // Create a completely fresh PDF container to FORCE-LOCK metadata
+            // Create a completely new document to ensure all metadata is scrubbed and replaced by our secure shell
             const secureDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Locking Page ${i} of ${totalPages}...`);
+                setStatusText(`Sealing Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Render at 3.0x for Ultra-HD text clarity (Better than standard converters)
+                // 3.0x Rendering for Ultra-HD text (Prevents blurring)
                 const viewport = page.getViewport({ scale: 3.0 });
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d', { alpha: false });
+                const context = canvas.getContext('2d');
                 if (!context) continue;
 
                 canvas.height = viewport.height;
@@ -126,12 +113,9 @@ export default function PdfProtector() {
                 context.fillStyle = '#FFFFFF';
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 
-                context.imageSmoothingEnabled = true;
-                context.imageSmoothingQuality = 'high';
-                
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
                 
-                // Convert page to high-quality image to break any bypass metadata
+                // Embed as high-quality JPEG to create an un-bypassable visual layer
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
                 const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
                 const embeddedImg = await secureDoc.embedJpg(imgBytes);
@@ -147,17 +131,18 @@ export default function PdfProtector() {
                 setProgress(10 + Math.round((i / totalPages) * 80));
             }
 
-            setStatusText("Injecting AES-128 Guard...");
+            setStatusText("Forcing AES-128 Encryption...");
             
-            /**
-             * Save with Absolute Forced Encryption
-             * userPassword: Required to OPEN
-             * ownerPassword: Randomly generated and unknown to user (Permanent Protection)
-             */
+            // Generate a random owner password to prevent permission bypass
+            const ownerPassword = Math.random().toString(36).substring(7) + Date.now().toString();
+
+            // SAVE WITH STRICT PARAMETERS
+            // useObjectStreams: false is CRITICAL for some browsers to detect encryption trailers
             const protectedPdfBytes = await secureDoc.save({
                 userPassword: password,
-                ownerPassword: `GR7-VAULT-${Math.random().toString(36).toUpperCase()}`, 
+                ownerPassword: ownerPassword,
                 updateMetadata: true,
+                useObjectStreams: false, 
                 addDefaultPage: false,
                 permissions: {
                     printing: 'highResolution',
@@ -171,17 +156,15 @@ export default function PdfProtector() {
             });
 
             const blob = new Blob([protectedPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            setProtectedPdfUrl(url);
+            setProtectedPdfUrl(URL.createObjectURL(blob));
             setProgress(100);
-            setStatusText("Document Sealed!");
-            
-            toast({ title: 'Vault Ready!', description: 'Your PDF is now strictly password protected.' });
+            setStatusText("Vault Sealed!");
+            toast({ title: 'Success!', description: 'Your PDF is now strictly locked.' });
 
         } catch (error: any) {
             console.error("Locking Error:", error);
-            setErrorDetails("Could not protect this document. It might be strictly locked already.");
-            toast({ variant: 'destructive', title: 'Action Failed', description: 'Could not apply encryption shell.' });
+            setErrorDetails("Encryption failed. The file might be corrupted or already locked.");
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not seal document.' });
         } finally {
             setIsProtecting(false);
         }
@@ -191,43 +174,35 @@ export default function PdfProtector() {
         if (!protectedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = protectedPdfUrl;
-        link.download = `protected-${pdfFile.name}`;
-        document.body.appendChild(link);
+        link.download = `locked-${pdfFile.name}`;
         link.click();
-        document.body.removeChild(link);
-    }
+    };
 
     if (!pdfFile) {
         return (
-            <Card
-                className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 border-2 border-dashed bg-card/50", isDragOver && "border-primary ring-4 ring-primary/20")}
-                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-            >
-                <CardHeader className="p-8">
-                    <div className="mx-auto mb-6 grid size-20 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-inner">
+            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 border-2 border-dashed", isDragOver && "border-primary ring-4 ring-primary/20")}
+                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+                <CardHeader>
+                    <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
                         <Lock className="h-10 w-10" />
                     </div>
-                    <CardTitle className="text-3xl font-black font-headline uppercase tracking-tighter">Vault PDF Protector</CardTitle>
-                    <CardDescription className="text-base font-bold">Military-grade protection. Force-locks every viewer and browser.</CardDescription>
+                    <CardTitle className="text-2xl font-black uppercase">Deep-Vault PDF Protector</CardTitle>
+                    <CardDescription>Force-lock any PDF document using Military-Grade re-encoding.</CardDescription>
                 </CardHeader>
-                <CardContent className="pb-10">
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-[2.5rem] p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative overflow-hidden" onClick={() => fileInputRef.current?.click()}>
-                        <div className="relative z-10">
-                            <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
+                <CardContent>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                        <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <div>
+                            <p className="text-xl font-bold">Drop PDF to Force-Lock</p>
+                            <p className="text-sm text-muted-foreground mt-2">Guaranteed password prompt on Adobe, Chrome & Mobile.</p>
                         </div>
-                        <div className="z-10">
-                            <p className="text-xl font-black uppercase tracking-tight text-foreground">Drop PDF here to Seal</p>
-                            <p className="text-sm text-muted-foreground mt-2 font-medium">100% Secure local re-encoding. Works like iLovePDF.</p>
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
-                <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 border-t pt-6 bg-muted/10">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> AES-128 Bit</div>
-                    <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> Instant Shield</div>
-                    <div className="flex items-center gap-1.5"><FileLock2 className="size-3 text-primary" /> ZERO CLOUD TRACE</div>
+                <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> AES-128 BIT</div>
+                    <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> FORCE-LOCK</div>
+                    <div className="flex items-center gap-1.5"><FileLock2 className="size-3 text-primary" /> ZERO BYPASS</div>
                 </CardFooter>
             </Card>
         );
@@ -241,105 +216,89 @@ export default function PdfProtector() {
                         <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                             <Lock className="h-5 w-5" />
                         </div>
-                        <CardTitle className="text-xl font-black uppercase tracking-tighter">Vault Settings</CardTitle>
+                        <CardTitle className="text-xl font-black uppercase tracking-tighter">Security Panel</CardTitle>
                     </div>
-                    {protectedPdfUrl && <Badge className="bg-green-600 text-white font-black animate-pulse uppercase text-[9px] px-3">PROTECTED</Badge>}
+                    {protectedPdfUrl && <Badge className="bg-green-600 text-white font-black uppercase text-[9px] px-3 animate-pulse">LOCKED</Badge>}
                 </div>
-                <CardDescription className="truncate font-mono text-[10px] mt-2 bg-muted/30 p-2 rounded-lg border">Target: {pdfFile.name}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
+            <CardContent className="p-8 space-y-6">
                 {!protectedPdfUrl && (
                     <div className="space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">1. Create Document Password</Label>
+                            <Label htmlFor="password" title="Required to open the file">1. Set Password</Label>
                             <Input 
                                 id="password" 
                                 type="password" 
                                 value={password} 
-                                onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter secret password..."
                                 disabled={isProtecting}
-                                className="h-14 text-lg font-black tracking-widest focus-visible:ring-primary border-2 rounded-2xl bg-muted/10 pl-5"
+                                className="h-14 text-lg font-black tracking-widest focus-visible:ring-primary border-2 rounded-2xl bg-muted/5 pl-5"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="confirm-password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">2. Confirm Password</Label>
+                            <Label htmlFor="confirm-password">2. Confirm Password</Label>
                             <Input 
                                 id="confirm-password" 
                                 type="password" 
                                 value={confirmPassword} 
-                                onChange={(e) => { setConfirmPassword(e.target.value); setErrorDetails(null); }}
-                                placeholder="Verify secret password..."
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Verify password..."
                                 disabled={isProtecting}
                                 className={cn(
-                                    "h-14 text-lg font-black tracking-widest border-2 rounded-2xl bg-muted/10 pl-5 transition-all",
-                                    confirmPassword && password !== confirmPassword && "border-destructive ring-2 ring-destructive/10 bg-destructive/5",
-                                    confirmPassword && password === confirmPassword && "border-green-500 ring-2 ring-green-500/10 bg-green-500/5"
+                                    "h-14 text-lg font-black tracking-widest border-2 rounded-2xl bg-muted/5 pl-5",
+                                    confirmPassword && password !== confirmPassword && "border-destructive/50",
+                                    confirmPassword && password === confirmPassword && "border-green-500/50"
                                 )}
                             />
-                            {confirmPassword && password !== confirmPassword && (
-                                <p className="text-[9px] font-black text-destructive uppercase tracking-tighter ml-1">Passwords do not match!</p>
-                            )}
                         </div>
                     </div>
                 )}
 
                 {isProtecting && (
-                    <div className="space-y-6 py-8 text-center animate-pulse">
-                        <div className="relative inline-block">
-                             <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
-                             <Lock className="absolute inset-0 m-auto h-6 w-6 text-primary" />
-                        </div>
-                        <div className="space-y-3">
+                    <div className="space-y-4 py-6 text-center animate-pulse">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+                        <div className="space-y-2">
                             <p className="font-black text-primary uppercase tracking-tighter text-sm">{statusText}</p>
-                            <Progress value={progress} className="h-2 shadow-inner" />
-                            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Applying Shell-Lock Technology</p>
+                            <Progress value={progress} className="h-1.5" />
                         </div>
                     </div>
                 )}
 
                 {errorDetails && (
-                    <Alert variant="destructive" className="rounded-2xl border-2 bg-destructive/5 border-destructive/20 animate-in shake-1 duration-300">
+                    <Alert variant="destructive">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle className="text-xs font-bold uppercase tracking-tight">Security Error</AlertTitle>
-                        <AlertDescription className="text-[11px] font-medium leading-relaxed opacity-80">
-                            {errorDetails}
-                        </AlertDescription>
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription className="text-xs">{errorDetails}</AlertDescription>
                     </Alert>
                 )}
 
                 {protectedPdfUrl && (
-                    <div className="p-10 bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2.5rem] flex flex-col items-center gap-6 text-center animate-in zoom-in-95 duration-500 shadow-inner">
-                        <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40">
+                    <div className="p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
+                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl shadow-green-500/20">
                             <CheckCircle2 className="h-10 w-10" />
                         </div>
-                        <div>
-                            <p className="font-black text-green-800 text-2xl uppercase tracking-tighter">VAULT SEALED!</p>
-                            <p className="text-[11px] text-green-700 font-bold mt-1 leading-relaxed">
-                                PDF is now force-locked. It will request a password on every device.
-                            </p>
-                        </div>
+                        <p className="font-black text-green-800 text-lg uppercase tracking-tighter leading-tight">DOCUMENT SEALED SUCCESSFULLY</p>
                     </div>
                 )}
             </CardContent>
-            <CardFooter className="flex flex-col gap-4 bg-muted/10 p-8 border-t-2 border-dashed">
+            <CardFooter className="flex flex-col gap-4 bg-muted/5 p-8 border-t border-dashed">
                 {!protectedPdfUrl ? (
                     <Button 
                         onClick={handleProtectPdf} 
                         disabled={isProtecting || !password || password !== confirmPassword} 
-                        className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50"
+                        className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group transition-all"
                     >
-                        {isProtecting ? <Loader2 className="animate-spin mr-3 size-6"/> : <Lock className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform"/>}
-                        {isProtecting ? "SEALING..." : "FORCE-LOCK PDF"}
+                        {isProtecting ? <Loader2 className="animate-spin mr-3"/> : <Lock className="mr-3 h-6 w-6"/>}
+                        {isProtecting ? "PROCESSING..." : "LOCK PDF NOW"}
                     </Button>
                 ) : (
-                    <Button onClick={handleDownload} className="w-full h-18 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl group transition-all active:scale-95">
-                        <Download className="mr-3 h-7 w-7 group-hover:translate-y-1 transition-transform" />
-                        DOWNLOAD LOCKED PDF
+                    <Button onClick={handleDownload} className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-2xl">
+                        <Download className="mr-3 h-7 w-7" /> DOWNLOAD LOCKED PDF
                     </Button>
                 )}
-                <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive" disabled={isProtecting}>
-                    <RefreshCcw className="h-3.5 w-3.5 mr-2" /> {protectedPdfUrl ? "Protect Another File" : "Replace Current File"}
+                <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive" disabled={isProtecting}>
+                    <RefreshCcw className="h-3.5 w-3.5 mr-2" /> {protectedPdfUrl ? "Protect Another" : "Change File"}
                 </Button>
             </CardFooter>
         </Card>

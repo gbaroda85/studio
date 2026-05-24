@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -153,7 +154,7 @@ export default function HtmlToPdfConverter() {
             <div className="grid lg:grid-cols-12 gap-8 items-stretch">
                 {/* Editor & Upload Section */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1">
+                    <Card className="flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -211,7 +212,7 @@ export default function HtmlToPdfConverter() {
                 </div>
 
                 {/* PDF Live Result */}
-                <Card className="lg:col-span-7 flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900">
+                <Card className="lg:col-span-7 flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900">
                     <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
