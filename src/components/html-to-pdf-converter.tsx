@@ -16,7 +16,7 @@ const initialHtml = `<!DOCTYPE html>
 <head>
     <title>Professional Layout</title>
     <style>
-        body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; line-height: 1.5; }
+        body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; line-height: 1.5; background: white; }
         .card { background: #f9f9f9; border-radius: 20px; padding: 30px; border: 2px solid #eee; margin-bottom: 20px; }
         h1 { color: #6366f1; font-size: 32px; margin-bottom: 10px; border-bottom: 3px solid #6366f1; display: inline-block; padding-bottom: 5px; }
         p { font-size: 16px; margin: 10px 0; }
@@ -43,29 +43,31 @@ export default function HtmlToPdfConverter() {
     const { toast } = useToast();
     const [htmlContent, setHtmlContent] = useState<string>(initialHtml);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
     const previewRef = useRef<HTMLDivElement>(null);
 
     const generatePdf = useCallback(async () => {
         if (!htmlContent.trim() || !previewRef.current) {
-            setPdfUrl(null);
+            setPreviewImage(null);
+            setPdfBlob(null);
             return;
         }
 
         setIsGenerating(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 100));
-
+            // High-DPI Capture for sharp text
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
                 backgroundColor: '#FFFFFF',
-                width: previewRef.current.scrollWidth,
-                height: previewRef.current.scrollHeight,
+                width: 800, // Fixed width for consistent doc feel
             });
             
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            setPreviewImage(imgData); // Show image instead of iframe for mobile compatibility
+
             const pdf = new jsPDF({
                 orientation: canvas.width > canvas.height ? 'l' : 'p',
                 unit: 'px',
@@ -73,11 +75,7 @@ export default function HtmlToPdfConverter() {
             });
 
             pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
-            
-            const pdfBlob = pdf.output('blob');
-            if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-            const url = URL.createObjectURL(pdfBlob);
-            setPdfUrl(url);
+            setPdfBlob(pdf.output('blob'));
         } catch (error) {
             console.error("Live HTML preview error:", error);
         } finally {
@@ -93,18 +91,16 @@ export default function HtmlToPdfConverter() {
         return () => clearTimeout(timer);
     }, [htmlContent, generatePdf]);
 
-    useEffect(() => {
-        return () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); };
-    }, [pdfUrl]);
-
     const handleDownload = () => {
-        if (!pdfUrl) return;
+        if (!pdfBlob) return;
+        const url = URL.createObjectURL(pdfBlob);
         const link = document.createElement('a');
-        link.href = pdfUrl;
+        link.href = url;
         link.download = 'web-document.pdf';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         toast({ title: 'Success', description: 'Professional PDF downloaded.' });
     };
     
@@ -141,7 +137,7 @@ export default function HtmlToPdfConverter() {
                             value={htmlContent}
                             onChange={(e) => setHtmlContent(e.target.value)}
                             placeholder="Enter <html> here..."
-                            className="flex-1 min-h-[450px] font-mono text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-2xl p-6 bg-slate-900 text-slate-100 selection:bg-primary/30"
+                            className="flex-1 min-h-[350px] font-mono text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-2xl p-6 bg-slate-900 text-slate-100 selection:bg-primary/30"
                         />
                         <div className="p-4 bg-muted/20 rounded-xl border-2 border-dashed flex gap-3 items-center">
                             <Zap className="size-4 text-yellow-500 shrink-0" />
@@ -161,15 +157,17 @@ export default function HtmlToPdfConverter() {
                         </div>
                         <Badge className="bg-green-600 text-white font-black text-[9px] uppercase tracking-widest px-3">Live Result</Badge>
                     </CardHeader>
-                    <CardContent className="flex-1 p-0 relative min-h-[500px] flex flex-col bg-white">
-                       {pdfUrl ? (
-                            <iframe
-                                src={pdfUrl}
-                                className="w-full h-full border-0"
-                                title="HTML to PDF Live Preview"
-                            />
+                    <CardContent className="flex-1 p-8 relative min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[700px]">
+                       {previewImage ? (
+                            <div className="relative w-full shadow-2xl border-4 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
+                                <img
+                                    src={previewImage}
+                                    alt="Live PDF Preview"
+                                    className="w-full h-auto block"
+                                />
+                            </div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-4 bg-slate-50 dark:bg-slate-900/50">
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-4">
                                 <div className="relative">
                                     <Loader2 className="size-16 text-primary/10 animate-spin stroke-[4]" />
                                     <Globe className="absolute inset-0 m-auto size-6 text-primary/20" />
@@ -184,7 +182,7 @@ export default function HtmlToPdfConverter() {
                     <CardFooter className="p-8 bg-white dark:bg-slate-950 border-t flex flex-col gap-4">
                         <Button 
                             onClick={handleDownload} 
-                            disabled={!pdfUrl || isGenerating} 
+                            disabled={!pdfBlob || isGenerating} 
                             className="w-full h-16 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group active:scale-95 transition-all"
                         >
                             <Download className="mr-3 h-7 w-7 group-hover:translate-y-1 transition-transform" />

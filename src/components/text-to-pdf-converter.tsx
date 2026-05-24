@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck } from 'lucide-react';
+import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck, Zap } from 'lucide-react';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Badge } from './ui/badge';
 
 type Font = 'helvetica' | 'times' | 'courier';
@@ -21,16 +22,31 @@ export default function TextToPdfConverter() {
     const [font, setFont] = useState<Font>('helvetica');
     const [margin, setMargin] = useState(20);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+    const previewRef = useRef<HTMLDivElement>(null);
 
     const generatePdf = useCallback(async () => {
-        if (!text.trim()) {
-            setPdfUrl(null);
+        if (!text.trim() || !previewRef.current) {
+            setPreviewImage(null);
+            setPdfBlob(null);
             return;
         }
 
         setIsGenerating(true);
         try {
+            // 1. Capture the styled HTML preview for mobile compatibility
+            const canvas = await html2canvas(previewRef.current, {
+                scale: 2,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                width: 595, // A4 width in pixels at standard scale
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.92);
+            setPreviewImage(imgData);
+
+            // 2. Generate actual PDF for download
             const doc = new jsPDF({
                 orientation: "p",
                 unit: "mm",
@@ -46,21 +62,18 @@ export default function TextToPdfConverter() {
             const maxLineWidth = pageWidth - marginSize * 2;
             
             const lines = doc.splitTextToSize(text, maxLineWidth);
-            let cursorY = marginSize;
+            let cursorY = marginSize + (fontSize * 0.3);
             
             lines.forEach((line: string) => {
                 if (cursorY + (fontSize * 0.35) > pageHeight - marginSize) {
                     doc.addPage();
-                    cursorY = marginSize;
+                    cursorY = marginSize + (fontSize * 0.3);
                 }
                 doc.text(line, marginSize, cursorY);
                 cursorY += (fontSize * 0.5); 
             });
             
-            const pdfBlob = doc.output('blob');
-            if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-            const url = URL.createObjectURL(pdfBlob);
-            setPdfUrl(url);
+            setPdfBlob(doc.output('blob'));
         } catch (error) {
             console.error("Live preview error:", error);
         } finally {
@@ -76,23 +89,38 @@ export default function TextToPdfConverter() {
         return () => clearTimeout(timer);
     }, [text, fontSize, font, margin, generatePdf]);
 
-    useEffect(() => {
-        return () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); };
-    }, [pdfUrl]);
-    
     const handleDownload = () => {
-        if (!pdfUrl) return;
+        if (!pdfBlob) return;
+        const url = URL.createObjectURL(pdfBlob);
         const link = document.createElement('a');
-        link.href = pdfUrl;
+        link.href = url;
         link.download = 'document.pdf';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         toast({ title: 'Download Started', description: 'Your PDF is being saved.' });
     }
     
     return (
         <div className="w-full max-w-7xl flex flex-col gap-6 px-4 animate-in fade-in duration-500">
+            {/* Hidden Sandbox for Rendering Preview Image */}
+            <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
+                <div 
+                    ref={previewRef} 
+                    className="w-[595px] bg-white p-[20px] m-0 overflow-hidden text-left" 
+                    style={{ 
+                        fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
+                        fontSize: `${fontSize}px`,
+                        padding: `${margin}mm`,
+                        whiteSpace: 'pre-wrap',
+                        color: '#000'
+                    }}
+                >
+                    {text}
+                </div>
+            </div>
+
             <div className="grid lg:grid-cols-2 gap-8 items-stretch">
                 {/* Editor Section */}
                 <Card className="flex flex-col border-2 shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950">
@@ -143,7 +171,7 @@ export default function TextToPdfConverter() {
                 </Card>
 
                 {/* Live Preview Section */}
-                <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
+                <Card className="flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
                     <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
@@ -151,13 +179,15 @@ export default function TextToPdfConverter() {
                         </div>
                         <Badge variant="outline" className="text-[9px] font-black bg-white dark:bg-black uppercase border-primary/20">A4 Document</Badge>
                     </CardHeader>
-                    <CardContent className="flex-1 p-0 relative min-h-[450px] lg:min-h-[550px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner">
-                       {pdfUrl ? (
-                            <iframe
-                                src={pdfUrl}
-                                className="w-full h-full border-0"
-                                title="Live PDF Preview"
-                            />
+                    <CardContent className="flex-1 p-8 relative min-h-[450px] lg:min-h-[550px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[700px]">
+                       {previewImage ? (
+                            <div className="relative w-full shadow-2xl border-4 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
+                                <img
+                                    src={previewImage}
+                                    alt="Live PDF Preview"
+                                    className="w-full h-auto block"
+                                />
+                            </div>
                         ) : (
                             <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-4">
                                 <div className="size-16 rounded-full bg-white/50 flex items-center justify-center animate-pulse">
@@ -168,7 +198,7 @@ export default function TextToPdfConverter() {
                         )}
                     </CardContent>
                     <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
-                        <Button onClick={handleDownload} disabled={!pdfUrl} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95 transition-all">
+                        <Button onClick={handleDownload} disabled={!pdfBlob} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95 transition-all">
                             <Download className="mr-2 h-6 w-6 group-hover:translate-y-0.5 transition-transform" />
                             DOWNLOAD PDF FILE
                         </Button>
