@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import { ArrowLeft, FileCode, ShieldCheck, Zap, HelpCircle, Code2, Globe, Braces } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, Code2, Globe, Braces } from 'lucide-react';
 import HtmlToPdfConverter from '@/components/html-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function HtmlToPdfPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <HtmlToPdfConverter />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="HTML to PDF HD Converter" steps={[
                 "Editor: Paste your raw HTML and CSS code into the editor box.",
                 "Styles: Ensure all your CSS is included in <style> tags.",

@@ -1,9 +1,9 @@
+
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, UserCircle, Camera, ShieldCheck, Zap, HelpCircle, FileCheck, Printer, Maximize, Scissors } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize } from 'lucide-react';
 import PassportPhotoMaker from '@/components/passport-photo-maker';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -27,21 +27,14 @@ export default function PassportPhotoPage() {
   ];
 
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PassportPhotoMaker />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Professional Passport Maker" steps={steps} />
 
             {/* Deep Value Section */}
@@ -60,7 +53,7 @@ export default function PassportPhotoPage() {
                         <p className="text-xs text-muted-foreground leading-relaxed">Exact support for India Passport (35x45mm), USA Visa (2x2 inch), and Indian PAN Card requirements.</p>
                     </div>
                     <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
-                        <Camera className="text-emerald-500 size-10" />
+                        <FileCheck className="text-emerald-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest">AI Isolation</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Our local neural engine performs pixel-level edge detection to remove messy backgrounds instantly.</p>
                     </div>
@@ -68,21 +61,6 @@ export default function PassportPhotoPage() {
                         <Printer className="text-rose-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest">300 DPI Export</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Rendered at high resolution to ensure your physical prints look professional and sharp on photo paper.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Technical Detail Section */}
-            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                    <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileCheck className="size-12 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Why use Local AI?</h2>
-                        <p className="text-muted-foreground leading-relaxed">
-                            Most "Online Passport Makers" upload your private face photo to their servers. We don't. At <strong>GR7 Tools</strong>, the AI logic (WASM) and Image Processing happen entirely in your browser's temporary memory. Your personal ID data <strong>never leaves your device</strong>.
-                        </p>
                     </div>
                 </div>
             </section>
@@ -126,4 +104,3 @@ export default function PassportPhotoPage() {
     </main>
   );
 }
-

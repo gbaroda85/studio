@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Scissors, ShieldCheck, Zap, HelpCircle, Scaling, MousePointer2, FileDigit, Crop, Scan, Grid3X3, Maximize } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize, Zap } from 'lucide-react';
 import PdfCropper from '@/components/pdf-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -27,27 +26,20 @@ export default function CropPdfPage() {
   ];
 
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PdfCropper />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="Professional PDF Cropper & Scanner" steps={steps} />
 
             {/* AdSense Deep Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-gradient-primary">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
                         <Grid3X3 className="text-primary size-8" />
                         Next-Gen Document Alignment
                     </h2>

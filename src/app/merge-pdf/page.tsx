@@ -1,9 +1,9 @@
+
 import { Metadata } from 'next';
-import { ArrowLeft, Merge, ShieldCheck, Zap, HelpCircle, SortAsc, FileStack, ArrowUpDown, FileText, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2 } from 'lucide-react';
 import PdfMerger from '@/components/pdf-merger';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -18,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function MergePdfPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PdfMerger />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="Bulk PDF Merger" steps={[
                 "Upload: Select two or more PDF files from your device.",
                 "Organize: Use arrow buttons to move files up/down or use 'Sort A-Z'.",
@@ -45,7 +38,7 @@ export default function MergePdfPage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
-                        <FileStack className="text-primary size-8" />
+                        <CheckCircle2 className="text-primary size-8" />
                         Professional Document Bundling
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">

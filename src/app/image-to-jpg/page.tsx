@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, FileOutput, ShieldCheck, Zap, HelpCircle, Target, Image as ImageIcon, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, Target, Sparkles } from 'lucide-react';
 import ImageConverter from '@/components/image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function ImageToJpgPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <ImageConverter targetFormat="jpeg" />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Image to JPG Converter" steps={[
                 "Upload Photo: Select any image (PNG, WEBP, BMP) from your device.",
                 "Verify Target: Ensure 'JPEG' is selected as the output format.",

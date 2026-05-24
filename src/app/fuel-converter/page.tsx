@@ -1,9 +1,9 @@
+
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Fuel, Gauge, Zap, HelpCircle, ShieldCheck, Target, Droplets, Landmark } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Gauge, HelpCircle, ShieldCheck, Landmark, Target } from 'lucide-react';
 import FuelConverter from '@/components/fuel-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -18,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function FuelConverterPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=converters">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Converters
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=converters" label="Back to Converters" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <FuelConverter />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Fuel Consumption Converter" steps={[
                 "Input: Enter the efficiency number from your vehicle's display.",
                 "From Unit: Select the current format (e.g., L/100km).",

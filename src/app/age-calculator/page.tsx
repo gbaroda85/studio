@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Cake, Calendar, Info, HelpCircle, Gift, Sparkles, User, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Calendar, HelpCircle, Gift, Clock } from 'lucide-react';
 import AgeCalculator from '@/components/age-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,20 +18,14 @@ export const metadata: Metadata = {
 
 export default function AgeCalculatorPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=calculator">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Tools
-                </Link>
-            </Button>
-        </div>
-        <div className="w-full flex justify-center mb-12">
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
+
+        <div className="w-full flex justify-center mb-12 px-4">
             <AgeCalculator />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Age Calculator" steps={[
                 "Select Date: Click the input to open the calendar.",
                 "Pick Birthday: Choose your birth date and year.",

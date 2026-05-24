@@ -1,9 +1,9 @@
+
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Gauge, Zap, ShieldCheck, HelpCircle, Activity, Target, Waves } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Activity, Target, ShieldCheck, HelpCircle, Waves } from 'lucide-react';
 import AccelerationConverter from '@/components/acceleration-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -26,21 +26,14 @@ export default function AccelerationConverterPage() {
   ];
 
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=converters">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Converters
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=converters" label="Back to Converters" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <AccelerationConverter />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="Acceleration Unit Converter" steps={steps} />
 
             {/* Deep Content Section */}

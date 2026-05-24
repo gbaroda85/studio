@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Crop, ShieldCheck, Zap, HelpCircle, Scan, Grid3X3, MousePointer2, Scaling, Maximize } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize } from 'lucide-react';
 import ImageCropper from '@/components/image-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,24 +18,14 @@ export const metadata: Metadata = {
 
 export default function CropImagePage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        {/* Navigation */}
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        {/* Main Tool Component */}
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <ImageCropper />
         </div>
 
-        {/* Deep Content for AdSense & SEO */}
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Smart Image Cropper" steps={[
                 "Upload Photo: Select any photo or document from your device.",
                 "Choose Mode: Use 'Rect' for standard crop or 'Scanner' for tilted photos.",

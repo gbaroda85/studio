@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, FileScan, Sparkles, ShieldCheck, Zap, HelpCircle, SearchCode, Languages, Clipboard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, SearchCode, Languages, Clipboard } from 'lucide-react';
 import ImageToTextConverter from '@/components/image-to-text-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,20 +18,14 @@ export const metadata: Metadata = {
 
 export default function ImageToTextPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Tools
-                </Link>
-            </Button>
-        </div>
-        <div className="w-full flex justify-center mb-12">
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Tools" />
+
+        <div className="w-full flex justify-center mb-12 px-4">
             <ImageToTextConverter />
         </div>
         
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="AI Image to Text (OCR)" steps={[
                 "Upload Image: Select an image containing text (like a screenshot or a scanned document).",
                 "Extract Text: Click the 'Extract Text' button to start the AI-powered OCR process.",

@@ -1,12 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Landmark, TrendingUp, PieChart, Info, HelpCircle, Calculator, Wallet, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Landmark, TrendingUp, PieChart, HelpCircle, Calculator, Wallet } from 'lucide-react';
 import LoanCalculator from '@/components/loan-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
-import Image from 'next/image';
-import placeholderData from '@/app/lib/placeholder-images.json';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -21,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function LoanCalculatorPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-6xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20">
-                <Link href="/tools?tab=calculator">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Calculators
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=calculator" label="Back to Calculators" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <LoanCalculator />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="Loan & EMI Calculator" steps={[
                 "Enter Amount: Input the total loan principal (e.g., 5,00,000).",
                 "Set Interest: Add the annual interest rate offered by the bank.",

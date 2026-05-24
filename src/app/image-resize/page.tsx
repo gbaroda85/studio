@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Maximize, Target, ShieldCheck, HelpCircle, User, PenTool, Sparkles, Wand2, Scaling, Layers } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, User, PenTool, Scaling, Layers, Maximize } from 'lucide-react';
 import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,28 +18,21 @@ export const metadata: Metadata = {
 
 export default function ImageResizePage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <ImageResizer />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Professional Image Resizer" steps={[
                 "Upload Image: Select the photo or signature you want to resize.",
                 "Select Mode: Use 'Govt Job Presets' or enter custom Pixel/MM values.",
                 "Lock Ratio: Keep 'Maintain Aspect Ratio' checked to avoid stretching.",
                 "Format: Choose JPEG (for forms) or PNG/WebP.",
                 "Download: Save your perfectly sized image locally."
-            ]} />
+            ]} [] />
 
             {/* In-depth Content Section */}
             <section className="space-y-10 py-10 border-t">
@@ -95,11 +87,6 @@ export default function ImageResizePage() {
                             </div>
                         </div>
                     </div>
-                    <div className="p-8 bg-primary/5 rounded-[3rem] border-2 border-dashed border-primary/20 text-center">
-                        <Sparkles className="size-16 text-primary mx-auto mb-6 animate-pulse" />
-                        <h4 className="text-xl font-black uppercase tracking-tight">No Quality Loss</h4>
-                        <p className="text-sm text-muted-foreground mt-2 font-medium">Export in HD JPEG, lossless PNG, or modern WebP format for optimal results.</p>
-                    </div>
                 </div>
             </section>
 
@@ -125,7 +112,7 @@ export default function ImageResizePage() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe to upload my signature here?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for upload my signature here?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Absolutely. We use <strong>Client-Side Processing</strong>. This means your images are never uploaded to any server. All the work happens inside your browser's temporary memory (RAM) and is deleted the moment you close the tab.
                         </AccordionContent>

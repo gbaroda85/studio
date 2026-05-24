@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Archive, ShieldCheck, Zap, HelpCircle, Info, FileArchive, Package, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { HelpCircle, Package, Lock } from 'lucide-react';
 import ZipCreator from '@/components/zip-creator';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,20 +18,14 @@ export const metadata: Metadata = {
 
 export default function CreateZipPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=file">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Tools
-                </Link>
-            </Button>
-        </div>
-        <div className="w-full flex justify-center mb-12">
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=file" label="Back to Tools" />
+
+        <div className="w-full flex justify-center mb-12 px-4">
             <ZipCreator />
         </div>
         
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="Zip Creator" steps={[
                 "Add Files: Select or drop multiple files to bundle.",
                 "Review: Check the file list for accuracy.",

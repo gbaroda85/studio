@@ -1,9 +1,9 @@
+
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, ImageIcon, ShieldCheck, Zap, HelpCircle, FileArchive, Target, Layers, Sparkles, MonitorCheck, Layout } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ImageIcon, ShieldCheck, HelpCircle, Sparkles, MonitorCheck, Layout } from 'lucide-react';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -18,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function PdfToImagePage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PdfToImageConverter />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="PDF to Image HD Studio" steps={[
                 "Upload: Select the PDF document you want to extract images from.",
                 "Select Page: Click on any page in the grid to configure its layout.",
@@ -68,21 +61,6 @@ export default function PdfToImagePage() {
                         <ShieldCheck className="text-teal-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">100% Private</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">No uploads. No cloud. Every byte is processed in your device's RAM and cleared instantly upon closing.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Technical Detail */}
-            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                    <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <MonitorCheck className="size-12 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Why use padding & alignment?</h2>
-                        <p className="text-muted-foreground leading-relaxed text-sm">
-                            When converting PDF pages for web use, standard extraction can leave content looking "cramped." Our <strong>Pro Studio</strong> allows you to add virtual padding. By selecting <strong>"Top" or "Bottom"</strong> alignment, you can position the PDF content on a standard A4-ratio canvas, making the exported images look like professional scans or document photos ready for official uploads.
-                        </p>
                     </div>
                 </div>
             </section>

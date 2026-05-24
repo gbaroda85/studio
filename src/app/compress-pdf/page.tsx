@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import { ArrowLeft, ShieldCheck, Zap, HelpCircle, FileArchive, Target, MousePointer2, TrendingDown } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, HelpCircle, Target, TrendingDown } from 'lucide-react';
 import PdfCompressor from '@/components/pdf-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function CompressPdfPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30 hover:ring-2 hover:ring-primary/50">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PdfCompressor />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4">
             <HowToGuide title="Pro PDF Optimizer" steps={[
                 "Upload PDF: Drag and drop any large document into the compressor workspace.",
                 "Target Size: Select 'Target Size' and enter 100KB or 200KB for government forms.",
@@ -56,17 +48,17 @@ export default function CompressPdfPage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <Target className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Target Hits</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Target Hits</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Need exactly under 100KB? Our smart engine automatically calculates the best quality-to-size ratio to hit your target.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-emerald-500/50 transition-all">
                         <ShieldCheck className="text-emerald-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Local Privacy</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Local Privacy</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Your bank statements and ID cards never leave your device. Compression happens in browser RAM and is deleted on close.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-rose-500/50 transition-all">
                         <Zap className="text-rose-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Native Speed</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Native Speed</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Using WASM technology, we process files at hardware speed. No queues, no limits, no "cloud" delays.</p>
                     </div>
                 </div>

@@ -1,10 +1,9 @@
 
 import { Metadata } from 'next';
-import { ArrowLeft, Scissors, ShieldCheck, Zap, HelpCircle, LayoutGrid, MousePointer2, FileDigit } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Scissors, ShieldCheck, HelpCircle, LayoutGrid, MousePointer2 } from 'lucide-react';
 import PdfSplitter from '@/components/pdf-splitter';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -19,21 +18,14 @@ export const metadata: Metadata = {
 
 export default function SplitPdfPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-7xl mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=pdf">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to PDF Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <PdfSplitter />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16">
+        <div className="w-full max-w-4xl space-y-16 px-4 mx-auto">
             <HowToGuide title="Visual PDF Splitter" steps={[
                 "Upload: Select a multi-page PDF from your device.",
                 "Visual Grid: Every page will be rendered as a preview in the grid.",
