@@ -37,7 +37,7 @@ body {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 35 100% 50%;       /* Match Orange in Dark for consistency or keep Purple */
+    --primary: 35 100% 50%;       
     --primary-foreground: 210 40% 98%; 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -93,5 +93,5 @@ body {
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+  @apply bg-black/10 dark:bg-white/20 rounded-full hover:bg-black/20 dark:hover:bg-white/30 transition-colors;
 }
