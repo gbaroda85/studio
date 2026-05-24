@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -109,16 +108,6 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => 
   </Link>
 );
 
-const FeatureItem = ({ icon: Icon, title, description, iconBg }: any) => (
-  <div className="flex flex-col items-center text-center px-4 group">
-    <div className={cn(`size-12 rounded-xl flex items-center justify-center mb-4 shadow-lg transition-all group-hover:-translate-y-1 group-hover:rotate-3`, iconBg)}>
-      <Icon className="size-6 text-white" />
-    </div>
-    <h4 className="text-sm font-black mb-1.5 text-slate-900 dark:text-white uppercase tracking-tighter">{title}</h4>
-    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px] font-medium">{description}</p>
-  </div>
-);
-
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -135,36 +124,36 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Balanced Height increased to pt-16 pb-20 */}
-      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[2rem] shadow-2xl shadow-primary/5 mx-auto">
+      {/* Hero Section - Increased Height and Text Size */}
+      <section className="relative w-full max-w-[2000px] pt-24 pb-32 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-3 shadow-sm">
-            <Sparkles className="size-2.5" /> ALL-IN-ONE GR7 TOOLKIT
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">
+            <Sparkles className="size-3" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-black mb-3 tracking-tighter leading-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[1.1]">
             Professional Tools for <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Images & PDFs</span>
           </h1>
           
-          <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-6 font-semibold leading-relaxed">
-            Everything happens locally in your device RAM, 100% private.
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-10 font-bold leading-relaxed">
+            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Search Bar - Compact */}
-          <div className="max-w-xl mx-auto relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
+          {/* Search Bar - Compact but prominent */}
+          <div className="max-w-2xl mx-auto relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'ocr', 'emi')"
-                className="w-full pl-14 pr-4 h-12 text-sm rounded-xl bg-white dark:bg-slate-800 border-none shadow-xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
+                placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
+                className="w-full pl-16 pr-6 h-16 text-lg rounded-2xl bg-white dark:bg-slate-800 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -174,42 +163,42 @@ export default function Page() {
       </section>
 
       {/* Tools Section */}
-      <section className="pt-10 pb-20 bg-background w-full flex justify-center">
+      <section className="pt-16 pb-24 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-[0.2em] mb-6">
-                  <div className="w-8 h-1 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.2em] mb-10">
+                  <div className="w-10 h-1.5 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 {filteredTools.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                         {filteredTools.map((tool, i) => (
                             <ToolCard key={i} {...tool} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-16 bg-muted/20 rounded-2xl border-2 border-dashed">
-                        <Search className="size-10 mx-auto mb-4 text-muted-foreground/30" />
-                        <h3 className="text-lg font-black text-slate-400 uppercase">No tools matched your search</h3>
-                        <p className="text-xs text-muted-foreground font-medium mt-2">Try words like 'PDF', 'Compress', 'Resize', or 'Calc'</p>
+                    <div className="text-center py-20 bg-muted/20 rounded-[2rem] border-2 border-dashed">
+                        <Search className="size-12 mx-auto mb-6 text-muted-foreground/30" />
+                        <h3 className="text-xl font-black text-slate-400 uppercase">No tools matched your search</h3>
+                        <p className="text-sm text-muted-foreground font-medium mt-3">Try words like 'PDF', 'Compress', 'Resize', or 'Calc'</p>
                     </div>
                 )}
             </div>
           ) : (
             <>
                 {/* Visual Processor */}
-                <div className="mb-12">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+                <div className="mb-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                         <div className="text-left">
-                            <div className="flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                                <div className="w-8 h-1 bg-primary rounded-full" /> Image Solutions
+                            <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                                <div className="w-10 h-1 bg-primary rounded-full" /> Image Solutions
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
                         <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
                         <ToolCard icon={UserCircle} title="Passport Photo" description="Create professional passport-sized photos for any country." href="/passport-photo" colorClass="bg-emerald-600" />
@@ -219,17 +208,17 @@ export default function Page() {
                 </div>
 
                 {/* Document Engine */}
-                <div className="mb-12">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+                <div className="mb-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                         <div className="text-left">
-                            <div className="flex items-center gap-2 text-rose-600 font-black text-[9px] uppercase tracking-[0.2em] mb-1">
-                                <div className="w-8 h-1 bg-rose-600 rounded-full" /> Document Engine
+                            <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                                <div className="w-10 h-1 bg-rose-600 rounded-full" /> Document Engine
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         <ToolCard icon={FileArchive} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
                         <ToolCard icon={ImageIcon} title="PDF to Image" description="Convert every page of a PDF into high-quality images." href="/pdf-to-image" colorClass="bg-orange-500" />
                         <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
@@ -239,8 +228,8 @@ export default function Page() {
                 </div>
                 
                 <div className="text-center">
-                    <Button asChild variant="outline" className="h-12 px-10 rounded-xl font-black text-sm text-primary border-2 border-primary/20 shadow-lg hover:bg-primary/5">
-                        <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-4" /></Link>
+                    <Button asChild variant="outline" className="h-16 px-12 rounded-2xl font-black text-lg text-primary border-2 border-primary/20 shadow-xl hover:bg-primary/5 hover:scale-105 transition-all">
+                        <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-5" /></Link>
                     </Button>
                 </div>
             </>
