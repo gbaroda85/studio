@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -69,7 +70,7 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // A4 Ratio coordinate system
+                    // Standard A4 Ratio Canvas (Strictly defined)
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414);
                     canvas.width = targetW;
@@ -78,19 +79,20 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Strict scaling logic
+                    // Strict scaling logic (90%)
                     const scaleFactor = 0.9;
                     const dw = img.width * scaleFactor;
                     const dh = img.height * scaleFactor;
                     const dx = (canvas.width - dw) / 2;
                     
                     let dy;
+                    // ABSOLUTE LITERAL CLAMPING
                     if (vAlign === 'top') {
-                        dy = 0; // Literal Top
+                        dy = 0; 
                     } else if (vAlign === 'bottom') {
-                        dy = canvas.height - dh; // Literal Bottom
+                        dy = canvas.height - dh; 
                     } else {
-                        dy = (canvas.height - dh) / 2; // Center
+                        dy = (canvas.height - dh) / 2; 
                     }
                     
                     ctx.imageSmoothingEnabled = true;
@@ -112,7 +114,6 @@ export default function PdfToImageConverter() {
         try {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-            const newPages: PageItem[] = [];
             const totalPages = pdf.numPages;
 
             for (let i = 1; i <= totalPages; i++) {
@@ -137,8 +138,6 @@ export default function PdfToImageConverter() {
                         fitMode: 'fit',
                         index: i
                     };
-                    newPages.push(newItem);
-                    // Critical: Update state immediately per page to avoid white boxes
                     setPages(prev => [...prev, newItem]);
                     if (i === 1) setSelectedId(id);
                 }
@@ -235,9 +234,40 @@ export default function PdfToImageConverter() {
 
     const selectedPage = pages.find(p => p.id === selectedId);
 
+    if (!pdfFile) {
+        return (
+            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
+                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+                <CardHeader>
+                    <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+                        <ImageIcon className="h-8 w-8" />
+                    </div>
+                    <CardTitle className="text-2xl font-black uppercase tracking-tight">PDF TO IMAGE HD STUDIO</CardTitle>
+                    <CardDescription>Extract pages as HD images with absolute alignment control.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                        <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <div>
+                            <p className="text-xl font-bold">Drop PDF document here</p>
+                            <p className="text-sm text-muted-foreground mt-2">100% Private local processing. No server storage.</p>
+                        </div>
+                    </div>
+                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                </CardContent>
+                <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> HD EXTRACTION</div>
+                    <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> NATIVE SPEED</div>
+                </CardFooter>
+            </Card>
+        );
+    }
+
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
             <div className="grid lg:grid-cols-12 gap-8 items-start">
+                
                 <div className="lg:col-span-8 space-y-6">
                     <Card className="border-2 shadow-xl overflow-hidden bg-card/50">
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
@@ -262,18 +292,22 @@ export default function PdfToImageConverter() {
                                         {pages.map((p) => (
                                             <div key={p.id} onClick={() => setSelectedId(p.id)}
                                                 className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white",
+                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white shadow-md",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
+                                                {/* THE LITERAL ABSOLUTE POSITIONING PREVIEW */}
                                                 <div className={cn(
                                                     "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
                                                     <img 
-                                                        src={p.finalSrc} 
+                                                        src={p.originalSrc} 
                                                         alt={`page-${p.index}`} 
-                                                        className="max-w-full max-h-[90%] object-contain pointer-events-none mx-auto block"
+                                                        className={cn(
+                                                            "w-full object-contain pointer-events-none mx-auto block",
+                                                            p.fitMode === 'original' ? "max-h-[90%]" : "max-h-full"
+                                                        )}
                                                     />
                                                 </div>
                                                 
@@ -292,7 +326,7 @@ export default function PdfToImageConverter() {
                         <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
                             <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
                             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure Processing
+                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure RAM Processing
                             </div>
                         </CardFooter>
                     </Card>
@@ -302,7 +336,7 @@ export default function PdfToImageConverter() {
                     <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                                <Layout className="size-6 text-primary" /> EXTRACTION
+                                <Layout className="size-6 text-primary" /> STUDIO CONTROL
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 space-y-8">
@@ -328,9 +362,9 @@ export default function PdfToImageConverter() {
                                         </Tabs>
                                     </div>
 
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                    <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-opacity", selectedPage?.fitMode === 'fit' && "opacity-20 pointer-events-none")}>
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Alignment
+                                            <AlignVerticalJustifyCenter className="size-3" /> Strict Alignment
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
@@ -357,8 +391,8 @@ export default function PdfToImageConverter() {
                             <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-1 text-primary">STRICT CLAMPING:</span>
-                                    Pages are pushed to the literal boundary of the canvas. 0-pixel gap logic enabled.
+                                    <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
+                                    "Bottom" pushes the image to the exact aakhri pixel of the canvas. No padding logic.
                                 </p>
                             </div>
                         </CardContent>

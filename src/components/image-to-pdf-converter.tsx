@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -197,7 +198,7 @@ export default function ImageToPdfConverter() {
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
-                // 90% Scaling to ensure there is vertical room for movement
+                // 90% Scaling balance
                 const scaleFactor = 0.9;
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scaleFactor;
                 const finalWidth = imgProps.width * ratio;
@@ -273,7 +274,7 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* THE LITERAL POSITIONING WRAPPER */}
+                                {/* THE LITERAL POSITIONING WRAPPER (Strict End-to-End) */}
                                 <div className={cn(
                                     "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
@@ -412,7 +413,7 @@ export default function ImageToPdfConverter() {
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                             <span className="font-black uppercase block mb-1 text-primary">STRICT CLAMPING:</span>
-                            Images are pushed to the literal boundary of the A4 page. 0-pixel gap logic enabled.
+                            "Bottom" logic pushes the image to the absolute last pixel of the page. Zero padding active.
                         </p>
                     </div>
                 </CardContent>
