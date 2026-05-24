@@ -40,6 +40,7 @@ import {
   Waves,
   FileArchive,
   UserCircle,
+  Calculator,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -124,7 +125,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Compact Height but Big Bold Text */}
+      {/* Hero Section - Compact Height */}
       <section className="relative w-full max-w-[2000px] pt-8 pb-8 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -141,9 +142,36 @@ export default function Page() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Images & PDFs</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed">
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-6 font-bold leading-relaxed">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
+
+          {/* Quick Category Buttons */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <Button 
+                variant="outline" 
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-primary h-12 px-6 shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-1"
+                onClick={() => document.getElementById('image-section')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <ImageIcon className="size-4 mr-2 text-blue-600" /> Image Tools
+            </Button>
+            <Button 
+                variant="outline" 
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-rose-600 h-12 px-6 shadow-md hover:shadow-rose-500/20 transition-all hover:-translate-y-1"
+                onClick={() => document.getElementById('pdf-section')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <FileArchive className="size-4 mr-2 text-rose-600" /> PDF Tools
+            </Button>
+            <Button 
+                variant="outline" 
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-emerald-500 h-12 px-6 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-1"
+                asChild
+            >
+              <Link href="/tools?tab=calculator">
+                <Calculator className="size-4 mr-2 text-emerald-500" /> Calculators
+              </Link>
+            </Button>
+          </div>
 
           {/* Search Bar - Compact and focused */}
           <div className="max-w-2xl mx-auto relative group">
@@ -188,7 +216,7 @@ export default function Page() {
           ) : (
             <>
                 {/* Visual Processor */}
-                <div className="mb-20">
+                <div className="mb-20" id="image-section">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                         <div className="text-left">
                             <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-2">
@@ -208,7 +236,7 @@ export default function Page() {
                 </div>
 
                 {/* Document Engine */}
-                <div className="mb-20">
+                <div className="mb-20" id="pdf-section">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                         <div className="text-left">
                             <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
