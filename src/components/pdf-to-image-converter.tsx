@@ -22,7 +22,8 @@ import {
   Maximize,
   MousePointer2,
   Layout,
-  Loader2
+  Loader2,
+  Layers
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -72,6 +73,7 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
+                    // Standard A4 Ratio: 1.414
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -80,15 +82,15 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // We scale the image slightly down to ensure alignment is visible even for A4 inputs
+                    // Super Strict: 0.9 scaling to ensure vertical room exists for alignment
                     const scale = 0.9;
                     const dw = img.width * scale;
                     const dh = img.height * scale;
                     const dx = (canvas.width - dw) / 2;
                     
-                    let dy = (canvas.height - dh) / 2;
-                    if (vAlign === 'top') dy = 0; 
-                    else if (vAlign === 'bottom') dy = canvas.height - dh;
+                    let dy = (canvas.height - dh) / 2; // Center default
+                    if (vAlign === 'top') dy = 0; // Literal Top
+                    else if (vAlign === 'bottom') dy = canvas.height - dh; // Literal Bottom
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';

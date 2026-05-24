@@ -200,7 +200,7 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 0.5; 
+    const tinyMargin = 0.1; // Literal edge safety
 
     for (let i = 0; i < images.length; i++) {
         if (i > 0) pdf.addPage();
@@ -215,11 +215,12 @@ export default function ImageToPdfConverter() {
                 let finalWidth, finalHeight;
 
                 if (imgData.fitMode === 'fit') {
-                    const maxWidth = pageWidth - (margin * 2);
-                    const maxHeight = pageHeight - (margin * 2);
+                    // Use 0.9 ratio to ensure vertical room exists for visible alignment
+                    const maxWidth = pageWidth - (tinyMargin * 2);
+                    const maxHeight = pageHeight - (tinyMargin * 2);
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    const ratio = Math.min(widthRatio, heightRatio) * 0.85; 
+                    const ratio = Math.min(widthRatio, heightRatio) * 0.9; 
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -227,13 +228,13 @@ export default function ImageToPdfConverter() {
                     finalWidth = imgProps.width * pxToMm;
                     finalHeight = imgProps.height * pxToMm;
 
-                    if (finalWidth > (pageWidth - margin * 2)) {
-                        const ratio = (pageWidth - margin * 2) / finalWidth;
+                    if (finalWidth > (pageWidth - tinyMargin * 2)) {
+                        const ratio = (pageWidth - tinyMargin * 2) / finalWidth;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
                     }
-                    if (finalHeight > (pageHeight - margin * 2)) {
-                        const ratio = (pageHeight - margin * 2) / finalHeight;
+                    if (finalHeight > (pageHeight - tinyMargin * 2)) {
+                        const ratio = (pageHeight - tinyMargin * 2) / finalHeight;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
                     }
@@ -243,11 +244,11 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = margin;
+                    y = tinyMargin; // Strict Top
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight - margin;
+                    y = pageHeight - finalHeight - tinyMargin; // Strict Bottom
                 } else {
-                    y = (pageHeight - finalHeight) / 2;
+                    y = (pageHeight - finalHeight) / 2; // Exact Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -323,7 +324,7 @@ export default function ImageToPdfConverter() {
                                             alt="thumb"
                                             fill
                                             className={cn(
-                                                "transition-all duration-300 pointer-events-none object-contain",
+                                                "transition-all duration-300 pointer-events-none object-contain p-0.5",
                                                 img.vAlign === 'top' ? "object-top" : 
                                                 img.vAlign === 'bottom' ? "object-bottom" : "object-center"
                                             )} 
