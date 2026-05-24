@@ -73,7 +73,7 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // Standard A4 Ratio: 1.414
+                    // A4 standard ratio
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -82,15 +82,15 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Super Strict: 0.9 scaling to ensure vertical room exists for alignment
+                    // Render 90% scale to allow Top/Bottom visibility
                     const scale = 0.9;
                     const dw = img.width * scale;
                     const dh = img.height * scale;
                     const dx = (canvas.width - dw) / 2;
                     
-                    let dy = (canvas.height - dh) / 2; // Center default
-                    if (vAlign === 'top') dy = 0; // Literal Top
-                    else if (vAlign === 'bottom') dy = canvas.height - dh; // Literal Bottom
+                    let dy = (canvas.height - dh) / 2;
+                    if (vAlign === 'top') dy = 0;
+                    else if (vAlign === 'bottom') dy = canvas.height - dh;
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
@@ -290,15 +290,15 @@ export default function PdfToImageConverter() {
                                         {pages.map((p) => (
                                             <div key={p.id} onClick={() => setSelectedId(p.id)}
                                                 className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col",
-                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl bg-white" : "bg-white hover:border-primary/30"
+                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white",
+                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
                                                 <div className={cn(
-                                                    "flex-1 relative flex flex-col overflow-hidden bg-white",
+                                                    "flex-1 relative flex flex-col bg-white overflow-hidden w-full h-full",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
-                                                    <div className="relative w-full h-full">
+                                                    <div className="relative w-full h-[90%] flex items-center justify-center">
                                                         <Image 
                                                             src={p.finalSrc} 
                                                             alt={`page-${p.index}`} 
@@ -320,7 +320,6 @@ export default function PdfToImageConverter() {
                                                         <Download className="size-4" />
                                                     </Button>
                                                 </div>
-                                                <div className="bg-muted/30 text-[7px] font-black py-0.5 text-center uppercase tracking-widest text-muted-foreground border-t">{p.vAlign}</div>
                                             </div>
                                         ))}
                                     </div>
@@ -364,9 +363,6 @@ export default function PdfToImageConverter() {
                                                 <TabsTrigger value="original" className="font-bold text-[10px] uppercase">A4 Canvas</TabsTrigger>
                                             </TabsList>
                                         </Tabs>
-                                        <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                            "A4 Canvas" creates a standard document frame for Top/Bottom positioning.
-                                        </p>
                                     </div>
 
                                     <div className="space-y-4 pt-4 border-t-2 border-dashed">
@@ -391,11 +387,11 @@ export default function PdfToImageConverter() {
 
                                     <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                         <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Image Format</Label>
-                                        <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); if(pdfFile) handlePdfToImage(pdfFile); }}>
+                                        <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
                                             <SelectTrigger className="h-12 font-bold rounded-xl border-2"><SelectValue /></SelectTrigger>
-                                            <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                <SelectItem value="png" className="font-bold">PNG (Lossless)</SelectItem>
-                                                <SelectItem value="jpeg" className="font-bold">JPEG (Optimized)</SelectItem>
+                                            <SelectContent>
+                                                <SelectItem value="png">PNG (Lossless)</SelectItem>
+                                                <SelectItem value="jpeg">JPEG (Optimized)</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
@@ -200,7 +200,6 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const tinyMargin = 0.1; // Literal edge safety
 
     for (let i = 0; i < images.length; i++) {
         if (i > 0) pdf.addPage();
@@ -215,12 +214,8 @@ export default function ImageToPdfConverter() {
                 let finalWidth, finalHeight;
 
                 if (imgData.fitMode === 'fit') {
-                    // Use 0.9 ratio to ensure vertical room exists for visible alignment
-                    const maxWidth = pageWidth - (tinyMargin * 2);
-                    const maxHeight = pageHeight - (tinyMargin * 2);
-                    const widthRatio = maxWidth / imgProps.width;
-                    const heightRatio = maxHeight / imgProps.height;
-                    const ratio = Math.min(widthRatio, heightRatio) * 0.9; 
+                    // 0.9 scale to leave vertical space for Top/Bottom movement visibility
+                    const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -228,13 +223,13 @@ export default function ImageToPdfConverter() {
                     finalWidth = imgProps.width * pxToMm;
                     finalHeight = imgProps.height * pxToMm;
 
-                    if (finalWidth > (pageWidth - tinyMargin * 2)) {
-                        const ratio = (pageWidth - tinyMargin * 2) / finalWidth;
+                    if (finalWidth > pageWidth) {
+                        const ratio = pageWidth / finalWidth;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
                     }
-                    if (finalHeight > (pageHeight - tinyMargin * 2)) {
-                        const ratio = (pageHeight - tinyMargin * 2) / finalHeight;
+                    if (finalHeight > pageHeight) {
+                        const ratio = pageHeight / finalHeight;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
                     }
@@ -244,11 +239,11 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = tinyMargin; // Strict Top
+                    y = 0; // Literal Top
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight - tinyMargin; // Strict Bottom
+                    y = pageHeight - finalHeight; // Literal Bottom
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Exact Center
+                    y = (pageHeight - finalHeight) / 2; // Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -310,21 +305,22 @@ export default function ImageToPdfConverter() {
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
+                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0",
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
+                                {/* Literal Positioning Mockup */}
                                 <div className={cn(
-                                    "flex-1 relative flex flex-col overflow-hidden bg-white",
+                                    "flex-1 relative flex flex-col bg-white overflow-hidden w-full h-full",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <div className="relative w-full h-full">
+                                    <div className="relative w-full h-[90%] flex items-center justify-center">
                                         <Image 
                                             src={img.src} 
                                             alt="thumb"
                                             fill
                                             className={cn(
-                                                "transition-all duration-300 pointer-events-none object-contain p-0.5",
+                                                "transition-all duration-300 pointer-events-none object-contain",
                                                 img.vAlign === 'top' ? "object-top" : 
                                                 img.vAlign === 'bottom' ? "object-bottom" : "object-center"
                                             )} 
