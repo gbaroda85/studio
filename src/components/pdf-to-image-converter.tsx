@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -79,7 +80,7 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Strict scaling logic (90%)
+                    // Strict scaling logic (90%) for room to align
                     const scaleFactor = 0.9;
                     const dw = img.width * scaleFactor;
                     const dh = img.height * scaleFactor;
@@ -134,8 +135,8 @@ export default function PdfToImageConverter() {
                         id,
                         originalSrc: src,
                         finalSrc: src,
-                        vAlign: 'center',
-                        fitMode: 'fit',
+                        vAlign: 'center' as VAlign,
+                        fitMode: 'fit' as FitMode,
                         index: i
                     };
                     setPages(prev => [...prev, newItem]);
@@ -282,7 +283,7 @@ export default function PdfToImageConverter() {
                                 <div className="flex flex-col items-center justify-center py-32 gap-8 text-center">
                                     <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
                                     <div className="space-y-4 w-full max-w-sm">
-                                        <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">Rendering PDF Pages...</p>
+                                        <p className="font-black text-2xl text-primary uppercase tracking-tighter">Rendering PDF Pages...</p>
                                         <Progress value={progress} className="h-2" />
                                     </div>
                                 </div>

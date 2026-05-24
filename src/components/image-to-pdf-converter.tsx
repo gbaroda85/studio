@@ -198,7 +198,7 @@ export default function ImageToPdfConverter() {
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
-                // 90% Scaling balance
+                // 90% Scaling for room to align
                 const scaleFactor = 0.9;
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scaleFactor;
                 const finalWidth = imgProps.width * ratio;
@@ -274,7 +274,7 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* THE LITERAL POSITIONING WRAPPER (Strict End-to-End) */}
+                                {/* THE LITERAL POSITIONING WRAPPER */}
                                 <div className={cn(
                                     "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
@@ -442,7 +442,7 @@ export default function ImageToPdfConverter() {
             </Card>
         </div>
       </div>
-      <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
+      <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
     </div>
   );
 }
