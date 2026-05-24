@@ -16,9 +16,9 @@ import {
   Layers, 
   RefreshCcw,
   Layout,
-  AlignCenterVertical,
-  AlignStartVertical,
-  AlignEndVertical,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyStart,
+  AlignVerticalJustifyEnd,
   Maximize,
   Minimize,
   Eye,
@@ -160,7 +160,7 @@ export default function ImageToPdfConverter() {
         const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
         const pdf = await loadingTask.promise;
         const imgs: string[] = [];
-        const pagesToRender = Math.min(pdf.numPages, 10); // Render first 10 for performance
+        const pagesToRender = Math.min(pdf.numPages, 10); 
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
@@ -217,7 +217,8 @@ export default function ImageToPdfConverter() {
                 if (imgData.fitMode === 'fit') {
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    const ratio = Math.min(widthRatio, heightRatio);
+                    // Provide a bit of vertical wiggle room for alignment visibility
+                    const ratio = Math.min(widthRatio, heightRatio * 0.95);
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -252,12 +253,10 @@ export default function ImageToPdfConverter() {
     const pdfBlob = pdf.output('blob');
     const url = URL.createObjectURL(pdfBlob);
     setConvertedPdfUrl(url);
-    
-    // Generate visual previews for a perfect mobile experience
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "PDF Created!", description: "High-quality document is ready for download." });
+    toast({ title: "PDF Created!", description: "Check alignment in visual preview below." });
   };
   
   const handleDownload = () => {
@@ -276,7 +275,6 @@ export default function ImageToPdfConverter() {
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
-        {/* Workspace Area */}
         <div className="lg:col-span-8 space-y-6">
             <Card className={cn("border-2 transition-all duration-300 overflow-hidden bg-card/50 shadow-xl hover:border-primary/40", isDragOver && "border-primary ring-4 ring-primary/20")}
                   onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
@@ -305,43 +303,51 @@ export default function ImageToPdfConverter() {
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative group aspect-square rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95",
-                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "bg-white hover:border-primary/30"
+                                    "relative group aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
+                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                <Image src={img.src} alt={`preview-${index}`} fill className="object-contain p-2" unoptimized />
-                                
-                                {selectedId === img.id && (
-                                    <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
-                                        <div className="size-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg border-2 border-white animate-in zoom-in-50">
-                                            <MousePointer2 className="size-5" />
-                                        </div>
+                                <div className={cn(
+                                    "flex-1 relative flex items-center justify-center p-2",
+                                    img.vAlign === 'top' ? 'items-start' : img.vAlign === 'bottom' ? 'items-end' : 'items-center'
+                                )}>
+                                    <div className="relative w-full h-full">
+                                        <Image 
+                                            src={img.src} 
+                                            alt={`preview-${index}`} 
+                                            fill 
+                                            className={cn(
+                                                "object-contain transition-all",
+                                                img.fitMode === 'original' ? 'p-4' : 'p-1'
+                                            )} 
+                                            unoptimized 
+                                        />
                                     </div>
-                                )}
-
+                                </div>
+                                
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRemoveImage(img.id); }}>
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <div className="absolute bottom-2 left-2 flex gap-1">
-                                    <div className="bg-black/60 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">Page {index + 1}</div>
+                                <div className="absolute bottom-2 left-2 flex gap-1 z-20">
+                                    <div className="bg-black/60 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">P{index + 1}</div>
                                     <div className="bg-primary/80 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">{img.vAlign}</div>
                                 </div>
                             </div>
                             ))}
-                            <button className="border-2 border-dashed border-muted-foreground/30 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-square" onClick={() => fileInputRef.current?.click()}>
+                            <button className="border-2 border-dashed border-muted-foreground/30 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[3/4]" onClick={() => fileInputRef.current?.click()}>
                                 <UploadCloud className="h-8 w-8 text-muted-foreground" />
-                                <span className="text-[10px] font-black uppercase text-muted-foreground">Add More Photos</span>
+                                <span className="text-[10px] font-black uppercase text-muted-foreground">Add More</span>
                             </button>
                         </div>
                     )}
                 </CardContent>
                 {images.length > 0 && (
                     <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
-                        <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Clear Workspace</Button>
+                        <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Clear All</Button>
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                            <ShieldCheck className="h-4 w-4 text-green-500" /> End-to-end Local Encryption
+                            <ShieldCheck className="h-4 w-4 text-green-500" /> Secure RAM Conversion
                         </div>
                     </CardFooter>
                 )}
@@ -351,7 +357,7 @@ export default function ImageToPdfConverter() {
                 <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
                     <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
                         <CardTitle className="text-sm font-black uppercase flex items-center gap-2 text-green-700">
-                            <Eye className="size-4" /> Visual Preview (Top 10 Pages)
+                            <Eye className="size-4" /> Visual Preview (Verify Layout)
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 bg-muted/20">
@@ -366,7 +372,7 @@ export default function ImageToPdfConverter() {
                                     previewImages.map((img, i) => (
                                         <div key={i} className="shadow-2xl border-4 border-white rounded-sm overflow-hidden bg-white max-w-full">
                                             <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto" />
-                                            <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">Page {i+1}</div>
+                                            <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">Page {i+1} Preview</div>
                                         </div>
                                     ))
                                 )}
@@ -382,8 +388,8 @@ export default function ImageToPdfConverter() {
                                 <CheckCircle2 className="size-8" />
                             </div>
                             <div>
-                                <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">CONVERSION SUCCESS!</p>
-                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Multi-Page PDF Bundle Ready</p>
+                                <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">PDF READY!</p>
+                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Layout logic successfully applied</p>
                             </div>
                         </div>
                         <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
@@ -394,7 +400,6 @@ export default function ImageToPdfConverter() {
             )}
         </div>
 
-        {/* Layout & Control Suite */}
         <div className="lg:col-span-4 space-y-6">
             <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                 <CardHeader className="bg-primary/5 border-b p-6">
@@ -425,14 +430,11 @@ export default function ImageToPdfConverter() {
                                         <TabsTrigger value="original" className="font-black text-[10px] uppercase">Original</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
-                                <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed">
-                                    "Original" prevents small photos (like signatures) from getting blurry by not stretching them.
-                                </p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignCenterVertical className="size-3" /> Vertical Position
+                                    <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button 
@@ -440,7 +442,7 @@ export default function ImageToPdfConverter() {
                                         className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedImage?.vAlign === 'top' && "border-primary")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
                                     >
-                                        <AlignStartVertical className="size-5" />
+                                        <AlignVerticalJustifyStart className="size-5" />
                                         <span className="text-[8px] font-black uppercase">Top</span>
                                     </Button>
                                     <Button 
@@ -448,22 +450,25 @@ export default function ImageToPdfConverter() {
                                         className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedImage?.vAlign === 'center' && "border-primary")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'center' })}
                                     >
-                                        <AlignCenterVertical className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Middle</span>
+                                        <AlignVerticalJustifyCenter className="size-5" />
+                                        <span className="text-[8px] font-black uppercase">Center</span>
                                     </Button>
                                     <Button 
                                         variant={selectedImage?.vAlign === 'bottom' ? 'default' : 'outline'} 
                                         className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedImage?.vAlign === 'bottom' && "border-primary")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
                                     >
-                                        <AlignEndVertical className="size-5" />
+                                        <AlignVerticalJustifyEnd className="size-5" />
                                         <span className="text-[8px] font-black uppercase">Bottom</span>
                                     </Button>
                                 </div>
+                                <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
+                                    Note: Portrait photos may fill the full height in "Fit" mode, leaving no room for vertical move.
+                                </p>
                             </div>
 
                             <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                <Layers className="size-3 mr-2" /> Apply Settings to All Photos
+                                <Layers className="size-3 mr-2" /> Sync Settings to All Pages
                             </Button>
                         </div>
                     )}
@@ -471,8 +476,8 @@ export default function ImageToPdfConverter() {
                     <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                            <span className="font-black uppercase block mb-1">High-DPI Preservation:</span>
-                            A4 standard format (210x297mm) is active. We preserve 300 DPI equivalent for clean printing.
+                            <span className="font-black uppercase block mb-1 text-primary">High-Fidelity Rendering:</span>
+                            We preserve the original DPI and orientation for 100% crisp text extraction.
                         </p>
                     </div>
                 </CardContent>
@@ -491,8 +496,8 @@ export default function ImageToPdfConverter() {
                             <div className="flex items-center gap-4">
                                 <FileDigit className="size-9" />
                                 <div className="text-left">
-                                    <span className="block uppercase tracking-tighter leading-none">CREATE PDF</span>
-                                    <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Process {images.length} pages</span>
+                                    <span className="block uppercase tracking-tighter leading-none">CONVERT TO PDF</span>
+                                    <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">{images.length} PAGES QUEUED</span>
                                 </div>
                             </div>
                         )}
@@ -505,8 +510,8 @@ export default function ImageToPdfConverter() {
                     <ShieldCheck className="size-6 text-green-600" />
                 </div>
                 <div>
-                    <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Privacy Vault Active</p>
-                    <p className="text-[10px] text-green-600/80 font-medium leading-tight">Conversion happens in RAM. No photos are ever uploaded.</p>
+                    <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Privacy Vault</p>
+                    <p className="text-[10px] text-green-600/80 font-medium leading-tight">All layout math happens in RAM. Photos never leave your browser.</p>
                 </div>
             </div>
         </div>
