@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
@@ -20,7 +21,6 @@ import {
   AlignVerticalJustifyStart,
   AlignVerticalJustifyEnd,
   Maximize,
-  Minimize,
   Eye,
   CheckCircle2,
   MousePointer2,
@@ -164,7 +164,7 @@ export default function ImageToPdfConverter() {
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 1.0 });
+            const viewport = page.getViewport({ scale: 1.5 });
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -198,7 +198,7 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 5; 
+    const margin = 2; // Strict minimal margin (2mm)
     const maxWidth = pageWidth - (margin * 2);
     const maxHeight = pageHeight - (margin * 2);
 
@@ -217,8 +217,8 @@ export default function ImageToPdfConverter() {
                 if (imgData.fitMode === 'fit') {
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    // Use a slightly smaller ratio to ensure vertical movement is visible
-                    const ratio = Math.min(widthRatio, heightRatio) * 0.85;
+                    // Slightly smaller scaling to allow the image to actually "move" visibly
+                    const ratio = Math.min(widthRatio, heightRatio) * 0.85; 
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -256,7 +256,7 @@ export default function ImageToPdfConverter() {
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "PDF Created!", description: "Layout logic applied successfully." });
+    toast({ title: "PDF Created!", description: "Alignment logic strictly applied." });
   };
   
   const handleDownload = () => {
@@ -303,17 +303,17 @@ export default function ImageToPdfConverter() {
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative group aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
+                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
                                 <div className={cn(
-                                    "flex-1 relative flex flex-col p-4",
+                                    "flex-1 relative flex flex-col p-1", // Minimal padding for strict edge visual
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
                                     <div className={cn(
                                         "relative w-full transition-all duration-300",
-                                        img.fitMode === 'original' ? 'h-auto' : 'h-[75%]'
+                                        img.fitMode === 'original' ? 'h-auto' : 'h-[80%]'
                                     )}>
                                         <Image 
                                             src={img.src} 
@@ -331,13 +331,13 @@ export default function ImageToPdfConverter() {
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <div className="absolute bottom-2 left-2 flex gap-1 z-20">
-                                    <div className="bg-black/60 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">P{index + 1}</div>
-                                    <div className="bg-primary/80 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">{img.vAlign}</div>
+                                <div className="absolute bottom-1 left-1 flex gap-1 z-20">
+                                    <div className="bg-black/60 text-white text-[6px] px-1.5 py-0.5 rounded-full font-black uppercase backdrop-blur-md">P{index + 1}</div>
+                                    <div className="bg-primary/80 text-white text-[6px] px-1.5 py-0.5 rounded-full font-black uppercase backdrop-blur-md">{img.vAlign}</div>
                                 </div>
                             </div>
                             ))}
-                            <button className="border-2 border-dashed border-muted-foreground/30 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[3/4]" onClick={() => fileInputRef.current?.click()}>
+                            <button className="border-2 border-dashed border-muted-foreground/30 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414]" onClick={() => fileInputRef.current?.click()}>
                                 <UploadCloud className="h-8 w-8 text-muted-foreground" />
                                 <span className="text-[10px] font-black uppercase text-muted-foreground">Add More</span>
                             </button>
@@ -376,9 +376,6 @@ export default function ImageToPdfConverter() {
                                             <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">Page {i+1} Preview</div>
                                         </div>
                                     ))
-                                )}
-                                {previewImages.length >= 10 && !isGeneratingPreview && (
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase py-4">... Previewing first 10 pages ...</p>
                                 )}
                             </div>
                         </ScrollArea>
@@ -464,7 +461,7 @@ export default function ImageToPdfConverter() {
                                     </Button>
                                 </div>
                                 <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                    Tip: Alignment works best in "Fit Page" mode as it provides more room on the A4 canvas.
+                                    Tip: Use "Fit Page" for the most dramatic alignment effect on A4 paper.
                                 </p>
                             </div>
 
@@ -477,8 +474,8 @@ export default function ImageToPdfConverter() {
                     <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                            <span className="font-black uppercase block mb-1 text-primary">STRICT ALIGNMENT:</span>
-                            Images are pushed to the literal edges of the page based on your selection.
+                            <span className="font-black uppercase block mb-1 text-primary">EXTREME ALIGNMENT:</span>
+                            Images are pushed to the literal edges of the page based on your selection. Zero-gap calculation active.
                         </p>
                     </div>
                 </CardContent>
