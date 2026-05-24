@@ -146,21 +146,25 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Category Buttons */}
+          {/* Quick Category Buttons - Now linking correctly to tool views */}
           <div className="flex flex-wrap justify-center gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
             <Button 
                 variant="outline" 
                 className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-primary h-12 px-6 shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-1"
-                onClick={() => document.getElementById('image-section')?.scrollIntoView({ behavior: 'smooth' })}
+                asChild
             >
-              <ImageIcon className="size-4 mr-2 text-blue-600" /> Image Tools
+              <Link href="/tools?tab=image">
+                <ImageIcon className="size-4 mr-2 text-blue-600" /> Image Tools
+              </Link>
             </Button>
             <Button 
                 variant="outline" 
                 className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-rose-600 h-12 px-6 shadow-md hover:shadow-rose-500/20 transition-all hover:-translate-y-1"
-                onClick={() => document.getElementById('pdf-section')?.scrollIntoView({ behavior: 'smooth' })}
+                asChild
             >
-              <FileArchive className="size-4 mr-2 text-rose-600" /> PDF Tools
+              <Link href="/tools?tab=pdf">
+                <FileArchive className="size-4 mr-2 text-rose-600" /> PDF Tools
+              </Link>
             </Button>
             <Button 
                 variant="outline" 
