@@ -71,7 +71,6 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // Standard A4 Ratio Canvas (Strictly defined)
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414);
                     canvas.width = targetW;
@@ -80,21 +79,15 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Strict scaling logic (90%) for room to align
                     const scaleFactor = 0.9;
                     const dw = img.width * scaleFactor;
                     const dh = img.height * scaleFactor;
                     const dx = (canvas.width - dw) / 2;
                     
                     let dy;
-                    // ABSOLUTE LITERAL CLAMPING
-                    if (vAlign === 'top') {
-                        dy = 0; 
-                    } else if (vAlign === 'bottom') {
-                        dy = canvas.height - dh; 
-                    } else {
-                        dy = (canvas.height - dh) / 2; 
-                    }
+                    if (vAlign === 'top') dy = 0;
+                    else if (vAlign === 'bottom') dy = canvas.height - dh;
+                    else dy = (canvas.height - dh) / 2;
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
@@ -171,13 +164,10 @@ export default function PdfToImageConverter() {
         if (!selectedId) return;
         const targetPage = pages.find(p => p.id === selectedId);
         if (!targetPage) return;
-
         const newVAlign = updates.vAlign ?? targetPage.vAlign;
         const newFitMode = updates.fitMode ?? targetPage.fitMode;
-        
         setIsProcessing(true);
         const newFinalSrc = await renderProcessedImage(targetPage.originalSrc, newVAlign, newFitMode);
-        
         setPages(prev => prev.map(p => p.id === selectedId ? { ...p, ...updates, finalSrc: newFinalSrc } : p));
         setIsProcessing(false);
     };
@@ -185,13 +175,11 @@ export default function PdfToImageConverter() {
     const applyToAll = async () => {
         const selected = pages.find(p => p.id === selectedId);
         if (!selected) return;
-        
         setIsProcessing(true);
         const updatedPages = await Promise.all(pages.map(async (p) => {
             const final = await renderProcessedImage(p.originalSrc, selected.vAlign, selected.fitMode);
             return { ...p, vAlign: selected.vAlign, fitMode: selected.fitMode, finalSrc: final };
         }));
-        
         setPages(updatedPages);
         setIsProcessing(false);
         toast({ title: "Strict Sync Complete", description: "Literal alignment applied to all pages." });
@@ -232,8 +220,6 @@ export default function PdfToImageConverter() {
         setSelectedId(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
-
-    const selectedPage = pages.find(p => p.id === selectedId);
 
     if (!pdfFile) {
         return (
@@ -296,8 +282,6 @@ export default function PdfToImageConverter() {
                                                     "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white shadow-md",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
-                                                
-                                                {/* THE LITERAL ABSOLUTE POSITIONING PREVIEW */}
                                                 <div className={cn(
                                                     "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
@@ -311,7 +295,6 @@ export default function PdfToImageConverter() {
                                                         )}
                                                     />
                                                 </div>
-                                                
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">{p.index}</div>
                                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                                     <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
@@ -393,7 +376,7 @@ export default function PdfToImageConverter() {
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                                     <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
-                                    "Bottom" pushes the image to the exact aakhri pixel of the canvas. No padding logic.
+                                    "Bottom" pushes the image to the exact edge of the canvas. No extra padding.
                                 </p>
                             </div>
                         </CardContent>
