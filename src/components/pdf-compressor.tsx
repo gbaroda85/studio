@@ -51,7 +51,7 @@ export default function PdfCompressor() {
     const [mode, setMode] = useState<CompressionMode>('target');
     const [targetValue, setTargetValue] = useState<string>("300");
     const [targetUnit, setTargetUnit] = useState<TargetUnit>('kb');
-    const [quality, setQuality] = useState<number[]>([80]);
+    const [quality, setQuality] = useState<number[]>([85]);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,7 +70,7 @@ export default function PdfCompressor() {
             setStatusText("");
             
             const sizeInKb = file.size / 1024;
-            setTargetValue(Math.max(50, Math.round(sizeInKb * 0.7)).toString());
+            setTargetValue(Math.max(100, Math.round(sizeInKb * 0.6)).toString());
             setTargetUnit('kb');
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a PDF file.' });
@@ -86,7 +86,7 @@ export default function PdfCompressor() {
         if (!pdfFile) return;
         setIsProcessing(true);
         setCompressionResult(null);
-        setStatusText("Optimizing HD Engine...");
+        setStatusText("Initializing HD Engine...");
         setProgress(5);
 
         try {
@@ -100,21 +100,22 @@ export default function PdfCompressor() {
                 targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024);
             }
 
-            const HD_RENDER_SCALE = 3.0; 
-            const MIN_QUALITY_FLOOR = 0.6; // High quality floor for crisp text
+            // PRO LOGIC: Higher scale (4.0x) for text sharpness, strictly control quality floor
+            const MAX_RENDER_SCALE = 4.0; 
+            const QUALITY_FLOOR = 0.7; // Below 0.7, text becomes blurry/artifacted
             
-            let finalScale = HD_RENDER_SCALE;
+            let finalScale = MAX_RENDER_SCALE;
             let finalQuality = 0.9;
 
             if (mode === 'target' && targetBytes > 0) {
-                // Adjust for overhead. We aim for 98% of target to be safe but close.
-                const adjustedTargetBytes = targetBytes * 0.98;
+                // Safety buffer for PDF structure overhead
+                const adjustedTargetBytes = targetBytes * 0.97;
                 const targetBytesPerPage = adjustedTargetBytes / totalPages;
                 
                 const page1 = await pdf.getPage(1);
-                setStatusText("Calibrating Text Sharpness...");
+                setStatusText("Calibrating HD Output...");
                 
-                const scalesToTry = [3.0, 2.5, 2.0, 1.5, 1.2, 1.0]; 
+                const scalesToTry = [4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.2]; 
                 let bestFound = false;
 
                 for (const testScale of scalesToTry) {
@@ -131,14 +132,15 @@ export default function PdfCompressor() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page1.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                    let low = MIN_QUALITY_FLOOR, high = 0.98;
-                    let pageBestQ = MIN_QUALITY_FLOOR;
+                    // Binary search for highest quality that fits per-page budget
+                    let low = QUALITY_FLOOR, high = 0.98;
+                    let pageBestQ = QUALITY_FLOOR;
                     let pageBestFits = false;
 
-                    for (let i = 0; i < 12; i++) { // Higher precision search
+                    for (let i = 0; i < 15; i++) { // Higher iterations for precision
                         const mid = (low + high) / 2;
                         const data = canvas.toDataURL('image/jpeg', mid);
-                        const estSize = Math.round((data.length - 22) * 0.75); // More accurate base64 to binary estimation
+                        const estSize = Math.round((data.length - 22) * 0.75);
 
                         if (estSize <= targetBytesPerPage) {
                             pageBestQ = mid;
@@ -153,21 +155,21 @@ export default function PdfCompressor() {
                         finalScale = testScale;
                         finalQuality = pageBestQ;
                         bestFound = true;
-                    } else if (testScale === 1.0) {
-                        finalScale = 1.0;
-                        finalQuality = MIN_QUALITY_FLOOR;
+                    } else if (testScale === 1.2) {
+                        // If even at smallest scale we fail budget, just use floor
+                        finalScale = 1.2;
+                        finalQuality = QUALITY_FLOOR;
                     }
                 }
             } else {
                 finalQuality = quality[0] / 100;
-                finalScale = HD_RENDER_SCALE;
+                finalScale = MAX_RENDER_SCALE;
             }
 
-            // CRITICAL: Disable jspdf internal compression to prevent quality loss and massive size drops
             const newPdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
-                compress: false 
+                compress: false // We handle compression at the image level for reliability
             });
 
             for (let i = 1; i <= totalPages; i++) {
@@ -235,14 +237,14 @@ export default function PdfCompressor() {
 
     if (!pdfFile) {
         return (
-            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/80 border-2 border-dashed", isDragOver && "border-primary ring-4 ring-primary/20")}
+            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 hover:border-primary/80 border-2 border-dashed", isDragOver && "border-primary ring-4 ring-primary/20")}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader>
                     <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
                         <FileArchive className="h-10 w-10" />
                     </div>
                     <CardTitle className="text-2xl font-black uppercase tracking-tight">Pro HD PDF Optimizer</CardTitle>
-                    <CardDescription>Precision target hits with 3.0x HD Sharpness Engine.</CardDescription>
+                    <CardDescription>Precision target hits with 4.0x HD Sharpness Engine.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
@@ -252,14 +254,14 @@ export default function PdfCompressor() {
                         </div>
                         <div>
                             <p className="text-xl font-bold">Drop PDF here to Optimize</p>
-                            <p className="text-sm text-muted-foreground mt-2">Zero Blur Logic. Text remains 100% crisp for office use.</p>
+                            <p className="text-sm text-muted-foreground mt-2">Maximum Readability Engine Active (300 DPI Equivalent).</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD 3.0x SCALING</div>
+                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD 4.0x SCALING</div>
                 </CardFooter>
             </Card>
         );
@@ -286,7 +288,7 @@ export default function PdfCompressor() {
                                     <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
                                     <Progress value={progress} className="h-3 shadow-inner rounded-full" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                        <span>Re-sampling 3.0x Pixels...</span>
+                                        <span>Re-sampling 4.0x Pixels...</span>
                                         <span>{progress}%</span>
                                     </div>
                                 </div>
@@ -401,8 +403,8 @@ export default function PdfCompressor() {
                         <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                             <Zap className="size-6 text-yellow-500 shrink-0" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                <span className="font-black uppercase block mb-1">ZERO-BLUR ENGINE:</span>
-                                We render at 3x resolution (300 DPI equivalent) to ensure every letter remains perfectly readable for SSC/UPSC portals.
+                                <span className="font-black uppercase block mb-1">PRO READABILITY ENGINE:</span>
+                                We render at 4.0x resolution (approx. 300 DPI) and lock quality at 70% floor. Your text will remain crisp even at small file sizes.
                             </p>
                         </div>
                     </CardContent>
