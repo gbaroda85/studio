@@ -214,7 +214,7 @@ export default function ImageToPdfConverter() {
                 const imgProps = pdf.getImageProperties(img);
                 let finalWidth, finalHeight;
 
-                // Strict 90% scaling to ensure alignment is visible
+                // 90% scaling for professional breathing space
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
                 finalWidth = imgProps.width * ratio;
                 finalHeight = imgProps.height * ratio;
@@ -223,11 +223,11 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Literal Top Pixel
+                    y = 0; // Literal Edge Top
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Literal Bottom Pixel
+                    y = pageHeight - finalHeight; // Literal Edge Bottom
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Mathematical Center
+                    y = (pageHeight - finalHeight) / 2; // Mathematical Vertical Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -293,22 +293,17 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* Literal Positioning Mockup - Using absolute positioning for strictness */}
+                                {/* Absolute Position Wrapper - Bypassing standard constraints */}
                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                     <div className={cn(
-                                        "absolute inset-0 flex flex-col p-0",
-                                        img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                        "absolute w-full h-[90%] left-0 transition-all duration-300",
+                                        img.vAlign === 'top' ? 'top-0' : img.vAlign === 'bottom' ? 'bottom-0' : 'top-1/2 -translate-y-1/2'
                                     )}>
-                                        <div className="relative w-full h-[90%] flex flex-col">
-                                            <img 
-                                                src={img.src} 
-                                                alt="thumb"
-                                                className={cn(
-                                                    "w-full h-auto max-h-full object-contain pointer-events-none transition-all duration-300",
-                                                    img.vAlign === 'top' ? "mt-0" : img.vAlign === 'bottom' ? "mb-0" : ""
-                                                )} 
-                                            />
-                                        </div>
+                                        <img 
+                                            src={img.src} 
+                                            alt="thumb"
+                                            className="w-full h-full object-contain pointer-events-none" 
+                                        />
                                     </div>
                                 </div>
                                 

@@ -83,16 +83,16 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Strict 90% scaling for visual alignment clarity
+                    // 90% scaling for extraction breathing room
                     const scale = 0.9;
                     const dw = img.width * scale;
                     const dh = img.height * scale;
                     const dx = (canvas.width - dw) / 2;
                     
                     let dy;
-                    if (vAlign === 'top') dy = 0; // Literal Top Pixel
-                    else if (vAlign === 'bottom') dy = canvas.height - dh; // Literal Bottom Pixel
-                    else dy = (canvas.height - dh) / 2; // Mathematical Center
+                    if (vAlign === 'top') dy = 0;
+                    else if (vAlign === 'bottom') dy = canvas.height - dh;
+                    else dy = (canvas.height - dh) / 2;
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
@@ -296,22 +296,17 @@ export default function PdfToImageConverter() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
+                                                {/* Literal Absolute Clamping Wrapper */}
                                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                                     <div className={cn(
-                                                        "absolute inset-0 flex flex-col p-0",
-                                                        p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                        "absolute w-full h-[90%] left-0 transition-all duration-300",
+                                                        p.vAlign === 'top' ? 'top-0' : p.vAlign === 'bottom' ? 'bottom-0' : 'top-1/2 -translate-y-1/2'
                                                     )}>
-                                                        <div className="relative w-full h-[90%] flex flex-col">
-                                                            <img 
-                                                                src={p.finalSrc} 
-                                                                alt={`page-${p.index}`} 
-                                                                className={cn(
-                                                                    "w-full h-auto max-h-full transition-all duration-300 pointer-events-none object-contain",
-                                                                    p.vAlign === 'top' ? "mt-0" : 
-                                                                    p.vAlign === 'bottom' ? "mb-0" : ""
-                                                                )}
-                                                            />
-                                                        </div>
+                                                        <img 
+                                                            src={p.finalSrc} 
+                                                            alt={`page-${p.index}`} 
+                                                            className="w-full h-full object-contain pointer-events-none"
+                                                        />
                                                     </div>
                                                 </div>
                                                 
