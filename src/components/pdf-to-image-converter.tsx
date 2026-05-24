@@ -114,7 +114,7 @@ export default function PdfToImageConverter() {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 2.5 }); 
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+                const context = canvas.getContext('2d', { willReadFrequently: true });
                 canvas.height = Math.floor(viewport.height);
                 canvas.width = Math.floor(viewport.width);
                 
@@ -132,8 +132,11 @@ export default function PdfToImageConverter() {
                         fitMode: 'fit' as FitMode,
                         index: i
                     };
-                    setPages(prev => [...prev, newItem]);
-                    if (i === 1) setSelectedId(id);
+                    setPages(prev => {
+                        const updated = [...prev, newItem];
+                        if (i === 1) setSelectedId(id);
+                        return updated;
+                    });
                 }
                 setProgress(Math.round((i / totalPages) * 100));
             }
@@ -220,6 +223,8 @@ export default function PdfToImageConverter() {
         setSelectedId(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
+
+    const selectedPage = pages.find(p => p.id === selectedId);
 
     if (!pdfFile) {
         return (
