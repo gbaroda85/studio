@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -260,7 +259,7 @@ export default function ImageToPdfConverter() {
                             </div>
                             <div className="text-center">
                                 <p className="text-lg font-bold uppercase tracking-tight">Drop images or Click to upload</p>
-                                <p className="text-xs text-muted-foreground mt-1">100% Private local RAM processing.</p>
+                                <p className="text-sm text-muted-foreground mt-1">100% Private local RAM processing.</p>
                             </div>
                         </div>
                     ) : (
@@ -442,7 +441,8 @@ export default function ImageToPdfConverter() {
             </Card>
         </div>
       </div>
-      <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
+      {/* FIXED: Changed accept="application/pdf" to accept="image/*" for Image to PDF tool */}
+      <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
     </div>
   );
 }
