@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -213,7 +214,7 @@ export default function ImageToPdfConverter() {
                 const imgProps = pdf.getImageProperties(img);
                 let finalWidth, finalHeight;
 
-                // 90% scaling for professional breathing space
+                // Scale to 90% to leave room for Top/Bottom movement
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
                 finalWidth = imgProps.width * ratio;
                 finalHeight = imgProps.height * ratio;
@@ -222,11 +223,11 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Literal Edge Top
+                    y = 0; // Literal Top Edge
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Literal Edge Bottom
+                    y = pageHeight - finalHeight; // Literal Bottom Edge
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Mathematical Vertical Center
+                    y = (pageHeight - finalHeight) / 2; // Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -241,14 +242,14 @@ export default function ImageToPdfConverter() {
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "Literal Alignment Success!", description: "PDF generated with edge-to-edge positioning." });
+    toast({ title: "Literal Alignment Success!", description: "PDF generated with edge-clamping logic." });
   };
   
   const handleDownload = () => {
       if (!convertedPdfUrl) return;
       const link = document.createElement('a');
       link.href = convertedPdfUrl;
-      link.download = `literal-aligned-${Date.now()}.pdf`;
+      link.download = `strictly-aligned-${Date.now()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -264,11 +265,11 @@ export default function ImageToPdfConverter() {
             <Card className={cn("border-2 transition-all duration-300 overflow-hidden bg-card/50 shadow-xl hover:border-primary/40", isDragOver && "border-primary ring-4 ring-primary/20")}
                   onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader className="bg-muted/30 border-b">
-                    <CardTitle className="text-xl font-black flex items-center justify-between">
-                        <span className="uppercase tracking-tighter">LITERAL PDF STUDIO</span>
-                        {images.length > 0 && <Badge className="bg-primary text-white font-black uppercase">{images.length} PAGES</Badge>}
+                    <CardTitle className="text-xl font-black flex items-center justify-between uppercase tracking-tighter">
+                        IMAGE TO PDF STUDIO
+                        {images.length > 0 && <Badge className="bg-primary">{images.length} PAGES</Badge>}
                     </CardTitle>
-                    <CardDescription>Absolute Top/Bottom edge-clamping logic active.</CardDescription>
+                    <CardDescription>Literal edge-to-edge alignment logic enabled.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     {images.length === 0 ? (
@@ -292,16 +293,16 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* Absolute Position Wrapper - Bypassing standard constraints */}
+                                {/* Absolute Literal Clamping Mockup */}
                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                     <div className={cn(
-                                        "absolute w-full h-[90%] left-0 transition-all duration-300",
-                                        img.vAlign === 'top' ? 'top-0' : img.vAlign === 'bottom' ? 'bottom-0' : 'top-1/2 -translate-y-1/2'
+                                        "absolute w-full h-full flex flex-col transition-all duration-300",
+                                        img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                     )}>
                                         <img 
                                             src={img.src} 
                                             alt="thumb"
-                                            className="w-full h-full object-contain pointer-events-none" 
+                                            className="max-w-full max-h-[90%] object-contain pointer-events-none mx-auto" 
                                         />
                                     </div>
                                 </div>
@@ -328,7 +329,7 @@ export default function ImageToPdfConverter() {
                     <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
                         <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over</Button>
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                            <ShieldCheck className="h-4 w-4 text-green-500" /> ABSOLUTE COORDINATE LOCK
+                            <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE RAM PROCESSING
                         </div>
                     </CardFooter>
                 )}
@@ -336,9 +337,9 @@ export default function ImageToPdfConverter() {
 
             {convertedPdfUrl && (
                 <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-                    <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
-                        <CardTitle className="text-sm font-black uppercase flex items-center gap-2 text-green-700">
-                            <Eye className="size-4" /> Visual Page Tracker
+                    <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20 text-center">
+                        <CardTitle className="text-sm font-black uppercase flex items-center justify-center gap-2 text-green-700">
+                            <Eye className="size-4" /> Visual Verification (A4 Rendering)
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 bg-muted/20">
@@ -348,13 +349,13 @@ export default function ImageToPdfConverter() {
                                     <div className="flex flex-col items-center gap-4 py-20 w-full max-w-xs text-center">
                                         <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20 mx-auto" />
                                         <Progress value={renderingProgress} className="h-1" />
-                                        <p className="text-[10px] font-black uppercase text-primary animate-pulse">Rasterizing Document Layers...</p>
+                                        <p className="text-[10px] font-black uppercase text-primary animate-pulse">Building Final Pages...</p>
                                     </div>
                                 ) : (
                                     previewImages.map((img, i) => (
                                         <div key={i} className="shadow-2xl border-4 border-white rounded-sm overflow-hidden bg-white max-w-full">
                                             <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto" />
-                                            <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">A4 Page {i+1} Preview</div>
+                                            <div className="bg-muted text-[8px] font-black py-1 px-2 text-center uppercase tracking-widest text-muted-foreground border-t">A4 Page {i+1} Output</div>
                                         </div>
                                     ))
                                 )}
@@ -368,7 +369,7 @@ export default function ImageToPdfConverter() {
                             </div>
                             <div>
                                 <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">PDF READY!</p>
-                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Literal Alignment Verified</p>
+                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Literal Edge Clamping Verified</p>
                             </div>
                         </div>
                         <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
@@ -383,7 +384,7 @@ export default function ImageToPdfConverter() {
             <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                 <CardHeader className="bg-primary/5 border-b p-6">
                     <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Layout className="size-6 text-primary" /> Strict Layout
+                        <Layout className="size-6 text-primary" /> Edge Control
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 space-y-8">
@@ -391,14 +392,14 @@ export default function ImageToPdfConverter() {
                         <div className="py-12 text-center space-y-4 opacity-40">
                              <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
                              <p className="text-xs font-black uppercase tracking-widest leading-relaxed">
-                                Select a page thumbnail<br/>to unlock literal positioning
+                                Select a page thumbnail<br/>to strictly align
                              </p>
                         </div>
                     ) : (
                         <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
                             <div className="space-y-4 pt-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignVerticalJustifyCenter className="size-3" /> Absolute Position
+                                    <AlignVerticalJustifyCenter className="size-3" /> Literal Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button 
@@ -429,7 +430,7 @@ export default function ImageToPdfConverter() {
                             </div>
 
                             <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                <Layers className="size-3 mr-2" /> Global Sync Alignment
+                                <Layers className="size-3 mr-2" /> Sync This Alignment to All
                             </Button>
                         </div>
                     )}
@@ -437,8 +438,8 @@ export default function ImageToPdfConverter() {
                     <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                            <span className="font-black uppercase block mb-1 text-primary">STRICT MODE:</span>
-                            Images are pushed to the literal boundary of the A4 page. 0-margin logic enabled.
+                            <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
+                            Images are pushed to the mathematical border of the A4 page. No hidden paddings allowed.
                         </p>
                     </div>
                 </CardContent>
@@ -472,7 +473,7 @@ export default function ImageToPdfConverter() {
                 </div>
                 <div>
                     <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Privacy Guard</p>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-tight">All layout rendering occurs 100% locally in your device RAM.</p>
+                    <p className="text-[10px] text-muted-foreground font-medium leading-tight">All processing occurs 100% locally on your device.</p>
                 </div>
             </div>
         </div>
