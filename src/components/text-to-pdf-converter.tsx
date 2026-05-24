@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -9,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings, Eye, MonitorMobile } from 'lucide-react';
+import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { Badge } from './ui/badge';
 
 type Font = 'helvetica' | 'times' | 'courier';
 
@@ -72,9 +72,9 @@ export default function TextToPdfConverter() {
     useEffect(() => {
         const timer = setTimeout(() => {
             generatePdf();
-        }, 600); // 600ms delay to prevent excessive regeneration while typing
+        }, 600); 
         return () => clearTimeout(timer);
-    }, [generatePdf]);
+    }, [text, fontSize, font, margin, generatePdf]);
 
     useEffect(() => {
         return () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); };
@@ -92,7 +92,7 @@ export default function TextToPdfConverter() {
     }
     
     return (
-        <div className="w-full max-w-7xl flex flex-col gap-6 px-4">
+        <div className="w-full max-w-7xl flex flex-col gap-6 px-4 animate-in fade-in duration-500">
             <div className="grid lg:grid-cols-2 gap-8 items-stretch">
                 {/* Editor Section */}
                 <Card className="flex flex-col border-2 shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950">
@@ -178,7 +178,10 @@ export default function TextToPdfConverter() {
             
             <div className="flex items-center justify-center gap-6 py-4 opacity-40">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
-                    <MonitorMobile className="size-3" /> Mobile Optimized Preview
+                    <Smartphone className="size-3" /> Responsive HD Rendering
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <ShieldCheck className="size-3" /> 100% Private
                 </div>
             </div>
         </div>

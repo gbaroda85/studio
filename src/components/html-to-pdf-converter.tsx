@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -6,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Download, Loader2, FileCode, Eye, Globe, Zap, ShieldCheck } from 'lucide-react';
+import { Download, Loader2, FileCode, Eye, Globe, Zap, ShieldCheck, Smartphone } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Badge } from './ui/badge';
@@ -55,7 +54,6 @@ export default function HtmlToPdfConverter() {
 
         setIsGenerating(true);
         try {
-            // Wait for DOM to render the innerHTML properly
             await new Promise(resolve => setTimeout(resolve, 100));
 
             const canvas = await html2canvas(previewRef.current, {
@@ -85,15 +83,15 @@ export default function HtmlToPdfConverter() {
         } finally {
             setIsGenerating(false);
         }
-    }, [htmlContent, pdfUrl]);
+    }, [htmlContent]);
 
     // Debounce live preview
     useEffect(() => {
         const timer = setTimeout(() => {
             generatePdf();
-        }, 800); // Slightly longer debounce for HTML as it is heavier
+        }, 800); 
         return () => clearTimeout(timer);
-    }, [htmlContent]);
+    }, [htmlContent, generatePdf]);
 
     useEffect(() => {
         return () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); };
@@ -171,7 +169,7 @@ export default function HtmlToPdfConverter() {
                                 title="HTML to PDF Live Preview"
                             />
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-6 bg-slate-50 dark:bg-slate-900/50">
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-4 bg-slate-50 dark:bg-slate-900/50">
                                 <div className="relative">
                                     <Loader2 className="size-16 text-primary/10 animate-spin stroke-[4]" />
                                     <Globe className="absolute inset-0 m-auto size-6 text-primary/20" />
@@ -194,7 +192,10 @@ export default function HtmlToPdfConverter() {
                         </Button>
                         <div className="flex items-center justify-center gap-6">
                             <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">
-                                <ShieldCheck className="size-3 text-green-500" /> 100% PRIVATE LOCAL RENDER
+                                <Smartphone className="size-3 text-primary" /> RESPONSIVE PREVIEW
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">
+                                <ShieldCheck className="size-3 text-green-500" /> 100% PRIVATE
                             </div>
                         </div>
                     </CardFooter>
