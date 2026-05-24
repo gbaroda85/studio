@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -75,9 +74,8 @@ export default function PdfToImageConverter() {
                 const ctx = canvas.getContext('2d', { alpha: true });
                 if (!ctx) return resolve(originalSrc);
 
-                // For PDF to Image, "Original" mode means placing the page content on a standard A4 canvas ratio
                 if (fitMode === 'original') {
-                    // Use standard A4 aspect ratio (1:1.414)
+                    // Standard A4 aspect ratio (1:1.414)
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -90,14 +88,15 @@ export default function PdfToImageConverter() {
                     if (vAlign === 'top') dy = 0;
                     else if (vAlign === 'bottom') dy = canvas.height - img.height;
                     
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, dy);
                     resolve(canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0));
                 } else {
-                    // "Page Only" mode just takes the page pixels as is. 
-                    // To show alignment in "Fit" mode, we add small padding if alignment is not center
+                    // "Page Only" mode - literal rip, but if aligned we add zero-margin padding
                     if (vAlign !== 'center') {
                         const targetW = img.width;
-                        const targetH = Math.round(img.height * 1.15); // Add 15% height padding
+                        const targetH = Math.round(img.height * 1.25); // 25% room for alignment visibility
                         canvas.width = targetW;
                         canvas.height = targetH;
                         
@@ -156,10 +155,10 @@ export default function PdfToImageConverter() {
             }
             setPages(newPages);
             if (newPages.length > 0) setSelectedId(newPages[0].id);
-            toast({ title: 'Ripping Complete', description: `Extracted ${newPages.length} pages.` });
+            toast({ title: 'Extraction Success', description: `Rendered ${newPages.length} pages in HD.` });
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to extract images.' });
         } finally {
             setIsProcessing(false);
         }
@@ -206,7 +205,7 @@ export default function PdfToImageConverter() {
         
         setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Studio Sync", description: "Layout settings synced across all pages." });
+        toast({ title: "Strict Sync", description: "Extreme alignment applied to all pages." });
     };
 
     const handleDownloadSingle = (url: string, index: number) => {
@@ -229,11 +228,11 @@ export default function PdfToImageConverter() {
             const zipBlob = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(zipBlob);
-            link.download = `${pdfFile.name.replace(/\.pdf$/i, '')}-extracted-images.zip`;
+            link.download = `${pdfFile.name.replace(/\.pdf$/i, '')}-hd-images.zip`;
             link.click();
-            toast({ title: 'ZIP Downloaded', description: 'All images bundled successfully.' });
+            toast({ title: 'ZIP Ready', description: 'All HD pages bundled.' });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to create archive.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to bundle archive.' });
         } finally {
             setIsZipping(false);
         }
@@ -308,9 +307,12 @@ export default function PdfToImageConverter() {
                                                     "group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl bg-white" : "bg-white hover:border-primary/30"
                                                 )}>
-                                                <div className="flex-1 relative flex flex-col justify-center bg-muted/5">
-                                                    <div className="relative w-full h-full p-2">
-                                                        <Image src={p.finalSrc} alt={`page-${p.index}`} fill className="object-contain" unoptimized />
+                                                <div className={cn(
+                                                    "flex-1 relative flex flex-col p-4",
+                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                )}>
+                                                    <div className="relative w-full h-[75%]">
+                                                        <Image src={p.originalSrc} alt={`page-${p.index}`} fill className="object-contain" unoptimized />
                                                     </div>
                                                 </div>
                                                 
@@ -361,9 +363,12 @@ export default function PdfToImageConverter() {
                             ) : (
                                 <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
                                     <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <Maximize className="size-3" /> Extraction Mode
-                                        </Label>
+                                        <div className="flex justify-between items-center">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                                <Maximize className="size-3" /> Extraction Mode
+                                            </Label>
+                                            <Badge variant="secondary" className="font-black text-[8px] uppercase">Selected</Badge>
+                                        </div>
                                         <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
                                             <TabsList className="grid grid-cols-2 h-12 bg-muted p-1 rounded-xl">
                                                 <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Page Only</TabsTrigger>
@@ -371,25 +376,25 @@ export default function PdfToImageConverter() {
                                             </TabsList>
                                         </Tabs>
                                         <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                            "A4 Canvas" adds padding to create a standard document ratio, perfect for consistent layouts.
+                                            "A4 Canvas" enables strict vertical positioning on a standard document ratio.
                                         </p>
                                     </div>
 
                                     <div className="space-y-4 pt-4 border-t-2 border-dashed transition-opacity">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Vertical Position
+                                            <AlignVerticalJustifyCenter className="size-3" /> Strict Position
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
-                                            <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
-                                                <AlignVerticalJustifyStart className="size-4" />
+                                            <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
+                                                <AlignVerticalJustifyStart className="size-5" />
                                                 <span className="text-[8px] font-black uppercase">Top</span>
                                             </Button>
-                                            <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
-                                                <AlignVerticalJustifyCenter className="size-4" />
+                                            <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
+                                                <AlignVerticalJustifyCenter className="size-5" />
                                                 <span className="text-[8px] font-black uppercase">Center</span>
                                             </Button>
-                                            <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
-                                                <AlignVerticalJustifyEnd className="size-4" />
+                                            <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
+                                                <AlignVerticalJustifyEnd className="size-5" />
                                                 <span className="text-[8px] font-black uppercase">Bottom</span>
                                             </Button>
                                         </div>
@@ -407,7 +412,7 @@ export default function PdfToImageConverter() {
                                     </div>
 
                                     <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                        <Layers className="size-3 mr-2" /> Apply Settings to All Pages
+                                        <Layers className="size-3 mr-2" /> Apply Alignment to All Pages
                                     </Button>
                                 </div>
                             )}
@@ -415,8 +420,8 @@ export default function PdfToImageConverter() {
                             <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-1 text-primary">PRO EXTRACTION:</span>
-                                    Pages are rendered at high-density (300 DPI) for perfect text clarity and professional use.
+                                    <span className="font-black uppercase block mb-1 text-primary">STRICT EXTRACTION:</span>
+                                    Pages are pushed to the literal edges of the canvas. Center is mathematically exact.
                                 </p>
                             </div>
                         </CardContent>
@@ -433,7 +438,7 @@ export default function PdfToImageConverter() {
                                         <FileArchive className="size-9" />
                                         <div className="text-left">
                                             <span className="block uppercase tracking-tighter leading-none">DOWNLOAD ALL</span>
-                                            <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Get ZIP Bundle ({pages.length})</span>
+                                            <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">HD ZIP BUNDLE ({pages.length})</span>
                                         </div>
                                     </div>
                                 )}

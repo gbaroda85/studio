@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
@@ -199,7 +198,7 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 10; 
+    const margin = 5; 
     const maxWidth = pageWidth - (margin * 2);
     const maxHeight = pageHeight - (margin * 2);
 
@@ -218,8 +217,8 @@ export default function ImageToPdfConverter() {
                 if (imgData.fitMode === 'fit') {
                     const widthRatio = maxWidth / imgProps.width;
                     const heightRatio = maxHeight / imgProps.height;
-                    // Reduced ratio to 0.85 to ensure alignment is clearly visible on the A4 page
-                    const ratio = Math.min(widthRatio, heightRatio * 0.85);
+                    // Use a slightly smaller ratio to ensure vertical movement is visible
+                    const ratio = Math.min(widthRatio, heightRatio) * 0.85;
                     finalWidth = imgProps.width * ratio;
                     finalHeight = imgProps.height * ratio;
                 } else {
@@ -257,7 +256,7 @@ export default function ImageToPdfConverter() {
     await generateVisualPreviews(pdfBlob);
 
     setIsConverting(false);
-    toast({ title: "PDF Created!", description: "Check alignment in visual preview below." });
+    toast({ title: "PDF Created!", description: "Layout logic applied successfully." });
   };
   
   const handleDownload = () => {
@@ -309,18 +308,19 @@ export default function ImageToPdfConverter() {
                                 )}
                             >
                                 <div className={cn(
-                                    "flex-1 relative flex flex-col p-2",
+                                    "flex-1 relative flex flex-col p-4",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <div className="relative w-full h-[85%]">
+                                    <div className={cn(
+                                        "relative w-full transition-all duration-300",
+                                        img.fitMode === 'original' ? 'h-auto' : 'h-[75%]'
+                                    )}>
                                         <Image 
                                             src={img.src} 
                                             alt={`preview-${index}`} 
-                                            fill 
-                                            className={cn(
-                                                "object-contain transition-all",
-                                                img.fitMode === 'original' ? 'p-4' : 'p-1'
-                                            )} 
+                                            width={200}
+                                            height={200}
+                                            className="w-full h-full object-contain" 
                                             unoptimized 
                                         />
                                     </div>
@@ -390,7 +390,7 @@ export default function ImageToPdfConverter() {
                             </div>
                             <div>
                                 <p className="text-lg font-black text-green-800 uppercase tracking-tighter leading-none">PDF READY!</p>
-                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Layout logic successfully applied</p>
+                                <p className="text-xs text-green-700 font-bold mt-1 uppercase tracking-widest">Alignment logic strictly applied</p>
                             </div>
                         </div>
                         <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
@@ -435,7 +435,7 @@ export default function ImageToPdfConverter() {
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
+                                    <AlignVerticalJustifyCenter className="size-3" /> Vertical Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button 
@@ -464,7 +464,7 @@ export default function ImageToPdfConverter() {
                                     </Button>
                                 </div>
                                 <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                    Tip: In "Fit Page" mode, we reduced the image size to 85% to make Top/Bottom alignment clearly visible.
+                                    Tip: Alignment works best in "Fit Page" mode as it provides more room on the A4 canvas.
                                 </p>
                             </div>
 
@@ -477,8 +477,8 @@ export default function ImageToPdfConverter() {
                     <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                            <span className="font-black uppercase block mb-1 text-primary">High-Fidelity Rendering:</span>
-                            We preserve the original DPI and orientation for 100% crisp text extraction.
+                            <span className="font-black uppercase block mb-1 text-primary">STRICT ALIGNMENT:</span>
+                            Images are pushed to the literal edges of the page based on your selection.
                         </p>
                     </div>
                 </CardContent>
@@ -521,4 +521,3 @@ export default function ImageToPdfConverter() {
     </div>
   );
 }
-
