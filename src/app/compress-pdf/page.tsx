@@ -1,6 +1,6 @@
 
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, Target, TrendingDown } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Target, TrendingDown, Zap } from 'lucide-react';
 import PdfCompressor from '@/components/pdf-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
