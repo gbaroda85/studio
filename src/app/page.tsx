@@ -124,28 +124,28 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Increased Height and Text Size */}
-      <section className="relative w-full max-w-[2000px] pt-24 pb-32 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
+      {/* Hero Section - Compact Height but Big Bold Text */}
+      <section className="relative w-full max-w-[2000px] pt-12 pb-14 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm">
             <Sparkles className="size-3" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tighter leading-[1.1]">
             Professional Tools for <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Images & PDFs</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-10 font-bold leading-relaxed">
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Search Bar - Compact but prominent */}
+          {/* Search Bar - Compact and focused */}
           <div className="max-w-2xl mx-auto relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative">
@@ -163,7 +163,7 @@ export default function Page() {
       </section>
 
       {/* Tools Section */}
-      <section className="pt-16 pb-24 bg-background w-full flex justify-center">
+      <section className="pt-12 pb-24 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           
           {isSearching ? (
