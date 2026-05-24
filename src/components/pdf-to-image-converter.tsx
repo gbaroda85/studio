@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -25,13 +24,11 @@ import {
   Loader2,
   Layers
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -72,9 +69,9 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // Standard A4 Ratio Coordinate System
+                    // A4 Ratio coordinate system
                     const targetW = img.width;
-                    const targetH = Math.round(targetW * 1.414); 
+                    const targetH = Math.round(targetW * 1.414);
                     canvas.width = targetW;
                     canvas.height = targetH;
                     
@@ -82,9 +79,9 @@ export default function PdfToImageConverter() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
                     // Strict scaling logic
-                    const scale = 0.9;
-                    const dw = img.width * scale;
-                    const dh = img.height * scale;
+                    const scaleFactor = 0.9;
+                    const dw = img.width * scaleFactor;
+                    const dh = img.height * scaleFactor;
                     const dx = (canvas.width - dw) / 2;
                     
                     let dy;
@@ -93,7 +90,7 @@ export default function PdfToImageConverter() {
                     } else if (vAlign === 'bottom') {
                         dy = canvas.height - dh; // Literal Bottom
                     } else {
-                        dy = (canvas.height - dh) / 2; // Exact Center
+                        dy = (canvas.height - dh) / 2; // Center
                     }
                     
                     ctx.imageSmoothingEnabled = true;
@@ -141,13 +138,13 @@ export default function PdfToImageConverter() {
                         index: i
                     };
                     newPages.push(newItem);
-                    // Update state per page to avoid white box
+                    // Critical: Update state immediately per page to avoid white boxes
+                    setPages(prev => [...prev, newItem]);
                     if (i === 1) setSelectedId(id);
                 }
                 setProgress(Math.round((i / totalPages) * 100));
             }
-            setPages(newPages);
-            toast({ title: 'Extraction Success', description: `Rendered ${newPages.length} pages in HD.` });
+            toast({ title: 'Extraction Success', description: `Rendered ${totalPages} pages in HD.` });
         } catch (error) {
             console.error(error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to extract images.' });
@@ -242,7 +239,7 @@ export default function PdfToImageConverter() {
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
-                    <Card className="border-2 shadow-2xl overflow-hidden bg-card/50">
+                    <Card className="border-2 shadow-xl overflow-hidden bg-card/50">
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
@@ -269,17 +266,15 @@ export default function PdfToImageConverter() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
-                                                <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
-                                                    <div className={cn(
-                                                        "absolute w-full h-full flex flex-col transition-all duration-300",
-                                                        p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                                    )}>
-                                                        <img 
-                                                            src={p.finalSrc} 
-                                                            alt={`page-${p.index}`} 
-                                                            className="max-w-full max-h-full object-contain pointer-events-none mx-auto"
-                                                        />
-                                                    </div>
+                                                <div className={cn(
+                                                    "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
+                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                )}>
+                                                    <img 
+                                                        src={p.finalSrc} 
+                                                        alt={`page-${p.index}`} 
+                                                        className="max-w-full max-h-[90%] object-contain pointer-events-none mx-auto block"
+                                                    />
                                                 </div>
                                                 
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">{p.index}</div>
@@ -297,7 +292,7 @@ export default function PdfToImageConverter() {
                         <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
                             <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
                             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                                <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE LOCAL RENDERING
+                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure Processing
                             </div>
                         </CardFooter>
                     </Card>
@@ -307,7 +302,7 @@ export default function PdfToImageConverter() {
                     <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                                <Layout className="size-6 text-primary" /> EXTRACTION PANEL
+                                <Layout className="size-6 text-primary" /> EXTRACTION
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 space-y-8">
@@ -335,7 +330,7 @@ export default function PdfToImageConverter() {
 
                                     <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
+                                            <AlignVerticalJustifyCenter className="size-3" /> Alignment
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
@@ -362,7 +357,7 @@ export default function PdfToImageConverter() {
                             <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-1 text-primary">STRICT EXTRACTION:</span>
+                                    <span className="font-black uppercase block mb-1 text-primary">STRICT CLAMPING:</span>
                                     Pages are pushed to the literal boundary of the canvas. 0-pixel gap logic enabled.
                                 </p>
                             </div>
