@@ -15,7 +15,6 @@ import {
   ShieldCheck, 
   Zap, 
   CheckCircle2,
-  Layers,
   FileArchive,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyStart,
@@ -34,7 +33,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Stable worker initialization
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
@@ -74,7 +72,6 @@ export default function PdfToImageConverter() {
                 if (!ctx) return resolve(originalSrc);
 
                 if (fitMode === 'original') {
-                    // Standard A4 aspect ratio (1:1.414) for strict extraction
                     const targetW = img.width;
                     const targetH = Math.round(targetW * 1.414); 
                     canvas.width = targetW;
@@ -83,16 +80,21 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    let dy = (canvas.height - img.height) / 2;
+                    // We scale the image slightly down to ensure alignment is visible even for A4 inputs
+                    const scale = 0.9;
+                    const dw = img.width * scale;
+                    const dh = img.height * scale;
+                    const dx = (canvas.width - dw) / 2;
+                    
+                    let dy = (canvas.height - dh) / 2;
                     if (vAlign === 'top') dy = 0; 
-                    else if (vAlign === 'bottom') dy = canvas.height - img.height;
+                    else if (vAlign === 'bottom') dy = canvas.height - dh;
                     
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    ctx.drawImage(img, 0, dy);
+                    ctx.drawImage(img, dx, dy, dw, dh);
                     resolve(canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0));
                 } else {
-                    // Page Only mode - literal extraction
                     resolve(originalSrc);
                 }
             };
@@ -289,22 +291,20 @@ export default function PdfToImageConverter() {
                                                     "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl bg-white" : "bg-white hover:border-primary/30"
                                                 )}>
-                                                {/* THE STRICT PREVIEW CONTAINER */}
+                                                
                                                 <div className={cn(
-                                                    "flex-1 relative flex flex-col overflow-hidden", 
+                                                    "flex-1 relative flex flex-col overflow-hidden bg-white",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
-                                                    <div className={cn(
-                                                        "relative w-full",
-                                                        p.fitMode === 'fit' ? "h-full" : "h-[70%]" 
-                                                    )}>
+                                                    <div className="relative w-full h-full">
                                                         <Image 
                                                             src={p.finalSrc} 
                                                             alt={`page-${p.index}`} 
                                                             fill 
                                                             className={cn(
-                                                                "object-contain transition-all duration-300 pointer-events-none",
-                                                                p.vAlign === 'top' ? 'object-top' : p.vAlign === 'bottom' ? 'object-bottom' : 'object-center'
+                                                                "transition-all duration-300 pointer-events-none object-contain",
+                                                                p.vAlign === 'top' ? "object-top" : 
+                                                                p.vAlign === 'bottom' ? "object-bottom" : "object-center"
                                                             )}
                                                             unoptimized 
                                                         />
@@ -312,14 +312,6 @@ export default function PdfToImageConverter() {
                                                 </div>
                                                 
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">{p.index}</div>
-                                                
-                                                {selectedId === p.id && (
-                                                    <div className="absolute inset-0 bg-primary/5 flex items-center justify-center z-10">
-                                                        <div className="size-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg border-2 border-white animate-in zoom-in-50">
-                                                            <CheckCircle2 className="size-5" />
-                                                        </div>
-                                                    </div>
-                                                )}
                                                 
                                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                                     <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
@@ -371,13 +363,13 @@ export default function PdfToImageConverter() {
                                             </TabsList>
                                         </Tabs>
                                         <p className="text-[9px] text-muted-foreground italic font-medium leading-relaxed bg-muted/30 p-2 rounded-lg">
-                                            "A4 Canvas" is required for literal Top/Bottom positioning.
+                                            "A4 Canvas" creates a standard document frame for Top/Bottom positioning.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed transition-opacity">
+                                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Strict Position
+                                            <AlignVerticalJustifyCenter className="size-3" /> Literal Position
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
@@ -407,7 +399,7 @@ export default function PdfToImageConverter() {
                                     </div>
 
                                     <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                        <Layers className="size-3 mr-2" /> Sync Alignment to All
+                                        <Layers className="size-3 mr-2" /> Global Sync Alignment
                                     </Button>
                                 </div>
                             )}
@@ -416,7 +408,7 @@ export default function PdfToImageConverter() {
                                 <Zap className="size-6 text-yellow-500 shrink-0" />
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                                     <span className="font-black uppercase block mb-1 text-primary">STRICT EXTRACTION:</span>
-                                    Pages are pushed to the literal border of the canvas. Center is mathematically 0-error.
+                                    Pages are pushed to the literal border of the canvas. 0-pixel gap logic enabled.
                                 </p>
                             </div>
                         </CardContent>
@@ -426,7 +418,7 @@ export default function PdfToImageConverter() {
                                 {isZipping ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="size-8 animate-spin" />
-                                        <span className="uppercase tracking-tighter">BUNDLE READY...</span>
+                                        <span className="uppercase tracking-tighter">ZIPPING BUNDLE...</span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-4">

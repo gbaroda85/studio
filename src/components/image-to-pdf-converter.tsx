@@ -34,7 +34,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 
-// Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
@@ -201,7 +200,7 @@ export default function ImageToPdfConverter() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 0.5; // Extreme edge safety margin
+    const margin = 0.5; 
 
     for (let i = 0; i < images.length; i++) {
         if (i > 0) pdf.addPage();
@@ -216,7 +215,6 @@ export default function ImageToPdfConverter() {
                 let finalWidth, finalHeight;
 
                 if (imgData.fitMode === 'fit') {
-                    // Use a slightly smaller ratio (0.8) to ensure we always have room to see Top/Bottom movement
                     const maxWidth = pageWidth - (margin * 2);
                     const maxHeight = pageHeight - (margin * 2);
                     const widthRatio = maxWidth / imgProps.width;
@@ -229,12 +227,12 @@ export default function ImageToPdfConverter() {
                     finalWidth = imgProps.width * pxToMm;
                     finalHeight = imgProps.height * pxToMm;
 
-                    if (finalWidth > pageWidth) {
+                    if (finalWidth > (pageWidth - margin * 2)) {
                         const ratio = (pageWidth - margin * 2) / finalWidth;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
                     }
-                    if (finalHeight > pageHeight) {
+                    if (finalHeight > (pageHeight - margin * 2)) {
                         const ratio = (pageHeight - margin * 2) / finalHeight;
                         finalWidth *= ratio;
                         finalHeight *= ratio;
@@ -315,29 +313,26 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* THE STRICT PREVIEW CONTAINER */}
                                 <div className={cn(
-                                    "flex-1 relative flex flex-col overflow-hidden",
+                                    "flex-1 relative flex flex-col overflow-hidden bg-white",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <div className={cn(
-                                        "relative w-full",
-                                        img.fitMode === 'fit' ? "h-[85%]" : "h-auto"
-                                    )}>
-                                        <img 
+                                    <div className="relative w-full h-full">
+                                        <Image 
                                             src={img.src} 
                                             alt="thumb"
+                                            fill
                                             className={cn(
-                                                "w-full transition-all duration-300 pointer-events-none",
-                                                img.fitMode === 'fit' ? "h-full object-contain" : "h-auto",
+                                                "transition-all duration-300 pointer-events-none object-contain",
                                                 img.vAlign === 'top' ? "object-top" : 
                                                 img.vAlign === 'bottom' ? "object-bottom" : "object-center"
                                             )} 
+                                            unoptimized
                                         />
                                     </div>
                                 </div>
                                 
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRemoveImage(img.id); }}>
                                         <X className="h-4 w-4" />
                                     </Button>
@@ -453,7 +448,7 @@ export default function ImageToPdfConverter() {
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
                                     >
                                         <AlignVerticalJustifyStart className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Extreme Top</span>
+                                        <span className="text-[8px] font-black uppercase">Literal Top</span>
                                     </Button>
                                     <Button 
                                         variant={selectedImage?.vAlign === 'center' ? 'default' : 'outline'} 
@@ -469,7 +464,7 @@ export default function ImageToPdfConverter() {
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
                                     >
                                         <AlignVerticalJustifyEnd className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Extreme Bottom</span>
+                                        <span className="text-[8px] font-black uppercase">Literal Bottom</span>
                                     </Button>
                                 </div>
                             </div>
@@ -484,7 +479,7 @@ export default function ImageToPdfConverter() {
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                             <span className="font-black uppercase block mb-1 text-primary">STRICT MODE:</span>
-                            Images are pushed to the literal border of the A4 page. 0.5mm safe-gap active.
+                            Images are pushed to the literal border of the A4 page. 0-pixel gap logic enabled.
                         </p>
                     </div>
                 </CardContent>
