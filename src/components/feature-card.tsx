@@ -27,7 +27,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <Card className="h-full relative overflow-hidden transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-2xl border-border/50 bg-card group-hover:border-primary/50 group-hover:ring-1 group-hover:ring-primary/20 bg-gradient-to-br from-white via-white to-primary/5 dark:from-slate-900 dark:via-slate-900 dark:to-primary/10 rounded-3xl">
+      <Card className="h-full relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl dark:group-hover:shadow-primary/20 border-2 border-border/50 dark:border-white/10 group-hover:border-primary/50 dark:group-hover:border-primary/40 bg-card bg-gradient-to-br from-white via-white to-primary/5 dark:from-slate-900 dark:via-slate-900 dark:to-primary/10 rounded-3xl">
         <CardHeader className="p-8">
           <div className="flex items-start justify-between mb-6">
             <div className={cn("grid size-16 place-items-center rounded-2xl bg-muted/50 transition-all group-hover:scale-110 group-hover:bg-primary/10 shadow-inner", color)}>
@@ -37,7 +37,7 @@ export function FeatureCard({
                 <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-black mb-4 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{title}</CardTitle>
+          <CardTitle className="text-2xl font-black mb-4 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight uppercase">{title}</CardTitle>
           <CardDescription className="text-base text-slate-500 dark:text-slate-400 leading-relaxed font-semibold line-clamp-2">{description}</CardDescription>
         </CardHeader>
         <div className="absolute -bottom-10 -right-10 size-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-2xl" />

@@ -92,8 +92,8 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
   <Link href={href} className="group">
-    <Card className="h-full border-border/50 shadow-sm hover:shadow-2xl transition-all duration-500 bg-white dark:bg-slate-900 overflow-hidden relative rounded-2xl bg-gradient-to-br from-white via-white to-primary/10 dark:from-slate-900 dark:via-slate-900 dark:to-primary/20">
-      <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
+    <Card className="h-full border-2 border-border/50 dark:border-white/10 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 dark:hover:border-primary/40 transition-all duration-300 bg-white dark:bg-slate-900 overflow-hidden relative rounded-2xl bg-gradient-to-br from-white via-white to-primary/5 dark:from-slate-900 dark:via-slate-900 dark:to-primary/10 hover:-translate-y-2">
+      <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-6">
         <div className={cn(`size-12 rounded-xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg`, colorClass)}>
           <Icon className="size-6" />
