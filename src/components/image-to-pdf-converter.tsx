@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -70,13 +71,11 @@ export default function ImageToPdfConverter() {
         setPreviewImages([]);
     }
     const newFilesList = Array.from(files || []).filter(file => file.type.startsWith('image/'));
-    if (newFilesList.length === 0 && files && files.length > 0) {
-        toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select only image files.' });
-        return;
-    }
-
+    
     const newItems: ImageItem[] = [];
     let processedCount = 0;
+
+    if (newFilesList.length === 0) return;
 
     newFilesList.forEach(file => {
         const reader = new FileReader();
@@ -107,11 +106,7 @@ export default function ImageToPdfConverter() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
 
   const handleRemoveImage = (id: string) => {
-    if (convertedPdfUrl) {
-        URL.revokeObjectURL(convertedPdfUrl);
-        setConvertedPdfUrl(null);
-        setPreviewImages([]);
-    }
+    clearPreviews();
     setImages(prev => {
         const filtered = prev.filter(img => img.id !== id);
         if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[0].id : null);
@@ -119,30 +114,32 @@ export default function ImageToPdfConverter() {
     });
   }
   
+  const clearPreviews = () => {
+    if (convertedPdfUrl) {
+        URL.revokeObjectURL(convertedPdfUrl);
+        setConvertedPdfUrl(null);
+    }
+    setPreviewImages([]);
+  }
+
   const handleReset = () => {
     setImages([]);
     setSelectedId(null);
-    if (convertedPdfUrl) URL.revokeObjectURL(convertedPdfUrl);
-    setConvertedPdfUrl(null);
-    setPreviewImages([]);
+    clearPreviews();
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   const updateSelectedImage = (updates: Partial<Pick<ImageItem, 'vAlign'>>) => {
       if (!selectedId) return;
       setImages(prev => prev.map(img => img.id === selectedId ? { ...img, ...updates } : img));
-      if (convertedPdfUrl) {
-          URL.revokeObjectURL(convertedPdfUrl);
-          setConvertedPdfUrl(null);
-          setPreviewImages([]);
-      }
+      clearPreviews();
   };
 
   const applyToAll = () => {
       const selected = images.find(img => img.id === selectedId);
       if (!selected) return;
       setImages(prev => prev.map(img => ({ ...img, vAlign: selected.vAlign })));
-      toast({ title: "Settings Applied", description: "Strict alignment sync complete." });
+      toast({ title: "Literal Sync Complete", description: "Strict alignment applied to all images." });
   };
 
   const generateVisualPreviews = async (pdfBlob: Blob) => {
@@ -181,8 +178,7 @@ export default function ImageToPdfConverter() {
   const handleConvertToPdf = async () => {
     if (images.length === 0) return;
     setIsConverting(true);
-    setConvertedPdfUrl(null);
-    setPreviewImages([]);
+    clearPreviews();
 
     const pdf = new jsPDF({
         orientation: 'p',
@@ -203,8 +199,9 @@ export default function ImageToPdfConverter() {
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
-                // 90% Scaling to ensure movement room
-                const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
+                // 90% Scaling to ensure visual movement
+                const scale = 0.9;
+                const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scale;
                 const finalWidth = imgProps.width * ratio;
                 const finalHeight = imgProps.height * ratio;
 
@@ -212,9 +209,9 @@ export default function ImageToPdfConverter() {
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Literal Top Edge
+                    y = 0; // Literal Top
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Literal Bottom Edge
+                    y = pageHeight - finalHeight; // Literal Bottom
                 } else {
                     y = (pageHeight - finalHeight) / 2; // Center
                 }
@@ -238,7 +235,7 @@ export default function ImageToPdfConverter() {
       if (!convertedPdfUrl) return;
       const link = document.createElement('a');
       link.href = convertedPdfUrl;
-      link.download = `strictly-aligned-${Date.now()}.pdf`;
+      link.download = `strictly-aligned-docs.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -278,13 +275,13 @@ export default function ImageToPdfConverter() {
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col",
+                                    "relative group aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0",
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                     <div className={cn(
-                                        "absolute w-full h-full flex flex-col transition-all duration-300",
+                                        "absolute inset-0 flex flex-col transition-all duration-300",
                                         img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                     )}>
                                         <img 
@@ -300,9 +297,8 @@ export default function ImageToPdfConverter() {
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <div className="absolute bottom-1 left-1 flex gap-1 z-20">
+                                <div className="absolute top-2 left-2 flex gap-1 z-20">
                                     <div className="bg-black/60 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">P{index + 1}</div>
-                                    <div className="bg-primary/80 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">{img.vAlign}</div>
                                 </div>
                             </div>
                             ))}
@@ -372,7 +368,7 @@ export default function ImageToPdfConverter() {
             <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                 <CardHeader className="bg-primary/5 border-b p-6">
                     <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Layout className="size-6 text-primary" /> Edge Control
+                        <Layout className="size-6 text-primary" /> POSITION PANEL
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 space-y-8">
@@ -418,7 +414,7 @@ export default function ImageToPdfConverter() {
                             </div>
 
                             <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                <Layers className="size-3 mr-2" /> Sync Alignment to All
+                                <Layers className="size-3 mr-2" /> Global Sync Alignment
                             </Button>
                         </div>
                     )}
@@ -426,7 +422,7 @@ export default function ImageToPdfConverter() {
                     <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                            <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
+                            <span className="font-black uppercase block mb-1 text-primary">STRICT CLAMPING:</span>
                             Images are pushed to the literal boundary of the A4 page. 0-pixel gap logic enabled.
                         </p>
                     </div>
@@ -454,16 +450,6 @@ export default function ImageToPdfConverter() {
                     </Button>
                 </CardFooter>
             </Card>
-
-            <div className="p-6 bg-green-500/5 rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
-                <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="size-6 text-green-600" />
-                </div>
-                <div>
-                    <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Privacy Guard</p>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-tight">All processing occurs 100% locally on your device.</p>
-                </div>
-            </div>
         </div>
       </div>
       <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />

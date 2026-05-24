@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -80,7 +81,7 @@ export default function PdfToImageConverter() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Scale to 90% for visible movement
+                    // Strict scaling logic
                     const scale = 0.9;
                     const dw = img.width * scale;
                     const dh = img.height * scale;
@@ -88,11 +89,11 @@ export default function PdfToImageConverter() {
                     
                     let dy;
                     if (vAlign === 'top') {
-                        dy = 0; // Literal Top Edge
+                        dy = 0; // Literal Top
                     } else if (vAlign === 'bottom') {
-                        dy = canvas.height - dh; // Literal Bottom Edge
+                        dy = canvas.height - dh; // Literal Bottom
                     } else {
-                        dy = (canvas.height - dh) / 2; // Center
+                        dy = (canvas.height - dh) / 2; // Exact Center
                     }
                     
                     ctx.imageSmoothingEnabled = true;
@@ -131,19 +132,21 @@ export default function PdfToImageConverter() {
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
                     const src = canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0);
                     const id = Math.random().toString(36).substr(2, 9);
-                    newPages.push({
+                    const newItem = {
                         id,
                         originalSrc: src,
                         finalSrc: src,
                         vAlign: 'center',
                         fitMode: 'fit',
                         index: i
-                    });
+                    };
+                    newPages.push(newItem);
+                    // Update state per page to avoid white box
+                    if (i === 1) setSelectedId(id);
                 }
                 setProgress(Math.round((i / totalPages) * 100));
             }
             setPages(newPages);
-            if (newPages.length > 0) setSelectedId(newPages[0].id);
             toast({ title: 'Extraction Success', description: `Rendered ${newPages.length} pages in HD.` });
         } catch (error) {
             console.error(error);
@@ -194,13 +197,13 @@ export default function PdfToImageConverter() {
         
         setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Strict Layout Sync", description: "Literal extraction applied to all pages." });
+        toast({ title: "Strict Sync Complete", description: "Literal alignment applied to all pages." });
     };
 
     const handleDownloadSingle = (url: string, index: number) => {
         const link = document.createElement('a');
         link.href = url;
-        link.download = `strictly-aligned-page-${index + 1}.${outputFormat === 'jpeg' ? 'jpg' : 'png'}`;
+        link.download = `extracted-page-${index + 1}.${outputFormat === 'jpeg' ? 'jpg' : 'png'}`;
         link.click();
     }
 
@@ -212,14 +215,13 @@ export default function PdfToImageConverter() {
             const ext = outputFormat === 'jpeg' ? 'jpg' : 'png';
             pages.forEach((p) => {
                 const base64Data = p.finalSrc.split(',')[1];
-                zip.file(`strictly-aligned-page-${p.index}.${ext}`, base64Data, { base64: true });
+                zip.file(`extracted-page-${p.index}.${ext}`, base64Data, { base64: true });
             });
             const zipBlob = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(zipBlob);
-            link.download = `hd-extracted-docs.zip`;
+            link.download = `hd-extracted-pages.zip`;
             link.click();
-            toast({ title: 'Extraction Bundle Ready', description: 'All pages strictly aligned and zipped.' });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to bundle archive.' });
         } finally {
@@ -243,17 +245,17 @@ export default function PdfToImageConverter() {
                     <Card className="border-2 shadow-2xl overflow-hidden bg-card/50">
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Extraction Studio</CardTitle>
+                                <CardTitle className="text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
                                 <CardDescription className="truncate max-w-md font-mono text-[10px] mt-1">{pdfFile?.name}</CardDescription>
                             </div>
                             {pages.length > 0 && <Badge className="bg-primary">{pages.length} PAGES</Badge>}
                         </CardHeader>
                         <CardContent className="p-6">
                             {isProcessing && pages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-24 gap-8 text-center">
+                                <div className="flex flex-col items-center justify-center py-32 gap-8 text-center">
                                     <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
                                     <div className="space-y-4 w-full max-w-sm">
-                                        <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">Rendering PDF Layers...</p>
+                                        <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">Rendering PDF Pages...</p>
                                         <Progress value={progress} className="h-2" />
                                     </div>
                                 </div>
@@ -275,13 +277,12 @@ export default function PdfToImageConverter() {
                                                         <img 
                                                             src={p.finalSrc} 
                                                             alt={`page-${p.index}`} 
-                                                            className="max-w-full max-h-[90%] object-contain pointer-events-none mx-auto"
+                                                            className="max-w-full max-h-full object-contain pointer-events-none mx-auto"
                                                         />
                                                     </div>
                                                 </div>
                                                 
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">{p.index}</div>
-                                                
                                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                                     <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
                                                         <Download className="size-4" />
@@ -306,7 +307,7 @@ export default function PdfToImageConverter() {
                     <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                                <Layout className="size-6 text-primary" /> Extraction Panel
+                                <Layout className="size-6 text-primary" /> EXTRACTION PANEL
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 space-y-8">
@@ -320,13 +321,13 @@ export default function PdfToImageConverter() {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
                                             <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                                <Maximize className="size-3" /> Canvas Strategy
+                                                <Maximize className="size-3" /> Canvas Mode
                                             </Label>
-                                            <Badge variant="secondary" className="font-black text-[8px] uppercase">A4 Standard</Badge>
+                                            <Badge variant="secondary" className="font-black text-[8px] uppercase">A4 RATIO</Badge>
                                         </div>
                                         <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
                                             <TabsList className="grid grid-cols-2 h-12 bg-muted p-1 rounded-xl">
-                                                <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Page Data Only</TabsTrigger>
+                                                <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Page Only</TabsTrigger>
                                                 <TabsTrigger value="original" className="font-bold text-[10px] uppercase">A4 Canvas</TabsTrigger>
                                             </TabsList>
                                         </Tabs>
@@ -334,7 +335,7 @@ export default function PdfToImageConverter() {
 
                                     <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Absolute Position
+                                            <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
@@ -350,17 +351,6 @@ export default function PdfToImageConverter() {
                                                 <span className="text-[8px] font-black uppercase">Literal Bottom</span>
                                             </Button>
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Image Format</Label>
-                                        <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
-                                            <SelectTrigger className="h-12 font-bold rounded-xl border-2"><SelectValue /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="png">PNG (Lossless)</SelectItem>
-                                                <SelectItem value="jpeg">JPEG (Optimized)</SelectItem>
-                                            </SelectContent>
-                                        </Select>
                                     </div>
 
                                     <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
