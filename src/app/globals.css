@@ -9,26 +9,26 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 95%; /* Minimalist Off-white */
-    --foreground: 0 0% 0%;   /* Pure Black Text */
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 0 0% 15%;   /* Dark Grey text */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;      /* Minimalist Black Buttons */
+    --popover-foreground: 0 0% 15%;
+    --primary: 35 100% 50%;      /* Skillbridge Orange (#FF9500) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 0%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 0 0% 97%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 35 100% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
-    --ring: 0 0% 0%;
-    --radius: 1.5rem; /* More rounded as per image */
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 35 100% 50%;
+    --radius: 1rem; /* Smooth rounded corners like the template */
   }
   .dark {
     --background: 222.2 84% 4.9%; /* Rich Navy */
@@ -60,8 +60,8 @@ body {
   body {
     @apply bg-background text-foreground selection:bg-primary/20;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(262, 83%, 58%, 0.03) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(199, 89% , 48%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(35, 100%, 50%, 0.02) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(35, 100%, 50%, 0.02) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
