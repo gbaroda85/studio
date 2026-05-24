@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -112,7 +111,7 @@ export default function PdfToImageConverter() {
 
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 2.5 }); 
+                const viewport = page.getViewport({ scale: 3.0 }); 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
                 canvas.height = Math.floor(viewport.height);
