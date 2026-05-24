@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -16,7 +15,6 @@ import {
   ShieldCheck, 
   Zap, 
   CheckCircle2,
-  FileArchive,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyStart,
   AlignVerticalJustifyEnd,
@@ -30,7 +28,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -270,7 +267,6 @@ export default function PdfToImageConverter() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 
-                                                {/* Literal Absolute Clamping Wrapper */}
                                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                                     <div className={cn(
                                                         "absolute w-full h-full flex flex-col transition-all duration-300",
@@ -391,7 +387,7 @@ export default function PdfToImageConverter() {
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-4">
-                                        <FileArchive className="size-9" />
+                                        <Layers className="size-9" />
                                         <div className="text-left">
                                             <span className="block uppercase tracking-tighter leading-none">EXTRACT ALL</span>
                                             <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">ZIP ARCHIVE ({pages.length})</span>
@@ -403,6 +399,7 @@ export default function PdfToImageConverter() {
                     </Card>
                 </div>
             </div>
+            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </div>
     );
 }

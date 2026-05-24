@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -14,24 +13,21 @@ import {
   Loader2, 
   ShieldCheck, 
   Zap, 
-  Layers, 
   RefreshCcw,
   Layout,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyStart,
   AlignVerticalJustifyEnd,
-  Maximize,
   Eye,
   CheckCircle2,
   MousePointer2,
-  Settings2
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 
@@ -40,14 +36,12 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 }
 
 type VAlign = 'top' | 'center' | 'bottom';
-type FitMode = 'fit' | 'original';
 
 interface ImageItem {
     id: string;
     file: File;
     src: string;
     vAlign: VAlign;
-    fitMode: FitMode;
 }
 
 export default function ImageToPdfConverter() {
@@ -65,9 +59,7 @@ export default function ImageToPdfConverter() {
 
   useEffect(() => {
     return () => {
-      if (convertedPdfUrl) {
-        URL.revokeObjectURL(convertedPdfUrl);
-      }
+      if (convertedPdfUrl) URL.revokeObjectURL(convertedPdfUrl);
     };
   }, [convertedPdfUrl]);
 
@@ -94,8 +86,7 @@ export default function ImageToPdfConverter() {
                 id,
                 file,
                 src: e.target?.result as string,
-                vAlign: 'center',
-                fitMode: 'fit'
+                vAlign: 'center'
             });
             processedCount++;
             if (processedCount === newFilesList.length) {
@@ -137,7 +128,7 @@ export default function ImageToPdfConverter() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  const updateSelectedImage = (updates: Partial<Pick<ImageItem, 'vAlign' | 'fitMode'>>) => {
+  const updateSelectedImage = (updates: Partial<Pick<ImageItem, 'vAlign'>>) => {
       if (!selectedId) return;
       setImages(prev => prev.map(img => img.id === selectedId ? { ...img, ...updates } : img));
       if (convertedPdfUrl) {
@@ -150,7 +141,7 @@ export default function ImageToPdfConverter() {
   const applyToAll = () => {
       const selected = images.find(img => img.id === selectedId);
       if (!selected) return;
-      setImages(prev => prev.map(img => ({ ...img, vAlign: selected.vAlign, fitMode: selected.fitMode })));
+      setImages(prev => prev.map(img => ({ ...img, vAlign: selected.vAlign })));
       toast({ title: "Settings Applied", description: "Strict alignment sync complete." });
   };
 
@@ -212,22 +203,20 @@ export default function ImageToPdfConverter() {
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
-                let finalWidth, finalHeight;
-
-                // Scale to 90% to leave room for Top/Bottom movement
+                // 90% Scaling to ensure movement room
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * 0.9;
-                finalWidth = imgProps.width * ratio;
-                finalHeight = imgProps.height * ratio;
+                const finalWidth = imgProps.width * ratio;
+                const finalHeight = imgProps.height * ratio;
 
                 const x = (pageWidth - finalWidth) / 2;
                 let y;
 
                 if (imgData.vAlign === 'top') {
-                    y = 0; // Absolute Top Edge
+                    y = 0; // Literal Top Edge
                 } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; // Absolute Bottom Edge
+                    y = pageHeight - finalHeight; // Literal Bottom Edge
                 } else {
-                    y = (pageHeight - finalHeight) / 2; // Exact Center
+                    y = (pageHeight - finalHeight) / 2; // Center
                 }
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
@@ -293,7 +282,6 @@ export default function ImageToPdfConverter() {
                                     selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                 )}
                             >
-                                {/* Absolute Literal Clamping Mockup */}
                                 <div className="flex-1 relative w-full h-full bg-white overflow-hidden p-0">
                                     <div className={cn(
                                         "absolute w-full h-full flex flex-col transition-all duration-300",
@@ -430,7 +418,7 @@ export default function ImageToPdfConverter() {
                             </div>
 
                             <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                <Layers className="size-3 mr-2" /> Sync This Alignment to All
+                                <Layers className="size-3 mr-2" /> Sync Alignment to All
                             </Button>
                         </div>
                     )}
@@ -439,7 +427,7 @@ export default function ImageToPdfConverter() {
                         <Zap className="size-6 text-yellow-500 shrink-0" />
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
                             <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
-                            Images are pushed to the mathematical border of the A4 page. No hidden paddings allowed.
+                            Images are pushed to the literal boundary of the A4 page. 0-pixel gap logic enabled.
                         </p>
                     </div>
                 </CardContent>
