@@ -28,7 +28,7 @@ body {
     --border: 0 0% 92%;
     --input: 0 0% 92%;
     --ring: 35 100% 50%;
-    --radius: 1rem; /* Smooth rounded corners like the template */
+    --radius: 1rem;
   }
   .dark {
     --background: 222.2 84% 4.9%; /* Rich Navy */
@@ -37,8 +37,8 @@ body {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262 83% 58%;      /* Original Purple */
-    --primary-foreground: 210 40% 98%; /* High contrast text */
+    --primary: 35 100% 50%;       /* Match Orange in Dark for consistency or keep Purple */
+    --primary-foreground: 210 40% 98%; 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -49,7 +49,7 @@ body {
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 58%;
+    --ring: 35 100% 50%;
   }
 }
 
@@ -66,6 +66,14 @@ body {
   }
 }
 
+/* Tab Hover Lifting Effect */
+.tabs-trigger-lift {
+  @apply transition-all duration-300;
+}
+.tabs-trigger-lift[data-state=active]:hover {
+  @apply -translate-y-1.5 shadow-2xl shadow-primary/30 scale-[1.03];
+}
+
 /* Fix for Tab selection colors in Dark Mode */
 .dark button[data-state=active] {
   background-color: hsl(var(--primary)) !important;
@@ -74,11 +82,6 @@ body {
 
 .font-headline {
   font-family: 'Orbitron', sans-serif;
-}
-
-/* Glassmorphism Classes */
-.glass-panel {
-  @apply bg-white/80 dark:bg-black/80 backdrop-blur-2xl border border-white/20 dark:border-white/10;
 }
 
 /* Custom Thin Scrollbar */

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -431,7 +432,7 @@ function ToolsPageContent() {
             <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-10">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 hover:scale-105 transition-all">
+                <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 transition-all tabs-trigger-lift">
                     <Icon className={cn("mr-2 h-4 w-4", color)} />
                     {t(categoryKey)}
                 </TabsTrigger>

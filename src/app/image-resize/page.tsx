@@ -17,6 +17,14 @@ export const metadata: Metadata = {
 };
 
 export default function ImageResizePage() {
+  const steps = [
+    "Upload Image: Select the photo or signature you want to resize.",
+    "Select Mode: Use 'Govt Job Presets' or enter custom Pixel/MM values.",
+    "Lock Ratio: Keep 'Maintain Aspect Ratio' checked to avoid stretching.",
+    "Format: Choose JPEG (for forms) or PNG/WebP.",
+    "Download: Save your perfectly sized image locally."
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
@@ -26,13 +34,7 @@ export default function ImageResizePage() {
         </div>
 
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="Professional Image Resizer" steps={[
-                "Upload Image: Select the photo or signature you want to resize.",
-                "Select Mode: Use 'Govt Job Presets' or enter custom Pixel/MM values.",
-                "Lock Ratio: Keep 'Maintain Aspect Ratio' checked to avoid stretching.",
-                "Format: Choose JPEG (for forms) or PNG/WebP.",
-                "Download: Save your perfectly sized image locally."
-            ]} />
+            <HowToGuide title="Professional Image Resizer" steps={steps} />
 
             {/* In-depth Content Section */}
             <section className="space-y-10 py-10 border-t">
