@@ -57,6 +57,8 @@ type CompressionResult = {
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CompressionMode = 'manual' | 'target';
 
+const QUICK_SIZES = ["20", "50", "100", "500"];
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -413,6 +415,22 @@ export default function ImageCompressor() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                     Target KB per image
                                 </Label>
+                                <div className="grid grid-cols-4 gap-2 mb-2">
+                                    {QUICK_SIZES.map((size) => (
+                                        <Button
+                                            key={size}
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setTargetSizeKb(size)}
+                                            className={cn(
+                                                "rounded-xl font-black text-[10px] uppercase h-9 transition-all border-2",
+                                                targetSizeKb === size ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                            )}
+                                        >
+                                            {size}KB
+                                        </Button>
+                                    ))}
+                                </div>
                                 <div className="relative group">
                                     <Input 
                                         type="number" 
