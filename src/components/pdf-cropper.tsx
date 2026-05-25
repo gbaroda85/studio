@@ -3,7 +3,7 @@
 
 import 'react-image-crop/dist/ReactCrop.css';
 
-import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
+import React, { useState, useRef, type SyntheticEvent, useCallback, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -27,7 +27,8 @@ import {
     Grid3X3,
     ShieldCheck,
     Zap,
-    FileText
+    FileText,
+    RotateCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -73,7 +74,6 @@ export default function PdfCropper() {
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Define handleReset using function keyword to ensure hoisting works safely in this scope
   function handleReset() {
     setPdfFile(null);
     setNumPages(0);
@@ -141,10 +141,10 @@ export default function PdfCropper() {
     }
   };
 
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
-  const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
   
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
@@ -171,6 +171,36 @@ export default function PdfCropper() {
           renderPage(pdfDocRef.current, newPage);
       }
   }
+
+  const handleRotatePage = () => {
+    if (!pageImage) return;
+    setIsProcessing(true);
+    const img = new window.Image();
+    img.src = pageImage;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsProcessing(false);
+            return;
+        }
+
+        // Swap width and height
+        canvas.width = img.height;
+        canvas.height = img.width;
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+        setPageImage(canvas.toDataURL('image/png'));
+        setCrop(undefined);
+        setCompletedCrop(undefined);
+        setResultPreview(null);
+        setIsProcessing(false);
+        toast({ title: "Page Rotated", description: "Orientation changed by 90°." });
+    };
+  };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
@@ -284,8 +314,6 @@ export default function PdfCropper() {
     setResultPreview(null);
 
     const image = imgRef.current;
-    const RENDER_SCALE = 2.5;
-
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
     
@@ -295,31 +323,26 @@ export default function PdfCropper() {
     const cropHeight_natural = completedCrop.height * scaleY;
 
     try {
-      const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-      const newPdfDoc = await PDFDocument.create();
-      
-      const [page] = await newPdfDoc.copyPages(pdfDoc, [currentPage - 1]);
-      const { height: pagePointsHeight } = page.getSize();
-      
-      const cropX_pt = cropX_natural / RENDER_SCALE;
-      const cropY_pt = pagePointsHeight - (cropY_natural / RENDER_SCALE) - (cropHeight_natural / RENDER_SCALE);
-      const cropWidth_pt = cropWidth_natural / RENDER_SCALE;
-      const cropHeight_pt = cropHeight_natural / RENDER_SCALE;
-
-      page.setCropBox(cropX_pt, cropY_pt, cropWidth_pt, cropHeight_pt);
-      page.setMediaBox(cropX_pt, cropY_pt, cropWidth_pt, cropHeight_pt);
-      newPdfDoc.addPage(page);
-
-      const bytes = await newPdfDoc.save();
-      setCroppedPdfUrl(URL.createObjectURL(new Blob([bytes], {type: 'application/pdf'})));
-      
       const previewCanvas = document.createElement('canvas');
       previewCanvas.width = cropWidth_natural;
       previewCanvas.height = cropHeight_natural;
       const ctx = previewCanvas.getContext('2d');
       ctx?.drawImage(image, cropX_natural, cropY_natural, cropWidth_natural, cropHeight_natural, 0, 0, cropWidth_natural, cropHeight_natural);
-      setResultPreview(previewCanvas.toDataURL('image/png'));
+      const processedImage = previewCanvas.toDataURL('image/jpeg', 0.95);
+      setResultPreview(processedImage);
+
+      const newPdfDoc = await PDFDocument.create();
+      const page = newPdfDoc.addPage([cropWidth_natural * 0.75, cropHeight_natural * 0.75]);
+      const imgBytes = await fetch(processedImage).then(res => res.arrayBuffer());
+      const embeddedImg = await newPdfDoc.embedJpg(imgBytes);
+      page.drawImage(embeddedImg, {
+          x: 0,
+          y: 0,
+          width: page.getWidth(),
+          height: page.getHeight(),
+      });
+      const bytes = await newPdfDoc.save();
+      setCroppedPdfUrl(URL.createObjectURL(new Blob([bytes], {type: 'application/pdf'})));
 
       toast({ title: "Trimmed!", description: "Margins cropped successfully." });
     } catch (error) {
@@ -383,7 +406,7 @@ export default function PdfCropper() {
           <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </CardContent>
         <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
             <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> VECTOR LOSSLESS</div>
             <div className="flex items-center gap-1.5"><Grid3X3 className="size-3 text-yellow-500" /> SCANNER MODE</div>
         </CardFooter>
@@ -476,6 +499,20 @@ export default function PdfCropper() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 space-y-8">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                                <RotateCw className="size-3" /> Orientation
+                            </Label>
+                            <Button 
+                                variant="outline" 
+                                className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase"
+                                onClick={handleRotatePage}
+                                disabled={isProcessing || !pageImage || !!resultPreview}
+                            >
+                                <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
+                            </Button>
+                        </div>
+
                         {cropMode === 'rectangular' ? (
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
