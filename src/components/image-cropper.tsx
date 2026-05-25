@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -133,7 +132,35 @@ export default function ImageCropper() {
         setImgSrc(newSrc);
         setCrop(undefined); // Reset crop for new orientation
         setIsProcessing(false);
-        toast({ title: "Rotated 90°", description: "Image orientation changed." });
+        toast({ title: "Rotated 90°", description: "Source image orientation changed." });
+    };
+  };
+
+  // Rotate the result image AFTER cropping
+  const handleRotateResult = () => {
+    if (!croppedImageSrc) return;
+    setIsProcessing(true);
+    const img = new window.Image();
+    img.src = croppedImageSrc;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsProcessing(false);
+            return;
+        }
+
+        canvas.width = img.height;
+        canvas.height = img.width;
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+        const newSrc = canvas.toDataURL(`image/${outputFormat}`, 0.95);
+        setCroppedImageSrc(newSrc);
+        setIsProcessing(false);
+        toast({ title: "Result Rotated", description: "Cropped image turned 90°." });
     };
   };
 
@@ -238,7 +265,6 @@ export default function ImageCropper() {
         return;
     }
 
-    // Since we now use hard rotation, the underlying image is always "straight"
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
@@ -247,7 +273,6 @@ export default function ImageCropper() {
 
     ctx.imageSmoothingQuality = 'high';
 
-    // Apply any fine-tuning straighten rotation or flips
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate(rotate * (Math.PI / 180));
     ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
@@ -463,11 +488,16 @@ export default function ImageCropper() {
                         <div className="relative shadow-2xl ring-8 ring-white rounded-lg overflow-hidden max-h-[65vh] bg-white transform-gpu hover:scale-[1.02] transition-transform">
                             <img src={croppedImageSrc} alt="Result" className="object-contain max-w-full max-h-[65vh] w-auto h-auto" />
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
-                            <Button variant="outline" size="lg" className="flex-1 h-14 border-2 font-black text-xs uppercase" onClick={() => setCroppedImageSrc(null)}>
-                                <RefreshCcw className="mr-2 h-4 w-4" /> Try Again
-                            </Button>
-                            <Button size="lg" className="flex-[2] h-14 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl" onClick={handleDownload}>
+                        <div className="flex flex-col gap-4 w-full max-w-sm">
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase" onClick={() => setCroppedImageSrc(null)}>
+                                    <RefreshCcw className="mr-2 h-4 w-4" /> Try Again
+                                </Button>
+                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase border-primary text-primary" onClick={handleRotateResult}>
+                                    <RotateCw className="mr-2 h-4 w-4" /> ROTATE 90°
+                                </Button>
+                            </div>
+                            <Button size="lg" className="h-14 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl" onClick={handleDownload}>
                                 <Download className="mr-2 h-6 w-6" /> DOWNLOAD
                             </Button>
                         </div>
