@@ -41,6 +41,7 @@ import {
   FileArchive,
   UserCircle,
   Calculator,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -169,6 +170,57 @@ export default function Page() {
           </div>
         </div>
       </section>
+
+      {/* Why Choose Section (Image Based) */}
+      {!isSearching && (
+        <section className="py-20 bg-white dark:bg-black/20 w-full flex justify-center border-b border-border/50">
+          <div className="w-full max-w-6xl px-8 md:px-16 text-center">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase">Why Choose GR7 Tools?</h2>
+            <p className="text-slate-500 dark:text-slate-400 font-bold mb-20 text-lg">Built with cutting-edge technology for professional results</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+              {/* Pillar 1: Secure */}
+              <div className="flex flex-col items-center group">
+                <div className="size-24 rounded-full bg-green-500 flex items-center justify-center text-white shadow-2xl shadow-green-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
+                  <ShieldCheck className="size-12" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">100% Secure</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
+                    All files are processed locally in your browser. No data is uploaded to our servers, ensuring complete privacy.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 2: Fast */}
+              <div className="flex flex-col items-center group">
+                <div className="size-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-2xl shadow-blue-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
+                  <Zap className="size-12 fill-white/20" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Lightning Fast</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
+                    Advanced algorithms ensure rapid processing of your files without compromising on quality or performance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 3: Quality */}
+              <div className="flex flex-col items-center group">
+                <div className="size-24 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white shadow-2xl shadow-purple-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
+                  <Star className="size-12 fill-white/20" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Professional Quality</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
+                    Industry-standard compression and processing techniques deliver professional-grade results every time.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="pt-16 pb-32 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
