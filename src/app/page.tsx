@@ -50,7 +50,6 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
@@ -61,8 +60,6 @@ const ALL_TOOLS = [
   { icon: FileOutput, title: "Image to JPG", description: "Convert any image format to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image" },
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
-  
-  // PDF Tools
   { icon: FileArchive, title: "PDF Optimizer", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
   { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
@@ -73,8 +70,6 @@ const ALL_TOOLS = [
   { icon: ImageIcon, title: "PDF to Image", description: "Extract every page of a PDF as a high-quality image.", href: "/pdf-to-image", colorClass: "bg-orange-500", category: "pdf" },
   { icon: Copyright, title: "Watermark PDF", description: "Add text watermarks to protect your documents.", href: "/add-watermark", colorClass: "bg-rose-500", category: "pdf" },
   { icon: NotebookPen, title: "Page Numbers", description: "Insert page numbers in various formats and positions.", href: "/add-page-numbers", colorClass: "bg-lime-500", category: "pdf" },
-
-  // Calculators & Converters
   { icon: Landmark, title: "EMI Calculator", description: "Calculate monthly loan payments and interest.", href: "/loan-calculator", colorClass: "bg-indigo-600", category: "calculator" },
   { icon: Cake, title: "Age Calculator", description: "Find out your exact age in years, months, and days.", href: "/age-calculator", colorClass: "bg-rose-500", category: "calculator" },
   { icon: Percent, title: "Percentage Calc", description: "Quickly calculate marks, ratios, and percentages.", href: "/percentage-calculator", colorClass: "bg-blue-500", category: "calculator" },
@@ -85,23 +80,21 @@ const ALL_TOOLS = [
   { icon: AreaChart, title: "Area Converter", description: "Convert Acre, Hectare, Sq Ft, and Sq Meter.", href: "/area-converter", colorClass: "bg-lime-500", category: "converters" },
   { icon: Fuel, title: "Fuel Converter", description: "Convert between km/L and MPG (US/UK).", href: "/fuel-converter", colorClass: "bg-orange-500", category: "converters" },
   { icon: Waves, title: "Pressure Converter", description: "Convert between Bar, PSI, Pa, and ATM.", href: "/pressure-converter", colorClass: "bg-sky-500", category: "converters" },
-
-  // File Tools
   { icon: Archive, title: "Create Zip", description: "Compress multiple files into a single archive.", href: "/create-zip", colorClass: "bg-violet-500", category: "file" },
   { icon: ArchiveRestore, title: "Unzip File", description: "Extract contents from any ZIP archive safely.", href: "/unzip-file", colorClass: "bg-stone-500", category: "file" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
   <Link href={href} className="group">
-    <Card className="h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 dark:hover:border-primary/40 transition-all duration-300 bg-card overflow-hidden relative rounded-[2rem] hover:-translate-y-2">
+    <Card className="h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 bg-card overflow-hidden relative rounded-[2rem] hover:-translate-y-2">
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-8">
-        <div className={cn(`size-14 rounded-2xl flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg`, colorClass)}>
+        <div className={cn(`size-14 rounded-2xl flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-7" />
         </div>
-        <h3 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-tight uppercase tracking-tighter">{title}</h3>
+        <h3 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter">{title}</h3>
         <p className="text-base text-slate-500 dark:text-slate-400 mb-6 line-clamp-2 leading-relaxed font-semibold">{description}</p>
-        <div className="flex items-center text-primary font-black text-xs uppercase tracking-widest group-hover:gap-2 transition-all">
+        <div className="flex items-center text-primary font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
           Launch Tool <ArrowRight className="ml-1 size-3.5" />
         </div>
       </CardContent>
@@ -125,67 +118,34 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Image Styled */}
-      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black/40 border-b border-slate-200 dark:border-white/5 rounded-b-[4rem] shadow-2xl mx-auto">
+      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black/40 border-b rounded-b-[4rem] shadow-2xl mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
-          <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6">
             <Sparkles className="size-3" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1] uppercase">
-            All Power <br />
+            Power <br />
             <span className="text-gradient-hero">Utilities</span>
           </h1>
           
           <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-10 font-bold leading-relaxed">
-            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
+            Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Category Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-in fade-in slide-in-from-bottom-2 duration-700">
-            <Button 
-                variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
-                asChild
-            >
-              <Link href="/tools?tab=image">
-                <ImageIcon className="size-5 mr-2 text-blue-500" /> Image Tools
-              </Link>
-            </Button>
-            <Button 
-                variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
-                asChild
-            >
-              <Link href="/tools?tab=pdf">
-                <FileArchive className="size-5 mr-2 text-rose-500" /> PDF Tools
-              </Link>
-            </Button>
-            <Button 
-                variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
-                asChild
-            >
-              <Link href="/tools?tab=calculator">
-                <Calculator className="size-5 mr-2 text-emerald-500" /> Calculators
-              </Link>
-            </Button>
-          </div>
-
-          {/* Search Bar */}
           <div className="max-w-2xl mx-auto relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary" />
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
+                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -194,73 +154,41 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Tools Section */}
       <section className="pt-20 pb-32 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
-          
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.2em] mb-12">
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
-                {filteredTools.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-                        {filteredTools.map((tool, i) => (
-                            <ToolCard key={i} {...tool} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-muted/20 rounded-[3rem] border-4 border-dashed">
-                        <Search className="size-16 mx-auto mb-6 text-muted-foreground/30" />
-                        <h3 className="text-2xl font-black text-slate-400 uppercase">No matches found</h3>
-                        <p className="text-sm text-muted-foreground font-medium mt-3">Try keywords like 'PDF', 'Crop', or 'Calculator'</p>
-                    </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                    {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
+                </div>
             </div>
           ) : (
             <>
-                {/* Visual Processor */}
-                <div className="mb-24" id="image-section">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-                        <div className="text-left">
-                            <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
-                                <div className="w-12 h-2 bg-primary rounded-full" /> Image Solutions
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
-                        </div>
+                <div className="mb-24">
+                    <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
+                        <div className="w-12 h-2 bg-primary rounded-full" /> Image Solutions
                     </div>
-
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">Visual Processor</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        <ToolCard icon={Shrink} title="AI Image Compress" description="Reduce image size up to 95% with zero visual loss." href="/image-compress" colorClass="bg-blue-600" />
-                        <ToolCard icon={Maximize} title="Smart Resize" description="Resize photos to exact pixels for job application forms." href="/image-resize" colorClass="bg-indigo-600" />
-                        <ToolCard icon={UserCircle} title="Passport Photo" description="Create professional passport-sized photos for any country." href="/passport-photo" colorClass="bg-emerald-600" />
-                        <ToolCard icon={Eraser} title="Background Remover" description="Extract subjects from any photo in high definition." href="/remove-background" colorClass="bg-rose-500" />
-                        <ToolCard icon={FileDigit} title="Image to PDF" description="Combine multiple images into one professional PDF." href="/image-to-pdf" colorClass="bg-red-500" />
+                        {ALL_TOOLS.filter(t => t.category === 'image').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                {/* Document Engine */}
-                <div className="mb-24" id="pdf-section">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-                        <div className="text-left">
-                            <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-[0.3em] mb-3">
-                                <div className="w-12 h-2 bg-rose-500 rounded-full" /> Document Engine
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
-                        </div>
+                <div className="mb-24">
+                    <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-[0.3em] mb-3">
+                        <div className="w-12 h-2 bg-rose-500 rounded-full" /> Document Engine
                     </div>
-
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        <ToolCard icon={FileArchive} title="PDF Optimizer" description="Shrink massive PDFs for easy email and portal uploads." href="/compress-pdf" colorClass="bg-rose-600" />
-                        <ToolCard icon={ImageIcon} title="PDF to Image" description="Convert every page of a PDF into high-quality images." href="/pdf-to-image" colorClass="bg-orange-500" />
-                        <ToolCard icon={Scissors} title="Split & Extract" description="Visually select and extract specific pages with ease." href="/split-pdf" colorClass="bg-cyan-600" />
-                        <ToolCard icon={Merge} title="Bulk Merge" description="Combine multiple documents into one secure file." href="/merge-pdf" colorClass="bg-emerald-600" />
-                        <ToolCard icon={Unlock} title="Unlock PDF" description="Remove passwords from Aadhaar or Bank PDFs." href="/unlock-pdf" colorClass="bg-teal-500" />
+                        {ALL_TOOLS.filter(t => t.category === 'pdf').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
                 
                 <div className="text-center">
-                    <Button asChild className="h-18 px-16 rounded-[2rem] font-black text-xl bg-gradient-button text-white shadow-2xl hover:scale-105 transition-all border-none">
+                    <Button asChild className="h-18 px-16 rounded-[2rem] font-black text-xl bg-gradient-button text-white shadow-2xl hover:scale-105 transition-all">
                         <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-3 size-6" /></Link>
                     </Button>
                 </div>

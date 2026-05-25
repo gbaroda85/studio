@@ -15,7 +15,7 @@ body {
     --card-foreground: 0 0% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 15%;
-    --primary: 10 100% 55%;      /* Vibrant Orange-Red like the image */
+    --primary: 10 100% 55%;      
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 15%;
@@ -31,24 +31,24 @@ body {
     --radius: 1.5rem;
   }
   .dark {
-    --background: 0 0% 2%;       /* Deep Dark Black like the image */
+    --background: 0 0% 1%;       /* Deep Dark Black */
     --foreground: 0 0% 98%;
-    --card: 0 0% 4%;            /* Slightly lighter card */
+    --card: 0 0% 3%;            
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 2%;
+    --popover: 0 0% 1%;
     --popover-foreground: 0 0% 98%;
-    --primary: 10 100% 60%;      /* Bright Orange-Red */
+    --primary: 10 100% 60%;      
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 8%;
+    --secondary: 0 0% 6%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 6%;
+    --muted: 0 0% 4%;
     --muted-foreground: 0 0% 60%;
     --accent: 10 100% 60%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 10%;
-    --input: 0 0% 10%;
+    --border: 0 0% 8%;
+    --input: 0 0% 8%;
     --ring: 10 100% 60%;
   }
 }
@@ -66,7 +66,7 @@ body {
   }
   .dark body {
     background-image: 
-      radial-gradient(at 50% -20%, hsla(10, 100%, 60%, 0.1) 0px, transparent 60%),
+      radial-gradient(at 50% -20%, hsla(10, 100%, 60%, 0.12) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(260, 100%, 20%, 0.1) 0px, transparent 50%);
   }
 }
@@ -75,7 +75,7 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 
-/* Custom Gradients from Image */
+/* Custom Gradients */
 .text-gradient-hero {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-purple-500 to-emerald-400;
 }
