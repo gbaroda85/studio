@@ -322,7 +322,7 @@ export default function PhotoEnhancer() {
                                     <span className="text-[9px] font-mono text-muted-foreground">{formatBytes(originalFileSize)}</span>
                                 </div>
                                 <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[300px]">
-                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-4 opacity-50 grayscale" />
+                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-4" />
                                 </div>
                             </div>
                             <div className="space-y-3 flex flex-col">

@@ -451,7 +451,7 @@ export default function ImageResizer() {
                             <div className="space-y-3 flex flex-col">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Before</span>
                                 <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[250px]">
-                                    <Image src={originalImageSrc} alt="Before" fill className={cn("object-contain p-4", resizedImageSrc && "opacity-40 grayscale")} />
+                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-4" />
                                 </div>
                                 <p className="text-center text-[9px] font-mono text-muted-foreground uppercase">{originalDimensions?.width}x{originalDimensions?.height} • {formatBytes(originalFileSize)}</p>
                             </div>
