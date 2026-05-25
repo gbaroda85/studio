@@ -44,6 +44,7 @@ import {
   NotebookPen,
   FileCode,
   FileScan,
+  FileText,
   PenLine,
   LayoutGrid,
   UserCircle,
