@@ -88,6 +88,15 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 
+/* Glassmorphism Utilities */
+.glass-panel {
+  @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
+}
+
+.glass-card {
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
+}
+
 /* Custom Gradients from provided image colors */
 .text-gradient-hero {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f];
@@ -120,4 +129,13 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+}
+
+/* Fancy Neon Gradients for Premium Feel */
+.neon-border {
+  @apply relative;
+}
+.neon-border::before {
+  content: "";
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-purple-500 to-accent rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }
