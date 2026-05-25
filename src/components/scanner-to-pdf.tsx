@@ -228,15 +228,16 @@ export default function ScannerToPdf() {
   }
   
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
+    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 pb-10">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
+        {/* Camera Section */}
         <div className="lg:col-span-7 space-y-6">
             <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative">
-                <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
+                <CardHeader className="bg-muted/30 border-b py-3 sm:py-4 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Camera className="size-4 text-primary" />
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Live Viewfinder</CardTitle>
+                        <CardTitle className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">Live Viewfinder</CardTitle>
                     </div>
                     {hasCameraPermission === true && <Badge className="bg-green-600 text-white font-black text-[9px] uppercase">CAMERA ACTIVE</Badge>}
                     {hasCameraPermission === null && <Loader2 className="size-4 animate-spin text-primary" />}
@@ -278,26 +279,26 @@ export default function ScannerToPdf() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
+                <CardFooter className="p-3 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <Button 
                         onClick={handleCapture} 
                         disabled={!hasCameraPermission} 
-                        className="h-14 flex-1 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
+                        className="h-12 sm:h-14 flex-1 text-base sm:text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
                     >
-                        <ScanLine className="mr-2 size-6 group-hover:scale-110 transition-transform" />
+                        <ScanLine className="mr-2 size-5 sm:size-6 group-hover:scale-110 transition-transform" />
                         CAPTURE PAGE
                     </Button>
                     <div className="flex flex-col gap-2 flex-1">
                         <Button 
                             variant="outline"
                             onClick={() => fileInputRef.current?.click()} 
-                            className="h-14 text-sm font-black border-2 rounded-2xl hover:bg-primary/5 w-full"
+                            className="h-12 sm:h-14 text-xs sm:text-sm font-black border-2 rounded-2xl hover:bg-primary/5 w-full"
                         >
-                            <UploadCloud className="mr-2 size-5" />
+                            <UploadCloud className="mr-2 size-4 sm:size-5" />
                             UPLOAD PHOTO
                         </Button>
                         {hasCameraPermission === true && (
-                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[10px] font-black uppercase text-muted-foreground h-6 w-full">
+                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[9px] sm:text-[10px] font-black uppercase text-muted-foreground h-6 w-full">
                                 <RefreshCcw className="size-3 mr-1" /> Refresh Camera
                             </Button>
                         )}
@@ -340,18 +341,19 @@ export default function ScannerToPdf() {
             )}
         </div>
 
+        {/* Document Stack Section */}
         <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[500px] flex flex-col bg-card/50">
-                <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between py-4">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[400px] flex flex-col bg-card/50">
+                <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between py-3 sm:py-4">
                     <div className="flex items-center gap-2">
                         <FileDigit className="size-4 text-primary" />
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Scanned Document Stack</CardTitle>
+                        <CardTitle className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">Document Stack</CardTitle>
                     </div>
-                    <Badge variant="secondary" className="font-black text-[10px] bg-primary/10 text-primary">{scannedImages.length} PAGES</Badge>
+                    <Badge variant="secondary" className="font-black text-[9px] sm:text-[10px] bg-primary/10 text-primary">{scannedImages.length} PAGES</Badge>
                 </CardHeader>
-                <CardContent className="flex-1 p-4 sm:p-6">
+                <CardContent className="flex-1 p-4">
                     {scannedImages.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                             {scannedImages.map((src, index) => (
                                 <div key={index} className="relative group aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-md hover:border-primary/50 transition-all transform hover:-translate-y-1">
                                     <Image src={src} alt={`Page ${index + 1}`} fill className="object-cover" />
@@ -368,58 +370,58 @@ export default function ScannerToPdf() {
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center text-center py-16 sm:py-24 gap-4 opacity-30">
-                            <Monitor className="size-16 text-muted-foreground" />
-                            <p className="text-xs font-black uppercase tracking-widest">Stack is Empty</p>
+                        <div className="flex flex-col items-center justify-center text-center py-12 sm:py-20 gap-4 opacity-30">
+                            <Monitor className="size-12 sm:size-16 text-muted-foreground" />
+                            <p className="text-[10px] font-black uppercase tracking-widest">Stack is Empty</p>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="p-4 sm:p-6 bg-muted/5 border-t flex flex-col gap-4">
+                <CardFooter className="p-4 sm:p-6 bg-muted/5 border-t flex flex-col gap-3">
                     {createdPdfUrl ? (
-                         <Button size="lg" className="w-full h-16 sm:h-18 bg-green-600 hover:bg-green-700 font-black text-lg sm:text-xl shadow-2xl rounded-2xl transition-all animate-in zoom-in-95" onClick={handleDownload}>
-                            <Download className="mr-3 size-7" /> DOWNLOAD PDF
+                         <Button size="lg" className="w-full h-14 sm:h-16 bg-green-600 hover:bg-green-700 font-black text-base sm:text-lg shadow-2xl rounded-2xl transition-all animate-in zoom-in-95" onClick={handleDownload}>
+                            <Download className="mr-3 size-6 sm:size-7" /> DOWNLOAD PDF
                         </Button>
                     ) : (
                         <Button 
                             onClick={handleCreatePdf} 
                             disabled={scannedImages.length === 0 || isProcessing} 
-                            className="w-full h-16 sm:h-18 text-lg sm:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
+                            className="w-full h-14 sm:h-16 text-base sm:text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
                         >
-                            {isProcessing ? <Loader2 className="animate-spin mr-3 size-7"/> : <CheckCircle2 className="mr-3 size-7 group-hover:scale-110 transition-transform" />}
+                            {isProcessing ? <Loader2 className="animate-spin mr-3 size-6"/> : <CheckCircle2 className="mr-3 size-6 sm:size-7 group-hover:scale-110 transition-transform" />}
                             {isProcessing ? "PROCESSING..." : "GENERATE PDF"}
                         </Button>
                     )}
-                    <div className="flex flex-col sm:flex-row gap-3 w-full items-center justify-between">
-                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-[10px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive w-full sm:w-auto">
-                            <RefreshCcw className="size-3 mr-1.5" /> Clear Workspace
+                    <div className="flex flex-row w-full items-center justify-between pt-1">
+                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-[9px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive h-8 px-2">
+                            <RefreshCcw className="size-3 mr-1" /> Clear Workspace
                         </Button>
-                        <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <div className="flex items-center gap-1.5 text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <ShieldCheck className="size-3 text-green-500" /> SECURE RAM
                         </div>
                     </div>
                 </CardFooter>
             </Card>
 
-            <div className="p-5 bg-primary/5 border-2 border-primary/10 rounded-[2rem] flex gap-4 items-center">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Zap className="size-6 text-primary" />
+            <div className="p-4 sm:p-5 bg-primary/5 border-2 border-primary/10 rounded-[2rem] flex gap-4 items-center">
+                <div className="size-10 sm:size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Zap className="size-5 sm:size-6 text-primary" />
                 </div>
                 <div>
-                    <p className="text-[11px] font-black text-primary uppercase tracking-tight">Pro OCR Logic Ready</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight font-medium">After scanning, you can use our <strong>Image to Text</strong> tool to extract editable characters from this PDF.</p>
+                    <p className="text-[10px] sm:text-[11px] font-black text-primary uppercase tracking-tight">Pro OCR Logic Ready</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground leading-tight font-medium">After scanning, you can use our <strong>Image to Text</strong> tool to extract editable characters.</p>
                 </div>
             </div>
         </div>
       </div>
 
       <Dialog open={imageToCrop !== null} onOpenChange={(open) => !open && setImageToCrop(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw]">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw] max-h-[90vh]">
           <DialogHeader className="bg-muted/30 border-b p-4 sm:p-6">
-            <DialogTitle className="text-lg sm:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-                <Crop className="text-primary size-5" /> Trim Scanned Page
+            <DialogTitle className="text-base sm:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+                <Crop className="text-primary size-4 sm:size-5" /> Trim Scanned Page
             </DialogTitle>
           </DialogHeader>
-          <div className="p-4 sm:p-8 bg-black/5 flex justify-center overflow-hidden">
+          <div className="p-3 sm:p-8 bg-black/5 flex justify-center overflow-hidden">
             {imageToCrop && (
               <ReactCrop
                 crop={crop}
@@ -432,15 +434,15 @@ export default function ScannerToPdf() {
                   alt="Crop preview"
                   src={imageToCrop}
                   onLoad={onCropImageLoad}
-                  className="max-h-[50vh] sm:max-h-[60vh] w-auto object-contain"
+                  className="max-h-[40vh] sm:max-h-[60vh] w-auto object-contain"
                 />
               </ReactCrop>
             )}
           </div>
-          <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" className="flex-1 font-bold h-12 rounded-xl" onClick={() => setImageToCrop(null)}>CANCEL</Button>
-            <Button className="flex-[2] font-black h-12 rounded-xl bg-primary text-base sm:text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
-              <CheckCircle2 className="mr-2 size-5" /> ADD TO PDF
+          <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Button variant="outline" className="flex-1 font-bold h-11 sm:h-12 rounded-xl text-xs sm:text-sm" onClick={() => setImageToCrop(null)}>CANCEL</Button>
+            <Button className="flex-[2] font-black h-11 sm:h-12 rounded-xl bg-primary text-sm sm:text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
+              <CheckCircle2 className="mr-2 size-4 sm:size-5" /> ADD TO PDF
             </Button>
           </DialogFooter>
         </DialogContent>
