@@ -201,38 +201,38 @@ export default function ImageCropper() {
     setIsProcessing(true);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+        setIsProcessing(false);
+        return;
+    }
 
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    const pixelRatio = window.devicePixelRatio || 1;
 
-    canvas.width = completedCrop.width * scaleX * pixelRatio;
-    canvas.height = completedCrop.height * scaleY * pixelRatio;
+    canvas.width = completedCrop.width * scaleX;
+    canvas.height = completedCrop.height * scaleY;
 
-    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     ctx.imageSmoothingQuality = 'high';
 
-    const cropX = completedCrop.x * scaleX;
-    const cropY = completedCrop.y * scaleY;
-    const rotateRads = rotate * (Math.PI / 180);
-    const centerX = image.naturalWidth / 2;
-    const centerY = image.naturalHeight / 2;
-
-    ctx.save();
-    ctx.translate(-cropX * pixelRatio, -cropY * pixelRatio);
-    ctx.translate(centerX * pixelRatio, centerY * pixelRatio);
-    ctx.rotate(rotateRads);
+    // To handle rotation correctly, we move the canvas origin to the center of the CROP box
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    
+    // Apply transformations
+    ctx.rotate(rotate * (Math.PI / 180));
     ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-    ctx.translate(-centerX * pixelRatio, -centerY * pixelRatio);
+
+    // Draw the source image offset so that the crop area aligns with the canvas center
+    const centerX = (completedCrop.x + completedCrop.width / 2) * scaleX;
+    const centerY = (completedCrop.y + completedCrop.height / 2) * scaleY;
 
     ctx.drawImage(
       image,
-      0, 0, image.naturalWidth, image.naturalHeight,
-      0, 0, image.naturalWidth * pixelRatio, image.naturalHeight * pixelRatio
+      -centerX,
+      -centerY,
+      image.naturalWidth,
+      image.naturalHeight
     );
 
-    ctx.restore();
     setCroppedImageSrc(canvas.toDataURL(`image/${outputFormat}`, 0.95));
     setIsProcessing(false);
   }
