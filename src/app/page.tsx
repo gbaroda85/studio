@@ -117,38 +117,38 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section */}
-      <section className="relative w-full max-w-[2000px] pt-12 pb-8 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      {/* Hero Section - Reduced height with pt-10 pb-6 */}
+      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-10 shadow-sm animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-orange-400 fill-orange-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black mb-10 tracking-tight leading-[1.05] animate-fade-in-up">
-            Professional Tools for <br />
-            <span className="text-gradient-hero">Images & PDFs</span>
+          <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
+            Power Utilities for <br className="hidden md:block" />
+            <span className="text-gradient-hero">Official Submissions</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-14 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-sm md:text-lg text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+          {/* Quick Action Category Buttons - Positioned above search box */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-rose-500/50 transition-all group">
               <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-emerald-500/50 transition-all group">
               <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
@@ -161,7 +161,7 @@ export default function Page() {
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-[#0a0a0a] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-16 pr-6 h-16 text-lg rounded-3xl bg-white dark:bg-[#0a0a0a] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -170,7 +170,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-20 pb-32 bg-background w-full flex justify-center">
+      <section className="pt-16 pb-32 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
