@@ -43,7 +43,9 @@ import {
     Camera,
     Globe,
     Frame,
-    Wand2
+    Wand2,
+    ChevronRight as ChevronRightIcon,
+    MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -61,7 +63,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 
 /**
- * ZUSTAND STATE MANAGEMENT FOR PREMIUM EDITOR
+ * ZUSTAND STATE MANAGEMENT
  */
 interface EditorState {
     history: string[];
@@ -107,12 +109,13 @@ const useEditorStore = create<EditorState>((set, get) => ({
  * CONSTANTS & PRESETS
  */
 const PRESETS = [
-    { id: 'in_p', label: "India Passport (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
+    { id: 'free', label: "Free Hand Crop (Manual)", width: 0, height: 0, unit: 'px' },
+    { id: 'in_p', label: "India Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
+    { id: 'aadhaar', label: "Aadhaar Card (86x54mm) - Landscape", width: 86, height: 54, unit: 'mm' },
+    { id: 'pan', label: "PAN Card (85x55mm) - Landscape", width: 85, height: 55, unit: 'mm' },
     { id: 'us_v', label: "USA Visa / Passport (2x2in)", width: 2, height: 2, unit: 'inch' },
-    { id: 'uk_p', label: "UK Passport (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
+    { id: 'uk_p', label: "UK Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
     { id: 'ca_p', label: "Canada Passport (5x7cm)", width: 50, height: 70, unit: 'mm' },
-    { id: 'pan', label: "Indian PAN Card (2.5x3.5cm)", width: 25, height: 35, unit: 'mm' },
-    { id: 'aadhaar', label: "Aadhaar Card Photo (2.3x3.3cm)", width: 23, height: 33, unit: 'mm' },
     { id: 'dl', label: "Driving Licence (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
     { id: 'custom', label: "Custom Size (Input mm Below)", width: 0, height: 0, unit: 'mm' },
 ];
@@ -147,7 +150,7 @@ export default function PassportPhotoMaker() {
     const [progress, setProgress] = useState(0);
 
     // Core Settings
-    const [selectedPreset, setSelectedPreset] = useState<number>(0);
+    const [selectedPreset, setSelectedPreset] = useState<number>(1); // Default to India Passport
     const [customWidth, setCustomWidth] = useState<string>("35");
     const [customHeight, setCustomHeight] = useState<string>("45");
     const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
@@ -180,34 +183,27 @@ export default function PassportPhotoMaker() {
 
     const getAspectRatio = useCallback(() => {
         const p = PRESETS[selectedPreset];
+        if (p.id === 'free') return undefined;
         if (p.id === 'custom') {
             const w = parseFloat(customWidth);
             const h = parseFloat(customHeight);
-            return (w > 0 && h > 0) ? w / h : 1;
+            return (w > 0 && h > 0) ? w / h : undefined;
         }
         return p.width / p.height;
     }, [selectedPreset, customWidth, customHeight]);
 
-    // Robust Crop Update when settings change
     const updateCropHandles = useCallback(() => {
         if (!imgRef.current) return;
         const { width, height } = imgRef.current;
         const aspect = getAspectRatio();
         
-        const newCrop = centerCrop(
-            makeAspectCrop(
-                { unit: '%', width: 90 }, 
-                aspect, 
-                width, 
-                height
-            ),
-            width,
-            height
-        );
-        setCrop(newCrop);
+        const initialCrop = aspect 
+            ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height)
+            : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+            
+        setCrop(initialCrop);
     }, [getAspectRatio]);
 
-    // Re-trigger handles when preset or inputs change
     useEffect(() => {
         if (stage === 'crop' && imgRef.current) {
             updateCropHandles();
@@ -290,8 +286,10 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
+        // Use actual crop ratio if available
+        const currentAspect = getAspectRatio() || (faceImg.width / faceImg.height);
         const targetW = 1200; 
-        const targetH = targetW / getAspectRatio();
+        const targetH = targetW / currentAspect;
         canvas.width = targetW;
         canvas.height = targetH;
 
@@ -326,7 +324,7 @@ export default function PassportPhotoMaker() {
             ctx.lineWidth = bPx;
             ctx.strokeRect(bPx/2, bPx/2, canvas.width - bPx, canvas.height - bPx);
         }
-    }, [bgColor, scale, posX, posY, rotation, selectedPreset, borderWidth, borderColor, brightness, contrast, saturation, blur, getAspectRatio]);
+    }, [bgColor, scale, posX, posY, rotation, borderWidth, borderColor, brightness, contrast, saturation, blur, getAspectRatio]);
 
     useEffect(() => {
         if (stage === 'studio') renderPhoto();
@@ -339,8 +337,9 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
+        const cropRatio = completedCrop.width / completedCrop.height;
         const targetW = 1600;
-        const targetH = targetW / getAspectRatio();
+        const targetH = targetW / cropRatio;
         canvas.width = targetW;
         canvas.height = targetH;
 
@@ -383,7 +382,7 @@ export default function PassportPhotoMaker() {
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/jpeg', 1.0);
-        link.download = `GR7-Premium-Passport-${Date.now()}.jpg`;
+        link.download = `GR7-Studio-Document-${Date.now()}.jpg`;
         link.click();
     };
 
@@ -442,9 +441,17 @@ export default function PassportPhotoMaker() {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, targetW, targetH);
 
+        // Get actual dimensions of the cropped photo
         const currentPreset = PRESETS[selectedPreset];
-        const pw_mm = currentPreset.id === 'custom' ? parseFloat(customWidth) : currentPreset.width;
-        const ph_mm = currentPreset.id === 'custom' ? parseFloat(customHeight) : currentPreset.height;
+        let pw_mm, ph_mm;
+
+        if (currentPreset.id === 'free') {
+            pw_mm = 35; ph_mm = 45; // Default if free
+        } else if (currentPreset.id === 'custom') {
+            pw_mm = parseFloat(customWidth); ph_mm = parseFloat(customHeight);
+        } else {
+            pw_mm = currentPreset.width; ph_mm = currentPreset.height;
+        }
 
         const photoW = (pw_mm / 25.4) * DPI;
         const photoH = (ph_mm / 25.4) * DPI;
@@ -481,7 +488,7 @@ export default function PassportPhotoMaker() {
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
-                            Step 1: Upload your photo to begin alignment. <br/>100% Private local processing.
+                            Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
                         </p>
                     </motion.div>
 
@@ -496,7 +503,7 @@ export default function PassportPhotoMaker() {
                                     <Zap className="absolute -top-2 -right-2 size-8 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
+                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
                                     <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
@@ -506,7 +513,7 @@ export default function PassportPhotoMaker() {
 
                     <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                        <div className="flex items-center gap-2"><Maximize className="size-4 text-primary" /> MULTI-COUNTRY</div>
+                        <div className="flex items-center gap-2"><Maximize className="size-4 text-primary" /> PORTRAIT & LANDSCAPE</div>
                         <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> GPU BOOST</div>
                     </div>
                 </div>
@@ -520,9 +527,9 @@ export default function PassportPhotoMaker() {
                             <div className="grid lg:grid-cols-2 gap-8 items-center">
                                 <div className="space-y-1">
                                     <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                        <CropIcon className="size-5 text-primary" /> Step 1: Size & Alignment
+                                        <CropIcon className="size-5 text-primary" /> Step 2: Size & Alignment
                                     </CardTitle>
-                                    <CardDescription className="font-bold text-[10px] uppercase opacity-60">Choose standard or enter custom dimensions.</CardDescription>
+                                    <CardDescription className="font-bold text-[10px] uppercase opacity-60">Select 'Free Hand' to drag handles anywhere.</CardDescription>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
@@ -531,7 +538,10 @@ export default function PassportPhotoMaker() {
                                             <SelectTrigger className="h-12 font-black border-2 rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                 {PRESETS.map((p, i) => (
-                                                    <SelectItem key={i} value={String(i)} className="font-bold py-3">{p.label}</SelectItem>
+                                                    <SelectItem key={i} value={String(i)} className="font-bold py-3">
+                                                        {p.id === 'free' ? <MousePointer2 className="size-3 mr-2 inline" /> : null}
+                                                        {p.label}
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -578,7 +588,7 @@ export default function PassportPhotoMaker() {
                                 <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
                             <Button className="h-14 px-12 text-base font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl group" onClick={handleInitialCrop}>
-                                CONFIRM & CONTINUE <ChevronRight className="ml-2 size-5" />
+                                CONFIRM CROP <ChevronRightIcon className="ml-2 size-5" />
                             </Button>
                         </CardFooter>
                     </Card>
@@ -670,9 +680,9 @@ export default function PassportPhotoMaker() {
                     </motion.div>
 
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-8">
-                        <div className="relative group max-w-[500px] w-full">
-                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[3.5rem] overflow-hidden flex items-center justify-center aspect-[1/1.4]">
-                                <canvas ref={mainCanvasRef} className="w-full h-full object-contain" />
+                        <div className="relative group max-w-[600px] w-full">
+                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[3.5rem] overflow-hidden flex items-center justify-center">
+                                <canvas ref={mainCanvasRef} className="max-w-full h-auto object-contain" />
                                 {isProcessing && (
                                     <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-12 gap-8 z-20">
                                         <Loader2 className="size-20 animate-spin text-primary stroke-[3]" />
@@ -687,6 +697,8 @@ export default function PassportPhotoMaker() {
                                 <div className="grid grid-cols-2 gap-1">
                                     <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
                                     <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-3"/></Button>
                                 </div>
                                 <Separator orientation="vertical" className="h-6 mx-1" />
                                 <Button variant="outline" size="icon" className="size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4"/></Button>
