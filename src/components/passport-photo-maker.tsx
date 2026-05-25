@@ -7,11 +7,11 @@ import { useToast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { 
     UploadCloud, 
+    Loader2, 
     Download, 
     Crop as CropIcon, 
     RefreshCcw, 
     Eraser, 
-    Loader2, 
     ZoomIn, 
     ZoomOut, 
     ChevronUp, 
@@ -472,56 +472,56 @@ export default function PassportPhotoMaker() {
     };
 
     return (
-        <div className="w-full max-w-[1800px] min-h-[90vh] mx-auto p-4 md:p-8 flex flex-col gap-6 animate-in fade-in duration-700">
+        <div className="w-full max-w-[1800px] min-h-[90vh] mx-auto p-2 md:p-4 flex flex-col gap-4 animate-in fade-in duration-700">
             
             {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
-                <div className="flex-1 flex flex-col items-center justify-center gap-12 py-12">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
-                        <div className="mx-auto mb-6 grid size-24 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-2xl relative">
-                            <UserCircle className="size-12" />
-                            <div className="absolute -top-2 -right-2 bg-accent text-accent-foreground size-8 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-4" />
+                <div className="flex-1 flex flex-col items-center justify-center gap-4 py-2">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2">
+                        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-[1.5rem] bg-primary/10 text-primary shadow-xl relative">
+                            <UserCircle className="size-8" />
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                <Sparkles className="size-3" />
                             </div>
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black font-headline tracking-tighter uppercase leading-none">
+                        <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
-                        <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
+                        <p className="text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
                             Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
                         </p>
                     </motion.div>
 
                     <Card className="w-full max-w-2xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-10">
+                        <CardContent className="p-6">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[3rem] p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[2rem] p-16 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
-                                    <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-2 -right-2 size-8 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
-                                    <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
+                                    <p className="text-xl font-black uppercase tracking-tighter">Click to Upload Image</p>
+                                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                        <div className="flex items-center gap-2"><Maximize className="size-4 text-primary" /> PORTRAIT & LANDSCAPE</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> GPU BOOST</div>
+                    <div className="flex flex-wrap justify-center gap-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> PORTRAIT & LANDSCAPE</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> GPU BOOST</div>
                     </div>
                 </div>
             )}
 
             {/* 2. CROP STAGE: SIZE SELECT + CROP */}
             {stage === 'crop' && imgSrc && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-4">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-2">
                     <Card className="w-full max-w-5xl glass-card shadow-2xl overflow-hidden">
                         <CardHeader className="border-b glass-panel py-6 px-8">
                             <div className="grid lg:grid-cols-2 gap-8 items-center">
