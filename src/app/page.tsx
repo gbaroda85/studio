@@ -185,7 +185,7 @@ export default function Page() {
             <>
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Visual Processor</span>
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
