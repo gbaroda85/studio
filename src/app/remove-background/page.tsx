@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, Eraser, ShieldCheck, Zap, HelpCircle, Target, Sparkles, Layers } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Eraser, ShieldCheck, Zap, HelpCircle, Target, Sparkles, Layers } from 'lucide-react';
 import BackgroundRemover from '@/components/background-remover';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -20,21 +19,14 @@ export const dynamic = 'force-dynamic';
 
 export default function RemoveBackgroundPage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <BackgroundRemover />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="AI Background Remover" steps={[
                 "Upload Photo: Select an image with a clear face or object.",
                 "AI Processing: Our local neural engine extracts the subject in HD.",
@@ -78,20 +70,20 @@ export default function RemoveBackgroundPage() {
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Why is this tool safer than "Cloud" removers?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">Why is this tool safer than "Cloud" removers?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Cloud-based background removers store your photos on their servers to train their AI. This is a massive privacy risk for your personal ID photos. Our tool runs the AI **locally in your browser RAM**, meaning your photo never touches the internet.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Does it work for Passport Photos?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">Does it work for Passport Photos?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Absolutely! You can remove the background, select "Royal Blue" or "Pure White" as the background color, and set the exact size in MM or Inch for any country's passport requirements.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Can it remove backgrounds from complex objects?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">Can it remove backgrounds from complex objects?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Yes, our neural model is trained on a wide variety of subjects including humans, pets, and e-commerce products. It performs exceptionally well with distinct contrast between the subject and background.
                         </AccordionContent>
                     </AccordionItem>
