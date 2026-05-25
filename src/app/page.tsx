@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -48,7 +49,6 @@ import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Global tool list for search functionality
 const ALL_TOOLS = [
   // Image Tools
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
@@ -93,16 +93,16 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
   <Link href={href} className="group">
-    <Card className="h-full border-2 border-border/50 dark:border-white/10 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 dark:hover:border-primary/40 transition-all duration-300 bg-white dark:bg-slate-900 overflow-hidden relative rounded-2xl bg-gradient-to-br from-white via-white to-primary/5 dark:from-slate-900 dark:via-slate-900 dark:to-primary/10 hover:-translate-y-2">
+    <Card className="h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 dark:hover:border-primary/40 transition-all duration-300 bg-card overflow-hidden relative rounded-[2rem] hover:-translate-y-2">
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
-      <CardContent className="p-6">
-        <div className={cn(`size-12 rounded-xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg`, colorClass)}>
-          <Icon className="size-6" />
+      <CardContent className="p-8">
+        <div className={cn(`size-14 rounded-2xl flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg`, colorClass)}>
+          <Icon className="size-7" />
         </div>
-        <h3 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-tight">{title}</h3>
+        <h3 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-tight uppercase tracking-tighter">{title}</h3>
         <p className="text-base text-slate-500 dark:text-slate-400 mb-6 line-clamp-2 leading-relaxed font-semibold">{description}</p>
         <div className="flex items-center text-primary font-black text-xs uppercase tracking-widest group-hover:gap-2 transition-all">
-          Try Now <ArrowRight className="ml-1 size-3.5" />
+          Launch Tool <ArrowRight className="ml-1 size-3.5" />
         </div>
       </CardContent>
     </Card>
@@ -125,67 +125,67 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Compact Height */}
-      <section className="relative w-full max-w-[2000px] pt-8 pb-8 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto">
+      {/* Hero Section - Image Styled */}
+      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black/40 border-b border-slate-200 dark:border-white/5 rounded-b-[4rem] shadow-2xl mx-auto">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
-          <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">
             <Sparkles className="size-3" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tighter leading-[1.1]">
-            Professional Tools for <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Images & PDFs</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1] uppercase">
+            All Power <br />
+            <span className="text-gradient-hero">Utilities</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-6 font-bold leading-relaxed">
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-10 font-bold leading-relaxed">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Category Buttons - Now linking correctly to tool views */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+          {/* Quick Category Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-in fade-in slide-in-from-bottom-2 duration-700">
             <Button 
                 variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-primary h-12 px-6 shadow-md hover:shadow-primary/20 transition-all hover:-translate-y-1"
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
                 asChild
             >
               <Link href="/tools?tab=image">
-                <ImageIcon className="size-4 mr-2 text-blue-600" /> Image Tools
+                <ImageIcon className="size-5 mr-2 text-blue-500" /> Image Tools
               </Link>
             </Button>
             <Button 
                 variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-rose-600 h-12 px-6 shadow-md hover:shadow-rose-500/20 transition-all hover:-translate-y-1"
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
                 asChild
             >
               <Link href="/tools?tab=pdf">
-                <FileArchive className="size-4 mr-2 text-rose-600" /> PDF Tools
+                <FileArchive className="size-5 mr-2 text-rose-500" /> PDF Tools
               </Link>
             </Button>
             <Button 
                 variant="outline" 
-                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 bg-white dark:bg-slate-900 hover:border-emerald-500 h-12 px-6 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-1"
+                className="rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 h-14 px-8 shadow-md transition-all hover:-translate-y-1 dark:bg-white/5"
                 asChild
             >
               <Link href="/tools?tab=calculator">
-                <Calculator className="size-4 mr-2 text-emerald-500" /> Calculators
+                <Calculator className="size-5 mr-2 text-emerald-500" /> Calculators
               </Link>
             </Button>
           </div>
 
-          {/* Search Bar - Compact and focused */}
+          {/* Search Bar */}
           <div className="max-w-2xl mx-auto relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
-                className="w-full pl-16 pr-6 h-16 text-lg rounded-2xl bg-white dark:bg-slate-800 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
+                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -195,13 +195,13 @@ export default function Page() {
       </section>
 
       {/* Tools Section */}
-      <section className="pt-12 pb-24 bg-background w-full flex justify-center">
+      <section className="pt-20 pb-32 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.2em] mb-10">
-                  <div className="w-10 h-1.5 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.2em] mb-12">
+                  <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 {filteredTools.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
@@ -210,23 +210,23 @@ export default function Page() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-20 bg-muted/20 rounded-[2rem] border-2 border-dashed">
-                        <Search className="size-12 mx-auto mb-6 text-muted-foreground/30" />
-                        <h3 className="text-xl font-black text-slate-400 uppercase">No tools matched your search</h3>
-                        <p className="text-sm text-muted-foreground font-medium mt-3">Try words like 'PDF', 'Compress', 'Resize', or 'Calc'</p>
+                    <div className="text-center py-20 bg-muted/20 rounded-[3rem] border-4 border-dashed">
+                        <Search className="size-16 mx-auto mb-6 text-muted-foreground/30" />
+                        <h3 className="text-2xl font-black text-slate-400 uppercase">No matches found</h3>
+                        <p className="text-sm text-muted-foreground font-medium mt-3">Try keywords like 'PDF', 'Crop', or 'Calculator'</p>
                     </div>
                 )}
             </div>
           ) : (
             <>
                 {/* Visual Processor */}
-                <div className="mb-20" id="image-section">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div className="mb-24" id="image-section">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
                         <div className="text-left">
-                            <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-2">
-                                <div className="w-10 h-1 bg-primary rounded-full" /> Image Solutions
+                            <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
+                                <div className="w-12 h-2 bg-primary rounded-full" /> Image Solutions
                             </div>
-                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
+                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
                         </div>
                     </div>
 
@@ -240,13 +240,13 @@ export default function Page() {
                 </div>
 
                 {/* Document Engine */}
-                <div className="mb-20" id="pdf-section">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div className="mb-24" id="pdf-section">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
                         <div className="text-left">
-                            <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
-                                <div className="w-10 h-1 bg-rose-600 rounded-full" /> Document Engine
+                            <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-[0.3em] mb-3">
+                                <div className="w-12 h-2 bg-rose-500 rounded-full" /> Document Engine
                             </div>
-                            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
+                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">PDF Toolkit</h2>
                         </div>
                     </div>
 
@@ -260,8 +260,8 @@ export default function Page() {
                 </div>
                 
                 <div className="text-center">
-                    <Button asChild variant="outline" className="h-16 px-12 rounded-2xl font-black text-lg text-primary border-2 border-primary/20 shadow-xl hover:bg-primary/5 hover:scale-105 transition-all">
-                        <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-5" /></Link>
+                    <Button asChild className="h-18 px-16 rounded-[2rem] font-black text-xl bg-gradient-button text-white shadow-2xl hover:scale-105 transition-all border-none">
+                        <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-3 size-6" /></Link>
                     </Button>
                 </div>
             </>

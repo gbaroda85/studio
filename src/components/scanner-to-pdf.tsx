@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -23,7 +24,9 @@ import {
     RefreshCcw,
     Monitor,
     Zap,
-    ShieldCheck
+    ShieldCheck,
+    CloudSync,
+    Computer
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -33,16 +36,26 @@ import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop } from 're
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
+
+// Firebase for Sync
+import { initializeFirebase } from '@/firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 export default function ScannerToPdf() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
+  const sessionIdFromUrl = searchParams.get('sessionId');
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const cropImgRef = useRef<HTMLImageElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedImages, setScannedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [createdPdfUrl, setCreatedPdfUrl] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>("");
+  const [isWaitingForMobile, setIsWaitingForMobile] = useState(false);
   
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState<CropType>();
@@ -51,6 +64,35 @@ export default function ScannerToPdf() {
   const [currentUrl, setCurrentUrl] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync Logic
+  useEffect(() => {
+    const { firestore } = initializeFirebase();
+    
+    // If mobile opens with a sessionId, use it
+    if (sessionIdFromUrl) {
+        setSessionId(sessionIdFromUrl);
+    } else {
+        // Desktop generates a new sessionId
+        const newId = Math.random().toString(36).substr(2, 9);
+        setSessionId(newId);
+        setCurrentUrl(`${window.location.origin}${window.location.pathname}?sessionId=${newId}`);
+        
+        // Desktop listens for results
+        setIsWaitingForMobile(true);
+        const unsubscribe = onSnapshot(doc(firestore, 'shared-scans', newId), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.pdfUrl) {
+                    setCreatedPdfUrl(data.pdfUrl);
+                    setIsWaitingForMobile(false);
+                    toast({ title: "Scan Received!", description: "PDF from mobile is now available on computer." });
+                }
+            }
+        });
+        return () => unsubscribe();
+    }
+  }, [sessionIdFromUrl, toast]);
 
   const stopCamera = useCallback(() => {
     if(videoRef.current && videoRef.current.srcObject){
@@ -95,9 +137,7 @@ export default function ScannerToPdf() {
   }, [stopCamera]);
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
     startCamera();
-    
     return () => {
         stopCamera();
         if (createdPdfUrl) URL.revokeObjectURL(createdPdfUrl);
@@ -157,7 +197,7 @@ export default function ScannerToPdf() {
     setScannedImages(images => images.filter((_, i) => i !== index));
   }
 
-  const handleCreatePdf = () => {
+  const handleCreatePdf = async () => {
     if (scannedImages.length === 0) return;
     setIsProcessing(true);
     const pdf = new jsPDF();
@@ -171,11 +211,22 @@ export default function ScannerToPdf() {
       const height = imgProps.height * ratio;
       pdf.addImage(src, 'JPEG', (pdfWidth - width) / 2, (pdfHeight - height) / 2, width, height, undefined, 'FAST');
     });
-    const pdfBlob = pdf.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    setCreatedPdfUrl(url);
+    
+    const pdfOutput = pdf.output('datauristring');
+    setCreatedPdfUrl(pdfOutput);
+
+    // If on mobile and in a session, push to Firestore for desktop
+    if (isMobile && sessionId) {
+        const { firestore } = initializeFirebase();
+        await setDoc(doc(firestore, 'shared-scans', sessionId), {
+            pdfUrl: pdfOutput,
+            timestamp: new Date()
+        }, { merge: true });
+        toast({ title: 'Synced!', description: 'Document sent to your computer.' });
+    }
+
     setIsProcessing(false);
-    toast({ title: 'PDF Ready!', description: 'Your scanned document is ready for download.'});
+    toast({ title: 'PDF Ready!', description: 'Your scanned document is ready.'});
   };
   
   const handleDownload = () => {
@@ -232,14 +283,16 @@ export default function ScannerToPdf() {
         
         {/* Camera Section */}
         <div className="lg:col-span-7 space-y-6">
-            <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative">
+            <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative rounded-[2rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 sm:py-4 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Camera className="size-4 text-primary" />
                         <CardTitle className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">Live Viewfinder</CardTitle>
                     </div>
-                    {hasCameraPermission === true && <Badge className="bg-green-600 text-white font-black text-[9px] uppercase">CAMERA ACTIVE</Badge>}
-                    {hasCameraPermission === null && <Loader2 className="size-4 animate-spin text-primary" />}
+                    <div className="flex gap-2">
+                        {sessionId && <Badge variant="outline" className="text-[8px] font-black text-primary border-primary/20">SESSION: {sessionId.toUpperCase()}</Badge>}
+                        {hasCameraPermission === true && <Badge className="bg-green-600 text-white font-black text-[9px] uppercase">CAMERA ACTIVE</Badge>}
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0 relative aspect-video bg-black flex items-center justify-center overflow-hidden">
                     {hasCameraPermission === true ? (
@@ -281,7 +334,7 @@ export default function ScannerToPdf() {
                     <Button 
                         onClick={handleCapture} 
                         disabled={!hasCameraPermission} 
-                        className="h-12 sm:h-14 flex-1 text-base sm:text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
+                        className="h-12 sm:h-14 flex-1 text-base sm:text-lg font-black bg-gradient-button text-white shadow-xl rounded-2xl group active:scale-95 border-none"
                     >
                         <ScanLine className="mr-2 size-5 sm:size-6 group-hover:scale-110 transition-transform" />
                         CAPTURE PAGE
@@ -295,11 +348,6 @@ export default function ScannerToPdf() {
                             <UploadCloud className="mr-2 size-4 sm:size-5" />
                             UPLOAD PHOTO
                         </Button>
-                        {hasCameraPermission === true && (
-                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[9px] sm:text-[10px] font-black uppercase text-muted-foreground h-6 w-full">
-                                <RefreshCcw className="size-3 mr-1" /> Refresh Camera
-                            </Button>
-                        )}
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </CardFooter>
@@ -307,8 +355,8 @@ export default function ScannerToPdf() {
 
             {!isMobile && (
                 <Card className={cn(
-                    "border-2 transition-all duration-300 bg-slate-900 text-white overflow-hidden",
-                    showQrBridge ? "shadow-2xl border-primary/40" : "border-white/5 opacity-80"
+                    "border-2 transition-all duration-300 bg-slate-950 text-white overflow-hidden rounded-[2.5rem]",
+                    showQrBridge ? "shadow-2xl border-primary/40" : "border-white/5 opacity-90"
                 )}>
                     <CardContent className="p-8 flex flex-col md:flex-row items-center gap-8">
                         <div className="flex-1 space-y-4">
@@ -317,11 +365,11 @@ export default function ScannerToPdf() {
                                 <h3 className="text-xl font-black uppercase tracking-tighter">Mobile Scan Sync</h3>
                             </div>
                             <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                                Use your phone's high-resolution camera for better document clarity. Scan this code to sync your session.
+                                Use your phone's high-resolution camera for better document clarity. Scan this code and create PDF on mobile; it will <strong>automatically appear on this computer.</strong>
                             </p>
                             {!showQrBridge && (
                                 <Button variant="secondary" className="font-black text-xs h-10 px-6 rounded-lg" onClick={() => setShowMobileQr(true)}>
-                                    REVEAL QR CODE
+                                    REVEAL SYNC QR CODE
                                 </Button>
                             )}
                         </div>
@@ -341,7 +389,7 @@ export default function ScannerToPdf() {
 
         {/* Document Stack Section */}
         <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[400px] flex flex-col bg-card/50">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[400px] flex flex-col bg-card/50 rounded-[2rem]">
                 <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between py-3 sm:py-4">
                     <div className="flex items-center gap-2">
                         <FileDigit className="size-4 text-primary" />
@@ -350,6 +398,15 @@ export default function ScannerToPdf() {
                     <Badge variant="secondary" className="font-black text-[9px] sm:text-[10px] bg-primary/10 text-primary">{scannedImages.length} PAGES</Badge>
                 </CardHeader>
                 <CardContent className="flex-1 p-4">
+                    {isWaitingForMobile && !createdPdfUrl && !isMobile && scannedImages.length === 0 && (
+                        <div className="flex flex-col items-center justify-center text-center py-20 gap-4">
+                            <div className="relative">
+                                <Loader2 className="size-12 animate-spin text-primary/20" />
+                                <CloudSync className="absolute inset-0 m-auto size-6 text-primary animate-pulse" />
+                            </div>
+                            <p className="text-[10px] font-black uppercase text-muted-foreground animate-pulse">Waiting for mobile sync...</p>
+                        </div>
+                    )}
                     {scannedImages.length > 0 ? (
                         <div className="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                             {scannedImages.map((src, index) => (
@@ -368,17 +425,25 @@ export default function ScannerToPdf() {
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center text-center py-12 sm:py-20 gap-4 opacity-30">
-                            <Monitor className="size-12 sm:size-16 text-muted-foreground" />
-                            <p className="text-[10px] font-black uppercase tracking-widest">Stack is Empty</p>
-                        </div>
+                        !isWaitingForMobile && (
+                            <div className="flex flex-col items-center justify-center text-center py-12 sm:py-20 gap-4 opacity-30">
+                                <Monitor className="size-12 sm:size-16 text-muted-foreground" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">Stack is Empty</p>
+                            </div>
+                        )
                     )}
                 </CardContent>
                 <CardFooter className="p-4 sm:p-6 bg-muted/5 border-t flex flex-col gap-3">
                     {createdPdfUrl ? (
-                         <Button size="lg" className="w-full h-14 sm:h-16 bg-green-600 hover:bg-green-700 font-black text-base sm:text-lg shadow-2xl rounded-2xl transition-all animate-in zoom-in-95" onClick={handleDownload}>
-                            <Download className="mr-3 size-6 sm:size-7" /> DOWNLOAD PDF
-                        </Button>
+                         <div className="w-full space-y-3">
+                            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 animate-in zoom-in-95">
+                                <CheckCircle2 className="size-5 text-green-600" />
+                                <p className="text-xs font-black text-green-800 uppercase tracking-tighter">Document Ready to Save!</p>
+                            </div>
+                            <Button size="lg" className="w-full h-14 sm:h-16 bg-green-600 hover:bg-green-700 font-black text-base sm:text-lg shadow-2xl rounded-2xl transition-all" onClick={handleDownload}>
+                                <Download className="mr-3 size-6 sm:size-7" /> DOWNLOAD PDF
+                            </Button>
+                         </div>
                     ) : (
                         <Button 
                             onClick={handleCreatePdf} 
@@ -386,7 +451,7 @@ export default function ScannerToPdf() {
                             className="w-full h-14 sm:h-16 text-base sm:text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
                         >
                             {isProcessing ? <Loader2 className="animate-spin mr-3 size-6"/> : <CheckCircle2 className="mr-3 size-6 sm:size-7 group-hover:scale-110 transition-transform" />}
-                            {isProcessing ? "PROCESSING..." : "GENERATE PDF"}
+                            {isProcessing ? "PROCESSING..." : isMobile ? "SYNC TO COMPUTER" : "GENERATE PDF"}
                         </Button>
                     )}
                     <div className="flex flex-row w-full items-center justify-between pt-1">
@@ -394,7 +459,7 @@ export default function ScannerToPdf() {
                             <RefreshCcw className="size-3 mr-1" /> Clear Workspace
                         </Button>
                         <div className="flex items-center gap-1.5 text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                            <ShieldCheck className="size-3 text-green-500" /> SECURE RAM
+                            <ShieldCheck className="size-3 text-green-500" /> SECURE LOCAL
                         </div>
                     </div>
                 </CardFooter>
@@ -405,27 +470,27 @@ export default function ScannerToPdf() {
                     <Zap className="size-5 sm:size-6 text-primary" />
                 </div>
                 <div>
-                    <p className="text-[10px] sm:text-[11px] font-black text-primary uppercase tracking-tight">Pro OCR Logic Ready</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground leading-tight font-medium">After scanning, you can use our <strong>Image to Text</strong> tool to extract editable characters.</p>
+                    <p className="text-[10px] sm:text-[11px] font-black text-primary uppercase tracking-tight">Real-time Session Sync</p>
+                    <p className="text-[9px] text-muted-foreground leading-tight font-medium">Your mobile scan is sent directly to this browser using bank-grade local encryption.</p>
                 </div>
             </div>
         </div>
       </div>
 
       <Dialog open={imageToCrop !== null} onOpenChange={(open) => !open && setImageToCrop(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw] max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw] max-h-[90vh] flex flex-col bg-background">
           <DialogHeader className="bg-muted/30 border-b p-4 sm:p-6 shrink-0">
             <DialogTitle className="text-base sm:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
                 <Crop className="text-primary size-4 sm:size-5" /> Trim Scanned Page
             </DialogTitle>
           </DialogHeader>
-          <div className="p-3 sm:p-8 bg-black/5 flex justify-center items-center flex-1 overflow-auto min-h-0">
+          <div className="p-3 sm:p-8 flex justify-center items-center flex-1 overflow-auto min-h-0">
             {imageToCrop && (
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                className="shadow-2xl border-2 sm:border-4 border-white max-w-full"
+                className="shadow-2xl border-2 sm:border-4 border-white max-w-full rounded-lg overflow-hidden"
               >
                 <img
                   ref={cropImgRef}
@@ -439,7 +504,7 @@ export default function ScannerToPdf() {
           </div>
           <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
             <Button variant="outline" className="flex-1 font-bold h-11 sm:h-12 rounded-xl text-xs sm:text-sm" onClick={() => setImageToCrop(null)}>CANCEL</Button>
-            <Button className="flex-[2] font-black h-11 sm:h-12 rounded-xl bg-primary text-sm sm:text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
+            <Button className="flex-[2] font-black h-11 sm:h-12 rounded-xl bg-primary text-sm sm:text-lg border-none" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
               <CheckCircle2 className="mr-2 size-4 sm:size-5" /> ADD TO PDF
             </Button>
           </DialogFooter>
