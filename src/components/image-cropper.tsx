@@ -282,44 +282,48 @@ export default function ImageCropper() {
     document.body.removeChild(link);
   }
 
+  const updateMagnifier = useCallback((clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    setMagnifierPos({ x, y });
+    return { x, y };
+  }, []);
+
   const handlePointMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
     if (e.cancelable) e.preventDefault();
     setDraggingPoint(index);
     
-    // Initialize magnifier position immediately on touch
-    if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        let clientX, clientY;
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-        } else {
-            clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
-        }
-        const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-        const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-        setMagnifierPos({ x, y });
-    }
-  };
-  
-  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
-    if (e.cancelable) e.preventDefault();
-    const rect = containerRef.current.getBoundingClientRect();
     let clientX, clientY;
     if ('touches' in e) {
         clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
     } else {
         clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
     }
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
-    setPoints(prev => {
-        const next = [...prev];
-        next[draggingPoint] = { x, y };
-        return next;
-    });
-  }, [draggingPoint]);
+    updateMagnifier(clientX, clientY);
+  };
+  
+  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current) return;
+    if (e.cancelable) e.preventDefault();
+    
+    let clientX, clientY;
+    if ('touches' in e) {
+        clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+    } else {
+        clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
+    }
+    
+    const pos = updateMagnifier(clientX, clientY);
+    if (pos) {
+        setPoints(prev => {
+            const next = [...prev];
+            next[draggingPoint] = { x: pos.x, y: pos.y };
+            return next;
+        });
+    }
+  }, [draggingPoint, updateMagnifier]);
 
   const handleMouseUp = () => setDraggingPoint(null);
 
@@ -509,8 +513,8 @@ export default function ImageCropper() {
                                             style={{ 
                                                 width: `${(imgRef.current?.width || 0) * 4}px`,
                                                 height: `${(imgRef.current?.height || 0) * 4}px`,
-                                                left: `calc(50% - ${magnifierPos.x * 4}%)`,
-                                                top: `calc(50% - ${magnifierPos.y * 4}%)`
+                                                left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`,
+                                                top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)`
                                             }} 
                                         />
                                     </div>
