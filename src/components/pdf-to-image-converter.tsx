@@ -23,7 +23,8 @@ import {
   MousePointer2,
   Layout,
   Loader2,
-  Layers
+  Layers,
+  RotateCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -175,6 +176,41 @@ export default function PdfToImageConverter() {
         setIsProcessing(false);
     };
 
+    const rotateSelectedPage = () => {
+        if (!selectedId) return;
+        const targetPage = pages.find(p => p.id === selectedId);
+        if (!targetPage) return;
+
+        setIsProcessing(true);
+        const img = new window.Image();
+        img.src = targetPage.originalSrc;
+        img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                setIsProcessing(false);
+                return;
+            }
+
+            // Swap width and height for 90 degree rotation
+            canvas.width = img.height;
+            canvas.height = img.width;
+
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((90 * Math.PI) / 180);
+            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+            const rotatedOriginal = canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0);
+            
+            // Re-render final image with potential canvas adjustments
+            const newFinal = await renderProcessedImage(rotatedOriginal, targetPage.vAlign, targetPage.fitMode);
+            
+            setPages(prev => prev.map(p => p.id === selectedId ? { ...p, originalSrc: rotatedOriginal, finalSrc: newFinal } : p));
+            setIsProcessing(false);
+            toast({ title: "Page Rotated", description: "Turned 90° clockwise." });
+        };
+    };
+
     const applyToAll = async () => {
         const selected = pages.find(p => p.id === selectedId);
         if (!selected) return;
@@ -292,7 +328,7 @@ export default function PdfToImageConverter() {
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
                                                     <img 
-                                                        src={p.originalSrc} 
+                                                        src={p.finalSrc} 
                                                         alt={`page-${p.index}`} 
                                                         className={cn(
                                                             "w-full object-contain pointer-events-none mx-auto block",
@@ -369,6 +405,20 @@ export default function PdfToImageConverter() {
                                                 <span className="text-[8px] font-black uppercase">Literal Bottom</span>
                                             </Button>
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                            <RotateCw className="size-3" /> Orientation
+                                        </Label>
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase"
+                                            onClick={rotateSelectedPage}
+                                            disabled={isProcessing}
+                                        >
+                                            <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
+                                        </Button>
                                     </div>
 
                                     <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
