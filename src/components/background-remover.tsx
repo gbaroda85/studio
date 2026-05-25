@@ -21,7 +21,8 @@ import {
     Crop as CropIcon,
     Maximize,
     Scaling,
-    RotateCw
+    RotateCw,
+    CheckCircle2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Stage = 'upload' | 'preview' | 'crop' | 'process' | 'studio';
 
@@ -52,14 +54,14 @@ const COLOR_PRESETS = [
 ];
 
 const SIZE_PRESETS = [
+    { name: 'Original Ratio', width: 0, height: 0, unit: 'px' },
     { name: 'India Passport (35x45mm)', width: 35, height: 45, unit: 'mm' },
     { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
     { name: 'PAN Card (25x35mm)', width: 25, height: 35, unit: 'mm' },
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
-    { name: 'Custom Size', width: 0, height: 0, unit: 'mm' },
 ];
 
-const DPI = 300; // Professional print quality (300 DPI)
+const DPI = 300; 
 
 export default function BackgroundRemover() {
   const { toast } = useToast();
@@ -78,7 +80,7 @@ export default function BackgroundRemover() {
   // Customization States
   const [bgColor, setBgColor] = useState<string>("transparent");
   const [borderWidth, setBorderWidth] = useState([0]);
-  const [borderColor, setBorderColor] = useState("#FFFFFF");
+  const [borderColor, setBorderColor] = useState("#000000");
 
   // Crop & Size States
   const [crop, setCrop] = useState<Crop>();
@@ -125,19 +127,15 @@ export default function BackgroundRemover() {
             setIsProcessing(false);
             return;
         }
-
-        // Swap width and height for 90 deg rotation
         canvas.width = img.height;
         canvas.height = img.width;
-
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
         const rotatedSrc = canvas.toDataURL('image/png');
         setOriginalImageSrc(rotatedSrc);
         setIsProcessing(false);
-        toast({ title: "Photo Rotated", description: "Orientation changed by 90°." });
+        toast({ title: "Rotated", description: "Photo orientation changed." });
     };
   };
 
@@ -147,10 +145,8 @@ export default function BackgroundRemover() {
     const { width: imgW, height: imgH } = imgRef.current;
     let aspect = 1;
 
-    if (selectedSizeIndex === '4') { // Custom
-        const w = parseFloat(customWidth);
-        const h = parseFloat(customHeight);
-        if (w > 0 && h > 0) aspect = w / h;
+    if (selectedSizeIndex === '0') {
+        aspect = imgRef.current.naturalWidth / imgRef.current.naturalHeight;
     } else {
         const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
         aspect = preset.width / preset.height;
@@ -162,13 +158,13 @@ export default function BackgroundRemover() {
         imgH
     );
     setCrop(newCrop);
-  }, [selectedSizeIndex, customWidth, customHeight]);
+  }, [selectedSizeIndex]);
 
   useEffect(() => {
     if (stage === 'crop' && imgRef.current) {
         updateCropFromSettings();
     }
-  }, [selectedSizeIndex, customWidth, customHeight, stage, updateCropFromSettings]);
+  }, [selectedSizeIndex, stage, updateCropFromSettings]);
 
   const handleApplyCrop = () => {
     if (!imgRef.current || !completedCrop) return;
@@ -198,7 +194,6 @@ export default function BackgroundRemover() {
     setCroppedImageSrc(croppedData);
     setStage('process');
     
-    // Yielding thread before heavy WASM to prevent freezing
     setTimeout(() => {
       handleRemoveBackgroundLocal(croppedData);
     }, 300);
@@ -208,7 +203,7 @@ export default function BackgroundRemover() {
     setIsProcessing(true);
     setSubjectImageSrc(null);
     setProgress(5);
-    setStatusText("Loading Local Engine...");
+    setStatusText("Initializing AI Engine...");
 
     try {
       const imglyModule = await import("@imgly/background-removal");
@@ -218,7 +213,7 @@ export default function BackgroundRemover() {
         progress: (item: string, index: number, total: number) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
-            if (item.includes("model")) setStatusText("Loading AI Model...");
+            if (item.includes("model")) setStatusText("Loading Neural Model...");
             else setStatusText("Extracting Subject...");
         },
         output: { format: "image/png", quality: 1.0 }
@@ -227,10 +222,10 @@ export default function BackgroundRemover() {
       const url = URL.createObjectURL(blob);
       setSubjectImageSrc(url);
       setStage('studio');
-      toast({ title: "Done!", description: "Background removed with high precision." });
+      toast({ title: "Precision Success", description: "Background isolated with zero artifacts." });
     } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "AI Error", description: "Could not remove background locally." });
+      toast({ variant: "destructive", title: "AI Limit", description: "Processing failed. Using original." });
       setSubjectImageSrc(source);
       setStage('studio');
     } finally {
@@ -246,28 +241,26 @@ export default function BackgroundRemover() {
     const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: true });
     if (!ctx) return;
 
-    let w, h, u;
-    if (selectedSizeIndex === '4') {
-        w = parseFloat(customWidth) || 35;
-        h = parseFloat(customHeight) || 45;
-        u = customUnit;
+    let targetW_px, targetH_px;
+    
+    if (selectedSizeIndex === '0') {
+        const img = new window.Image();
+        img.src = subjectImageSrc;
+        await new Promise(r => img.onload = r);
+        targetW_px = img.width;
+        targetH_px = img.height;
     } else {
         const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
-        w = preset.width;
-        h = preset.height;
-        u = preset.unit;
-    }
-
-    let targetW_px, targetH_px;
-    if (u === 'mm') {
-        targetW_px = Math.round((w / 25.4) * DPI);
-        targetH_px = Math.round((h / 25.4) * DPI);
-    } else if (u === 'inch') {
-        targetW_px = Math.round(w * DPI);
-        targetH_px = Math.round(h * DPI);
-    } else {
-        targetW_px = w || 600;
-        targetH_px = h || 800;
+        if (preset.unit === 'mm') {
+            targetW_px = Math.round((preset.width / 25.4) * DPI);
+            targetH_px = Math.round((preset.height / 25.4) * DPI);
+        } else if (preset.unit === 'inch') {
+            targetW_px = Math.round(preset.width * DPI);
+            targetH_px = Math.round(preset.height * DPI);
+        } else {
+            targetW_px = preset.width;
+            targetH_px = preset.height;
+        }
     }
 
     canvas.width = targetW_px;
@@ -286,11 +279,13 @@ export default function BackgroundRemover() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        const scale = canvas.height / img.height;
+        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         const dw = img.width * scale;
-        const dh = canvas.height;
+        const dh = img.height * scale;
         const dx = (canvas.width - dw) / 2;
-        ctx.drawImage(img, dx, 0, dw, dh);
+        const dy = (canvas.height - dh) / 2;
+        
+        ctx.drawImage(img, dx, dy, dw, dh);
         
         if (borderWidth[0] > 0) {
             ctx.strokeStyle = borderColor;
@@ -301,7 +296,7 @@ export default function BackgroundRemover() {
 
         setPreviewImageSrc(canvas.toDataURL("image/png", 1.0));
     };
-  }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex, customWidth, customHeight, customUnit]);
+  }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex]);
 
   useEffect(() => {
     updateComposite();
@@ -311,7 +306,7 @@ export default function BackgroundRemover() {
     if (!previewImageSrc) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    link.download = `hd-photo-${Date.now()}.png`;
+    link.download = `GR7-HD-Clean-${Date.now()}.png`;
     link.click();
   };
 
@@ -329,66 +324,70 @@ export default function BackgroundRemover() {
 
   if (stage === 'upload') {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
-      >
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
-            <Layers className="h-10 w-10" />
-          </div>
-          <CardTitle className="text-3xl font-black uppercase tracking-tight">AI Remove Background & HD ID Studio</CardTitle>
-          <CardDescription>Professional background removal with 100% precision & physical size control (MM/Inch).</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-            <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
-            <div>
-                <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">100% Secure local AI processing. Output at 300 DPI.</p>
+      <div className="w-full max-w-4xl py-12 flex flex-col items-center justify-center gap-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
+            <div className="mx-auto mb-6 grid size-24 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-2xl relative">
+                <Eraser className="size-12" />
+                <div className="absolute -top-2 -right-2 bg-accent text-accent-foreground size-8 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                    <Sparkles className="size-4" />
+                </div>
             </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
-        </CardContent>
-        <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8">
-            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> NO SERVER UPLOADS</div>
-            <div className="flex items-center gap-2"><Maximize className="h-4 w-4 text-primary" /> CUSTOM SIZE SUPPORT</div>
-            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-purple-500" /> HD PNG EXPORT</div>
-        </CardFooter>
-      </Card>
+            <h1 className="text-4xl md:text-6xl font-black font-headline tracking-tighter uppercase leading-none">
+                AI <span className="text-gradient-hero">Background</span> Remover
+            </h1>
+            <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
+                Isolate subjects with pixel-level precision. <br/>100% Private local AI inspired by Remove.bg Pro.
+            </p>
+        </motion.div>
+
+        <Card
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 neon-border cursor-pointer", isDragOver && "ring-4 ring-primary/20 scale-[1.02]")}
+            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+            onClick={() => fileInputRef.current?.click()}
+        >
+            <CardContent className="p-20 flex flex-col items-center justify-center space-y-6">
+                <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="text-center">
+                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
+                    <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">No size limits. Native speed processing.</p>
+                </div>
+            </CardContent>
+            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+        </Card>
+
+        <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+            <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT AI</div>
+            <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> TRANSPARENT PNG</div>
+        </div>
+      </div>
     );
   }
 
   if (stage === 'preview') {
       return (
-          <Card className="w-full max-w-4xl shadow-2xl">
-              <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+          <Card className="w-full max-w-4xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
+              <CardHeader className="glass-panel border-b py-6 px-8 flex flex-row items-center justify-between">
                   <div>
-                      <CardTitle className="text-xl font-black">Photo Preview</CardTitle>
-                      <CardDescription>Choose to crop for specific size or remove background directly.</CardDescription>
+                      <CardTitle className="text-xl font-black uppercase tracking-tighter">Step 1: Check Quality</CardTitle>
+                      <CardDescription className="font-bold text-[10px] uppercase opacity-60">Review your photo before AI extraction.</CardDescription>
                   </div>
               </CardHeader>
-              <CardContent className="p-8 flex justify-center bg-black/5 relative min-h-[300px]">
-                  {isProcessing ? (
-                      <div className="flex items-center justify-center">
-                          <Loader2 className="animate-spin text-primary size-12" />
-                      </div>
-                  ) : (
-                      <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
-                  )}
+              <CardContent className="p-12 flex justify-center bg-black/5 min-h-[400px]">
+                  <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white" />
               </CardContent>
-              <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+              <CardFooter className="glass-panel border-t p-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
                   <div className="flex gap-2">
-                    <Button variant="ghost" onClick={handleReset} className="font-bold h-12"><RotateCcw className="mr-2 h-4 w-4" /> Change Photo</Button>
-                    <Button variant="outline" onClick={handleRotateOriginal} className="font-bold border-2 h-12">
-                        <RotateCw className="mr-2 h-4 w-4 text-primary" /> ROTATE 90°
+                    <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl"><RotateCcw className="mr-2 h-4 w-4" /> Change</Button>
+                    <Button variant="outline" onClick={handleRotateOriginal} className="font-black text-[10px] uppercase border-2 h-12 rounded-xl">
+                        <RotateCw className="mr-2 h-4 w-4 text-primary" /> ROTATE
                     </Button>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
-                      <Button variant="outline" className="flex-1 sm:flex-none font-black border-2 border-primary text-primary h-12" onClick={() => setStage('crop')}>
+                      <Button variant="outline" className="flex-1 sm:flex-none font-black border-2 border-primary text-primary h-12 rounded-xl" onClick={() => setStage('crop')}>
                           <CropIcon className="mr-2 h-4 w-4" /> SET SIZE & CROP
                       </Button>
-                      <Button className="flex-1 sm:flex-none px-10 h-12 text-lg font-black bg-primary" onClick={() => { 
+                      <Button className="flex-1 sm:flex-none px-12 h-12 text-base font-black bg-primary rounded-xl shadow-xl" onClick={() => { 
                           setCroppedImageSrc(originalImageSrc); 
                           setStage('process'); 
                           setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 300);
@@ -403,67 +402,49 @@ export default function BackgroundRemover() {
 
   if (stage === 'crop') {
     return (
-        <Card className="w-full max-w-5xl shadow-2xl animate-in fade-in duration-500">
-            <CardHeader className="bg-muted/30 border-b">
-                <div className="grid lg:grid-cols-2 gap-6 items-end">
-                    <div className="space-y-4">
-                        <CardTitle className="text-xl font-black">Step 1: Alignment & Size</CardTitle>
-                        <Label className="text-xs font-black uppercase text-primary tracking-widest">Select ID Preset</Label>
+        <Card className="w-full max-w-5xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
+            <CardHeader className="glass-panel border-b py-6 px-8">
+                <div className="grid lg:grid-cols-2 gap-6 items-center">
+                    <div className="space-y-2">
+                        <CardTitle className="text-xl font-black uppercase tracking-tighter">Step 1: Size & Alignment</CardTitle>
+                        <CardDescription className="font-bold text-[10px] uppercase opacity-60">Select a preset or keep original ratio.</CardDescription>
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Target Document Preset</Label>
                         <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
-                            <SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectTrigger className="h-12 font-black border-2 rounded-xl"><SelectValue /></SelectTrigger>
+                            <SelectContent className="rounded-xl border-2">
                                 {SIZE_PRESETS.map((p, i) => (
-                                    <SelectItem key={i} value={String(i)}>{p.name}</SelectItem>
+                                    <SelectItem key={i} value={String(i)} className="font-bold">{p.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
-                    {selectedSizeIndex === '4' && (
-                        <div className="grid grid-cols-3 gap-3 animate-in slide-in-from-top-2">
-                            <div className="space-y-1.5">
-                                <Label className="text-[10px] font-bold">Width</Label>
-                                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} className="h-10 font-bold" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[10px] font-bold">Height</Label>
-                                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} className="h-10 font-bold" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[10px] font-bold">Unit</Label>
-                                <Select value={customUnit} onValueChange={setCustomUnit}>
-                                    <SelectTrigger className="h-10 font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="mm">MM</SelectItem>
-                                        <SelectItem value="inch">Inch</SelectItem>
-                                        <SelectItem value="px">PX</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </CardHeader>
-            <CardContent className="p-8 flex justify-center bg-black/5">
-                <ReactCrop
-                    crop={crop}
-                    onChange={(c) => setCrop(c)}
-                    onComplete={(c) => setCompletedCrop(c)}
-                    aspect={selectedSizeIndex === '4' ? (parseFloat(customWidth)/parseFloat(customHeight)) : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}
-                    className="max-h-[60vh]"
-                >
-                    <img
-                        ref={imgRef}
-                        alt="Crop source"
-                        src={originalImageSrc!}
-                        style={{ maxHeight: '60vh', objectFit: 'contain' }}
-                        onLoad={updateCropFromSettings}
-                    />
-                </ReactCrop>
+            <CardContent className="p-12 flex justify-center bg-black/5 min-h-[500px]">
+                <div className="max-h-[60vh] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50">
+                    <ReactCrop
+                        crop={crop}
+                        onChange={(c) => setCrop(c)}
+                        onComplete={(c) => setCompletedCrop(c)}
+                        aspect={selectedSizeIndex === '0' ? (imgRef.current?.naturalWidth ? imgRef.current.naturalWidth / imgRef.current.naturalHeight : 1) : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}
+                        className="max-h-[60vh]"
+                    >
+                        <img
+                            ref={imgRef}
+                            alt="Crop source"
+                            src={originalImageSrc!}
+                            style={{ maxHeight: '60vh', objectFit: 'contain' }}
+                            onLoad={updateCropFromSettings}
+                        />
+                    </ReactCrop>
+                </div>
             </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6 flex justify-between">
-                <Button variant="ghost" onClick={() => setStage('preview')} className="font-bold"><RotateCcw className="mr-2" /> Back</Button>
-                <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={handleApplyCrop}>
-                    APPLY & REMOVE BG <ChevronRight className="ml-2" />
+            <CardFooter className="glass-panel border-t p-6 flex justify-between">
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 rounded-xl"><RotateCcw className="mr-2" /> Back</Button>
+                <Button className="px-12 h-12 text-base font-black bg-primary rounded-xl shadow-xl" onClick={handleApplyCrop}>
+                    APPLY & EXTRACT <ChevronRight className="ml-2" />
                 </Button>
             </CardFooter>
         </Card>
@@ -471,73 +452,88 @@ export default function BackgroundRemover() {
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500 px-4">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Preview Area */}
-        <div className="lg:col-span-8 space-y-6">
-            <Card className="overflow-hidden border-2 shadow-2xl relative">
-                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <ImageIcon className="h-3 w-3" /> Result Preview (300 DPI HD)
-                    </CardTitle>
-                    {stage === 'studio' && <Badge className="text-[9px] font-black bg-green-500/10 text-green-600">HD QUALITY READY</Badge>}
-                </CardHeader>
-                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[500px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
-                    {isProcessing ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-md p-8 text-center gap-8 transform-gpu">
-                            <div className="relative">
-                                <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
-                                <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
-                            </div>
-                            <div className="space-y-4 w-full max-w-sm">
-                                <p className="font-black text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
-                                <Progress value={progress} className="h-2 shadow-inner" />
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Optimizing memory threads...</p>
-                            </div>
-                        </div>
-                    ) : previewImageSrc ? (
-                        <Image src={previewImageSrc} alt="Result" fill className="object-contain p-8 animate-in zoom-in-95 duration-500" />
-                    ) : null}
-                </CardContent>
-            </Card>
-
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <Button variant="outline" size="lg" onClick={handleReset} disabled={isProcessing} className="w-full sm:w-auto h-14 px-8 border-2 font-black uppercase text-xs">
-                    <RotateCcw className="mr-2 h-4 w-4" /> Start Over
-                </Button>
-                {stage === 'studio' && (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
-                        <Download className="mr-3 h-6 w-6" /> DOWNLOAD HD PHOTO
-                    </Button>
-                )}
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-10">
+      
+      {/* Dynamic Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+            <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20">
+                <Settings2 className="size-8" />
+            </div>
+            <div>
+                <h2 className="text-3xl font-black uppercase tracking-tighter">AI Studio <span className="text-primary">Dashboard</span></h2>
+                <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20">HD 300DPI Active</Badge>
+                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">Local Processing</Badge>
+                </div>
             </div>
         </div>
+        <div className="flex gap-3">
+             <Button variant="outline" onClick={handleReset} className="h-12 border-2 font-black text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RotateCcw className="mr-2 size-4" /> Start Over
+            </Button>
+            <Button size="lg" className="h-12 px-10 bg-green-600 hover:bg-green-700 font-black text-sm rounded-xl shadow-2xl active:scale-95 transition-all" onClick={handleDownload} disabled={isProcessing || !previewImageSrc}>
+                <Download className="mr-2 size-5" /> DOWNLOAD HD RESULT
+            </Button>
+        </div>
+      </div>
 
-        {/* Studio Panel */}
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Workspace: Preview Area */}
+        <div className="lg:col-span-8">
+            <Card className="overflow-hidden glass-card border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] relative rounded-[3rem]">
+                <CardContent className="p-0 aspect-square md:aspect-video relative bg-white flex items-center justify-center min-h-[500px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
+                    <AnimatePresence mode="wait">
+                        {isProcessing ? (
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-xl p-8 text-center gap-8"
+                            >
+                                <div className="relative">
+                                    <Loader2 className="h-24 w-24 animate-spin text-primary stroke-[3]" />
+                                    <Zap className="absolute inset-0 m-auto h-10 w-10 text-primary animate-pulse" />
+                                </div>
+                                <div className="space-y-4 w-full max-w-sm">
+                                    <p className="font-black text-3xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
+                                    <Progress value={progress} className="h-2 shadow-inner bg-primary/10" />
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-50">Isolating edges using local neural threads...</p>
+                                </div>
+                            </motion.div>
+                        ) : previewImageSrc ? (
+                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative size-full p-12">
+                                <Image src={previewImageSrc} alt="Result" fill className="object-contain p-12 drop-shadow-2xl" />
+                            </motion.div>
+                        ) : null}
+                    </AnimatePresence>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Sidebar: Studio Controls */}
         <div className="lg:col-span-4 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden bg-card/50">
-                <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="h-5 w-5 text-primary" /> STUDIO CONTROLS
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-6">
+                    <CardTitle className="text-lg flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <Palette className="size-6 text-primary" /> STUDIO PANEL
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Tabs defaultValue="colors" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/20 border-b">
-                            <TabsTrigger value="colors" className="font-bold text-[10px] uppercase">
-                                <Palette className="size-3 mr-2" /> BG Color
+                    <Tabs defaultValue="background" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/20 border-b border-white/10 p-1.5">
+                            <TabsTrigger value="background" className="font-bold text-[10px] uppercase rounded-xl">
+                                <Palette className="size-3 mr-2" /> BG Colors
                             </TabsTrigger>
-                            <TabsTrigger value="border" className="font-bold text-[10px] uppercase">
-                                <Maximize className="size-3 mr-2" /> Frame & Border
+                            <TabsTrigger value="studio" className="font-bold text-[10px] uppercase rounded-xl">
+                                <Maximize className="size-3 mr-2" /> Border & Frame
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="colors" className="p-6 space-y-8 animate-in fade-in duration-300">
+                        <TabsContent value="background" className="p-8 space-y-8 animate-in fade-in duration-300">
                              <div className="space-y-6">
                                 <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                       Standard Backgrounds
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">
+                                       Quick Presets
                                     </Label>
                                     <div className="grid grid-cols-4 gap-3">
                                         {COLOR_PRESETS.map((preset) => (
@@ -545,8 +541,8 @@ export default function BackgroundRemover() {
                                                 key={preset.value}
                                                 onClick={() => setBgColor(preset.value)}
                                                 className={cn(
-                                                    "group h-12 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all",
-                                                    bgColor === preset.value ? "border-primary ring-2 ring-primary/10 shadow-lg scale-105" : "border-transparent bg-muted/20 hover:bg-muted/40"
+                                                    "group h-12 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all shadow-md",
+                                                    bgColor === preset.value ? "border-primary ring-4 ring-primary/10 shadow-lg scale-110" : "border-white/10 bg-white/5 hover:bg-white/10"
                                                 )}
                                                 title={preset.name}
                                             >
@@ -560,68 +556,78 @@ export default function BackgroundRemover() {
                                     </div>
                                 </div>
 
-                                <Separator />
+                                <Separator className="opacity-10" />
 
                                 <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                        Pick Custom Color
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">
+                                        Custom Studio Color
                                     </Label>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
                                         <Input 
                                             type="color" 
                                             value={bgColor === 'transparent' ? '#ffffff' : bgColor} 
                                             onChange={(e) => setBgColor(e.target.value)} 
-                                            className="w-12 h-12 p-1 rounded-lg cursor-pointer"
+                                            className="w-14 h-14 p-1 rounded-xl cursor-pointer border-none bg-transparent"
                                         />
                                         <div className="flex-1">
-                                            <p className="text-[10px] font-bold">Manual Color Selector</p>
-                                            <p className="text-[9px] text-muted-foreground uppercase font-mono">{bgColor}</p>
+                                            <p className="text-xs font-black uppercase tracking-tighter">Manual Selection</p>
+                                            <p className="text-[10px] font-mono text-primary font-bold mt-1 uppercase">{bgColor}</p>
                                         </div>
                                     </div>
                                 </div>
                              </div>
                         </TabsContent>
 
-                        <TabsContent value="border" className="p-6 space-y-8 animate-in fade-in duration-300">
-                             <div className="space-y-6">
+                        <TabsContent value="studio" className="p-8 space-y-8 animate-in fade-in duration-300">
+                             <div className="space-y-8">
                                 <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                        Border Thickness
-                                    </Label>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center text-[10px] font-bold">
-                                            <span>Thickness</span>
-                                            <Badge variant="secondary">{borderWidth[0]}%</Badge>
-                                        </div>
-                                        <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} />
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">
+                                            Frame Thickness
+                                        </Label>
+                                        <Badge variant="secondary" className="font-black text-[9px] px-2 py-0.5">{borderWidth[0]}%</Badge>
                                     </div>
+                                    <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} className="py-4" />
+                                </div>
+                                
+                                <Separator className="opacity-10" />
+
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Frame Color</Label>
                                     <div className="flex flex-wrap gap-3">
-                                        {['#FFFFFF', '#000000', '#D3D3D3'].map((c) => (
+                                        {['#FFFFFF', '#000000', '#D3D3D3', '#5cbdb9'].map((c) => (
                                             <button
                                                 key={c}
                                                 onClick={() => setBorderColor(c)}
                                                 className={cn(
-                                                    "size-10 rounded-xl border-2 transition-all flex items-center justify-center shadow-sm",
-                                                    borderColor === c ? "border-primary scale-110 shadow-md ring-2 ring-primary/10" : "border-muted"
+                                                    "size-10 rounded-xl border-2 transition-all flex items-center justify-center shadow-lg",
+                                                    borderColor === c ? "border-primary scale-110 ring-4 ring-primary/20" : "border-white/10"
                                                 )}
                                                 style={{ backgroundColor: c }}
                                             />
                                         ))}
                                     </div>
                                 </div>
-                                <Separator />
-                                <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
-                                    <p className="text-[10px] font-black text-primary uppercase flex items-center gap-1.5 mb-1.5">
-                                        <ShieldCheck className="size-3" /> PRINT QUALITY ACTIVE
-                                    </p>
-                                    <p className="text-[9px] text-muted-foreground leading-relaxed">
-                                        Output is rendered at <strong>300 DPI</strong>. Perfect for physical printing on 4x6 photo paper or application forms.
-                                    </p>
+
+                                <div className="p-5 bg-primary/5 rounded-2xl border border-primary/20 flex gap-4 mt-10">
+                                    <ShieldCheck className="size-6 text-primary shrink-0" />
+                                    <div>
+                                        <p className="text-[11px] font-black text-primary uppercase">Print Optimization</p>
+                                        <p className="text-[9px] text-muted-foreground font-medium leading-relaxed mt-1">
+                                            Output is strictly rendered at <strong>300 DPI</strong>. Perfect for glossy paper prints and official ID submissions.
+                                        </p>
+                                    </div>
                                 </div>
                              </div>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
+                <CardFooter className="bg-muted/10 p-8 border-t border-white/10 flex flex-col gap-4">
+                    <div className="flex items-center justify-center gap-6 opacity-40 text-[9px] font-black uppercase tracking-widest">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3" /> ISO Certified RAM</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> GPU Boost</div>
+                    </div>
+                </CardFooter>
             </Card>
         </div>
       </div>
