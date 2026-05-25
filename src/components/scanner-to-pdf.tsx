@@ -56,23 +56,46 @@ export default function ScannerToPdf() {
   useEffect(() => {
     setCurrentUrl(window.location.href);
     
-    if (isMobile) {
-        startCamera();
-    }
+    // Auto-start on mount
+    startCamera();
     
     return () => {
         stopCamera();
         if (createdPdfUrl) URL.revokeObjectURL(createdPdfUrl);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, []);
 
   const startCamera = async () => {
-    const constraints = { video: { facingMode: 'environment' } };
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setHasCameraPermission(false);
+        toast({
+            variant: "destructive",
+            title: "Not Supported",
+            description: "Your browser does not support camera access or you are not using HTTPS."
+        });
+        return;
+    }
+
+    setHasCameraPermission(null); // Loading state
+
+    // Try Rear Camera first
+    const constraints = { 
+        video: { 
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+        } 
+    };
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // Ensure video plays
+        videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+        };
       }
       setHasCameraPermission(true);
     } catch (error) {
@@ -81,14 +104,17 @@ export default function ScannerToPdf() {
           const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
           if (videoRef.current) {
               videoRef.current.srcObject = fallbackStream;
+              videoRef.current.onloadedmetadata = () => {
+                videoRef.current?.play();
+            };
           }
           setHasCameraPermission(true);
       } catch (fallbackError) {
           setHasCameraPermission(false);
           toast({
             variant: 'destructive',
-            title: 'Camera Error',
-            description: 'Could not access camera. Try uploading photos instead.',
+            title: 'Permission Denied',
+            description: 'Please allow camera access in your browser settings to scan documents.',
           });
       }
     }
@@ -110,7 +136,7 @@ export default function ScannerToPdf() {
   }
 
   const handleCapture = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !hasCameraPermission) return;
     clearCreatedPdf();
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
@@ -138,7 +164,6 @@ export default function ScannerToPdf() {
         };
         reader.readAsDataURL(file);
     }
-    // Reset input for same file selection
     e.target.value = "";
   };
   
@@ -228,34 +253,40 @@ export default function ScannerToPdf() {
                         <Camera className="size-4 text-primary" />
                         <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Live Viewfinder</CardTitle>
                     </div>
-                    {hasCameraPermission && <Badge className="bg-green-600 text-white font-black text-[9px] uppercase">CAMERA ACTIVE</Badge>}
+                    {hasCameraPermission === true && <Badge className="bg-green-600 text-white font-black text-[9px] uppercase">CAMERA ACTIVE</Badge>}
+                    {hasCameraPermission === null && <Loader2 className="size-4 animate-spin text-primary" />}
                 </CardHeader>
                 <CardContent className="p-0 relative aspect-video bg-black flex items-center justify-center overflow-hidden">
-                    {hasCameraPermission ? (
-                        <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                    {hasCameraPermission === true ? (
+                        <video 
+                            ref={videoRef} 
+                            className="w-full h-full object-cover" 
+                            autoPlay 
+                            muted 
+                            playsInline 
+                        />
                     ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-center p-8 gap-6">
                             <div className="size-20 rounded-full bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-700">
-                                <Zap className="size-8 text-slate-600" />
+                                <AlertTriangle className="size-8 text-orange-500" />
                             </div>
                             <div className="space-y-2">
-                                <p className="text-lg font-black text-white uppercase tracking-tighter">Webcam not available</p>
-                                <p className="text-xs text-slate-400 max-w-[250px] mx-auto">Click "Enable Camera" or use the mobile sync option below for best results.</p>
+                                <p className="text-lg font-black text-white uppercase tracking-tighter">Camera Access Required</p>
+                                <p className="text-xs text-slate-400 max-w-[300px] mx-auto leading-relaxed">
+                                    To scan documents, please allow camera permissions in your browser. 
+                                    If you are on desktop, you can also scan using your phone via the QR code below.
+                                </p>
                             </div>
-                            <Button onClick={startCamera} className="bg-primary hover:bg-primary/90 font-black">ENABLE CAMERA</Button>
+                            <Button onClick={startCamera} className="bg-primary hover:bg-primary/90 font-black h-12 px-8 rounded-xl shadow-xl">
+                                <Camera className="mr-2" /> ENABLE CAMERA
+                            </Button>
                         </div>
                     )}
 
-                    {/* Desktop Bridge Overlay */}
-                    {!isMobile && !showQrBridge && (
-                        <div className="absolute bottom-6 right-6 z-20">
-                            <Button 
-                                onClick={() => setShowMobileQr(true)} 
-                                className="h-14 px-8 bg-white/10 backdrop-blur-xl border border-white/20 text-white font-black rounded-2xl shadow-2xl hover:bg-white/20 transition-all group"
-                            >
-                                <Smartphone className="mr-2 group-hover:scale-110 transition-transform" />
-                                SCAN WITH MOBILE
-                            </Button>
+                    {/* Capture UI Hint */}
+                    {hasCameraPermission === true && (
+                        <div className="absolute inset-0 border-[20px] border-black/30 pointer-events-none flex items-center justify-center">
+                            <div className="size-64 border-2 border-white/20 rounded-xl" />
                         </div>
                     )}
                 </CardContent>
@@ -266,7 +297,7 @@ export default function ScannerToPdf() {
                         className="h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
                     >
                         <ScanLine className="mr-2 size-6 group-hover:scale-110 transition-transform" />
-                        SCAN PAGE
+                        CAPTURE PAGE
                     </Button>
                     <Button 
                         variant="outline"
@@ -274,46 +305,42 @@ export default function ScannerToPdf() {
                         className="h-14 text-sm font-black border-2 rounded-2xl hover:bg-primary/5"
                     >
                         <UploadCloud className="mr-2 size-5" />
-                        UPLOAD IMAGE
+                        UPLOAD PHOTO
                     </Button>
                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </CardFooter>
             </Card>
 
             {/* Desktop Sync Bridge Dialog */}
-            {!isMobile && showQrBridge && (
-                <Card className="border-2 border-primary/30 shadow-2xl bg-slate-900 text-white overflow-hidden animate-in zoom-in-95 duration-300">
-                    <CardContent className="p-10 flex flex-col md:flex-row items-center gap-10">
+            {!isMobile && (
+                <Card className={cn(
+                    "border-2 transition-all duration-300 bg-slate-900 text-white overflow-hidden",
+                    showQrBridge ? "shadow-2xl border-primary/40" : "border-white/5 opacity-80"
+                )}>
+                    <CardContent className="p-8 flex flex-col md:flex-row items-center gap-8">
                         <div className="flex-1 space-y-4">
                             <div className="flex items-center gap-3">
                                 <QrCode className="size-8 text-primary" />
-                                <h3 className="text-2xl font-black uppercase tracking-tighter">Mobile Scan Sync</h3>
+                                <h3 className="text-xl font-black uppercase tracking-tighter">Mobile Scan Sync</h3>
                             </div>
                             <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                                Use your phone's high-resolution camera as a professional document scanner.
-                                <br/><br/>
-                                1. Open your phone's camera.<br/>
-                                2. Scan the QR code.<br/>
-                                3. Scan documents directly to PDF.
+                                Use your phone's high-resolution camera for better document clarity. Scan this code to sync your session.
                             </p>
-                            <Button variant="ghost" className="text-xs font-bold text-slate-500 hover:text-white" onClick={() => setShowMobileQr(false)}>
-                                <X className="mr-2 size-3" /> Dismiss Bridge
-                            </Button>
+                            {!showQrBridge && (
+                                <Button variant="secondary" className="font-black text-xs h-10 px-6 rounded-lg" onClick={() => setShowMobileQr(true)}>
+                                    REVEAL QR CODE
+                                </Button>
+                            )}
                         </div>
-                        <div className="bg-white p-6 rounded-[2.5rem] shadow-2xl shrink-0 group hover:scale-105 transition-transform">
-                            <div className="relative">
+                        {showQrBridge && (
+                            <div className="bg-white p-4 rounded-2xl shadow-2xl shrink-0 animate-in zoom-in-95 duration-300">
                                 <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`} 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`} 
                                     alt="QR Sync" 
-                                    className="size-48"
+                                    className="size-36"
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="size-12 rounded-full bg-primary flex items-center justify-center text-white shadow-xl animate-bounce">
-                                        <Smartphone className="size-6" />
-                                    </div>
-                                </div>
                             </div>
-                        </div>
+                        )}
                     </CardContent>
                 </Card>
             )}
@@ -325,9 +352,9 @@ export default function ScannerToPdf() {
                 <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                         <FileDigit className="size-4 text-primary" />
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Scanned Stack</CardTitle>
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Scanned Document Stack</CardTitle>
                     </div>
-                    <Badge variant="secondary" className="font-black text-[10px]">{scannedImages.length} PAGES</Badge>
+                    <Badge variant="secondary" className="font-black text-[10px] bg-primary/10 text-primary">{scannedImages.length} PAGES</Badge>
                 </CardHeader>
                 <CardContent className="flex-1 p-6">
                     {scannedImages.length > 0 ? (
@@ -348,7 +375,7 @@ export default function ScannerToPdf() {
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center text-center py-20 gap-4 opacity-30">
+                        <div className="flex flex-col items-center justify-center text-center py-24 gap-4 opacity-30">
                             <Monitor className="size-16 text-muted-foreground" />
                             <p className="text-xs font-black uppercase tracking-widest">Stack is Empty</p>
                         </div>
@@ -366,7 +393,7 @@ export default function ScannerToPdf() {
                             className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
                         >
                             {isProcessing ? <Loader2 className="animate-spin mr-3 size-7"/> : <CheckCircle2 className="mr-3 size-7 group-hover:scale-110 transition-transform" />}
-                            {isProcessing ? "BUILDING..." : "GENERATE PDF"}
+                            {isProcessing ? "PROCESSING..." : "GENERATE PDF"}
                         </Button>
                     )}
                     <div className="flex gap-2 w-full">
@@ -429,4 +456,3 @@ export default function ScannerToPdf() {
     </div>
   );
 }
-
