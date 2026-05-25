@@ -173,7 +173,7 @@ export default function ImageCropper() {
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].x * dst[i].x, dst[i].x]);
         p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
@@ -471,20 +471,24 @@ export default function ImageCropper() {
                                     </div>
                                 ))}
 
-                                {/* Precision Magnifier Circle */}
+                                {/* Precision Fixed Magnifier Circle - Top Center */}
                                 {draggingPoint !== null && (
-                                    <div className="absolute pointer-events-none z-50 overflow-hidden size-32 rounded-full border-4 border-white shadow-2xl bg-white animate-in zoom-in-50"
-                                         style={{ left: `${magnifierPos.x}%`, top: `${magnifierPos.y - 15}%`, transform: 'translate(-50%, -100%)' }}>
+                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-primary shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="size-1 bg-red-500 rounded-full z-10 shadow-sm" />
-                                            <div className="absolute size-full opacity-50 bg-black/5" />
+                                            {/* Precision Crosshair */}
+                                            <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
+                                                <div className="w-full h-0.5 bg-red-500/50 absolute" />
+                                                <div className="h-full w-0.5 bg-red-500/50 absolute" />
+                                                <div className="size-2 border-2 border-red-500 rounded-full bg-white shadow-sm" />
+                                            </div>
+                                            <div className="absolute size-full opacity-30 bg-black/5" />
                                         </div>
                                         <img src={imgSrc} alt="magnify" className="absolute max-w-none origin-top-left"
                                              style={{ 
-                                                width: `${(imgRef.current?.width || 0) * 3}px`,
-                                                height: `${(imgRef.current?.height || 0) * 3}px`,
-                                                left: `-${magnifierPos.x * 3}%`,
-                                                top: `-${magnifierPos.y * 3}%`
+                                                width: `${(imgRef.current?.width || 0) * 4}px`,
+                                                height: `${(imgRef.current?.height || 0) * 4}px`,
+                                                left: `calc(50% - ${magnifierPos.x * 4}%)`,
+                                                top: `calc(50% - ${magnifierPos.y * 4}%)`
                                              }} />
                                     </div>
                                 )}
