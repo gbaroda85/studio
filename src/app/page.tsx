@@ -129,12 +129,12 @@ export default function Page() {
             <Sparkles className="size-3 text-orange-400 fill-orange-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
             Power Utilities for <br className="hidden md:block" />
             <span className="text-gradient-hero">Official Submissions</span>
           </h1>
           
-          <p className="text-sm md:text-lg text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
