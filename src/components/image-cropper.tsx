@@ -173,7 +173,7 @@ export default function ImageCropper() {
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].x * dst[i].x, dst[i].x]);
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
         p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
@@ -282,7 +282,24 @@ export default function ImageCropper() {
     document.body.removeChild(link);
   }
 
-  const handlePointMouseDown = (index: number) => setDraggingPoint(index);
+  const handlePointMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
+    if (e.cancelable) e.preventDefault();
+    setDraggingPoint(index);
+    
+    // Initialize magnifier position immediately on touch
+    if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        let clientX, clientY;
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+        } else {
+            clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
+        }
+        const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+        setMagnifierPos({ x, y });
+    }
+  };
   
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
@@ -445,7 +462,6 @@ export default function ImageCropper() {
                     </div>
                 ) : imgSrc && (
                     <div 
-                        ref={containerRef}
                         className="relative max-w-full max-h-full flex items-center justify-center"
                         style={{ touchAction: 'none' }}
                         onMouseMove={handleMouseMove}
@@ -458,7 +474,10 @@ export default function ImageCropper() {
                                 <img ref={imgRef} alt="Source" src={imgSrc} onLoad={onImageLoad} style={{ maxHeight: '75vh', objectFit: 'contain', transform: `rotate(${rotate}deg) scale(${flipH ? -1 : 1}, ${flipV ? -1 : 1})` }} />
                             </ReactCrop>
                         ) : (
-                            <div className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
+                            <div 
+                                ref={containerRef}
+                                className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu"
+                            >
                                 <img ref={imgRef} alt="Scanner Source" src={imgSrc} onLoad={onImageLoad} className="max-h-[75vh] w-auto object-contain pointer-events-none" />
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
@@ -466,30 +485,34 @@ export default function ImageCropper() {
                                 {points.map((p, i) => (
                                     <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
                                          style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                         onMouseDown={() => handlePointMouseDown(i)} onTouchStart={() => handlePointMouseDown(i)}>
+                                         onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
                                         <div className="size-2.5 bg-white rounded-full shadow-inner" />
                                     </div>
                                 ))}
 
                                 {/* Precision Fixed Magnifier Circle - Top Center */}
                                 {draggingPoint !== null && (
-                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-primary shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
+                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            {/* Precision Crosshair */}
+                                            {/* Precision Crosshair UI */}
                                             <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
-                                                <div className="w-full h-0.5 bg-red-500/50 absolute" />
-                                                <div className="h-full w-0.5 bg-red-500/50 absolute" />
-                                                <div className="size-2 border-2 border-red-500 rounded-full bg-white shadow-sm" />
+                                                <div className="w-full h-0.5 bg-green-500/50 absolute" />
+                                                <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                                <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
                                             </div>
                                             <div className="absolute size-full opacity-30 bg-black/5" />
                                         </div>
-                                        <img src={imgSrc} alt="magnify" className="absolute max-w-none origin-top-left"
-                                             style={{ 
+                                        <img 
+                                            src={imgSrc} 
+                                            alt="magnify" 
+                                            className="absolute max-w-none origin-top-left"
+                                            style={{ 
                                                 width: `${(imgRef.current?.width || 0) * 4}px`,
                                                 height: `${(imgRef.current?.height || 0) * 4}px`,
                                                 left: `calc(50% - ${magnifierPos.x * 4}%)`,
                                                 top: `calc(50% - ${magnifierPos.y * 4}%)`
-                                             }} />
+                                            }} 
+                                        />
                                     </div>
                                 )}
                             </div>
