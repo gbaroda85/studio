@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -41,7 +42,8 @@ import {
     History,
     Save,
     Camera,
-    Globe
+    Globe,
+    Frame
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -120,7 +122,7 @@ const COLORS = [
     { name: "Navy Blue", value: "#000080" },
     { name: "Sky Blue", value: "#ADD8E6" },
     { name: "Light Grey", value: "#D3D3D3" },
-    { name: "Dark Red", value: "#8B0000" },
+    { name: "Black Frame", value: "#000000" },
     { name: "Premium Teal", value: "#5cbdb9" },
 ];
 
@@ -165,12 +167,12 @@ export default function PassportPhotoMaker() {
     const [crop, setCrop] = useState<Crop>();
     const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
     const [originalCroppedData, setOriginalCroppedData] = useState<string | null>(null);
+    const [printSheetSrc, setPrintSheetSrc] = useState<string | null>(null);
 
     const imgRef = useRef<HTMLImageElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const mainCanvasRef = useRef<HTMLCanvasElement>(null);
     const faceImgRef = useRef<HTMLImageElement | null>(null);
-    const printCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const getAspectRatio = () => {
         const p = PRESETS[selectedPreset];
@@ -279,7 +281,7 @@ export default function PassportPhotoMaker() {
         
         ctx.restore();
 
-        // 4. Border
+        // 4. Border (Frame)
         if (borderWidth > 0) {
             const bPx = (borderWidth / 100) * canvas.width;
             ctx.strokeStyle = borderColor;
@@ -379,6 +381,7 @@ export default function PassportPhotoMaker() {
         setOriginalCroppedData(null);
         setSubjectImageSrc(null);
         faceImgRef.current = null;
+        setPrintSheetSrc(null);
         store.resetHistory();
         resetToDefaults();
     };
@@ -386,18 +389,18 @@ export default function PassportPhotoMaker() {
     const renderPrintSheet = (sheetIndex: number) => {
         const sheet = PRINT_SHEETS[sheetIndex];
         const sourceCanvas = mainCanvasRef.current;
-        const canvas = printCanvasRef.current;
-        if (!canvas || !sourceCanvas) return;
+        if (!sourceCanvas) return;
 
-        const ctx = canvas.getContext('2d');
+        const offScreenCanvas = document.createElement('canvas');
+        const ctx = offScreenCanvas.getContext('2d');
         if (!ctx) return;
 
         // A4 or 4x6 at 300 DPI
         const targetW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
         const targetH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
         
-        canvas.width = targetW;
-        canvas.height = targetH;
+        offScreenCanvas.width = targetW;
+        offScreenCanvas.height = targetH;
         
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, targetW, targetH);
@@ -415,6 +418,8 @@ export default function PassportPhotoMaker() {
                 ctx.drawImage(sourceCanvas, x, y, photoW, photoH);
             }
         }
+        
+        setPrintSheetSrc(offScreenCanvas.toDataURL('image/jpeg', 1.0));
         setStage('print');
     };
 
@@ -490,39 +495,40 @@ export default function PassportPhotoMaker() {
 
             {/* 2. CROP STAGE */}
             {stage === 'crop' && imgSrc && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-8">
-                    <Card className="w-full max-w-5xl glass-card overflow-hidden">
-                        <CardHeader className="border-b glass-panel py-6 px-10 flex flex-row items-center justify-between">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-4">
+                    <Card className="w-full max-w-4xl glass-card overflow-hidden">
+                        <CardHeader className="border-b glass-panel py-4 px-8 flex flex-row items-center justify-between">
                             <div className="space-y-1">
-                                <CardTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                    <CropIcon className="size-6 text-primary" /> Step 1: Smart Alignment
+                                <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                    <CropIcon className="size-5 text-primary" /> Step 1: Alignment
                                 </CardTitle>
-                                <CardDescription className="font-bold text-xs uppercase opacity-60">Center your face perfectly within the frame.</CardDescription>
+                                <CardDescription className="font-bold text-[10px] uppercase opacity-60">Crop your face as per standards.</CardDescription>
                             </div>
-                            <Badge className="bg-primary text-white font-black px-4 py-1.5 rounded-full uppercase text-[10px] tracking-widest shadow-xl">
+                            <Badge className="bg-primary text-white font-black px-4 py-1 rounded-full uppercase text-[9px] tracking-widest">
                                 {PRESETS[selectedPreset].label}
                             </Badge>
                         </CardHeader>
-                        <CardContent className="p-10 flex justify-center bg-black/5 dark:bg-white/5 shadow-inner">
-                            <ReactCrop 
-                                crop={crop} 
-                                onChange={setCrop} 
-                                onComplete={setCompletedCrop} 
-                                aspect={getAspectRatio()} 
-                                className="shadow-2xl ring-8 ring-white/50 rounded-lg overflow-hidden"
-                            >
-                                <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[60vh] w-full object-contain" onLoad={(e) => {
-                                    const { width, height } = e.currentTarget;
-                                    setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
-                                }} />
-                            </ReactCrop>
+                        <CardContent className="p-6 flex justify-center bg-black/5">
+                            <div className="max-h-[55vh] overflow-hidden rounded-lg shadow-2xl border-4 border-white/50">
+                                <ReactCrop 
+                                    crop={crop} 
+                                    onChange={setCrop} 
+                                    onComplete={setCompletedCrop} 
+                                    aspect={getAspectRatio()} 
+                                >
+                                    <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[55vh] w-auto object-contain" onLoad={(e) => {
+                                        const { width, height } = e.currentTarget;
+                                        setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
+                                    }} />
+                                </ReactCrop>
+                            </div>
                         </CardContent>
-                        <CardFooter className="glass-panel border-t p-8 flex justify-between">
-                            <Button variant="ghost" onClick={handleReset} className="font-black text-xs uppercase tracking-widest h-14 px-8 rounded-2xl">
+                        <CardFooter className="glass-panel border-t p-6 flex justify-between">
+                            <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
                                 <ChevronLeft className="mr-2 size-4" /> Go Back
                             </Button>
-                            <Button className="h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group" onClick={handleInitialCrop}>
-                                START AI STUDIO <ChevronRight className="ml-2 size-5 group-hover:translate-x-1 transition-transform" />
+                            <Button className="h-12 px-10 text-base font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl group" onClick={handleInitialCrop}>
+                                CONFIRM & EDIT <ChevronRight className="ml-2 size-5" />
                             </Button>
                         </CardFooter>
                     </Card>
@@ -607,12 +613,15 @@ export default function PassportPhotoMaker() {
                                             </div>
                                             <Separator className="opacity-10" />
                                             <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Square className="size-3" /> Border</Label><span className="text-[10px] font-mono font-bold">{borderWidth}%</span></div>
-                                                <Slider min={0} max={5} step={0.2} value={[borderWidth]} onValueChange={(v) => setBorderWidth(v[0])} />
-                                                <div className="flex gap-2">
-                                                    {['#000', '#fff', '#ccc'].map(c => (
-                                                        <button key={c} onClick={() => setBorderColor(c)} className={cn("size-6 rounded-md border", borderColor === c && "ring-2 ring-primary")} style={{ backgroundColor: c }} />
-                                                    ))}
+                                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Frame className="size-3" /> Photo Border (Frame)</Label><span className="text-[10px] font-mono font-bold">{borderWidth}%</span></div>
+                                                <Slider min={0} max={5} step={0.1} value={[borderWidth]} onValueChange={(v) => setBorderWidth(v[0])} />
+                                                <div className="space-y-2">
+                                                    <Label className="text-[9px] font-black uppercase opacity-40">Frame Color</Label>
+                                                    <div className="flex gap-2">
+                                                        {['#000', '#fff', '#e2e8f0', '#5cbdb9'].map(c => (
+                                                            <button key={c} onClick={() => setBorderColor(c)} className={cn("size-8 rounded-lg border-2 shadow-sm transition-all", borderColor === c ? "border-primary scale-110" : "border-transparent")} style={{ backgroundColor: c }} />
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TabsContent>
@@ -739,7 +748,7 @@ export default function PassportPhotoMaker() {
 
             {/* 4. PRINT SHEET PREVIEW MODAL */}
             <AnimatePresence>
-                {stage === 'print' && (
+                {stage === 'print' && printSheetSrc && (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -772,7 +781,7 @@ export default function PassportPhotoMaker() {
                                     </Button>
                                     <Button className="h-16 flex-[2] rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-lg" onClick={() => {
                                         const link = document.createElement('a');
-                                        link.href = printCanvasRef.current!.toDataURL('image/jpeg', 1.0);
+                                        link.href = printSheetSrc;
                                         link.download = `Print-Sheet-${Date.now()}.jpg`;
                                         link.click();
                                     }}>
@@ -782,7 +791,7 @@ export default function PassportPhotoMaker() {
                             </div>
                             <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500">
                                 <div className="shadow-[0_0_80px_rgba(92,189,185,0.4)] border-[12px] border-white dark:border-slate-800 rounded-sm overflow-hidden bg-white max-w-full">
-                                    <canvas ref={printCanvasRef} className="max-w-full h-auto max-h-[70vh] shadow-2xl" />
+                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] shadow-2xl" />
                                 </div>
                                 <div className="absolute -top-6 -right-6 bg-primary text-white font-black text-[10px] px-6 py-2 rounded-full shadow-2xl uppercase tracking-widest animate-pulse">
                                     READY FOR PRINT
@@ -796,9 +805,7 @@ export default function PassportPhotoMaker() {
                 )}
             </AnimatePresence>
 
-            <canvas ref={compositeCanvasRef} className="hidden" />
+            <canvas ref={mainCanvasRef} className="hidden" />
         </div>
     );
 }
-
-const compositeCanvasRef = { current: null as any };
