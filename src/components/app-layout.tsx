@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -48,7 +47,8 @@ import {
   Gauge,
   AreaChart,
   Fuel,
-  Waves
+  Waves,
+  Printer
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -81,6 +81,7 @@ const CATEGORIES = [
     tools: [
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
       { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
+      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
       { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
       { href: '/crop-image', label: 'crop_image_label', icon: Crop },
       { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
@@ -460,4 +461,3 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     </div>
   );
 }
-

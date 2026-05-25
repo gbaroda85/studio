@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/remove-signature',
     '/enhance-photo',
     '/passport-photo',
+    '/aadhaar-printer',
     '/image-to-text',
     '/image-to-jpg',
     '/image-to-png',
