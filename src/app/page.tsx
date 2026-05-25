@@ -88,12 +88,12 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => 
   <Link href={href} className="group">
     <Card className="h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 bg-card overflow-hidden relative rounded-[2rem] hover:-translate-y-2">
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
-      <CardContent className="p-8">
-        <div className={cn(`size-14 rounded-2xl flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
-          <Icon className="size-7" />
+      <CardContent className="p-6">
+        <div className={cn(`size-12 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
+          <Icon className="size-6" />
         </div>
-        <h3 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter">{title}</h3>
-        <p className="text-base text-slate-500 dark:text-slate-400 mb-6 line-clamp-2 leading-relaxed font-semibold">{description}</p>
+        <h3 className="text-xl font-black mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter">{title}</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2 leading-relaxed font-semibold">{description}</p>
         <div className="flex items-center text-primary font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
           Launch Tool <ArrowRight className="ml-1 size-3.5" />
         </div>
@@ -139,7 +139,7 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Action Category Buttons */}
+          {/* Quick Access Action Category Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
             <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
