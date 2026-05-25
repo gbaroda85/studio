@@ -15,6 +15,10 @@ import {
   PenTool,
   Settings2,
   Scaling,
+  ArrowLeftRight,
+  Eye,
+  RefreshCcw,
+  CheckCircle2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 type Unit = 'px' | 'mm' | 'inch';
@@ -46,12 +51,23 @@ const GOVT_PRESETS = [
 
 const DPI = 96; // Standard web DPI
 
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+
 export default function ImageResizer() {
   const { toast } = useToast();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
   const [resizedImageSrc, setResizedImageSrc] = useState<string | null>(null);
   const [originalDimensions, setOriginalDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [originalFileSize, setOriginalFileSize] = useState<number>(0);
+  const [resizedFileSize, setResizedFileSize] = useState<number>(0);
   const [newDimensions, setNewDimensions] = useState({ width: '', height: '' });
   const [maintainAspectRatio, setMaintainAspectRatio] = useState(true);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
@@ -78,6 +94,7 @@ export default function ImageResizer() {
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       setImageFile(file);
+      setOriginalFileSize(file.size);
       const reader = new FileReader();
       reader.onload = (e) => {
         const src = e.target?.result as string;
@@ -165,7 +182,7 @@ export default function ImageResizer() {
 
     const img = new window.Image();
     img.src = originalImageSrc;
-    img.onload = () => {
+    img.onload = async () => {
       const targetWidthPx = convertUnitToPx(parseFloat(newDimensions.width), unit);
       const targetHeightPx = convertUnitToPx(parseFloat(newDimensions.height), unit);
 
@@ -188,7 +205,11 @@ export default function ImageResizer() {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       const mimeType = `image/${outputFormat}`;
-      const resizedDataUrl = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? 0.95 : undefined);
+      const resizedDataUrl = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? 0.92 : undefined);
+      
+      const blob = await (await fetch(resizedDataUrl)).blob();
+      setResizedFileSize(blob.size);
+      
       setResizedImageSrc(resizedDataUrl);
       setIsProcessing(false);
       toast({ title: "Resized!", description: `Photo adjusted to ${targetWidthPx}x${targetHeightPx} px.` });
@@ -216,6 +237,8 @@ export default function ImageResizer() {
     setOriginalImageSrc(null);
     setResizedImageSrc(null);
     setOriginalDimensions(null);
+    setOriginalFileSize(0);
+    setResizedFileSize(0);
     setNewDimensions({ width: '', height: '' });
     setIsProcessing(false);
     if (fileInputRef.current) {
@@ -261,9 +284,9 @@ export default function ImageResizer() {
   }
 
   return (
-    <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 animate-in fade-in duration-500 px-4">
+    <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in duration-500 px-4">
         {/* Left Side: Controls */}
-        <div className="space-y-6">
+        <div className="lg:col-span-5 space-y-6">
           <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
@@ -300,7 +323,10 @@ export default function ImageResizer() {
               </CardHeader>
               <CardContent className="space-y-6 pt-6">
                   {originalDimensions && (
-                      <Badge variant="secondary" className="font-mono text-[10px]">Original: {originalDimensions.width}x{originalDimensions.height} px</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="font-mono text-[10px]">Original: {originalDimensions.width}x{originalDimensions.height} px</Badge>
+                        <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(originalFileSize)}</Badge>
+                      </div>
                   )}
                   
                   <div className="space-y-4">
@@ -359,35 +385,110 @@ export default function ImageResizer() {
           </Card>
         </div>
 
-        {/* Right Side: Preview */}
-        <div className="space-y-6">
+        {/* Right Side: Before vs After Preview */}
+        <div className="lg:col-span-7 space-y-6">
             <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col">
-                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <FileImage className="h-4 w-4" /> Result Preview
-                    </CardTitle>
-                    {resizedImageSrc && <Badge className="bg-green-500 text-white font-black animate-pulse">PROCESSED</Badge>}
+                <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <ArrowLeftRight className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm font-black uppercase tracking-tighter">Compare Results</CardTitle>
+                    </div>
+                    {resizedImageSrc && (
+                        <div className="flex items-center gap-2">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8 font-black text-[10px] border-2 uppercase">
+                                        <Eye className="size-3 mr-1.5" /> Full Comparison
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter">
+                                            <ArrowLeftRight className="text-primary" /> Before vs After Resolution
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <div className="grid md:grid-cols-2 gap-8 py-6">
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg">
+                                                <span className="text-[10px] font-black uppercase text-muted-foreground">Original Dimensions</span>
+                                                <Badge variant="outline" className="font-mono">{originalDimensions?.width}x{originalDimensions?.height} px</Badge>
+                                            </div>
+                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center">
+                                                <Image src={originalImageSrc!} alt="original" fill className="object-contain p-2" />
+                                            </div>
+                                            <p className="text-center text-[10px] font-bold text-muted-foreground uppercase">Size: {formatBytes(originalFileSize)}</p>
+                                        </div>
+                                        <div className="space-y-3 text-right">
+                                            <div className="flex justify-between items-center bg-primary/10 p-2 rounded-lg">
+                                                <Badge className="bg-primary text-white font-mono">RESIZED</Badge>
+                                                <span className="text-[10px] font-black uppercase text-primary">{convertUnitToPx(parseFloat(newDimensions.width), unit)}x{convertUnitToPx(parseFloat(newDimensions.height), unit)} px</span>
+                                            </div>
+                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center">
+                                                <Image src={resizedImageSrc!} alt="resized" fill className="object-contain p-2" />
+                                            </div>
+                                            <p className="text-center text-[10px] font-bold text-primary uppercase">New Size: {formatBytes(resizedFileSize)}</p>
+                                        </div>
+                                    </div>
+                                    <CardFooter className="p-0 pt-4">
+                                        <Button className="w-full h-14 bg-green-600 hover:bg-green-700 font-black text-lg" onClick={handleDownload}>
+                                            DOWNLOAD RESIZED IMAGE <Download className="ml-2 size-5" />
+                                        </Button>
+                                    </CardFooter>
+                                </DialogContent>
+                            </Dialog>
+                            <Badge className="bg-green-500 text-white font-black uppercase text-[10px]">READY</Badge>
+                        </div>
+                    )}
                 </CardHeader>
-                <CardContent className="p-0 flex-1 relative bg-white min-h-[350px] lg:min-h-[400px] flex items-center justify-center">
+                <CardContent className="p-6 flex-1 bg-slate-50 dark:bg-slate-900/50">
                     {isProcessing ? (
-                        <div className="flex flex-col items-center gap-4">
+                        <div className="h-full flex flex-col items-center justify-center gap-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary stroke-[3]" />
-                            <p className="text-sm font-black text-primary uppercase tracking-tighter animate-pulse">Re-sampling Pixels...</p>
-                        </div>
-                    ) : resizedImageSrc ? (
-                        <div className="relative w-full h-full p-4 flex items-center justify-center">
-                            <img src={resizedImageSrc} alt="Resized" className="max-w-full max-h-[350px] object-contain shadow-2xl rounded-lg" />
-                        </div>
-                    ) : originalImageSrc ? (
-                        <div className="relative w-full h-full p-4 flex items-center justify-center opacity-40 grayscale">
-                            <img src={originalImageSrc} alt="Original" className="max-w-full max-h-[350px] object-contain" />
+                            <p className="text-sm font-black text-primary uppercase tracking-tighter animate-pulse">Processing Pixels...</p>
                         </div>
                     ) : (
-                        <FileImage className="h-20 w-20 text-muted-foreground/20" />
+                        <div className="grid md:grid-cols-2 gap-6 h-full">
+                            {/* Original Box */}
+                            <div className="space-y-3 flex flex-col">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original State</span>
+                                    {originalDimensions && <span className="text-[9px] font-mono text-muted-foreground">{originalDimensions.width}x{originalDimensions.height}</span>}
+                                </div>
+                                <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[250px]">
+                                    <Image src={originalImageSrc} alt="Before" fill className={cn("object-contain p-4", resizedImageSrc && "opacity-50 grayscale")} />
+                                    {!resizedImageSrc && <div className="absolute inset-0 border-2 border-primary/20 pointer-events-none rounded-2xl" />}
+                                </div>
+                            </div>
+
+                            {/* Resized Box */}
+                            <div className="space-y-3 flex flex-col">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-primary">Resized Result</span>
+                                    {resizedImageSrc && <span className="text-[9px] font-mono text-primary font-bold">{convertUnitToPx(parseFloat(newDimensions.width), unit)}x{convertUnitToPx(parseFloat(newDimensions.height), unit)}</span>}
+                                </div>
+                                <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[250px] border-primary/20">
+                                    {resizedImageSrc ? (
+                                        <div className="relative size-full animate-in zoom-in-95 duration-500">
+                                            <Image src={resizedImageSrc} alt="After" fill className="object-contain p-4" />
+                                            <div className="absolute top-2 right-2">
+                                                <div className="bg-green-500 text-white rounded-full p-1 shadow-lg">
+                                                    <CheckCircle2 className="size-4" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center gap-2 opacity-10">
+                                            <FileImage className="size-16" />
+                                            <p className="text-[10px] font-black uppercase">Awaiting Resize</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </CardContent>
                 <CardFooter className="bg-muted/10 border-t p-6">
-                    <Button className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
+                    <Button className="w-full h-16 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl shadow-green-500/20 rounded-2xl" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
                         <Download className="mr-3 h-7 w-7" /> DOWNLOAD PHOTO
                     </Button>
                 </CardFooter>
