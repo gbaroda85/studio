@@ -117,7 +117,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Matching the User's Image with Reduced Padding */}
+      {/* Hero Section */}
       <section className="relative w-full max-w-[2000px] pt-12 pb-8 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -125,18 +125,15 @@ export default function Page() {
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          {/* Badge Style from Image */}
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-10 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-orange-400 fill-orange-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          {/* Main Heading Text from Image */}
           <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black mb-10 tracking-tight leading-[1.05] animate-fade-in-up">
             Professional Tools for <br />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          {/* Description Text from Image */}
           <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-14 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
@@ -174,7 +171,12 @@ export default function Page() {
                     <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Image Solutions</span>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">Visual Processor</h2>
+                    <div className="flex items-center justify-between gap-4 mb-10">
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
+                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-black text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
+                            <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-4" /></Link>
+                        </Button>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'image').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -188,12 +190,6 @@ export default function Page() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'pdf').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
-                </div>
-                
-                <div className="text-center">
-                    <Button asChild className="h-18 px-16 rounded-[2rem] font-black text-xl bg-gradient-button text-white shadow-2xl hover:scale-105 transition-all">
-                        <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-3 size-6" /></Link>
-                    </Button>
                 </div>
             </>
           )}
