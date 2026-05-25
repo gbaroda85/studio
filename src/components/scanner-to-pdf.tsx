@@ -85,7 +85,7 @@ export default function ScannerToPdf() {
         const pages = snapshot.docs.map(d => d.data().src);
         if (pages.length > 0) {
             setScannedImages(pages);
-            setCreatedPdfUrl(null); // Clear previous PDF if new images arrive
+            setCreatedPdfUrl(null); 
         }
     });
 
@@ -141,6 +141,7 @@ export default function ScannerToPdf() {
             setHasCameraPermission(true);
         } catch (playErr) {
             console.warn("Auto-play blocked");
+            setHasCameraPermission(true); // Still true, user might need to click play
         }
       }
     } catch (error) {
@@ -149,11 +150,10 @@ export default function ScannerToPdf() {
   }, [stopCamera]);
 
   useEffect(() => {
-    if (sessionIdFromUrl || isMobile) {
-        startCamera();
-    }
+    // Start camera immediately on component mount
+    startCamera();
     return () => stopCamera();
-  }, [sessionIdFromUrl, isMobile, startCamera, stopCamera]);
+  }, [startCamera, stopCamera]);
 
   const onCropImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -173,7 +173,7 @@ export default function ScannerToPdf() {
   };
 
   const handleCapture = () => {
-    if (!videoRef.current || !hasCameraPermission || videoRef.current.paused) return;
+    if (!videoRef.current || !hasCameraPermission) return;
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -254,7 +254,7 @@ export default function ScannerToPdf() {
       if (!createdPdfUrl) return;
       const link = document.createElement('a');
       link.href = createdPdfUrl;
-      link.download = `strictly-aligned-docs.pdf`;
+      link.download = `scanned-document-${Date.now()}.pdf`;
       link.click();
   }
 
@@ -293,9 +293,16 @@ export default function ScannerToPdf() {
                     )}
                 </CardHeader>
                 <CardContent className="p-0 relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
-                    {hasCameraPermission === true ? (
-                        <video ref={videoRef} className="w-full h-full object-contain" autoPlay muted playsInline />
-                    ) : hasCameraPermission === false ? (
+                    {/* Video element is always rendered to ensure ref is available */}
+                    <video 
+                        ref={videoRef} 
+                        className={cn("w-full h-full object-contain", hasCameraPermission !== true && "hidden")} 
+                        autoPlay 
+                        muted 
+                        playsInline 
+                    />
+
+                    {hasCameraPermission === false && (
                         <div className="p-12 text-center space-y-6">
                             <div className="size-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
                                 <Camera className="size-10 text-destructive" />
@@ -306,21 +313,23 @@ export default function ScannerToPdf() {
                             </div>
                             <Button onClick={startCamera} className="bg-primary font-black uppercase tracking-tighter h-12 px-8 rounded-xl">RETRY CAMERA</Button>
                         </div>
-                    ) : (
+                    )}
+                    
+                    {hasCameraPermission === null && (
                         <div className="flex flex-col items-center gap-4 text-white">
                             <Loader2 className="size-10 animate-spin text-primary opacity-20" />
                             <p className="text-[10px] font-black uppercase tracking-widest animate-pulse">Initializing Lens...</p>
                         </div>
                     )}
                     
-                    {hasCameraPermission && (
+                    {hasCameraPermission === true && (
                         <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20 flex items-center justify-center">
                             <div className="size-full border-2 border-dashed border-white/40 rounded-xl" />
                         </div>
                     )}
                 </CardContent>
                 <CardFooter className="p-8 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
-                    <Button onClick={handleCapture} disabled={!hasCameraPermission} className="h-16 flex-[2] text-xl font-black bg-gradient-button text-white shadow-2xl rounded-2xl group">
+                    <Button onClick={handleCapture} disabled={hasCameraPermission !== true} className="h-16 flex-[2] text-xl font-black bg-gradient-button text-white shadow-2xl rounded-2xl group">
                         <ScanLine className="mr-3 h-7 w-7 group-hover:scale-110 transition-transform" /> CAPTURE PAGE
                     </Button>
                     <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-16 flex-1 font-black border-2 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-primary/5">
