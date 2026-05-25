@@ -104,7 +104,6 @@ export default function ScannerToPdf() {
     }
   }, [startCamera, stopCamera, createdPdfUrl]);
 
-  // Periodic check to ensure video is actually playing if permission is granted
   useEffect(() => {
     const interval = setInterval(() => {
         if (hasCameraPermission === true && videoRef.current && videoRef.current.paused) {
@@ -252,7 +251,6 @@ export default function ScannerToPdf() {
                                 muted 
                                 playsInline 
                             />
-                            {/* Tap to focus/re-play overlay */}
                             <div className="absolute inset-0 z-10" onClick={() => videoRef.current?.play()} />
                         </>
                     ) : (
