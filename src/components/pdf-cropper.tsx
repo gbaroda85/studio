@@ -55,7 +55,7 @@ interface PageState {
     crop?: Crop;
     completedCrop?: PixelCrop;
     points: Point[];
-    processedImage: string | null; // DataURL of the cropped page
+    result: string | null; // DataURL of the cropped page
 }
 
 export default function PdfCropper() {
@@ -123,7 +123,7 @@ export default function PdfCropper() {
       setIsProcessing(true);
       try {
           const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2.5 }); // High DPI for quality
+          const viewport = page.getViewport({ scale: 2.5 }); // High DPI
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { willReadFrequently: true });
           canvas.height = viewport.height;
@@ -184,7 +184,6 @@ export default function PdfCropper() {
 
   const handlePageChange = (newPage: number) => {
       if (newPage > 0 && newPage <= numPages && pdfDocRef.current) {
-          // Save current state before switching
           saveCurrentPageState();
           setCurrentPage(newPage);
           renderPage(pdfDocRef.current, newPage);
@@ -338,7 +337,6 @@ export default function PdfCropper() {
         for (const [_, state] of sortedPages) {
             const imgBytes = await fetch(state.result!).then(res => res.arrayBuffer());
             const embeddedImg = await finalPdf.embedJpg(imgBytes);
-            // 0.75 factor to convert pixels to PDF points (approx)
             const page = finalPdf.addPage([embeddedImg.width * 0.75, embeddedImg.height * 0.75]);
             page.drawImage(embeddedImg, { x: 0, y: 0, width: page.getWidth(), height: page.getHeight() });
         }
@@ -362,6 +360,7 @@ export default function PdfCropper() {
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
     setMagnifierPos({ x, y });
+    return { x, y };
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -374,20 +373,17 @@ export default function PdfCropper() {
         clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
     }
     
-    updateMagnifier(clientX, clientY);
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    
-    setPoints(prev => {
-        const next = [...prev];
-        next[draggingPoint] = { x, y };
-        return next;
-    });
+    const pos = updateMagnifier(clientX, clientY);
+    if (pos) {
+        setPoints(prev => {
+            const next = [...prev];
+            next[draggingPoint] = { x: pos.x, y: pos.y };
+            return next;
+        });
+    }
   }, [draggingPoint, updateMagnifier]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      setDraggingPoint(idx);
       let clientX, clientY;
       if ('touches' in e) {
           clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
@@ -395,6 +391,7 @@ export default function PdfCropper() {
           clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
       }
       updateMagnifier(clientX, clientY);
+      setDraggingPoint(idx);
   };
 
   const croppedCount = Object.values(pageStates).filter(s => !!s.result).length;
@@ -462,22 +459,22 @@ export default function PdfCropper() {
                         )}
 
                         {pageImage && (
-                            <div ref={containerRef} className="relative p-8">
+                            <div className="relative p-8 w-full h-full flex flex-col items-center" style={{ touchAction: 'none' }}>
                                 {cropMode === 'rectangular' ? (
-                                    <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={setCompletedCrop} className="shadow-2xl border-4 border-white">
+                                    <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={setCompletedCrop} className="shadow-2xl border-4 border-white max-w-full">
                                         <img ref={imgRef} src={pageImage} alt="page" className="max-h-[70vh] object-contain" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
-                                    <div className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
+                                    <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
                                         <img ref={imgRef} src={pageImage} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                                         </svg>
                                         {points.map((p, i) => (
-                                            <div key={i} className={cn("absolute size-8 -ml-4 -mt-4 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
-                                                 style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                                            <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                                 style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                                  onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                                <div className="size-2 bg-white rounded-full shadow-inner" />
+                                                <div className="size-2.5 bg-white rounded-full shadow-inner" />
                                             </div>
                                         ))}
 
