@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -321,9 +320,9 @@ export default function PdfCropper() {
         const bytes = await finalPdf.save();
         const link = document.createElement('a');
         link.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
-        link.download = `cropped-separate-pages-${Date.now()}.pdf`;
+        link.download = `cropped-bundle-${Date.now()}.pdf`;
         link.click();
-        toast({ title: "Separate Pages Created!", description: "Each cropped image is now on its own page." });
+        toast({ title: "PDF Bundle Created!", description: "Each cropped image is on a separate page." });
     } catch (e) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to build PDF bundle.' });
     } finally {
@@ -380,7 +379,7 @@ export default function PdfCropper() {
       <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
         <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-inner">
             <Scan className="h-8 w-8" />
           </div>
           <CardTitle className="text-2xl font-black uppercase tracking-tight">Precision PDF Cropper & Scanner</CardTitle>
@@ -413,7 +412,7 @@ export default function PdfCropper() {
                 <Card className="border-2 shadow-2xl overflow-hidden bg-card/50">
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
-                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background p-1 rounded-lg border">
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                                 <TabsList className="h-8">
                                     <TabsTrigger value="rectangular" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
                                     <TabsTrigger value="perspective" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
@@ -431,7 +430,7 @@ export default function PdfCropper() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
                         {isProcessing && (
-                            <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                            <div className="absolute inset-0 z-30 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
                                 <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
                                 <p className="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Processing Document...</p>
                             </div>
@@ -452,7 +451,7 @@ export default function PdfCropper() {
                                         {points.map((p, i) => (
                                             <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
                                                  style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                                 onMouseDown={(e) => handlePointDown(idx, e)} onTouchStart={(e) => handlePointDown(idx, e)}>
+                                                 onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
                                                 <div className="size-2.5 bg-white rounded-full shadow-inner" />
                                             </div>
                                         ))}
@@ -516,7 +515,7 @@ export default function PdfCropper() {
             </div>
 
             <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-card dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-xl font-black uppercase tracking-tighter">
                             <Scissors className="size-6 text-primary mr-2 inline" /> Bundle Panel
@@ -539,7 +538,7 @@ export default function PdfCropper() {
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-8 border-t-2 flex flex-col gap-4">
+                    <CardFooter className="bg-muted/10 border-t-2 p-8 flex flex-col gap-4">
                         <Button className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
                                 onClick={handleApplyCrop} disabled={isProcessing || !pageImage}>
                             {isProcessing ? <Loader2 className="animate-spin mr-3 size-6"/> : <Scissors className="mr-3 size-7" />}
@@ -580,4 +579,3 @@ export default function PdfCropper() {
     </div>
   );
 }
-
