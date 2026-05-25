@@ -3,7 +3,7 @@
 
 import 'react-image-crop/dist/ReactCrop.css';
 
-import { useState, useRef, useEffect, type SyntheticEvent } from 'react';
+import { useState, useRef, useEffect, type SyntheticEvent, useCallback } from 'react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -53,38 +53,28 @@ export default function ScannerToPdf() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setCurrentUrl(window.location.href);
-    
-    // Auto-start on mount
-    startCamera();
-    
-    return () => {
-        stopCamera();
-        if (createdPdfUrl) URL.revokeObjectURL(createdPdfUrl);
+  const stopCamera = useCallback(() => {
+    if(videoRef.current && videoRef.current.srcObject){
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setHasCameraPermission(false);
-        toast({
-            variant: "destructive",
-            title: "Not Supported",
-            description: "Your browser does not support camera access or you are not using HTTPS."
-        });
         return;
     }
 
-    setHasCameraPermission(null); // Loading state
+    setHasCameraPermission(null); 
+    stopCamera();
 
-    // Try Rear Camera first
     const constraints = { 
         video: { 
             facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
         } 
     };
 
@@ -92,41 +82,38 @@ export default function ScannerToPdf() {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        // Ensure video plays
-        videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play();
-        };
+        try {
+            await videoRef.current.play();
+        } catch (playErr) {
+            console.warn("Auto-play blocked by browser, waiting for interaction");
+        }
       }
       setHasCameraPermission(true);
     } catch (error) {
-      console.warn('Rear camera not available, trying any camera.', error);
-      try {
-          const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          if (videoRef.current) {
-              videoRef.current.srcObject = fallbackStream;
-              videoRef.current.onloadedmetadata = () => {
-                videoRef.current?.play();
-            };
-          }
-          setHasCameraPermission(true);
-      } catch (fallbackError) {
-          setHasCameraPermission(false);
-          toast({
-            variant: 'destructive',
-            title: 'Permission Denied',
-            description: 'Please allow camera access in your browser settings to scan documents.',
-          });
-      }
+      console.warn('Camera access failed:', error);
+      setHasCameraPermission(false);
     }
-  }
+  }, [stopCamera]);
 
-  const stopCamera = () => {
-    if(videoRef.current && videoRef.current.srcObject){
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+    startCamera();
+    
+    return () => {
+        stopCamera();
+        if (createdPdfUrl) URL.revokeObjectURL(createdPdfUrl);
     }
-  }
+  }, [startCamera, stopCamera, createdPdfUrl]);
+
+  // Periodic check to ensure video is actually playing if permission is granted
+  useEffect(() => {
+    const interval = setInterval(() => {
+        if (hasCameraPermission === true && videoRef.current && videoRef.current.paused) {
+            videoRef.current.play().catch(() => {});
+        }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [hasCameraPermission]);
   
   const clearCreatedPdf = () => {
       if(createdPdfUrl) {
@@ -136,7 +123,7 @@ export default function ScannerToPdf() {
   }
 
   const handleCapture = () => {
-    if (!videoRef.current || !hasCameraPermission) return;
+    if (!videoRef.current || !hasCameraPermission || videoRef.current.paused) return;
     clearCreatedPdf();
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
@@ -245,7 +232,6 @@ export default function ScannerToPdf() {
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Section: Camera / Scanner Workspace */}
         <div className="lg:col-span-7 space-y-6">
             <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative">
                 <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
@@ -258,13 +244,17 @@ export default function ScannerToPdf() {
                 </CardHeader>
                 <CardContent className="p-0 relative aspect-video bg-black flex items-center justify-center overflow-hidden">
                     {hasCameraPermission === true ? (
-                        <video 
-                            ref={videoRef} 
-                            className="w-full h-full object-cover" 
-                            autoPlay 
-                            muted 
-                            playsInline 
-                        />
+                        <>
+                            <video 
+                                ref={videoRef} 
+                                className="w-full h-full object-contain" 
+                                autoPlay 
+                                muted 
+                                playsInline 
+                            />
+                            {/* Tap to focus/re-play overlay */}
+                            <div className="absolute inset-0 z-10" onClick={() => videoRef.current?.play()} />
+                        </>
                     ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-center p-8 gap-6">
                             <div className="size-20 rounded-full bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-700">
@@ -273,8 +263,8 @@ export default function ScannerToPdf() {
                             <div className="space-y-2">
                                 <p className="text-lg font-black text-white uppercase tracking-tighter">Camera Access Required</p>
                                 <p className="text-xs text-slate-400 max-w-[300px] mx-auto leading-relaxed">
-                                    To scan documents, please allow camera permissions in your browser. 
-                                    If you are on desktop, you can also scan using your phone via the QR code below.
+                                    To scan documents, please allow camera permissions. 
+                                    If you see a black screen, click "REFRESH CAMERA".
                                 </p>
                             </div>
                             <Button onClick={startCamera} className="bg-primary hover:bg-primary/90 font-black h-12 px-8 rounded-xl shadow-xl">
@@ -283,7 +273,6 @@ export default function ScannerToPdf() {
                         </div>
                     )}
 
-                    {/* Capture UI Hint */}
                     {hasCameraPermission === true && (
                         <div className="absolute inset-0 border-[20px] border-black/30 pointer-events-none flex items-center justify-center">
                             <div className="size-64 border-2 border-white/20 rounded-xl" />
@@ -299,19 +288,25 @@ export default function ScannerToPdf() {
                         <ScanLine className="mr-2 size-6 group-hover:scale-110 transition-transform" />
                         CAPTURE PAGE
                     </Button>
-                    <Button 
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()} 
-                        className="h-14 text-sm font-black border-2 rounded-2xl hover:bg-primary/5"
-                    >
-                        <UploadCloud className="mr-2 size-5" />
-                        UPLOAD PHOTO
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                        <Button 
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()} 
+                            className="h-14 text-sm font-black border-2 rounded-2xl hover:bg-primary/5 w-full"
+                        >
+                            <UploadCloud className="mr-2 size-5" />
+                            UPLOAD PHOTO
+                        </Button>
+                        {hasCameraPermission === true && (
+                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[10px] font-black uppercase text-muted-foreground h-6">
+                                <RefreshCcw className="size-3 mr-1" /> Refresh Camera
+                            </Button>
+                        )}
+                    </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </CardFooter>
             </Card>
 
-            {/* Desktop Sync Bridge Dialog */}
             {!isMobile && (
                 <Card className={cn(
                     "border-2 transition-all duration-300 bg-slate-900 text-white overflow-hidden",
@@ -346,7 +341,6 @@ export default function ScannerToPdf() {
             )}
         </div>
 
-        {/* Right Section: Page Grid & PDF Actions */}
         <div className="lg:col-span-5 space-y-6">
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[600px] flex flex-col bg-card/50">
                 <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
@@ -419,7 +413,6 @@ export default function ScannerToPdf() {
         </div>
       </div>
 
-      {/* Manual Crop Dialog */}
       <Dialog open={imageToCrop !== null} onOpenChange={(open) => !open && setImageToCrop(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem]">
           <DialogHeader className="bg-muted/30 border-b p-6">
@@ -456,3 +449,4 @@ export default function ScannerToPdf() {
     </div>
   );
 }
+
