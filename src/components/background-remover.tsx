@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -324,19 +323,19 @@ export default function BackgroundRemover() {
 
   if (stage === 'upload') {
     return (
-      <div className="w-full max-w-4xl py-12 flex flex-col items-center justify-center gap-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
-            <div className="mx-auto mb-6 grid size-24 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-2xl relative">
-                <Eraser className="size-12" />
-                <div className="absolute -top-2 -right-2 bg-accent text-accent-foreground size-8 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                    <Sparkles className="size-4" />
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2">
+            <div className="mx-auto mb-2 grid size-20 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                <Eraser className="size-10" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-3" />
                 </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black font-headline tracking-tighter uppercase leading-none">
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                 AI <span className="text-gradient-hero">Background</span> Remover
             </h1>
-            <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
-                Isolate subjects with pixel-level precision. <br/>100% Private local AI inspired by Remove.bg Pro.
+            <p className="text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                Isolate subjects with pixel-level precision. <br/>100% Private local AI.
             </p>
         </motion.div>
 
@@ -345,20 +344,20 @@ export default function BackgroundRemover() {
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
             onClick={() => fileInputRef.current?.click()}
         >
-            <CardContent className="p-20 flex flex-col items-center justify-center space-y-6">
-                <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+            <CardContent className="p-12 md:p-20 flex flex-col items-center justify-center space-y-6">
+                <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                 <div className="text-center">
-                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
-                    <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">No size limits. Native speed processing.</p>
+                    <p className="text-xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
+                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60">No size limits. Native speed processing.</p>
                 </div>
             </CardContent>
             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </Card>
 
-        <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-            <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT AI</div>
-            <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> TRANSPARENT PNG</div>
+        <div className="flex flex-wrap justify-center gap-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+            <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT AI</div>
+            <div className="flex items-center gap-1.5"><ImageIcon className="size-3.5 text-primary" /> TRANSPARENT PNG</div>
         </div>
       </div>
     );
