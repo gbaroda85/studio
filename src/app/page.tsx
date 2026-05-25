@@ -188,7 +188,7 @@ export default function Page() {
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Visual Processor</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Image Solutions</h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
                         <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-black text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
                             <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
