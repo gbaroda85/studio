@@ -43,7 +43,8 @@ import {
     Save,
     Camera,
     Globe,
-    Frame
+    Frame,
+    Wand2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -127,7 +128,7 @@ const COLORS = [
 ];
 
 const PRINT_SHEETS = [
-    { name: "4x6 Inch Sheet (8 Photos)", width: 4, height: 6, unit: 'inch', cols: 4, rows: 2 },
+    { name: "4x6 Inch Sheet (8 Photos)", width: 6, height: 4, unit: 'inch', cols: 4, rows: 2 },
     { name: "A4 Paper (Multi-Set)", width: 210, height: 297, unit: 'mm', cols: 5, rows: 6 },
 ];
 
@@ -202,6 +203,14 @@ export default function PassportPhotoMaker() {
         setBlur(0);
         setBorderWidth(0);
         setBgColor("#FFFFFF");
+    };
+
+    const handleAutoEnhance = () => {
+        setBrightness(105);
+        setContrast(115);
+        setSaturation(110);
+        setBlur(0);
+        toast({ title: "Auto-Studio Fix", description: "Brightness and contrast balanced for photo quality." });
     };
 
     const handleRemoveBackground = async () => {
@@ -408,6 +417,7 @@ export default function PassportPhotoMaker() {
         const photoW = (PRESETS[selectedPreset].width / 25.4) * DPI;
         const photoH = (PRESETS[selectedPreset].height / 25.4) * DPI;
         
+        // Improved Margin Logic
         const marginX = (targetW - (photoW * sheet.cols)) / (sheet.cols + 1);
         const marginY = (targetH - (photoH * sheet.rows)) / (sheet.rows + 1);
 
@@ -508,15 +518,16 @@ export default function PassportPhotoMaker() {
                                 {PRESETS[selectedPreset].label}
                             </Badge>
                         </CardHeader>
-                        <CardContent className="p-6 flex justify-center bg-black/5">
-                            <div className="max-h-[55vh] overflow-hidden rounded-lg shadow-2xl border-4 border-white/50">
+                        <CardContent className="p-12 flex items-center justify-center bg-black/5 min-h-[500px]">
+                            <div className="max-h-[50vh] overflow-hidden rounded-lg shadow-2xl border-4 border-white/50 flex items-center justify-center">
                                 <ReactCrop 
                                     crop={crop} 
                                     onChange={setCrop} 
                                     onComplete={setCompletedCrop} 
                                     aspect={getAspectRatio()} 
+                                    className="max-h-[50vh]"
                                 >
-                                    <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[55vh] w-auto object-contain" onLoad={(e) => {
+                                    <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[50vh] w-auto object-contain block" onLoad={(e) => {
                                         const { width, height } = e.currentTarget;
                                         setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
                                     }} />
@@ -552,15 +563,23 @@ export default function PassportPhotoMaker() {
                                         <Button variant="ghost" size="icon" className="size-8 rounded-full" onClick={handleRedo}><Redo2 className="size-4"/></Button>
                                     </div>
                                 </div>
-                                <Button 
-                                    className="w-full h-12 font-black bg-primary group relative overflow-hidden shadow-xl rounded-xl"
-                                    onClick={handleRemoveBackground}
-                                    disabled={isProcessing}
-                                >
-                                    {isProcessing ? <Loader2 className="size-5 animate-spin mr-2" /> : <Zap className="size-5 text-yellow-400 fill-yellow-400 mr-2 group-hover:scale-125 transition-transform" />}
-                                    AI REMOVE BACKGROUND
-                                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover:opacity-100 animate-pulse -z-10 transition-opacity" />
-                                </Button>
+                                <div className="space-y-3">
+                                    <Button 
+                                        className="w-full h-12 font-black bg-primary group relative overflow-hidden shadow-xl rounded-xl"
+                                        onClick={handleRemoveBackground}
+                                        disabled={isProcessing}
+                                    >
+                                        {isProcessing ? <Loader2 className="size-5 animate-spin mr-2" /> : <Zap className="size-5 text-yellow-400 fill-yellow-400 mr-2 group-hover:scale-125 transition-transform" />}
+                                        AI REMOVE BACKGROUND
+                                    </Button>
+                                    <Button 
+                                        variant="outline"
+                                        className="w-full h-12 font-black border-2 border-primary/20 hover:border-primary text-primary rounded-xl"
+                                        onClick={handleAutoEnhance}
+                                    >
+                                        <Wand2 className="size-4 mr-2" /> AUTO STUDIO FIX
+                                    </Button>
+                                </div>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <Tabs defaultValue="filters" className="w-full">
@@ -688,7 +707,6 @@ export default function PassportPhotoMaker() {
                                 <span className="relative z-10 flex items-center justify-center gap-3">
                                     <Download className="size-6 group-hover:translate-y-0.5 transition-transform" /> DOWNLOAD HD JPG
                                 </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover:opacity-100 -z-10 transition-opacity" />
                             </Button>
                         </div>
                     </motion.div>
@@ -753,7 +771,7 @@ export default function PassportPhotoMaker() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl p-4 md:p-12 flex items-center justify-center"
+                        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-4 md:p-12 flex items-center justify-center overflow-y-auto"
                     >
                         <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 items-center">
                             <div className="flex-1 space-y-8 text-white text-center md:text-left">
@@ -776,7 +794,7 @@ export default function PassportPhotoMaker() {
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
-                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/20 text-white hover:bg-white/10 font-black uppercase">
+                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/30 text-white hover:bg-white/10 font-black uppercase bg-transparent">
                                         CANCEL
                                     </Button>
                                     <Button className="h-16 flex-[2] rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-lg" onClick={() => {
@@ -791,7 +809,7 @@ export default function PassportPhotoMaker() {
                             </div>
                             <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500">
                                 <div className="shadow-[0_0_80px_rgba(92,189,185,0.4)] border-[12px] border-white dark:border-slate-800 rounded-sm overflow-hidden bg-white max-w-full">
-                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] shadow-2xl" />
+                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] shadow-2xl block" />
                                 </div>
                                 <div className="absolute -top-6 -right-6 bg-primary text-white font-black text-[10px] px-6 py-2 rounded-full shadow-2xl uppercase tracking-widest animate-pulse">
                                     READY FOR PRINT
