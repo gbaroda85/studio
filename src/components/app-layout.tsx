@@ -42,6 +42,12 @@ import {
   Zap,
   Home,
   UserCircle,
+  FileLock2,
+  Infinity,
+  Gauge,
+  AreaChart,
+  Fuel,
+  Waves
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -81,6 +87,8 @@ const CATEGORIES = [
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
+      { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
+      { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
     ]
   },
   {
@@ -92,6 +100,8 @@ const CATEGORIES = [
       { href: '/split-pdf', label: 'split_pdf_label', icon: Scissors },
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
+      { href: '/protect-pdf', label: 'Vault Protect PDF', icon: FileLock2 },
+      { href: '/crop-pdf', label: 'crop_pdf_label', icon: Crop },
       { href: '/pdf-to-image', label: 'pdf_to_image_label', icon: ImageIcon },
       { href: '/html-to-pdf', label: 'html_to_pdf_label', icon: FileCode },
       { href: '/text-to-pdf', label: 'text_to_pdf_label', icon: FileText },
@@ -104,12 +114,24 @@ const CATEGORIES = [
     icon: Calculator,
     color: "text-emerald-500",
     tools: [
+      { href: '/standard-calculator', label: 'standard_calculator_label', icon: Calculator },
       { href: '/loan-calculator', label: 'loan_emi_calculator_label', icon: Landmark },
       { href: '/age-calculator', label: 'age_calculator_label', icon: Cake },
       { href: '/percentage-calculator', label: 'percentage_calculator_label', icon: Percent },
       { href: '/fuel-cost-calculator', label: 'fuel_cost_calculator_label', icon: Route },
       { href: '/interest-calculator', label: 'interest_calculator_label', icon: Coins },
       { href: '/sales-tax-calculator', label: 'sales_tax_calculator_label', icon: Receipt },
+    ]
+  },
+  {
+    name: "converter_tools",
+    icon: Infinity,
+    color: "text-amber-500",
+    tools: [
+      { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
+      { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
+      { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
+      { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
     ]
   },
   {
@@ -313,7 +335,7 @@ function AppHeader() {
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
-        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center group mr-2">
               <GR7Logo />
