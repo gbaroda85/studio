@@ -1,10 +1,8 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
 
 import { useState, useRef, useEffect, type SyntheticEvent, useCallback } from 'react';
-import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import { 
@@ -14,99 +12,42 @@ import {
     Loader2, 
     Crop, 
     FileDigit, 
-    QrCode, 
     UploadCloud,
     CheckCircle2,
     RefreshCcw,
     Zap,
     ShieldCheck,
-    Cloud,
-    RefreshCw,
+    ScanLine,
     Monitor,
     Smartphone,
-    ArrowRight,
-    ScanLine
+    Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop } from 'react-image-crop';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useSearchParams } from 'next/navigation';
-
-// Firebase for Sync
-import { initializeFirebase } from '@/firebase';
-import { doc, onSnapshot, setDoc, collection, addDoc, serverTimestamp, query, orderBy, deleteDoc, getDocs } from 'firebase/firestore';
+import Image from 'next/image';
 
 export default function ScannerToPdf() {
   const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const searchParams = useSearchParams();
-  const sessionIdFromUrl = searchParams.get('sessionId');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const cropImgRef = useRef<HTMLImageElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedImages, setScannedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBuildingPdf, setIsBuildingPdf] = useState(false);
   const [createdPdfUrl, setCreatedPdfUrl] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string>("");
-  const [currentUrl, setCurrentUrl] = useState("");
   
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState<CropType>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [showQrBridge, setShowMobileQr] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 1. Session & Sync Logic
-  useEffect(() => {
-    const { firestore } = initializeFirebase();
-    let sid = sessionIdFromUrl;
-
-    if (!sid) {
-        sid = Math.random().toString(36).substr(2, 9);
-        const url = `${window.location.origin}${window.location.pathname}?sessionId=${sid}`;
-        setCurrentUrl(url);
-    }
-    setSessionId(sid);
-
-    // Sync Page Stack from Firestore
-    const q = query(
-        collection(firestore, 'shared-scans', sid, 'pages'), 
-        orderBy('timestamp', 'asc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const pages = snapshot.docs.map(d => d.data().src);
-        if (pages.length > 0) {
-            setScannedImages(pages);
-            setCreatedPdfUrl(null); 
-        }
-    });
-
-    // Listen for final PDF if needed
-    const unsubscribeFinal = onSnapshot(doc(firestore, 'shared-scans', sid), (docSnap) => {
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.pdfUrl && !isMobile) {
-                setCreatedPdfUrl(data.pdfUrl);
-                toast({ title: "Document Synced!", description: "Complete PDF received from mobile." });
-            }
-        }
-    });
-
-    return () => {
-        unsubscribe();
-        unsubscribeFinal();
-    };
-  }, [sessionIdFromUrl, toast, isMobile]);
-
-  // 2. Camera Management
+  // 1. Camera Management
   const stopCamera = useCallback(() => {
     if(videoRef.current && videoRef.current.srcObject){
         const stream = videoRef.current.srcObject as MediaStream;
@@ -141,7 +82,7 @@ export default function ScannerToPdf() {
             setHasCameraPermission(true);
         } catch (playErr) {
             console.warn("Auto-play blocked");
-            setHasCameraPermission(true); // Still true, user might need to click play
+            setHasCameraPermission(true); 
         }
       }
     } catch (error) {
@@ -150,17 +91,16 @@ export default function ScannerToPdf() {
   }, [stopCamera]);
 
   useEffect(() => {
-    // Start camera immediately on component mount
     startCamera();
     return () => stopCamera();
   }, [startCamera, stopCamera]);
 
   const onCropImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerCrop({ unit: '%', width: 80, height: 80 }, width, height));
+    setCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -188,7 +128,7 @@ export default function ScannerToPdf() {
 
   const handleConfirmCrop = async () => {
     const image = cropImgRef.current;
-    if (!image || !completedCrop?.width || !sessionId) return;
+    if (!image || !completedCrop?.width) return;
     
     setIsProcessing(true);
     const canvas = document.createElement('canvas');
@@ -202,20 +142,12 @@ export default function ScannerToPdf() {
     ctx.drawImage(image, completedCrop.x * scaleX, completedCrop.y * scaleY, completedCrop.width * scaleX, completedCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
     const croppedData = canvas.toDataURL('image/jpeg', 0.85);
 
-    try {
-        const { firestore } = initializeFirebase();
-        await addDoc(collection(firestore, 'shared-scans', sessionId, 'pages'), {
-            src: croppedData,
-            timestamp: serverTimestamp()
-        });
-        toast({ title: "Captured!", description: "Image synced to computer stack." });
-    } catch (e) {
-        console.error(e);
-        setScannedImages(prev => [...prev, croppedData]);
-    }
+    setScannedImages(prev => [...prev, croppedData]);
+    setCreatedPdfUrl(null);
 
     setImageToCrop(null);
     setIsProcessing(false);
+    toast({ title: "Page Added", description: "Added to your document stack." });
   };
 
   const handleCreatePdf = async () => {
@@ -237,15 +169,6 @@ export default function ScannerToPdf() {
     
     const pdfOutput = pdf.output('datauristring');
     setCreatedPdfUrl(pdfOutput);
-
-    if (sessionId) {
-        const { firestore } = initializeFirebase();
-        await setDoc(doc(firestore, 'shared-scans', sessionId), {
-            pdfUrl: pdfOutput,
-            timestamp: serverTimestamp()
-        }, { merge: true });
-    }
-
     setIsBuildingPdf(false);
     toast({ title: 'PDF Ready!', description: 'Your scanned document is ready to download.' });
   };
@@ -258,18 +181,12 @@ export default function ScannerToPdf() {
       link.click();
   }
 
-  const handleRemoveImage = async (index: number) => {
+  const handleRemoveImage = (index: number) => {
     setScannedImages(prev => prev.filter((_, i) => i !== index));
     setCreatedPdfUrl(null);
   }
 
-  const handleReset = async () => {
-    if (sessionId) {
-        const { firestore } = initializeFirebase();
-        const pagesRef = collection(firestore, 'shared-scans', sessionId, 'pages');
-        const snaps = await getDocs(pagesRef);
-        snaps.forEach(async (d) => await deleteDoc(d.ref));
-    }
+  const handleReset = () => {
     setScannedImages([]);
     setCreatedPdfUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -279,6 +196,7 @@ export default function ScannerToPdf() {
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 pb-20">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
+        {/* Left Side: Viewfinder */}
         <div className="lg:col-span-7 space-y-6">
             <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
@@ -286,14 +204,11 @@ export default function ScannerToPdf() {
                         <Camera className="size-4 text-primary" />
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Scanner Viewfinder</CardTitle>
                     </div>
-                    {hasCameraPermission === true ? (
+                    {hasCameraPermission === true && (
                          <Badge className="bg-green-600 text-white font-black text-[9px] uppercase tracking-widest">CAMERA ACTIVE</Badge>
-                    ) : (
-                         <Badge variant="outline" className="text-[9px] font-black uppercase">READY</Badge>
                     )}
                 </CardHeader>
                 <CardContent className="p-0 relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
-                    {/* Video element is always rendered to ensure ref is available */}
                     <video 
                         ref={videoRef} 
                         className={cn("w-full h-full object-contain", hasCameraPermission !== true && "hidden")} 
@@ -307,11 +222,11 @@ export default function ScannerToPdf() {
                             <div className="size-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
                                 <Camera className="size-10 text-destructive" />
                             </div>
-                            <div className="space-y-2">
-                                <p className="text-white font-black uppercase">Camera Blocked</p>
-                                <p className="text-slate-400 text-xs">Please allow camera access in your browser settings.</p>
+                            <div className="space-y-2 text-white">
+                                <p className="font-black uppercase">Camera Access Required</p>
+                                <p className="text-slate-400 text-xs">Please enable camera in your browser settings to scan documents.</p>
                             </div>
-                            <Button onClick={startCamera} className="bg-primary font-black uppercase tracking-tighter h-12 px-8 rounded-xl">RETRY CAMERA</Button>
+                            <Button onClick={startCamera} className="bg-primary font-black uppercase tracking-tighter h-12 px-8 rounded-xl shadow-xl">ACTIVATE CAMERA</Button>
                         </div>
                     )}
                     
@@ -329,7 +244,7 @@ export default function ScannerToPdf() {
                     )}
                 </CardContent>
                 <CardFooter className="p-8 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
-                    <Button onClick={handleCapture} disabled={hasCameraPermission !== true} className="h-16 flex-[2] text-xl font-black bg-gradient-button text-white shadow-2xl rounded-2xl group">
+                    <Button onClick={handleCapture} disabled={hasCameraPermission !== true} className="h-16 flex-[2] text-xl font-black bg-gradient-button text-white shadow-2xl rounded-2xl group active:scale-95 transition-all">
                         <ScanLine className="mr-3 h-7 w-7 group-hover:scale-110 transition-transform" /> CAPTURE PAGE
                     </Button>
                     <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-16 flex-1 font-black border-2 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-primary/5">
@@ -339,44 +254,29 @@ export default function ScannerToPdf() {
                 </CardFooter>
             </Card>
 
-            {!isMobile && !sessionIdFromUrl && (
-                <Card className="border-2 shadow-xl bg-slate-950 text-white rounded-[2.5rem] overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Cloud className="size-40" />
+            <div className="grid md:grid-cols-2 gap-6">
+                <div className="p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 flex gap-4 items-center">
+                    <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="size-6 text-primary" />
                     </div>
-                    <CardContent className="p-10 flex flex-col md:flex-row items-center gap-10 relative z-10">
-                        <div className="flex-1 space-y-6">
-                            <div className="flex items-center gap-3">
-                                <Smartphone className="size-8 text-primary animate-bounce" />
-                                <h3 className="text-2xl font-black uppercase tracking-tighter">Instant Mobile Sync</h3>
-                            </div>
-                            <p className="text-slate-400 font-medium leading-relaxed">
-                                Don't have a document photo on your PC? Scan this QR on your phone to use your mobile camera. **Captures appear here instantly.**
-                            </p>
-                            {!showQrBridge ? (
-                                <Button variant="secondary" size="lg" className="font-black rounded-xl h-14 px-8 shadow-xl" onClick={() => setShowMobileQr(true)}>
-                                    GENERATE MOBILE LINK <ArrowRight className="ml-2 size-4" />
-                                </Button>
-                            ) : (
-                                <div className="flex items-center gap-3 text-green-500 font-black text-xs uppercase tracking-widest bg-green-500/10 p-3 rounded-xl border border-green-500/20">
-                                    <RefreshCw className="size-4 animate-spin" /> Link Active: Scan QR on Right
-                                </div>
-                            )}
-                        </div>
-                        {showQrBridge && (
-                            <div className="bg-white p-6 rounded-[2rem] shadow-2xl scale-110 animate-in zoom-in-50 duration-500">
-                                <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x140&data=${encodeURIComponent(currentUrl)}`} 
-                                    alt="QR Sync" 
-                                    className="w-40 h-40"
-                                />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
+                    <div>
+                        <p className="text-[11px] font-black text-primary uppercase tracking-tight">100% PRIVATE</p>
+                        <p className="text-[10px] text-muted-foreground font-medium leading-tight">All scanning occurs locally in your device RAM. No files reach our servers.</p>
+                    </div>
+                </div>
+                <div className="p-6 bg-blue-500/5 rounded-[2rem] border-2 border-blue-500/10 flex gap-4 items-center">
+                    <div className="size-12 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <Zap className="size-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-black text-blue-700 uppercase tracking-tight">HD RENDERING</p>
+                        <p className="text-[10px] text-muted-foreground font-medium leading-tight">Output pages are rendered in high density for crystal clear text.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        {/* Right Side: Stack & Controls */}
         <div className="lg:col-span-5 space-y-6">
             <Card className="border-2 shadow-2xl border-primary/10 flex flex-col bg-card/50 rounded-[2.5rem] min-h-[500px]">
                 <CardHeader className="bg-primary/5 border-b py-6 flex flex-row items-center justify-between">
@@ -394,7 +294,7 @@ export default function ScannerToPdf() {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm font-black uppercase tracking-widest">Waiting for Capture</p>
-                                <p className="text-[10px] font-bold">Use mobile scanner or capture above.</p>
+                                <p className="text-[10px] font-bold">Use camera above or upload a file.</p>
                             </div>
                         </div>
                     ) : (
@@ -432,7 +332,7 @@ export default function ScannerToPdf() {
                             className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 group"
                         >
                             {isBuildingPdf ? <Loader2 className="animate-spin mr-3 size-7" /> : <CheckCircle2 className="mr-3 size-7 text-white/50" />}
-                            {isMobile ? "GENERATE & SYNC" : "GENERATE PDF"}
+                            GENERATE PDF DOCUMENT
                         </Button>
                     )}
                     {scannedImages.length > 0 && (
@@ -442,16 +342,6 @@ export default function ScannerToPdf() {
                     )}
                 </CardFooter>
             </Card>
-
-            <div className="p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 flex gap-4 items-center shadow-sm">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="size-6 text-primary" />
-                </div>
-                <div>
-                    <p className="text-[11px] font-black text-primary uppercase tracking-tight">Security Handshake</p>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-tight">Captures are temporary and cleared from our cloud buffer after use.</p>
-                </div>
-            </div>
         </div>
       </div>
 
@@ -481,12 +371,9 @@ export default function ScannerToPdf() {
             )}
           </div>
           <DialogFooter className="p-8 bg-muted/20 border-t flex flex-col gap-4">
-             <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 justify-center">
-                <Zap className="size-3 text-yellow-500" /> Instant sync active for this session
-             </div>
              <Button className="w-full h-16 text-xl font-black bg-primary rounded-2xl shadow-xl active:scale-95 transition-all" onClick={handleConfirmCrop} disabled={isProcessing}>
                 {isProcessing ? <Loader2 className="animate-spin mr-3"/> : <CheckCircle2 className="mr-3 h-7 w-7"/>}
-                CONFIRM & ADD PAGE
+                CONFIRM & ADD TO STACK
              </Button>
           </DialogFooter>
         </DialogContent>
