@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -25,7 +26,8 @@ import {
     Move,
     Scan,
     Maximize,
-    Grid3X3
+    Grid3X3,
+    Settings2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -34,7 +36,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as pdfjs from 'pdfjs-dist';
+import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 
 // Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -43,6 +48,7 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 
 type Workflow = 'a4' | 'separate';
 type Stage = 'selection' | 'upload' | 'password' | 'refine' | 'preview';
+type CropMode = 'rect' | 'scanner';
 
 interface Point {
     x: number;
@@ -53,6 +59,7 @@ export default function AadhaarPrinter() {
   const { toast } = useToast();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [stage, setStage] = useState<Stage>('selection');
+  const [cropMode, setCropMode] = useState<CropMode>('scanner');
   
   // A4 Workflow States
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -71,6 +78,10 @@ export default function AadhaarPrinter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
+  // Rect Mode States
+  const [rectCrop, setRectCrop] = useState<CropType>();
+  const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
+
   // 4-Dot Scanner States
   const [points, setPoints] = useState<Point[]>([
     { x: 20, y: 20 }, { x: 80, y: 20 },
@@ -140,6 +151,16 @@ export default function AadhaarPrinter() {
     ]);
   };
 
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const initialCrop = centerCrop(
+        makeAspectCrop({ unit: '%', width: 90 }, ID_ASPECT, width, height),
+        width,
+        height
+    );
+    setRectCrop(initialCrop);
+  };
+
   const handlePdfRender = async () => {
     if (!pdfBuffer) return;
     setIsProcessing(true);
@@ -176,7 +197,6 @@ export default function AadhaarPrinter() {
     }
   };
 
-  // --- PERSPECTIVE LOGIC (Homography) ---
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -211,90 +231,109 @@ export default function AadhaarPrinter() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Calculate dimensions based on top and side distances
-    const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
-    const w2 = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
-    const h1 = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
-    const h2 = Math.hypot(points[2].x - points[1].x, points[2].y - points[1].y);
-    
-    // Scale normalized percentage to natural pixels
-    const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
-    const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-    
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
+    let finalData = "";
 
-    const srcPoints = points.map(p => ({ 
-        x: p.x * (image.naturalWidth / 100), 
-        y: p.y * (image.naturalHeight / 100) 
-    }));
-    const dstPoints = [
-        { x: 0, y: 0 }, 
-        { x: targetWidth, y: 0 }, 
-        { x: targetWidth, y: targetHeight }, 
-        { x: 0, y: targetHeight }
-    ];
+    if (cropMode === 'scanner') {
+        const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+        const w2 = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
+        const h1 = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
+        const h2 = Math.hypot(points[2].x - points[1].x, points[2].y - points[1].y);
+        
+        const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
+        const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
+        
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
-    const h = solvePerspective(dstPoints, srcPoints);
-    const imgData = ctx.createImageData(targetWidth, targetHeight);
-    
-    const srcCanvas = document.createElement('canvas');
-    srcCanvas.width = image.naturalWidth;
-    srcCanvas.height = image.naturalHeight;
-    const srcCtx = srcCanvas.getContext('2d');
-    srcCtx?.drawImage(image, 0, 0);
-    const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
+        const srcPoints = points.map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
+        const dstPoints = [
+            { x: 0, y: 0 }, 
+            { x: targetWidth, y: 0 }, 
+            { x: targetWidth, y: targetHeight }, 
+            { x: 0, y: targetHeight }
+        ];
 
-    if (srcData) {
-        for (let y = 0; y < targetHeight; y++) {
-            for (let x = 0; x < targetWidth; x++) {
-                const z = h[6] * x + h[7] * y + 1;
-                const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
-                const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                
-                if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
-                    const dstIdx = (y * targetWidth + x) * 4;
-                    const srcIdx = (sy * image.naturalWidth + sx) * 4;
-                    imgData.data[dstIdx] = srcData[srcIdx];
-                    imgData.data[dstIdx+1] = srcData[srcIdx+1];
-                    imgData.data[dstIdx+2] = srcData[srcIdx+2];
-                    imgData.data[dstIdx+3] = srcData[srcIdx+3];
+        const h = solvePerspective(dstPoints, srcPoints);
+        const imgData = ctx.createImageData(targetWidth, targetHeight);
+        
+        const srcCanvas = document.createElement('canvas');
+        srcCanvas.width = image.naturalWidth;
+        srcCanvas.height = image.naturalHeight;
+        const srcCtx = srcCanvas.getContext('2d');
+        srcCtx?.drawImage(image, 0, 0);
+        const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
+
+        if (srcData) {
+            for (let y = 0; y < targetHeight; y++) {
+                for (let x = 0; x < targetWidth; x++) {
+                    const z = h[6] * x + h[7] * y + 1;
+                    const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
+                    const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
+                    
+                    if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
+                        const dstIdx = (y * targetWidth + x) * 4;
+                        const srcIdx = (sy * image.naturalWidth + sx) * 4;
+                        imgData.data[dstIdx] = srcData[srcIdx];
+                        imgData.data[dstIdx+1] = srcData[srcIdx+1];
+                        imgData.data[dstIdx+2] = srcData[srcIdx+2];
+                        imgData.data[dstIdx+3] = srcData[srcIdx+3];
+                    }
                 }
             }
+            ctx.putImageData(imgData, 0, 0);
         }
-        ctx.putImageData(imgData, 0, 0);
+        finalData = canvas.toDataURL("image/png");
+    } else {
+        if (!completedRectCrop) return;
+        const scaleX = image.naturalWidth / image.width;
+        const scaleY = image.naturalHeight / image.height;
+        canvas.width = completedRectCrop.width * scaleX;
+        canvas.height = completedRectCrop.height * scaleY;
+        ctx.drawImage(
+            image,
+            completedRectCrop.x * scaleX,
+            completedRectCrop.y * scaleY,
+            completedRectCrop.width * scaleX,
+            completedRectCrop.height * scaleY,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+        finalData = canvas.toDataURL("image/png");
     }
 
-    const finalData = canvas.toDataURL("image/png");
-
     if (workflow === 'a4') {
-        // For Aadhaar strip, split into two
-        const halfWidth = canvas.width / 2;
-        
-        const fCanvas = document.createElement("canvas");
-        fCanvas.width = halfWidth; fCanvas.height = canvas.height;
-        fCanvas.getContext("2d")?.drawImage(canvas, 0, 0, halfWidth, canvas.height, 0, 0, halfWidth, canvas.height);
-        setFrontFinal(fCanvas.toDataURL("image/png"));
-        
-        const bCanvas = document.createElement("canvas");
-        bCanvas.width = halfWidth; bCanvas.height = canvas.height;
-        bCanvas.getContext("2d")?.drawImage(canvas, halfWidth, 0, halfWidth, canvas.height, 0, 0, halfWidth, canvas.height);
-        setBackFinal(bCanvas.toDataURL("image/png"));
-        
-        setStage('preview');
+        const cardImg = new window.Image();
+        cardImg.src = finalData;
+        cardImg.onload = () => {
+            const halfWidth = cardImg.width / 2;
+            const fCanvas = document.createElement("canvas");
+            fCanvas.width = halfWidth; fCanvas.height = cardImg.height;
+            fCanvas.getContext("2d")?.drawImage(cardImg, 0, 0, halfWidth, cardImg.height, 0, 0, halfWidth, cardImg.height);
+            setFrontFinal(fCanvas.toDataURL("image/png"));
+            
+            const bCanvas = document.createElement("canvas");
+            bCanvas.width = halfWidth; bCanvas.height = cardImg.height;
+            bCanvas.getContext("2d")?.drawImage(cardImg, halfWidth, 0, halfWidth, cardImg.height, 0, 0, halfWidth, cardImg.height);
+            setBackFinal(bCanvas.toDataURL("image/png"));
+            setStage('preview');
+            setIsProcessing(false);
+        };
     } else {
         if (refiningSide === 'front') setFrontFinal(finalData);
         else setBackFinal(finalData);
-        
         setRefiningSide(null);
         setStage('upload');
+        setIsProcessing(false);
     }
     
-    setIsProcessing(false);
-    toast({ title: "Smart Scan Success", description: "Perspective corrected and straightened." });
+    toast({ title: "Adjustment Applied", description: "Image processed with high fidelity." });
   };
 
-  // --- MAGNIFIER & POINT HANDLERS ---
   const updateMagnifier = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -499,16 +538,6 @@ export default function AadhaarPrinter() {
                       </CardContent>
                   </Card>
               </div>
-
-              <div className="p-8 bg-blue-500/5 rounded-[3rem] border-2 border-dashed border-blue-500/10 flex flex-col items-center gap-4 text-center no-print">
-                  <div className="flex items-center gap-3">
-                       <Zap className="size-5 text-yellow-500 fill-yellow-500" />
-                       <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-700">Perspective Scan Mode Active</p>
-                  </div>
-                  <p className="text-xs text-blue-900/60 font-medium max-w-xl">
-                      Drag the 4 corner points to the edges of the ID card in your photo. Use the magnifier circle for pixel-perfect placement.
-                  </p>
-              </div>
           </div>
       )}
 
@@ -548,45 +577,65 @@ export default function AadhaarPrinter() {
         </Card>
       )}
 
-      {/* STAGE 3: REFINE WITH 4-DOT SCANNER */}
+      {/* STAGE 3: REFINE WITH MODES */}
       {stage === 'refine' && (
           <Card className="w-full max-w-6xl mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden mx-4">
-              <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-                        <Scan className="size-5 text-primary" /> Smart-Scan Straightener
-                    </CardTitle>
-                    <CardDescription className="text-[10px] font-black uppercase opacity-60">Drag dots to the 4 corners of {refiningSide || 'Aadhaar'} portion.</CardDescription>
+              <CardHeader className="bg-muted/30 border-b p-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+                            <Settings2 className="size-5 text-primary" /> Adjustment Studio
+                        </CardTitle>
+                        <CardDescription className="text-[10px] font-black uppercase opacity-60">Pick mode and align corners of {refiningSide || 'Aadhaar'} portion.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-3">
+                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
+                            <TabsList className="h-9">
+                                <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4">
+                                    <Maximize className="size-3 mr-1.5" /> Rect
+                                </TabsTrigger>
+                                <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4">
+                                    <Scan className="size-3 mr-1.5" /> Scanner
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                        <Button variant="ghost" size="icon" onClick={() => setStage('upload')} className="text-destructive"><X /></Button>
+                    </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setStage('upload')} className="text-destructive"><X /></Button>
               </CardHeader>
               <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex items-center justify-center min-h-[600px] relative overflow-hidden select-none"
                            onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                   
+                  {isProcessing && (
+                      <div className="absolute inset-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                          <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                          <p className="text-xs font-black uppercase animate-pulse">Processing Pixels...</p>
+                      </div>
+                  )}
+
                   <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white">
-                    <img 
-                        ref={imgRef} 
-                        src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} 
-                        alt="refining" 
-                        className="max-h-[70vh] w-auto object-contain pointer-events-none" 
-                    />
-                    
-                    {/* Perspective Guide Overlay */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
-                    </svg>
-
-                    {/* Drag Handles */}
-                    {points.map((p, i) => (
-                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
-                             style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                             onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
-                            <div className="size-2.5 bg-white rounded-full shadow-inner" />
+                    {cropMode === 'rect' ? (
+                        <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} aspect={ID_ASPECT} className="max-h-[70vh]">
+                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="rect" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
+                        </ReactCrop>
+                    ) : (
+                        <div className="relative">
+                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" />
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
+                            </svg>
+                            {points.map((p, i) => (
+                                <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
+                                    style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
+                                    onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
+                                    <div className="size-2.5 bg-white rounded-full shadow-inner" />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
 
-                    {/* Precision Fixed Magnifier Circle */}
-                    {draggingPoint !== null && (
+                    {/* Precision Magnifier Circle (Common for points) */}
+                    {draggingPoint !== null && cropMode === 'scanner' && (
                         <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
@@ -612,14 +661,15 @@ export default function AadhaarPrinter() {
 
                   <div className="absolute bottom-8 flex justify-center w-full">
                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
-                          <Move className="h-4 w-4 text-primary animate-pulse" /> Drag 4 dots to ID corners
+                          <Move className="h-4 w-4 text-primary animate-pulse" /> 
+                          {cropMode === 'rect' ? "Drag box to ID area" : "Drag 4 dots to ID corners"}
                       </div>
                   </div>
               </CardContent>
               <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex justify-between">
                   <Button variant="ghost" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2">CANCEL</Button>
                   <Button className="h-12 px-12 bg-primary font-black rounded-xl shadow-xl group" onClick={handleFinalizeCrop}>
-                      APPLY SMART SCAN <ChevronRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
+                      CONFIRM ADJUSTMENT <ChevronRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
               </CardFooter>
           </Card>
@@ -634,7 +684,7 @@ export default function AadhaarPrinter() {
                         <CheckCircle2 className="size-7" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black uppercase tracking-tighter">Smart Scan Ready</h3>
+                        <h3 className="text-xl font-black uppercase tracking-tighter">Adjustment Ready</h3>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Standard 85.6mm x 54mm Alignment</p>
                     </div>
                 </div>
@@ -651,13 +701,13 @@ export default function AadhaarPrinter() {
             <div className="no-print">
                 <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
                     <CardHeader className="bg-white/50 dark:bg-black/20 border-b p-4 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">300 DPI SCANNER QUALITY RENDERING</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">HD STUDIO QUALITY RENDERING</span>
                     </CardHeader>
                     <CardContent className="p-12 flex flex-col md:flex-row items-center justify-center gap-12">
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">FRONT PORTION</span>
                             <div className="relative shadow-2xl rounded-xl overflow-hidden border-[6px] border-white bg-white group hover:scale-[1.05] transition-all" style={{ width: '320px', height: '202px' }}>
-                                <img src={frontFinal} alt="Front" className="w-full h-full object-cover" />
+                                <img src={frontFinal} alt="Front" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>
                                 </div>
@@ -667,7 +717,7 @@ export default function AadhaarPrinter() {
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">BACK PORTION</span>
                             <div className="relative shadow-2xl rounded-xl overflow-hidden border-[6px] border-white bg-white group hover:scale-[1.05] transition-all" style={{ width: '320px', height: '202px' }}>
-                                <img src={backFinal} alt="Back" className="w-full h-full object-cover" />
+                                <img src={backFinal} alt="Back" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>
                                 </div>
@@ -687,15 +737,15 @@ export default function AadhaarPrinter() {
                 <div className="flex flex-col items-center gap-12 pt-24">
                     <div className="text-center mb-10">
                         <h2 className="text-2xl font-black uppercase tracking-[0.3em] text-slate-800">DIGITAL IDENTITY MASTER</h2>
-                        <p className="text-[9px] font-black uppercase opacity-40 mt-1">Straightened via GR7 Smart Scanner • High Fidelity 300 DPI</p>
+                        <p className="text-[9px] font-black uppercase opacity-40 mt-1">Processed via GR7 Studio • High Fidelity 300 DPI</p>
                     </div>
                     
-                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm" style={{ width: '85.6mm', height: '54mm' }}>
-                        <img src={frontFinal} className="w-full h-full object-cover" alt="Front Print" />
+                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
+                        <img src={frontFinal} className="max-w-full max-h-full object-contain" alt="Front Print" />
                     </div>
 
-                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm" style={{ width: '85.6mm', height: '54mm' }}>
-                        <img src={backFinal} className="w-full h-full object-cover" alt="Back Print" />
+                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
+                        <img src={backFinal} className="max-w-full max-h-full object-contain" alt="Back Print" />
                     </div>
 
                     <div className="mt-20 border-t-2 border-dashed w-48 border-slate-300 opacity-50"></div>
@@ -704,7 +754,7 @@ export default function AadhaarPrinter() {
         </div>
       )}
 
-      {/* Global CSS for Print & Magnifier */}
+      {/* Global CSS for Print */}
       <style jsx global>{`
         @media print {
           body * {
@@ -727,16 +777,8 @@ export default function AadhaarPrinter() {
             margin: 0;
           }
         }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(0,0,0,0.1);
-          border-radius: 10px;
-        }
       `}</style>
       <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
     </div>
   );
 }
-
