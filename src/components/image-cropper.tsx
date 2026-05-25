@@ -23,7 +23,8 @@ import {
     Loader2,
     ShieldCheck,
     Zap,
-    ArrowLeftRight
+    ArrowLeftRight,
+    Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -62,6 +63,7 @@ export default function ImageCropper() {
       { x: 85, y: 85 }, { x: 15, y: 85 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
+  const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -106,7 +108,6 @@ export default function ImageCropper() {
     }
   }
 
-  // Handle Aspect Ratio Changes - UPDATED for immediate UI feedback
   const handleAspectChange = (val: string) => {
     const newAspect = val === 'free' ? undefined : parseFloat(val);
     setAspect(newAspect);
@@ -132,14 +133,11 @@ export default function ImageCropper() {
             setIsProcessing(false);
             return;
         }
-
         canvas.width = img.height;
         canvas.height = img.width;
-
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
         const newSrc = canvas.toDataURL('image/png');
         setImgSrc(newSrc);
         setCrop(undefined); 
@@ -160,14 +158,11 @@ export default function ImageCropper() {
             setIsProcessing(false);
             return;
         }
-
         canvas.width = img.height;
         canvas.height = img.width;
-
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
         const newSrc = canvas.toDataURL(`image/${outputFormat}`, 0.95);
         setCroppedImageSrc(newSrc);
         setIsProcessing(false);
@@ -181,13 +176,10 @@ export default function ImageCropper() {
         p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
         p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
-    
     const n = 8;
     for (let i = 0; i < n; i++) {
         let max = i;
-        for (let j = i + 1; j < n; j++) {
-            if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
-        }
+        for (let j = i + 1; j < n; j++) if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
         const temp = p[i]; p[i] = p[max]; p[max] = temp;
         for (let j = i + 1; j < n; j++) {
             const f = p[j][i] / p[i][i];
@@ -206,31 +198,21 @@ export default function ImageCropper() {
   const applyPerspective = async () => {
     const image = imgRef.current;
     if (!image) return;
-
     setIsProcessing(true);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
     const w2 = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
     const h1 = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
     const h2 = Math.hypot(points[2].x - points[1].x, points[2].y - points[1].y);
-    
     const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
     const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-
     canvas.width = targetWidth;
     canvas.height = targetHeight;
-
     const srcPoints = points.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
-    const dstPoints = [
-        { x: 0, y: 0 }, { x: targetWidth, y: 0 },
-        { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }
-    ];
-
+    const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
     const h = solvePerspective(dstPoints, srcPoints);
-
     const imgData = ctx.createImageData(targetWidth, targetHeight);
     const srcCanvas = document.createElement('canvas');
     srcCanvas.width = image.naturalWidth;
@@ -238,15 +220,12 @@ export default function ImageCropper() {
     const srcCtx = srcCanvas.getContext('2d');
     srcCtx?.drawImage(image, 0, 0);
     const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
-
     if (!srcData) return;
-
     for (let y = 0; y < targetHeight; y++) {
         for (let x = 0; x < targetWidth; x++) {
             const z = h[6] * x + h[7] * y + 1;
             const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
             const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-
             if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
                 const dstIdx = (y * targetWidth + x) * 4;
                 const srcIdx = (sy * image.naturalWidth + sx) * 4;
@@ -257,7 +236,6 @@ export default function ImageCropper() {
             }
         }
     }
-
     ctx.putImageData(imgData, 0, 0);
     const result = canvas.toDataURL(`image/${outputFormat}`, 0.95);
     setCroppedImageSrc(result);
@@ -267,7 +245,6 @@ export default function ImageCropper() {
   async function handleRectCrop() {
     const image = imgRef.current;
     if (!image || !completedCrop?.width) return;
-
     setIsProcessing(true);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -275,30 +252,17 @@ export default function ImageCropper() {
         setIsProcessing(false);
         return;
     }
-
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-
     canvas.width = completedCrop.width * scaleX;
     canvas.height = completedCrop.height * scaleY;
-
     ctx.imageSmoothingQuality = 'high';
-
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate(rotate * (Math.PI / 180));
     ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-
     const centerX = (completedCrop.x + completedCrop.width / 2) * scaleX;
     const centerY = (completedCrop.y + completedCrop.height / 2) * scaleY;
-
-    ctx.drawImage(
-      image,
-      -centerX,
-      -centerY,
-      image.naturalWidth,
-      image.naturalHeight
-    );
-
+    ctx.drawImage(image, -centerX, -centerY, image.naturalWidth, image.naturalHeight);
     setCroppedImageSrc(canvas.toDataURL(`image/${outputFormat}`, 0.95));
     setIsProcessing(false);
   }
@@ -320,27 +284,19 @@ export default function ImageCropper() {
 
   const handlePointMouseDown = (index: number) => setDraggingPoint(index);
   
-  // Smooth dragging for Scanner Mode
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
-    
-    // Prevent default to avoid scrolling on mobile
     if (e.cancelable) e.preventDefault();
-
     const rect = containerRef.current.getBoundingClientRect();
     let clientX, clientY;
-    
     if ('touches' in e) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
+        clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
     } else {
-        clientX = (e as React.MouseEvent).clientX;
-        clientY = (e as React.MouseEvent).clientY;
+        clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
     }
-
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-
+    setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
         next[draggingPoint] = { x, y };
@@ -411,15 +367,13 @@ export default function ImageCropper() {
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-4 min-h-[500px]">
             {/* Control Sidebar */}
-            <div className="lg:col-span-1 border-r bg-muted/20 p-6 space-y-8">
+            <div className="lg:col-span-1 border-r bg-muted/20 p-6 space-y-8 order-2 lg:order-1">
                 {cropMode === 'rectangular' ? (
                     <div className="space-y-6">
                         <div className="space-y-3">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aspect Ratio</Label>
                             <Select value={aspect === undefined ? "free" : aspect.toString()} onValueChange={handleAspectChange}>
-                                <SelectTrigger className="h-12 font-bold border-2">
-                                    <SelectValue placeholder="Free" />
-                                </SelectTrigger>
+                                <SelectTrigger className="h-12 font-bold border-2"><SelectValue placeholder="Free" /></SelectTrigger>
                                 <SelectContent className="font-bold">
                                     <SelectItem value="free">Free Form</SelectItem>
                                     <SelectItem value="1">Square (1:1)</SelectItem>
@@ -428,20 +382,12 @@ export default function ImageCropper() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        
                         <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Orientation Control</Label>
-                            <Button 
-                                variant="outline" 
-                                className="w-full h-14 border-2 font-black text-xs uppercase tracking-widest bg-white dark:bg-slate-900 group active:scale-95 transition-all"
-                                onClick={handleHardRotate}
-                                disabled={isProcessing}
-                            >
-                                <RotateCw className="size-5 mr-3 text-primary group-hover:rotate-90 transition-transform duration-300" /> 
-                                ROTATE 90°
+                            <Button variant="outline" className="w-full h-14 border-2 font-black text-xs uppercase bg-white dark:bg-slate-900" onClick={handleHardRotate} disabled={isProcessing}>
+                                <RotateCw className="size-5 mr-3 text-primary" /> ROTATE 90°
                             </Button>
                         </div>
-
                         <div className="space-y-4 pt-2">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground">Straighten Fine-tune</Label>
@@ -449,7 +395,6 @@ export default function ImageCropper() {
                             </div>
                             <Slider min={-45} max={45} step={0.1} value={[rotate]} onValueChange={(v) => setRotate(v[0])} />
                         </div>
-                        
                         <div className="grid grid-cols-2 gap-2">
                             <Button variant="outline" size="sm" className="h-10 border-2 font-bold text-[10px]" onClick={() => setFlipH(!flipH)}><FlipHorizontal className="h-4 w-4 mr-2" /> FLIP H</Button>
                             <Button variant="outline" size="sm" className="h-10 border-2 font-bold text-[10px]" onClick={() => setFlipV(!flipV)}><FlipVertical className="h-4 w-4 mr-2" /> FLIP V</Button>
@@ -458,23 +403,14 @@ export default function ImageCropper() {
                 ) : (
                     <div className="space-y-6">
                         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
-                            <p className="text-[10px] font-black text-primary flex items-center gap-2 mb-2 uppercase tracking-widest">
-                                <Grid3X3 className="h-4 w-4" /> SCANNER MODE
-                            </p>
-                            <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
-                                Drag the 4 corner dots to the edges of your document. The logic will flatten the perspective for a professional scan look.
-                            </p>
+                            <p className="text-[10px] font-black text-primary flex items-center gap-2 mb-2 uppercase tracking-widest"><Grid3X3 className="h-4 w-4" /> SCANNER MODE</p>
+                            <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">Drag the 4 corner dots to the edges of your document. Use the magnifier circle for precision.</p>
                         </div>
-                        <Button 
-                            variant="outline" 
-                            className="w-full h-12 border-2 font-black text-[10px] uppercase tracking-widest"
-                            onClick={() => setPoints([{x:20, y:20}, {x:80, y:20}, {x:80, y:80}, {x:20, y:80}])}
-                        >
+                        <Button variant="outline" className="w-full h-12 border-2 font-black text-[10px] uppercase" onClick={() => setPoints([{x:20, y:20}, {x:80, y:20}, {x:80, y:80}, {x:20, y:80}])}>
                             <RefreshCcw className="size-3 mr-2" /> Reset 4-Dots
                         </Button>
                     </div>
                 )}
-
                 <div className="space-y-3 pt-6 border-t border-dashed">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Save as format</Label>
                     <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
@@ -486,15 +422,14 @@ export default function ImageCropper() {
                         </SelectContent>
                     </Select>
                 </div>
-                
-                <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95" onClick={handleApplyCrop} disabled={isProcessing}>
+                <Button className="w-full h-16 text-lg font-black bg-primary shadow-2xl rounded-2xl active:scale-95" onClick={handleApplyCrop} disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <CropIcon className="mr-3 h-6 w-6" />}
                     {isProcessing ? "PROCESSING..." : "CROP & SAVE"}
                 </Button>
             </div>
 
             {/* Preview Workspace */}
-            <div className="lg:col-span-3 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-8 relative overflow-hidden select-none min-h-[600px] shadow-inner">
+            <div className="lg:col-span-3 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center p-8 relative overflow-hidden select-none min-h-[600px] order-1 lg:order-2">
                 {croppedImageSrc ? (
                      <div className="flex flex-col items-center gap-8 animate-in zoom-in-95 duration-500 w-full">
                         <div className="relative shadow-2xl ring-8 ring-white rounded-lg overflow-hidden max-h-[65vh] bg-white transform-gpu hover:scale-[1.02] transition-transform">
@@ -502,91 +437,72 @@ export default function ImageCropper() {
                         </div>
                         <div className="flex flex-col gap-4 w-full max-w-sm">
                             <div className="grid grid-cols-2 gap-3">
-                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase" onClick={() => setCroppedImageSrc(null)}>
-                                    <RefreshCcw className="mr-2 h-4 w-4" /> Try Again
-                                </Button>
-                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase border-primary text-primary" onClick={handleRotateResult}>
-                                    <RotateCw className="mr-2 h-4 w-4" /> ROTATE 90°
-                                </Button>
+                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase" onClick={() => setCroppedImageSrc(null)}><RefreshCcw className="mr-2 h-4 w-4" /> Try Again</Button>
+                                <Button variant="outline" className="h-12 border-2 font-black text-[10px] uppercase border-primary text-primary" onClick={handleRotateResult}><RotateCw className="mr-2 h-4 w-4" /> ROTATE 90°</Button>
                             </div>
-                            <Button size="lg" className="h-14 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl" onClick={handleDownload}>
-                                <Download className="mr-2 h-6 w-6" /> DOWNLOAD
-                            </Button>
+                            <Button size="lg" className="h-14 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl" onClick={handleDownload}><Download className="mr-2 h-6 w-6" /> DOWNLOAD</Button>
                         </div>
                     </div>
                 ) : imgSrc && (
                     <div 
                         ref={containerRef}
-                        className="relative max-w-full max-h-full"
-                        style={{ touchAction: 'none' }} // Stops scrolling while dragging dots
+                        className="relative max-w-full max-h-full flex items-center justify-center"
+                        style={{ touchAction: 'none' }}
                         onMouseMove={handleMouseMove}
                         onTouchMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onTouchEnd={handleMouseUp}
                     >
                         {cropMode === 'rectangular' ? (
-                            <ReactCrop
-                                crop={crop}
-                                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                                onComplete={(c) => setCompletedCrop(c)}
-                                aspect={aspect}
-                                className="max-h-[75vh] shadow-2xl"
-                            >
-                                <img
-                                    ref={imgRef}
-                                    alt="Source"
-                                    src={imgSrc}
-                                    onLoad={onImageLoad}
-                                    style={{ 
-                                        maxHeight: '75vh', 
-                                        objectFit: 'contain',
-                                        transform: `rotate(${rotate}deg) scale(${flipH ? -1 : 1}, ${flipV ? -1 : 1})`,
-                                    }}
-                                />
+                            <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)} aspect={aspect} className="max-h-[75vh] shadow-2xl">
+                                <img ref={imgRef} alt="Source" src={imgSrc} onLoad={onImageLoad} style={{ maxHeight: '75vh', objectFit: 'contain', transform: `rotate(${rotate}deg) scale(${flipH ? -1 : 1}, ${flipV ? -1 : 1})` }} />
                             </ReactCrop>
                         ) : (
                             <div className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
-                                <img
-                                    ref={imgRef}
-                                    alt="Perspective Source"
-                                    src={imgSrc}
-                                    onLoad={onImageLoad}
-                                    className="max-h-[75vh] w-auto object-contain pointer-events-none"
-                                />
+                                <img ref={imgRef} alt="Scanner Source" src={imgSrc} onLoad={onImageLoad} className="max-h-[75vh] w-auto object-contain pointer-events-none" />
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <polygon 
-                                        points={points.map(p => `${p.x},${p.y}`).join(' ')} 
-                                        className="fill-primary/20 stroke-primary stroke-[0.5]" 
-                                    />
+                                    <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                                 </svg>
                                 {points.map((p, i) => (
-                                    <div 
-                                        key={i}
-                                        className={cn(
-                                            "absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform hover:scale-110",
-                                            draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90"
-                                        )}
-                                        style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                        onMouseDown={() => handlePointMouseDown(i)}
-                                        onTouchStart={() => handlePointMouseDown(i)}
-                                    >
+                                    <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                         style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
+                                         onMouseDown={() => handlePointMouseDown(i)} onTouchStart={() => handlePointMouseDown(i)}>
                                         <div className="size-2.5 bg-white rounded-full shadow-inner" />
                                     </div>
                                 ))}
+
+                                {/* Precision Magnifier Circle */}
+                                {draggingPoint !== null && (
+                                    <div className="absolute pointer-events-none z-50 overflow-hidden size-32 rounded-full border-4 border-white shadow-2xl bg-white animate-in zoom-in-50"
+                                         style={{ left: `${magnifierPos.x}%`, top: `${magnifierPos.y - 15}%`, transform: 'translate(-50%, -100%)' }}>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="size-1 bg-red-500 rounded-full z-10 shadow-sm" />
+                                            <div className="absolute size-full opacity-50 bg-black/5" />
+                                        </div>
+                                        <img src={imgSrc} alt="magnify" className="absolute max-w-none origin-top-left"
+                                             style={{ 
+                                                width: `${(imgRef.current?.width || 0) * 3}px`,
+                                                height: `${(imgRef.current?.height || 0) * 3}px`,
+                                                left: `-${magnifierPos.x * 3}%`,
+                                                top: `-${magnifierPos.y * 3}%`
+                                             }} />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 )}
                 
+                {/* Floating Instructions outside image bounds */}
                 {!croppedImageSrc && imgSrc && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                    <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
                         <Move className="h-4 w-4 text-primary animate-pulse" /> 
                         {cropMode === 'rectangular' ? "Drag corners to crop" : "Drag 4 dots to corners of object"}
                     </div>
                 )}
 
                 {isProcessing && (
-                    <div className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-40 flex flex-col items-center justify-center gap-4">
+                    <div className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-[60] flex flex-col items-center justify-center gap-4">
                         <Loader2 className="h-16 w-16 animate-spin text-primary stroke-[3]" />
                         <p className="text-sm font-black text-primary uppercase tracking-widest animate-pulse">Processing Pixels...</p>
                     </div>
