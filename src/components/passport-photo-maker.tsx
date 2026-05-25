@@ -172,7 +172,7 @@ export default function PassportPhotoMaker() {
     const [borderColor, setBorderColor] = useState("#000000");
 
     // Crop Logic
-    const [crop, setCrop] = useState<Crop>();
+    const [crop, setCrop] = useState<CropType>();
     const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
     const [originalCroppedData, setOriginalCroppedData] = useState<string | null>(null);
     const [printSheetSrc, setPrintSheetSrc] = useState<string | null>(null);
@@ -478,44 +478,44 @@ export default function PassportPhotoMaker() {
             {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
                 <div className="flex flex-col items-center justify-start gap-2 pt-2">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-                        <div className="mx-auto mb-2 grid size-12 place-items-center rounded-xl bg-primary/10 text-primary shadow-lg relative">
-                            <UserCircle className="size-6" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-2.5" />
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
+                        <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                            <UserCircle className="size-8" />
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                <Sparkles className="size-3" />
                             </div>
                         </div>
-                        <h1 className="text-xl md:text-3xl font-black font-headline tracking-tighter uppercase leading-none">
+                        <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
-                        <p className="text-[10px] md:text-xs text-muted-foreground font-semibold max-w-xl mx-auto">
+                        <p className="text-xs md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
                             Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
                         </p>
                     </motion.div>
 
-                    <Card className="w-full max-w-2xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-4">
+                    <Card className="w-full max-w-3xl glass-card overflow-hidden neon-border">
+                        <CardContent className="p-6">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[1.5rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-16 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
-                                    <UploadCloud className="size-12 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-5 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-lg font-black uppercase tracking-tighter">Click to Upload Image</p>
-                                    <p className="text-[10px] text-muted-foreground mt-1 font-bold opacity-60">High-fidelity local re-sampling active.</p>
+                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
+                                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> PORTRAIT & LANDSCAPE</div>
-                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> GPU BOOST</div>
+                    <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-8">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Maximize className="size-3.5 text-primary" /> PORTRAIT & LANDSCAPE</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> GPU BOOST</div>
                     </div>
                 </div>
             )}
@@ -759,3 +759,4 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
+
