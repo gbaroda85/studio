@@ -20,7 +20,8 @@ import {
   Eye,
   CheckCircle2,
   MousePointer2,
-  Layers
+  Layers,
+  RotateCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -131,6 +132,38 @@ export default function ImageToPdfConverter() {
       if (!selectedId) return;
       setImages(prev => prev.map(img => img.id === selectedId ? { ...img, ...updates } : img));
       clearPreviews();
+  };
+
+  const rotateSelectedImage = () => {
+    if (!selectedId) return;
+    const item = images.find(img => img.id === selectedId);
+    if (!item) return;
+
+    setIsConverting(true);
+    const img = new window.Image();
+    img.src = item.src;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsConverting(false);
+            return;
+        }
+
+        // Swap width/height for 90 degree rotation
+        canvas.width = img.height;
+        canvas.height = img.width;
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+        const rotatedSrc = canvas.toDataURL('image/png');
+        setImages(prev => prev.map(i => i.id === selectedId ? { ...i, src: rotatedSrc } : i));
+        clearPreviews();
+        setIsConverting(false);
+        toast({ title: "Image Rotated", description: "Turned 90° clockwise." });
+    };
   };
 
   const applyToAll = () => {
@@ -402,6 +435,19 @@ export default function ImageToPdfConverter() {
                                 </div>
                             </div>
 
+                            <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <RotateCw className="size-3" /> Orientation
+                                </Label>
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase"
+                                    onClick={rotateSelectedImage}
+                                >
+                                    <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
+                                </Button>
+                            </div>
+
                             <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
                                 <Layers className="size-3 mr-2" /> Global Sync Alignment
                             </Button>
@@ -425,7 +471,7 @@ export default function ImageToPdfConverter() {
                         {isConverting ? (
                             <div className="flex items-center gap-3">
                                 <Loader2 className="size-8 animate-spin" />
-                                <span className="uppercase tracking-tighter">CONVERTING...</span>
+                                <span className="uppercase tracking-tighter">PROCESSING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-4">
@@ -441,7 +487,6 @@ export default function ImageToPdfConverter() {
             </Card>
         </div>
       </div>
-      {/* FIXED: Changed accept="application/pdf" to accept="image/*" for Image to PDF tool */}
       <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
     </div>
   );
