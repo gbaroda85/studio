@@ -24,7 +24,8 @@ import {
     RefreshCw,
     Monitor,
     Smartphone,
-    ArrowRight
+    ArrowRight,
+    ScanLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -484,4 +485,3 @@ export default function ScannerToPdf() {
     </div>
   );
 }
-
