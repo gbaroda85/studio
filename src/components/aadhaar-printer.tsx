@@ -69,6 +69,8 @@ export default function AadhaarPrinter() {
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const ID_ASPECT = 85.6 / 54;
@@ -106,8 +108,14 @@ export default function AadhaarPrinter() {
         const reader = new FileReader();
         reader.onload = (e) => {
             const src = e.target?.result as string;
-            if (side === 'front') setFrontRaw(src);
-            else setBackRaw(src);
+            if (side === 'front') {
+                setFrontRaw(src);
+                setFrontFinal(null);
+            } else {
+                setBackRaw(src);
+                setBackFinal(null);
+            }
+            toast({ title: 'Upload Successful', description: `Side ${side?.toUpperCase()} ready for adjustment.` });
         };
         reader.readAsDataURL(file);
     }
@@ -231,6 +239,8 @@ export default function AadhaarPrinter() {
     setPdfBuffer(null);
     setPassword("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (frontInputRef.current) frontInputRef.current.value = "";
+    if (backInputRef.current) backInputRef.current.value = "";
   };
 
   return (
@@ -238,7 +248,7 @@ export default function AadhaarPrinter() {
       
       {/* STAGE 0: SELECTION */}
       {stage === 'selection' && (
-        <div className="grid md:grid-cols-2 gap-8 pt-4">
+        <div className="grid md:grid-cols-2 gap-8 pt-4 px-4">
             <Card className="group border-2 border-dashed hover:border-primary hover:shadow-2xl transition-all cursor-pointer rounded-[2.5rem] overflow-hidden" onClick={() => handleSelection('a4')}>
                 <CardHeader className="p-10 text-center">
                     <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl transition-transform group-hover:scale-110">
@@ -267,10 +277,10 @@ export default function AadhaarPrinter() {
         </div>
       )}
 
-      {/* STAGE 1: UPLOAD */}
+      {/* STAGE 1: UPLOAD (A4) */}
       {stage === 'upload' && workflow === 'a4' && (
         <Card className={cn(
-            "border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl",
+            "border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl mx-4",
             isDragOver && "border-primary bg-primary/5"
         )}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -296,9 +306,9 @@ export default function AadhaarPrinter() {
         </Card>
       )}
 
-      {/* NEW: SEPARATE UPLOAD WORKFLOW */}
+      {/* STAGE 1: UPLOAD (SEPARATE SIDES) */}
       {stage === 'upload' && workflow === 'separate' && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4">
               <div className="flex items-center justify-between no-print">
                    <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest"><ArrowLeft className="mr-1 size-3" /> Selection</Button>
                    <div className="flex items-center gap-3">
@@ -323,7 +333,7 @@ export default function AadhaarPrinter() {
                                   <img src={frontFinal} alt="front" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('front'); setStage('refine'); }}><Crop className="size-3 mr-1.5" /> Adjust</Button>
-                                      <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => setFrontFinal(null)}><X className="size-4" /></Button>
+                                      <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => { setFrontFinal(null); setFrontRaw(null); }}><X className="size-4" /></Button>
                                   </div>
                               </div>
                           ) : frontRaw ? (
@@ -331,12 +341,13 @@ export default function AadhaarPrinter() {
                                   <div className="size-16 rounded-full bg-primary/20 flex items-center justify-center text-primary animate-pulse"><RotateCcw className="size-8" /></div>
                                   <p className="text-xs font-bold text-primary uppercase">Ready to Align</p>
                                   <Button className="font-black uppercase text-xs bg-primary rounded-xl" onClick={() => { setRefiningSide('front'); setStage('refine'); }}>Crop Front Side</Button>
+                                  <Button variant="ghost" onClick={() => setFrontRaw(null)} className="text-[9px] font-bold uppercase opacity-50">Clear Image</Button>
                               </div>
                           ) : (
-                              <div className="flex flex-col items-center gap-4 text-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity" onClick={() => fileInputRef.current?.click()}>
+                              <div className="flex flex-col items-center gap-4 text-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity" onClick={() => frontInputRef.current?.click()}>
                                   <UploadCloud className="size-12" />
                                   <p className="text-xs font-black uppercase tracking-tighter">Upload Front Photo</p>
-                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], 'front')} />
+                                  <input ref={frontInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], 'front')} />
                               </div>
                           )}
                       </CardContent>
@@ -355,7 +366,7 @@ export default function AadhaarPrinter() {
                                   <img src={backFinal} alt="back" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('back'); setStage('refine'); }}><Crop className="size-3 mr-1.5" /> Adjust</Button>
-                                      <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => setBackFinal(null)}><X className="size-4" /></Button>
+                                      <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => { setBackFinal(null); setBackRaw(null); }}><X className="size-4" /></Button>
                                   </div>
                               </div>
                           ) : backRaw ? (
@@ -363,15 +374,13 @@ export default function AadhaarPrinter() {
                                   <div className="size-16 rounded-full bg-primary/20 flex items-center justify-center text-primary animate-pulse"><RotateCcw className="size-8" /></div>
                                   <p className="text-xs font-bold text-primary uppercase">Ready to Align</p>
                                   <Button className="font-black uppercase text-xs bg-primary rounded-xl" onClick={() => { setRefiningSide('back'); setStage('refine'); }}>Crop Back Side</Button>
+                                  <Button variant="ghost" onClick={() => setBackRaw(null)} className="text-[9px] font-bold uppercase opacity-50">Clear Image</Button>
                               </div>
                           ) : (
-                              <div className="flex flex-col items-center gap-4 text-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity" onClick={() => {
-                                  const input = document.createElement('input'); input.type='file'; input.accept='image/*';
-                                  input.onchange = (e) => (e.target as any).files[0] && handleFile((e.target as any).files[0], 'back');
-                                  input.click();
-                              }}>
+                              <div className="flex flex-col items-center gap-4 text-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity" onClick={() => backInputRef.current?.click()}>
                                   <UploadCloud className="size-12" />
                                   <p className="text-xs font-black uppercase tracking-tighter">Upload Back Photo</p>
+                                  <input ref={backInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], 'back')} />
                               </div>
                           )}
                       </CardContent>
@@ -428,7 +437,7 @@ export default function AadhaarPrinter() {
 
       {/* STAGE 3: REFINE CROP */}
       {stage === 'refine' && (
-          <Card className="w-full max-w-4xl mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden">
+          <Card className="w-full max-w-4xl mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden mx-4">
               <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                 <div>
                     <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
@@ -436,7 +445,7 @@ export default function AadhaarPrinter() {
                     </CardTitle>
                     <CardDescription className="text-[10px] font-black uppercase opacity-60">Adjust handles for {refiningSide || 'Aadhaar'} side.</CardDescription>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setStage(workflow === 'a4' ? 'upload' : 'upload')} className="text-destructive"><X /></Button>
+                <Button variant="ghost" size="icon" onClick={() => setStage('upload')} className="text-destructive"><X /></Button>
               </CardHeader>
               <CardContent className="p-8 md:p-12 bg-slate-900/5 flex items-center justify-center min-h-[500px]">
                   <div className="max-h-[60vh] overflow-hidden rounded-xl border-4 border-white shadow-2xl">
@@ -467,7 +476,7 @@ export default function AadhaarPrinter() {
 
       {/* STAGE 4: PREVIEW & PRINT */}
       {stage === 'preview' && frontFinal && backFinal && (
-        <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500 px-4">
             {/* Action Bar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 no-print">
                 <div className="flex items-center gap-4">
@@ -480,7 +489,7 @@ export default function AadhaarPrinter() {
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setStage(workflow === 'a4' ? 'refine' : 'upload')} className="h-12 border-2 px-6 font-black text-xs uppercase rounded-xl hover:bg-primary/5">
+                    <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-xs uppercase rounded-xl hover:bg-primary/5">
                         <RefreshCcw className="mr-2 size-4" /> Change / Re-align
                     </Button>
                     <Button onClick={handlePrint} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl active:scale-95 transition-all">
@@ -573,4 +582,3 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
-
