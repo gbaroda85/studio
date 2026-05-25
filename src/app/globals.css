@@ -30,7 +30,7 @@ body {
     --radius: 1.5rem;
   }
   .dark {
-    --background: 240 10% 2%;    /* Ultra Deep Black (#030303) */
+    --background: 240 10% 2%;    /* Ultra Deep Black (#020202) */
     --foreground: 0 0% 98%;
     --card: 240 10% 4%;            
     --card-foreground: 0 0% 98%;

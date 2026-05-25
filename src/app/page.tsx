@@ -117,8 +117,8 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Matching the User's Image */}
-      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-[#050505] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      {/* Hero Section - Matching the User's Image with Reduced Padding */}
+      <section className="relative w-full max-w-[2000px] pt-12 pb-8 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
