@@ -59,6 +59,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 
 /**
  * ZUSTAND STATE MANAGEMENT FOR PREMIUM EDITOR
@@ -114,6 +115,7 @@ const PRESETS = [
     { id: 'pan', label: "Indian PAN Card (2.5x3.5cm)", width: 25, height: 35, unit: 'mm' },
     { id: 'aadhaar', label: "Aadhaar Card Photo (2.3x3.3cm)", width: 23, height: 33, unit: 'mm' },
     { id: 'dl', label: "Driving Licence (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
+    { id: 'custom', label: "Custom Size (Input Below)", width: 0, height: 0, unit: 'mm' },
 ];
 
 const COLORS = [
@@ -147,6 +149,8 @@ export default function PassportPhotoMaker() {
 
     // Core Settings
     const [selectedPreset, setSelectedPreset] = useState<number>(0);
+    const [customWidth, setCustomWidth] = useState<string>("35");
+    const [customHeight, setCustomHeight] = useState<string>("45");
     const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
     const [bgColor, setBgColor] = useState("#FFFFFF");
     
@@ -175,10 +179,29 @@ export default function PassportPhotoMaker() {
     const mainCanvasRef = useRef<HTMLCanvasElement>(null);
     const faceImgRef = useRef<HTMLImageElement | null>(null);
 
-    const getAspectRatio = () => {
+    const getAspectRatio = useCallback(() => {
         const p = PRESETS[selectedPreset];
+        if (p.id === 'custom') {
+            const w = parseFloat(customWidth);
+            const h = parseFloat(customHeight);
+            return (w > 0 && h > 0) ? w / h : 1;
+        }
         return p.width / p.height;
-    };
+    }, [selectedPreset, customWidth, customHeight]);
+
+    // Force crop update when preset or dimensions change
+    useEffect(() => {
+        if (stage === 'crop' && imgRef.current) {
+            const { width, height } = imgRef.current;
+            const aspect = getAspectRatio();
+            const newCrop = centerCrop(
+                makeAspectCrop({ unit: '%', width: 80 }, aspect, width, height),
+                width,
+                height
+            );
+            setCrop(newCrop);
+        }
+    }, [selectedPreset, customWidth, customHeight, stage, getAspectRatio]);
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('image/')) {
@@ -297,7 +320,7 @@ export default function PassportPhotoMaker() {
             ctx.lineWidth = bPx;
             ctx.strokeRect(bPx/2, bPx/2, canvas.width - bPx, canvas.height - bPx);
         }
-    }, [bgColor, scale, posX, posY, rotation, selectedPreset, borderWidth, borderColor, brightness, contrast, saturation, blur]);
+    }, [bgColor, scale, posX, posY, rotation, selectedPreset, borderWidth, borderColor, brightness, contrast, saturation, blur, getAspectRatio]);
 
     useEffect(() => {
         if (stage === 'studio') renderPhoto();
@@ -414,8 +437,8 @@ export default function PassportPhotoMaker() {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, targetW, targetH);
 
-        const photoW = (PRESETS[selectedPreset].width / 25.4) * DPI;
-        const photoH = (PRESETS[selectedPreset].height / 25.4) * DPI;
+        const photoW = (PRESETS[selectedPreset].id === 'custom' ? parseFloat(customWidth) : PRESETS[selectedPreset].width) / 25.4 * DPI;
+        const photoH = (PRESETS[selectedPreset].id === 'custom' ? parseFloat(customHeight) : PRESETS[selectedPreset].height) / 25.4 * DPI;
         
         // Improved Margin Logic
         const marginX = (targetW - (photoW * sheet.cols)) / (sheet.cols + 1);
@@ -457,24 +480,51 @@ export default function PassportPhotoMaker() {
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
-                            Production-ready passport photos with exact global standards. <br/>100% Secure local processing inspired by Adobe Express.
+                            Production-ready passport photos with exact global standards. <br/>100% Secure local processing.
                         </p>
                     </motion.div>
 
                     <Card className="w-full max-w-2xl glass-card overflow-hidden neon-border">
                         <CardContent className="p-10 space-y-10">
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase text-primary tracking-[0.3em] flex items-center gap-2">
-                                    <Globe className="size-3" /> Select Target Standard
-                                </Label>
-                                <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(Number(v))}>
-                                    <SelectTrigger className="h-16 font-black text-lg border-2 rounded-2xl shadow-xl px-6"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-2xl border-2 shadow-2xl">
-                                        {PRESETS.map((p, i) => (
-                                            <SelectItem key={i} value={String(i)} className="font-bold py-4">{p.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase text-primary tracking-[0.3em] flex items-center gap-2">
+                                        <Globe className="size-3" /> Select Target Standard
+                                    </Label>
+                                    <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(Number(v))}>
+                                        <SelectTrigger className="h-16 font-black text-lg border-2 rounded-2xl shadow-xl px-6"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-2 shadow-2xl">
+                                            {PRESETS.map((p, i) => (
+                                                <SelectItem key={i} value={String(i)} className="font-bold py-4">{p.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {PRESETS[selectedPreset].id === 'custom' && (
+                                    <div className="grid grid-cols-2 gap-6 animate-in slide-in-from-top-2 duration-300">
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Width (mm)</Label>
+                                            <Input 
+                                                type="number" 
+                                                value={customWidth} 
+                                                onChange={(e) => setCustomWidth(e.target.value)} 
+                                                className="h-14 text-xl font-black border-2 rounded-2xl bg-muted/5 focus-visible:ring-primary"
+                                                placeholder="e.g. 35"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Height (mm)</Label>
+                                            <Input 
+                                                type="number" 
+                                                value={customHeight} 
+                                                onChange={(e) => setCustomHeight(e.target.value)} 
+                                                className="h-14 text-xl font-black border-2 rounded-2xl bg-muted/5 focus-visible:ring-primary"
+                                                placeholder="e.g. 45"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div 
@@ -496,9 +546,9 @@ export default function PassportPhotoMaker() {
                     </Card>
 
                     <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> Vercel Pro Ready</div>
-                        <div className="flex items-center gap-2"><Maximize className="size-4 text-primary" /> Multi-Country Support</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> GPU Accelerated AI</div>
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-2"><Maximize className="size-4 text-primary" /> MULTI-COUNTRY</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> GPU BOOST</div>
                     </div>
                 </div>
             )}
@@ -515,7 +565,7 @@ export default function PassportPhotoMaker() {
                                 <CardDescription className="font-bold text-[10px] uppercase opacity-60">Crop your face as per standards.</CardDescription>
                             </div>
                             <Badge className="bg-primary text-white font-black px-4 py-1 rounded-full uppercase text-[9px] tracking-widest">
-                                {PRESETS[selectedPreset].label}
+                                {PRESETS[selectedPreset].id === 'custom' ? `${customWidth}x${customHeight} mm` : PRESETS[selectedPreset].label}
                             </Badge>
                         </CardHeader>
                         <CardContent className="p-12 flex items-center justify-center bg-black/5 min-h-[500px]">
@@ -527,10 +577,16 @@ export default function PassportPhotoMaker() {
                                     aspect={getAspectRatio()} 
                                     className="max-h-[50vh]"
                                 >
-                                    <img ref={imgRef} src={imgSrc} alt="source" className="max-h-[50vh] w-auto object-contain block" onLoad={(e) => {
-                                        const { width, height } = e.currentTarget;
-                                        setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
-                                    }} />
+                                    <img 
+                                        ref={imgRef} 
+                                        src={imgSrc} 
+                                        alt="source" 
+                                        className="max-h-[50vh] w-auto object-contain block" 
+                                        onLoad={(e) => {
+                                            const { width, height } = e.currentTarget;
+                                            setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
+                                        }} 
+                                    />
                                 </ReactCrop>
                             </div>
                         </CardContent>
@@ -827,3 +883,4 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
+
