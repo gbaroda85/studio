@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -31,24 +30,24 @@ body {
     --radius: 1.5rem;
   }
   .dark {
-    --background: 0 0% 1%;       /* Deep Dark Black */
+    --background: 0 0% 2%;       /* Deep Charcoal Black (#050505) */
     --foreground: 0 0% 98%;
-    --card: 0 0% 3%;            
+    --card: 0 0% 4%;            
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 1%;
+    --popover: 0 0% 2%;
     --popover-foreground: 0 0% 98%;
     --primary: 10 100% 60%;      
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 6%;
+    --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 4%;
+    --muted: 0 0% 6%;
     --muted-foreground: 0 0% 60%;
     --accent: 10 100% 60%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 8%;
-    --input: 0 0% 8%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 10 100% 60%;
   }
 }
@@ -66,8 +65,8 @@ body {
   }
   .dark body {
     background-image: 
-      radial-gradient(at 50% -20%, hsla(10, 100%, 60%, 0.12) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(260, 100%, 20%, 0.1) 0px, transparent 50%);
+      radial-gradient(at 50% -20%, hsla(10, 100%, 60%, 0.1) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(260, 100%, 20%, 0.05) 0px, transparent 50%);
   }
 }
 
@@ -75,7 +74,7 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 
-/* Custom Gradients */
+/* Custom Gradients from Image */
 .text-gradient-hero {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-purple-500 to-emerald-400;
 }

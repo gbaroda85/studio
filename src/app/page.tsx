@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -118,7 +117,8 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black/40 border-b rounded-b-[4rem] shadow-2xl mx-auto">
+      {/* Hero Section - Preserving Original Size and Text */}
+      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black border-b rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
@@ -169,7 +169,7 @@ export default function Page() {
             <>
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> Image Solutions
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Image Solutions</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">Visual Processor</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
@@ -179,7 +179,7 @@ export default function Page() {
 
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-[0.3em] mb-3">
-                        <div className="w-12 h-2 bg-rose-500 rounded-full" /> Document Engine
+                        <div className="w-12 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">Document Engine</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
