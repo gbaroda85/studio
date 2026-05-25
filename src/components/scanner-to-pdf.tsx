@@ -20,7 +20,8 @@ import {
     RefreshCcw,
     Zap,
     ShieldCheck,
-    CloudSync,
+    Cloud,
+    RefreshCw,
     Monitor,
     Smartphone,
     ArrowRight
@@ -87,7 +88,7 @@ export default function ScannerToPdf() {
         }
     });
 
-    // Listen for final PDF if needed (optional since we build locally now too)
+    // Listen for final PDF if needed
     const unsubscribeFinal = onSnapshot(doc(firestore, 'shared-scans', sid), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -146,7 +147,6 @@ export default function ScannerToPdf() {
     }
   }, [stopCamera]);
 
-  // Auto-start camera on mobile sync landing
   useEffect(() => {
     if (sessionIdFromUrl || isMobile) {
         startCamera();
@@ -154,7 +154,23 @@ export default function ScannerToPdf() {
     return () => stopCamera();
   }, [sessionIdFromUrl, isMobile, startCamera, stopCamera]);
 
-  // 3. Image Actions
+  const onCropImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    setCrop(centerCrop({ unit: '%', width: 80, height: 80 }, width, height));
+  };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToCrop(reader.result?.toString() || null);
+        setCrop(undefined);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCapture = () => {
     if (!videoRef.current || !hasCameraPermission || videoRef.current.paused) return;
     const canvas = document.createElement('canvas');
@@ -185,7 +201,6 @@ export default function ScannerToPdf() {
     ctx.drawImage(image, completedCrop.x * scaleX, completedCrop.y * scaleY, completedCrop.width * scaleX, completedCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
     const croppedData = canvas.toDataURL('image/jpeg', 0.85);
 
-    // SYNC TO CLOUD IMMEDIATELY
     try {
         const { firestore } = initializeFirebase();
         await addDoc(collection(firestore, 'shared-scans', sessionId, 'pages'), {
@@ -195,7 +210,6 @@ export default function ScannerToPdf() {
         toast({ title: "Captured!", description: "Image synced to computer stack." });
     } catch (e) {
         console.error(e);
-        // Fallback to local only if firebase fails
         setScannedImages(prev => [...prev, croppedData]);
     }
 
@@ -223,7 +237,6 @@ export default function ScannerToPdf() {
     const pdfOutput = pdf.output('datauristring');
     setCreatedPdfUrl(pdfOutput);
 
-    // Update final PDF status for session
     if (sessionId) {
         const { firestore } = initializeFirebase();
         await setDoc(doc(firestore, 'shared-scans', sessionId), {
@@ -236,11 +249,15 @@ export default function ScannerToPdf() {
     toast({ title: 'PDF Ready!', description: 'Your scanned document is ready to download.' });
   };
   
+  const handleDownload = () => {
+      if (!createdPdfUrl) return;
+      const link = document.createElement('a');
+      link.href = createdPdfUrl;
+      link.download = `strictly-aligned-docs.pdf`;
+      link.click();
+  }
+
   const handleRemoveImage = async (index: number) => {
-    // If it's a sync session, we should ideally delete from Firestore too
-    // For MVP simplicity, we just clear locally and the user can start over
-    // or we could find the doc by index. Let's just reset the whole stack if needed
-    // but better: user can manually click 'Refresh' if they want.
     setScannedImages(prev => prev.filter((_, i) => i !== index));
     setCreatedPdfUrl(null);
   }
@@ -248,7 +265,6 @@ export default function ScannerToPdf() {
   const handleReset = async () => {
     if (sessionId) {
         const { firestore } = initializeFirebase();
-        // Clean up cloud pages
         const pagesRef = collection(firestore, 'shared-scans', sessionId, 'pages');
         const snaps = await getDocs(pagesRef);
         snaps.forEach(async (d) => await deleteDoc(d.ref));
@@ -262,7 +278,6 @@ export default function ScannerToPdf() {
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 pb-20">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left: Viewfinder & Sync Info */}
         <div className="lg:col-span-7 space-y-6">
             <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 relative rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
@@ -297,7 +312,6 @@ export default function ScannerToPdf() {
                         </div>
                     )}
                     
-                    {/* Floating Capture Overlay */}
                     {hasCameraPermission && (
                         <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20 flex items-center justify-center">
                             <div className="size-full border-2 border-dashed border-white/40 rounded-xl" />
@@ -315,11 +329,10 @@ export default function ScannerToPdf() {
                 </CardFooter>
             </Card>
 
-            {/* Mobile Sync Box - Prominent QR */}
             {!isMobile && !sessionIdFromUrl && (
                 <Card className="border-2 shadow-xl bg-slate-950 text-white rounded-[2.5rem] overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <CloudSync className="size-40" />
+                        <Cloud className="size-40" />
                     </div>
                     <CardContent className="p-10 flex flex-col md:flex-row items-center gap-10 relative z-10">
                         <div className="flex-1 space-y-6">
@@ -336,7 +349,7 @@ export default function ScannerToPdf() {
                                 </Button>
                             ) : (
                                 <div className="flex items-center gap-3 text-green-500 font-black text-xs uppercase tracking-widest bg-green-500/10 p-3 rounded-xl border border-green-500/20">
-                                    <CloudSync className="size-4 animate-spin" /> Link Active: Scan QR on Right
+                                    <RefreshCw className="size-4 animate-spin" /> Link Active: Scan QR on Right
                                 </div>
                             )}
                         </div>
@@ -354,7 +367,6 @@ export default function ScannerToPdf() {
             )}
         </div>
 
-        {/* Right: Page Stack & Building */}
         <div className="lg:col-span-5 space-y-6">
             <Card className="border-2 shadow-2xl border-primary/10 flex flex-col bg-card/50 rounded-[2.5rem] min-h-[500px]">
                 <CardHeader className="bg-primary/5 border-b py-6 flex flex-row items-center justify-between">
@@ -391,7 +403,6 @@ export default function ScannerToPdf() {
                                     </Button>
                                 </div>
                             ))}
-                            {/* Visual Hint for adding more */}
                             <div className="border-2 border-dashed border-muted-foreground/20 rounded-xl aspect-[3/4] flex flex-col items-center justify-center gap-2 opacity-50">
                                 <Zap className="size-6" />
                                 <span className="text-[8px] font-black uppercase">Next Page</span>
@@ -422,7 +433,6 @@ export default function ScannerToPdf() {
                 </CardFooter>
             </Card>
 
-            {/* Privacy Promise */}
             <div className="p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 flex gap-4 items-center shadow-sm">
                 <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <ShieldCheck className="size-6 text-primary" />
@@ -435,7 +445,6 @@ export default function ScannerToPdf() {
         </div>
       </div>
 
-      {/* Crop Dialog for Capture */}
       <Dialog open={imageToCrop !== null} onOpenChange={() => setImageToCrop(null)}>
         <DialogContent className="max-w-4xl p-0 rounded-[3rem] overflow-hidden border-2 shadow-3xl bg-white">
           <DialogHeader className="p-6 bg-primary/5 border-b flex flex-row items-center justify-between">
