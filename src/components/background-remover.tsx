@@ -20,7 +20,8 @@ import {
     Settings2,
     Crop as CropIcon,
     Maximize,
-    Scaling
+    Scaling,
+    RotateCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -110,6 +111,34 @@ export default function BackgroundRemover() {
     } else if (file) {
       toast({ variant: "destructive", title: "Invalid File", description: "Please select an image file." });
     }
+  };
+
+  const handleRotateOriginal = () => {
+    if (!originalImageSrc) return;
+    setIsProcessing(true);
+    const img = new window.Image();
+    img.src = originalImageSrc;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsProcessing(false);
+            return;
+        }
+
+        // Swap width and height for 90 deg rotation
+        canvas.width = img.height;
+        canvas.height = img.width;
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+        const rotatedSrc = canvas.toDataURL('image/png');
+        setOriginalImageSrc(rotatedSrc);
+        setIsProcessing(false);
+        toast({ title: "Photo Rotated", description: "Orientation changed by 90°." });
+    };
   };
 
   const updateCropFromSettings = useCallback(() => {
@@ -339,21 +368,32 @@ export default function BackgroundRemover() {
                       <CardDescription>Choose to crop for specific size or remove background directly.</CardDescription>
                   </div>
               </CardHeader>
-              <CardContent className="p-8 flex justify-center bg-black/5">
-                  <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
+              <CardContent className="p-8 flex justify-center bg-black/5 relative min-h-[300px]">
+                  {isProcessing ? (
+                      <div className="flex items-center justify-center">
+                          <Loader2 className="animate-spin text-primary size-12" />
+                      </div>
+                  ) : (
+                      <img src={originalImageSrc!} alt="Preview" className="max-h-[60vh] object-contain rounded-lg shadow-xl" />
+                  )}
               </CardContent>
-              <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row gap-4 justify-between">
-                  <Button variant="ghost" onClick={handleReset} className="font-bold"><RotateCcw className="mr-2" /> Change Photo</Button>
-                  <div className="flex gap-3">
-                      <Button variant="outline" className="font-black border-2 border-primary text-primary" onClick={() => setStage('crop')}>
-                          <CropIcon className="mr-2" /> SET SIZE & CROP
+              <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                  <div className="flex gap-2">
+                    <Button variant="ghost" onClick={handleReset} className="font-bold h-12"><RotateCcw className="mr-2 h-4 w-4" /> Change Photo</Button>
+                    <Button variant="outline" onClick={handleRotateOriginal} className="font-bold border-2 h-12">
+                        <RotateCw className="mr-2 h-4 w-4 text-primary" /> ROTATE 90°
+                    </Button>
+                  </div>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                      <Button variant="outline" className="flex-1 sm:flex-none font-black border-2 border-primary text-primary h-12" onClick={() => setStage('crop')}>
+                          <CropIcon className="mr-2 h-4 w-4" /> SET SIZE & CROP
                       </Button>
-                      <Button className="px-10 h-12 text-lg font-black bg-primary" onClick={() => { 
+                      <Button className="flex-1 sm:flex-none px-10 h-12 text-lg font-black bg-primary" onClick={() => { 
                           setCroppedImageSrc(originalImageSrc); 
                           setStage('process'); 
                           setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 300);
                       }}>
-                          REMOVE BACKGROUND <ChevronRight className="ml-2" />
+                          REMOVE BACKGROUND <ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
                   </div>
               </CardFooter>
