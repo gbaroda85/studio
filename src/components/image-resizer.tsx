@@ -122,7 +122,7 @@ export default function ImageResizer() {
   };
   
   const applyPreset = (preset: typeof GOVT_PRESETS[0]) => {
-    setUnit('px'); // Presets are always in pixels
+    setUnit('px'); 
     setNewDimensions({ width: String(preset.width), height: String(preset.height) });
     setOutputFormat(preset.format);
     setMaintainAspectRatio(false);
@@ -138,7 +138,6 @@ export default function ImageResizer() {
         return;
     }
     
-    // Convert current values to new unit
     const currentW_px = convertUnitToPx(parseFloat(newDimensions.width) || 0, unit);
     const currentH_px = convertUnitToPx(parseFloat(newDimensions.height) || 0, unit);
     
@@ -183,43 +182,64 @@ export default function ImageResizer() {
     const img = new window.Image();
     img.src = originalImageSrc;
     img.onload = async () => {
-      const targetWidthPx = convertUnitToPx(parseFloat(newDimensions.width), unit);
-      const targetHeightPx = convertUnitToPx(parseFloat(newDimensions.height), unit);
+      const targetWidth = convertUnitToPx(parseFloat(newDimensions.width), unit);
+      const targetHeight = convertUnitToPx(parseFloat(newDimensions.height), unit);
 
-      const canvas = document.createElement("canvas");
-      canvas.width = targetWidthPx;
-      canvas.height = targetHeightPx;
-      const ctx = canvas.getContext("2d", { alpha: outputFormat !== 'jpeg' });
+      // --- ITERATIVE DOWNSAMPLING (QUALITY FIX) ---
+      // We create intermediate steps to prevent aliasing/blurriness.
+      let curCanvas: HTMLCanvasElement | HTMLImageElement = img;
+      
+      if (img.width > targetWidth * 2) {
+          let stepW = img.width;
+          let stepH = img.height;
+          
+          while (stepW > targetWidth * 2) {
+              const nextW = Math.floor(stepW / 2);
+              const nextH = Math.floor(stepH / 2);
+              
+              const stepCanvas = document.createElement('canvas');
+              stepCanvas.width = nextW;
+              stepCanvas.height = nextH;
+              const stepCtx = stepCanvas.getContext('2d');
+              if (stepCtx) {
+                  stepCtx.imageSmoothingEnabled = true;
+                  stepCtx.imageSmoothingQuality = 'high';
+                  stepCtx.drawImage(curCanvas, 0, 0, nextW, nextH);
+                  curCanvas = stepCanvas;
+              }
+              stepW = nextW;
+              stepH = nextH;
+          }
+      }
 
-      if (!ctx) {
-        toast({ variant: "destructive", title: "Error", description: "Could not process image." });
-        setIsProcessing(false);
-        return;
+      // Final Render Canvas
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = targetWidth;
+      finalCanvas.height = targetHeight;
+      const finalCtx = finalCanvas.getContext("2d", { alpha: outputFormat !== 'jpeg' });
+
+      if (finalCtx) {
+        finalCtx.imageSmoothingEnabled = true;
+        finalCtx.imageSmoothingQuality = 'high';
+        
+        if (outputFormat === 'jpeg') {
+          finalCtx.fillStyle = '#FFFFFF';
+          finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+        }
+        
+        finalCtx.drawImage(curCanvas, 0, 0, targetWidth, targetHeight);
+
+        const mimeType = `image/${outputFormat}`;
+        // Quality 1.0 for absolutely no additional artifacts
+        const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0);
+        
+        const blob = await (await fetch(resizedDataUrl)).blob();
+        setResizedFileSize(blob.size);
+        setResizedImageSrc(resizedDataUrl);
       }
       
-      // QUALITY OPTIMIZATION: Set high smoothing quality
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      
-      if (outputFormat === 'jpeg') {
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      
-      // Perform the high-quality draw
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      const mimeType = `image/${outputFormat}`;
-      // INCREASED QUALITY: Using 0.98 for JPEG and WebP to preserve clarity
-      const qualityFactor = outputFormat === 'png' ? undefined : 0.98;
-      const resizedDataUrl = canvas.toDataURL(mimeType, qualityFactor);
-      
-      const blob = await (await fetch(resizedDataUrl)).blob();
-      setResizedFileSize(blob.size);
-      
-      setResizedImageSrc(resizedDataUrl);
       setIsProcessing(false);
-      toast({ title: "Resized!", description: `Photo adjusted to ${targetWidthPx}x${targetHeightPx} px with HD priority.` });
+      toast({ title: "Resized!", description: `High-fidelity iterative scaling applied.` });
     };
     img.onerror = () => {
       toast({ variant: "destructive", title: "Error", description: "Could not load image." });
@@ -266,7 +286,7 @@ export default function ImageResizer() {
             <Scaling className="h-10 w-10" />
           </div>
           <CardTitle className="text-2xl font-black">Pro Image Resizer</CardTitle>
-          <CardDescription>Resize in Pixels, MM, or Inches. Includes one-click Gov Job presets.</CardDescription>
+          <CardDescription>Iterative HD Resampling for pixel-perfect results. Government job ready.</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -276,15 +296,15 @@ export default function ImageResizer() {
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo here to Resize</p>
-                <p className="text-sm text-muted-foreground mt-2">No size limits. Privacy guaranteed.</p>
+                <p className="text-sm text-muted-foreground mt-2">Maximum sharpness engine enabled.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
         </CardContent>
         <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8">
-            <div className="flex items-center gap-1.5">SSC / UPSC PRESETS</div>
-            <div className="flex items-center gap-1.5">MM & INCH SUPPORT</div>
-            <div className="flex items-center gap-1.5">100% PRIVATE</div>
+            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> ITERATIVE SCALING</div>
+            <div className="flex items-center gap-1.5"><RefreshCcw className="size-3 text-primary" /> HD RE-ENCODING</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> 100% PRIVATE</div>
         </CardFooter>
       </Card>
     );
@@ -329,13 +349,6 @@ export default function ImageResizer() {
                   </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 pt-6">
-                  {originalDimensions && (
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="font-mono text-[10px]">Original: {originalDimensions.width}x{originalDimensions.height} px</Badge>
-                        <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(originalFileSize)}</Badge>
-                      </div>
-                  )}
-                  
                   <div className="space-y-4">
                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Select Unit</Label>
                     <div className="grid grid-cols-3 gap-2">
@@ -383,7 +396,7 @@ export default function ImageResizer() {
               <CardFooter className="flex flex-col gap-2 bg-muted/20 p-6 border-t">
                   <Button className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl" onClick={handleResize} disabled={isProcessing}>
                       {isProcessing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Maximize className="mr-2 h-5 w-5" />}
-                      {isProcessing ? "RESIZING..." : "RESIZE IMAGE"}
+                      {isProcessing ? "PROCESSING..." : "RESIZE IMAGE"}
                   </Button>
                   <Button variant="ghost" onClick={handleReset} className="w-full text-xs font-bold uppercase tracking-widest h-10" disabled={isProcessing}>
                       <X className="mr-2 h-3 w-3" /> Start Over
@@ -411,13 +424,13 @@ export default function ImageResizer() {
                                 <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                                     <DialogHeader>
                                         <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter">
-                                            <ArrowLeftRight className="text-primary" /> Before vs After Resolution
+                                            <ArrowLeftRight className="text-primary" /> High-Fidelity Comparison
                                         </DialogTitle>
                                     </DialogHeader>
                                     <div className="grid md:grid-cols-2 gap-8 py-6">
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg">
-                                                <span className="text-[10px] font-black uppercase text-muted-foreground">Original Dimensions</span>
+                                                <span className="text-[10px] font-black uppercase text-muted-foreground">Original Source</span>
                                                 <Badge variant="outline" className="font-mono">{originalDimensions?.width}x{originalDimensions?.height} px</Badge>
                                             </div>
                                             <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center">
@@ -451,14 +464,14 @@ export default function ImageResizer() {
                     {isProcessing ? (
                         <div className="h-full flex flex-col items-center justify-center gap-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary stroke-[3]" />
-                            <p className="text-sm font-black text-primary uppercase tracking-tighter animate-pulse">Processing Pixels...</p>
+                            <p className="text-sm font-black text-primary uppercase tracking-tighter animate-pulse">Processing High-Res Steps...</p>
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-2 gap-6 h-full">
                             {/* Original Box */}
                             <div className="space-y-3 flex flex-col">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original State</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original</span>
                                     {originalDimensions && <span className="text-[9px] font-mono text-muted-foreground">{originalDimensions.width}x{originalDimensions.height}</span>}
                                 </div>
                                 <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[250px]">
@@ -470,7 +483,7 @@ export default function ImageResizer() {
                             {/* Resized Box */}
                             <div className="space-y-3 flex flex-col">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-primary">Resized Result</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-primary">Preview</span>
                                     {resizedImageSrc && <span className="text-[9px] font-mono text-primary font-bold">{convertUnitToPx(parseFloat(newDimensions.width), unit)}x{convertUnitToPx(parseFloat(newDimensions.height), unit)}</span>}
                                 </div>
                                 <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[250px] border-primary/20">
