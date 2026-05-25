@@ -352,10 +352,17 @@ export default function ImageCropper() {
                         </div>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <Label className="text-xs font-bold uppercase text-muted-foreground">Straighten</Label>
+                                <Label className="text-xs font-bold uppercase text-muted-foreground">Rotate & Straighten</Label>
                                 <span className="text-xs font-mono font-bold text-primary">{rotate}°</span>
                             </div>
-                            <Slider min={-45} max={45} step={0.5} value={[rotate]} onValueChange={(v) => setRotate(v[0])} />
+                            <Slider min={-180} max={180} step={0.5} value={[rotate]} onValueChange={(v) => setRotate(v[0])} />
+                            <Button 
+                              variant="outline" 
+                              className="w-full h-10 border-2 font-black text-[10px] uppercase tracking-widest"
+                              onClick={() => setRotate((r) => (r + 90) % 360)}
+                            >
+                                <RotateCw className="size-3 mr-2 text-primary" /> Rotate 90°
+                            </Button>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <Button variant="outline" size="sm" onClick={() => setFlipH(!flipH)}><FlipHorizontal className="h-4 w-4 mr-2" /> Flip H</Button>
