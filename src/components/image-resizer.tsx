@@ -189,7 +189,7 @@ export default function ImageResizer() {
       const canvas = document.createElement("canvas");
       canvas.width = targetWidthPx;
       canvas.height = targetHeightPx;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { alpha: outputFormat !== 'jpeg' });
 
       if (!ctx) {
         toast({ variant: "destructive", title: "Error", description: "Could not process image." });
@@ -197,22 +197,29 @@ export default function ImageResizer() {
         return;
       }
       
+      // QUALITY OPTIMIZATION: Set high smoothing quality
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
       if (outputFormat === 'jpeg') {
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
       
+      // Perform the high-quality draw
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       const mimeType = `image/${outputFormat}`;
-      const resizedDataUrl = canvas.toDataURL(mimeType, outputFormat === 'jpeg' ? 0.92 : undefined);
+      // INCREASED QUALITY: Using 0.98 for JPEG and WebP to preserve clarity
+      const qualityFactor = outputFormat === 'png' ? undefined : 0.98;
+      const resizedDataUrl = canvas.toDataURL(mimeType, qualityFactor);
       
       const blob = await (await fetch(resizedDataUrl)).blob();
       setResizedFileSize(blob.size);
       
       setResizedImageSrc(resizedDataUrl);
       setIsProcessing(false);
-      toast({ title: "Resized!", description: `Photo adjusted to ${targetWidthPx}x${targetHeightPx} px.` });
+      toast({ title: "Resized!", description: `Photo adjusted to ${targetWidthPx}x${targetHeightPx} px with HD priority.` });
     };
     img.onerror = () => {
       toast({ variant: "destructive", title: "Error", description: "Could not load image." });
@@ -366,7 +373,7 @@ export default function ImageResizer() {
                       <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isProcessing}>
                           <SelectTrigger id="format" className="h-12 font-bold border-2"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="jpeg" className="font-bold">JPEG (For Forms)</SelectItem>
+                              <SelectItem value="jpeg" className="font-bold">JPEG (HD Priority)</SelectItem>
                               <SelectItem value="png" className="font-bold">PNG (Lossless)</SelectItem>
                               <SelectItem value="webp" className="font-bold">WEBP (Optimized)</SelectItem>
                           </SelectContent>
