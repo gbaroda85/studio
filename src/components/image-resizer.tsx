@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -18,7 +17,9 @@ import {
   ArrowLeftRight,
   Eye,
   RefreshCcw,
-  CheckCircle2
+  CheckCircle2,
+  Zap,
+  ShieldCheck
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -186,7 +187,6 @@ export default function ImageResizer() {
       const targetHeight = convertUnitToPx(parseFloat(newDimensions.height), unit);
 
       // --- ITERATIVE DOWNSAMPLING (QUALITY FIX) ---
-      // We create intermediate steps to prevent aliasing/blurriness.
       let curCanvas: HTMLCanvasElement | HTMLImageElement = img;
       
       if (img.width > targetWidth * 2) {
@@ -230,7 +230,6 @@ export default function ImageResizer() {
         finalCtx.drawImage(curCanvas, 0, 0, targetWidth, targetHeight);
 
         const mimeType = `image/${outputFormat}`;
-        // Quality 1.0 for absolutely no additional artifacts
         const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0);
         
         const blob = await (await fetch(resizedDataUrl)).blob();
