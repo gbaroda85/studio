@@ -8,47 +8,60 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 15%;
+    /* Teeny Greeny Background (#ebf6f5) */
+    --background: 173 40% 94%;      
+    --foreground: 178 60% 15%;      
+    
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 15%;
+    --card-foreground: 178 60% 15%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 15%;
-    --primary: 10 100% 55%;      
+    --popover-foreground: 178 60% 15%;
+    
+    /* Blue Greeny Primary (#5cbdb9) */
+    --primary: 178 44% 55%;         
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 15%;
-    --muted: 0 0% 97%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 10 100% 55%;
-    --accent-foreground: 0 0% 100%;
+    
+    /* Pinky Accent (#fbe3e8) */
+    --secondary: 349 71% 94%;       
+    --secondary-foreground: 349 60% 30%;
+    
+    --muted: 173 30% 90%;
+    --muted-foreground: 178 30% 40%;
+    
+    --accent: 349 71% 94%;          
+    --accent-foreground: 349 60% 30%;
+    
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 92%;
-    --input: 0 0% 92%;
-    --ring: 10 100% 55%;
+    
+    --border: 178 30% 85%;
+    --input: 178 30% 85%;
+    --ring: 178 44% 55%;
     --radius: 1.5rem;
   }
+  
   .dark {
-    --background: 240 10% 2%;    /* Ultra Deep Black (#020202) */
-    --foreground: 0 0% 98%;
-    --card: 240 10% 4%;            
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 2%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 10 100% 60%;      
+    /* Maintaining a matching dark mode with teal/pink hues */
+    --background: 178 40% 4%;
+    --foreground: 173 20% 98%;
+    --card: 178 40% 6%;
+    --card-foreground: 173 20% 98%;
+    --popover: 178 40% 4%;
+    --popover-foreground: 173 20% 98%;
+    --primary: 178 44% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 10% 8%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 10% 6%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 260 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 349 40% 15%;
+    --secondary-foreground: 349 71% 94%;
+    --muted: 178 30% 12%;
+    --muted-foreground: 178 20% 60%;
+    --accent: 349 40% 15%;
+    --accent-foreground: 349 71% 94%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 10% 12%;
-    --input: 240 10% 12%;
-    --ring: 10 100% 60%;
+    --border: 178 30% 15%;
+    --input: 178 30% 15%;
+    --ring: 178 44% 55%;
   }
 }
 
@@ -58,15 +71,16 @@ body {
   }
   body {
     @apply bg-background text-foreground selection:bg-primary/20;
+    /* Image-inspired Background Gradient */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(10, 100%, 60%, 0.03) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(260, 100%, 60%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.4) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.1) 0px, transparent 50%);
     background-attachment: fixed;
   }
   .dark body {
     background-image: 
-      radial-gradient(at 50% -20%, hsla(10, 100%, 60%, 0.1) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(260, 100%, 20%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 50% -20%, hsla(178, 44%, 55%, 0.15) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(349, 71%, 10%, 0.1) 0px, transparent 50%);
   }
 }
 
@@ -74,13 +88,13 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 
-/* Custom Gradients from Image */
+/* Custom Gradients from provided image colors */
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-purple-500 to-slate-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f];
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-[#ff4d4d] to-[#f9cb28] hover:from-[#ff3333] hover:to-[#f9b115] transition-all duration-300;
+  @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] text-white shadow-lg transition-all duration-300;
 }
 
 /* Tab Hover Lifting Effect */
@@ -88,7 +102,7 @@ body {
   @apply transition-all duration-300;
 }
 .tabs-trigger-lift[data-state=active]:hover {
-  @apply -translate-y-1.5 shadow-2xl shadow-primary/30 scale-[1.03];
+  @apply -translate-y-1.5 shadow-xl shadow-primary/20 scale-[1.03];
 }
 
 .dark button[data-state=active] {
@@ -96,7 +110,7 @@ body {
   color: hsl(var(--primary-foreground)) !important;
 }
 
-/* Custom Thin Scrollbar */
+/* Custom Thin Scrollbar matching Blue Greeny */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -105,5 +119,5 @@ body {
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-black/10 dark:bg-white/20 rounded-full hover:bg-black/20 dark:hover:bg-white/30 transition-colors;
+  @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
 }
