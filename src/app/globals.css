@@ -31,25 +31,25 @@ body {
     --radius: 1rem;
   }
   .dark {
-    --background: 222 98% 25%;    /* Deep Navy Blue (#01257D) */
-    --foreground: 180 10% 98%;   /* Near White text */
-    --card: 222 98% 25%;
-    --card-foreground: 180 10% 98%;
-    --popover: 222 98% 25%;
-    --popover-foreground: 180 10% 98%;
-    --primary: 180 100% 50%;     /* Electric Blue (#00FFFF) */
-    --primary-foreground: 222 98% 10%;
-    --secondary: 222 60% 35%;
-    --secondary-foreground: 180 10% 98%;
-    --muted: 222 60% 30%;
-    --muted-foreground: 222 40% 75%;
-    --accent: 180 100% 50%;      /* Electric Blue as Accent */
-    --accent-foreground: 222 98% 10%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 222 60% 35%;
-    --input: 222 60% 35%;
-    --ring: 180 100% 50%;
+    --background: 240 10% 4%;    /* Modern Matte Charcoal */
+    --foreground: 0 0% 98%;      /* Soft White */
+    --card: 240 10% 6%;          /* Slightly lighter card */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 35 100% 50%;      /* Signature Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 35 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 35 100% 50%;
   }
 }
 
@@ -66,8 +66,8 @@ body {
   }
   .dark body {
     background-image: 
-      radial-gradient(at 0% 0%, hsla(180, 100%, 50%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(180, 100%, 50%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 50% 0%, hsla(35, 100%, 50%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(240, 10%, 10%, 0.5) 0px, transparent 50%);
   }
 }
 
