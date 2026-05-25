@@ -40,7 +40,8 @@ import {
     Redo2,
     History,
     Save,
-    Camera
+    Camera,
+    Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -50,6 +51,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -371,6 +373,16 @@ export default function PassportPhotoMaker() {
         }
     };
 
+    const handleReset = () => {
+        setStage('setup');
+        setImgSrc(null);
+        setOriginalCroppedData(null);
+        setSubjectImageSrc(null);
+        faceImgRef.current = null;
+        store.resetHistory();
+        resetToDefaults();
+    };
+
     const renderPrintSheet = (sheetIndex: number) => {
         const sheet = PRINT_SHEETS[sheetIndex];
         const sourceCanvas = mainCanvasRef.current;
@@ -396,8 +408,8 @@ export default function PassportPhotoMaker() {
         const marginX = (targetW - (photoW * sheet.cols)) / (sheet.cols + 1);
         const marginY = (targetH - (photoH * sheet.rows)) / (sheet.rows + 1);
 
-        for (let r = 0; i < sheet.rows; r++) {
-            for (let c = 0; j < sheet.cols; c++) {
+        for (let r = 0; r < sheet.rows; r++) {
+            for (let c = 0; c < sheet.cols; c++) {
                 const x = marginX + c * (photoW + marginX);
                 const y = marginY + r * (photoH + marginY);
                 ctx.drawImage(sourceCanvas, x, y, photoW, photoH);
@@ -789,7 +801,4 @@ export default function PassportPhotoMaker() {
     );
 }
 
-/**
- * RE-DEFINED COMPOSITE CANVAS REF (for legacy or internal buffers)
- */
 const compositeCanvasRef = { current: null as any };
