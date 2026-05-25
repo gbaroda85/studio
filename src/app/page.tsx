@@ -117,35 +117,38 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Preserving Original Size and Text */}
-      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-black border-b rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      {/* Hero Section - Matching the User's Image */}
+      <section className="relative w-full max-w-[2000px] pt-16 pb-20 overflow-hidden bg-white dark:bg-[#050505] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6">
-            <Sparkles className="size-3" /> ALL-IN-ONE GR7 TOOLKIT
+          {/* Badge Style from Image */}
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-10 shadow-sm animate-fade-in-up">
+            <Sparkles className="size-3 text-orange-400 fill-orange-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1] uppercase">
-            Power <br />
-            <span className="text-gradient-hero">Utilities</span>
+          {/* Main Heading Text from Image */}
+          <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black mb-10 tracking-tight leading-[1.05] animate-fade-in-up">
+            Professional Tools for <br />
+            <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-10 font-bold leading-relaxed">
-            Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
+          {/* Description Text from Image */}
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-14 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="max-w-2xl mx-auto relative group">
+          <div className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary" />
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
-                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-16 pr-6 h-18 text-lg rounded-3xl bg-white dark:bg-[#0a0a0a] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
