@@ -117,7 +117,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Reduced height with pt-10 pb-6 */}
+      {/* Hero Section - Compact padding pt-10 pb-6 */}
       <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -130,15 +130,15 @@ export default function Page() {
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
-            Power Utilities for <br className="hidden md:block" />
-            <span className="text-gradient-hero">Official Submissions</span>
+            Professional Tools for <br className="hidden md:block" />
+            <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
           <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Action Category Buttons - Positioned above search box */}
+          {/* Quick Action Category Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
             <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
@@ -185,10 +185,10 @@ export default function Page() {
             <>
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Image Solutions</span>
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">Visual Processor</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Visual Processor</h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Image Solutions</h2>
                         <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-black text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
                             <Link href="/tools">EXPLORE ALL UTILITIES <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
