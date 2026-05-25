@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { ArrowLeft, PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser } from 'lucide-react';
 import SignatureRemover from '@/components/signature-remover';
 import { HowToGuide } from '@/components/how-to-guide';
+import { ToolNavigation } from '@/components/tool-navigation';
 import {
   Accordion,
   AccordionContent,
@@ -20,21 +19,14 @@ export const dynamic = 'force-dynamic';
 
 export default function RemoveSignaturePage() {
   return (
-    <main className="flex-1 p-4 md:p-8 flex flex-col items-stretch">
-        <div className="mb-6 self-start">
-            <Button asChild variant="outline" className="dark:border-white border-foreground/20 transition-all hover:shadow-lg hover:shadow-primary/30">
-                <Link href="/tools?tab=image">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Image Tools
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center">
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12">
+        <div className="w-full flex justify-center mb-12 px-4">
             <SignatureRemover />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16">
+        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
             <HowToGuide title="AI Signature Remover" steps={[
                 "Upload Image: Take a clear photo of your signature on white paper.",
                 "Extract: Click 'Start Cleaning' to let our AI isolate the ink.",
