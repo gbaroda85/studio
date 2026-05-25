@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -48,7 +49,7 @@ import {
     MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -472,46 +473,46 @@ export default function PassportPhotoMaker() {
     };
 
     return (
-        <div className="w-full max-w-[1800px] min-h-[90vh] mx-auto p-2 md:p-4 flex flex-col gap-4 animate-in fade-in duration-700">
+        <div className="w-full max-w-[1800px] mx-auto p-2 md:p-4 flex flex-col gap-4 animate-in fade-in duration-700">
             
             {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
-                <div className="flex-1 flex flex-col items-center justify-center gap-4 py-2">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2">
-                        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-[1.5rem] bg-primary/10 text-primary shadow-xl relative">
-                            <UserCircle className="size-8" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-3" />
+                <div className="flex flex-col items-center justify-start gap-2 pt-2">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+                        <div className="mx-auto mb-2 grid size-12 place-items-center rounded-xl bg-primary/10 text-primary shadow-lg relative">
+                            <UserCircle className="size-6" />
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                <Sparkles className="size-2.5" />
                             </div>
                         </div>
-                        <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                        <h1 className="text-xl md:text-3xl font-black font-headline tracking-tighter uppercase leading-none">
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
-                        <p className="text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                        <p className="text-[10px] md:text-xs text-muted-foreground font-semibold max-w-xl mx-auto">
                             Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
                         </p>
                     </motion.div>
 
                     <Card className="w-full max-w-2xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-6">
+                        <CardContent className="p-4">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[2rem] p-16 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[1.5rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
-                                    <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-12 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-xl font-black uppercase tracking-tighter">Click to Upload Image</p>
-                                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">High-fidelity local re-sampling active.</p>
+                                    <p className="text-lg font-black uppercase tracking-tighter">Click to Upload Image</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-wrap justify-center gap-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-4">
                         <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                         <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> PORTRAIT & LANDSCAPE</div>
                         <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> GPU BOOST</div>
@@ -521,9 +522,9 @@ export default function PassportPhotoMaker() {
 
             {/* 2. CROP STAGE: SIZE SELECT + CROP */}
             {stage === 'crop' && imgSrc && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-2">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-start py-2">
                     <Card className="w-full max-w-5xl glass-card shadow-2xl overflow-hidden">
-                        <CardHeader className="border-b glass-panel py-6 px-8">
+                        <CardHeader className="border-b glass-panel py-4 px-8">
                             <div className="grid lg:grid-cols-2 gap-8 items-center">
                                 <div className="space-y-1">
                                     <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -563,20 +564,20 @@ export default function PassportPhotoMaker() {
                             </div>
                         </CardHeader>
                         
-                        <CardContent className="p-8 md:p-12 flex items-center justify-center bg-black/5 min-h-[500px]">
-                            <div className="max-h-[55vh] overflow-hidden rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50">
+                        <CardContent className="p-8 md:p-12 flex items-center justify-center bg-black/5 min-h-[400px]">
+                            <div className="max-h-[50vh] overflow-hidden rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50">
                                 <ReactCrop 
                                     crop={crop} 
                                     onChange={setCrop} 
                                     onComplete={setCompletedCrop} 
                                     aspect={getAspectRatio()} 
-                                    className="max-h-[55vh]"
+                                    className="max-h-[50vh]"
                                 >
                                     <img 
                                         ref={imgRef} 
                                         src={imgSrc} 
                                         alt="source" 
-                                        className="max-h-[55vh] w-auto object-contain block" 
+                                        className="max-h-[50vh] w-auto object-contain block" 
                                         onLoad={updateCropHandles} 
                                     />
                                 </ReactCrop>
@@ -587,7 +588,7 @@ export default function PassportPhotoMaker() {
                             <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
                                 <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
-                            <Button className="h-14 px-12 text-base font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl group" onClick={handleInitialCrop}>
+                            <Button className="h-14 px-12 text-base font-black bg-primary rounded-xl shadow-2xl group" onClick={handleInitialCrop}>
                                 CONFIRM CROP <ChevronRightIcon className="ml-2 size-5" />
                             </Button>
                         </CardFooter>

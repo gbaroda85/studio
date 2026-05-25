@@ -28,9 +28,9 @@ export default function PassportPhotoPage() {
 
   return (
     <main className="flex-1 flex flex-col items-center">
-        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" className="mb-2" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
+        <div className="w-full flex justify-center mb-2 px-4">
             <PassportPhotoMaker />
         </div>
 
