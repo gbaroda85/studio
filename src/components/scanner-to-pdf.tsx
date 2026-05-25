@@ -413,13 +413,13 @@ export default function ScannerToPdf() {
       </div>
 
       <Dialog open={imageToCrop !== null} onOpenChange={(open) => !open && setImageToCrop(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw] max-h-[90vh]">
-          <DialogHeader className="bg-muted/30 border-b p-4 sm:p-6">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw] max-h-[90vh] flex flex-col">
+          <DialogHeader className="bg-muted/30 border-b p-4 sm:p-6 shrink-0">
             <DialogTitle className="text-base sm:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
                 <Crop className="text-primary size-4 sm:size-5" /> Trim Scanned Page
             </DialogTitle>
           </DialogHeader>
-          <div className="p-3 sm:p-8 bg-black/5 flex justify-center overflow-hidden">
+          <div className="p-3 sm:p-8 bg-black/5 flex justify-center items-center flex-1 overflow-auto min-h-0">
             {imageToCrop && (
               <ReactCrop
                 crop={crop}
@@ -432,12 +432,12 @@ export default function ScannerToPdf() {
                   alt="Crop preview"
                   src={imageToCrop}
                   onLoad={onCropImageLoad}
-                  className="max-h-[40vh] sm:max-h-[60vh] w-auto object-contain"
+                  className="max-h-[35vh] sm:max-h-[60vh] w-auto object-contain"
                 />
               </ReactCrop>
             )}
           </div>
-          <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
             <Button variant="outline" className="flex-1 font-bold h-11 sm:h-12 rounded-xl text-xs sm:text-sm" onClick={() => setImageToCrop(null)}>CANCEL</Button>
             <Button className="flex-[2] font-black h-11 sm:h-12 rounded-xl bg-primary text-sm sm:text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
               <CheckCircle2 className="mr-2 size-4 sm:size-5" /> ADD TO PDF
