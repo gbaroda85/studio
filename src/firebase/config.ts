@@ -1,10 +1,15 @@
 'use client';
 
+/**
+ * @fileOverview Firebase configuration using environment variables.
+ * For security, real keys are stored in .env files and not committed to the repository.
+ */
+
 export const firebaseConfig = {
-  apiKey: "AIzaSyC-d57iJoWWi005_b-xuy1dya_il1RG7pE",
-  authDomain: "grs-multi-tools-kits.firebaseapp.com",
-  projectId: "grs-multi-tools-kits",
-  storageBucket: "grs-multi-tools-kits.firebasestorage.app",
-  messagingSenderId: "395729544318",
-  appId: "1:395729544318:web:290fe09b2beadbe0d5e42f"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
