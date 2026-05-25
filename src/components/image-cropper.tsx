@@ -22,7 +22,8 @@ import {
     X,
     Loader2,
     ShieldCheck,
-    Zap
+    Zap,
+    ArrowLeftRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -51,16 +52,16 @@ export default function ImageCropper() {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [aspect, setAspect] = useState<number | undefined>(undefined);
-  const [rotate, setRotate] = useState(0); // Fine-tune straighten
+  const [rotate, setRotate] = useState(0); 
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
 
   // Perspective Mode States
   const [points, setPoints] = useState<Point[]>([
-      { x: 10, y: 10 }, { x: 90, y: 10 },
-      { x: 90, y: 90 }, { x: 10, y: 90 }
+      { x: 15, y: 15 }, { x: 85, y: 15 },
+      { x: 85, y: 85 }, { x: 15, y: 85 }
   ]);
-  const [draggingPoint, setPointIndex] = useState<number | null>(null);
+  const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -93,11 +94,10 @@ export default function ImageCropper() {
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
     if (cropMode === 'rectangular') {
-        if (aspect) {
-            setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height));
-        } else {
-            setCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
-        }
+        const initialCrop = aspect 
+            ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height)
+            : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+        setCrop(initialCrop);
     } else {
         setPoints([
             { x: 15, y: 15 }, { x: 85, y: 15 },
@@ -106,7 +106,20 @@ export default function ImageCropper() {
     }
   }
 
-  // Hard Rotation - PHYSICALLY rotates the image data URL
+  // Handle Aspect Ratio Changes - UPDATED for immediate UI feedback
+  const handleAspectChange = (val: string) => {
+    const newAspect = val === 'free' ? undefined : parseFloat(val);
+    setAspect(newAspect);
+    
+    if (imgRef.current) {
+        const { width, height } = imgRef.current;
+        const newCrop = newAspect 
+            ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, newAspect, width, height), width, height)
+            : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+        setCrop(newCrop);
+    }
+  };
+
   const handleHardRotate = () => {
     if (!imgSrc) return;
     setIsProcessing(true);
@@ -120,7 +133,6 @@ export default function ImageCropper() {
             return;
         }
 
-        // Switch dimensions for 90 degree rotation
         canvas.width = img.height;
         canvas.height = img.width;
 
@@ -130,13 +142,12 @@ export default function ImageCropper() {
 
         const newSrc = canvas.toDataURL('image/png');
         setImgSrc(newSrc);
-        setCrop(undefined); // Reset crop for new orientation
+        setCrop(undefined); 
         setIsProcessing(false);
         toast({ title: "Rotated 90°", description: "Source image orientation changed." });
     };
   };
 
-  // Rotate the result image AFTER cropping
   const handleRotateResult = () => {
     if (!croppedImageSrc) return;
     setIsProcessing(true);
@@ -307,11 +318,15 @@ export default function ImageCropper() {
     document.body.removeChild(link);
   }
 
-  const handlePointMouseDown = (index: number) => setPointIndex(index);
+  const handlePointMouseDown = (index: number) => setDraggingPoint(index);
   
+  // Smooth dragging for Scanner Mode
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     
+    // Prevent default to avoid scrolling on mobile
+    if (e.cancelable) e.preventDefault();
+
     const rect = containerRef.current.getBoundingClientRect();
     let clientX, clientY;
     
@@ -333,7 +348,7 @@ export default function ImageCropper() {
     });
   }, [draggingPoint]);
 
-  const handleMouseUp = () => setPointIndex(null);
+  const handleMouseUp = () => setDraggingPoint(null);
 
   if (!imgSrc) {
     return (
@@ -401,10 +416,7 @@ export default function ImageCropper() {
                     <div className="space-y-6">
                         <div className="space-y-3">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aspect Ratio</Label>
-                            <Select defaultValue="free" onValueChange={(val) => {
-                                if (val === 'free') setAspect(undefined);
-                                else setAspect(parseFloat(val));
-                            }}>
+                            <Select value={aspect === undefined ? "free" : aspect.toString()} onValueChange={handleAspectChange}>
                                 <SelectTrigger className="h-12 font-bold border-2">
                                     <SelectValue placeholder="Free" />
                                 </SelectTrigger>
@@ -506,6 +518,7 @@ export default function ImageCropper() {
                     <div 
                         ref={containerRef}
                         className="relative max-w-full max-h-full"
+                        style={{ touchAction: 'none' }} // Stops scrolling while dragging dots
                         onMouseMove={handleMouseMove}
                         onTouchMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
@@ -532,7 +545,7 @@ export default function ImageCropper() {
                                 />
                             </ReactCrop>
                         ) : (
-                            <div className="relative cursor-crosshair shadow-2xl border-4 border-white">
+                            <div className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
                                 <img
                                     ref={imgRef}
                                     alt="Perspective Source"
@@ -550,14 +563,14 @@ export default function ImageCropper() {
                                     <div 
                                         key={i}
                                         className={cn(
-                                            "absolute size-8 -ml-4 -mt-4 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all transform hover:scale-110",
+                                            "absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform hover:scale-110",
                                             draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90"
                                         )}
-                                        style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                                        style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                         onMouseDown={() => handlePointMouseDown(i)}
                                         onTouchStart={() => handlePointMouseDown(i)}
                                     >
-                                        <div className="size-2 bg-white rounded-full shadow-inner" />
+                                        <div className="size-2.5 bg-white rounded-full shadow-inner" />
                                     </div>
                                 ))}
                             </div>
