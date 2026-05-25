@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -115,7 +114,7 @@ const PRESETS = [
     { id: 'pan', label: "Indian PAN Card (2.5x3.5cm)", width: 25, height: 35, unit: 'mm' },
     { id: 'aadhaar', label: "Aadhaar Card Photo (2.3x3.3cm)", width: 23, height: 33, unit: 'mm' },
     { id: 'dl', label: "Driving Licence (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
-    { id: 'custom', label: "Custom Size (Input Below)", width: 0, height: 0, unit: 'mm' },
+    { id: 'custom', label: "Custom Size (Input mm Below)", width: 0, height: 0, unit: 'mm' },
 ];
 
 const COLORS = [
@@ -189,19 +188,31 @@ export default function PassportPhotoMaker() {
         return p.width / p.height;
     }, [selectedPreset, customWidth, customHeight]);
 
-    // Force crop update when preset or dimensions change
+    // Robust Crop Update when settings change
+    const updateCropHandles = useCallback(() => {
+        if (!imgRef.current) return;
+        const { width, height } = imgRef.current;
+        const aspect = getAspectRatio();
+        
+        const newCrop = centerCrop(
+            makeAspectCrop(
+                { unit: '%', width: 90 }, 
+                aspect, 
+                width, 
+                height
+            ),
+            width,
+            height
+        );
+        setCrop(newCrop);
+    }, [getAspectRatio]);
+
+    // Re-trigger handles when preset or inputs change
     useEffect(() => {
         if (stage === 'crop' && imgRef.current) {
-            const { width, height } = imgRef.current;
-            const aspect = getAspectRatio();
-            const newCrop = centerCrop(
-                makeAspectCrop({ unit: '%', width: 80 }, aspect, width, height),
-                width,
-                height
-            );
-            setCrop(newCrop);
+            updateCropHandles();
         }
-    }, [selectedPreset, customWidth, customHeight, stage, getAspectRatio]);
+    }, [selectedPreset, customWidth, customHeight, stage, updateCropHandles]);
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('image/')) {
@@ -279,21 +290,17 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // ULTRA HD Resolution
         const targetW = 1200; 
         const targetH = targetW / getAspectRatio();
         canvas.width = targetW;
         canvas.height = targetH;
 
-        // 1. Background
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Filters Application
         ctx.save();
         ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`;
         
-        // 3. Transformations
         const s = scale / 100;
         const dw = canvas.width * s;
         const dh = (faceImg.height * (dw / faceImg.width));
@@ -313,7 +320,6 @@ export default function PassportPhotoMaker() {
         
         ctx.restore();
 
-        // 4. Border (Frame)
         if (borderWidth > 0) {
             const bPx = (borderWidth / 100) * canvas.width;
             ctx.strokeStyle = borderColor;
@@ -427,7 +433,6 @@ export default function PassportPhotoMaker() {
         const ctx = offScreenCanvas.getContext('2d');
         if (!ctx) return;
 
-        // A4 or 4x6 at 300 DPI
         const targetW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
         const targetH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
         
@@ -437,10 +442,13 @@ export default function PassportPhotoMaker() {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, targetW, targetH);
 
-        const photoW = (PRESETS[selectedPreset].id === 'custom' ? parseFloat(customWidth) : PRESETS[selectedPreset].width) / 25.4 * DPI;
-        const photoH = (PRESETS[selectedPreset].id === 'custom' ? parseFloat(customHeight) : PRESETS[selectedPreset].height) / 25.4 * DPI;
+        const currentPreset = PRESETS[selectedPreset];
+        const pw_mm = currentPreset.id === 'custom' ? parseFloat(customWidth) : currentPreset.width;
+        const ph_mm = currentPreset.id === 'custom' ? parseFloat(customHeight) : currentPreset.height;
+
+        const photoW = (pw_mm / 25.4) * DPI;
+        const photoH = (ph_mm / 25.4) * DPI;
         
-        // Improved Margin Logic
         const marginX = (targetW - (photoW * sheet.cols)) / (sheet.cols + 1);
         const marginY = (targetH - (photoH * sheet.rows)) / (sheet.rows + 1);
 
@@ -456,20 +464,13 @@ export default function PassportPhotoMaker() {
         setStage('print');
     };
 
-    /**
-     * MAIN UI RENDER
-     */
     return (
         <div className="w-full max-w-[1800px] min-h-[90vh] mx-auto p-4 md:p-8 flex flex-col gap-6 animate-in fade-in duration-700">
             
-            {/* 1. SETUP / WELCOME STAGE */}
+            {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
                 <div className="flex-1 flex flex-col items-center justify-center gap-12 py-12">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center space-y-4"
-                    >
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
                         <div className="mx-auto mb-6 grid size-24 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-2xl relative">
                             <UserCircle className="size-12" />
                             <div className="absolute -top-2 -right-2 bg-accent text-accent-foreground size-8 rounded-full flex items-center justify-center shadow-lg animate-bounce">
@@ -480,55 +481,14 @@ export default function PassportPhotoMaker() {
                             Premium <span className="text-gradient-hero">AI Studio</span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-semibold max-w-xl mx-auto">
-                            Production-ready passport photos with exact global standards. <br/>100% Secure local processing.
+                            Step 1: Upload your photo to begin alignment. <br/>100% Private local processing.
                         </p>
                     </motion.div>
 
                     <Card className="w-full max-w-2xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-10 space-y-10">
-                            <div className="space-y-6">
-                                <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-primary tracking-[0.3em] flex items-center gap-2">
-                                        <Globe className="size-3" /> Select Target Standard
-                                    </Label>
-                                    <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(Number(v))}>
-                                        <SelectTrigger className="h-16 font-black text-lg border-2 rounded-2xl shadow-xl px-6"><SelectValue /></SelectTrigger>
-                                        <SelectContent className="rounded-2xl border-2 shadow-2xl">
-                                            {PRESETS.map((p, i) => (
-                                                <SelectItem key={i} value={String(i)} className="font-bold py-4">{p.label}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {PRESETS[selectedPreset].id === 'custom' && (
-                                    <div className="grid grid-cols-2 gap-6 animate-in slide-in-from-top-2 duration-300">
-                                        <div className="space-y-3">
-                                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Width (mm)</Label>
-                                            <Input 
-                                                type="number" 
-                                                value={customWidth} 
-                                                onChange={(e) => setCustomWidth(e.target.value)} 
-                                                className="h-14 text-xl font-black border-2 rounded-2xl bg-muted/5 focus-visible:ring-primary"
-                                                placeholder="e.g. 35"
-                                            />
-                                        </div>
-                                        <div className="space-y-3">
-                                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Height (mm)</Label>
-                                            <Input 
-                                                type="number" 
-                                                value={customHeight} 
-                                                onChange={(e) => setCustomHeight(e.target.value)} 
-                                                className="h-14 text-xl font-black border-2 rounded-2xl bg-muted/5 focus-visible:ring-primary"
-                                                placeholder="e.g. 45"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
+                        <CardContent className="p-10">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[3rem] p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[3rem] p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
@@ -536,10 +496,9 @@ export default function PassportPhotoMaker() {
                                     <Zap className="absolute -top-2 -right-2 size-8 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-2xl font-black uppercase tracking-tighter">Drag & Drop Image</p>
+                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
                                     <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
@@ -553,60 +512,82 @@ export default function PassportPhotoMaker() {
                 </div>
             )}
 
-            {/* 2. CROP STAGE */}
+            {/* 2. CROP STAGE: SIZE SELECT + CROP */}
             {stage === 'crop' && imgSrc && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center py-4">
-                    <Card className="w-full max-w-4xl glass-card overflow-hidden">
-                        <CardHeader className="border-b glass-panel py-4 px-8 flex flex-row items-center justify-between">
-                            <div className="space-y-1">
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                    <CropIcon className="size-5 text-primary" /> Step 1: Alignment
-                                </CardTitle>
-                                <CardDescription className="font-bold text-[10px] uppercase opacity-60">Crop your face as per standards.</CardDescription>
+                    <Card className="w-full max-w-5xl glass-card shadow-2xl overflow-hidden">
+                        <CardHeader className="border-b glass-panel py-6 px-8">
+                            <div className="grid lg:grid-cols-2 gap-8 items-center">
+                                <div className="space-y-1">
+                                    <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                        <CropIcon className="size-5 text-primary" /> Step 1: Size & Alignment
+                                    </CardTitle>
+                                    <CardDescription className="font-bold text-[10px] uppercase opacity-60">Choose standard or enter custom dimensions.</CardDescription>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Target Document Standard</Label>
+                                        <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(Number(v))}>
+                                            <SelectTrigger className="h-12 font-black border-2 rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                {PRESETS.map((p, i) => (
+                                                    <SelectItem key={i} value={String(i)} className="font-bold py-3">{p.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {PRESETS[selectedPreset].id === 'custom' && (
+                                        <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Width (mm)</Label>
+                                                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} className="h-10 font-bold border-2 rounded-lg" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Height (mm)</Label>
+                                                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} className="h-10 font-bold border-2 rounded-lg" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <Badge className="bg-primary text-white font-black px-4 py-1 rounded-full uppercase text-[9px] tracking-widest">
-                                {PRESETS[selectedPreset].id === 'custom' ? `${customWidth}x${customHeight} mm` : PRESETS[selectedPreset].label}
-                            </Badge>
                         </CardHeader>
-                        <CardContent className="p-12 flex items-center justify-center bg-black/5 min-h-[500px]">
-                            <div className="max-h-[50vh] overflow-hidden rounded-lg shadow-2xl border-4 border-white/50 flex items-center justify-center">
+                        
+                        <CardContent className="p-8 md:p-12 flex items-center justify-center bg-black/5 min-h-[500px]">
+                            <div className="max-h-[55vh] overflow-hidden rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50">
                                 <ReactCrop 
                                     crop={crop} 
                                     onChange={setCrop} 
                                     onComplete={setCompletedCrop} 
                                     aspect={getAspectRatio()} 
-                                    className="max-h-[50vh]"
+                                    className="max-h-[55vh]"
                                 >
                                     <img 
                                         ref={imgRef} 
                                         src={imgSrc} 
                                         alt="source" 
-                                        className="max-h-[50vh] w-auto object-contain block" 
-                                        onLoad={(e) => {
-                                            const { width, height } = e.currentTarget;
-                                            setCrop(centerCrop(makeAspectCrop({ unit: '%', width: 80 }, getAspectRatio(), width, height), width, height));
-                                        }} 
+                                        className="max-h-[55vh] w-auto object-contain block" 
+                                        onLoad={updateCropHandles} 
                                     />
                                 </ReactCrop>
                             </div>
                         </CardContent>
+
                         <CardFooter className="glass-panel border-t p-6 flex justify-between">
                             <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
-                                <ChevronLeft className="mr-2 size-4" /> Go Back
+                                <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
-                            <Button className="h-12 px-10 text-base font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl group" onClick={handleInitialCrop}>
-                                CONFIRM & EDIT <ChevronRight className="ml-2 size-5" />
+                            <Button className="h-14 px-12 text-base font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl group" onClick={handleInitialCrop}>
+                                CONFIRM & CONTINUE <ChevronRight className="ml-2 size-5" />
                             </Button>
                         </CardFooter>
                     </Card>
                 </motion.div>
             )}
 
-            {/* 3. STUDIO STAGE (DASHBOARD STYLE) */}
+            {/* 3. STUDIO STAGE */}
             {stage === 'studio' && (
                 <div className="flex-1 grid lg:grid-cols-12 gap-8 items-start h-full">
-                    
-                    {/* LEFT SIDEBAR: TOOLS */}
                     <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                             <CardHeader className="border-b border-white/10 p-6 bg-primary/5">
@@ -628,11 +609,7 @@ export default function PassportPhotoMaker() {
                                         {isProcessing ? <Loader2 className="size-5 animate-spin mr-2" /> : <Zap className="size-5 text-yellow-400 fill-yellow-400 mr-2 group-hover:scale-125 transition-transform" />}
                                         AI REMOVE BACKGROUND
                                     </Button>
-                                    <Button 
-                                        variant="outline"
-                                        className="w-full h-12 font-black border-2 border-primary/20 hover:border-primary text-primary rounded-xl"
-                                        onClick={handleAutoEnhance}
-                                    >
+                                    <Button variant="outline" className="w-full h-12 font-black border-2 border-primary/20 text-primary rounded-xl" onClick={handleAutoEnhance}>
                                         <Wand2 className="size-4 mr-2" /> AUTO STUDIO FIX
                                     </Button>
                                 </div>
@@ -640,63 +617,42 @@ export default function PassportPhotoMaker() {
                             <CardContent className="p-0">
                                 <Tabs defaultValue="filters" className="w-full">
                                     <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/40 p-1.5 border-b border-white/10">
-                                        <TabsTrigger value="filters" className="font-bold text-[10px] uppercase rounded-xl">
-                                            <Sun className="size-3 mr-2" /> Filters
-                                        </TabsTrigger>
-                                        <TabsTrigger value="studio" className="font-bold text-[10px] uppercase rounded-xl">
-                                            <Palette className="size-3 mr-2" /> Studio
-                                        </TabsTrigger>
+                                        <TabsTrigger value="filters" className="font-bold text-[10px] uppercase rounded-xl">Filters</TabsTrigger>
+                                        <TabsTrigger value="studio" className="font-bold text-[10px] uppercase rounded-xl">Studio</TabsTrigger>
                                     </TabsList>
-
-                                    <ScrollArea className="h-[500px]">
-                                        <TabsContent value="filters" className="p-8 space-y-8 animate-in fade-in duration-300">
+                                    <ScrollArea className="h-[450px]">
+                                        <TabsContent value="filters" className="p-8 space-y-8">
                                             <div className="space-y-6">
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Sun className="size-3" /> Brightness</Label><span className="text-[10px] font-mono font-bold">{brightness}%</span></div>
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Brightness</Label><span className="text-[10px] font-mono font-bold">{brightness}%</span></div>
                                                     <Slider min={50} max={150} value={[brightness]} onValueChange={(v) => setBrightness(v[0])} />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Contrast className="size-3" /> Contrast</Label><span className="text-[10px] font-mono font-bold">{contrast}%</span></div>
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><span className="text-[10px] font-mono font-bold">{contrast}%</span></div>
                                                     <Slider min={50} max={150} value={[contrast]} onValueChange={(v) => setContrast(v[0])} />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Droplets className="size-3" /> Saturation</Label><span className="text-[10px] font-mono font-bold">{saturation}%</span></div>
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Saturation</Label><span className="text-[10px] font-mono font-bold">{saturation}%</span></div>
                                                     <Slider min={0} max={200} value={[saturation]} onValueChange={(v) => setSaturation(v[0])} />
-                                                </div>
-                                                <Separator className="opacity-10" />
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Zap className="size-3" /> Blur Fine-tune</Label><span className="text-[10px] font-mono font-bold">{blur}px</span></div>
-                                                    <Slider min={0} max={10} step={0.5} value={[blur]} onValueChange={(v) => setBlur(v[0])} />
                                                 </div>
                                             </div>
                                         </TabsContent>
-
-                                        <TabsContent value="studio" className="p-8 space-y-10 animate-in fade-in duration-300">
+                                        <TabsContent value="studio" className="p-8 space-y-10">
                                             <div className="space-y-4">
                                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Background Color</Label>
                                                 <div className="grid grid-cols-4 gap-3">
                                                     {COLORS.map(c => (
-                                                        <button 
-                                                            key={c.value} 
-                                                            onClick={() => setBgColor(c.value)} 
-                                                            className={cn("size-10 rounded-xl border-2 transition-all shadow-lg hover:scale-110", bgColor === c.value ? "border-primary ring-4 ring-primary/20" : "border-white/10")} 
-                                                            style={{ backgroundColor: c.value }} 
-                                                            title={c.name}
-                                                        />
+                                                        <button key={c.value} onClick={() => setBgColor(c.value)} className={cn("size-10 rounded-xl border-2 transition-all shadow-lg hover:scale-110", bgColor === c.value ? "border-primary ring-4 ring-primary/20" : "border-white/10")} style={{ backgroundColor: c.value }} />
                                                     ))}
                                                 </div>
                                             </div>
-                                            <Separator className="opacity-10" />
                                             <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase flex items-center gap-2 opacity-60"><Frame className="size-3" /> Photo Border (Frame)</Label><span className="text-[10px] font-mono font-bold">{borderWidth}%</span></div>
+                                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Border (Frame)</Label><span className="text-[10px] font-mono font-bold">{borderWidth}%</span></div>
                                                 <Slider min={0} max={5} step={0.1} value={[borderWidth]} onValueChange={(v) => setBorderWidth(v[0])} />
-                                                <div className="space-y-2">
-                                                    <Label className="text-[9px] font-black uppercase opacity-40">Frame Color</Label>
-                                                    <div className="flex gap-2">
-                                                        {['#000', '#fff', '#e2e8f0', '#5cbdb9'].map(c => (
-                                                            <button key={c} onClick={() => setBorderColor(c)} className={cn("size-8 rounded-lg border-2 shadow-sm transition-all", borderColor === c ? "border-primary scale-110" : "border-transparent")} style={{ backgroundColor: c }} />
-                                                        ))}
-                                                    </div>
+                                                <div className="flex gap-2">
+                                                    {['#000', '#fff', '#e2e8f0', '#5cbdb9'].map(c => (
+                                                        <button key={c} onClick={() => setBorderColor(c)} className={cn("size-8 rounded-lg border-2", borderColor === c ? "border-primary" : "border-transparent")} style={{ backgroundColor: c }} />
+                                                    ))}
                                                 </div>
                                             </div>
                                         </TabsContent>
@@ -704,177 +660,84 @@ export default function PassportPhotoMaker() {
                                 </Tabs>
                             </CardContent>
                         </Card>
-
                         <div className="glass-panel p-6 rounded-[2rem] flex gap-4 items-center shadow-xl">
-                            <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                                <ShieldCheck className="size-6 text-green-600" />
-                            </div>
+                            <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0"><ShieldCheck className="size-6 text-green-600" /></div>
                             <div>
-                                <p className="text-[11px] font-black text-green-700 dark:text-green-400 uppercase tracking-tight">Enterprise Privacy</p>
+                                <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Enterprise Privacy</p>
                                 <p className="text-[9px] text-muted-foreground font-medium leading-tight">ISO-27001 standard compliant local re-encoding. Zero cloud footprint.</p>
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* CENTER: PREVIEW AREA */}
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-8">
                         <div className="relative group max-w-[500px] w-full">
-                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[3.5rem] overflow-hidden flex items-center justify-center aspect-[1/1.4] transform-gpu transition-all hover:scale-[1.02]">
+                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[3.5rem] overflow-hidden flex items-center justify-center aspect-[1/1.4]">
                                 <canvas ref={mainCanvasRef} className="w-full h-full object-contain" />
-                                
                                 {isProcessing && (
-                                    <div className="absolute inset-0 bg-white/95 dark:bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-12 gap-8 z-20">
-                                        <div className="relative">
-                                            <Loader2 className="size-20 animate-spin text-primary stroke-[3]" />
-                                            <ImageIcon className="absolute inset-0 m-auto size-8 text-primary/40 animate-pulse" />
-                                        </div>
-                                        <div className="w-full max-w-[280px] space-y-4">
-                                            <div className="space-y-1 text-center">
-                                                <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">Running Neural AI</p>
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{progress}% Finalizing HD Layers</p>
-                                            </div>
-                                            <Progress value={progress} className="h-2 shadow-inner bg-primary/10" />
-                                        </div>
+                                    <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-12 gap-8 z-20">
+                                        <Loader2 className="size-20 animate-spin text-primary stroke-[3]" />
+                                        <Progress value={progress} className="h-2 w-full max-w-[280px]" />
                                     </div>
                                 )}
                             </Card>
-                            
-                            {/* Floating Transformation Bar */}
                             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-2.5 rounded-[2rem] shadow-2xl border-2 border-white/20 z-10">
                                 <Button variant="outline" size="icon" className="size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-4"/></Button>
                                 <Button variant="outline" size="icon" className="size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-4"/></Button>
                                 <Separator orientation="vertical" className="h-6 mx-1" />
-                                <div className="grid grid-cols-2 gap-1.5">
-                                    <Button variant="outline" size="icon" className="size-8 rounded-lg" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-8 rounded-lg" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-8 rounded-lg" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-8 rounded-lg" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-3"/></Button>
+                                <div className="grid grid-cols-2 gap-1">
+                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
                                 </div>
                                 <Separator orientation="vertical" className="h-6 mx-1" />
                                 <Button variant="outline" size="icon" className="size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4"/></Button>
                             </div>
                         </div>
-
                         <div className="flex gap-4 w-full max-w-[500px] mt-10">
-                             <Button variant="outline" onClick={handleReset} className="flex-1 h-16 rounded-[1.5rem] border-2 font-black uppercase text-xs tracking-widest hover:bg-destructive/5 hover:text-destructive">
-                                <RefreshCcw className="mr-2 size-4" /> Start Over
-                            </Button>
-                            <Button className="flex-[2] h-16 rounded-[1.5rem] bg-primary text-lg font-black shadow-2xl shadow-primary/30 group overflow-hidden relative" onClick={handleDownload}>
-                                <span className="relative z-10 flex items-center justify-center gap-3">
-                                    <Download className="size-6 group-hover:translate-y-0.5 transition-transform" /> DOWNLOAD HD JPG
-                                </span>
-                            </Button>
+                             <Button variant="outline" onClick={handleReset} className="flex-1 h-16 rounded-[1.5rem] border-2 font-black uppercase text-xs tracking-widest">Start Over</Button>
+                            <Button className="flex-[2] h-16 rounded-[1.5rem] bg-primary text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-3 size-6" /> DOWNLOAD JPG</Button>
                         </div>
                     </motion.div>
 
-                    {/* RIGHT SIDEBAR: PRINT & TEMPLATES */}
                     <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-6">
                         <Card className="glass-panel border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
                             <CardHeader className="bg-primary/5 p-6 border-b border-white/10">
-                                <CardTitle className="text-lg font-black uppercase flex items-center gap-2">
-                                    <Printer className="size-5 text-primary" /> Print Sheets
-                                </CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase opacity-60">Auto-arrange multiple copies.</CardDescription>
+                                <CardTitle className="text-lg font-black uppercase flex items-center gap-2"><Printer className="size-5 text-primary" /> Print Sheets</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 space-y-4">
-                                <div className="grid grid-cols-1 gap-3">
-                                    {PRINT_SHEETS.map((sheet, i) => (
-                                        <Button 
-                                            key={i} 
-                                            variant="outline" 
-                                            className="h-20 justify-start gap-4 rounded-2xl border-2 hover:border-primary hover:bg-primary/5 transition-all text-left group"
-                                            onClick={() => renderPrintSheet(i)}
-                                        >
-                                            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                                {i === 0 ? <Layout className="size-5" /> : <Maximize className="size-5" />}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black uppercase tracking-tight">{sheet.name}</p>
-                                                <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-70">300 DPI Rendering</p>
-                                            </div>
-                                        </Button>
-                                    ))}
-                                </div>
+                                {PRINT_SHEETS.map((sheet, i) => (
+                                    <Button key={i} variant="outline" className="h-20 w-full justify-start gap-4 rounded-2xl border-2 hover:border-primary" onClick={() => renderPrintSheet(i)}>
+                                        <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><Layout className="size-5" /></div>
+                                        <div className="text-left"><p className="text-xs font-black uppercase">{sheet.name}</p><p className="text-[9px] font-bold text-muted-foreground uppercase opacity-70">300 DPI Rendering</p></div>
+                                    </Button>
+                                ))}
                             </CardContent>
                         </Card>
-
-                        <div className="p-8 bg-gradient-to-br from-primary/10 to-accent/10 rounded-[2.5rem] border-2 border-white/20 shadow-xl relative overflow-hidden group">
-                            <div className="relative z-10 space-y-4">
-                                <h4 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <History className="size-4" /> Recent Work
-                                </h4>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {store.history.slice(-2).map((h, i) => (
-                                        <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden border-2 border-white shadow-lg bg-white">
-                                            <img src={h} alt="recent" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-                                        </div>
-                                    ))}
-                                    {store.history.length === 0 && (
-                                        <div className="col-span-2 py-6 text-center text-[10px] font-bold uppercase opacity-30">No history yet</div>
-                                    )}
-                                </div>
-                            </div>
-                            <Sparkles className="absolute -bottom-4 -right-4 size-24 text-primary/5 group-hover:text-primary/10 group-hover:scale-125 transition-all duration-700" />
-                        </div>
                     </motion.div>
                 </div>
             )}
 
-            {/* 4. PRINT SHEET PREVIEW MODAL */}
+            {/* 4. PRINT PREVIEW MODAL */}
             <AnimatePresence>
                 {stage === 'print' && printSheetSrc && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-4 md:p-12 flex items-center justify-center overflow-y-auto"
-                    >
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-8 flex items-center justify-center overflow-y-auto">
                         <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 items-center">
                             <div className="flex-1 space-y-8 text-white text-center md:text-left">
-                                <div className="space-y-4">
-                                    <h2 className="text-5xl font-black font-headline uppercase tracking-tighter leading-none">
-                                        Print-Ready <span className="text-primary">Master Sheet</span>
-                                    </h2>
-                                    <p className="text-slate-400 text-lg font-medium">Rendered at industrial 300 DPI standards for ultra-sharp glossy prints.</p>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                                        <CheckCircle2 className="size-6 text-primary mb-3 mx-auto md:mx-0" />
-                                        <p className="text-[10px] font-black uppercase opacity-60">Layout Logic</p>
-                                        <p className="text-sm font-bold mt-1">Symmetrical Clamping</p>
-                                    </div>
-                                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                                        <Printer className="size-6 text-accent mb-3 mx-auto md:mx-0" />
-                                        <p className="text-[10px] font-black uppercase opacity-60">Paper Density</p>
-                                        <p className="text-sm font-bold mt-1">300 DPI Ultra-HD</p>
-                                    </div>
-                                </div>
+                                <h2 className="text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
+                                <p className="text-slate-400 text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
                                 <div className="flex gap-4">
-                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/30 text-white hover:bg-white/10 font-black uppercase bg-transparent">
-                                        CANCEL
-                                    </Button>
+                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
                                     <Button className="h-16 flex-[2] rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-lg" onClick={() => {
-                                        const link = document.createElement('a');
-                                        link.href = printSheetSrc;
-                                        link.download = `Print-Sheet-${Date.now()}.jpg`;
-                                        link.click();
-                                    }}>
-                                        DOWNLOAD MASTER SHEET
-                                    </Button>
+                                        const link = document.createElement('a'); link.href = printSheetSrc; link.download = `Print-Sheet-${Date.now()}.jpg`; link.click();
+                                    }}>DOWNLOAD SHEET</Button>
                                 </div>
                             </div>
                             <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500">
-                                <div className="shadow-[0_0_80px_rgba(92,189,185,0.4)] border-[12px] border-white dark:border-slate-800 rounded-sm overflow-hidden bg-white max-w-full">
-                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] shadow-2xl block" />
-                                </div>
-                                <div className="absolute -top-6 -right-6 bg-primary text-white font-black text-[10px] px-6 py-2 rounded-full shadow-2xl uppercase tracking-widest animate-pulse">
-                                    READY FOR PRINT
+                                <div className="shadow-2xl border-[12px] border-white rounded-sm overflow-hidden bg-white max-w-full">
+                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] block" />
                                 </div>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="absolute top-8 right-8 size-12 text-white hover:bg-white/10 rounded-full" onClick={() => setStage('studio')}>
-                            <X className="size-8" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="absolute top-8 right-8 size-12 text-white" onClick={() => setStage('studio')}><X className="size-8" /></Button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -883,4 +746,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-
