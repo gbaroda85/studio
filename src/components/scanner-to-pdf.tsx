@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -274,21 +273,21 @@ export default function ScannerToPdf() {
                     )}
 
                     {hasCameraPermission === true && (
-                        <div className="absolute inset-0 border-[20px] border-black/30 pointer-events-none flex items-center justify-center">
-                            <div className="size-64 border-2 border-white/20 rounded-xl" />
+                        <div className="absolute inset-0 border-[15px] sm:border-[20px] border-black/30 pointer-events-none flex items-center justify-center">
+                            <div className="size-48 sm:size-64 border-2 border-white/20 rounded-xl" />
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="p-6 bg-muted/10 border-t grid grid-cols-2 gap-4">
+                <CardFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
                     <Button 
                         onClick={handleCapture} 
                         disabled={!hasCameraPermission} 
-                        className="h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
+                        className="h-14 flex-1 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95"
                     >
                         <ScanLine className="mr-2 size-6 group-hover:scale-110 transition-transform" />
                         CAPTURE PAGE
                     </Button>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 flex-1">
                         <Button 
                             variant="outline"
                             onClick={() => fileInputRef.current?.click()} 
@@ -298,7 +297,7 @@ export default function ScannerToPdf() {
                             UPLOAD PHOTO
                         </Button>
                         {hasCameraPermission === true && (
-                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[10px] font-black uppercase text-muted-foreground h-6">
+                            <Button variant="ghost" size="sm" onClick={startCamera} className="text-[10px] font-black uppercase text-muted-foreground h-6 w-full">
                                 <RefreshCcw className="size-3 mr-1" /> Refresh Camera
                             </Button>
                         )}
@@ -342,15 +341,15 @@ export default function ScannerToPdf() {
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[600px] flex flex-col bg-card/50">
-                <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden min-h-[500px] flex flex-col bg-card/50">
+                <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between py-4">
                     <div className="flex items-center gap-2">
                         <FileDigit className="size-4 text-primary" />
                         <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Scanned Document Stack</CardTitle>
                     </div>
                     <Badge variant="secondary" className="font-black text-[10px] bg-primary/10 text-primary">{scannedImages.length} PAGES</Badge>
                 </CardHeader>
-                <CardContent className="flex-1 p-6">
+                <CardContent className="flex-1 p-4 sm:p-6">
                     {scannedImages.length > 0 ? (
                         <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                             {scannedImages.map((src, index) => (
@@ -369,29 +368,29 @@ export default function ScannerToPdf() {
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center text-center py-24 gap-4 opacity-30">
+                        <div className="flex flex-col items-center justify-center text-center py-16 sm:py-24 gap-4 opacity-30">
                             <Monitor className="size-16 text-muted-foreground" />
                             <p className="text-xs font-black uppercase tracking-widest">Stack is Empty</p>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="p-6 bg-muted/5 border-t flex flex-col gap-4">
+                <CardFooter className="p-4 sm:p-6 bg-muted/5 border-t flex flex-col gap-4">
                     {createdPdfUrl ? (
-                         <Button size="lg" className="w-full h-18 bg-green-600 hover:bg-green-700 font-black text-xl shadow-2xl rounded-2xl transition-all animate-in zoom-in-95" onClick={handleDownload}>
+                         <Button size="lg" className="w-full h-16 sm:h-18 bg-green-600 hover:bg-green-700 font-black text-lg sm:text-xl shadow-2xl rounded-2xl transition-all animate-in zoom-in-95" onClick={handleDownload}>
                             <Download className="mr-3 size-7" /> DOWNLOAD PDF
                         </Button>
                     ) : (
                         <Button 
                             onClick={handleCreatePdf} 
                             disabled={scannedImages.length === 0 || isProcessing} 
-                            className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
+                            className="w-full h-16 sm:h-18 text-lg sm:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all"
                         >
                             {isProcessing ? <Loader2 className="animate-spin mr-3 size-7"/> : <CheckCircle2 className="mr-3 size-7 group-hover:scale-110 transition-transform" />}
                             {isProcessing ? "PROCESSING..." : "GENERATE PDF"}
                         </Button>
                     )}
-                    <div className="flex gap-2 w-full">
-                        <Button variant="ghost" size="sm" onClick={handleReset} className="flex-1 text-[10px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full items-center justify-between">
+                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-[10px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive w-full sm:w-auto">
                             <RefreshCcw className="size-3 mr-1.5" /> Clear Workspace
                         </Button>
                         <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
@@ -414,33 +413,33 @@ export default function ScannerToPdf() {
       </div>
 
       <Dialog open={imageToCrop !== null} onOpenChange={(open) => !open && setImageToCrop(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem]">
-          <DialogHeader className="bg-muted/30 border-b p-6">
-            <DialogTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-2 shadow-2xl rounded-[2.5rem] w-[95vw]">
+          <DialogHeader className="bg-muted/30 border-b p-4 sm:p-6">
+            <DialogTitle className="text-lg sm:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
                 <Crop className="text-primary size-5" /> Trim Scanned Page
             </DialogTitle>
           </DialogHeader>
-          <div className="p-8 bg-black/5 flex justify-center">
+          <div className="p-4 sm:p-8 bg-black/5 flex justify-center overflow-hidden">
             {imageToCrop && (
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                className="shadow-2xl border-4 border-white"
+                className="shadow-2xl border-2 sm:border-4 border-white max-w-full"
               >
                 <img
                   ref={cropImgRef}
                   alt="Crop preview"
                   src={imageToCrop}
                   onLoad={onCropImageLoad}
-                  className="max-h-[60vh] w-auto object-contain"
+                  className="max-h-[50vh] sm:max-h-[60vh] w-auto object-contain"
                 />
               </ReactCrop>
             )}
           </div>
-          <DialogFooter className="p-6 bg-muted/10 border-t flex flex-row gap-3">
+          <DialogFooter className="p-4 sm:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
             <Button variant="outline" className="flex-1 font-bold h-12 rounded-xl" onClick={() => setImageToCrop(null)}>CANCEL</Button>
-            <Button className="flex-[2] font-black h-12 rounded-xl bg-primary text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
+            <Button className="flex-[2] font-black h-12 rounded-xl bg-primary text-base sm:text-lg" onClick={handleConfirmCrop} disabled={!completedCrop?.width}>
               <CheckCircle2 className="mr-2 size-5" /> ADD TO PDF
             </Button>
           </DialogFooter>
@@ -449,4 +448,3 @@ export default function ScannerToPdf() {
     </div>
   );
 }
-
