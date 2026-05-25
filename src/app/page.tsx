@@ -138,6 +138,22 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+              <ImageIcon className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+            </Link>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+              <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+            </Link>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3.5 bg-white dark:bg-slate-900 border shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
+              <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            </Link>
+          </div>
+
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
