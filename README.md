@@ -20,7 +20,14 @@ When you deploy to Vercel or Firebase App Hosting, you MUST add these 2 environm
 - `CONVERT_API_SECRET`
 - `CLOUD_CONVERT_API_KEY`
 
-### 3. Key Rotation (Recommended)
+### 3. Vercel "Deployment Blocked" Fix
+If you see "Deployment Blocked" on Vercel after making the repo private:
+1. Go to **Vercel Dashboard** -> Your Project -> **Settings** -> **Git**.
+2. Click **Disconnect** repository.
+3. Click **Connect** again and select your private repository.
+4. Ensure the Vercel GitHub App has permissions for your private repos (Check GitHub Settings -> Applications -> Vercel).
+
+### 4. Key Rotation (Recommended)
 Since the keys were shared in chat, go to ConvertAPI and CloudConvert dashboards, **Delete** the old keys, and generate fresh ones for 100% security.
 
 ---
