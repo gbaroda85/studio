@@ -116,17 +116,18 @@ export default function PdfProtector() {
             const totalPages = pdf.numPages;
 
             // REAL PROTECTION LOGIC:
-            // We use jsPDF's built-in encryption plugin. 
-            // In some bundles, it's not automatically available on the instance.
             const securePdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
                 compress: true
             });
 
-            // CRITICAL CHECK: Verify if encryption method exists on this build
-            if (typeof (securePdf as any).encrypt !== 'function') {
-                throw new Error("Internal Encryption Engine not found in browser bundle. Please refresh and try again.");
+            // CRITICAL: Ensure the encryption engine is accessible
+            // We use a broader check and call method for jspdf plugins
+            const encryptMethod = (securePdf as any).encrypt;
+            if (typeof encryptMethod !== 'function') {
+                console.error("jsPDF Encryption Plugin not found. This might be a bundling issue.");
+                throw new Error("Local Encryption Engine is currently unavailable in this browser session. Please try refreshing or using a different browser.");
             }
 
             for (let i = 1; i <= totalPages; i++) {
@@ -165,8 +166,7 @@ export default function PdfProtector() {
             // Randomly generated Owner Password for permission control
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            // ASLI AES LOCK: This is where the magic happens.
-            // This call modifies the PDF dictionary to set /Encrypt.
+            // Native AES Lock Implementation
             (securePdf as any).encrypt(password, ownerPass, {
                 userPermissions: {
                     print: allowPrinting,
@@ -185,7 +185,7 @@ export default function PdfProtector() {
         } catch (error: any) {
             console.error("Vault Error:", error);
             setErrorDetails(error.message || "Could not apply encryption layers.");
-            toast({ variant: 'destructive', title: 'Vault Error', description: 'Real encryption failed to initialize.' });
+            toast({ variant: 'destructive', title: 'Vault Error', description: 'Encryption engine failed to start.' });
         } finally {
             setIsProtecting(false);
         }
