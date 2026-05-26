@@ -109,8 +109,7 @@ export default function PdfProtector() {
         setStatusText("Initializing Secure Vault...");
 
         try {
-            // DYNAMICALLY LOAD THE FULL UMD VERSION OF JSPDF
-            // This version includes the encryption plugin which is often missing in ES builds
+            // DYNAMICALLY LOAD JSPDF TO ENSURE PLUGINS ARE INITIALIZED
             const jspdfModule: any = await import('jspdf');
             const jsPDF = jspdfModule.jsPDF;
 
@@ -125,12 +124,10 @@ export default function PdfProtector() {
                 compress: true
             });
 
-            // Check if the encrypt method exists
-            const encryptMethod = (securePdf as any).processJPG ? (securePdf as any).encrypt : (securePdf as any).encrypt;
-            
+            // CRITICAL: Check if encryption plugin is available in this bundle
             if (typeof (securePdf as any).encrypt !== 'function') {
                 console.error("jsPDF Encryption Plugin not found. This might be a bundling issue.");
-                throw new Error("Local Encryption Engine is currently unavailable in this browser session. Please try refreshing or using a different browser.");
+                throw new Error("Local Encryption Engine is currently unavailable. This usually happens when the browser strips security plugins. Please refresh the page.");
             }
 
             for (let i = 1; i <= totalPages; i++) {
@@ -169,7 +166,7 @@ export default function PdfProtector() {
             // Randomly generated Owner Password for permission control
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            // Native AES Lock Implementation
+            // Native AES Lock Implementation - strictly respecting password
             (securePdf as any).encrypt(password, ownerPass, {
                 userPermissions: {
                     print: allowPrinting,
@@ -232,7 +229,7 @@ export default function PdfProtector() {
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-8 py-8 bg-muted/10 border-t border-dashed">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                     <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> AES-128 BIT</div>
                     <div className="flex items-center gap-1.5"><FileLock2 className="size-3.5 text-primary" /> ADOBE COMPATIBLE</div>
                 </CardFooter>
