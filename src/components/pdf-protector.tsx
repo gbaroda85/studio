@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
-import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import * as pdfjs from 'pdfjs-dist';
 
 // Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -109,7 +109,7 @@ export default function PdfProtector() {
         setStatusText("Initializing Secure Vault...");
 
         try {
-            // Force dynamic import of jsPDF to ensure all plugins are available
+            // Dynamic import of jsPDF
             const { jsPDF } = await import('jspdf');
             
             const arrayBuffer = await pdfFile.arrayBuffer();
@@ -123,10 +123,10 @@ export default function PdfProtector() {
                 compress: true
             });
 
-            // CRITICAL ENGINE CHECK
+            // CRITICAL CHECK: Verify if encryption method exists on this build
             if (typeof (securePdf as any).encrypt !== 'function') {
-                console.error("jsPDF Encryption Plugin not found in this bundle.");
-                throw new Error("Local Encryption Engine is currently unavailable. Please refresh or try another browser.");
+                console.error("jsPDF Encryption Plugin not found. This might be a bundling issue.");
+                throw new Error("Local Encryption Engine is currently unavailable in this browser session. Please try refreshing or using a different browser.");
             }
 
             for (let i = 1; i <= totalPages; i++) {
@@ -162,10 +162,10 @@ export default function PdfProtector() {
 
             setStatusText("Applying AES Encryption...");
             
-            // Generate Owner Password for permissions
+            // Standard owner password logic
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            // Standard-compliant AES-128 Encryption Seal
+            // REAL ENCRYPTION CALL
             (securePdf as any).encrypt(password, ownerPass, {
                 userPermissions: {
                     print: allowPrinting,
