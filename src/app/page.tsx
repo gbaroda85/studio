@@ -42,7 +42,6 @@ import {
   UserCircle,
   Calculator,
   Star,
-  FileLock2,
   Infinity,
   Printer
 } from 'lucide-react';
@@ -67,12 +66,11 @@ const ALL_TOOLS = [
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   
-  // PDF Tools (12)
+  // PDF Tools (11)
   { icon: FileArchive, title: "PDF Optimizer", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
   { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove passwords from Aadhaar or Bank PDFs.", href: "/unlock-pdf", colorClass: "bg-teal-500", category: "pdf" },
-  { icon: FileLock2, title: "Protect PDF", description: "Add password and AES-128 encryption to your documents.", href: "/protect-pdf", colorClass: "bg-indigo-700", category: "pdf" },
   { icon: Crop, title: "Crop PDF", description: "Trim margins or fix perspective of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", category: "pdf" },
   { icon: ScanLine, title: "Scan to PDF", description: "Turn your camera into a professional document scanner.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", category: "pdf" },
   { icon: FileText, title: "Text to PDF", description: "Convert plain text into a clean PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", category: "pdf" },

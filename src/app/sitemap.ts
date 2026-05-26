@@ -30,7 +30,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/crop-pdf',
     '/scan-to-pdf',
     '/unlock-pdf',
-    '/protect-pdf',
     '/pdf-to-image',
     '/html-to-pdf',
     '/text-to-pdf',

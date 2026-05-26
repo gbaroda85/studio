@@ -47,8 +47,7 @@ import {
   FileText,
   PenLine,
   LayoutGrid,
-  UserCircle,
-  FileLock2
+  UserCircle
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -207,13 +206,6 @@ function ToolsPageContent() {
       descriptionKey: 'unlock_pdf_description',
       icon: Unlock,
       color: 'text-teal-500',
-    },
-    {
-        href: '/protect-pdf',
-        labelKey: 'Vault Protect PDF',
-        descriptionKey: 'Add password and encryption to your documents.',
-        icon: FileLock2,
-        color: 'text-indigo-700',
     },
     {
       href: '/add-watermark',
