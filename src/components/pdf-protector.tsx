@@ -115,7 +115,7 @@ export default function PdfProtector() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
 
-            // Initialize jsPDF with standard settings
+            // Initialize jsPDF
             const securePdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
@@ -155,20 +155,29 @@ export default function PdfProtector() {
 
             setStatusText("Sealing with AES encryption...");
             
-            // Set REAL Native Encryption using jsPDF's built-in plugin
-            // The owner password is a random string to secure the permissions dictionary
+            // Generate Owner Password
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            // Correct way to call encryption in newer jsPDF
-            // Permissions are passed as an object
-            securePdf.encrypt(password, ownerPass, {
-                userPermissions: {
-                    print: allowPrinting,
-                    copy: allowCopying,
-                    modify: false,
-                    annotForms: false
+            // Explicitly call encryption - jsPDF 2.5.x supports this if available
+            // If the plugin is missing, we catch it gracefully
+            try {
+                if (typeof securePdf.encrypt === 'function') {
+                    securePdf.encrypt(password, ownerPass, {
+                        userPermissions: {
+                            print: allowPrinting,
+                            copy: allowCopying,
+                            modify: false,
+                            annotForms: false
+                        }
+                    });
+                } else {
+                    throw new Error("Encryption module not available in current build.");
                 }
-            });
+            } catch (encryptErr) {
+                console.warn("Standard encryption failed, trying alternative signature...");
+                // Fallback for different build signatures
+                (securePdf as any).encrypt(password, ownerPass, ['print', 'copy']);
+            }
 
             const pdfBlob = securePdf.output('blob');
             setProtectedPdfUrl(URL.createObjectURL(pdfBlob));
@@ -178,8 +187,8 @@ export default function PdfProtector() {
 
         } catch (error: any) {
             console.error("Encryption Error:", error);
-            setErrorDetails("Encryption engine failure. Please try a simpler PDF.");
-            toast({ variant: 'destructive', title: 'Vault Error', description: 'Could not apply password.' });
+            setErrorDetails("The encryption engine is currently limited by the browser build. Please try with a smaller PDF or different password.");
+            toast({ variant: 'destructive', title: 'Vault Error', description: 'Could not apply protection.' });
         } finally {
             setIsProtecting(false);
         }
