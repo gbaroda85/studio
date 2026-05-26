@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -110,13 +111,52 @@ export default function AadhaarPrinter() {
     setStage('upload');
   };
 
+  /**
+   * Checks if PDF is encrypted and routes to appropriate stage
+   */
+  const checkPdfEncryptionAndProceed = async (buffer: ArrayBuffer) => {
+    setIsProcessing(true);
+    try {
+        // Attempt to load PDF without password
+        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+        const pdf = await loadingTask.promise;
+        
+        // If successful, proceed to render immediately (skip password)
+        const page = await pdf.getPage(pdf.numPages);
+        const viewport = page.getViewport({ scale: 2.5 });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        if (ctx) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            setOriginalA4Src(canvas.toDataURL('image/jpeg', 1.0));
+            setStage('refine');
+            resetPoints();
+        }
+    } catch (error: any) {
+        if (error.name === 'PasswordException') {
+            // Password required, show input stage
+            setStage('password');
+        } else {
+            toast({ variant: 'destructive', title: 'Invalid File', description: 'Could not process PDF file.' });
+        }
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
   const handleFile = (file: File, side?: 'front' | 'back') => {
     if (workflow === 'a4') {
         if (file.type === 'application/pdf') {
             const reader = new FileReader();
             reader.onload = (e) => {
-                setPdfBuffer(e.target?.result as ArrayBuffer);
-                setStage('password');
+                const buffer = e.target?.result as ArrayBuffer;
+                setPdfBuffer(buffer);
+                checkPdfEncryptionAndProceed(buffer);
             };
             reader.readAsArrayBuffer(file);
         } else if (file.type.startsWith('image/')) {
@@ -145,7 +185,6 @@ export default function AadhaarPrinter() {
                 setBackRaw(src);
                 setBackFinal(null);
             }
-            toast({ title: 'Upload Successful', description: `Side ${side?.toUpperCase()} ready for adjustment.` });
         };
         reader.readAsDataURL(file);
     }
@@ -341,6 +380,9 @@ export default function AadhaarPrinter() {
     toast({ title: "Adjustment Applied", description: "Image processed with high fidelity." });
   };
 
+  /**
+   * Optimized coordinate mapping for high-responsiveness
+   */
   const updateMagnifier = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -352,7 +394,6 @@ export default function AadhaarPrinter() {
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
-    if (e.cancelable) e.preventDefault();
     
     let clientX, clientY;
     if ('touches' in e) {
@@ -372,7 +413,6 @@ export default function AadhaarPrinter() {
   }, [draggingPoint, updateMagnifier]);
 
   const handlePointMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
-    if (e.cancelable) e.preventDefault();
     setDraggingPoint(index);
     
     let clientX, clientY;
@@ -442,11 +482,11 @@ export default function AadhaarPrinter() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-12 overflow-x-hidden">
+    <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
       
       {/* STAGE 0: SELECTION */}
       {stage === 'selection' && (
-        <div className="grid md:grid-cols-2 gap-8 pt-4 px-4 w-full max-w-5xl">
+        <div className="grid md:grid-cols-2 gap-8 pt-4 px-4 w-full max-w-5xl justify-center">
             <Card className="group border-2 border-dashed hover:border-primary hover:shadow-2xl transition-all cursor-pointer rounded-[2.5rem] overflow-hidden" onClick={() => handleSelection('a4')}>
                 <CardHeader className="p-10 text-center">
                     <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl transition-transform group-hover:scale-110">
@@ -497,7 +537,7 @@ export default function AadhaarPrinter() {
                 <div className="border-3 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
                     <Zap className="size-8 text-yellow-500 animate-pulse" />
                     <p className="font-black uppercase tracking-tighter">Drop Original PDF here</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Local Extraction Logic Active</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Auto-Decrypt Logic Active</p>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
             </CardContent>
@@ -517,7 +557,7 @@ export default function AadhaarPrinter() {
                    </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 no-print">
+              <div className="grid md:grid-cols-2 gap-8 no-print justify-center">
                   <Card className={cn("border-2 border-dashed rounded-[2.5rem] overflow-hidden transition-all", frontFinal ? "border-green-500/50 bg-green-500/5" : "hover:border-primary")}>
                       <CardHeader className="pb-4 text-center">
                           <CardTitle className="text-sm font-black uppercase text-muted-foreground flex items-center justify-center gap-2">
@@ -647,7 +687,7 @@ export default function AadhaarPrinter() {
                     </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex items-center justify-center min-h-[600px] relative overflow-hidden select-none"
+              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden select-none"
                            onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                   
                   {isProcessing && (
@@ -657,7 +697,7 @@ export default function AadhaarPrinter() {
                       </div>
                   )}
 
-                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white">
+                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10">
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} aspect={ID_ASPECT} className="max-h-[70vh]">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="rect" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
@@ -669,10 +709,10 @@ export default function AadhaarPrinter() {
                                 <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
-                                <div key={i} className={cn("absolute size-12 -ml-6 -mt-6 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
+                                <div key={i} className={cn("absolute size-14 -ml-7 -mt-7 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                     onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
-                                    <div className="size-3 bg-white rounded-full shadow-inner" />
+                                    <div className="size-4 bg-white rounded-full shadow-inner" />
                                 </div>
                             ))}
                         </div>
@@ -703,8 +743,8 @@ export default function AadhaarPrinter() {
                     )}
                   </div>
 
-                  <div className="absolute bottom-8 flex justify-center w-full">
-                       <div className="inline-flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t">
+                       <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-4 w-4 text-primary animate-pulse" /> 
                           {cropMode === 'rect' ? "Drag box to ID area" : "Drag 4 dots to ID corners"}
                       </div>
@@ -787,16 +827,12 @@ export default function AadhaarPrinter() {
                 </Card>
             </div>
 
+            {/* PRINT WRAPPER */}
             <div className={cn(
                 "hidden print:flex flex-col items-center w-full min-h-[297mm] p-0 m-0 bg-white",
                 vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
             )}>
                 <div className="flex flex-col items-center gap-12">
-                    <div className="text-center mb-10 opacity-20">
-                        <h2 className="text-xl font-black uppercase tracking-[0.3em] text-slate-400">IDENTITY MASTER</h2>
-                        <p className="text-[8px] font-black uppercase opacity-40">Processed via GR7 Studio • 300 DPI</p>
-                    </div>
-                    
                     <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
                         <img src={frontFinal} className="max-w-full max-h-full object-contain" alt="Front Print" />
                     </div>
@@ -809,31 +845,46 @@ export default function AadhaarPrinter() {
         </div>
       )}
 
-      {/* Global CSS for Print */}
+      {/* Global CSS for Print - STRICT 1 PAGE FIX */}
       <style jsx global>{`
         @media print {
-          body * {
-            visibility: hidden;
-            background: none !important;
+          body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
           }
-          .print\:flex, .print\:flex * {
-            visibility: visible;
-          }
-          .print\:flex {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 210mm;
-            height: 297mm;
-            display: flex !important;
-            z-index: 9999;
-          }
-          .no-print {
+          /* Hide everything by default */
+          body > *:not(.print-wrapper-actual) {
             display: none !important;
+          }
+          header, footer, nav, button, .no-print, [data-sidebar="sidebar"], .tool-navigation {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          /* Show only the target container */
+          .print\:flex {
+            display: flex !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            z-index: 99999 !important;
+            background: white !important;
+            visibility: visible !important;
+          }
+          .print\:flex * {
+            visibility: visible !important;
           }
           @page {
             size: A4 portrait;
             margin: 0;
+          }
+          html, body {
+            height: 100%;
           }
         }
       `}</style>
