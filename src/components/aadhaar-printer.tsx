@@ -32,7 +32,8 @@ import {
     AlignVerticalJustifyStart,
     AlignVerticalJustifyCenter,
     AlignVerticalJustifyEnd,
-    Square
+    Square,
+    Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -70,6 +71,7 @@ export default function AadhaarPrinter() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
   const [showBorder, setShowBorder] = useState(true);
+  const [autoEnhance, setAutoEnhance] = useState(true); // Default to on for better UX
   
   // A4 Workflow States
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -195,7 +197,7 @@ export default function AadhaarPrinter() {
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop(
-        { unit: '%', width: 90, height: 90 }, // Free Size by default now
+        { unit: '%', width: 90, height: 90 },
         width,
         height
     );
@@ -304,7 +306,13 @@ export default function AadhaarPrinter() {
         srcCanvas.width = image.naturalWidth;
         srcCanvas.height = image.naturalHeight;
         const srcCtx = srcCanvas.getContext('2d');
-        srcCtx?.drawImage(image, 0, 0);
+        if (srcCtx) {
+            if (autoEnhance) {
+                srcCtx.filter = 'brightness(1.05) contrast(1.15) saturate(1.1) contrast(1.05)';
+            }
+            srcCtx.drawImage(image, 0, 0);
+            srcCtx.filter = 'none';
+        }
         const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
 
         if (srcData) {
@@ -333,6 +341,11 @@ export default function AadhaarPrinter() {
         const scaleY = image.naturalHeight / image.height;
         canvas.width = completedRectCrop.width * scaleX;
         canvas.height = completedRectCrop.height * scaleY;
+        
+        if (autoEnhance) {
+            ctx.filter = 'brightness(1.05) contrast(1.15) saturate(1.1) contrast(1.05)';
+        }
+        
         ctx.drawImage(
             image,
             completedRectCrop.x * scaleX,
@@ -344,6 +357,7 @@ export default function AadhaarPrinter() {
             canvas.width,
             canvas.height
         );
+        ctx.filter = 'none';
         finalData = canvas.toDataURL("image/png");
     }
 
@@ -372,7 +386,7 @@ export default function AadhaarPrinter() {
         setIsProcessing(false);
     }
     
-    toast({ title: "Adjustment Applied", description: "Image processed with high fidelity." });
+    toast({ title: "Adjustment Applied", description: `Image processed ${autoEnhance ? "with AI enhancement" : "normally"}.` });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -668,6 +682,11 @@ export default function AadhaarPrinter() {
                         <CardDescription className="text-[10px] font-black uppercase opacity-60">Pick mode and align corners of {refiningSide || 'Aadhaar'} portion.</CardDescription>
                     </div>
                     <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/20 mr-2">
+                            <Sparkles className={cn("size-3.5", autoEnhance ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")} />
+                            <span className="text-[10px] font-black uppercase">AI Enhance</span>
+                            <Switch checked={autoEnhance} onCheckedChange={setAutoEnhance} />
+                        </div>
                          <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                             <TabsList className="h-9">
                                 <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4">
