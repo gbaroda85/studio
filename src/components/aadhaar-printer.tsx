@@ -31,7 +31,8 @@ import {
     Download,
     AlignVerticalJustifyStart,
     AlignVerticalJustifyCenter,
-    AlignVerticalJustifyEnd
+    AlignVerticalJustifyEnd,
+    Square
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -67,6 +69,7 @@ export default function AadhaarPrinter() {
   const [stage, setStage] = useState<Stage>('selection');
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
+  const [showBorder, setShowBorder] = useState(true);
   
   // A4 Workflow States
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -104,23 +107,17 @@ export default function AadhaarPrinter() {
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const ID_ASPECT = 85.6 / 54;
-
   const handleSelection = (mode: Workflow) => {
     setWorkflow(mode);
     setStage('upload');
   };
 
-  /**
-   * Robust Check if PDF is encrypted and routes to appropriate stage
-   */
   const checkPdfEncryptionAndProceed = async (buffer: ArrayBuffer) => {
     setIsProcessing(true);
     try {
         const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
         const pdf = await loadingTask.promise;
         
-        // Success means NO password
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 2.5 });
         const canvas = document.createElement('canvas');
@@ -198,7 +195,7 @@ export default function AadhaarPrinter() {
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop(
-        makeAspectCrop({ unit: '%', width: 90 }, ID_ASPECT, width, height),
+        { unit: '%', width: 90, height: 90 }, // Free Size by default now
         width,
         height
     );
@@ -378,13 +375,9 @@ export default function AadhaarPrinter() {
     toast({ title: "Adjustment Applied", description: "Image processed with high fidelity." });
   };
 
-  /**
-   * GLUE LOGIC: Precise 1:1 Tracking
-   */
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     
-    // Prevent scrolling or browser dragging behavior
     if (e.cancelable) e.preventDefault();
 
     let clientX, clientY;
@@ -427,7 +420,6 @@ export default function AadhaarPrinter() {
   const handleMouseUp = () => setDraggingPoint(null);
 
   const handlePrint = () => {
-      // Ensure the print wrapper exists and layout is applied before triggering
       window.print();
   }
 
@@ -569,7 +561,7 @@ export default function AadhaarPrinter() {
                       </CardHeader>
                       <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
                           {frontFinal ? (
-                              <div className="relative group shadow-2xl rounded-lg overflow-hidden border-2 bg-white max-w-full aspect-[85.6/54] h-40">
+                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-40", showBorder && "border-2 border-black")}>
                                   <img src={frontFinal} alt="front" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('front'); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
@@ -601,7 +593,7 @@ export default function AadhaarPrinter() {
                       </CardHeader>
                       <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
                           {backFinal ? (
-                              <div className="relative group shadow-2xl rounded-lg overflow-hidden border-2 bg-white max-w-full aspect-[85.6/54] h-40">
+                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-40", showBorder && "border-2 border-black")}>
                                   <img src={backFinal} alt="back" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('back'); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
@@ -679,7 +671,7 @@ export default function AadhaarPrinter() {
                          <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                             <TabsList className="h-9">
                                 <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4">
-                                    <Maximize className="size-3 mr-1.5" /> Rect
+                                    <Maximize className="size-3 mr-1.5" /> Rect (Free)
                                 </TabsTrigger>
                                 <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4">
                                     <Scan className="size-3 mr-1.5" /> Scanner
@@ -702,7 +694,7 @@ export default function AadhaarPrinter() {
 
                   <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
-                        <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} aspect={ID_ASPECT} className="max-h-[70vh]">
+                        <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="rect" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
                         </ReactCrop>
                     ) : (
@@ -721,7 +713,6 @@ export default function AadhaarPrinter() {
                         </div>
                     )}
 
-                    {/* Precision Magnifier Circle */}
                     {draggingPoint !== null && cropMode === 'scanner' && (
                         <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -746,10 +737,10 @@ export default function AadhaarPrinter() {
                     )}
                   </div>
 
-                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
+                  <div className="w-full py-10 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
                        <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-4 w-4 text-primary animate-pulse" /> 
-                          {cropMode === 'rect' ? "Drag box to ID area" : "Drag 4 dots to ID corners"}
+                          {cropMode === 'rect' ? "Drag box to any area" : "Drag 4 dots to corners"}
                       </div>
                   </div>
               </CardContent>
@@ -771,11 +762,16 @@ export default function AadhaarPrinter() {
                         <CheckCircle2 className="size-7" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black uppercase tracking-tighter">Adjustment Ready</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Standard 85.6mm x 54mm Alignment</p>
+                        <h3 className="text-xl font-black uppercase tracking-tighter">Print Ready</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Professional Studio Alignment</p>
                     </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2 mr-2">
+                        <Square className="size-3 text-muted-foreground" />
+                        <span className="text-[10px] font-black uppercase">Card Border</span>
+                        <Switch checked={showBorder} onCheckedChange={setShowBorder} />
+                    </div>
                     <Tabs value={vAlign} onValueChange={(v) => setVAlign(v as VAlign)} className="bg-muted p-1 rounded-xl border-2">
                         <TabsList className="h-9">
                             <TabsTrigger value="top" className="px-3" title="Align Top"><AlignVerticalJustifyStart className="size-4"/></TabsTrigger>
@@ -798,12 +794,12 @@ export default function AadhaarPrinter() {
             <div className="no-print">
                 <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
                     <CardHeader className="bg-white/50 dark:bg-black/20 border-b p-4 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">HD STUDIO QUALITY RENDERING</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span>
                     </CardHeader>
                     <CardContent className="p-12 flex flex-col md:flex-row items-center justify-center gap-12">
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">FRONT PORTION</span>
-                            <div className="relative shadow-2xl rounded-xl overflow-hidden border-[6px] border-white bg-white group hover:scale-[1.05] transition-all" style={{ width: '320px', height: '202px' }}>
+                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")} style={{ width: '320px', height: '202px' }}>
                                 <img src={frontFinal} alt="Front" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>
@@ -813,7 +809,7 @@ export default function AadhaarPrinter() {
 
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">BACK PORTION</span>
-                            <div className="relative shadow-2xl rounded-xl overflow-hidden border-[6px] border-white bg-white group hover:scale-[1.05] transition-all" style={{ width: '320px', height: '202px' }}>
+                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")} style={{ width: '320px', height: '202px' }}>
                                 <img src={backFinal} alt="Back" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>
@@ -824,23 +820,23 @@ export default function AadhaarPrinter() {
                     <CardFooter className="bg-primary/5 p-6 border-t flex gap-4">
                         <ShieldCheck className="size-5 text-primary shrink-0" />
                         <p className="text-[11px] font-bold leading-relaxed text-primary/80 uppercase">
-                            <strong>Safe & Private:</strong> This straightened rendering is generated 100% locally in your RAM. Your ID details never touch any external server.
+                            <strong>Safe & Private:</strong> Processing happens 100% locally in your RAM. Your ID details never touch any external server.
                         </p>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* PRINT WRAPPER - REFACTORED FOR RELIABILITY */}
+            {/* PRINT WRAPPER - STRICT 1 PAGE FIX */}
             <div className={cn(
                 "hidden print:flex flex-col items-center w-full min-h-[297mm] p-0 m-0 bg-white",
                 vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
             )} id="printable-area">
                 <div className="flex flex-col items-center gap-12">
-                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
+                    <div className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm' }}>
                         <img src={frontFinal} className="max-w-full max-h-full object-contain" alt="Front Print" />
                     </div>
 
-                    <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
+                    <div className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm' }}>
                         <img src={backFinal} className="max-w-full max-h-full object-contain" alt="Back Print" />
                     </div>
                 </div>
@@ -848,26 +844,26 @@ export default function AadhaarPrinter() {
         </div>
       )}
 
-      {/* Global CSS for Print - STRICT 1 PAGE FIX */}
+      {/* Global CSS for Print - ABSOLUTE 1 PAGE LOCK */}
       <style jsx global>{`
         @media print {
-          /* Hide EVERYTHING by default */
           html, body {
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
-            height: 100% !important;
+            height: 297mm !important;
+            width: 210mm !important;
             overflow: hidden !important;
           }
           body * {
             visibility: hidden !important;
+            margin: 0 !important;
           }
-          /* Show ONLY our printable area */
           #printable-area, #printable-area * {
             visibility: visible !important;
           }
           #printable-area {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             width: 210mm !important;
@@ -877,6 +873,7 @@ export default function AadhaarPrinter() {
             align-items: center !important;
             background: white !important;
             z-index: 9999999 !important;
+            page-break-after: avoid !important;
           }
           @page {
             size: A4 portrait;
