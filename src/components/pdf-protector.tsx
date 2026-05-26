@@ -3,7 +3,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -122,8 +122,14 @@ export default function PdfProtector() {
                 compress: true
             });
 
+            // CRITICAL: Ensure encryption is available before proceeding
+            const encryptionPlugin = (securePdf as any).encrypt;
+            if (typeof encryptionPlugin !== 'function') {
+                throw new Error("Encryption engine not initialized in browser. Please try again.");
+            }
+
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Locking Page ${i}/${totalPages}...`);
+                setStatusText(`Sealing Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 // High-Density (300 DPI equivalent) for professional clarity
@@ -153,43 +159,32 @@ export default function PdfProtector() {
                 setProgress(10 + Math.round((i / totalPages) * 80));
             }
 
-            setStatusText("Sealing with AES Encryption...");
+            setStatusText("Applying AES Lock...");
             
-            // Generate Owner Password (randomly generated for permission control)
+            // Randomly generated Owner Password for permission control
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            /**
-             * ENCRYPTION LOGIC
-             * Standard jsPDF encryption logic for browser-side security.
-             * Note: In some bundlers, the method name might vary or be attached to prototype.
-             */
-            const encryptionMethod = (securePdf as any).encrypt;
-            
-            if (typeof encryptionMethod === 'function') {
-                encryptionMethod.call(securePdf, password, ownerPass, {
-                    userPermissions: {
-                        print: allowPrinting,
-                        copy: allowCopying,
-                        modify: false,
-                        annotForms: false
-                    }
-                });
-            } else {
-                console.warn("Standard encryption API not found, applying high-fidelity secure rendering.");
-                // Note: Re-encoding already provides a layer of security as the original text objects are removed.
-                // For 'Real' Adobe lock, we rely on the jsPDF encryption plugin being present in the bundle.
-            }
+            // REAL ENCRYPTION CALL
+            // This modifies the PDF internal dictionary to require a password on open
+            (securePdf as any).encrypt(password, ownerPass, {
+                userPermissions: {
+                    print: allowPrinting,
+                    copy: allowCopying,
+                    modify: false,
+                    annotForms: false
+                }
+            });
 
             const pdfBlob = securePdf.output('blob');
             setProtectedPdfUrl(URL.createObjectURL(pdfBlob));
             setProgress(100);
             setStatusText("Vault Sealed!");
-            toast({ title: 'Success!', description: 'PDF protected and high-density sealed.' });
+            toast({ title: 'Success!', description: 'PDF protected with real AES encryption.' });
 
         } catch (error: any) {
             console.error("Vault Error:", error);
-            setErrorDetails("Could not apply encryption layers. Please check if the file is already corrupted or too large.");
-            toast({ variant: 'destructive', title: 'Vault Error', description: 'Could not apply protection.' });
+            setErrorDetails(error.message || "Could not apply encryption layers.");
+            toast({ variant: 'destructive', title: 'Vault Error', description: 'Real encryption failed.' });
         } finally {
             setIsProtecting(false);
         }
@@ -444,4 +439,3 @@ export default function PdfProtector() {
         </div>
     );
 }
-
