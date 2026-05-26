@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Printer, ShieldCheck, HelpCircle, Layout, Scissors, Smartphone, CreditCard, LayoutGrid } from 'lucide-react';
+import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 
 export default function AadhaarPrinterPage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1 flex flex-col items-center w-full">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-8 space-y-4">
+        <div className="w-full flex flex-col items-center mb-12 px-4">
+            <div className="w-full max-w-5xl text-center mb-12 space-y-4">
                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <CreditCard className="size-3" /> UNIVERSAL IDENTITY STUDIO
                 </div>
@@ -32,7 +32,10 @@ export default function AadhaarPrinterPage() {
                     Auto-crop Aadhaar or arrange PAN/DL sides for perfect 85.6mm x 54mm printing.
                 </p>
             </div>
-            <AadhaarPrinter />
+            
+            <div className="w-full flex justify-center">
+                <AadhaarPrinter />
+            </div>
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">
@@ -107,4 +110,3 @@ export default function AadhaarPrinterPage() {
     </main>
   );
 }
-
