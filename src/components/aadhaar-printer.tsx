@@ -112,17 +112,16 @@ export default function AadhaarPrinter() {
   };
 
   /**
-   * Checks if PDF is encrypted and routes to appropriate stage
+   * Robust Check if PDF is encrypted and routes to appropriate stage
    */
   const checkPdfEncryptionAndProceed = async (buffer: ArrayBuffer) => {
     setIsProcessing(true);
     try {
-        // Attempt to load PDF without password
         const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
         const pdf = await loadingTask.promise;
         
-        // If successful, proceed to render immediately (skip password)
-        const page = await pdf.getPage(pdf.numPages);
+        // Success means NO password
+        const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 2.5 });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -139,7 +138,6 @@ export default function AadhaarPrinter() {
         }
     } catch (error: any) {
         if (error.name === 'PasswordException') {
-            // Password required, show input stage
             setStage('password');
         } else {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Could not process PDF file.' });
@@ -216,7 +214,7 @@ export default function AadhaarPrinter() {
             password: password 
         });
         const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(pdf.numPages); 
+        const page = await pdf.getPage(1); 
         
         const viewport = page.getViewport({ scale: 2.5 });
         const canvas = document.createElement('canvas');
@@ -381,20 +379,14 @@ export default function AadhaarPrinter() {
   };
 
   /**
-   * Optimized coordinate mapping for high-responsiveness
+   * GLUE LOGIC: Precise 1:1 Tracking
    */
-  const updateMagnifier = useCallback((clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
-    return { x, y };
-  }, []);
-
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     
+    // Prevent scrolling or browser dragging behavior
+    if (e.cancelable) e.preventDefault();
+
     let clientX, clientY;
     if ('touches' in e) {
         clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
@@ -402,15 +394,17 @@ export default function AadhaarPrinter() {
         clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
     }
     
-    const pos = updateMagnifier(clientX, clientY);
-    if (pos) {
-        setPoints(prev => {
-            const next = [...prev];
-            next[draggingPoint] = { x: pos.x, y: pos.y };
-            return next;
-        });
-    }
-  }, [draggingPoint, updateMagnifier]);
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+
+    setMagnifierPos({ x, y });
+    setPoints(prev => {
+        const next = [...prev];
+        next[draggingPoint] = { x, y };
+        return next;
+    });
+  }, [draggingPoint]);
 
   const handlePointMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
     setDraggingPoint(index);
@@ -421,12 +415,21 @@ export default function AadhaarPrinter() {
     } else {
         clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
     }
-    updateMagnifier(clientX, clientY);
+    
+    if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+        setMagnifierPos({ x, y });
+    }
   };
 
   const handleMouseUp = () => setDraggingPoint(null);
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+      // Ensure the print wrapper exists and layout is applied before triggering
+      window.print();
+  }
 
   const handleDownloadPdf = async () => {
     if (!frontFinal || !backFinal) return;
@@ -697,7 +700,7 @@ export default function AadhaarPrinter() {
                       </div>
                   )}
 
-                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10">
+                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} aspect={ID_ASPECT} className="max-h-[70vh]">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="rect" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
@@ -743,7 +746,7 @@ export default function AadhaarPrinter() {
                     )}
                   </div>
 
-                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t">
+                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
                        <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-4 w-4 text-primary animate-pulse" /> 
                           {cropMode === 'rect' ? "Drag box to ID area" : "Drag 4 dots to ID corners"}
@@ -827,11 +830,11 @@ export default function AadhaarPrinter() {
                 </Card>
             </div>
 
-            {/* PRINT WRAPPER */}
+            {/* PRINT WRAPPER - REFACTORED FOR RELIABILITY */}
             <div className={cn(
                 "hidden print:flex flex-col items-center w-full min-h-[297mm] p-0 m-0 bg-white",
                 vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
-            )}>
+            )} id="printable-area">
                 <div className="flex flex-col items-center gap-12">
                     <div className="border-[1pt] border-slate-300 rounded-sm overflow-hidden bg-white shadow-sm flex items-center justify-center" style={{ width: '85.6mm', height: '54mm' }}>
                         <img src={frontFinal} className="max-w-full max-h-full object-contain" alt="Front Print" />
@@ -848,43 +851,36 @@ export default function AadhaarPrinter() {
       {/* Global CSS for Print - STRICT 1 PAGE FIX */}
       <style jsx global>{`
         @media print {
-          body {
+          /* Hide EVERYTHING by default */
+          html, body {
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
+            height: 100% !important;
             overflow: hidden !important;
           }
-          /* Hide everything by default */
-          body > *:not(.print-wrapper-actual) {
-            display: none !important;
+          body * {
+            visibility: hidden !important;
           }
-          header, footer, nav, button, .no-print, [data-sidebar="sidebar"], .tool-navigation {
-            display: none !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
+          /* Show ONLY our printable area */
+          #printable-area, #printable-area * {
+            visibility: visible !important;
           }
-          /* Show only the target container */
-          .print\:flex {
-            display: flex !important;
+          #printable-area {
             position: absolute !important;
-            top: 0 !important;
             left: 0 !important;
+            top: 0 !important;
             width: 210mm !important;
             height: 297mm !important;
-            z-index: 99999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
             background: white !important;
-            visibility: visible !important;
-          }
-          .print\:flex * {
-            visibility: visible !important;
+            z-index: 9999999 !important;
           }
           @page {
             size: A4 portrait;
             margin: 0;
-          }
-          html, body {
-            height: 100%;
           }
         }
       `}</style>
