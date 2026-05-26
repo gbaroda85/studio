@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -98,6 +99,7 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
+      { href: '/docx-to-pdf', label: 'word_to_pdf_label', icon: FileText },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
       { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
       { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -65,6 +66,8 @@ const translations = {
     add_watermark_description: 'Add a text or image watermark to your PDF.',
     add_page_numbers_label: 'Add Page Numbers',
     add_page_numbers_description: 'Insert page numbers into your PDF document.',
+    word_to_pdf_label: 'Word to PDF',
+    word_to_pdf_description: 'Convert DOCX documents to professional PDF files instantly.',
     create_zip_label: 'Create Zip',
     create_zip_description: 'Combine multiple files into a single zip archive.',
     unzip_file_label: 'Unzip File',
@@ -163,6 +166,8 @@ const translations = {
     add_watermark_description: 'अपने पीडीएफ में टेक्स्ट या छवि वॉटरमार्क जोड़ें।',
     add_page_numbers_label: 'पृष्ठ संख्याएँ जोड़ें',
     add_page_numbers_description: 'अपने पीडीएफ दस्तावेज़ में पृष्ठ संख्याएँ डालें।',
+    word_to_pdf_label: 'Word से PDF',
+    word_to_pdf_description: 'DOCX दस्तावेजों को तुरंत पेशेवर PDF फाइलों में बदलें।',
     create_zip_label: 'ज़िप बनाएं',
     create_zip_description: 'कई फ़ाइलों को एक ज़िप संग्रह में मिलाएं।',
     unzip_file_label: 'फ़ाइल अनज़िप करें',
@@ -261,6 +266,8 @@ const translations = {
     add_watermark_description: 'Agrega una marca de agua de texto o imagen a tu PDF.',
     add_page_numbers_label: 'Agregar números de página',
     add_page_numbers_description: 'Inserte números de página en su documento PDF.',
+    word_to_pdf_label: 'Word a PDF',
+    word_to_pdf_description: 'Convierta documentos DOCX a archivos PDF profesionales al instante.',
     create_zip_label: 'Crear Zip',
     create_zip_description: 'Combina varios archivos en un solo archivo zip.',
     unzip_file_label: 'Descomprimir Archivo',

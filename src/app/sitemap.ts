@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -24,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/image-to-pdf',
     
     // PDF Tools
+    '/docx-to-pdf',
     '/lock-pdf',
     '/compress-pdf',
     '/merge-pdf',

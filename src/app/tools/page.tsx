@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -145,6 +146,13 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/docx-to-pdf',
+      labelKey: 'word_to_pdf_label',
+      descriptionKey: 'word_to_pdf_description',
+      icon: FileText,
+      color: 'text-blue-500',
+    },
     {
       href: '/lock-pdf',
       labelKey: 'lock_pdf_label',
