@@ -109,10 +109,9 @@ export default function PdfProtector() {
         setStatusText("Initializing Secure Vault...");
 
         try {
-            // DYNAMICALLY LOAD JSPDF TO ENSURE PLUGINS ARE INITIALIZED
-            const jspdfModule: any = await import('jspdf');
-            const jsPDF = jspdfModule.jsPDF;
-
+            // Force dynamic import of jsPDF to ensure all plugins are available
+            const { jsPDF } = await import('jspdf');
+            
             const arrayBuffer = await pdfFile.arrayBuffer();
             const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
             const pdf = await loadingTask.promise;
@@ -124,17 +123,17 @@ export default function PdfProtector() {
                 compress: true
             });
 
-            // CRITICAL: Check if encryption plugin is available in this bundle
+            // CRITICAL ENGINE CHECK
             if (typeof (securePdf as any).encrypt !== 'function') {
-                console.error("jsPDF Encryption Plugin not found. This might be a bundling issue.");
-                throw new Error("Local Encryption Engine is currently unavailable. This usually happens when the browser strips security plugins. Please refresh the page.");
+                console.error("jsPDF Encryption Plugin not found in this bundle.");
+                throw new Error("Local Encryption Engine is currently unavailable. Please refresh or try another browser.");
             }
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Sealing Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // High-Density (300 DPI equivalent) for professional clarity
+                // 2.5x Scale for 300 DPI quality
                 const viewport = page.getViewport({ scale: 2.5 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
@@ -163,10 +162,10 @@ export default function PdfProtector() {
 
             setStatusText("Applying AES Encryption...");
             
-            // Randomly generated Owner Password for permission control
+            // Generate Owner Password for permissions
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            // Native AES Lock Implementation - strictly respecting password
+            // Standard-compliant AES-128 Encryption Seal
             (securePdf as any).encrypt(password, ownerPass, {
                 userPermissions: {
                     print: allowPrinting,
@@ -180,12 +179,12 @@ export default function PdfProtector() {
             setProtectedPdfUrl(URL.createObjectURL(pdfBlob));
             setProgress(100);
             setStatusText("Vault Sealed!");
-            toast({ title: 'Security Applied', description: 'PDF protected with real AES-128 bit encryption.' });
+            toast({ title: 'Security Applied', description: 'PDF protected with real AES encryption.' });
 
         } catch (error: any) {
             console.error("Vault Error:", error);
             setErrorDetails(error.message || "Could not apply encryption layers.");
-            toast({ variant: 'destructive', title: 'Vault Error', description: 'Encryption engine failed to start.' });
+            toast({ variant: 'destructive', title: 'Vault Error', description: 'Encryption engine failed.' });
         } finally {
             setIsProtecting(false);
         }
@@ -196,9 +195,7 @@ export default function PdfProtector() {
         const link = document.createElement('a');
         link.href = protectedPdfUrl;
         link.download = `vault-locked-${pdfFile.name}`;
-        document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
     };
 
     if (!pdfFile) {
@@ -223,7 +220,7 @@ export default function PdfProtector() {
                         </div>
                         <div>
                             <p className="text-xl font-black uppercase tracking-tight">Drop PDF to Seal with AES</p>
-                            <p className="text-xs text-muted-foreground font-bold mt-2 uppercase tracking-widest opacity-50">Local Processing • Military Grade Protection</p>
+                            <p className="text-xs text-muted-foreground font-bold mt-2 uppercase tracking-widest opacity-50">Local Processing • Standard Compliant</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
