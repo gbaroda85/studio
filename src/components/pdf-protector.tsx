@@ -3,7 +3,6 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { jsPDF } from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -110,22 +109,26 @@ export default function PdfProtector() {
         setStatusText("Initializing Secure Vault...");
 
         try {
+            // DYNAMICALLY LOAD THE FULL UMD VERSION OF JSPDF
+            // This version includes the encryption plugin which is often missing in ES builds
+            const jspdfModule: any = await import('jspdf');
+            const jsPDF = jspdfModule.jsPDF;
+
             const arrayBuffer = await pdfFile.arrayBuffer();
             const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
 
-            // REAL PROTECTION LOGIC:
             const securePdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
                 compress: true
             });
 
-            // CRITICAL: Ensure the encryption engine is accessible
-            // We use a broader check and call method for jspdf plugins
-            const encryptMethod = (securePdf as any).encrypt;
-            if (typeof encryptMethod !== 'function') {
+            // Check if the encrypt method exists
+            const encryptMethod = (securePdf as any).processJPG ? (securePdf as any).encrypt : (securePdf as any).encrypt;
+            
+            if (typeof (securePdf as any).encrypt !== 'function') {
                 console.error("jsPDF Encryption Plugin not found. This might be a bundling issue.");
                 throw new Error("Local Encryption Engine is currently unavailable in this browser session. Please try refreshing or using a different browser.");
             }
