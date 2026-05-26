@@ -8,17 +8,25 @@ import CloudConvert from 'cloudconvert';
 
 /**
  * @fileOverview Server-side DOCX to PDF conversion route.
- * This runs on the backend, so API keys are NEVER visible to the website visitors.
+ * Security Note: API keys are now loaded from environment variables for safety.
+ * This prevents keys from being exposed in public GitHub repositories.
  */
 
-// --- API KEYS (SERVER-SIDE ONLY) ---
-const CONVERT_API_SECRET = 'LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7';
-const CLOUD_CONVERT_API_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNTkyMmIzZGNkZWJkMDRlOTMyOTMxOTc4ZWYwZjZlMDZmOWNjMjMwNjQyZWJkY2E2ZmEzM2NjOWU5ZjVhZjhmMWUwYWE0YjUzNjE2N2ExMTEiLCJpYXQiOjE3Nzk3ODg0MzMuNDM2OTc0LCJuYmYiOjE3Nzk3ODg0MzMuNDM2OTc2LCJleHAiOjQ5MzU0NjIwMzMuNDMxNTY1LCJzdWIiOiI3NTcxNjYxMiIsInNjb3BlcyI6WyJ0YXNrLnJlYWQiLCJ0YXNrLndyaXRlIl19.qCUtk8UaTWg5aF1pu5wbmGCBEo_Z2rPOOkKghqWGvaJNV4UOzteo-Pb3fOkghJ8sWsaEj3IX-fGZqlRUZV6g5ur7RkhKjPKVgS9r7HSrA-IfJzVVgtSdC_EE3DjXakK78APgaPmmbJGNKlzU4pauTtsGVUt9CYPWdWLw6j7txdLYDb9FDmNZ6RNnyNY3_FIIXEF4p5RZN2RwZ7uz0xyUyEKEwcAZyJ3bSJHfonK93Bzzxetc1pxe7IZruAcLuhHOl6twM7RNlSsZNuzBoqGju5FTPHib1CShvWs-JwNBdb0rH85aBqTp2rlgRCW_mrwRlxs-HvsPNSXYGHEOO6thmsLdM9yDcMap1sd16jRA_h21FX48sRishocEPQP0JqqUjHSmp35cccGMzg8xy9EXocc8P06l0N4OcxZNfFQc60oxo0Dp0WGbVJjHpGcU_g8mTICso7ctjFmkZ7O1IWW7GzkrsBe5f6Z1Q61ANHJLV0HzQYModE_PwAiXFe2fQcxE2ahAUdFevH5vcTg8rEvxzvjvwWGMnioCR2eo6impKe-8pXjuG2UqY6a40rskw98PIdqzwVM2_aod1qT8QnW7OgQH596VVQpd_V6lLu1CfOfC36rshnbwhgvUjhKunI8CuHw6d3fQQW26uFcFg1stSDeVYz8g-y6NFdrZLoFtTy4'; 
-
-const capi = convertapi(CONVERT_API_SECRET);
+// Keys are fetched from process.env (Server-side environment)
+const CONVERT_API_SECRET = process.env.CONVERT_API_SECRET;
+const CLOUD_CONVERT_API_KEY = process.env.CLOUD_CONVERT_API_KEY;
 
 export async function POST(req: Request) {
   try {
+    // Check if keys are present in the environment
+    if (!CONVERT_API_SECRET || !CLOUD_CONVERT_API_KEY) {
+      console.error('Missing API keys in environment variables.');
+      return NextResponse.json({ 
+        error: 'Server is not configured with necessary API keys.' 
+      }, { status: 500 });
+    }
+
+    const capi = convertapi(CONVERT_API_SECRET);
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -46,13 +54,12 @@ export async function POST(req: Request) {
         provider: 'convertapi' 
       });
     } catch (capiError: any) {
-      console.warn('ConvertAPI limit reached or error. Switching to CloudConvert...', capiError.message);
+      console.warn('ConvertAPI failed or limit reached. Switching to Fallback...', capiError.message);
       
       // --- STRATEGY 2: CLOUDCONVERT (FALLBACK) ---
       console.log('Attempting fallback conversion with CloudConvert...');
       const cloudConvert = new CloudConvert(CLOUD_CONVERT_API_KEY);
       
-      // Create a job for CloudConvert
       let job = await cloudConvert.jobs.create({
         tasks: {
           'upload-task': {
@@ -62,7 +69,7 @@ export async function POST(req: Request) {
             operation: 'convert',
             input: 'upload-task',
             output_format: 'pdf',
-            engine: 'office' // Highest fidelity for Word docs
+            engine: 'office' 
           },
           'export-task': {
             operation: 'export/url',
@@ -72,15 +79,11 @@ export async function POST(req: Request) {
       });
 
       const uploadTask = job.tasks.find((task: any) => task.name === 'upload-task');
-      
-      // Stream for upload
       const uploadStream = new Readable();
       uploadStream.push(buffer);
       uploadStream.push(null);
 
       await cloudConvert.tasks.upload(uploadTask, uploadStream, file.name);
-      
-      // Wait for completion
       job = await cloudConvert.jobs.wait(job.id);
       
       const exportTask = job.tasks.find(

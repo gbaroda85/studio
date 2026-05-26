@@ -1,43 +1,34 @@
-# Firebase Studio
 
-This is a NextJS starter in Firebase Studio.
+# GR7 Tools - Professional Studio
 
-To get started, take a look at src/app/page.tsx.
+This is a high-performance utility suite built with Next.js and Firebase Studio.
 
-## Deploying to Vercel
+## 🔐 Security Instructions (ACTION REQUIRED)
 
-Deploying this application to Vercel is a straightforward process. Follow these steps to get your site live.
+Your repository is currently **Public**. To protect your API keys and credits:
 
-### IMPORTANT: Deploying Updates
+### 1. Make Repository Private
+Go to your GitHub repo **Settings** > **General** > **Danger Zone** > **Change visibility** and set it to **Private**.
 
-Every time you make changes to your app, you must **push those changes to your Git repository** before Vercel can see them. If your deployment is failing with an old error, it's likely because the latest code fixes have not been pushed to your repository.
+### 2. Rotate Your API Keys
+Since the keys were visible in the history, they are no longer secure. Please generate new ones:
+- **ConvertAPI**: [Dashboard](https://www.convertapi.com/a/profile)
+- **CloudConvert**: [API Keys](https://cloudconvert.com/dashboard/api/v2/keys)
 
-### Step 1: Push Your Code to a Git Repository
+### 3. Setup Hosting Environment
+When deploying to Vercel or Firebase, add these **Environment Variables** in their respective dashboards:
+- `CONVERT_API_SECRET`
+- `CLOUD_CONVERT_API_KEY`
+- `GOOGLE_API_KEY`
 
-Vercel deploys directly from a Git repository (like GitHub, GitLab, or Bitbucket).
+---
 
-1.  Create a new repository on your preferred Git provider.
-2.  Follow the provider's instructions to push your local project code to the new repository.
+## Features
+- **AI Image Processing**: Compression, Resizing, BG Removal, Enhancement.
+- **PDF Suite**: Secure Locking, Unlocking, Merging, Splitting, Conversion.
+- **Tools Hub**: 30+ utilities for daily productivity.
 
-### Step 2: Import Your Project in Vercel
-
-1.  [Sign up for a Vercel account](https://vercel.com/signup) if you don't have one.
-2.  From your Vercel dashboard, click "**Add New...**" and select "**Project**".
-3.  Connect Vercel to your Git provider and select the repository you just created.
-4.  Vercel will automatically detect that this is a Next.js project and configure the build settings for you. You typically don't need to change anything here.
-
-### Step 3: Configure Environment Variables
-
-Your application uses Genkit for AI features, which requires an API key to communicate with Google's services. You must provide this key to Vercel.
-
-1.  In the project configuration screen on Vercel, expand the "**Environment Variables**" section.
-2.  Add a new environment variable:
-    *   **Name**: `GOOGLE_API_KEY`
-    *   **Value**: Paste your Google AI API key here. You can get a key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-3.  Ensure the key is available in all environments (Production, Preview, and Development).
-
-### Step 4: Deploy
-
-1.  Click the "**Deploy**" button.
-2.  Vercel will start building and deploying your application. You can watch the progress in the build logs.
-3.  Once complete, Vercel will provide you with a live URL for your project. Congratulations!
+## Deployment to Vercel
+1. Connect your (Private) GitHub repo.
+2. Add Environment Variables in Vercel Settings.
+3. Deploy!
