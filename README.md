@@ -16,17 +16,25 @@ Look at the very top-left of your GitHub page near the repository name:
 3. **Scroll to the very bottom** of the page to find the section called **"Danger Zone"**.
 4. Click the button **"Change visibility"** to toggle between Public and Private.
 
-### 3. Deployment Setup (Vercel/Firebase)
-When you deploy, you MUST add these 2 environment variables in their dashboard so the Word-to-PDF tool works:
+### 3. Vercel "Deployment Blocked" Fix
+If Vercel blocks your deployment after making the repo private, follow these steps to refresh permissions:
+
+**Part A: GitHub App Permissions**
+1. Click your **Profile Picture** (Top Right) on GitHub -> **Settings**.
+2. Left sidebar -> **Applications** -> **Installed GitHub Apps**.
+3. Find **Vercel** -> Click **Configure**.
+4. Scroll to **Repository access** -> Select **"All repositories"** and click **Save**.
+
+**Part B: Vercel Dashboard Reconnect**
+1. Go to **Vercel Dashboard** -> Open your project.
+2. Click the **Settings** tab (Top row) -> Click **Git** (Left sidebar).
+3. Scroll down and click the **"Disconnect"** button.
+4. Now click **"Connect"** again and select your **Private Studio Repository**.
+
+### 4. Environment Variables
+When you deploy, you MUST add these 2 environment variables in the Vercel/Firebase dashboard so the Word-to-PDF tool works:
 - `CONVERT_API_SECRET`
 - `CLOUD_CONVERT_API_KEY`
-
-### 4. Vercel "Deployment Blocked" Fix
-If Vercel blocks your deployment after making the repo private:
-1. Go to **Vercel Dashboard** -> Your Project -> **Settings** -> **Git**.
-2. Click **Disconnect** repository.
-3. Click **Connect** again and select your private repository.
-4. Ensure the Vercel GitHub App has permissions (Check GitHub Settings -> Applications -> Vercel).
 
 ---
 
