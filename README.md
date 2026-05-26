@@ -5,22 +5,23 @@ This is a high-performance utility suite built with Next.js and Firebase Studio.
 
 ## 🔐 Security Instructions (ACTION REQUIRED)
 
-### 1. Make Repository Private
-Agar aapne abhi tak code push nahi kiya hai, toh pehle repo ko Private banaiye:
-1. GitHub par apni repository ke page par jayein.
-2. Upar ki tabs mein (Code, Issues, Pull requests...) ek **Settings** (Gear icon ⚙️) hoga. 
-   *Agar nahi dikh raha, toh **...** (three dots) par click karein, wahan Settings mil jayega.*
-3. Left sidebar mein **General** par click karein (yeh pehle se select hota hai).
-4. Page ke ekdam niche scroll karein wahan **"Danger Zone"** likha hoga.
-5. **"Change visibility"** button par click karein aur **"Make private"** select kar lein.
+### 1. How to make Repo Private (See Screenshot Guide)
+Look at the very top row of tabs in your GitHub repo:
+`Code` | `Issues` | `Pull requests` | `Actions` | ... | **Settings** ⚙️
 
-### 2. Setup Hosting Environment
-Jab aap website ko Vercel ya Firebase par deploy karenge, toh wahan ke dashboard mein "Environment Variables" mein yeh 2 keys add karni hongi:
+1. Click on the **Settings** tab (the last one on the right).
+2. On the left sidebar, make sure you are in **General**.
+3. Scroll all the way to the bottom to find the **"Danger Zone"**.
+4. Click the button **"Change visibility"**.
+5. Select **"Make private"** and confirm.
+
+### 2. Deployment Setup
+When you deploy to Vercel or Firebase App Hosting, you MUST add these 2 environment variables in their dashboard:
 - `CONVERT_API_SECRET`
 - `CLOUD_CONVERT_API_KEY`
 
-### 3. Rotate Your API Keys (Highly Recommended)
-Kyunki aapne keys chat mein share ki hain, behtar hoga ki aap apne ConvertAPI aur CloudConvert dashboard par jaakar purani keys **Delete** karke naye generate karein aur unhe upar bataye tarike se add karein.
+### 3. Key Rotation (Recommended)
+Since the keys were shared in chat, go to ConvertAPI and CloudConvert dashboards, **Delete** the old keys, and generate fresh ones for 100% security.
 
 ---
 
