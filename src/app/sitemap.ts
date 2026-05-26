@@ -24,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/image-to-pdf',
     
     // PDF Tools
+    '/lock-pdf',
     '/compress-pdf',
     '/merge-pdf',
     '/split-pdf',

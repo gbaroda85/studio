@@ -43,7 +43,8 @@ import {
   Calculator,
   Star,
   Infinity,
-  Printer
+  Printer,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -67,6 +68,7 @@ const ALL_TOOLS = [
   { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   
   // PDF Tools (11)
+  { icon: Lock, title: "Vault PDF Locker", description: "Seal your documents with real AES password encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", category: "pdf" },
   { icon: FileArchive, title: "PDF Optimizer", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
   { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },

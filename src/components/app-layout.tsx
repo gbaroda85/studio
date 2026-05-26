@@ -47,7 +47,8 @@ import {
   AreaChart,
   Fuel,
   Waves,
-  Printer
+  Printer,
+  Lock
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -97,10 +98,11 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
+      { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
+      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
       { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
       { href: '/split-pdf', label: 'split_pdf_label', icon: Scissors },
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
-      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
       { href: '/crop-pdf', label: 'crop_pdf_label', icon: Crop },
       { href: '/pdf-to-image', label: 'pdf_to_image_label', icon: ImageIcon },
       { href: '/html-to-pdf', label: 'html_to_pdf_label', icon: FileCode },
@@ -366,7 +368,7 @@ function AppHeader() {
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
             <div className="flex items-center gap-1">
-                <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/5 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
+                <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/10 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
                     <a href="mailto:gaurav.thearmy@yahoo.com">
                         <Mail className="h-4 w-4 text-primary" />
                         <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>

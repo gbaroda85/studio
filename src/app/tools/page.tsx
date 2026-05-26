@@ -47,7 +47,8 @@ import {
   FileText,
   PenLine,
   LayoutGrid,
-  UserCircle
+  UserCircle,
+  Lock
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -145,6 +146,20 @@ function ToolsPageContent() {
 
   const pdfFeatures = [
     {
+      href: '/lock-pdf',
+      labelKey: 'lock_pdf_label',
+      descriptionKey: 'lock_pdf_description',
+      icon: Lock,
+      color: 'text-slate-900',
+    },
+    {
+      href: '/unlock-pdf',
+      labelKey: 'unlock_pdf_label',
+      descriptionKey: 'unlock_pdf_description',
+      icon: Unlock,
+      color: 'text-teal-500',
+    },
+    {
       href: '/text-to-pdf',
       labelKey: 'text_to_pdf_label',
       descriptionKey: 'text_to_pdf_description',
@@ -199,13 +214,6 @@ function ToolsPageContent() {
       descriptionKey: 'scan_to_pdf_description',
       icon: ScanLine,
       color: 'text-indigo-500',
-    },
-    {
-      href: '/unlock-pdf',
-      labelKey: 'unlock_pdf_label',
-      descriptionKey: 'unlock_pdf_description',
-      icon: Unlock,
-      color: 'text-teal-500',
     },
     {
       href: '/add-watermark',
