@@ -16,7 +16,8 @@ import {
     AlertCircle,
     X,
     FileText,
-    Sparkles
+    Sparkles,
+    FileDigit
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -80,14 +81,15 @@ export default function PdfLocker() {
     }
 
     setIsProcessing(true);
-    setProgress(20);
+    setProgress(10);
     
     try {
-        // UI simulation of progress
+        // UI simulation of progress while engine starts
         const interval = setInterval(() => {
-            setProgress(p => p < 90 ? p + 5 : p);
-        }, 100);
+            setProgress(p => p < 80 ? p + 10 : p);
+        }, 150);
 
+        // Call our sanitize + encrypt utility
         const blob = await lockPdf(pdfFile, password);
         
         clearInterval(interval);
@@ -101,9 +103,10 @@ export default function PdfLocker() {
             colors: ['#5cbdb9', '#fbe3e8', '#ffffff']
         });
 
-        toast({ title: "Document Locked!", description: "AES encryption applied successfully." });
+        toast({ title: "Document Locked!", description: "AES encryption applied with HD sanitization." });
     } catch (error) {
-        toast({ variant: "destructive", title: "Encryption Error", description: "Failed to protect document. It might already be encrypted." });
+        console.error(error);
+        toast({ variant: "destructive", title: "Encryption Error", description: "Failed to protect document. Check if the original PDF is corrupted." });
     } finally {
         setIsProcessing(false);
     }
@@ -114,7 +117,7 @@ export default function PdfLocker() {
     const url = URL.createObjectURL(protectedBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `protected-${pdfFile.name}`;
+    link.download = `locked-${pdfFile.name}`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -147,7 +150,7 @@ export default function PdfLocker() {
         </div>
 
         <Card
-            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
         >
@@ -158,7 +161,7 @@ export default function PdfLocker() {
                 </div>
                 <div className="text-center">
                     <p className="text-2xl font-black uppercase tracking-tighter">Drop PDF to Lock</p>
-                    <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">No file size limits. Adobe Acrobat compatible.</p>
+                    <p className="text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity sanitization active.</p>
                 </div>
             </CardContent>
             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -166,8 +169,8 @@ export default function PdfLocker() {
 
         <div className="flex flex-wrap justify-center gap-8 text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-4">
             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> AES-128 ENCRYPTION</div>
-            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> NATIVE PERFORMANCE</div>
-            <div className="flex items-center gap-2"><ShieldAlert className="size-4 text-primary" /> ZERO SERVER LOGS</div>
+            <div className="flex items-center gap-2"><FileDigit className="size-4 text-primary" /> HD SANITIZATION</div>
+            <div className="flex items-center gap-2"><ShieldAlert className="size-4 text-rose-500" /> ZERO SERVER LOGS</div>
         </div>
       </div>
     );
@@ -184,7 +187,7 @@ export default function PdfLocker() {
             <div>
                 <h2 className="text-3xl font-black uppercase tracking-tighter">Security <span className="text-primary">Vault</span></h2>
                 <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20">Real PDF Protection</Badge>
+                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20">Clean Buffer Ready</Badge>
                     <Badge variant="outline" className="text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">Local RAM</Badge>
                 </div>
             </div>
@@ -206,7 +209,7 @@ export default function PdfLocker() {
                     </div>
                     <Badge className="font-mono text-[10px]">{formatBytes(pdfFile.size)}</Badge>
                 </CardHeader>
-                <CardContent className="p-12 flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900/50">
+                <CardContent className="p-12 flex flex-col items-center justify-center min-h-[450px] bg-slate-50 dark:bg-slate-900/50">
                     {protectedBlob ? (
                         <div className="text-center space-y-8 animate-in zoom-in-95 duration-500">
                              <div className="size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-green-500/40 relative">
@@ -215,7 +218,7 @@ export default function PdfLocker() {
                             </div>
                             <div className="space-y-2">
                                 <h3 className="text-4xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
-                                <p className="text-sm text-muted-foreground font-bold">Your document is now sealed with AES-128 standard.</p>
+                                <p className="text-sm text-muted-foreground font-bold">Your document is sanitized and sealed.</p>
                             </div>
                             <Button size="lg" className="h-20 px-12 bg-green-600 hover:bg-green-700 text-2xl font-black rounded-[1.5rem] shadow-2xl active:scale-95 transition-all w-full group" onClick={handleDownload}>
                                 <Download className="mr-4 size-8 group-hover:translate-y-1 transition-transform" /> SAVE SECURE PDF
@@ -230,7 +233,7 @@ export default function PdfLocker() {
                             <div className="space-y-4">
                                 <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">Encoding Security Layer...</p>
                                 <Progress value={progress} className="h-2 shadow-inner bg-primary/10" />
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-50">Applying AES Dictionary in device RAM...</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-50">Cleaning buffer and applying AES lock...</p>
                             </div>
                         </div>
                     ) : (
@@ -292,9 +295,9 @@ export default function PdfLocker() {
                     <div className="p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4">
                         <AlertCircle className="size-6 text-blue-600 shrink-0" />
                         <div>
-                            <p className="text-[11px] font-black text-blue-700 uppercase">Warning</p>
+                            <p className="text-[11px] font-black text-blue-700 uppercase">Sanitization Note</p>
                             <p className="text-[10px] text-blue-600/80 font-medium leading-tight mt-1">
-                                We cannot recover your password. Please keep it safe. The encryption is permanent until manually removed.
+                                We automatically rebuild the PDF structure to ensure encryption is applied deeply. No content is lost.
                             </p>
                         </div>
                     </div>
@@ -332,7 +335,7 @@ export default function PdfLocker() {
                 </div>
                 <div>
                     <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Vault-Grade Engine</p>
-                    <p className="text-[10px] text-green-600/80 font-medium leading-tight">This tool produces files compatible with Adobe, Chrome, and all standard PDF readers.</p>
+                    <p className="text-[10px] text-green-600/80 font-medium leading-tight">Adobe & Browser compatible. Guaranteed no blank pages.</p>
                 </div>
             </div>
         </div>
