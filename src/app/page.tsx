@@ -135,7 +135,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Ultra Compact */}
+      {/* Hero Section - Optimized Title */}
       <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -148,12 +148,12 @@ export default function Page() {
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
-            Professional Tools for <br className="hidden md:block" />
+            Elite Studio for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images, PDFs & Utilities</span>
           </h1>
           
           <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-6 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
+            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for professional use.
           </p>
 
           {/* Quick Access Action Category Buttons */}
