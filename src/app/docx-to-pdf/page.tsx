@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { FileText, ShieldCheck, HelpCircle, Zap, Layout, FileDigit } from 'lucide-react';
 import DocxToPdf from '@/components/docx-to-pdf';

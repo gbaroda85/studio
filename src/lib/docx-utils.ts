@@ -1,4 +1,3 @@
-
 import * as mammoth from 'mammoth';
 
 /**
@@ -8,7 +7,7 @@ import * as mammoth from 'mammoth';
 
 export const convertDocxToPdf = async (file: File): Promise<boolean> => {
   try {
-    // Dynamic import to avoid SSR issues
+    // Dynamic import to avoid SSR issues with html2pdf.js
     const html2pdf = (await import('html2pdf.js')).default;
 
     // 1. Read DOCX file as ArrayBuffer
@@ -18,14 +17,14 @@ export const convertDocxToPdf = async (file: File): Promise<boolean> => {
     const result = await mammoth.convertToHtml({ arrayBuffer });
     const htmlContent = result.value;
 
-    // Optional: Add some basic CSS to the HTML to make it look like a document
+    // 3. Configure styling to make the HTML look like a real document
     const styledHtml = `
       <div style="font-family: 'Helvetica', 'Arial', sans-serif; padding: 40px; line-height: 1.6; color: #333; background: white; min-height: 1000px;">
         ${htmlContent}
       </div>
     `;
 
-    // 3. Configure html2pdf options
+    // 4. Configure html2pdf options
     const originalName = file.name.replace('.docx', '').replace('.doc', '');
     const options = {
       margin: [0.5, 0.5, 0.5, 0.5],
@@ -40,7 +39,7 @@ export const convertDocxToPdf = async (file: File): Promise<boolean> => {
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    // 4. Generate and save PDF
+    // 5. Generate and save PDF
     await html2pdf().set(options).from(styledHtml).save();
     return true;
   } catch (error) {
