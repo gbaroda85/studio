@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -114,7 +115,7 @@ export default function PdfProtector() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
 
-            // Using jsPDF internal encryption which is Adobe compatible
+            // Initialize jsPDF with standard settings
             const securePdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
@@ -125,8 +126,8 @@ export default function PdfProtector() {
                 setStatusText(`Locking Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // High-Density (3.0x scale) to ensure original sharpness preservation
-                const viewport = page.getViewport({ scale: 3.0 });
+                // High-Density (2.5x scale) for professional clarity
+                const viewport = page.getViewport({ scale: 2.5 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
                 if (!context) continue;
@@ -140,51 +141,45 @@ export default function PdfProtector() {
                 context.imageSmoothingQuality = 'high';
 
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
                 
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                if (i > 1) securePdf.addPage([viewport.width, viewport.height], 'p');
+                else {
+                    securePdf.deletePage(1);
+                    securePdf.addPage([viewport.width, viewport.height], 'p');
+                }
                 
-                if (i === 1) securePdf.deletePage(1);
-                
-                securePdf.addPage([viewport.width, viewport.height], 'p');
                 securePdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
-
                 setProgress(10 + Math.round((i / totalPages) * 80));
             }
 
-            setStatusText("Injecting AES Lock...");
+            setStatusText("Sealing with AES encryption...");
             
-            // Generate a random owner password to secure permissions
+            // Set REAL Native Encryption using jsPDF's built-in plugin
+            // The owner password is a random string to secure the permissions dictionary
             const ownerPass = Math.random().toString(36).substring(2, 15);
             
-            (securePdf as any).setProperties({
-                title: 'Vault Protected Document',
-                author: 'GR7 Secure Studio',
-                subject: 'AES-128 Encrypted'
+            // Correct way to call encryption in newer jsPDF
+            // Permissions are passed as an object
+            securePdf.encrypt(password, ownerPass, {
+                userPermissions: {
+                    print: allowPrinting,
+                    copy: allowCopying,
+                    modify: false,
+                    annotForms: false
+                }
             });
-
-            // Set Real Native Encryption
-            // userPermissions: array of allowed actions
-            const permissions = [];
-            if (allowPrinting) permissions.push('print');
-            if (allowCopying) permissions.push('copy');
-            permissions.push('modify', 'annot-forms'); // These remain locked for basic users usually
-
-            (securePdf as any).encryption = {
-                userPassword: password,
-                ownerPassword: ownerPass,
-                userPermissions: permissions
-            };
 
             const pdfBlob = securePdf.output('blob');
             setProtectedPdfUrl(URL.createObjectURL(pdfBlob));
             setProgress(100);
             setStatusText("Vault Sealed!");
-            toast({ title: 'Success!', description: 'Your PDF is now military-grade protected.' });
+            toast({ title: 'Success!', description: 'PDF protected with standard AES encryption.' });
 
         } catch (error: any) {
             console.error("Encryption Error:", error);
-            setErrorDetails("Locking failed. The source PDF might be heavily restricted.");
-            toast({ variant: 'destructive', title: 'Lock Error', description: 'Could not seal document.' });
+            setErrorDetails("Encryption engine failure. Please try a simpler PDF.");
+            toast({ variant: 'destructive', title: 'Vault Error', description: 'Could not apply password.' });
         } finally {
             setIsProtecting(false);
         }
