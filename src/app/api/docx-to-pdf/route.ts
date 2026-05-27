@@ -7,26 +7,23 @@ import convertapi from 'convertapi';
 import CloudConvert from 'cloudconvert';
 
 /**
- * @fileOverview Server-side DOCX to PDF conversion route.
- * Security Note: API keys are now loaded from environment variables for safety.
- * This prevents keys from being exposed in public GitHub repositories.
+ * @fileOverview Server-side DOCX to PDF conversion route with multi-provider fallback.
+ * Security Note: API keys are loaded from environment variables (process.env).
  */
 
-// Keys are fetched from process.env (Server-side environment)
 const CONVERT_API_SECRET = process.env.CONVERT_API_SECRET;
 const CLOUD_CONVERT_API_KEY = process.env.CLOUD_CONVERT_API_KEY;
 
 export async function POST(req: Request) {
   try {
-    // Check if keys are present in the environment
+    // 1. Check for keys
     if (!CONVERT_API_SECRET || !CLOUD_CONVERT_API_KEY) {
       console.error('Missing API keys in environment variables.');
       return NextResponse.json({ 
-        error: 'Server is not configured with necessary API keys.' 
+        error: 'Server configuration error: Missing API keys.' 
       }, { status: 500 });
     }
 
-    const capi = convertapi(CONVERT_API_SECRET);
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -40,6 +37,7 @@ export async function POST(req: Request) {
     // --- STRATEGY 1: CONVERTAPI (PRIMARY) ---
     try {
       console.log('Attempting conversion with ConvertAPI...');
+      const capi = convertapi(CONVERT_API_SECRET);
       const stream = new Readable();
       stream.push(buffer);
       stream.push(null);
