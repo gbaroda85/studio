@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    /* Premium Interior Studio Palette from User Image */
-    --background: 180 20% 97%;      /* Very pale teal-grey/off-white */
-    --foreground: 180 60% 12%;      /* Deep navy-teal text */
+    /* Premium Interior Studio Palette - Light Mode */
+    --background: 180 20% 97%;      /* Soft Airy Teal-Grey (#f2f7f7) */
+    --foreground: 180 60% 10%;      /* Deep Navy-Teal text */
     --card: 0 0% 100%;
-    --card-foreground: 180 60% 12%;
+    --card-foreground: 180 60% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 180 60% 12%;
+    --popover-foreground: 180 60% 10%;
     --primary: 178 44% 55%;         /* Signature Studio Teal (#5cbdb9) */
     --primary-foreground: 0 0% 100%;
     --secondary: 349 71% 94%;       /* Soft Rose Highlight (#fbe3e8) */
@@ -21,27 +21,27 @@
     --accent-foreground: 349 60% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 180 20% 88%;
-    --input: 180 20% 88%;
+    --border: 178 44% 85%;
+    --input: 178 44% 85%;
     --ring: 178 44% 55%;
     --radius: 1.5rem;
   }
   
   .dark {
-    /* Nature-Inspired Dark Palette - Kept Exactly as requested */
-    --background: 172 45% 4%; /* Deep Forest/Teal Black */
-    --foreground: 45 20% 96%; /* Soft Cream */
-    --card: 172 40% 7%; /* Muted Deep Green */
+    /* Nature-Inspired Nature Palette - Dark Mode */
+    --background: 172 45% 4%;       /* Deep Forest Green-Black (#0a1c1a) */
+    --foreground: 45 20% 96%;       /* Soft Cream text */
+    --card: 172 40% 7%;             /* Organic Muted Green */
     --card-foreground: 45 20% 96%;
     --popover: 172 45% 4%;
     --popover-foreground: 45 20% 96%;
-    --primary: 145 25% 55%; /* Leaf Green */
+    --primary: 145 25% 55%;         /* Leaf Green */
     --primary-foreground: 172 45% 4%;
-    --secondary: 26 30% 18%; /* Earthy Wood Brown */
+    --secondary: 26 30% 18%;        /* Earthy Wood Brown (#2b1f18) */
     --secondary-foreground: 45 40% 90%;
     --muted: 172 30% 12%;
     --muted-foreground: 172 20% 65%;
-    --accent: 26 30% 22%; /* Rich Earth Tone */
+    --accent: 26 30% 22%;           /* Rich Earth Tone */
     --accent-foreground: 45 40% 90%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
@@ -94,12 +94,12 @@
 }
 
 .text-gradient-hero {
-  /* Precise Teal Gradient from Studio Image */
+  /* Precise Teal/Green Gradient from Images */
   @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f] dark:from-[#7fb58c] dark:to-[#5a8c6a];
 }
 
 .bg-gradient-button {
-  /* Precise Teal Button from Studio Image */
+  /* Precise Button Styles from Studio Images */
   @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] dark:from-[#5a8c6a] dark:to-[#4a7a5a] text-white shadow-lg transition-all duration-300;
 }
 
