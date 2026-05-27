@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -322,7 +321,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: string) => {
-    const langDict = translations[language] as Record<string, string>;
+    const langDict = (translations[language] || translations['en']) as Record<string, string>;
     return langDict[key] || key;
   };
 
