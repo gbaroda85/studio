@@ -30,6 +30,14 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
 
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
+}
+
 export default function PdfUnlocker() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -94,7 +102,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
@@ -120,10 +128,11 @@ export default function PdfUnlocker() {
         setProgress(10);
 
         try {
-            const pdf = await pdfjs.getDocument({ 
+            const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(arrayBuffer),
                 password: password
-            }).promise;
+            });
+            const pdf = await loadingTask.promise;
 
             const totalPages = pdf.numPages;
             const newPdf = new jsPDF({
@@ -135,24 +144,39 @@ export default function PdfUnlocker() {
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decrypting Page ${i} of ${totalPages}...`);
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 2.0 });
+                
+                // 1. Original dimensions in PDF points
+                const viewport = page.getViewport({ scale: 1.0 });
+                
+                // 2. High-res dimensions for rendering sharpness
+                const renderViewport = page.getViewport({ scale: 2.2 }); 
+                
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                
+                canvas.height = Math.floor(renderViewport.height);
+                canvas.width = Math.floor(renderViewport.width);
 
                 if (context) {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const imgData = canvas.toDataURL('image/jpeg', 0.8);
                     
-                    if (i > 1) newPdf.addPage([viewport.width, viewport.height], 'p');
-                    else {
+                    // Render page at high scale
+                    await page.render({ canvasContext: context, viewport: renderViewport }).promise;
+                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                    
+                    // Determine orientation for current page
+                    const orientation = viewport.width > viewport.height ? 'l' : 'p';
+                    
+                    // Add fresh page with exact original dimensions
+                    if (i === 1) {
                         newPdf.deletePage(1);
-                        newPdf.addPage([viewport.width, viewport.height], 'p');
                     }
-                    newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height);
+                    
+                    newPdf.addPage([viewport.width, viewport.height], orientation);
+                    
+                    // Draw high-res image exactly into the original bounds
+                    newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
@@ -162,13 +186,14 @@ export default function PdfUnlocker() {
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Unlocked Successfully!");
-            toast({ title: 'Success!', description: 'File Unlocked via Power Decoder.' });
+            toast({ title: 'Success!', description: 'File Unlocked with full dimensions preserved.' });
 
         } catch (error: any) {
+            console.error("Unlock error:", error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please double check.");
             } else {
-                setErrorDetails("Decryption failed. The file might be too complex for browser decoding.");
+                setErrorDetails("Decryption failed. The document might be corrupted or too complex.");
             }
         }
     };
@@ -204,37 +229,51 @@ export default function PdfUnlocker() {
 
     if (!pdfFile) {
         return (
-            <Card
-                className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
-                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-            >
-                <CardHeader>
-                    <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-                        <Unlock className="text-primary h-6 w-6" /> Universal PDF Unlocker
-                    </CardTitle>
-                    <CardDescription>Unlock Aadhaar, Bank Statements, and any encrypted PDF locally.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                        <div className="relative">
-                            <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-2 -right-2 h-6 w-6 text-yellow-500 animate-pulse" />
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
+                <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="mx-auto mb-2 grid size-16 md:size-20 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                        <Unlock className="size-8 md:size-10" />
+                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 md:size-6 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                            <Sparkles className="size-2.5 md:size-3" />
                         </div>
-                        <p className="text-muted-foreground font-medium">Drop Encrypted PDF here</p>
-                        <p className="text-xs text-muted-foreground">Works for AES-256, Aadhaar, and Bank Bills.</p>
                     </div>
+                    <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
+                        Universal <span className="text-gradient-hero">PDF Unlocker</span>
+                    </h1>
+                    <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                        Unlock Aadhaar, Bank Statements, and any encrypted PDF locally. <br/>100% Private local decoding.
+                    </p>
+                </div>
+
+                <Card
+                    className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
+                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <CardContent className="p-10 md:p-24 flex flex-col items-center justify-center space-y-6">
+                        <div className="relative group">
+                            <UploadCloud className="size-12 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                        </div>
+                        <div className="text-center px-4">
+                            <p className="text-lg md:text-2xl font-black uppercase tracking-tighter">Drop Encrypted PDF here</p>
+                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">Works for AES-256, Aadhaar, and Bank Bills.</p>
+                        </div>
+                    </CardContent>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                </CardContent>
-                <CardFooter className="justify-center text-[10px] text-muted-foreground bg-muted/5 py-4 gap-4">
-                    <div className="flex items-center"><ShieldAlert className="h-3 w-3 mr-1 text-green-500" /> 100% PRIVATE</div>
-                    <div className="flex items-center"><Sparkles className="h-3 w-3 mr-1 text-primary" /> HD RE-ENCODING</div>
-                </CardFooter>
-            </Card>
+                </Card>
+
+                <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-4">
+                    <div className="flex items-center gap-1.5 md:gap-2"><ShieldAlert className="size-3 md:size-4 text-green-500" /> 100% PRIVATE</div>
+                    <div className="flex items-center gap-1.5 md:gap-2"><Sparkles className="size-3 md:size-4 text-primary" /> HD RE-ENCODING</div>
+                    <div className="flex items-center gap-1.5 md:gap-2"><Info className="size-3 md:size-4 text-blue-500" /> SUPPORTS AADHAAR</div>
+                </div>
+            </div>
         );
     }
     
     return (
-        <Card className="w-full max-w-md shadow-2xl border-primary/10 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+        <Card className="w-full max-w-md shadow-2xl border-primary/10 overflow-hidden animate-in fade-in zoom-in-95 duration-300 mx-4">
             <CardHeader className="bg-muted/30 border-b">
                 <CardTitle className="text-lg flex items-center gap-2">
                     {isChecking ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : isProtected ? <Lock className="text-primary h-5 w-5" /> : <CheckCircle2 className="text-green-500 h-5 w-5" />}
@@ -297,7 +336,7 @@ export default function PdfUnlocker() {
                         <div className="space-y-2">
                             <p className="font-black text-primary uppercase tracking-tighter text-sm animate-pulse">{statusText}</p>
                             <Progress value={progress} className="h-2" />
-                            <p className="text-[10px] text-muted-foreground font-bold">Extracting high-security pages...</p>
+                            <p className="text-[10px] text-muted-foreground font-bold">Decoding high-security pages...</p>
                         </div>
                     </div>
                 )}
@@ -319,7 +358,7 @@ export default function PdfUnlocker() {
                         </div>
                         <div className="text-center">
                             <p className="font-bold text-green-700">Decryption Successful!</p>
-                            <p className="text-xs text-green-600/80">Security has been removed from all pages.</p>
+                            <p className="text-xs text-green-600/80">Full document scale has been preserved.</p>
                         </div>
                     </div>
                 )}
@@ -331,7 +370,7 @@ export default function PdfUnlocker() {
                     </Button>
                 ) : !unlockedPdfUrl ? (
                     <Button onClick={handleUnlockPdf} disabled={isUnlocking || !password || isChecking} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl">
-                        {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Sparkles className="mr-2 h-5 w-5"/>}
+                        {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400"/>}
                         {isUnlocking ? "DECODING..." : "UNLOCK PDF"}
                     </Button>
                 ) : (
