@@ -17,7 +17,8 @@ import {
     UploadCloud, 
     Trash2, 
     RefreshCcw,
-    Monitor
+    Monitor,
+    Sparkles
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -29,7 +30,7 @@ const initialHtml = `<!DOCTYPE html>
 <head>
     <style>
         body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; line-height: 1.6; background: white; }
-        .hero { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 40px; border-radius: 24px; margin-bottom: 30px; text-align: center; }
+        .hero { background: linear-gradient(135deg, #5cbdb9 0%, #3aa39f 100%); color: white; padding: 40px; border-radius: 24px; margin-bottom: 30px; text-align: center; }
         h1 { margin: 0; font-size: 36px; letter-spacing: -1px; }
         .card { border: 2px solid #e2e8f0; padding: 25px; border-radius: 20px; margin-top: 20px; }
         .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
@@ -151,16 +152,16 @@ export default function HtmlToPdfConverter() {
                 />
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+            <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Editor & Upload Section */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1">
-                        <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
+                    <Card className="flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1">
+                        <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                     <FileCode className="size-5" />
                                 </div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">HTML Source</CardTitle>
+                                <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">HTML Source</CardTitle>
                             </div>
                             <div className="flex gap-2">
                                 <Button variant="ghost" size="icon" onClick={handleClear} className="h-8 w-8 text-destructive hover:bg-destructive/10" title="Clear Editor">
@@ -168,7 +169,7 @@ export default function HtmlToPdfConverter() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col gap-4 p-6">
+                        <CardContent className="flex-1 flex flex-col gap-4 p-4 md:p-6">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                     <Globe className="size-3"/> Source Editor
@@ -179,13 +180,13 @@ export default function HtmlToPdfConverter() {
                                 value={htmlContent}
                                 onChange={(e) => setHtmlContent(e.target.value)}
                                 placeholder="Paste your HTML code here..."
-                                className="flex-1 min-h-[400px] font-mono text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-2xl p-6 bg-slate-900 text-slate-100 selection:bg-primary/30"
+                                className="flex-1 min-h-[300px] md:min-h-[450px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 selection:bg-primary/30 custom-scrollbar"
                             />
                         </CardContent>
-                        <CardFooter className="p-6 bg-muted/10 border-t flex flex-col gap-4">
+                        <CardFooter className="p-4 md:p-6 bg-muted/10 border-t flex flex-col gap-4">
                             <Button 
                                 variant="outline" 
-                                className="w-full h-12 border-2 border-dashed border-primary/30 hover:border-primary font-black text-xs uppercase transition-all"
+                                className="w-full h-12 border-2 border-dashed border-primary/30 hover:border-primary font-black text-[10px] md:text-xs uppercase transition-all"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <UploadCloud className="mr-2 size-4" /> UPLOAD .HTML FILE
@@ -200,32 +201,32 @@ export default function HtmlToPdfConverter() {
                         </CardFooter>
                     </Card>
                     
-                    <div className="p-5 bg-primary/5 border-2 border-primary/10 rounded-[2rem] flex gap-4 items-center">
-                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <ShieldCheck className="size-6 text-primary" />
+                    <div className="p-4 md:p-5 bg-primary/5 border-2 border-primary/10 rounded-xl md:rounded-[2rem] flex gap-3 md:gap-4 items-center">
+                        <div className="size-10 md:size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="size-5 md:size-6 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-black text-primary uppercase tracking-tight">Privacy Guard Active</p>
-                            <p className="text-[10px] text-muted-foreground font-medium leading-tight">All rendering happens 100% in your browser RAM. Your source code never touches our servers.</p>
+                            <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-tight">Privacy Guard Active</p>
+                            <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">All rendering happens 100% in your browser RAM. Your source code never touches our servers.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* PDF Live Result */}
-                <Card className="lg:col-span-7 flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900">
-                    <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
+                <Card className="lg:col-span-7 flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
+                    <CardHeader className="bg-muted/30 border-b p-3 md:p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Visual PDF Output</CardTitle>
+                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Visual PDF Output</CardTitle>
                         </div>
                         <div className="flex items-center gap-3">
                             {isGenerating && <Loader2 className="size-3 animate-spin text-primary" />}
-                            <Badge className="bg-green-600 text-white font-black text-[9px] uppercase tracking-widest px-3">Live Ready</Badge>
+                            <Badge className="bg-green-600 text-white font-black text-[8px] md:text-[9px] uppercase tracking-widest px-3">Live Ready</Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-6 md:p-10 relative min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[750px] custom-scrollbar">
+                    <CardContent className="flex-1 p-4 md:p-10 relative min-h-[400px] md:min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[750px] custom-scrollbar">
                        {previewImage ? (
-                            <div className="relative w-full shadow-2xl border-4 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
+                            <div className="relative w-full shadow-2xl border-2 md:border-4 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
                                 <img
                                     src={previewImage}
                                     alt="Live PDF Preview"
@@ -236,32 +237,33 @@ export default function HtmlToPdfConverter() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 gap-6">
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 md:p-12 gap-4 md:gap-6">
                                 <div className="relative">
-                                    <Loader2 className="size-20 text-primary/10 animate-spin stroke-[4]" />
-                                    <Monitor className="absolute inset-0 m-auto size-8 text-primary/20" />
+                                    <Loader2 className="size-16 md:size-20 text-primary/10 animate-spin stroke-[4]" />
+                                    <Monitor className="absolute inset-0 m-auto size-6 md:size-8 text-primary/20" />
                                 </div>
                                 <div className="space-y-2">
-                                    <p className="text-sm font-black text-muted-foreground uppercase tracking-widest animate-pulse">Waiting for Code...</p>
-                                    <p className="text-[10px] text-muted-foreground/60 font-medium max-w-[200px] mx-auto">Please provide HTML code or upload a file to generate high-fidelity PDF.</p>
+                                    <p className="text-xs md:text-sm font-black text-muted-foreground uppercase tracking-widest animate-pulse">Waiting for Code...</p>
+                                    <p className="text-[9px] md:text-[10px] text-muted-foreground/60 font-medium max-w-[200px] mx-auto">Please provide HTML code or upload a file to generate high-fidelity PDF.</p>
                                 </div>
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="p-8 bg-white dark:bg-slate-950 border-t flex flex-col gap-4">
+                    <CardFooter className="p-4 md:p-8 bg-white dark:bg-slate-950 border-t flex flex-col gap-4">
                         <Button 
                             onClick={handleDownload} 
                             disabled={!pdfBlob || isGenerating} 
-                            className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group active:scale-95 transition-all"
+                            className="w-full h-14 md:h-18 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl group active:scale-95 transition-all"
                         >
-                            <Download className="mr-3 h-7 w-7 group-hover:translate-y-1 transition-transform" />
-                            DOWNLOAD PROFESSIONAL PDF
+                            <Download className="mr-3 h-5 w-5 md:h-7 md:w-7 group-hover:translate-y-1 transition-transform" />
+                            <span className="hidden sm:inline">DOWNLOAD PROFESSIONAL PDF</span>
+                            <span className="sm:hidden">DOWNLOAD PDF</span>
                         </Button>
-                        <div className="flex items-center justify-center gap-6">
-                            <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
-                                <Smartphone className="size-3 text-primary" /> MOBILE OPTIMIZED
+                        <div className="flex items-center justify-center gap-4 md:gap-6">
+                            <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
+                                <Smartphone className="size-3 text-primary" /> MOBILE READY
                             </div>
-                            <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
+                            <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
                                 <Zap className="size-3 text-yellow-500" /> NATIVE SPEED
                             </div>
                         </div>
