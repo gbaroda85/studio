@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
@@ -102,7 +102,8 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            // FIXED: Use readAsArrayBuffer instead of readAsDataURL for PDF binary data
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
@@ -240,7 +241,7 @@ export default function PdfUnlocker() {
                     <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
                         Universal <span className="text-gradient-hero">PDF Unlocker</span>
                     </h1>
-                    <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                    <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                         Unlock Aadhaar, Bank Statements, and any encrypted PDF locally. <br/>100% Private local decoding.
                     </p>
                 </div>
@@ -330,7 +331,7 @@ export default function PdfUnlocker() {
                 {isUnlocking && (
                     <div className="space-y-4 py-4 text-center">
                         <div className="relative inline-block">
-                             <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
+                             <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                              <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
