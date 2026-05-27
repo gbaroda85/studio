@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -338,7 +337,7 @@ function AppHeader() {
 
   return (
     <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
-      <div className="w-full max-w-[2000px] h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
+      <div className="w-full h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center group mr-2">
@@ -390,7 +389,7 @@ export function AppFooter() {
   const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
-      <div className="w-full max-w-[2000px] px-4 md:px-12 lg:px-16">
+      <div className="w-full px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">
@@ -447,14 +446,14 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden">
       <AppHeader />
-      <main className="flex-1 relative flex flex-col items-center">
+      <main className="flex-1 flex flex-col w-full relative">
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
-         <div className="w-full flex-1 flex flex-col items-center">
-            <div className="w-full flex-1 pb-20">
+         <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
+            <div className="w-full flex-1">
               {children}
             </div>
             <AppFooter />

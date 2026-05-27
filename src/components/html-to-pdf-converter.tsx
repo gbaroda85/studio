@@ -157,48 +157,50 @@ export default function HtmlToPdfConverter() {
 
     if (stage === 'setup') {
         return (
-            <Card className={cn(
-                "w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto rounded-[2rem] overflow-hidden",
-                isDragOver && "border-primary ring-4 ring-primary/20"
-            )}
-                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }}
-            >
-                <CardHeader className="pt-8 md:pt-12">
-                    <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
-                        <FileCode className="h-8 md:h-10 w-8 md:w-10" />
-                    </div>
-                    <CardTitle className="text-xl md:text-3xl font-black uppercase tracking-tight">HTML to PDF Studio</CardTitle>
-                    <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60">Convert raw code or files into professional documents.</CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 md:p-10">
-                    <div
-                        className="border-4 border-dashed border-muted-foreground/20 rounded-2xl md:rounded-[2rem] p-6 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                        onClick={() => setStage('editor')}
-                    >
-                        <div className="relative">
-                            <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
+            <div className="w-full flex items-center justify-center p-4">
+                <Card className={cn(
+                    "w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed rounded-[2rem] overflow-hidden",
+                    isDragOver && "border-primary ring-4 ring-primary/20"
+                )}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }}
+                >
+                    <CardHeader className="pt-8 md:pt-12">
+                        <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
+                            <FileCode className="h-8 md:h-10 w-8 md:w-10" />
                         </div>
-                        <div className="text-center px-4">
-                            <p className="text-lg md:text-xl font-bold uppercase tracking-tighter">Click to Start Editor</p>
-                            <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-medium">Or drop an .html file here to begin extraction.</p>
+                        <CardTitle className="text-xl md:text-3xl font-black uppercase tracking-tight">HTML to PDF Studio</CardTitle>
+                        <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60">Convert raw code or files into professional documents.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 md:p-10">
+                        <div
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-2xl md:rounded-[2rem] p-6 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                            onClick={() => setStage('editor')}
+                        >
+                            <div className="relative">
+                                <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center px-4">
+                                <p className="text-lg md:text-xl font-bold uppercase tracking-tighter">Click to Start Editor</p>
+                                <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-medium">Or drop an .html file here to begin extraction.</p>
+                            </div>
                         </div>
-                    </div>
-                    <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm" onChange={handleFileUpload} />
-                </CardContent>
-                <CardFooter className="justify-center gap-4 md:gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> LIVE PREVIEW</div>
-                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> 300 DPI HD</div>
-                </CardFooter>
-            </Card>
+                        <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm" onChange={handleFileUpload} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-4 md:gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> LIVE PREVIEW</div>
+                        <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> 300 DPI HD</div>
+                    </CardFooter>
+                </Card>
+            </div>
         );
     }
     
     return (
-        <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-6 md:gap-8 px-0 md:px-4 animate-in fade-in duration-500">
+        <div className="w-full flex flex-col gap-6 md:gap-8 animate-in fade-in duration-500">
             {/* Hidden Sandbox for Rendering */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
@@ -209,7 +211,7 @@ export default function HtmlToPdfConverter() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start w-full px-4 md:px-8">
                 {/* Editor Section */}
                 <div className="lg:col-span-5 flex flex-col gap-6 w-full">
                     <Card className="flex flex-col border-2 shadow-2xl rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1 w-full border-primary/10">
@@ -240,7 +242,7 @@ export default function HtmlToPdfConverter() {
                                 value={htmlContent}
                                 onChange={(e) => setHtmlContent(e.target.value)}
                                 placeholder="Paste your HTML code here..."
-                                className="flex-1 min-h-[350px] md:min-h-[500px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 custom-scrollbar w-full"
+                                className="flex-1 min-h-[400px] md:min-h-[600px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 custom-scrollbar w-full"
                             />
                         </CardContent>
                         <CardFooter className="p-4 md:p-6 bg-muted/10 border-t flex flex-col gap-4">
@@ -278,7 +280,7 @@ export default function HtmlToPdfConverter() {
                             <Badge className="bg-green-600 text-white font-black text-[8px] md:text-[9px] uppercase tracking-widest px-3 py-1">HD READY</Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-4 md:p-8 lg:p-12 relative min-h-[400px] md:min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[850px] custom-scrollbar">
+                    <CardContent className="flex-1 p-4 md:p-8 lg:p-12 relative min-h-[450px] md:min-h-[600px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[850px] custom-scrollbar">
                        {previewImage ? (
                             <div className="relative w-full shadow-2xl border-2 md:border-8 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
                                 <img

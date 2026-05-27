@@ -17,14 +17,14 @@ export const metadata: Metadata = {
 
 export default function HtmlToPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center w-full">
+    <main className="flex-1 flex flex-col items-center w-full min-h-screen">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full max-w-[2000px] flex flex-col items-center mb-12 px-4">
+        <div className="w-full flex flex-col items-center mb-12 px-0 md:px-8">
             <HtmlToPdfConverter />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 md:px-8 pb-20">
             <HowToGuide title="HTML to PDF HD Converter" steps={[
                 "Editor: Paste your raw HTML and CSS code into the editor box.",
                 "Styles: Ensure all your CSS is included in <style> tags.",

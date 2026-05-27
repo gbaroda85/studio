@@ -2,39 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-}
-
 @layer base {
   :root {
-    /* Teeny Greeny Background (#ebf6f5) */
     --background: 173 40% 94%;      
     --foreground: 178 60% 15%;      
-    
     --card: 0 0% 100%;
     --card-foreground: 178 60% 15%;
-    
     --popover: 0 0% 100%;
     --popover-foreground: 178 60% 15%;
-    
-    /* Blue Greeny Primary (#5cbdb9) */
     --primary: 178 44% 55%;         
     --primary-foreground: 0 0% 100%;
-    
-    /* Pinky Accent (#fbe3e8) */
     --secondary: 349 71% 94%;       
     --secondary-foreground: 349 60% 30%;
-    
     --muted: 173 30% 90%;
     --muted-foreground: 178 30% 40%;
-    
     --accent: 349 71% 94%;          
     --accent-foreground: 349 60% 30%;
-    
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
     --border: 178 30% 85%;
     --input: 178 30% 85%;
     --ring: 178 44% 55%;
@@ -42,7 +27,6 @@ body {
   }
   
   .dark {
-    /* Maintaining a matching dark mode with teal/pink hues */
     --background: 178 40% 4%;
     --foreground: 173 20% 98%;
     --card: 178 40% 6%;
@@ -66,21 +50,29 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  html, body {
+    @apply h-full w-full m-0 p-0 overflow-x-hidden;
+    background-color: hsl(var(--background));
   }
+
+  * {
+    @apply border-border outline-none;
+  }
+
   body {
-    @apply bg-background text-foreground selection:bg-primary/20;
-    /* Image-inspired Background Gradient */
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
+    /* Immersive Background Gradients - Fixed to Viewport to eliminate white edges */
     background-image: 
       radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.4) 0px, transparent 50%),
       radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.1) 0px, transparent 50%);
     background-attachment: fixed;
   }
+
   .dark body {
     background-image: 
-      radial-gradient(at 50% -20%, hsla(178, 44%, 55%, 0.15) 0px, transparent 70%),
+      radial-gradient(at 50% -20%, hsla(178, 44% , 55%, 0.15) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(349, 71%, 10%, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
@@ -88,7 +80,7 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Professionals */
 .glass-panel {
   @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
 }
@@ -97,7 +89,6 @@ body {
   @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
 }
 
-/* Custom Gradients from provided image colors */
 .text-gradient-hero {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f];
 }
@@ -106,20 +97,7 @@ body {
   @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] text-white shadow-lg transition-all duration-300;
 }
 
-/* Tab Hover Lifting Effect */
-.tabs-trigger-lift {
-  @apply transition-all duration-300;
-}
-.tabs-trigger-lift[data-state=active]:hover {
-  @apply -translate-y-1.5 shadow-xl shadow-primary/20 scale-[1.03];
-}
-
-.dark button[data-state=active] {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-}
-
-/* Custom Thin Scrollbar matching Blue Greeny */
+/* Custom Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -131,7 +109,6 @@ body {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
 }
 
-/* Fancy Neon Gradients for Premium Feel */
 .neon-border {
   @apply relative;
 }
