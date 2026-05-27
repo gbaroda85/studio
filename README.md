@@ -16,7 +16,13 @@ Look at the very top-left of your GitHub page near the repository name:
 3. **Scroll to the very bottom** of the page to find the section called **"Danger Zone"**.
 4. Click the button **"Change visibility"** to toggle between Public and Private.
 
-### 3. Vercel "Deployment Blocked" Fix
+### 3. Git Authentication Fix (For "Failed to authenticate" Error)
+If you see a "Failed to authenticate to git remote" error like in the screenshot:
+1. **Refresh Studio**: Browser tab ko refresh karein.
+2. **Re-connect GitHub**: Firebase Studio mein left sidebar mein 'Source Control' par jayein aur agar mangey toh 'Connect to GitHub' dubara karein.
+3. **Personal Access Token**: Agar aap manual git use kar rahe hain, toh ensure karein ki aapka GitHub PAT (Token) valid hai aur 'workflow' scopes enabled hain.
+
+### 4. Vercel "Deployment Blocked" Fix
 If Vercel blocks your deployment after making the repo private, follow these steps to refresh permissions:
 
 **Part A: GitHub App Permissions**
@@ -31,7 +37,7 @@ If Vercel blocks your deployment after making the repo private, follow these ste
 3. Scroll down and click the **"Disconnect"** button.
 4. Now click **"Connect"** again and select your **Private Studio Repository**.
 
-### 4. Environment Variables
+### 5. Environment Variables
 When you deploy, you MUST add these 2 environment variables in the Vercel/Firebase dashboard so the Word-to-PDF tool works:
 - `CONVERT_API_SECRET`
 - `CLOUD_CONVERT_API_KEY`
@@ -50,4 +56,4 @@ When you deploy, you MUST add these 2 environment variables in the Vercel/Fireba
 
 ---
 **Status**: Development Environment Synchronized
-**Last Build Patch**: Optimized Hero Title & Meta Sync
+**Last Build Patch**: Git Auth Troubleshooting Added
