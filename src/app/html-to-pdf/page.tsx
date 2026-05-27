@@ -21,7 +21,7 @@ export default function HtmlToPdfPage() {
     <main className="flex-1 flex flex-col items-center w-full">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
+        <div className="w-full max-w-[2000px] flex justify-center mb-12 px-4 md:px-8 lg:px-16">
             <HtmlToPdfConverter />
         </div>
 
