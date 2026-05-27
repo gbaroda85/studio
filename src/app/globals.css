@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Premium Interior Studio Palette - Light Mode */
-    --background: 180 20% 97%;      /* Soft Airy Teal-Grey (#f2f7f7) */
+    --background: 180 20% 96%;      /* Soft Airy Teal-Grey (#f2f7f7) */
     --foreground: 180 60% 10%;      /* Deep Navy-Teal text */
     --card: 0 0% 100%;
     --card-foreground: 180 60% 10%;
@@ -28,7 +28,7 @@
   }
   
   .dark {
-    /* Nature-Inspired Nature Palette - Dark Mode */
+    /* Nature-Inspired Palette - Dark Mode */
     --background: 172 45% 4%;       /* Deep Forest Green-Black (#0a1c1a) */
     --foreground: 45 20% 96%;       /* Soft Cream text */
     --card: 172 40% 7%;             /* Organic Muted Green */
@@ -65,8 +65,8 @@
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
     /* Immersive Studio Gradients for Light Mode */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.4) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.12) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.5) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
