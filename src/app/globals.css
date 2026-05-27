@@ -27,25 +27,26 @@
   }
   
   .dark {
-    --background: 178 40% 4%;
-    --foreground: 173 20% 98%;
-    --card: 178 40% 6%;
-    --card-foreground: 173 20% 98%;
-    --popover: 178 40% 4%;
-    --popover-foreground: 173 20% 98%;
-    --primary: 178 44% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 349 40% 15%;
-    --secondary-foreground: 349 71% 94%;
-    --muted: 178 30% 12%;
-    --muted-foreground: 178 20% 60%;
-    --accent: 349 40% 15%;
-    --accent-foreground: 349 71% 94%;
+    /* Nature-Inspired Dark Palette from Image */
+    --background: 172 45% 4%; /* Deep Forest/Teal Black */
+    --foreground: 45 20% 96%; /* Soft Cream */
+    --card: 172 40% 7%; /* Muted Deep Green */
+    --card-foreground: 45 20% 96%;
+    --popover: 172 45% 4%;
+    --popover-foreground: 45 20% 96%;
+    --primary: 145 25% 55%; /* Leaf Green */
+    --primary-foreground: 172 45% 4%;
+    --secondary: 26 30% 18%; /* Earthy Wood Brown */
+    --secondary-foreground: 45 40% 90%;
+    --muted: 172 30% 12%;
+    --muted-foreground: 172 20% 65%;
+    --accent: 26 30% 22%; /* Rich Earth Tone */
+    --accent-foreground: 45 40% 90%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 178 30% 15%;
-    --input: 178 30% 15%;
-    --ring: 178 44% 55%;
+    --border: 172 30% 15%;
+    --input: 172 30% 15%;
+    --ring: 145 25% 55%;
   }
 }
 
@@ -61,7 +62,7 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Immersive Background Gradients - Fixed to Viewport to eliminate white edges */
+    /* Immersive Background Gradients */
     background-image: 
       radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.4) 0px, transparent 50%),
       radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.1) 0px, transparent 50%);
@@ -69,9 +70,11 @@
   }
 
   .dark body {
+    /* Nature-themed radial overlays */
     background-image: 
-      radial-gradient(at 50% -20%, hsla(178, 44% , 55%, 0.15) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(349, 71%, 10%, 0.1) 0px, transparent 50%);
+      radial-gradient(at 50% -20%, hsla(145, 25%, 55%, 0.15) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(26, 30%, 18%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(172, 45%, 10%, 0.2) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -86,15 +89,15 @@
 }
 
 .glass-card {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
+  @apply bg-white/70 dark:bg-slate-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
 }
 
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f];
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f] dark:from-[#7fb58c] dark:to-[#5a8c6a];
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] text-white shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] dark:from-[#5a8c6a] dark:to-[#4a7a5a] text-white shadow-lg transition-all duration-300;
 }
 
 /* Custom Thin Scrollbar */
@@ -114,5 +117,5 @@
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-purple-500 to-accent rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-green-800 to-accent rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }
