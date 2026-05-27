@@ -93,9 +93,6 @@ export default function PhotoEnhancer() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  /**
-   * Apply Adjustments to Canvas
-   */
   const applyAdjustments = async () => {
     if (!originalImageSrc) return;
 
@@ -110,15 +107,11 @@ export default function PhotoEnhancer() {
         canvas.width = img.width;
         canvas.height = img.height;
         
-        // 1. Clear and Draw Original
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // 2. Apply Filters (Brightness, Contrast, Saturation)
         ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`;
         ctx.drawImage(img, 0, 0);
         ctx.filter = 'none';
 
-        // 3. Apply Sharpness (Convolution)
         if (sharpness[0] > 0) {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
@@ -162,8 +155,6 @@ export default function PhotoEnhancer() {
 
         const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
         setResultImageSrc(dataUrl);
-        
-        // Est. size for UI
         setEnhancedFileSize(Math.round((dataUrl.length - 23) * 0.75));
     };
   };
@@ -234,21 +225,21 @@ export default function PhotoEnhancer() {
         </CardHeader>
         <CardContent>
           <div
-            className="border-2 border-dashed border-muted-foreground/50 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+            className="border-2 border-dashed border-muted-foreground/50 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
             onClick={() => fileInputRef.current?.click()}
           >
             <div className="relative">
-                <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
+                <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
             </div>
             <div>
-                <p className="text-xl font-bold">Drop photo to Enhance</p>
-                <p className="text-sm text-muted-foreground mt-2">All processing happens in your device RAM.</p>
+                <p className="text-lg md:text-xl font-bold">Drop photo to Enhance</p>
+                <p className="text-xs text-muted-foreground mt-2">All processing happens in your device RAM.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
         </CardContent>
-        <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
+        <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE LOCAL</div>
             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT AI</div>
             <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD OUTPUT</div>
@@ -259,34 +250,33 @@ export default function PhotoEnhancer() {
 
   return (
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
         
-        {/* Comparison Preview Area */}
         <div className="lg:col-span-7 space-y-6">
-            <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col relative border-foreground/5">
-                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between">
+            <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col relative border-foreground/5 bg-card/50">
+                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between p-4 md:px-6">
                     <div className="flex items-center gap-2">
                         <ArrowLeftRight className="h-4 w-4 text-primary" />
                         <CardTitle className="text-sm font-black uppercase tracking-tighter">HD Quality Comparison</CardTitle>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         {resultImageSrc && (
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-8 font-black text-[10px] border-2 uppercase">
-                                        <Eye className="size-3 mr-1.5" /> Full Zoom Check
+                                    <Button size="sm" variant="outline" className="h-8 font-black text-[8px] md:text-[10px] border-2 uppercase">
+                                        <Eye className="size-3 mr-1.5" /> <span className="hidden sm:inline">Full Zoom Check</span><span className="sm:hidden">Zoom</span>
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                                    <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter">Precision Enhancement Check</DialogTitle></DialogHeader>
-                                    <div className="grid md:grid-cols-2 gap-8 py-6">
+                                <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-4 md:p-6">
+                                    <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter text-sm md:text-lg">Precision Enhancement Check</DialogTitle></DialogHeader>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 py-6">
                                         <div className="space-y-3">
                                             <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[10px]">ORIGINAL (DULL)</Badge>
                                             <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center">
                                                 <Image src={originalImageSrc!} alt="original" fill className="object-contain p-2" />
                                             </div>
                                         </div>
-                                        <div className="space-y-3 text-right">
+                                        <div className="space-y-3">
                                             <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[10px]">ENHANCED (SHARP)</Badge>
                                             <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center">
                                                 <Image src={resultImageSrc!} alt="enhanced" fill className="object-contain p-2" />
@@ -294,85 +284,84 @@ export default function PhotoEnhancer() {
                                         </div>
                                     </div>
                                     <CardFooter className="p-0 pt-4">
-                                        <Button className="w-full h-14 bg-green-600 hover:bg-green-700 font-black text-lg" onClick={handleDownload}>SAVE ENHANCED PHOTO <Download className="ml-2 size-5" /></Button>
+                                        <Button className="w-full h-12 md:h-14 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg" onClick={handleDownload}>SAVE ENHANCED PHOTO <Download className="ml-2 size-4 md:size-5" /></Button>
                                     </CardFooter>
                                 </DialogContent>
                             </Dialog>
                         )}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleReset}><X /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleReset}><X className="size-4" /></Button>
                     </div>
                 </CardHeader>
-                <CardContent className="p-6 flex-1 bg-slate-50 dark:bg-slate-900/50 min-h-[450px]">
+                <CardContent className="p-4 md:p-6 flex-1 bg-slate-50 dark:bg-slate-900/50 min-h-[350px] md:min-h-[450px]">
                     {isProcessing ? (
-                        <div className="h-full flex flex-col items-center justify-center p-12 text-center gap-8">
+                        <div className="h-full flex flex-col items-center justify-center p-8 md:p-12 text-center gap-8">
                             <div className="relative">
-                                <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
-                                <Sparkles className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                <Loader2 className="h-16 w-16 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
+                                <Sparkles className="absolute inset-0 m-auto h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse" />
                             </div>
                             <div className="space-y-4 w-full max-w-sm">
-                                <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">Eliminating Blurriness...</p>
-                                <Progress value={progress} className="h-2 shadow-inner" />
+                                <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter animate-pulse">Enhancing Details...</p>
+                                <Progress value={progress} className="h-1.5 shadow-inner" />
                             </div>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-2 gap-6 h-full">
-                            <div className="space-y-3 flex flex-col">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 h-full">
+                            <div className="space-y-2 md:space-y-3 flex flex-col">
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original</span>
-                                    <span className="text-[9px] font-mono text-muted-foreground">{formatBytes(originalFileSize)}</span>
+                                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original</span>
+                                    <span className="text-[8px] md:text-[9px] font-mono text-muted-foreground">{formatBytes(originalFileSize)}</span>
                                 </div>
-                                <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[300px]">
-                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-4" />
+                                <div className="flex-1 relative aspect-square bg-white rounded-xl md:rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[250px]">
+                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-2 md:p-4" />
                                 </div>
                             </div>
-                            <div className="space-y-3 flex flex-col">
+                            <div className="space-y-2 md:space-y-3 flex flex-col">
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-2.5"/> Enhanced Result</span>
-                                    <span className="text-[9px] font-mono text-primary font-bold">{formatBytes(enhancedFileSize)}</span>
+                                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-2 md:size-2.5"/> Enhanced Result</span>
+                                    <span className="text-[8px] md:text-[9px] font-mono text-primary font-bold">{formatBytes(enhancedFileSize)}</span>
                                 </div>
-                                <div className="flex-1 relative aspect-square md:aspect-auto bg-white rounded-2xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[300px] border-primary/20">
+                                <div className="flex-1 relative aspect-square bg-white rounded-xl md:rounded-2xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[250px] border-primary/20">
                                     {resultImageSrc ? (
                                         <div className="relative size-full animate-in zoom-in-95 duration-500">
-                                            <Image src={resultImageSrc} alt="After" fill className="object-contain p-4" />
-                                            <div className="absolute top-2 right-2"><div className="bg-green-500 text-white rounded-full p-1 shadow-lg"><CheckCircle2 className="size-4" /></div></div>
+                                            <Image src={resultImageSrc} alt="After" fill className="object-contain p-2 md:p-4" />
+                                            <div className="absolute top-2 right-2"><div className="bg-green-500 text-white rounded-full p-1 shadow-lg"><CheckCircle2 className="size-3 md:size-4" /></div></div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center gap-2 opacity-10"><ImageIcon className="size-16" /><p className="text-[10px] font-black uppercase">Rendering...</p></div>
+                                        <div className="flex flex-col items-center justify-center gap-2 opacity-10"><ImageIcon className="size-12 md:size-16" /><p className="text-[10px] font-black uppercase">Rendering...</p></div>
                                     )}
                                 </div>
                             </div>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-muted/10 border-t p-6">
-                    <Button className="w-full h-16 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all" 
+                <CardFooter className="bg-muted/10 border-t p-4 md:p-6">
+                    <Button className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-xl md:rounded-2xl transition-all" 
                             onClick={handleDownload} disabled={!resultImageSrc || isProcessing}>
-                        <Download className="mr-3 h-7 w-7" /> DOWNLOAD ENHANCED PHOTO
+                        <Download className="mr-3 h-6 w-6 md:h-7 md:w-7" /> <span className="hidden sm:inline">DOWNLOAD ENHANCED PHOTO</span><span className="sm:hidden">DOWNLOAD HD</span>
                     </Button>
                 </CardFooter>
             </Card>
         </div>
 
-        {/* Studio Panel Area */}
-        <div className="lg:col-span-4 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950">
-                <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between p-6">
-                    <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Settings2 className="h-6 w-6 text-primary" /> STUDIO PANEL
+        <div className="lg:col-span-5 space-y-6">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+                <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between p-5 md:p-6">
+                    <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-5 md:size-6 text-primary" /> STUDIO PANEL
                     </CardTitle>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary/5 hover:text-primary" onClick={resetAdjustments}>
                         <RefreshCcw className="h-4 w-4" />
                     </Button>
                 </CardHeader>
-                <CardContent className="p-8 space-y-10">
+                <CardContent className="p-5 md:p-8 space-y-8 md:space-y-10">
                     
-                    <Button className="w-full h-14 font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group relative overflow-hidden" onClick={handleAutoEnhance} disabled={isProcessing}>
-                        <Zap className="mr-2 h-6 w-6 text-yellow-400 group-hover:scale-125 transition-transform" />
+                    <Button className="w-full h-12 md:h-14 font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl md:rounded-2xl group relative overflow-hidden text-[10px] md:text-xs" onClick={handleAutoEnhance} disabled={isProcessing}>
+                        <Zap className="mr-2 h-5 md:h-6 w-5 md:w-6 text-yellow-400 group-hover:scale-125 transition-transform" />
                         AI AUTO-ENHANCE PRESET
                     </Button>
 
-                    <div className="space-y-8">
-                        <div className="space-y-4">
+                    <div className="space-y-6 md:space-y-8">
+                        <div className="space-y-3 md:space-y-4">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Sun className="size-3 text-yellow-500" /> Exposure</Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{brightness[0]}%</span>
@@ -380,7 +369,7 @@ export default function PhotoEnhancer() {
                             <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} className="py-2" />
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 md:space-y-4">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Contrast className="size-3 text-orange-500" /> Definition</Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{contrast[0]}%</span>
@@ -388,7 +377,7 @@ export default function PhotoEnhancer() {
                             <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} className="py-2" />
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 md:space-y-4">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Droplets className="size-3 text-blue-500" /> Vibrance</Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{saturation[0]}%</span>
@@ -396,32 +385,29 @@ export default function PhotoEnhancer() {
                             <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} className="py-2" />
                         </div>
 
-                        <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/10">
+                        <div className="space-y-3 md:space-y-4 pt-4 border-t-2 border-dashed border-primary/10">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-primary"><Zap className="size-3" /> Sharpness Level</Label>
                                 <Badge className="font-mono font-black text-xs px-2 bg-primary">{sharpness[0]}</Badge>
                             </div>
                             <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} className="py-2" />
-                            <p className="text-[9px] text-muted-foreground font-medium italic">Adjust to recover details from slightly blurry or low-res shots.</p>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 border-t py-6 px-8">
+                <CardFooter className="bg-muted/10 border-t py-6 px-6 md:px-8">
                     <div className="flex gap-4 items-center">
                         <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
                             <ShieldCheck className="size-5 text-green-600" />
                         </div>
-                        <p className="text-[9px] text-muted-foreground font-semibold leading-relaxed">
-                            <span className="font-black uppercase block text-foreground">Zero Cloud Footprint</span>
-                            Enhancement is performed locally using convolution kernels in your browser.
+                        <p className="text-[8px] md:text-[9px] text-muted-foreground font-semibold leading-relaxed uppercase">
+                            <span className="font-black text-foreground">Zero Cloud Footprint</span><br/>
+                            Processing happens 100% on-device.
                         </p>
                     </div>
                 </CardFooter>
             </Card>
         </div>
       </div>
-      
-      {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
