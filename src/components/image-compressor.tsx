@@ -55,6 +55,7 @@ type CompressionResult = {
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CompressionMode = 'manual' | 'target';
+type TargetUnit = 'kb' | 'mb';
 
 const QUICK_SIZES = ["20", "50", "100", "500"];
 
@@ -72,7 +73,8 @@ export default function ImageCompressor() {
   const [results, setResults] = useState<CompressionResult[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [compressionMode, setCompressionMode] = useState<CompressionMode>('target');
-  const [targetSizeKb, setTargetSizeKb] = useState<string>("50");
+  const [targetSizeValue, setTargetSizeValue] = useState<string>("50");
+  const [targetUnit, setTargetUnit] = useState<TargetUnit>('kb');
   const [quality, setQuality] = useState<number[]>([75]);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -138,7 +140,9 @@ export default function ImageCompressor() {
                 const blob = await (await fetch(finalUrl)).blob();
                 finalSize = blob.size;
             } else {
-                const targetBytes = parseInt(targetSizeKb, 10) * 1024;
+                const multiplier = targetUnit === 'mb' ? 1024 * 1024 : 1024;
+                const targetBytes = parseFloat(targetSizeValue) * multiplier;
+                
                 let currentScale = 1.0;
                 let bestUrl = "";
                 let bestSize = 0;
@@ -406,7 +410,7 @@ export default function ImageCompressor() {
                         <TabsContent value="target" className="pt-4 md:pt-8 space-y-4 md:space-y-6 animate-in fade-in duration-500">
                              <div className="space-y-4">
                                 <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                    Target KB per image
+                                    Target Size per image
                                 </Label>
                                 <div className="grid grid-cols-4 gap-1.5 md:gap-2 mb-2">
                                     {QUICK_SIZES.map((size) => (
@@ -414,24 +418,34 @@ export default function ImageCompressor() {
                                             key={size}
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => setTargetSizeKb(size)}
+                                            onClick={() => setTargetSizeValue(size)}
                                             className={cn(
                                                 "rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase h-8 md:h-9 transition-all border-2",
-                                                targetSizeKb === size ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                targetSizeValue === size ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
                                             )}
                                         >
                                             {size}K
                                         </Button>
                                     ))}
                                 </div>
-                                <div className="relative group">
-                                    <Input 
-                                        type="number" 
-                                        value={targetSizeKb} 
-                                        onChange={(e) => setTargetSizeKb(e.target.value)} 
-                                        className="h-12 md:h-16 text-2xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl pl-6 md:pl-8 pr-16 md:pr-20 bg-muted/10"
-                                    />
-                                    <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-base md:text-xl text-primary/40 tracking-tighter uppercase">KB</div>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <div className="relative group flex-1">
+                                        <Input 
+                                            type="number" 
+                                            value={targetSizeValue} 
+                                            onChange={(e) => setTargetSizeValue(e.target.value)} 
+                                            className="h-12 md:h-16 text-xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl pl-6 md:pl-8 bg-muted/10 w-full"
+                                        />
+                                    </div>
+                                    <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
+                                        <SelectTrigger className="w-full sm:w-28 h-12 md:h-16 font-black text-sm md:text-xl border-2 rounded-xl md:rounded-2xl uppercase">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                            <SelectItem value="kb" className="font-bold py-2 md:py-3 uppercase">KB</SelectItem>
+                                            <SelectItem value="mb" className="font-bold py-2 md:py-3 uppercase">MB</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="p-3 md:p-4 bg-primary/5 rounded-xl md:rounded-2xl border-2 border-primary/10">
                                     <p className="text-[9px] md:text-[10px] text-primary/80 font-bold leading-relaxed">
