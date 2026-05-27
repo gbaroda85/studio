@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -274,7 +273,7 @@ export default function PdfToImageConverter() {
                     <CardDescription>Extract pages as HD images with absolute alignment control.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                         <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <div>
                             <p className="text-xl font-bold">Drop PDF document here</p>
@@ -298,16 +297,16 @@ export default function PdfToImageConverter() {
                 
                 <div className="lg:col-span-8 space-y-6">
                     <Card className="border-2 shadow-xl overflow-hidden bg-card/50">
-                        <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+                        <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                             <div>
                                 <CardTitle className="text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
                                 <CardDescription className="truncate max-w-md font-mono text-[10px] mt-1">{pdfFile?.name}</CardDescription>
                             </div>
                             {pages.length > 0 && <Badge className="bg-primary">{pages.length} PAGES</Badge>}
                         </CardHeader>
-                        <CardContent className="p-6">
+                        <CardContent className="p-4 md:p-6">
                             {isProcessing && pages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-32 gap-8 text-center">
+                                <div className="flex flex-col items-center justify-center py-20 md:py-32 gap-8 text-center">
                                     <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
                                     <div className="space-y-4 w-full max-w-sm">
                                         <p className="font-black text-2xl text-primary uppercase tracking-tighter">Rendering PDF Pages...</p>
@@ -316,7 +315,7 @@ export default function PdfToImageConverter() {
                                 </div>
                             ) : (
                                 <ScrollArea className="h-[550px] pr-4">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-1">
                                         {pages.map((p) => (
                                             <div key={p.id} onClick={() => setSelectedId(p.id)}
                                                 className={cn(
@@ -350,7 +349,7 @@ export default function PdfToImageConverter() {
                         </CardContent>
                         <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
                             <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
-                            <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
+                            <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
                                 <ShieldCheck className="h-4 w-4 text-green-500" /> Secure RAM Processing
                             </div>
                         </CardFooter>
@@ -364,7 +363,7 @@ export default function PdfToImageConverter() {
                                 <Layout className="size-6 text-primary" /> STUDIO CONTROL
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-8 space-y-8">
+                        <CardContent className="p-6 md:p-8 space-y-8">
                             {!selectedId ? (
                                 <div className="py-12 text-center space-y-4 opacity-40">
                                      <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
@@ -435,7 +434,7 @@ export default function PdfToImageConverter() {
                                 </p>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-8 border-t-2">
+                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
                             <Button className="w-full h-20 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
                                     onClick={handleDownloadAll} disabled={pages.length === 0 || isZipping}>
                                 {isZipping ? (

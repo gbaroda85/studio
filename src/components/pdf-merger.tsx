@@ -131,7 +131,7 @@ export default function PdfMerger() {
                 if (context) {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
-                    await page.render({ canvasContext: context, viewport }).promise;
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
                     imgs.push(canvas.toDataURL('image/jpeg', 0.8));
                 }
             }
@@ -191,7 +191,7 @@ export default function PdfMerger() {
                     isDragOver && "border-primary ring-4 ring-primary/20",
                     pdfFiles.length === 0 && "hover:border-primary/50"
                 )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-                    <CardHeader className="bg-muted/30 dark:bg-slate-950/30 border-b flex flex-row items-center justify-between">
+                    <CardHeader className="bg-muted/30 dark:bg-slate-950/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                         <div>
                             <CardTitle className="text-xl font-black uppercase tracking-tighter">Merge Workspace</CardTitle>
                             <CardDescription>Arrange your files in order. 100% Secure Local Engine.</CardDescription>
@@ -200,7 +200,7 @@ export default function PdfMerger() {
                     </CardHeader>
                     <CardContent className="p-6">
                         {pdfFiles.length === 0 ? (
-                            <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                            <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                                 <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <UploadCloud className="size-10" />
                                 </div>
@@ -212,16 +212,16 @@ export default function PdfMerger() {
                         ) : (
                             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 p-1 custom-scrollbar">
                                 {pdfFiles.map((file, index) => (
-                                     <div key={`${file.name}-${index}`} className="flex items-center justify-between p-4 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-950 hover:border-primary/40 transition-all group shadow-sm">
-                                         <div className="flex items-center gap-4 overflow-hidden">
+                                     <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 md:p-4 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-950 hover:border-primary/40 transition-all group shadow-sm">
+                                         <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                                             <div className="flex flex-col gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
                                                 <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-4 w-4" /></Button>
                                                 <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-4 w-4" /></Button>
                                             </div>
-                                            <div className="flex items-center gap-4 truncate">
+                                            <div className="flex items-center gap-3 md:gap-4 truncate">
                                                 <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-sm shrink-0 border border-primary/20">{index + 1}</div>
                                                 <div className="truncate">
-                                                    <p className="text-sm font-black truncate max-w-[250px] uppercase tracking-tight" title={file.name}>{file.name}</p>
+                                                    <p className="text-sm font-black truncate max-w-[150px] md:max-w-[250px] uppercase tracking-tight" title={file.name}>{file.name}</p>
                                                     <p className="text-[10px] font-bold text-muted-foreground uppercase">PDF Document</p>
                                                 </div>
                                             </div>
@@ -241,7 +241,7 @@ export default function PdfMerger() {
                             <Button variant="ghost" size="sm" onClick={handleReset} className="text-[10px] font-black uppercase text-destructive hover:bg-destructive/10 h-10 px-4">
                                 <Trash2 className="size-4 mr-2"/> REMOVE ALL FILES
                             </Button>
-                            <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">
+                            <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">
                                 <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE RAM PROCESSING
                             </div>
                         </CardFooter>
@@ -256,7 +256,7 @@ export default function PdfMerger() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0 bg-muted/20">
-                            <ScrollArea className="h-[550px] w-full p-8">
+                            <ScrollArea className="h-[550px] w-full p-6 md:p-8">
                                 <div className="flex flex-col items-center gap-8">
                                     {isGeneratingPreview ? (
                                         <div className="flex flex-col items-center gap-4 py-20 text-center">
@@ -275,15 +275,15 @@ export default function PdfMerger() {
                                 </div>
                             </ScrollArea>
                         </CardContent>
-                        <CardFooter className="bg-green-500/10 p-8 flex flex-col sm:flex-row justify-between items-center gap-8 border-t border-green-500/20">
+                        <CardFooter className="bg-green-500/10 p-6 md:p-8 flex flex-col sm:flex-row justify-between items-center gap-8 border-t border-green-500/20">
                             <div className="flex items-center gap-5 text-center sm:text-left">
-                                <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40 shrink-0"><CheckCircle2 className="size-9" /></div>
+                                <div className="size-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40 shrink-0"><CheckCircle2 className="size-9" /></div>
                                 <div>
                                     <p className="text-xl font-black text-green-800 dark:text-green-400 uppercase tracking-tighter leading-none">MERGE READY!</p>
                                     <p className="text-[10px] text-green-700 dark:text-green-500 font-bold mt-2 uppercase tracking-widest">All documents successfully bundled</p>
                                 </div>
                             </div>
-                            <Button size="lg" className="h-18 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleDownload}>
+                            <Button size="lg" className="w-full sm:w-auto h-18 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleDownload}>
                                 <Download className="mr-3 h-7 w-7 group-hover:translate-y-1 transition-transform" /> DOWNLOAD PDF
                             </Button>
                         </CardFooter>
@@ -299,7 +299,7 @@ export default function PdfMerger() {
                             <FileStack className="size-6 text-primary" /> ORGANIZE & SORT
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-10">
+                    <CardContent className="p-6 md:p-8 space-y-10">
                         {/* Sorting Section */}
                         <div className="space-y-6">
                             <div className="flex items-center justify-between">

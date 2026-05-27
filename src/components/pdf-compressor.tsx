@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -243,12 +242,12 @@ export default function PdfCompressor() {
                     <CardDescription>Exactly hit target sizes with high-fidelity sharpness logic.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                         <div className="relative">
                             <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                             <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
                         </div>
-                        <div>
+                        <div className="text-center">
                             <p className="text-xl font-bold">Drop PDF here to Begin</p>
                             <p className="text-sm text-muted-foreground mt-2">Maximum Readability Engine Active (300 DPI Equivalent).</p>
                         </div>
@@ -268,7 +267,7 @@ export default function PdfCompressor() {
         <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in duration-500 px-4">
             <div className="lg:col-span-7">
                 <Card className="shadow-2xl border-primary/10 overflow-hidden h-full bg-card/50">
-                    <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
+                    <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                         <div className="flex items-center gap-3 truncate pr-4">
                             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <FileText className="h-6 w-6" />
@@ -306,7 +305,7 @@ export default function PdfCompressor() {
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-green-600/80 uppercase font-black tracking-widest mb-1">OPTIMIZATION COMPLETE</p>
-                                        <p className="text-6xl font-black text-green-600">-{compressionResult.savings.toFixed(1)}%</p>
+                                        <p className="text-5xl md:text-6xl font-black text-green-600">-{compressionResult.savings.toFixed(1)}%</p>
                                         <p className="text-sm font-bold text-green-700 mt-2">Saved {formatBytes(compressionResult.originalSize - compressionResult.newSize)}</p>
                                     </div>
                                  </div>
@@ -356,7 +355,7 @@ export default function PdfCompressor() {
                             <Settings2 className="h-5 w-5 text-primary" /> Optimizer Panel
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-8 pb-8 space-y-8">
+                    <CardContent className="p-6 md:pt-8 md:pb-8 space-y-8">
                         <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1.5 bg-muted rounded-2xl border-2">
                                 <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
@@ -370,7 +369,7 @@ export default function PdfCompressor() {
                             <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300">
                                 <div className="space-y-4">
                                     <Label htmlFor="target-val" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Maximum File Limit</Label>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         <div className="relative flex-1 group">
                                             <Input 
                                                 id="target-val" 
@@ -382,7 +381,7 @@ export default function PdfCompressor() {
                                             <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/30 font-black text-xl uppercase">{targetUnit}</div>
                                         </div>
                                         <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                            <SelectTrigger className="w-24 h-16 font-black text-lg border-2 rounded-2xl">
+                                            <SelectTrigger className="w-full sm:w-24 h-16 font-black text-lg border-2 rounded-2xl">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
@@ -408,7 +407,7 @@ export default function PdfCompressor() {
                         <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4">
                             <ShieldCheck className="size-6 text-green-600 shrink-0" />
                             <p className="text-[10px] text-green-800 font-bold leading-relaxed">
-                                <span className="font-black uppercase block mb-1">SMART-ADAPTIVE ENCODING:</span>
+                                <span className="font-black uppercase block mb-1 text-primary">SMART-ADAPTIVE ENCODING:</span>
                                 We render at 4.0x resolution. If target is small, we intelligently adjust scale while locking quality at 70%. Text remains 100% crisp.
                             </p>
                         </div>

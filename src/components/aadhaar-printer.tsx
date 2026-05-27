@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -536,16 +535,16 @@ export default function AadhaarPrinter() {
         >
             <CardHeader className="pt-12 relative">
                 <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase"><ArrowLeft className="mr-1 size-3" /> Back</Button>
-                <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
-                    <UploadCloud className="size-10" />
+                <div className="mx-auto mb-6 grid size-16 md:size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
+                    <UploadCloud className="size-8 md:size-10" />
                 </div>
-                <CardTitle className="text-3xl font-black uppercase tracking-tighter">e-Aadhaar Upload</CardTitle>
+                <CardTitle className="text-2xl md:text-3xl font-black uppercase tracking-tighter">e-Aadhaar Upload</CardTitle>
                 <CardDescription>Select the PDF file downloaded from UIDAI portal.</CardDescription>
             </CardHeader>
-            <CardContent className="pb-12">
-                <div className="border-3 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
+            <CardContent className="pb-12 px-4 md:px-6">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
                     <Zap className="size-8 text-yellow-500 animate-pulse" />
-                    <p className="font-black uppercase tracking-tighter">Drop Original PDF here</p>
+                    <p className="font-black uppercase tracking-tighter text-center">Drop Original PDF here</p>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Auto-Decrypt Logic Active</p>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
@@ -559,7 +558,7 @@ export default function AadhaarPrinter() {
               <div className="flex items-center justify-between no-print">
                    <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest"><ArrowLeft className="mr-1 size-3" /> Selection</Button>
                    <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="font-black text-primary border-primary/20 bg-primary/5 uppercase text-[9px] px-3">Standard ID-1 Format</Badge>
+                        <Badge variant="outline" className="hidden sm:inline-flex font-black text-primary border-primary/20 bg-primary/5 uppercase text-[9px] px-3">Standard ID-1 Format</Badge>
                         {frontFinal && backFinal && (
                             <Button onClick={() => setStage('preview')} className="bg-primary font-black uppercase text-xs h-10 px-8 rounded-xl shadow-xl animate-bounce">GENERATE PRINT <ChevronRight className="ml-1 size-4" /></Button>
                         )}
@@ -573,9 +572,9 @@ export default function AadhaarPrinter() {
                              {frontFinal ? <CheckCircle2 className="size-4 text-green-500" /> : <CreditCard className="size-4" />} FRONT SIDE
                           </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
+                      <CardContent className="p-6 md:p-8 flex flex-col items-center gap-6 min-h-[250px] md:min-h-[300px] justify-center">
                           {frontFinal ? (
-                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-40", showBorder && "border-2 border-black")}>
+                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-32 md:h-40", showBorder && "border-2 border-black")}>
                                   <img src={frontFinal} alt="front" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('front'); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
@@ -605,9 +604,9 @@ export default function AadhaarPrinter() {
                              {backFinal ? <CheckCircle2 className="size-4 text-green-500" /> : <CreditCard className="size-4" />} BACK SIDE
                           </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
+                      <CardContent className="p-6 md:p-8 flex flex-col items-center gap-6 min-h-[250px] md:min-h-[300px] justify-center">
                           {backFinal ? (
-                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-40", showBorder && "border-2 border-black")}>
+                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white max-w-full aspect-[85.6/54] h-32 md:h-40", showBorder && "border-2 border-black")}>
                                   <img src={backFinal} alt="back" className="w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                       <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase h-8 px-4" onClick={() => { setRefiningSide('back'); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
@@ -636,7 +635,7 @@ export default function AadhaarPrinter() {
 
       {/* STAGE 2: PASSWORD (A4 ONLY) */}
       {stage === 'password' && (
-        <Card className="w-full max-w-md mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden">
+        <Card className="w-full max-w-md mx-4 shadow-2xl rounded-[2.5rem] overflow-hidden">
             <CardHeader className="bg-primary/5 p-6 border-b text-center">
                 <CardTitle className="text-xl font-black uppercase flex items-center justify-center gap-3">
                     <Lock className="size-5 text-primary" /> Aadhaar Password
@@ -672,17 +671,17 @@ export default function AadhaarPrinter() {
 
       {/* STAGE 3: REFINE WITH MODES */}
       {stage === 'refine' && (
-          <Card className="w-full max-w-5xl mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden mx-4">
-              <CardHeader className="bg-muted/30 border-b p-6">
+          <Card className="w-full max-w-5xl mx-4 shadow-2xl rounded-[2.5rem] overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div>
-                        <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+                    <div className="text-center md:text-left">
+                        <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center justify-center md:justify-start gap-2">
                             <Settings2 className="size-5 text-primary" /> Adjustment Studio
                         </CardTitle>
                         <CardDescription className="text-[10px] font-black uppercase opacity-60">Pick mode and align corners of {refiningSide || 'Aadhaar'} portion.</CardDescription>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/20 mr-2">
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                        <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/20">
                             <Sparkles className={cn("size-3.5", autoEnhance ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")} />
                             <span className="text-[10px] font-black uppercase">AI Enhance</span>
                             <Switch checked={autoEnhance} onCheckedChange={setAutoEnhance} />
@@ -690,7 +689,7 @@ export default function AadhaarPrinter() {
                          <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                             <TabsList className="h-9">
                                 <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4">
-                                    <Maximize className="size-3 mr-1.5" /> Rect (Free)
+                                    <Maximize className="size-3 mr-1.5" /> Rect
                                 </TabsTrigger>
                                 <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4">
                                     <Scan className="size-3 mr-1.5" /> Scanner
@@ -701,7 +700,7 @@ export default function AadhaarPrinter() {
                     </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden select-none"
+              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[400px] md:min-h-[600px] relative overflow-hidden select-none"
                            onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                   
                   {isProcessing && (
@@ -711,7 +710,7 @@ export default function AadhaarPrinter() {
                       </div>
                   )}
 
-                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10" style={{ touchAction: 'none' }}>
+                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10 max-w-[90vw]" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="rect" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
@@ -723,22 +722,22 @@ export default function AadhaarPrinter() {
                                 <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
-                                <div key={i} className={cn("absolute size-14 -ml-7 -mt-7 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
+                                <div key={i} className={cn("absolute size-10 md:size-14 -ml-5 md:-ml-7 -mt-5 md:-mt-7 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                     onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
-                                    <div className="size-4 bg-white rounded-full shadow-inner" />
+                                    <div className="size-3 md:size-4 bg-white rounded-full shadow-inner" />
                                 </div>
                             ))}
                         </div>
                     )}
 
                     {draggingPoint !== null && cropMode === 'scanner' && (
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
                                     <div className="w-full h-0.5 bg-green-500/50 absolute" />
                                     <div className="h-full w-0.5 bg-green-500/50 absolute" />
-                                    <div className="size-4 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
+                                    <div className="size-3 md:size-4 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
                                 </div>
                             </div>
                             <img 
@@ -756,16 +755,16 @@ export default function AadhaarPrinter() {
                     )}
                   </div>
 
-                  <div className="w-full py-10 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
-                       <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                  <div className="w-full py-6 md:py-10 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
+                       <div className="inline-flex items-center gap-3 px-6 md:px-8 py-2 md:py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-4 w-4 text-primary animate-pulse" /> 
                           {cropMode === 'rect' ? "Drag box to any area" : "Drag 4 dots to corners"}
                       </div>
                   </div>
               </CardContent>
-              <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex justify-between">
-                  <Button variant="ghost" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2">CANCEL</Button>
-                  <Button className="h-12 px-12 bg-primary font-black rounded-xl shadow-xl group" onClick={handleFinalizeCrop}>
+              <CardFooter className="p-4 md:p-6 bg-white dark:bg-slate-950 border-t flex flex-col md:flex-row justify-between gap-4">
+                  <Button variant="ghost" onClick={() => setStage('upload')} className="w-full md:w-auto font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2 order-2 md:order-1">CANCEL</Button>
+                  <Button className="w-full md:w-auto h-12 md:h-14 px-12 bg-primary font-black rounded-xl shadow-xl group order-1 md:order-2" onClick={handleFinalizeCrop}>
                       CONFIRM ADJUSTMENT <ChevronRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
               </CardFooter>
@@ -785,10 +784,10 @@ export default function AadhaarPrinter() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Professional Studio Alignment</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2 mr-2">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2">
                         <Square className="size-3 text-muted-foreground" />
-                        <span className="text-[10px] font-black uppercase">Card Border</span>
+                        <span className="text-[10px] font-black uppercase">Border</span>
                         <Switch checked={showBorder} onCheckedChange={setShowBorder} />
                     </div>
                     <Tabs value={vAlign} onValueChange={(v) => setVAlign(v as VAlign)} className="bg-muted p-1 rounded-xl border-2">
@@ -815,10 +814,10 @@ export default function AadhaarPrinter() {
                     <CardHeader className="bg-white/50 dark:bg-black/20 border-b p-4 text-center">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span>
                     </CardHeader>
-                    <CardContent className="p-12 flex flex-col md:flex-row items-center justify-center gap-12">
+                    <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">FRONT PORTION</span>
-                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")} style={{ width: '320px', height: '202px' }}>
+                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all w-[280px] h-[176px] md:w-[320px] md:h-[202px]", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")}>
                                 <img src={frontFinal} alt="Front" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>
@@ -828,7 +827,7 @@ export default function AadhaarPrinter() {
 
                         <div className="space-y-4">
                             <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">BACK PORTION</span>
-                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")} style={{ width: '320px', height: '202px' }}>
+                            <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white group hover:scale-[1.05] transition-all w-[280px] h-[176px] md:w-[320px] md:h-[202px]", showBorder ? "border-[2px] border-black" : "border-[6px] border-white")}>
                                 <img src={backFinal} alt="Back" className="w-full h-full object-contain" />
                                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Badge className="bg-primary shadow-lg border-2 border-white font-black">ID-1 STANDARD</Badge>

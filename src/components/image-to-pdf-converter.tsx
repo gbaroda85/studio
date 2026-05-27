@@ -284,11 +284,11 @@ export default function ImageToPdfConverter() {
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">IMAGE TO PDF STUDIO</CardTitle>
                     <CardDescription>Absolute zero-gap alignment enabled.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                     {images.length === 0 ? (
-                        <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                            <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                <UploadCloud className="size-10" />
+                        <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                            <div className="size-16 md:size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                <UploadCloud className="size-8 md:size-10" />
                             </div>
                             <div className="text-center">
                                 <p className="text-lg font-bold uppercase tracking-tight">Drop images or Click to upload</p>
@@ -296,7 +296,7 @@ export default function ImageToPdfConverter() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
                             {images.map((img, index) => (
                             <div 
                                 key={img.id} 
@@ -353,7 +353,7 @@ export default function ImageToPdfConverter() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 bg-muted/20">
-                        <ScrollArea className="h-[550px] w-full p-8">
+                        <ScrollArea className="h-[550px] w-full p-4 md:p-8">
                             <div className="flex flex-col items-center gap-8">
                                 {isGeneratingPreview ? (
                                     <div className="flex flex-col items-center gap-4 py-20 w-full max-w-xs text-center">
@@ -380,7 +380,7 @@ export default function ImageToPdfConverter() {
                                 <p className="text-[10px] text-green-700 font-bold mt-1 uppercase tracking-widest">Literal Clamping Active</p>
                             </div>
                         </div>
-                        <Button size="lg" className="h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
+                        <Button size="lg" className="w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-green-700 text-xl font-black shadow-2xl rounded-2xl transition-all active:scale-95" onClick={handleDownload}>
                             <Download className="mr-3 size-7" /> DOWNLOAD PDF
                         </Button>
                     </CardFooter>
@@ -395,7 +395,7 @@ export default function ImageToPdfConverter() {
                         <Layout className="size-6 text-primary" /> POSITIONING
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8 space-y-8">
+                <CardContent className="p-6 md:p-8 space-y-8">
                     {!selectedId ? (
                         <div className="py-12 text-center space-y-4 opacity-40">
                              <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
@@ -462,7 +462,7 @@ export default function ImageToPdfConverter() {
                         </p>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-8 border-t-2">
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
                     <Button 
                         className="w-full h-20 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
                         disabled={images.length === 0 || isConverting}

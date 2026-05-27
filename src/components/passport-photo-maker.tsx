@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -494,9 +493,9 @@ export default function PassportPhotoMaker() {
                     </motion.div>
 
                     <Card className="w-full max-w-3xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-6">
+                        <CardContent className="p-4 md:p-6">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-16 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
@@ -504,7 +503,7 @@ export default function PassportPhotoMaker() {
                                     <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
                                     <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
@@ -564,7 +563,7 @@ export default function PassportPhotoMaker() {
                             </div>
                         </CardHeader>
                         
-                        <CardContent className="p-8 md:p-12 flex items-center justify-center bg-black/5 min-h-[400px]">
+                        <CardContent className="p-4 md:p-12 flex items-center justify-center bg-black/5 min-h-[400px]">
                             <div className="max-h-[50vh] overflow-hidden rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50">
                                 <ReactCrop 
                                     crop={crop} 
@@ -584,11 +583,11 @@ export default function PassportPhotoMaker() {
                             </div>
                         </CardContent>
 
-                        <CardFooter className="glass-panel border-t p-6 flex justify-between">
-                            <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
+                        <CardFooter className="glass-panel border-t p-6 flex flex-col md:flex-row gap-4 justify-between">
+                            <Button variant="ghost" onClick={handleReset} className="w-full md:w-auto font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
                                 <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
-                            <Button className="h-14 px-12 text-base font-black bg-primary rounded-xl shadow-2xl group" onClick={handleInitialCrop}>
+                            <Button className="w-full md:w-auto h-14 px-12 text-base font-black bg-primary rounded-xl shadow-2xl group" onClick={handleInitialCrop}>
                                 CONFIRM CROP <ChevronRightIcon className="ml-2 size-5" />
                             </Button>
                         </CardFooter>
@@ -631,7 +630,7 @@ export default function PassportPhotoMaker() {
                                         <TabsTrigger value="filters" className="font-bold text-[10px] uppercase rounded-xl">Filters</TabsTrigger>
                                         <TabsTrigger value="studio" className="font-bold text-[10px] uppercase rounded-xl">Studio</TabsTrigger>
                                     </TabsList>
-                                    <ScrollArea className="h-[450px]">
+                                    <ScrollArea className="h-[300px] md:h-[450px]">
                                         <TabsContent value="filters" className="p-8 space-y-8">
                                             <div className="space-y-6">
                                                 <div className="space-y-4">
@@ -671,7 +670,7 @@ export default function PassportPhotoMaker() {
                                 </Tabs>
                             </CardContent>
                         </Card>
-                        <div className="glass-panel p-6 rounded-[2rem] flex gap-4 items-center shadow-xl">
+                        <div className="hidden lg:flex glass-panel p-6 rounded-[2rem] gap-4 items-center shadow-xl">
                             <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0"><ShieldCheck className="size-6 text-green-600" /></div>
                             <div>
                                 <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Enterprise Privacy</p>
@@ -682,30 +681,30 @@ export default function PassportPhotoMaker() {
 
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-8">
                         <div className="relative group max-w-[600px] w-full">
-                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[3.5rem] overflow-hidden flex items-center justify-center">
+                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[2rem] md:rounded-[3.5rem] overflow-hidden flex items-center justify-center">
                                 <canvas ref={mainCanvasRef} className="max-w-full h-auto object-contain" />
                                 {isProcessing && (
                                     <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-12 gap-8 z-20">
-                                        <Loader2 className="size-20 animate-spin text-primary stroke-[3]" />
+                                        <Loader2 className="size-16 md:size-20 animate-spin text-primary stroke-[3]" />
                                         <Progress value={progress} className="h-2 w-full max-w-[280px]" />
                                     </div>
                                 )}
                             </Card>
-                            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-2.5 rounded-[2rem] shadow-2xl border-2 border-white/20 z-10">
-                                <Button variant="outline" size="icon" className="size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-4"/></Button>
-                                <Button variant="outline" size="icon" className="size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-4"/></Button>
+                            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-2 md:p-2.5 rounded-[2rem] shadow-2xl border-2 border-white/20 z-10">
+                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-4"/></Button>
+                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-4"/></Button>
                                 <Separator orientation="vertical" className="h-6 mx-1" />
                                 <div className="grid grid-cols-2 gap-1">
-                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-3"/></Button>
                                 </div>
                                 <Separator orientation="vertical" className="h-6 mx-1" />
-                                <Button variant="outline" size="icon" className="size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4"/></Button>
+                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4"/></Button>
                             </div>
                         </div>
-                        <div className="flex gap-4 w-full max-w-[500px] mt-10">
+                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-[500px] mt-10">
                              <Button variant="outline" onClick={handleReset} className="flex-1 h-16 rounded-[1.5rem] border-2 font-black uppercase text-xs tracking-widest">Start Over</Button>
                             <Button className="flex-[2] h-16 rounded-[1.5rem] bg-primary text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-3 size-6" /> DOWNLOAD JPG</Button>
                         </div>
@@ -732,25 +731,25 @@ export default function PassportPhotoMaker() {
             {/* 4. PRINT PREVIEW MODAL */}
             <AnimatePresence>
                 {stage === 'print' && printSheetSrc && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-8 flex items-center justify-center overflow-y-auto">
-                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 items-center">
-                            <div className="flex-1 space-y-8 text-white text-center md:text-left">
-                                <h2 className="text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
-                                <p className="text-slate-400 text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
-                                <div className="flex gap-4">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-4 md:p-8 flex items-center justify-center overflow-y-auto">
+                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-12 items-center">
+                            <div className="flex-1 space-y-6 md:space-y-8 text-white text-center md:text-left">
+                                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
+                                <p className="text-slate-400 text-base md:text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
+                                <div className="flex flex-col sm:flex-row gap-4">
                                     <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
                                     <Button className="h-16 flex-[2] rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-lg" onClick={() => {
                                         const link = document.createElement('a'); link.href = printSheetSrc; link.download = `Print-Sheet-${Date.now()}.jpg`; link.click();
                                     }}>DOWNLOAD SHEET</Button>
                                 </div>
                             </div>
-                            <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500">
-                                <div className="shadow-2xl border-[12px] border-white rounded-sm overflow-hidden bg-white max-w-full">
-                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[70vh] block" />
+                            <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500 max-w-full">
+                                <div className="shadow-2xl border-[6px] md:border-[12px] border-white rounded-sm overflow-hidden bg-white max-w-full">
+                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[60vh] md:max-h-[70vh] block" />
                                 </div>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="absolute top-8 right-8 size-12 text-white" onClick={() => setStage('studio')}><X className="size-8" /></Button>
+                        <Button variant="ghost" size="icon" className="absolute top-4 right-4 md:top-8 md:right-8 size-10 md:size-12 text-white" onClick={() => setStage('studio')}><X className="size-6 md:size-8" /></Button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -759,4 +758,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-

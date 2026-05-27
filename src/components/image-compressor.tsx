@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -246,21 +245,21 @@ export default function ImageCompressor() {
                     "border-2 border-dashed transition-all duration-300 relative overflow-hidden bg-card/50",
                     "hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10",
                     isDragOver && "border-primary bg-primary/5", 
-                    results.length > 0 ? "p-4" : "p-24 text-center"
+                    results.length > 0 ? "p-4" : "p-6 md:p-24 text-center"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
                 {results.length === 0 ? (
                     <div className="flex flex-col items-center gap-6 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-24 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                            <UploadCloud className="size-12" />
+                        <div className="size-20 md:size-24 rounded-[2rem] md:rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                            <UploadCloud className="size-10 md:size-12" />
                         </div>
                         <div className="space-y-2">
-                            <p className="text-2xl font-black uppercase tracking-tighter">Bulk Compression Workspace</p>
+                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Bulk Compression Workspace</p>
                             <p className="text-sm text-muted-foreground font-medium">
                                 <span className="text-primary font-black">Drag and drop</span> or Click to upload photos
                             </p>
-                            <p className="text-xs text-muted-foreground italic opacity-70">Up to 50 images at once. Private local processing.</p>
+                            <p className="text-[10px] md:text-xs text-muted-foreground italic opacity-70">Up to 50 images at once. Private local processing.</p>
                         </div>
                     </div>
                 ) : (
@@ -276,13 +275,13 @@ export default function ImageCompressor() {
                         <ScrollArea className="h-[500px] pr-4">
                             <div className="grid gap-3">
                                 {results.map((res) => (
-                                    <div key={res.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 hover:border-primary/40 transition-all group shadow-sm">
-                                        <div className="flex items-center gap-4 truncate">
-                                            <div className="size-16 rounded-xl overflow-hidden bg-muted border-2 shrink-0 relative shadow-sm">
+                                    <div key={res.id} className="flex items-center justify-between p-3 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 hover:border-primary/40 transition-all group shadow-sm">
+                                        <div className="flex items-center gap-3 md:gap-4 truncate">
+                                            <div className="size-12 md:size-16 rounded-xl overflow-hidden bg-muted border-2 shrink-0 relative shadow-sm">
                                                 <Image src={res.originalDataUrl} alt="prev" fill className="object-cover" />
                                             </div>
                                             <div className="truncate">
-                                                <p className="text-xs font-black truncate max-w-[150px] uppercase tracking-tight">{res.name}</p>
+                                                <p className="text-xs font-black truncate max-w-[120px] md:max-w-[150px] uppercase tracking-tight">{res.name}</p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="text-[10px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
                                                     {res.newSize > 0 && (
@@ -299,12 +298,12 @@ export default function ImageCompressor() {
                                             {res.isProcessing ? (
                                                 <Loader2 className="size-5 animate-spin text-primary" />
                                             ) : res.newSize > 0 ? (
-                                                <div className="flex items-center gap-2">
-                                                    <Badge className="bg-green-500 hover:bg-green-500 text-white text-[9px] font-black">-{res.savings.toFixed(0)}%</Badge>
+                                                <div className="flex items-center gap-1.5 md:gap-2">
+                                                    <Badge className="bg-green-500 hover:bg-green-500 text-white text-[8px] md:text-[9px] font-black">-{res.savings.toFixed(0)}%</Badge>
                                                     
                                                     <Dialog>
                                                         <DialogTrigger asChild>
-                                                            <Button size="icon" variant="outline" className="size-9 rounded-xl border-2 hover:bg-primary/5">
+                                                            <Button size="icon" variant="outline" className="size-8 md:size-9 rounded-xl border-2 hover:bg-primary/5">
                                                                 <Eye className="size-4 text-primary" />
                                                             </Button>
                                                         </DialogTrigger>
@@ -342,14 +341,14 @@ export default function ImageCompressor() {
                                                         </DialogContent>
                                                     </Dialog>
 
-                                                    <Button size="icon" variant="outline" className="size-9 rounded-xl border-2 border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
+                                                    <Button size="icon" variant="outline" className="size-8 md:size-9 rounded-xl border-2 border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
                                                         <Download className="size-4 text-green-600" />
                                                     </Button>
                                                 </div>
                                             ) : (
                                                 <Badge variant="outline" className="text-[9px] font-black uppercase opacity-40">Ready</Badge>
                                             )}
-                                            <Button variant="ghost" size="icon" className="size-8 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
+                                            <Button variant="ghost" size="icon" className="size-7 md:size-8 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
                                                 <X className="size-4" />
                                             </Button>
                                         </div>
@@ -367,17 +366,17 @@ export default function ImageCompressor() {
 
             {allProcessed && results.length > 1 && (
                 <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500">
-                    <CardContent className="p-8 flex flex-col sm:flex-row items-center justify-between gap-8">
+                    <CardContent className="p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 md:gap-8">
                         <div className="flex items-center gap-5 text-center sm:text-left">
-                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl shadow-green-500/30 shrink-0 mx-auto sm:mx-0">
-                                <CheckCircle2 className="size-8" />
+                            <div className="size-14 md:size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl shadow-green-500/30 shrink-0 mx-auto sm:mx-0">
+                                <CheckCircle2 className="size-7 md:size-8" />
                             </div>
                             <div>
                                 <p className="text-lg font-black uppercase tracking-tighter text-green-800">Batch Processing Complete!</p>
                                 <p className="text-xs text-green-700 font-medium">All photos optimized. Download them as a single ZIP archive.</p>
                             </div>
                         </div>
-                        <Button size="lg" className="h-16 px-10 bg-green-600 hover:bg-green-700 font-black text-lg shadow-2xl rounded-2xl transition-all active:scale-95" onClick={downloadAllAsZip}>
+                        <Button size="lg" className="w-full sm:w-auto h-16 px-10 bg-green-600 hover:bg-green-700 font-black text-lg shadow-2xl rounded-2xl transition-all active:scale-95" onClick={downloadAllAsZip}>
                             <Download className="mr-3 size-6" /> DOWNLOAD ZIP
                         </Button>
                     </CardContent>
@@ -393,7 +392,7 @@ export default function ImageCompressor() {
                         <Settings2 className="size-6 text-primary" /> Optimizer Suite
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8 space-y-8">
+                <CardContent className="p-6 md:p-8 space-y-8">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 h-14 p-1.5 bg-muted/50 rounded-2xl border-2">
                             <TabsTrigger 
@@ -472,7 +471,7 @@ export default function ImageCompressor() {
                         </Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-8 border-t-2">
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
                     <Button 
                         className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50" 
                         disabled={results.length === 0 || isBulkProcessing}
