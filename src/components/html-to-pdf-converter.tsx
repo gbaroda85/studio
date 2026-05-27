@@ -199,7 +199,7 @@ export default function HtmlToPdfConverter() {
     }
     
     return (
-        <div className="w-full flex flex-col gap-6 md:gap-8 px-0 animate-in fade-in duration-500">
+        <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 md:gap-8 px-0 animate-in fade-in duration-500">
             {/* Hidden Sandbox for Rendering */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
