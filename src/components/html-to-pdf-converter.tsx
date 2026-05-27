@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -18,7 +19,8 @@ import {
     Trash2, 
     RefreshCcw,
     Monitor,
-    Sparkles
+    Sparkles,
+    ChevronRight
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -141,7 +143,7 @@ export default function HtmlToPdfConverter() {
     };
     
     return (
-        <div className="w-full max-w-7xl flex flex-col gap-6 px-4 animate-in fade-in duration-500">
+        <div className="w-full max-w-7xl flex flex-col gap-6 px-0 md:px-4 animate-in fade-in duration-500">
             {/* Hidden Sandbox for Rendering - Fixed A4 Ratio */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
@@ -152,10 +154,10 @@ export default function HtmlToPdfConverter() {
                 />
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch w-full">
                 {/* Editor & Upload Section */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1">
+                <div className="lg:col-span-5 flex flex-col gap-6 w-full">
+                    <Card className="flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex-1 w-full">
                         <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -174,13 +176,13 @@ export default function HtmlToPdfConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                     <Globe className="size-3"/> Source Editor
                                 </Label>
-                                {fileName && <Badge variant="secondary" className="text-[9px] font-bold uppercase">{fileName}</Badge>}
+                                {fileName && <Badge variant="secondary" className="text-[9px] font-bold uppercase truncate max-w-[100px] md:max-w-none">{fileName}</Badge>}
                             </div>
                             <Textarea
                                 value={htmlContent}
                                 onChange={(e) => setHtmlContent(e.target.value)}
                                 placeholder="Paste your HTML code here..."
-                                className="flex-1 min-h-[300px] md:min-h-[450px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 selection:bg-primary/30 custom-scrollbar"
+                                className="flex-1 min-h-[250px] md:min-h-[450px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 selection:bg-primary/30 custom-scrollbar w-full"
                             />
                         </CardContent>
                         <CardFooter className="p-4 md:p-6 bg-muted/10 border-t flex flex-col gap-4">
@@ -213,8 +215,8 @@ export default function HtmlToPdfConverter() {
                 </div>
 
                 {/* PDF Live Result */}
-                <Card className="lg:col-span-7 flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
-                    <CardHeader className="bg-muted/30 border-b p-3 md:p-4 flex flex-row items-center justify-between">
+                <Card className="lg:col-span-7 flex flex-col border-2 shadow-xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 w-full">
+                    <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Visual PDF Output</CardTitle>
@@ -249,7 +251,7 @@ export default function HtmlToPdfConverter() {
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="p-4 md:p-8 bg-white dark:bg-slate-950 border-t flex flex-col gap-4">
+                    <CardFooter className="p-4 md:p-8 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
                         <Button 
                             onClick={handleDownload} 
                             disabled={!pdfBlob || isGenerating} 
