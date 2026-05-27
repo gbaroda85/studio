@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -22,7 +21,8 @@ import {
     Sparkles,
     ChevronRight,
     SearchCode,
-    FileDigit
+    FileDigit,
+    X
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -161,23 +161,23 @@ export default function HtmlToPdfConverter() {
     if (stage === 'setup') {
         return (
             <Card className={cn(
-                "w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto",
+                "w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto rounded-2xl md:rounded-[2.5rem] overflow-hidden",
                 isDragOver && "border-primary ring-4 ring-primary/20"
             )}
                 onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }}
             >
-                <CardHeader>
+                <CardHeader className="pt-8 md:pt-12">
                     <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-3xl bg-primary/10 text-primary">
                         <FileCode className="h-8 md:h-10 w-8 md:w-10" />
                     </div>
                     <CardTitle className="text-xl md:text-3xl font-black uppercase tracking-tight">HTML to PDF Studio</CardTitle>
                     <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60">Convert raw code or files into professional documents.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-4 md:p-6">
+                <CardContent className="p-4 md:p-10">
                     <div
-                        className="border-3 border-dashed border-muted-foreground/30 rounded-2xl md:rounded-3xl p-8 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                        className="border-4 border-dashed border-muted-foreground/20 rounded-2xl md:rounded-[2rem] p-8 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
                         onClick={() => setStage('editor')}
                     >
                         <div className="relative">
@@ -309,9 +309,9 @@ export default function HtmlToPdfConverter() {
                         <Button 
                             onClick={handleDownload} 
                             disabled={!pdfBlob || isGenerating} 
-                            className="w-full h-14 md:h-18 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl group active:scale-95 transition-all"
+                            className="w-full h-14 md:h-18 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl md:rounded-2xl group active:scale-95 transition-all"
                         >
-                            <Download className="mr-3 h-5 w-5 md:h-7 md:w-7 group-hover:translate-y-1 transition-transform" />
+                            <Download className="mr-3 h-5 w-5 md:h-7 md:w-7 group-hover:translate-y-0.5 transition-transform" />
                             <span className="hidden sm:inline">DOWNLOAD PROFESSIONAL PDF</span>
                             <span className="sm:hidden">DOWNLOAD PDF</span>
                         </Button>
