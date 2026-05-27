@@ -135,11 +135,11 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Optimized Title */}
-      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      {/* Hero Section - Matched to User's Screenshot Content */}
+      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
-          <div className="absolute top-1/2 -right-48 size-[800px] bg-purple-500/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
@@ -148,18 +148,18 @@ export default function Page() {
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
-            Elite Studio for <br className="hidden md:block" />
-            <span className="text-gradient-hero">Images, PDFs & Utilities</span>
+            Professional Tools for <br className="hidden md:block" />
+            <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
           <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-6 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for professional use.
+            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
           {/* Quick Access Action Category Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
             <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
-              <ImageIcon className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
+              <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
             <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-rose-500/50 transition-all group">
@@ -173,7 +173,7 @@ export default function Page() {
           </div>
 
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary" />
               <Input
@@ -226,7 +226,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* Why Choose Section (Image Based) - Now at the Bottom */}
+                {/* Why Choose Section */}
                 <section className="py-20 mt-32 bg-white dark:bg-black/20 w-full flex justify-center border-t border-border/50 rounded-[4rem] shadow-inner">
                     <div className="w-full max-w-6xl px-8 md:px-16 text-center">
                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase">Why Choose GR7 Tools?</h2>
