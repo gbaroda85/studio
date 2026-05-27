@@ -26,7 +26,10 @@ import {
     Zap,
     FileStack,
     RefreshCcw,
-    LayoutList
+    LayoutList,
+    ArrowDownAz,
+    ArrowUpAz,
+    Repeat
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -193,7 +196,7 @@ export default function PdfMerger() {
                     <CardHeader className="bg-muted/30 dark:bg-slate-950/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
                         <div>
                             <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">Merge Workspace</CardTitle>
-                            <CardDescription className="text-[10px] md:text-sm">Arrange files in order. 100% Secure.</CardDescription>
+                            <CardDescription className="text-[10px] md:text-sm">Manage and bundle your PDF stack here.</CardDescription>
                         </div>
                         <div className="flex items-center gap-3">
                             {pdfFiles.length > 0 && <Badge className="bg-primary font-black uppercase text-[8px] md:text-[10px] tracking-widest">{pdfFiles.length} FILES</Badge>}
@@ -212,25 +215,7 @@ export default function PdfMerger() {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {/* SIDE BY SIDE SORTING TOOLBAR */}
-                                <div className="flex flex-wrap items-center gap-2 p-2 bg-muted/40 rounded-xl border-2 border-dashed">
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground ml-2 mr-2">Quick Sort:</span>
-                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('asc')}>
-                                        <SortAsc className="size-3 mr-1" /> A-Z
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('desc')}>
-                                        <SortDesc className="size-3 mr-1" /> Z-A
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('reverse')}>
-                                        <RefreshCcw className="size-3 mr-1" /> Reverse
-                                    </Button>
-                                    <div className="flex-1" />
-                                    <Button variant="ghost" size="sm" onClick={handleReset} className="text-[8px] font-black uppercase text-destructive h-8 px-3">
-                                        <Trash2 className="size-3 mr-1"/> Clear All
-                                    </Button>
-                                </div>
-
-                                <ScrollArea className="h-[400px] md:h-[500px] pr-1 custom-scrollbar p-1">
+                                <ScrollArea className="h-[400px] md:h-[600px] pr-1 custom-scrollbar p-1">
                                     <div className="space-y-3">
                                         {pdfFiles.map((file, index) => (
                                              <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 md:p-4 rounded-xl md:rounded-2xl border-2 border-transparent bg-white dark:bg-slate-950 hover:border-primary/40 transition-all group shadow-sm">
@@ -305,21 +290,66 @@ export default function PdfMerger() {
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-2 md:gap-3">
-                            <FileStack className="size-5 md:size-6 text-primary" /> BUNDLE ACTION
+                            <LayoutList className="size-5 md:size-6 text-primary" /> ORGANIZE & SORT
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-4 md:p-8 space-y-6 md:space-y-10">
+                    <CardContent className="p-4 md:p-8 space-y-8">
                         
                         <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
-                                <ShieldCheck className="size-3 text-green-500" /> Secure Sandbox
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-4">
+                                <ArrowUpDown className="size-3" /> SORTING OPTIONS
                             </Label>
-                            <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium leading-relaxed">
-                                All PDF bytes are combined 100% in your device RAM. Your private documents never touch our cloud storage.
-                            </p>
+                            
+                            {/* HORIZONTAL BUTTON GRID: LEFT, CENTER, RIGHT */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <Button 
+                                    variant="outline" 
+                                    className="h-auto flex-col gap-2 py-4 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    onClick={() => sortFiles('asc')}
+                                    disabled={pdfFiles.length < 2}
+                                >
+                                    <div className="size-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
+                                        <ArrowDownAz className="size-5 text-primary" />
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-[10px] font-black uppercase leading-tight">SORT A TO Z</div>
+                                        <div className="text-[8px] font-bold opacity-40 uppercase">BY NAME</div>
+                                    </div>
+                                </Button>
+
+                                <Button 
+                                    variant="outline" 
+                                    className="h-auto flex-col gap-2 py-4 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    onClick={() => sortFiles('desc')}
+                                    disabled={pdfFiles.length < 2}
+                                >
+                                    <div className="size-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
+                                        <ArrowUpAz className="size-5 text-primary" />
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-[10px] font-black uppercase leading-tight">SORT Z TO A</div>
+                                        <div className="text-[8px] font-bold opacity-40 uppercase">REVERSE</div>
+                                    </div>
+                                </Button>
+
+                                <Button 
+                                    variant="outline" 
+                                    className="h-auto flex-col gap-2 py-4 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    onClick={() => sortFiles('reverse')}
+                                    disabled={pdfFiles.length < 2}
+                                >
+                                    <div className="size-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
+                                        <Repeat className="size-5 text-primary" />
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-[10px] font-black uppercase leading-tight">MANUAL FLIP</div>
+                                        <div className="text-[8px] font-bold opacity-40 uppercase">INVERT LIST</div>
+                                    </div>
+                                </Button>
+                            </div>
                         </div>
 
-                        <div className="p-4 md:p-6 bg-primary/5 rounded-[1.5rem] md:rounded-[2rem] border-2 border-primary/10 flex gap-3 md:gap-5 shadow-sm">
+                        <div className="p-4 md:p-6 bg-primary/5 rounded-[1.5rem] md:rounded-[2rem] border-2 border-primary/10 flex gap-3 md:gap-5 shadow-sm mt-8">
                             <Zap className="size-5 md:size-6 text-yellow-500 shrink-0 animate-pulse" />
                             <div className="space-y-1">
                                 <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-widest">PRO BUNDLING</p>
@@ -341,6 +371,16 @@ export default function PdfMerger() {
                         </Button>
                     </CardFooter>
                 </Card>
+                
+                <div className="p-4 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-3 md:gap-4 items-center shadow-sm">
+                    <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="size-5 md:size-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Privacy Guard</p>
+                        <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight">Processing occurs 100% locally. Your files are never uploaded.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
