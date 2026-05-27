@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -199,7 +198,7 @@ export default function HtmlToPdfConverter() {
     }
     
     return (
-        <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 md:gap-8 px-0 animate-in fade-in duration-500">
+        <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-6 md:gap-8 px-0 md:px-4 animate-in fade-in duration-500">
             {/* Hidden Sandbox for Rendering */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
@@ -241,7 +240,7 @@ export default function HtmlToPdfConverter() {
                                 value={htmlContent}
                                 onChange={(e) => setHtmlContent(e.target.value)}
                                 placeholder="Paste your HTML code here..."
-                                className="flex-1 min-h-[300px] md:min-h-[450px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 custom-scrollbar w-full"
+                                className="flex-1 min-h-[350px] md:min-h-[500px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-xl md:rounded-2xl p-4 md:p-6 bg-slate-900 text-slate-100 custom-scrollbar w-full"
                             />
                         </CardContent>
                         <CardFooter className="p-4 md:p-6 bg-muted/10 border-t flex flex-col gap-4">
@@ -279,7 +278,7 @@ export default function HtmlToPdfConverter() {
                             <Badge className="bg-green-600 text-white font-black text-[8px] md:text-[9px] uppercase tracking-widest px-3 py-1">HD READY</Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-4 md:p-8 lg:p-12 relative min-h-[400px] md:min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[750px] custom-scrollbar">
+                    <CardContent className="flex-1 p-4 md:p-8 lg:p-12 relative min-h-[400px] md:min-h-[500px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-y-auto max-h-[850px] custom-scrollbar">
                        {previewImage ? (
                             <div className="relative w-full shadow-2xl border-2 md:border-8 border-white bg-white rounded-sm mx-auto overflow-hidden animate-in zoom-in-95 duration-300">
                                 <img
