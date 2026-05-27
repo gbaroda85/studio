@@ -385,8 +385,8 @@ export default function PdfCropper() {
           <CardTitle className="text-2xl font-black uppercase tracking-tight">Precision PDF Cropper & Scanner</CardTitle>
           <CardDescription>Trim margins or fix perspective. Batch process multiple pages into one PDF.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+        <CardContent className="p-4 md:p-6">
+          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-6 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop PDF document here</p>
@@ -395,7 +395,7 @@ export default function PdfCropper() {
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </CardContent>
-        <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
+        <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
             <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> INDEPENDENT PAGES</div>
             <div className="flex items-center gap-1.5"><Grid3X3 className="size-3 text-yellow-500" /> BATCH BUNDLE</div>
@@ -406,63 +406,63 @@ export default function PdfCropper() {
 
   return (
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
             
             <div className="lg:col-span-8 space-y-6">
-                <Card className="border-2 shadow-2xl overflow-hidden bg-card/50">
-                    <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between">
-                        <div className="flex flex-col md:flex-row md:items-center gap-4">
-                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
-                                <TabsList className="h-8">
+                <Card className="border-2 shadow-2xl overflow-hidden bg-card/50 rounded-xl md:rounded-[2.5rem]">
+                    <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
+                        <div className="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border w-full md:w-auto">
+                                <TabsList className="grid grid-cols-2 h-8">
                                     <TabsTrigger value="rectangular" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
                                     <TabsTrigger value="perspective" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
                                 </TabsList>
                             </Tabs>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center gap-2">
                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isProcessing}><ChevronLeft className="size-4"/></Button>
-                                <span className="text-[10px] font-black uppercase px-3 py-1 bg-primary/10 text-primary rounded-full">Page {currentPage}/{numPages}</span>
+                                <span className="text-[10px] font-black uppercase px-3 py-1 bg-primary/10 text-primary rounded-full whitespace-nowrap">Page {currentPage}/{numPages}</span>
                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= numPages || isProcessing}><ChevronRight className="size-4"/></Button>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleReset}><X /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive self-end md:self-auto" onClick={handleReset}><X /></Button>
                     </CardHeader>
-                    <CardContent className="p-0 min-h-[550px] flex items-center justify-center bg-black/5 relative overflow-hidden select-none"
+                    <CardContent className="p-0 min-h-[350px] md:min-h-[550px] flex items-center justify-center bg-black/5 relative overflow-hidden select-none"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
                         {isProcessing && (
                             <div className="absolute inset-0 z-30 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                <Loader2 className="h-10 w-10 md:h-12 md:w-12 animate-spin text-primary stroke-[3]" />
                                 <p className="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Processing Document...</p>
                             </div>
                         )}
 
                         {pageImage && (
-                            <div className="relative p-8 w-full h-full flex flex-col items-center" style={{ touchAction: 'none' }}>
+                            <div className="relative p-4 md:p-8 w-full h-full flex flex-col items-center" style={{ touchAction: 'none' }}>
                                 {cropMode === 'rectangular' ? (
-                                    <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={setCompletedCrop} className="shadow-2xl border-4 border-white max-w-full">
-                                        <img ref={imgRef} src={pageImage} alt="page" className="max-h-[70vh] object-contain" onLoad={onImageLoad} />
+                                    <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={setCompletedCrop} className="shadow-2xl border-2 md:border-4 border-white max-w-full">
+                                        <img ref={imgRef} src={pageImage} alt="page" className="max-h-[60vh] md:max-h-[70vh] object-contain" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
-                                    <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu">
-                                        <img ref={imgRef} src={pageImage} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" />
+                                    <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-2 md:border-4 border-white transform-gpu max-w-full">
+                                        <img ref={imgRef} src={pageImage} alt="scanner" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain pointer-events-none" />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                                         </svg>
                                         {points.map((p, i) => (
-                                            <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                            <div key={i} className={cn("absolute size-8 md:size-10 -ml-4 md:-ml-5 -mt-4 md:-mt-5 rounded-full border-2 md:border-4 border-white shadow-xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
                                                  style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                                  onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                                <div className="size-2.5 bg-white rounded-full shadow-inner" />
+                                                <div className="size-2 md:size-2.5 bg-white rounded-full shadow-inner" />
                                             </div>
                                         ))}
 
                                         {draggingPoint !== null && (
-                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
+                                            <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-24 md:size-40 rounded-full border-2 md:border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-2 md:ring-4 ring-white/50">
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
                                                         <div className="w-full h-0.5 bg-green-500/50 absolute" />
                                                         <div className="h-full w-0.5 bg-green-500/50 absolute" />
-                                                        <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
+                                                        <div className="size-2 md:size-3 border border-red-500 rounded-full bg-white/50 shadow-sm" />
                                                     </div>
                                                 </div>
                                                 <img 
@@ -480,9 +480,9 @@ export default function PdfCropper() {
                                         )}
                                     </div>
                                 )}
-                                <div className="mt-8 flex justify-center">
-                                     <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-black/70 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
-                                        <Move className="h-4 w-4 text-primary animate-pulse" /> 
+                                <div className="mt-6 md:mt-8 flex justify-center w-full px-4">
+                                     <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-2.5 bg-black/70 backdrop-blur-md rounded-full text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                                        <Move className="h-3 w-3 md:h-4 md:w-4 text-primary animate-pulse" /> 
                                         {cropMode === 'rectangular' ? "Trim page margins" : "Drag 4 dots to corners"}
                                     </div>
                                 </div>
@@ -492,19 +492,19 @@ export default function PdfCropper() {
                 </Card>
 
                 {croppedCount > 0 && (
-                    <Card className="border-2 border-green-500/20 shadow-xl overflow-hidden bg-card/30">
-                        <CardHeader className="bg-green-500/5 border-b py-3 px-6 flex flex-row items-center justify-between">
-                            <CardTitle className="text-xs font-black uppercase text-green-700 flex items-center gap-2">
-                                <CheckCircle2 className="size-4" /> Ready for Multi-Page Bundle ({croppedCount}/{numPages})
+                    <Card className="border-2 border-green-500/20 shadow-xl overflow-hidden bg-card/30 rounded-xl md:rounded-[2rem]">
+                        <CardHeader className="bg-green-500/5 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between">
+                            <CardTitle className="text-[10px] md:text-xs font-black uppercase text-green-700 flex items-center gap-2">
+                                <CheckCircle2 className="size-3 md:size-4" />Multi-Page Bundle ({croppedCount}/{numPages})
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 md:p-4">
                             <ScrollArea className="w-full whitespace-nowrap">
-                                <div className="flex gap-4 p-1">
+                                <div className="flex gap-3 md:gap-4 p-1">
                                     {Object.entries(pageStates).filter(([_, s]) => !!s.result).map(([pageNum, state]) => (
-                                        <div key={pageNum} className="relative group shrink-0 aspect-[3/4] h-28 rounded-lg overflow-hidden border-2 border-green-500/40 bg-white shadow-lg transform transition-transform hover:scale-105">
+                                        <div key={pageNum} className="relative group shrink-0 aspect-[3/4] h-20 md:h-28 rounded-lg overflow-hidden border-2 border-green-500/40 bg-white shadow-lg transform transition-transform hover:scale-105">
                                             <img src={state.result!} alt={`P${pageNum}`} className="w-full h-full object-contain" />
-                                            <div className="absolute top-1 left-1 bg-green-600 text-white text-[8px] px-1.5 rounded font-black">Page {pageNum}</div>
+                                            <div className="absolute top-0.5 left-0.5 bg-green-600 text-white text-[7px] md:text-[8px] px-1 rounded font-black">P{pageNum}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -515,63 +515,63 @@ export default function PdfCropper() {
             </div>
 
             <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-card dark:bg-slate-950">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-xl font-black uppercase tracking-tighter">
-                            <Scissors className="size-6 text-primary mr-2 inline" /> Bundle Panel
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2rem] bg-card dark:bg-slate-950">
+                    <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
+                        <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                            <Scissors className="size-5 md:size-6 text-primary" /> Bundle Panel
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-8">
-                        <div className="p-5 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 text-center">
-                            <p className="text-[11px] font-bold text-muted-foreground leading-relaxed">
+                    <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
+                        <div className="p-4 md:p-5 bg-primary/5 rounded-xl md:rounded-2xl border-2 border-dashed border-primary/20 text-center">
+                            <p className="text-[10px] md:text-[11px] font-bold text-muted-foreground leading-relaxed">
                                 {cropMode === 'rectangular' 
                                     ? "Trim margins for a clean digital doc."
                                     : "Correct perspective for document photos."}
                             </p>
                         </div>
 
-                        <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4">
-                            <ShieldCheck className="size-6 text-green-600 shrink-0" />
+                        <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                            <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0" />
                             <div className="space-y-1">
-                                <p className="text-[10px] text-green-800 font-bold uppercase tracking-tight">Independent Pages Active</p>
-                                <p className="text-[9px] text-green-700/80 leading-tight">Every crop results in a separate new page in the output PDF.</p>
+                                <p className="text-[10px] text-green-800 font-bold uppercase tracking-tight">Independent Pages</p>
+                                <p className="text-[9px] text-green-700/80 leading-tight font-medium">Every crop results in a separate new page in the output PDF.</p>
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 border-t-2 p-8 flex flex-col gap-4">
-                        <Button className="w-full h-18 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
+                    <CardFooter className="bg-muted/10 border-t-2 p-6 md:p-8 flex flex-col gap-4">
+                        <Button className="w-full h-14 md:h-18 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
                                 onClick={handleApplyCrop} disabled={isProcessing || !pageImage}>
-                            {isProcessing ? <Loader2 className="animate-spin mr-3 size-6"/> : <Scissors className="mr-3 size-7" />}
+                            {isProcessing ? <Loader2 className="animate-spin mr-3 size-5 md:size-6"/> : <Scissors className="mr-2 md:mr-3 size-6 md:size-7" />}
                             APPLY CROP P{currentPage}
                         </Button>
                         
                         <Button 
-                            className="w-full h-16 text-base font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-2xl disabled:opacity-30"
+                            className="w-full h-12 md:h-16 text-[10px] md:text-base font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-xl md:rounded-2xl disabled:opacity-30"
                             onClick={handleDownloadFullPdf}
                             disabled={croppedCount === 0 || isBuildingPdf || isProcessing}
                         >
                             {isBuildingPdf ? (
-                                <div className="flex items-center gap-3">
-                                    <Loader2 className="size-5 animate-spin" />
-                                    <span className="uppercase text-sm">SEPARATING PAGES...</span>
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <Loader2 className="size-4 md:size-5 animate-spin" />
+                                    <span className="uppercase text-xs">BUNDLING...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-3">
-                                    <FileDigit className="size-6" />
-                                    <span className="uppercase">DOWNLOAD BUNDLE ({croppedCount})</span>
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <FileDigit className="size-5 md:size-6" />
+                                    <span className="uppercase tracking-tighter">DOWNLOAD BUNDLE ({croppedCount})</span>
                                 </div>
                             )}
                         </Button>
                     </CardFooter>
                 </Card>
 
-                <div className="p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 flex gap-4 items-center shadow-sm">
-                    <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Zap className="size-6 text-primary" />
+                <div className="p-5 md:p-6 bg-primary/5 rounded-xl md:rounded-[2rem] border-2 border-primary/10 flex gap-4 items-center shadow-sm">
+                    <div className="size-10 md:size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Zap className="size-5 md:size-6 text-primary" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-black text-primary uppercase tracking-tight">HD 300DPI Render</p>
-                        <p className="text-[10px] text-muted-foreground font-medium leading-tight">Output pages are rendered in high density for crystal clear text.</p>
+                        <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-tight">HD 300DPI Render</p>
+                        <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium leading-tight">Output pages are high density for crystal clear text extraction.</p>
                     </div>
                 </div>
             </div>
