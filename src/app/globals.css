@@ -4,30 +4,31 @@
 
 @layer base {
   :root {
-    --background: 173 40% 94%;      
-    --foreground: 178 60% 15%;      
+    /* Premium Interior Studio Palette from User Image */
+    --background: 180 20% 97%;      /* Very pale teal-grey/off-white */
+    --foreground: 180 60% 12%;      /* Deep navy-teal text */
     --card: 0 0% 100%;
-    --card-foreground: 178 60% 15%;
+    --card-foreground: 180 60% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 178 60% 15%;
-    --primary: 178 44% 55%;         
+    --popover-foreground: 180 60% 12%;
+    --primary: 178 44% 55%;         /* Signature Studio Teal (#5cbdb9) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 349 71% 94%;       
+    --secondary: 349 71% 94%;       /* Soft Rose Highlight (#fbe3e8) */
     --secondary-foreground: 349 60% 30%;
-    --muted: 173 30% 90%;
-    --muted-foreground: 178 30% 40%;
-    --accent: 349 71% 94%;          
+    --muted: 180 20% 92%;
+    --muted-foreground: 180 30% 40%;
+    --accent: 349 71% 94%;          /* Soft Rose Accent */
     --accent-foreground: 349 60% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 178 30% 85%;
-    --input: 178 30% 85%;
+    --border: 180 20% 88%;
+    --input: 180 20% 88%;
     --ring: 178 44% 55%;
     --radius: 1.5rem;
   }
   
   .dark {
-    /* Nature-Inspired Dark Palette from Image */
+    /* Nature-Inspired Dark Palette - Kept Exactly as requested */
     --background: 172 45% 4%; /* Deep Forest/Teal Black */
     --foreground: 45 20% 96%; /* Soft Cream */
     --card: 172 40% 7%; /* Muted Deep Green */
@@ -62,15 +63,15 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Immersive Background Gradients */
+    /* Immersive Studio Gradients for Light Mode */
     background-image: 
       radial-gradient(at 0% 0%, hsla(349, 71%, 94%, 0.4) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.1) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(178, 44%, 55%, 0.12) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
   .dark body {
-    /* Nature-themed radial overlays */
+    /* Nature-themed radial overlays for Dark Mode */
     background-image: 
       radial-gradient(at 50% -20%, hsla(145, 25%, 55%, 0.15) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(26, 30%, 18%, 0.1) 0px, transparent 50%),
@@ -93,10 +94,12 @@
 }
 
 .text-gradient-hero {
+  /* Precise Teal Gradient from Studio Image */
   @apply bg-clip-text text-transparent bg-gradient-to-r from-[#5cbdb9] to-[#3aa39f] dark:from-[#7fb58c] dark:to-[#5a8c6a];
 }
 
 .bg-gradient-button {
+  /* Precise Teal Button from Studio Image */
   @apply bg-gradient-to-r from-[#5cbdb9] to-[#4ba8a4] hover:from-[#4ba8a4] hover:to-[#5cbdb9] dark:from-[#5a8c6a] dark:to-[#4a7a5a] text-white shadow-lg transition-all duration-300;
 }
 
@@ -117,5 +120,5 @@
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-green-800 to-accent rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-teal-800 to-accent rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }
