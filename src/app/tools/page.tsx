@@ -407,7 +407,8 @@ function ToolsPageContent() {
         </div>
       </section>
 
-      <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4">
+      {/* Added bottom padding pb-32 to ensure cards don't touch the footer */}
+      <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4 pb-32">
         {isSearching ? (
             <div className="space-y-20">
             {searchResults.length > 0 ? (
