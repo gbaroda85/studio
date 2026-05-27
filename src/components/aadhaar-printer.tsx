@@ -122,8 +122,13 @@ export default function AadhaarPrinter() {
   const processPdfWithPassword = async (buffer: ArrayBuffer, pass: string = "") => {
     setIsProcessing(true);
     try {
+        // We use .slice(0) to create a copy of the ArrayBuffer.
+        // This prevents the original buffer from being detached by the PDF.js worker,
+        // allowing us to reuse the same data for subsequent password attempts.
+        const bufferCopy = buffer.slice(0);
+        
         const loadingTask = pdfjs.getDocument({ 
-            data: new Uint8Array(buffer),
+            data: new Uint8Array(bufferCopy),
             password: pass,
             // Character maps are essential for Aadhaar Hindi/Regional fonts
             cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
@@ -158,7 +163,7 @@ export default function AadhaarPrinter() {
         setStage('refine');
         resetPoints();
     } catch (error: any) {
-        if (error.name === 'PasswordException') {
+        if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
             setStage('password');
         } else {
             console.error("PDF Processing Error:", error);
