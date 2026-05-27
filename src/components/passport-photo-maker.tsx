@@ -493,25 +493,25 @@ export default function PassportPhotoMaker() {
                     </motion.div>
 
                     <Card className="w-full max-w-3xl glass-card overflow-hidden neon-border">
-                        <CardContent className="p-4 md:p-6">
+                        <CardContent className="p-3 md:p-6">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[1.5rem] md:rounded-[2.5rem] p-8 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
-                                    <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
-                                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
+                                    <p className="text-lg md:text-2xl font-black uppercase tracking-tighter">Click to Upload Image</p>
+                                    <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60">High-fidelity local re-sampling active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-8">
+                    <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-8">
                         <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                         <div className="flex items-center gap-1.5"><Maximize className="size-3.5 text-primary" /> PORTRAIT & LANDSCAPE</div>
                         <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> GPU BOOST</div>
@@ -523,23 +523,22 @@ export default function PassportPhotoMaker() {
             {stage === 'crop' && imgSrc && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-start py-2">
                     <Card className="w-full max-w-5xl glass-card shadow-2xl overflow-hidden">
-                        <CardHeader className="border-b glass-panel py-4 px-8">
-                            <div className="grid lg:grid-cols-2 gap-8 items-center">
-                                <div className="space-y-1">
-                                    <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                        <CropIcon className="size-5 text-primary" /> Step 2: Size & Alignment
+                        <CardHeader className="border-b glass-panel p-4 md:p-6 md:px-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
+                                <div className="space-y-1 text-center md:text-left">
+                                    <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center justify-center md:justify-start gap-3">
+                                        <CropIcon className="size-5 text-primary" /> Size & Alignment
                                     </CardTitle>
-                                    <CardDescription className="font-bold text-[10px] uppercase opacity-60">Select 'Free Hand' to drag handles anywhere.</CardDescription>
+                                    <CardDescription className="font-bold text-[9px] md:text-[10px] uppercase opacity-60">Select standard or 'Free Hand' crop.</CardDescription>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Target Document Standard</Label>
+                                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-primary tracking-widest">Document Standard</Label>
                                         <Select value={String(selectedPreset)} onValueChange={(v) => setSelectedPreset(Number(v))}>
-                                            <SelectTrigger className="h-12 font-black border-2 rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="h-10 md:h-12 font-black border-2 rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                 {PRESETS.map((p, i) => (
-                                                    <SelectItem key={i} value={String(i)} className="font-bold py-3">
-                                                        {p.id === 'free' ? <MousePointer2 className="size-3 mr-2 inline" /> : null}
+                                                    <SelectItem key={i} value={String(i)} className="font-bold py-2 md:py-3">
                                                         {p.label}
                                                     </SelectItem>
                                                 ))}
@@ -551,11 +550,11 @@ export default function PassportPhotoMaker() {
                                         <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
                                             <div className="space-y-1.5">
                                                 <Label className="text-[9px] font-black uppercase opacity-60">Width (mm)</Label>
-                                                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} className="h-10 font-bold border-2 rounded-lg" />
+                                                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} className="h-9 md:h-10 font-bold border-2 rounded-lg" />
                                             </div>
                                             <div className="space-y-1.5">
                                                 <Label className="text-[9px] font-black uppercase opacity-60">Height (mm)</Label>
-                                                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} className="h-10 font-bold border-2 rounded-lg" />
+                                                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} className="h-9 md:h-10 font-bold border-2 rounded-lg" />
                                             </div>
                                         </div>
                                     )}
@@ -563,31 +562,31 @@ export default function PassportPhotoMaker() {
                             </div>
                         </CardHeader>
                         
-                        <CardContent className="p-4 md:p-12 flex items-center justify-center bg-black/5 min-h-[400px]">
-                            <div className="max-h-[50vh] overflow-hidden rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50">
+                        <CardContent className="p-4 md:p-12 flex items-center justify-center bg-black/5 min-h-[350px] md:min-h-[400px]">
+                            <div className="max-h-[45vh] md:max-h-[50vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white/50">
                                 <ReactCrop 
                                     crop={crop} 
                                     onChange={setCrop} 
                                     onComplete={setCompletedCrop} 
                                     aspect={getAspectRatio()} 
-                                    className="max-h-[50vh]"
+                                    className="max-h-[45vh] md:max-h-[50vh]"
                                 >
                                     <img 
                                         ref={imgRef} 
                                         src={imgSrc} 
                                         alt="source" 
-                                        className="max-h-[50vh] w-auto object-contain block" 
+                                        className="max-h-[45vh] md:max-h-[50vh] w-auto object-contain block" 
                                         onLoad={updateCropHandles} 
                                     />
                                 </ReactCrop>
                             </div>
                         </CardContent>
 
-                        <CardFooter className="glass-panel border-t p-6 flex flex-col md:flex-row gap-4 justify-between">
-                            <Button variant="ghost" onClick={handleReset} className="w-full md:w-auto font-black text-[10px] uppercase tracking-widest h-12 px-6 rounded-xl">
+                        <CardFooter className="glass-panel border-t p-4 md:p-6 flex flex-col md:flex-row gap-4 justify-between">
+                            <Button variant="ghost" onClick={handleReset} className="w-full md:w-auto font-black text-[9px] md:text-[10px] uppercase tracking-widest h-11 md:h-12 px-6 rounded-xl">
                                 <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
-                            <Button className="w-full md:w-auto h-14 px-12 text-base font-black bg-primary rounded-xl shadow-2xl group" onClick={handleInitialCrop}>
+                            <Button className="w-full md:w-auto h-12 md:h-14 px-12 text-sm md:text-base font-black bg-primary rounded-xl shadow-2xl" onClick={handleInitialCrop}>
                                 CONFIRM CROP <ChevronRightIcon className="ml-2 size-5" />
                             </Button>
                         </CardFooter>
@@ -597,129 +596,115 @@ export default function PassportPhotoMaker() {
 
             {/* 3. STUDIO STAGE */}
             {stage === 'studio' && (
-                <div className="flex-1 grid lg:grid-cols-12 gap-8 items-start h-full">
-                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-6">
-                        <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
-                            <CardHeader className="border-b border-white/10 p-6 bg-primary/5">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start h-full">
+                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-4 md:space-y-6">
+                        <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
+                            <CardHeader className="border-b border-white/10 p-4 md:p-6 bg-primary/5">
                                 <div className="flex items-center justify-between mb-4">
-                                     <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
-                                        <Settings2 className="size-5 text-primary" /> Adjustments
+                                     <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-2">
+                                        <Settings2 className="size-4 md:size-5 text-primary" /> Adjustments
                                     </CardTitle>
-                                    <div className="flex gap-2">
-                                        <Button variant="ghost" size="icon" className="size-8 rounded-full" onClick={handleUndo}><Undo2 className="size-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="size-8 rounded-full" onClick={handleRedo}><Redo2 className="size-4"/></Button>
+                                    <div className="flex gap-1.5 md:gap-2">
+                                        <Button variant="ghost" size="icon" className="size-7 md:size-8 rounded-full" onClick={handleUndo}><Undo2 className="size-3.5 md:size-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="size-7 md:size-8 rounded-full" onClick={handleRedo}><Redo2 className="size-3.5 md:size-4"/></Button>
                                     </div>
                                 </div>
                                 <div className="space-y-3">
                                     <Button 
-                                        className="w-full h-12 font-black bg-primary group relative overflow-hidden shadow-xl rounded-xl"
+                                        className="w-full h-10 md:h-12 font-black bg-primary group relative overflow-hidden shadow-xl rounded-lg md:rounded-xl text-[10px] md:text-xs"
                                         onClick={handleRemoveBackground}
                                         disabled={isProcessing}
                                     >
-                                        {isProcessing ? <Loader2 className="size-5 animate-spin mr-2" /> : <Zap className="size-5 text-yellow-400 fill-yellow-400 mr-2 group-hover:scale-125 transition-transform" />}
+                                        {isProcessing ? <Loader2 className="size-4 md:size-5 animate-spin mr-2" /> : <Zap className="size-4 md:size-5 text-yellow-400 fill-yellow-400 mr-2" />}
                                         AI REMOVE BACKGROUND
                                     </Button>
-                                    <Button variant="outline" className="w-full h-12 font-black border-2 border-primary/20 text-primary rounded-xl" onClick={handleAutoEnhance}>
-                                        <Wand2 className="size-4 mr-2" /> AUTO STUDIO FIX
+                                    <Button variant="outline" className="w-full h-10 md:h-12 font-black border-2 border-primary/20 text-primary rounded-lg md:rounded-xl text-[10px] md:text-xs" onClick={handleAutoEnhance}>
+                                        <Wand2 className="size-3.5 md:size-4 mr-2" /> AUTO STUDIO FIX
                                     </Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <Tabs defaultValue="filters" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/40 p-1.5 border-b border-white/10">
-                                        <TabsTrigger value="filters" className="font-bold text-[10px] uppercase rounded-xl">Filters</TabsTrigger>
-                                        <TabsTrigger value="studio" className="font-bold text-[10px] uppercase rounded-xl">Studio</TabsTrigger>
+                                    <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/40 p-1.5 border-b border-white/10">
+                                        <TabsTrigger value="filters" className="font-bold text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl">Filters</TabsTrigger>
+                                        <TabsTrigger value="studio" className="font-bold text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl">Studio</TabsTrigger>
                                     </TabsList>
-                                    <ScrollArea className="h-[300px] md:h-[450px]">
-                                        <TabsContent value="filters" className="p-8 space-y-8">
-                                            <div className="space-y-6">
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Brightness</Label><span className="text-[10px] font-mono font-bold">{brightness}%</span></div>
+                                    <ScrollArea className="h-[250px] md:h-[450px]">
+                                        <TabsContent value="filters" className="p-4 md:p-8 space-y-6 md:space-y-8">
+                                            <div className="space-y-4 md:space-y-6">
+                                                <div className="space-y-3 md:space-y-4">
+                                                    <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Brightness</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{brightness}%</span></div>
                                                     <Slider min={50} max={150} value={[brightness]} onValueChange={(v) => setBrightness(v[0])} />
                                                 </div>
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><span className="text-[10px] font-mono font-bold">{contrast}%</span></div>
+                                                <div className="space-y-3 md:space-y-4">
+                                                    <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Contrast</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{contrast}%</span></div>
                                                     <Slider min={50} max={150} value={[contrast]} onValueChange={(v) => setContrast(v[0])} />
                                                 </div>
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Saturation</Label><span className="text-[10px] font-mono font-bold">{saturation}%</span></div>
+                                                <div className="space-y-3 md:space-y-4">
+                                                    <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Vibrance</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{saturation}%</span></div>
                                                     <Slider min={0} max={200} value={[saturation]} onValueChange={(v) => setSaturation(v[0])} />
                                                 </div>
                                             </div>
                                         </TabsContent>
-                                        <TabsContent value="studio" className="p-8 space-y-10">
-                                            <div className="space-y-4">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Background Color</Label>
-                                                <div className="grid grid-cols-4 gap-3">
+                                        <TabsContent value="studio" className="p-4 md:p-8 space-y-8 md:space-y-10">
+                                            <div className="space-y-3 md:space-y-4">
+                                                <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary">Background Color</Label>
+                                                <div className="grid grid-cols-4 gap-2 md:gap-3">
                                                     {COLORS.map(c => (
-                                                        <button key={c.value} onClick={() => setBgColor(c.value)} className={cn("size-10 rounded-xl border-2 transition-all shadow-lg hover:scale-110", bgColor === c.value ? "border-primary ring-4 ring-primary/20" : "border-white/10")} style={{ backgroundColor: c.value }} />
+                                                        <button key={c.value} onClick={() => setBgColor(c.value)} className={cn("size-8 md:size-10 rounded-lg md:rounded-xl border-2 transition-all", bgColor === c.value ? "border-primary ring-4 ring-primary/20" : "border-white/10")} style={{ backgroundColor: c.value }} />
                                                     ))}
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Border (Frame)</Label><span className="text-[10px] font-mono font-bold">{borderWidth}%</span></div>
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Border (Frame)</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{borderWidth}%</span></div>
                                                 <Slider min={0} max={5} step={0.1} value={[borderWidth]} onValueChange={(v) => setBorderWidth(v[0])} />
-                                                <div className="flex gap-2">
-                                                    {['#000', '#fff', '#e2e8f0', '#5cbdb9'].map(c => (
-                                                        <button key={c} onClick={() => setBorderColor(c)} className={cn("size-8 rounded-lg border-2", borderColor === c ? "border-primary" : "border-transparent")} style={{ backgroundColor: c }} />
-                                                    ))}
-                                                </div>
                                             </div>
                                         </TabsContent>
                                     </ScrollArea>
                                 </Tabs>
                             </CardContent>
                         </Card>
-                        <div className="hidden lg:flex glass-panel p-6 rounded-[2rem] gap-4 items-center shadow-xl">
-                            <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0"><ShieldCheck className="size-6 text-green-600" /></div>
-                            <div>
-                                <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Enterprise Privacy</p>
-                                <p className="text-[9px] text-muted-foreground font-medium leading-tight">ISO-27001 standard compliant local re-encoding. Zero cloud footprint.</p>
-                            </div>
-                        </div>
                     </motion.div>
 
-                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-8">
-                        <div className="relative group max-w-[600px] w-full">
-                            <Card className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white rounded-[2rem] md:rounded-[3.5rem] overflow-hidden flex items-center justify-center">
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-6 md:gap-8">
+                        <div className="relative group w-full max-w-[500px]">
+                            <Card className="relative bg-white shadow-2xl border-[6px] md:border-[12px] border-white rounded-[1.5rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center">
                                 <canvas ref={mainCanvasRef} className="max-w-full h-auto object-contain" />
                                 {isProcessing && (
-                                    <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-12 gap-8 z-20">
-                                        <Loader2 className="size-16 md:size-20 animate-spin text-primary stroke-[3]" />
-                                        <Progress value={progress} className="h-2 w-full max-w-[280px]" />
+                                    <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 md:p-12 gap-6 md:gap-8 z-20">
+                                        <Loader2 className="size-12 md:size-20 animate-spin text-primary stroke-[3]" />
+                                        <Progress value={progress} className="h-1.5 w-full max-w-[200px] md:max-w-[280px]" />
                                     </div>
                                 )}
                             </Card>
-                            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-2 md:p-2.5 rounded-[2rem] shadow-2xl border-2 border-white/20 z-10">
-                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-4"/></Button>
-                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-4"/></Button>
-                                <Separator orientation="vertical" className="h-6 mx-1" />
-                                <div className="grid grid-cols-2 gap-1">
-                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-6 md:size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-3"/></Button>
+                            <div className="absolute -bottom-4 md:-bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 md:gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-1.5 md:p-2.5 rounded-full shadow-2xl border-2 border-white/20 z-10 whitespace-nowrap">
+                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-3.5 md:size-4"/></Button>
+                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3.5 md:size-4"/></Button>
+                                <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
+                                <div className="grid grid-cols-2 gap-0.5">
+                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-2.5 md:size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-2.5 md:size-3"/></Button>
                                 </div>
-                                <Separator orientation="vertical" className="h-6 mx-1" />
-                                <Button variant="outline" size="icon" className="size-8 md:size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4"/></Button>
+                                <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
+                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-3.5 md:size-4"/></Button>
                             </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-[500px] mt-10">
-                             <Button variant="outline" onClick={handleReset} className="flex-1 h-16 rounded-[1.5rem] border-2 font-black uppercase text-xs tracking-widest">Start Over</Button>
-                            <Button className="flex-[2] h-16 rounded-[1.5rem] bg-primary text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-3 size-6" /> DOWNLOAD JPG</Button>
+                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-[500px] mt-6 md:mt-10">
+                             <Button variant="outline" onClick={handleReset} className="flex-1 h-12 md:h-16 rounded-xl md:rounded-[1.5rem] border-2 font-black uppercase text-[10px] md:text-xs tracking-widest">Start Over</Button>
+                            <Button className="flex-[2] h-12 md:h-16 rounded-xl md:rounded-[1.5rem] bg-primary text-base md:text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-2 md:mr-3 size-5 md:size-6" /> SAVE JPG</Button>
                         </div>
                     </motion.div>
 
-                    <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-6">
-                        <Card className="glass-panel border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
-                            <CardHeader className="bg-primary/5 p-6 border-b border-white/10">
-                                <CardTitle className="text-lg font-black uppercase flex items-center gap-2"><Printer className="size-5 text-primary" /> Print Sheets</CardTitle>
+                    <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-4 md:space-y-6">
+                        <Card className="glass-panel border-none shadow-2xl rounded-2xl md:rounded-[2.5rem] overflow-hidden">
+                            <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10">
+                                <CardTitle className="text-base md:text-lg font-black uppercase flex items-center gap-2"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-6 space-y-4">
+                            <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
                                 {PRINT_SHEETS.map((sheet, i) => (
-                                    <Button key={i} variant="outline" className="h-20 w-full justify-start gap-4 rounded-2xl border-2 hover:border-primary" onClick={() => renderPrintSheet(i)}>
-                                        <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><Layout className="size-5" /></div>
-                                        <div className="text-left"><p className="text-xs font-black uppercase">{sheet.name}</p><p className="text-[9px] font-bold text-muted-foreground uppercase opacity-70">300 DPI Rendering</p></div>
+                                    <Button key={i} variant="outline" className="h-16 md:h-20 w-full justify-start gap-3 md:gap-4 rounded-xl md:rounded-2xl border-2 hover:border-primary" onClick={() => renderPrintSheet(i)}>
+                                        <div className="size-8 md:size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Layout className="size-4 md:size-5" /></div>
+                                        <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase">{sheet.name}</p><p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">300 DPI Rendering</p></div>
                                     </Button>
                                 ))}
                             </CardContent>
@@ -732,20 +717,20 @@ export default function PassportPhotoMaker() {
             <AnimatePresence>
                 {stage === 'print' && printSheetSrc && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-4 md:p-8 flex items-center justify-center overflow-y-auto">
-                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-12 items-center">
-                            <div className="flex-1 space-y-6 md:space-y-8 text-white text-center md:text-left">
-                                <h2 className="text-3xl md:text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
-                                <p className="text-slate-400 text-base md:text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-16 flex-1 rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
-                                    <Button className="h-16 flex-[2] rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-lg" onClick={() => {
+                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-6 md:gap-12 items-center">
+                            <div className="flex-1 space-y-4 md:space-y-8 text-white text-center md:text-left">
+                                <h2 className="text-2xl md:text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
+                                <p className="text-slate-400 text-sm md:text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
+                                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-12 md:h-16 flex-1 rounded-xl md:rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
+                                    <Button className="h-12 md:h-16 flex-[2] rounded-xl md:rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-lg" onClick={() => {
                                         const link = document.createElement('a'); link.href = printSheetSrc; link.download = `Print-Sheet-${Date.now()}.jpg`; link.click();
                                     }}>DOWNLOAD SHEET</Button>
                                 </div>
                             </div>
                             <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500 max-w-full">
                                 <div className="shadow-2xl border-[6px] md:border-[12px] border-white rounded-sm overflow-hidden bg-white max-w-full">
-                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[60vh] md:max-h-[70vh] block" />
+                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[55vh] md:max-h-[70vh] block" />
                                 </div>
                             </div>
                         </div>

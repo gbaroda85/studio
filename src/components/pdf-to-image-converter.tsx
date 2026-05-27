@@ -293,33 +293,33 @@ export default function PdfToImageConverter() {
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
                 
                 <div className="lg:col-span-8 space-y-6">
                     <Card className="border-2 shadow-xl overflow-hidden bg-card/50">
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                             <div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
-                                <CardDescription className="truncate max-w-md font-mono text-[10px] mt-1">{pdfFile?.name}</CardDescription>
+                                <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
+                                <CardDescription className="truncate max-w-[150px] md:max-w-md font-mono text-[9px] md:text-[10px] mt-1">{pdfFile?.name}</CardDescription>
                             </div>
-                            {pages.length > 0 && <Badge className="bg-primary">{pages.length} PAGES</Badge>}
+                            {pages.length > 0 && <Badge className="bg-primary text-[10px]">{pages.length} PAGES</Badge>}
                         </CardHeader>
-                        <CardContent className="p-4 md:p-6">
+                        <CardContent className="p-3 md:p-6">
                             {isProcessing && pages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-20 md:py-32 gap-8 text-center">
-                                    <Loader2 className="h-20 w-20 animate-spin text-primary stroke-[3]" />
-                                    <div className="space-y-4 w-full max-w-sm">
-                                        <p className="font-black text-2xl text-primary uppercase tracking-tighter">Rendering PDF Pages...</p>
+                                    <Loader2 className="h-16 w-16 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
+                                    <div className="space-y-4 w-full max-w-[280px] md:max-w-sm">
+                                        <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter">Rendering PDF Pages...</p>
                                         <Progress value={progress} className="h-2" />
                                     </div>
                                 </div>
                             ) : (
-                                <ScrollArea className="h-[550px] pr-4">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-1">
+                                <ScrollArea className="h-[400px] md:h-[550px] pr-2 md:pr-4">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 p-1">
                                         {pages.map((p) => (
                                             <div key={p.id} onClick={() => setSelectedId(p.id)}
                                                 className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white shadow-md",
+                                                    "group relative aspect-[1/1.414] rounded-lg md:rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white shadow-md",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
                                                 )}>
                                                 <div className={cn(
@@ -335,10 +335,10 @@ export default function PdfToImageConverter() {
                                                         )}
                                                     />
                                                 </div>
-                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">{p.index}</div>
-                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                                    <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
-                                                        <Download className="size-4" />
+                                                <div className="absolute top-1.5 left-1.5 size-6 md:size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] md:text-[10px] font-black text-white z-20">{p.index}</div>
+                                                <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                                    <Button size="icon" className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
+                                                        <Download className="size-3.5 md:size-4" />
                                                     </Button>
                                                 </div>
                                             </div>
@@ -348,106 +348,106 @@ export default function PdfToImageConverter() {
                             )}
                         </CardContent>
                         <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
-                            <Button variant="ghost" onClick={handleReset} className="text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
-                            <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure RAM Processing
+                            <Button variant="ghost" onClick={handleReset} className="text-[10px] md:text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over</Button>
+                            <div className="hidden sm:flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-muted-foreground">
+                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure Processing
                             </div>
                         </CardFooter>
                     </Card>
                 </div>
 
                 <div className="lg:col-span-4 space-y-6">
-                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
-                        <CardHeader className="bg-primary/5 border-b p-6">
-                            <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                                <Layout className="size-6 text-primary" /> STUDIO CONTROL
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2rem] bg-white dark:bg-slate-950">
+                        <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
+                            <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                                <Layout className="size-5 md:size-6 text-primary" /> STUDIO CONTROL
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 md:p-8 space-y-8">
+                        <CardContent className="p-5 md:p-8 space-y-6 md:space-y-8">
                             {!selectedId ? (
                                 <div className="py-12 text-center space-y-4 opacity-40">
-                                     <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
-                                     <p className="text-xs font-black uppercase tracking-widest leading-relaxed">Select a page thumbnail<br/>to strictly align</p>
+                                     <MousePointer2 className="size-10 md:size-12 mx-auto text-muted-foreground" />
+                                     <p className="text-[10px] md:text-xs font-black uppercase tracking-widest leading-relaxed">Select a page thumbnail<br/>to strictly align</p>
                                 </div>
                             ) : (
-                                <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+                                <div className="space-y-6 md:space-y-8 animate-in slide-in-from-right-4 duration-300">
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                            <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                                 <Maximize className="size-3" /> Canvas Mode
                                             </Label>
-                                            <Badge variant="secondary" className="font-black text-[8px] uppercase">A4 RATIO</Badge>
+                                            <Badge variant="secondary" className="font-black text-[7px] md:text-[8px] uppercase">A4 RATIO</Badge>
                                         </div>
                                         <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
-                                            <TabsList className="grid grid-cols-2 h-12 bg-muted p-1 rounded-xl">
-                                                <TabsTrigger value="fit" className="font-bold text-[10px] uppercase">Page Only</TabsTrigger>
-                                                <TabsTrigger value="original" className="font-bold text-[10px] uppercase">A4 Canvas</TabsTrigger>
+                                            <TabsList className="grid grid-cols-2 h-10 md:h-12 bg-muted p-1 rounded-xl">
+                                                <TabsTrigger value="fit" className="font-bold text-[9px] md:text-[10px] uppercase">Page Only</TabsTrigger>
+                                                <TabsTrigger value="original" className="font-bold text-[9px] md:text-[10px] uppercase">A4 Canvas</TabsTrigger>
                                             </TabsList>
                                         </Tabs>
                                     </div>
 
                                     <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-opacity", selectedPage?.fitMode === 'fit' && "opacity-20 pointer-events-none")}>
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                        <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                             <AlignVerticalJustifyCenter className="size-3" /> Strict Alignment
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
-                                            <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
-                                                <AlignVerticalJustifyStart className="size-5" />
-                                                <span className="text-[8px] font-black uppercase">Literal Top</span>
+                                            <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
+                                                <AlignVerticalJustifyStart className="size-4 md:size-5" />
+                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Top</span>
                                             </Button>
-                                            <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
-                                                <AlignVerticalJustifyCenter className="size-5" />
-                                                <span className="text-[8px] font-black uppercase">Center</span>
+                                            <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
+                                                <AlignVerticalJustifyCenter className="size-4 md:size-5" />
+                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Center</span>
                                             </Button>
-                                            <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
-                                                <AlignVerticalJustifyEnd className="size-5" />
-                                                <span className="text-[8px] font-black uppercase">Literal Bottom</span>
+                                            <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
+                                                <AlignVerticalJustifyEnd className="size-4 md:size-5" />
+                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Bottom</span>
                                             </Button>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <div className="space-y-3 md:space-y-4 pt-4 border-t-2 border-dashed">
+                                        <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                             <RotateCw className="size-3" /> Orientation
                                         </Label>
                                         <Button 
                                             variant="outline" 
-                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase"
+                                            className="w-full h-10 md:h-12 rounded-xl border-2 font-black text-[10px] uppercase"
                                             onClick={rotateSelectedPage}
                                             disabled={isProcessing}
                                         >
-                                            <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
+                                            <RotateCw className="size-3.5 md:size-4 mr-2" /> Rotate 90° Clockwise
                                         </Button>
                                     </div>
 
-                                    <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
+                                    <Button variant="outline" className="w-full h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
                                         <Layers className="size-3 mr-2" /> Global Sync Alignment
                                     </Button>
                                 </div>
                             )}
 
-                            <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
-                                <Zap className="size-6 text-yellow-500 shrink-0" />
-                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-1 text-primary">LITERAL CLAMPING:</span>
+                            <div className="p-4 md:p-5 bg-primary/5 rounded-xl md:rounded-2xl border-2 border-primary/10 flex gap-3 md:gap-4">
+                                <Zap className="size-5 md:size-6 text-yellow-500 shrink-0" />
+                                <p className="text-[9px] md:text-[10px] text-primary/80 font-bold leading-relaxed">
+                                    <span className="font-black uppercase block mb-0.5 md:mb-1 text-primary text-[10px] md:text-xs">LITERAL CLAMPING:</span>
                                     "Bottom" pushes the image to the exact edge of the canvas. No extra padding.
                                 </p>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
-                            <Button className="w-full h-20 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
+                        <CardFooter className="bg-muted/10 p-5 md:p-8 border-t-2">
+                            <Button className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
                                     onClick={handleDownloadAll} disabled={pages.length === 0 || isZipping}>
                                 {isZipping ? (
-                                    <div className="flex items-center gap-3">
-                                        <Loader2 className="size-8 animate-spin" />
-                                        <span className="uppercase tracking-tighter">ZIPPING...</span>
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                        <Loader2 className="size-6 md:size-8 animate-spin" />
+                                        <span className="uppercase text-sm md:text-base tracking-tighter">ZIPPING...</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-4">
-                                        <Layers className="size-9" />
+                                    <div className="flex items-center gap-3 md:gap-4">
+                                        <Layers className="size-7 md:size-9" />
                                         <div className="text-left">
-                                            <span className="block uppercase tracking-tighter leading-none">EXTRACT ALL</span>
-                                            <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">ZIP ARCHIVE ({pages.length})</span>
+                                            <span className="block uppercase tracking-tighter leading-none text-base md:text-xl">EXTRACT ALL</span>
+                                            <span className="text-[8px] md:text-[10px] font-bold opacity-60 uppercase tracking-widest">ZIP ARCHIVE ({pages.length})</span>
                                         </div>
                                     </div>
                                 )}
