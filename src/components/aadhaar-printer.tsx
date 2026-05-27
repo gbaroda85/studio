@@ -33,7 +33,8 @@ import {
     AlignVerticalJustifyEnd,
     Square,
     Sparkles,
-    ChevronRight as ChevronRightIcon
+    ChevronRight as ChevronRightIcon,
+    RotateCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -71,7 +72,7 @@ export default function AadhaarPrinter() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
   const [showBorder, setShowBorder] = useState(true);
-  const [autoEnhance, setAutoEnhance] = useState(true); // Default to on for better UX
+  const [autoEnhance, setAutoEnhance] = useState(true); 
   
   // A4 Workflow States
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -114,32 +115,58 @@ export default function AadhaarPrinter() {
     setStage('upload');
   };
 
-  const checkPdfEncryptionAndProceed = async (buffer: ArrayBuffer) => {
+  /**
+   * Robust PDF Rendering Logic
+   * Handles encrypted Aadhaar documents with CMaps and Standard Fonts support
+   */
+  const processPdfWithPassword = async (buffer: ArrayBuffer, pass: string = "") => {
     setIsProcessing(true);
     try {
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
-        const pdf = await loadingTask.promise;
+        const loadingTask = pdfjs.getDocument({ 
+            data: new Uint8Array(buffer),
+            password: pass,
+            // Character maps are essential for Aadhaar Hindi/Regional fonts
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+            cMapPacked: true,
+            // Standard fonts fallback
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
+        });
         
+        const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.5 });
+        
+        // 2.0 scale is ideal for A4 text clarity without hitting browser memory limits
+        const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        if (!ctx) throw new Error("Could not initialize canvas context");
+
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: ctx, viewport }).promise;
-            setOriginalA4Src(canvas.toDataURL('image/jpeg', 1.0));
-            setStage('refine');
-            resetPoints();
-        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        await page.render({ 
+            canvasContext: ctx, 
+            viewport,
+            intent: 'print' // Optimized rendering for documents
+        }).promise;
+        
+        setOriginalA4Src(canvas.toDataURL('image/jpeg', 0.95));
+        setStage('refine');
+        resetPoints();
     } catch (error: any) {
         if (error.name === 'PasswordException') {
             setStage('password');
         } else {
-            toast({ variant: 'destructive', title: 'Invalid File', description: 'Could not process PDF file.' });
+            console.error("PDF Processing Error:", error);
+            toast({ 
+                variant: 'destructive', 
+                title: 'Processing Failed', 
+                description: 'This document contains complex layers that failed to render. Please try a different scan.' 
+            });
         }
     } finally {
         setIsProcessing(false);
@@ -153,7 +180,7 @@ export default function AadhaarPrinter() {
             reader.onload = (e) => {
                 const buffer = e.target?.result as ArrayBuffer;
                 setPdfBuffer(buffer);
-                checkPdfEncryptionAndProceed(buffer);
+                processPdfWithPassword(buffer);
             };
             reader.readAsArrayBuffer(file);
         } else if (file.type.startsWith('image/')) {
@@ -204,40 +231,9 @@ export default function AadhaarPrinter() {
     setRectCrop(initialCrop);
   };
 
-  const handlePdfRender = async () => {
+  const handlePdfRenderWithPassword = async () => {
     if (!pdfBuffer) return;
-    setIsProcessing(true);
-    try {
-        const loadingTask = pdfjs.getDocument({ 
-            data: new Uint8Array(pdfBuffer),
-            password: password 
-        });
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1); 
-        
-        const viewport = page.getViewport({ scale: 2.5 });
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: ctx, viewport }).promise;
-            setOriginalA4Src(canvas.toDataURL('image/jpeg', 1.0));
-            setStage('refine');
-            resetPoints();
-        }
-    } catch (error: any) {
-        if (error.name === 'PasswordException') {
-            toast({ variant: 'destructive', title: 'Wrong Password', description: 'Check Aadhaar password format (NAME1990).' });
-        } else {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
-        }
-    } finally {
-        setIsProcessing(false);
-    }
+    await processPdfWithPassword(pdfBuffer, password);
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
@@ -662,7 +658,7 @@ export default function AadhaarPrinter() {
                 </div>
             </CardContent>
             <CardFooter className="p-5 md:p-6 bg-muted/5 border-t">
-                <Button onClick={handlePdfRender} disabled={isProcessing || !password} className="w-full h-12 md:h-14 bg-primary font-black rounded-xl text-base md:text-lg shadow-xl">
+                <Button onClick={handlePdfRenderWithPassword} disabled={isProcessing || !password} className="w-full h-12 md:h-14 bg-primary font-black rounded-xl text-base md:text-lg shadow-xl">
                     {isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />}
                     UNLOCK & RENDER
                 </Button>
