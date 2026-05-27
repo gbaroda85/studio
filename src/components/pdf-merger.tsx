@@ -190,12 +190,14 @@ export default function PdfMerger() {
                     isDragOver && "border-primary ring-4 ring-primary/20",
                     pdfFiles.length === 0 && "hover:border-primary/50"
                 )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-                    <CardHeader className="bg-muted/30 dark:bg-slate-950/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
+                    <CardHeader className="bg-muted/30 dark:bg-slate-950/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
                         <div>
                             <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">Merge Workspace</CardTitle>
                             <CardDescription className="text-[10px] md:text-sm">Arrange files in order. 100% Secure.</CardDescription>
                         </div>
-                        {pdfFiles.length > 0 && <Badge className="bg-primary font-black uppercase text-[8px] md:text-[10px] tracking-widest">{pdfFiles.length} FILES</Badge>}
+                        <div className="flex items-center gap-3">
+                            {pdfFiles.length > 0 && <Badge className="bg-primary font-black uppercase text-[8px] md:text-[10px] tracking-widest">{pdfFiles.length} FILES</Badge>}
+                        </div>
                     </CardHeader>
                     <CardContent className="p-3 md:p-6">
                         {pdfFiles.length === 0 ? (
@@ -209,42 +211,54 @@ export default function PdfMerger() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto pr-1 custom-scrollbar p-1">
-                                {pdfFiles.map((file, index) => (
-                                     <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 md:p-4 rounded-xl md:rounded-2xl border-2 border-transparent bg-white dark:bg-slate-950 hover:border-primary/40 transition-all group shadow-sm">
-                                         <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
-                                            <div className="flex flex-col gap-0.5 md:gap-1 opacity-40 group-hover:opacity-100 transition-opacity shrink-0">
-                                                <Button size="icon" variant="ghost" className="h-5 w-5 md:h-6 md:w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-3 w-3 md:h-4 md:w-4" /></Button>
-                                                <Button size="icon" variant="ghost" className="h-5 w-5 md:h-6 md:w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-3 w-3 md:h-4 md:w-4" /></Button>
-                                            </div>
-                                            <div className="flex items-center gap-2 md:gap-4 truncate">
-                                                <div className="size-8 md:size-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm shrink-0 border border-primary/20">{index + 1}</div>
-                                                <div className="truncate">
-                                                    <p className="text-xs md:text-sm font-black truncate max-w-[120px] md:max-w-[250px] uppercase tracking-tight" title={file.name}>{file.name}</p>
-                                                    <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase">PDF Document</p>
-                                                </div>
-                                            </div>
-                                         </div>
-                                        <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground hover:text-destructive rounded-full" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4 md:h-5 md:w-5" /></Button>
-                                     </div>
-                                ))}
-                                <Button variant="outline" className="w-full border-2 border-dashed h-12 md:h-16 rounded-xl md:rounded-2xl mt-4 font-black text-[10px] md:text-xs uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all" onClick={() => fileInputRef.current?.click()}>
-                                    <UploadCloud className="size-4 md:size-5 mr-2 md:mr-3" /> ADD MORE DOCUMENTS
-                                </Button>
+                            <div className="space-y-4">
+                                {/* SIDE BY SIDE SORTING TOOLBAR */}
+                                <div className="flex flex-wrap items-center gap-2 p-2 bg-muted/40 rounded-xl border-2 border-dashed">
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground ml-2 mr-2">Quick Sort:</span>
+                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('asc')}>
+                                        <SortAsc className="size-3 mr-1" /> A-Z
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('desc')}>
+                                        <SortDesc className="size-3 mr-1" /> Z-A
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="h-8 text-[8px] font-black uppercase rounded-lg border-2" onClick={() => sortFiles('reverse')}>
+                                        <RefreshCcw className="size-3 mr-1" /> Reverse
+                                    </Button>
+                                    <div className="flex-1" />
+                                    <Button variant="ghost" size="sm" onClick={handleReset} className="text-[8px] font-black uppercase text-destructive h-8 px-3">
+                                        <Trash2 className="size-3 mr-1"/> Clear All
+                                    </Button>
+                                </div>
+
+                                <ScrollArea className="h-[400px] md:h-[500px] pr-1 custom-scrollbar p-1">
+                                    <div className="space-y-3">
+                                        {pdfFiles.map((file, index) => (
+                                             <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 md:p-4 rounded-xl md:rounded-2xl border-2 border-transparent bg-white dark:bg-slate-950 hover:border-primary/40 transition-all group shadow-sm">
+                                                 <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                                                    <div className="flex flex-col gap-0.5 md:gap-1 opacity-40 group-hover:opacity-100 transition-opacity shrink-0">
+                                                        <Button size="icon" variant="ghost" className="h-5 w-5 md:h-6 md:w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-3 w-3 md:h-4 md:w-4" /></Button>
+                                                        <Button size="icon" variant="ghost" className="h-5 w-5 md:h-6 md:w-6 rounded-md bg-muted/50" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-3 w-3 md:h-4 md:w-4" /></Button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 md:gap-4 truncate">
+                                                        <div className="size-8 md:size-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm shrink-0 border border-primary/20">{index + 1}</div>
+                                                        <div className="truncate">
+                                                            <p className="text-xs md:text-sm font-black truncate max-w-[120px] md:max-w-[250px] uppercase tracking-tight" title={file.name}>{file.name}</p>
+                                                            <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase">PDF Document</p>
+                                                        </div>
+                                                    </div>
+                                                 </div>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground hover:text-destructive rounded-full" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4 md:h-5 md:w-5" /></Button>
+                                             </div>
+                                        ))}
+                                        <Button variant="outline" className="w-full border-2 border-dashed h-12 md:h-16 rounded-xl md:rounded-2xl mt-4 font-black text-[10px] md:text-xs uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all" onClick={() => fileInputRef.current?.click()}>
+                                            <UploadCloud className="size-4 md:size-5 mr-2 md:mr-3" /> ADD MORE DOCUMENTS
+                                        </Button>
+                                    </div>
+                                </ScrollArea>
                             </div>
                         )}
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
                     </CardContent>
-                    {pdfFiles.length > 0 && (
-                        <CardFooter className="bg-muted/10 border-t p-3 md:p-5 flex justify-between items-center">
-                            <Button variant="ghost" size="sm" onClick={handleReset} className="text-[8px] md:text-[10px] font-black uppercase text-destructive h-9 px-3">
-                                <Trash2 className="size-3 md:size-4 mr-1.5 md:mr-2"/> CLEAR ALL
-                            </Button>
-                            <div className="flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[9px] font-black uppercase text-muted-foreground/60 tracking-widest">
-                                <ShieldCheck className="size-3 md:size-4 text-green-500" /> SECURE RAM
-                            </div>
-                        </CardFooter>
-                    )}
                 </Card>
 
                 {mergedPdfUrl && (
@@ -291,31 +305,18 @@ export default function PdfMerger() {
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-2 md:gap-3">
-                            <FileStack className="size-5 md:size-6 text-primary" /> ORGANIZE & SORT
+                            <FileStack className="size-5 md:size-6 text-primary" /> BUNDLE ACTION
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 md:p-8 space-y-6 md:space-y-10">
+                        
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-[9px] md:text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
-                                    <LayoutList className="size-3" /> Sorting Options
-                                </Label>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 gap-2 md:gap-3">
-                                <Button variant="outline" className="h-12 md:h-14 justify-start gap-3 md:gap-4 rounded-xl md:rounded-2xl border-2 hover:border-primary/40 hover:bg-primary/5 transition-all group" onClick={() => sortFiles('asc')} disabled={pdfFiles.length < 2}>
-                                    <div className="size-8 md:size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><SortAsc className="size-4 md:size-5" /></div>
-                                    <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase tracking-tight">Sort A to Z</p><p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">Order by File Name</p></div>
-                                </Button>
-                                <Button variant="outline" className="h-12 md:h-14 justify-start gap-3 md:gap-4 rounded-xl md:rounded-2xl border-2 hover:border-primary/40 hover:bg-primary/5 transition-all group" onClick={() => sortFiles('desc')} disabled={pdfFiles.length < 2}>
-                                    <div className="size-8 md:size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><SortDesc className="size-4 md:size-5" /></div>
-                                    <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase tracking-tight">Sort Z to A</p><p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">Reverse Name</p></div>
-                                </Button>
-                                <Button variant="outline" className="h-12 md:h-14 justify-start gap-3 md:gap-4 rounded-xl md:rounded-2xl border-2 hover:border-primary/40 hover:bg-primary/5 transition-all group" onClick={() => sortFiles('reverse')} disabled={pdfFiles.length < 2}>
-                                    <div className="size-8 md:size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><RefreshCcw className="size-4 md:size-5" /></div>
-                                    <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase tracking-tight">Manual Flip</p><p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">Reverse Current</p></div>
-                                </Button>
-                            </div>
+                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                                <ShieldCheck className="size-3 text-green-500" /> Secure Sandbox
+                            </Label>
+                            <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium leading-relaxed">
+                                All PDF bytes are combined 100% in your device RAM. Your private documents never touch our cloud storage.
+                            </p>
                         </div>
 
                         <div className="p-4 md:p-6 bg-primary/5 rounded-[1.5rem] md:rounded-[2rem] border-2 border-primary/10 flex gap-3 md:gap-5 shadow-sm">
