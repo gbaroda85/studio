@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* New Professional Palette - Light Mode (Based on Image) */
+    /* New Professional Palette - Light Mode (Based on Interior Studio Image) */
     --background: 31 88% 97%;      /* Soft Peach Cream (#FDE8D3 - lightened) */
     --foreground: 125 10% 20%;     /* Deep Olive Grey text (#657166 - darkened) */
     --card: 0 0% 100%;
@@ -28,26 +28,26 @@
   }
   
   .dark {
-    /* Nature-Inspired Palette - Dark Mode (Nature Forest) */
-    --background: 172 45% 4%;       /* Deep Forest Green-Black (#0a1c1a) */
-    --foreground: 45 20% 96%;       /* Soft Cream text */
-    --card: 172 40% 7%;             /* Organic Muted Green */
-    --card-foreground: 45 20% 96%;
-    --popover: 172 45% 4%;
-    --popover-foreground: 45 20% 96%;
-    --primary: 145 25% 55%;         /* Leaf Green */
-    --primary-foreground: 172 45% 4%;
-    --secondary: 26 30% 18%;        /* Earthy Wood Brown (#2b1f18) */
-    --secondary-foreground: 45 40% 90%;
-    --muted: 172 30% 12%;
-    --muted-foreground: 172 20% 65%;
-    --accent: 26 30% 22%;           /* Rich Earth Tone */
-    --accent-foreground: 45 40% 90%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 172 30% 15%;
-    --input: 172 30% 15%;
-    --ring: 145 25% 55%;
+    /* Deep Purple & Mauve Palette - Dark Mode (Based on Image) */
+    --background: 300 100% 5%;       /* #190019 */
+    --foreground: 20 71% 92%;        /* #FBE4D8 */
+    --card: 265 62% 18%;             /* #2B124C */
+    --card-foreground: 20 71% 92%;
+    --popover: 300 100% 5%;
+    --popover-foreground: 20 71% 92%;
+    --primary: 327 26% 42%;          /* #854F6C */
+    --primary-foreground: 20 71% 92%;
+    --secondary: 288 36% 26%;        /* #522B5B */
+    --secondary-foreground: 20 71% 92%;
+    --muted: 288 36% 15%;
+    --muted-foreground: 327 26% 70%;
+    --accent: 5 41% 79%;            /* #DFB6B2 */
+    --accent-foreground: 265 62% 18%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 20 71% 92%;
+    --border: 288 36% 26%;
+    --input: 288 36% 26%;
+    --ring: 327 26% 42%;
   }
 }
 
@@ -72,11 +72,11 @@
   }
 
   .dark body {
-    /* Nature-themed radial overlays for Dark Mode */
+    /* Mauve to Deep Purple radial overlays for Dark Mode */
     background-image: 
-      radial-gradient(at 50% -20%, hsla(145, 25%, 55%, 0.15) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(26, 30%, 18%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(172, 45%, 10%, 0.2) 0px, transparent 50%);
+      radial-gradient(at 50% -20%, hsla(327, 26% , 42%, 0.15) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(265, 62%, 18%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(300, 100%, 10%, 0.2) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -95,13 +95,13 @@
 }
 
 .text-gradient-hero {
-  /* Sky Blue to Coral Gradient for Light Mode */
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#99CDD8] to-[#F3C3B2] dark:from-[#7fb58c] dark:to-[#5a8c6a];
+  /* Dynamic Gradients for both modes */
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#99CDD8] to-[#F3C3B2] dark:from-[#854F6C] dark:to-[#DFB6B2];
 }
 
 .bg-gradient-button {
   /* Match button style from the palette primary */
-  @apply bg-gradient-to-r from-[#99CDD8] to-[#7dbdc9] hover:from-[#7dbdc9] hover:to-[#99CDD8] dark:from-[#5a8c6a] dark:to-[#4a7a5a] text-white shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-[#99CDD8] to-[#7dbdc9] hover:from-[#7dbdc9] hover:to-[#99CDD8] dark:from-[#854F6C] dark:to-[#522B5B] text-white shadow-lg transition-all duration-300;
 }
 
 /* Custom Thin Scrollbar */
