@@ -4,50 +4,51 @@
 
 @layer base {
   :root {
-    /* New Professional Palette - Light Mode (Based on Interior Studio Image) */
-    --background: 31 88% 97%;      /* Soft Peach Cream (#FDE8D3 - lightened) */
-    --foreground: 125 10% 20%;     /* Deep Olive Grey text (#657166 - darkened) */
+    /* Professional Palette - Light Mode (Interior Studio) */
+    /* Light Theme (Interior Studio Palette) */
+    --background: 180 20% 96%;      /* Airy Studio Grey-Teal (#f2f8f8) */
+    --foreground: 180 40% 15%;      /* Deep Navy Teal text */
     --card: 0 0% 100%;
-    --card-foreground: 125 10% 20%;
+    --card-foreground: 180 40% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 125 10% 20%;
-    --primary: 190 45% 72%;        /* Sky Blue (#99CDD8) */
-    --primary-foreground: 190 45% 20%;
-    --secondary: 16 68% 82%;       /* Soft Coral (#F3C3B2) */
-    --secondary-foreground: 16 68% 25%;
-    --muted: 156 25% 89%;          /* Mintish Grey (#DAEBE3) */
-    --muted-foreground: 125 10% 45%;
-    --accent: 83 16% 80%;          /* Muted Sage (#CFD6C4) */
-    --accent-foreground: 125 10% 20%;
+    --popover-foreground: 180 40% 15%;
+    --primary: 178 44% 47%;        /* Signature Studio Teal (#48a9a4) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 349 71% 94%;      /* Soft Dusty Rose (#fce7eb) */
+    --secondary-foreground: 349 71% 30%;
+    --muted: 180 15% 90%;
+    --muted-foreground: 180 10% 40%;
+    --accent: 349 71% 94%;         /* Soft Dusty Rose */
+    --accent-foreground: 180 40% 15%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 31 20% 90%;
-    --input: 31 20% 90%;
-    --ring: 190 45% 72%;
+    --border: 180 15% 85%;
+    --input: 180 15% 85%;
+    --ring: 178 44% 47%;
     --radius: 1.5rem;
   }
   
   .dark {
-    /* Deep Purple & Mauve Palette - Dark Mode (Based on Image) */
-    --background: 300 100% 5%;       /* #190019 */
-    --foreground: 20 71% 92%;        /* #FBE4D8 */
-    --card: 265 62% 18%;             /* #2B124C */
-    --card-foreground: 20 71% 92%;
-    --popover: 300 100% 5%;
-    --popover-foreground: 20 71% 92%;
-    --primary: 327 26% 42%;          /* #854F6C */
-    --primary-foreground: 20 71% 92%;
-    --secondary: 288 36% 26%;        /* #522B5B */
-    --secondary-foreground: 20 71% 92%;
-    --muted: 288 36% 15%;
-    --muted-foreground: 327 26% 70%;
-    --accent: 5 41% 79%;            /* #DFB6B2 */
-    --accent-foreground: 265 62% 18%;
+    /* NEW Oceanic Blue Palette - Dark Mode (Based on Image) */
+    --background: 209 100% 11%;      /* Midnight Blue (#001D39) */
+    --foreground: 204 46% 83%;       /* Pale Blue text (#BDD8E9) */
+    --card: 210 84% 15%;             /* Dark Navy Card (#05284a) */
+    --card-foreground: 204 46% 83%;
+    --popover: 209 100% 8%;
+    --popover-foreground: 204 46% 83%;
+    --primary: 204 70% 70%;          /* Sky Blue Primary (#7BBDE8) */
+    --primary-foreground: 209 100% 11%;
+    --secondary: 210 84% 25%;        /* Deep Blue (#0A4174) */
+    --secondary-foreground: 204 46% 83%;
+    --muted: 209 37% 25%;            /* Muted Blue (#49769F) */
+    --muted-foreground: 204 20% 60%;
+    --accent: 194 35% 47%;           /* Teal-ish Accent (#4E8EA2) */
+    --accent-foreground: 204 46% 83%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 20 71% 92%;
-    --border: 288 36% 26%;
-    --input: 288 36% 26%;
-    --ring: 327 26% 42%;
+    --destructive-foreground: 204 46% 83%;
+    --border: 210 84% 25%;
+    --input: 210 84% 25%;
+    --ring: 204 70% 70%;
   }
 }
 
@@ -63,20 +64,20 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Immersive Studio Gradients for Light Mode - Peach/Blue/Mint themed */
+    /* Immersive Studio Gradients for Light Mode - Teal/Rose themed */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(190, 45%, 72%, 0.4) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(16, 68%, 82%, 0.3) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(83, 16%, 80%, 0.2) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(178, 44%, 47%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(349, 71%, 94%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(178, 44%, 47%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
   .dark body {
-    /* Mauve to Deep Purple radial overlays for Dark Mode */
+    /* Oceanic Blue radial overlays for Dark Mode */
     background-image: 
-      radial-gradient(at 50% -20%, hsla(327, 26% , 42%, 0.15) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(265, 62%, 18%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(300, 100%, 10%, 0.2) 0px, transparent 50%);
+      radial-gradient(at 50% -20%, hsla(204, 70%, 70%, 0.1) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(194, 35%, 47%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(210, 84% , 25%, 0.1) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -95,13 +96,13 @@
 }
 
 .text-gradient-hero {
-  /* Dynamic Gradients for both modes */
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#99CDD8] to-[#F3C3B2] dark:from-[#854F6C] dark:to-[#DFB6B2];
+  /* Dynamic Gradients based on current theme variables */
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#48a9a4] to-[#fce7eb] dark:from-[#7BBDE8] dark:to-[#BDD8E9];
 }
 
 .bg-gradient-button {
   /* Match button style from the palette primary */
-  @apply bg-gradient-to-r from-[#99CDD8] to-[#7dbdc9] hover:from-[#7dbdc9] hover:to-[#99CDD8] dark:from-[#854F6C] dark:to-[#522B5B] text-white shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-[#48a9a4] to-[#3aa39f] hover:from-[#3aa39f] hover:to-[#48a9a4] dark:from-[#7BBDE8] dark:to-[#49769F] text-white dark:text-slate-950 shadow-lg transition-all duration-300;
 }
 
 /* Custom Thin Scrollbar */
@@ -121,5 +122,5 @@
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-[#99CDD8] via-[#DAEBE3] to-[#F3C3B2] rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-accent to-secondary rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }

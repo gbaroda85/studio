@@ -135,8 +135,8 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Matched to User's Screenshot Content */}
-      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#020202] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      {/* Hero Section - Balanced Spacing */}
+      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#001D39] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
@@ -144,7 +144,7 @@ export default function Page() {
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
-            <Sparkles className="size-3 text-orange-400 fill-orange-400" /> ALL-IN-ONE GR7 TOOLKIT
+            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
@@ -152,7 +152,7 @@ export default function Page() {
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-6 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-bold leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
@@ -179,7 +179,7 @@ export default function Page() {
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
-                className="w-full pl-16 pr-6 h-16 text-lg rounded-3xl bg-white dark:bg-[#0a0a0a] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-16 pr-6 h-16 text-lg rounded-3xl bg-white dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -230,7 +230,7 @@ export default function Page() {
                 <section className="py-20 mt-32 bg-white dark:bg-black/20 w-full flex justify-center border-t border-border/50 rounded-[4rem] shadow-inner">
                     <div className="w-full max-w-6xl px-8 md:px-16 text-center">
                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase">Why Choose GR7 Tools?</h2>
-                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-20 text-lg">Built with cutting-edge technology for professional results</p>
+                    <p className="text-slate-500 dark:text-slate-300 font-bold mb-20 text-lg">Built with cutting-edge technology for professional results</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
                         {/* Pillar 1: Secure */}
