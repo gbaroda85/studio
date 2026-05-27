@@ -82,7 +82,6 @@ export default function PdfCompressor() {
             setProgress(0);
             setStatusText("");
             
-            // Suggest a target size (approx 60% of original)
             const sizeInKb = file.size / 1024;
             setTargetValue(Math.max(100, Math.round(sizeInKb * 0.6)).toString());
         } else if (file) {
@@ -120,7 +119,7 @@ export default function PdfCompressor() {
                 compress: false 
             });
 
-            const QUALITY_FLOOR = 0.7; // Strict floor from Image Tool
+            const QUALITY_FLOOR = 0.7;
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Optimizing Page ${i}/${totalPages}...`);
@@ -146,7 +145,6 @@ export default function PdfCompressor() {
                 };
 
                 if (mode === 'target') {
-                    // Iterative Scaling (Mirroring Image Compressor)
                     const scalesToTry = [4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.2, 1.0, 0.8, 0.5];
                     let bestFound = false;
 
@@ -163,9 +161,9 @@ export default function PdfCompressor() {
 
                             if (estSize <= targetBytesPerPage) {
                                 stepBestUrl = testUrl;
-                                low = mid; // Try higher quality
+                                low = mid; 
                             } else {
-                                high = mid; // Must lower quality
+                                high = mid; 
                             }
                         }
 
@@ -241,20 +239,20 @@ export default function PdfCompressor() {
                     <CardTitle className="text-2xl font-black uppercase tracking-tight">Pro HD PDF Optimizer</CardTitle>
                     <CardDescription>Exactly hit target sizes with high-fidelity sharpness logic.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                <CardContent className="p-4 md:p-6">
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-6 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                         <div className="relative">
-                            <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
+                            <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
                         </div>
                         <div className="text-center">
-                            <p className="text-xl font-bold">Drop PDF here to Begin</p>
-                            <p className="text-sm text-muted-foreground mt-2">Maximum Readability Engine Active (300 DPI Equivalent).</p>
+                            <p className="text-lg md:text-xl font-bold">Drop PDF here to Begin</p>
+                            <p className="text-xs text-muted-foreground mt-2">Maximum Readability Engine Active (300 DPI Equivalent).</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
-                <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
+                <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> 100% PRIVATE</div>
                     <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD SHARPNESS</div>
                     <div className="flex items-center gap-1.5"><Target className="size-3 text-blue-500" /> PRECISION HITS</div>
@@ -264,7 +262,7 @@ export default function PdfCompressor() {
     }
     
     return (
-        <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in duration-500 px-4">
+        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-in fade-in duration-500 px-4">
             <div className="lg:col-span-7">
                 <Card className="shadow-2xl border-primary/10 overflow-hidden h-full bg-card/50">
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
@@ -277,20 +275,20 @@ export default function PdfCompressor() {
                                 <CardDescription className="font-mono text-[10px]">{formatBytes(pdfFile.size)}</CardDescription>
                             </div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={triggerReplace} className="h-8 text-[10px] font-black border-2 border-primary/20 hover:border-primary shrink-0">
-                            <RefreshCcw className="size-3 mr-1.5" /> REPLACE FILE
+                        <Button variant="outline" size="sm" onClick={triggerReplace} className="h-8 text-[10px] font-black border-2 border-primary/20 hover:border-primary shrink-0 px-3">
+                            <RefreshCcw className="size-3 mr-1.5" /> <span className="hidden sm:inline">REPLACE</span>
                         </Button>
                     </CardHeader>
-                    <CardContent className="py-12 flex flex-col items-center justify-center min-h-[400px]">
+                    <CardContent className="py-8 md:py-12 flex flex-col items-center justify-center min-h-[350px] md:min-h-[400px]">
                         {isProcessing ? (
-                            <div className="space-y-8 w-full max-w-sm text-center">
+                            <div className="space-y-6 w-full max-w-sm text-center px-4">
                                 <div className="relative inline-block">
-                                     <Loader2 className="h-24 w-24 animate-spin text-primary opacity-20 stroke-[3]" />
-                                     <Zap className="absolute inset-0 m-auto h-12 w-12 text-primary animate-pulse" />
+                                     <Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary opacity-20 stroke-[3]" />
+                                     <Zap className="absolute inset-0 m-auto h-8 w-8 md:h-12 md:w-12 text-primary animate-pulse" />
                                 </div>
                                 <div className="space-y-3">
-                                    <p className="font-black text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
-                                    <Progress value={progress} className="h-3 shadow-inner rounded-full" />
+                                    <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
+                                    <Progress value={progress} className="h-2 md:h-3 shadow-inner rounded-full" />
                                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                                         <span>Syncing HD Layers...</span>
                                         <span>{progress}%</span>
@@ -298,50 +296,50 @@ export default function PdfCompressor() {
                                 </div>
                             </div>
                         ) : compressionResult ? (
-                             <div className="w-full max-w-md space-y-8 animate-in zoom-in-95 duration-500">
-                                 <div className="p-10 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-[2.5rem] flex flex-col items-center gap-4 text-center">
-                                    <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40">
-                                        <CheckCircle2 className="h-10 w-10" />
+                             <div className="w-full max-w-md space-y-6 md:space-y-8 animate-in zoom-in-95 duration-500 px-4">
+                                 <div className="p-6 md:p-10 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-[2rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center">
+                                    <div className="size-16 md:size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shadow-green-500/40">
+                                        <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-green-600/80 uppercase font-black tracking-widest mb-1">OPTIMIZATION COMPLETE</p>
-                                        <p className="text-5xl md:text-6xl font-black text-green-600">-{compressionResult.savings.toFixed(1)}%</p>
-                                        <p className="text-sm font-bold text-green-700 mt-2">Saved {formatBytes(compressionResult.originalSize - compressionResult.newSize)}</p>
+                                        <p className="text-4xl md:text-6xl font-black text-green-600">-{compressionResult.savings.toFixed(1)}%</p>
+                                        <p className="text-xs md:text-sm font-bold text-green-700 mt-2">Saved {formatBytes(compressionResult.originalSize - compressionResult.newSize)}</p>
                                     </div>
                                  </div>
                                 
-                                <div className="grid grid-cols-2 gap-8 text-center px-4">
+                                <div className="grid grid-cols-2 gap-4 md:gap-8 text-center">
                                     <div className="space-y-1">
-                                        <p className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">Before</p>
-                                        <p className="text-lg font-bold">{formatBytes(compressionResult.originalSize)}</p>
+                                        <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-wider">Before</p>
+                                        <p className="text-base md:text-lg font-bold">{formatBytes(compressionResult.originalSize)}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[11px] font-black text-primary uppercase tracking-wider">After</p>
-                                        <p className="text-lg font-bold text-primary">{formatBytes(compressionResult.newSize)}</p>
+                                        <p className="text-[9px] md:text-[11px] font-black text-primary uppercase tracking-wider">After</p>
+                                        <p className="text-base md:text-lg font-bold text-primary">{formatBytes(compressionResult.newSize)}</p>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center space-y-4">
-                                <div className="size-32 rounded-[2.5rem] bg-muted/50 flex items-center justify-center mx-auto border-4 border-dashed border-muted-foreground/20">
-                                    <FileArchive className="h-16 w-16 text-muted-foreground/30" />
+                            <div className="text-center space-y-4 px-4">
+                                <div className="size-24 md:size-32 rounded-[1.5rem] md:rounded-[2.5rem] bg-muted/50 flex items-center justify-center mx-auto border-4 border-dashed border-muted-foreground/20">
+                                    <FileArchive className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/30" />
                                 </div>
                                 <div>
-                                    <p className="text-lg font-black text-foreground uppercase tracking-tight">READY TO PROCESS</p>
-                                    <p className="text-sm text-muted-foreground font-medium italic">High-Fidelity Engine Active.</p>
+                                    <p className="text-base md:text-lg font-black text-foreground uppercase tracking-tight">READY TO PROCESS</p>
+                                    <p className="text-xs md:text-sm text-muted-foreground font-medium italic">High-Fidelity Engine Active.</p>
                                 </div>
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-muted/10 border-t p-6">
+                    <CardFooter className="bg-muted/10 border-t p-4 md:p-6">
                         {compressionResult && (
-                             <Button onClick={handleDownload} className="w-full h-16 text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95">
-                                <Download className="mr-3 h-7 w-7" /> DOWNLOAD HD PDF
+                             <Button onClick={handleDownload} className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95">
+                                <Download className="mr-2 md:mr-3 h-6 w-6 md:h-7 md:w-7" /> DOWNLOAD HD PDF
                             </Button>
                         )}
                         {!compressionResult && !isProcessing && (
-                            <Button className="w-full h-16 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleCompressPdf}>
-                                <Zap className="mr-2 h-6 w-6 text-yellow-400 group-hover:scale-125 transition-transform" /> START COMPRESSION
+                            <Button className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 group" onClick={handleCompressPdf}>
+                                <Zap className="mr-2 h-5 w-5 md:h-6 md:w-6 text-yellow-400 group-hover:scale-125 transition-transform" /> START COMPRESSION
                             </Button>
                         )}
                     </CardFooter>
@@ -349,26 +347,26 @@ export default function PdfCompressor() {
             </div>
 
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                            <Settings2 className="h-5 w-5 text-primary" /> Optimizer Panel
+                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden sticky top-24 rounded-xl md:rounded-[2rem] bg-white dark:bg-slate-950">
+                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
+                        <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                            <Settings2 className="size-5 md:size-6 text-primary" /> Optimizer Panel
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6 md:pt-8 md:pb-8 space-y-8">
+                    <CardContent className="p-4 md:p-8 space-y-6 md:space-y-8">
                         <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1.5 bg-muted rounded-2xl border-2">
-                                <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
-                                    <Target className="h-4 w-4 mr-2" /> Target Size
+                            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 h-12 md:h-14 p-1 md:p-1.5 bg-muted rounded-xl md:rounded-2xl border-2">
+                                <TabsTrigger value="target" className="font-black text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl transition-all">
+                                    <Target className="h-3 w-3 md:h-4 md:w-4 mr-1.5 md:mr-2" /> Target Size
                                 </TabsTrigger>
-                                <TabsTrigger value="manual" className="font-black text-[10px] uppercase rounded-xl transition-all">
-                                    <Settings2 className="h-4 w-4 mr-2" /> Manual Mode
+                                <TabsTrigger value="manual" className="font-black text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl transition-all">
+                                    <Settings2 className="h-3 w-3 md:h-4 md:w-4 mr-1.5 md:mr-2" /> Manual Mode
                                 </TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300">
-                                <div className="space-y-4">
-                                    <Label htmlFor="target-val" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Maximum File Limit</Label>
+                            <TabsContent value="target" className="space-y-4 md:space-y-6 animate-in fade-in duration-300">
+                                <div className="space-y-3 md:space-y-4">
+                                    <Label htmlFor="target-val" className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">Maximum File Limit</Label>
                                     <div className="flex flex-col sm:flex-row gap-2">
                                         <div className="relative flex-1 group">
                                             <Input 
@@ -376,39 +374,39 @@ export default function PdfCompressor() {
                                                 type="number" 
                                                 value={targetValue} 
                                                 onChange={(e) => setTargetValue(e.target.value)} 
-                                                className="h-16 text-3xl font-black focus-visible:ring-primary border-2 rounded-2xl bg-background pl-8"
+                                                className="h-14 md:h-16 text-xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl bg-background pl-6 md:pl-8"
                                             />
-                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/30 font-black text-xl uppercase">{targetUnit}</div>
+                                            <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-primary/30 font-black text-sm md:text-xl uppercase">{targetUnit}</div>
                                         </div>
                                         <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                            <SelectTrigger className="w-full sm:w-24 h-16 font-black text-lg border-2 rounded-2xl">
+                                            <SelectTrigger className="w-full sm:w-24 h-12 md:h-16 font-black text-sm md:text-lg border-2 rounded-xl md:rounded-2xl">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                <SelectItem value="kb" className="font-bold py-3">KB</SelectItem>
-                                                <SelectItem value="mb" className="font-bold py-3">MB</SelectItem>
+                                                <SelectItem value="kb" className="font-bold py-2 md:py-3">KB</SelectItem>
+                                                <SelectItem value="mb" className="font-bold py-2 md:py-3">MB</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
                             </TabsContent>
 
-                            <TabsContent value="manual" className="space-y-6 animate-in fade-in duration-300">
-                                <div className="space-y-6">
+                            <TabsContent value="manual" className="space-y-4 md:space-y-6 animate-in fade-in duration-300">
+                                <div className="space-y-4 md:space-y-6">
                                     <div className="flex justify-between items-center">
-                                        <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Image Quality</Label>
-                                        <Badge className="font-mono font-black text-base px-4 py-1 bg-primary text-white rounded-lg">{quality[0]}%</Badge>
+                                        <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Image Quality</Label>
+                                        <Badge className="font-mono font-black text-sm md:text-base px-3 md:px-4 py-0.5 md:py-1 bg-primary text-white rounded-lg">{quality[0]}%</Badge>
                                     </div>
-                                    <Slider min={40} max={100} step={5} value={quality} onValueChange={setQuality} className="py-4" />
+                                    <Slider min={40} max={100} step={5} value={quality} onValueChange={setQuality} className="py-2 md:py-4" />
                                 </div>
                             </TabsContent>
                         </Tabs>
 
-                        <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4">
-                            <ShieldCheck className="size-6 text-green-600 shrink-0" />
-                            <p className="text-[10px] text-green-800 font-bold leading-relaxed">
-                                <span className="font-black uppercase block mb-1 text-primary">SMART-ADAPTIVE ENCODING:</span>
-                                We render at 4.0x resolution. If target is small, we intelligently adjust scale while locking quality at 70%. Text remains 100% crisp.
+                        <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                            <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0" />
+                            <p className="text-[9px] md:text-[10px] text-green-800 font-bold leading-relaxed">
+                                <span className="font-black uppercase block mb-0.5 md:mb-1 text-primary">SMART-ADAPTIVE ENCODING:</span>
+                                We render at 4.0x resolution. Text remains 100% crisp even at extreme compression targets.
                             </p>
                         </div>
                     </CardContent>
