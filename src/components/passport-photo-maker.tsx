@@ -28,7 +28,7 @@ import {
     CheckCircle2,
     Palette,
     Square,
-    Image as ImageIcon,
+    ImageIcon,
     Sun,
     Contrast,
     Droplets,
@@ -677,24 +677,23 @@ export default function PassportPhotoMaker() {
                                     </div>
                                 )}
                             </Card>
-                            <div className="absolute -bottom-4 md:-bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 md:gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-1.5 md:p-2.5 rounded-full shadow-2xl border-2 border-white/20 z-10 whitespace-nowrap">
-                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-3.5 md:size-4"/></Button>
-                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3.5 md:size-4"/></Button>
-                                <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
+                            <div className="absolute -bottom-10 md:-bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-1 md:gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-1 md:p-1.5 rounded-full shadow-2xl border-2 border-white/20 z-10 whitespace-nowrap">
+                                <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-3 md:size-3.5"/></Button>
+                                <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3 md:size-3.5"/></Button>
+                                <Separator orientation="vertical" className="h-3 md:h-5 mx-0.5" />
                                 
-                                {/* RE-STACKED DIRECTIONAL CONTROLS (2x2) */}
-                                <div className="grid grid-cols-2 gap-0.5 md:gap-1">
-                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-2.5 md:size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-2.5 md:size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-2.5 md:size-3"/></Button>
-                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-2.5 md:size-3"/></Button>
+                                <div className="grid grid-cols-2 gap-0.5">
+                                    <Button variant="outline" size="icon" className="size-4 md:size-6 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-2 md:size-2.5"/></Button>
+                                    <Button variant="outline" size="icon" className="size-4 md:size-6 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-2 md:size-2.5"/></Button>
+                                    <Button variant="outline" size="icon" className="size-4 md:size-6 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-2 md:size-2.5"/></Button>
+                                    <Button variant="outline" size="icon" className="size-4 md:size-6 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-2 md:size-2.5"/></Button>
                                 </div>
 
-                                <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
-                                <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-3.5 md:size-4"/></Button>
+                                <Separator orientation="vertical" className="h-3 md:h-5 mx-0.5" />
+                                <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-3 md:size-3.5"/></Button>
                             </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-[500px] mt-6 md:mt-10">
+                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-[500px] mt-12 md:mt-16">
                              <Button variant="outline" onClick={handleReset} className="flex-1 h-12 md:h-16 rounded-xl md:rounded-[1.5rem] border-2 font-black uppercase text-[10px] md:text-xs tracking-widest">Start Over</Button>
                             <Button className="flex-[2] h-12 md:h-16 rounded-xl md:rounded-[1.5rem] bg-primary text-base md:text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-2 md:mr-3 size-5 md:size-6" /> SAVE JPG</Button>
                         </div>
