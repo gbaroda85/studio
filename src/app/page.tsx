@@ -227,7 +227,7 @@ export default function Page() {
                 </div>
 
                 {/* Why Choose Section (Image Based) - Now at the Bottom */}
-                <section className="py-20 bg-white dark:bg-black/20 w-full flex justify-center border-t border-border/50 rounded-[4rem] shadow-inner">
+                <section className="py-20 mt-32 bg-white dark:bg-black/20 w-full flex justify-center border-t border-border/50 rounded-[4rem] shadow-inner">
                     <div className="w-full max-w-6xl px-8 md:px-16 text-center">
                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase">Why Choose GR7 Tools?</h2>
                     <p className="text-slate-500 dark:text-slate-400 font-bold mb-20 text-lg">Built with cutting-edge technology for professional results</p>

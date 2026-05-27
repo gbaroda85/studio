@@ -681,10 +681,15 @@ export default function PassportPhotoMaker() {
                                 <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-3.5 md:size-4"/></Button>
                                 <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3.5 md:size-4"/></Button>
                                 <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
-                                <div className="grid grid-cols-2 gap-0.5">
+                                
+                                {/* RE-STACKED DIRECTIONAL CONTROLS (2x2) */}
+                                <div className="grid grid-cols-2 gap-0.5 md:gap-1">
+                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosY(p => p - 1)}><ChevronUp className="size-2.5 md:size-3"/></Button>
+                                    <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosY(p => p + 1)}><ChevronDown className="size-2.5 md:size-3"/></Button>
                                     <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p - 1)}><ChevronLeft className="size-2.5 md:size-3"/></Button>
                                     <Button variant="outline" size="icon" className="size-5 md:size-7 rounded" onClick={() => setPosX(p => p + 1)}><ChevronRight className="size-2.5 md:size-3"/></Button>
                                 </div>
+
                                 <Separator orientation="vertical" className="h-4 md:h-6 mx-0.5" />
                                 <Button variant="outline" size="icon" className="size-7 md:size-10 rounded-full text-primary" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-3.5 md:size-4"/></Button>
                             </div>
@@ -696,7 +701,7 @@ export default function PassportPhotoMaker() {
                     </motion.div>
 
                     <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-4 md:space-y-6">
-                        <Card className="glass-panel border-none shadow-2xl rounded-2xl md:rounded-[2.5rem] overflow-hidden">
+                        <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10">
                                 <CardTitle className="text-base md:text-lg font-black uppercase flex items-center gap-2"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
                             </CardHeader>
