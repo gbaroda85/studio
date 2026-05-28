@@ -54,22 +54,22 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Top Featured Image Tools (Visible on Home Page)
+  // Top Featured Image Tools (Visible on Home Page - Strictly these 5)
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "featured_home" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "featured_home" },
   
-  // Other Image Tools (Hidden from Home Page Featured, but in search and category tabs)
+  // Other Image Tools (Internal - Hidden from Home Page Featured)
   { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image_internal" },
   { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image_internal" },
-  { icon: PenLine, title: "Signature Remover", description: "Identify and remove signatures from images automatically.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
-  { icon: Sparkles, title: "Pro HD Enhancer", description: "Improve photo quality, colors, and lighting professionally.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
-  { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
-  { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image" },
-  { icon: FileOutput, title: "Image to PNG", description: "Convert various image formats to lossless PNG.", href: "/image-to-png", colorClass: "bg-sky-500", category: "image" },
-  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local high-speed processing.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image" },
+  { icon: PenLine, title: "Signature Remover", description: "Identify and remove signatures from images automatically.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image_internal" },
+  { icon: Sparkles, title: "Pro HD Enhancer", description: "Improve photo quality, colors, and lighting professionally.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image_internal" },
+  { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image_internal" },
+  { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image_internal" },
+  { icon: FileOutput, title: "Image to PNG", description: "Convert various image formats to lossless PNG.", href: "/image-to-png", colorClass: "bg-sky-500", category: "image_internal" },
+  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local high-speed processing.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image_internal" },
   
   // PDF Tools
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF files instantly.", href: "/docx-to-pdf", colorClass: "bg-blue-500", category: "pdf" },
@@ -215,7 +215,7 @@ export default function Page() {
                         </Button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'image' || t.category === 'featured_home').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'image' || t.category === 'featured_home').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
