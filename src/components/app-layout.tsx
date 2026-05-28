@@ -50,7 +50,8 @@ import {
   Printer,
   Lock,
   Heart,
-  Sparkles
+  Sparkles,
+  Contact2
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -142,6 +143,7 @@ const CATEGORIES = [
     icon: Archive,
     color: "text-violet-500",
     tools: [
+      { href: '/resume-builder', label: 'resume_builder_label', icon: Contact2 },
       { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
       { href: '/create-zip', label: 'create_zip_label', icon: Archive },
       { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
@@ -396,7 +398,7 @@ export function AppFooter() {
             <Link href="/" className="flex items-center gap-2">
                 <GR7Logo />
             </Link>
-            <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
+            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
             <div className="flex items-center gap-4 pt-4">

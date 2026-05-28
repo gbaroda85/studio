@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -46,7 +45,8 @@ import {
   Infinity,
   Printer,
   Lock,
-  Heart
+  Heart,
+  Contact2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -102,6 +102,7 @@ const ALL_TOOLS = [
   { icon: Waves, title: "Pressure Converter", description: "Convert between Bar, PSI, Pa, and ATM.", href: "/pressure-converter", colorClass: "bg-sky-500", category: "converters" },
   
   // File Tools
+  { icon: Contact2, title: "Pro Resume Builder", description: "Create a professional, ATS-ready CV with A4 layout.", href: "/resume-builder", colorClass: "bg-blue-600", category: "file" },
   { icon: Archive, title: "Create Zip", description: "Compress multiple files into a single archive.", href: "/create-zip", colorClass: "bg-violet-500", category: "file" },
   { icon: ArchiveRestore, title: "Unzip File", description: "Extract contents from any ZIP archive safely.", href: "/unzip-file", colorClass: "bg-stone-500", category: "file" },
 ];

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -72,6 +71,8 @@ const translations = {
     create_zip_description: 'Combine multiple files into a single zip archive.',
     unzip_file_label: 'Unzip File',
     unzip_file_description: 'Extract files from a zip archive.',
+    resume_builder_label: 'Pro Resume Builder',
+    resume_builder_description: 'Create a professional, ATS-ready CV with A4 print layout.',
     about_shrinkray_title: 'About GR7 Multi Tools Kits Hub',
     about_detailed_description: 'All processing is done directly in your browser. No data is ever uploaded to our servers, ensuring your files remain completely private.',
     developed_by: 'Developed by',
@@ -162,7 +163,7 @@ const translations = {
     unlock_pdf_description: 'पीडीएफ से पासवर्ड सुरक्षा हटाएं (आधार कार्ड सपोर्ट)।',
     lock_pdf_label: 'वॉल्ट पीडीएफ लॉकर',
     lock_pdf_description: 'अपने पीडीएफ को सुरक्षित AES पासवर्ड एन्क्रिप्शन के साथ सुरक्षित करें।',
-    add_watermark_label: 'वॉटरमार्क जोड़ें',
+    add_watermark_label: 'वॉटरmark जोड़ें',
     add_watermark_description: 'अपने पीडीएफ में टेक्स्ट या छवि वॉटरमार्क जोड़ें।',
     add_page_numbers_label: 'पृष्ठ संख्याएँ जोड़ें',
     add_page_numbers_description: 'अपने पीडीएफ दस्तावेज़ में पृष्ठ संख्याएँ डालें।',
@@ -172,6 +173,8 @@ const translations = {
     create_zip_description: 'कई फ़ाइलों को एक ज़िप संग्रह में मिलाएं।',
     unzip_file_label: 'फ़ाइल अनज़िप करें',
     unzip_file_description: 'एक ज़िप संग्रह से फ़ाइलें निकालें।',
+    resume_builder_label: 'प्रो रिज्यूमे मेकर',
+    resume_builder_description: 'A4 प्रिंट लेआउट के साथ पेशेवर, ATS-रेडी CV बनाएं।',
     about_shrinkray_title: 'GR7 मल्टी टूल्स किट्स हब के बारे में',
     about_detailed_description: 'सभी प्रोसेसिंग सीधे आपके ब्राउज़र में की जाती है। हमारे सर्वर पर कभी कोई डेटा अपलोड नहीं किया जाता है, यह सुनिश्चित करते हुए कि आपकी फाइलें पूरी तरह से निजी रहें।',
     developed_by: 'द्वारा विकसित',
@@ -272,6 +275,8 @@ const translations = {
     create_zip_description: 'Combina varios archivos en un solo archivo zip.',
     unzip_file_label: 'Descomprimir Archivo',
     unzip_file_description: 'Extrae archivos de un archivo zip.',
+    resume_builder_label: 'Creador de CV Pro',
+    resume_builder_description: 'Crea un CV profesional listo para ATS con diseño de impresión A4.',
     about_shrinkray_title: 'Acerca de GR7 Multi Tools Kits Hub',
     about_detailed_description: 'Todo el procesamiento se realiza directamente en su navegador. Nunca se cargan datos en nuestros servidores, lo que garantiza que sus archivos permanezcan completamente privados.',
     developed_by: 'Desarrollado por',
