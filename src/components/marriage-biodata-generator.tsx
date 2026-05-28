@@ -383,7 +383,7 @@ export default function MarriageBiodataGenerator() {
                                     <Input value={formData.family.siblings} onChange={(e) => handleInputChange('family', 'siblings', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="col-span-full space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Residential Address</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Address</Label>
                                     <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" />
                                 </div>
                             </div>
@@ -419,6 +419,10 @@ export default function MarriageBiodataGenerator() {
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Personal Email</Label>
                                     <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Residence Address</Label>
+                                    <Textarea value={formData.contact.address} onChange={(e) => handleInputChange('contact', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" placeholder="Enter your full residential address..." />
                                 </div>
                             </div>
                         </div>
@@ -639,10 +643,12 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
                             <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><Mail className="size-3" /></div>
                             <div className="overflow-hidden"><p className="text-[7px] font-black uppercase opacity-60">Email</p><p className="text-[10px] font-bold break-all">{formData.contact.email}</p></div>
                         </div>
-                        <div className="flex items-start gap-3">
-                            <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><MapPin className="size-3" /></div>
-                            <div><p className="text-[7px] font-black uppercase opacity-60">Residence</p><p className="text-[9px] font-bold leading-tight">{formData.contact.address}</p></div>
-                        </div>
+                        {formData.contact.address && (
+                            <div className="flex items-start gap-3">
+                                <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><MapPin className="size-3" /></div>
+                                <div><p className="text-[7px] font-black uppercase opacity-60">Residence</p><p className="text-[9px] font-bold leading-tight">{formData.contact.address}</p></div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -676,7 +682,7 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
 
             {/* Main Content (Right Column) */}
             <div className="flex-1 p-12 space-y-12">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 pl-16">
                      <h1 className="text-7xl font-black tracking-tighter" style={{ color: themeColor }}>
                         {formData.personal.fullName.split(' ')[0]} <span className="block text-5xl opacity-80 mt-[-10px]">{formData.personal.fullName.split(' ').slice(1).join(' ')}</span>
                      </h1>
@@ -694,7 +700,7 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
                         <MainRow label="Mother's Name" value={formData.family.motherName} themeColor={themeColor} />
                         <MainRow label="Mother's Occ." value={formData.family.motherOccupation} themeColor={themeColor} />
                         <MainRow label="Siblings" value={formData.family.siblings} themeColor={themeColor} />
-                        <MainRow label="Residence" value={formData.family.address} themeColor={themeColor} />
+                        <MainRow label="Family Address" value={formData.family.address} themeColor={themeColor} />
                     </MainSection>
 
                     {/* Section: Education */}
