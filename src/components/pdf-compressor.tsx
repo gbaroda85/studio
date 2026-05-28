@@ -51,6 +51,8 @@ type CompressionResult = {
 type CompressionMode = 'manual' | 'target';
 type TargetUnit = 'kb' | 'mb';
 
+const QUICK_SIZES = ["50", "100", "500"];
+
 export default function PdfCompressor() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -83,7 +85,7 @@ export default function PdfCompressor() {
             setStatusText("");
             
             const sizeInKb = file.size / 1024;
-            setTargetValue(Math.max(100, Math.round(sizeInKb * 0.6)).toString());
+            setTargetValue(Math.max(50, Math.round(sizeInKb * 0.6)).toString());
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a PDF file.' });
         }
@@ -365,28 +367,50 @@ export default function PdfCompressor() {
                             </TabsList>
 
                             <TabsContent value="target" className="space-y-4 md:space-y-6 animate-in fade-in duration-300">
-                                <div className="space-y-3 md:space-y-4">
-                                    <Label htmlFor="target-val" className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">Maximum File Limit</Label>
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <div className="relative flex-1 group">
-                                            <Input 
-                                                id="target-val" 
-                                                type="number" 
-                                                value={targetValue} 
-                                                onChange={(e) => setTargetValue(e.target.value)} 
-                                                className="h-14 md:h-16 text-xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl bg-background pl-6 md:pl-8"
-                                            />
-                                            <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-primary/30 font-black text-sm md:text-xl uppercase">{targetUnit}</div>
+                                <div className="space-y-4">
+                                    <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Quick Presets</Label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {QUICK_SIZES.map((size) => (
+                                            <Button
+                                                key={size}
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setTargetValue(size);
+                                                    setTargetUnit('kb');
+                                                }}
+                                                className={cn(
+                                                    "rounded-xl font-black text-[10px] uppercase h-9 border-2 transition-all",
+                                                    targetValue === size && targetUnit === 'kb' ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                )}
+                                            >
+                                                {size}KB
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <div className="space-y-2 pt-2">
+                                        <Label htmlFor="target-val" className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">Custom File Limit</Label>
+                                        <div className="flex flex-col sm:flex-row gap-2">
+                                            <div className="relative flex-1 group">
+                                                <Input 
+                                                    id="target-val" 
+                                                    type="number" 
+                                                    value={targetValue} 
+                                                    onChange={(e) => setTargetValue(e.target.value)} 
+                                                    className="h-14 md:h-16 text-xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl bg-background pl-6 md:pl-8"
+                                                />
+                                                <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-primary/30 font-black text-sm md:text-xl uppercase">{targetUnit}</div>
+                                            </div>
+                                            <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
+                                                <SelectTrigger className="w-full sm:w-24 h-12 md:h-16 font-black text-sm md:text-lg border-2 rounded-xl md:rounded-2xl">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                    <SelectItem value="kb" className="font-bold py-2 md:py-3">KB</SelectItem>
+                                                    <SelectItem value="mb" className="font-bold py-2 md:py-3">MB</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
-                                        <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                            <SelectTrigger className="w-full sm:w-24 h-12 md:h-16 font-black text-sm md:text-lg border-2 rounded-xl md:rounded-2xl">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                <SelectItem value="kb" className="font-bold py-2 md:py-3">KB</SelectItem>
-                                                <SelectItem value="mb" className="font-bold py-2 md:py-3">MB</SelectItem>
-                                            </SelectContent>
-                                        </Select>
                                     </div>
                                 </div>
                             </TabsContent>
