@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -47,21 +48,21 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const THEME_COLORS = [
+    { name: "Royal Purple", value: "#2d0b3a" },
     { name: "Dusty Rose", value: "#7A404F" },
     { name: "Royal Maroon", value: "#800000" },
     { name: "Navy Blue", value: "#000080" },
     { name: "Deep Gold", value: "#B8860B" },
     { name: "Premium Teal", value: "#008080" },
-    { name: "Charcoal", value: "#333333" },
 ];
 
 const TEMPLATES = [
+    { id: 'royal-gold', name: 'Royal Gold (Premium)', description: 'Dark theme with gold ornaments' },
     { id: 'canva-pro', name: 'Pro Canvas', description: 'Side-column asymmetric layout' },
     { id: 'royal', name: 'Royal Heritage', description: 'Traditional gold & maroon accents' },
     { id: 'modern', name: 'Modern Minimal', description: 'Clean layout & airy spacing' },
     { id: 'floral', name: 'Floral Elegance', description: 'Decorative flower patterns' },
     { id: 'vintage', name: 'Vintage Classic', description: 'Double borders & serif fonts' },
-    { id: 'slate', name: 'Professional Slate', description: 'Bold headers & grid layout' },
 ];
 
 const BORDER_STYLES = [
@@ -74,15 +75,18 @@ const BORDER_STYLES = [
 
 const INITIAL_DATA = {
     personal: {
-        fullName: "Jane Doe",
-        gender: "Female",
+        fullName: "Sanjay Singh",
+        gender: "Male",
         maritalStatus: "Single",
         religion: "Hindu",
-        caste: "Brahmin",
-        dob: "15-01-1990",
+        caste: "Singh",
+        subCaste: "Singh",
+        gotra: "Singh",
+        dob: "22/10/2000",
         tob: "10:30 AM",
-        placeOfBirth: "New Delhi, India",
-        height: "5 feet 10 inches",
+        placeOfBirth: "Bangalore",
+        rashi: "Mithuna (Gemini)",
+        height: "5 Feet 8 Inches",
         complexion: "Fair",
         bloodGroup: "A+",
         hobbies: "Reading, Painting",
@@ -90,29 +94,31 @@ const INITIAL_DATA = {
         favoriteFood: "Italian, Indian"
     },
     education: {
-        qualification: "Bachelor's in Computer Science",
+        qualification: "MBA in Finance",
         institution: "XYZ University",
         graduationYear: "2012",
         intermediate: "DEF College (2010)",
         highSchool: "ABC School (2008)",
-        occupation: "Software Engineer",
+        occupation: "Project Manager",
         company: "Tech Solutions Inc.",
-        workLocation: "New Delhi, India",
+        workLocation: "Bangalore",
         annualIncome: "₹ 15,00,000 PA"
     },
     family: {
-        fatherName: "Mr. James Doe",
-        fatherOccupation: "Structural Engineer",
-        motherName: "Mrs. Mary Doe",
-        motherOccupation: "Principal (Retired)",
-        siblings: "2 brothers, 1 sister",
+        fatherName: "Mr. Pramod Singh",
+        fatherOccupation: "A.G.M. at State Bank of India",
+        motherName: "Mrs. Meena Singh",
+        motherOccupation: "House Wife",
+        numBrothers: "2",
+        numSisters: "2",
+        siblings: "2 brothers, 2 sisters",
         mamaFamily: "Bhardwaj family from Jaipur",
-        address: "123 Main Street, Vasant Vihar, New Delhi, 110075"
+        address: "Bangalore"
     },
     contact: {
-        primaryPhone: "+91 98765 43210",
-        email: "jane.doe@email.com",
-        address: "123 Main Street, New Delhi, India"
+        primaryPhone: "75678XXXXX",
+        email: "sanjay.singh@email.com",
+        address: "Bangalore"
     }
 };
 
@@ -120,8 +126,8 @@ export default function MarriageBiodataGenerator() {
     const { toast } = useToast();
     const [formData, setFormData] = useState(INITIAL_DATA);
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
-    const [themeColor, setThemeColor] = useState("#7A404F");
-    const [selectedTemplate, setSelectedTemplate] = useState('canva-pro');
+    const [themeColor, setThemeColor] = useState("#2d0b3a");
+    const [selectedTemplate, setSelectedTemplate] = useState('royal-gold');
     const [borderStyle, setBorderStyle] = useState('double');
     const [isExporting, setIsExporting] = useState(false);
     
@@ -180,8 +186,8 @@ export default function MarriageBiodataGenerator() {
     const handleReset = () => {
         setFormData(INITIAL_DATA);
         setProfilePic("https://picsum.photos/seed/portrait1/400/500");
-        setThemeColor("#7A404F");
-        setSelectedTemplate('canva-pro');
+        setThemeColor("#2d0b3a");
+        setSelectedTemplate('royal-gold');
         setBorderStyle('double');
     };
 
@@ -232,7 +238,7 @@ export default function MarriageBiodataGenerator() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                        <Palette className="size-3" /> Colors
+                                        <Palette className="size-3" /> Theme Colors
                                     </Label>
                                     <div className="flex flex-wrap gap-2">
                                         {THEME_COLORS.map(c => (
@@ -252,7 +258,7 @@ export default function MarriageBiodataGenerator() {
                                 </div>
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                        <Camera className="size-3" /> Photo
+                                        <Camera className="size-3" /> Photo Upload
                                     </Label>
                                     <Button size="sm" variant="outline" className="w-full h-10 rounded-xl font-black text-[10px] border-2 uppercase border-dashed" onClick={() => fileInputRef.current?.click()}>
                                         <Plus className="size-3 mr-1.5" /> UPLOAD PHOTO
@@ -273,12 +279,16 @@ export default function MarriageBiodataGenerator() {
                                     <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-10 rounded-lg font-bold border-2 focus:ring-primary/20" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Gender</Label>
-                                    <Input value={formData.personal.gender} onChange={(e) => handleInputChange('personal', 'gender', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Date of Birth</Label>
+                                    <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Marital Status</Label>
-                                    <Input value={formData.personal.maritalStatus} onChange={(e) => handleInputChange('personal', 'maritalStatus', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Place of Birth</Label>
+                                    <Input value={formData.personal.placeOfBirth} onChange={(e) => handleInputChange('personal', 'placeOfBirth', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Rashi</Label>
+                                    <Input value={formData.personal.rashi} onChange={(e) => handleInputChange('personal', 'rashi', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Religion</Label>
@@ -289,28 +299,24 @@ export default function MarriageBiodataGenerator() {
                                     <Input value={formData.personal.caste} onChange={(e) => handleInputChange('personal', 'caste', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Date of Birth</Label>
-                                    <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Sub Caste</Label>
+                                    <Input value={formData.personal.subCaste} onChange={(e) => handleInputChange('personal', 'subCaste', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Time of Birth</Label>
-                                    <Input value={formData.personal.tob} onChange={(e) => handleInputChange('personal', 'tob', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Height</Label>
-                                    <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Gotra</Label>
+                                    <Input value={formData.personal.gotra} onChange={(e) => handleInputChange('personal', 'gotra', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Complexion</Label>
                                     <Input value={formData.personal.complexion} onChange={(e) => handleInputChange('personal', 'complexion', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Blood Group</Label>
-                                    <Input value={formData.personal.bloodGroup} onChange={(e) => handleInputChange('personal', 'bloodGroup', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Height</Label>
+                                    <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Birth Place</Label>
-                                    <Input value={formData.personal.placeOfBirth} onChange={(e) => handleInputChange('personal', 'placeOfBirth', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Marital Status</Label>
+                                    <Input value={formData.personal.maritalStatus} onChange={(e) => handleInputChange('personal', 'maritalStatus', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
                         </div>
@@ -320,36 +326,16 @@ export default function MarriageBiodataGenerator() {
                             <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Education & Career</Badge>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="col-span-full space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Highest Qualification</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Education</Label>
                                     <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="col-span-full space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Institution/College</Label>
-                                    <Input value={formData.education.institution} onChange={(e) => handleInputChange('education', 'institution', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Graduation Year</Label>
-                                    <Input value={formData.education.graduationYear} onChange={(e) => handleInputChange('education', 'graduationYear', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Inter / +2 Details</Label>
-                                    <Input value={formData.education.intermediate} onChange={(e) => handleInputChange('education', 'intermediate', e.target.value)} className="h-10 rounded-lg font-bold border-2" placeholder="e.g. DEF College (2010)" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">High School Details</Label>
-                                    <Input value={formData.education.highSchool} onChange={(e) => handleInputChange('education', 'highSchool', e.target.value)} className="h-10 rounded-lg font-bold border-2" placeholder="e.g. ABC School (2008)" />
-                                </div>
-                                <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Occupation</Label>
                                     <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label>
-                                    <Input value={formData.education.company} onChange={(e) => handleInputChange('education', 'company', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Work Location</Label>
-                                    <Input value={formData.education.workLocation} onChange={(e) => handleInputChange('education', 'workLocation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Institution/College</Label>
+                                    <Input value={formData.education.institution} onChange={(e) => handleInputChange('education', 'institution', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Annual Income</Label>
@@ -360,14 +346,14 @@ export default function MarriageBiodataGenerator() {
 
                         {/* 4. Family Information Section */}
                         <div className="space-y-6">
-                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Family Profile</Badge>
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Family Details</Badge>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Father's Name</Label>
                                     <Input value={formData.family.fatherName} onChange={(e) => handleInputChange('family', 'fatherName', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Father's Occ.</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Father's Occupation</Label>
                                     <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
@@ -375,54 +361,31 @@ export default function MarriageBiodataGenerator() {
                                     <Input value={formData.family.motherName} onChange={(e) => handleInputChange('family', 'motherName', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Mother's Occ.</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Mother's Occupation</Label>
                                     <Input value={formData.family.motherOccupation} onChange={(e) => handleInputChange('family', 'motherOccupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
-                                <div className="col-span-full space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Siblings Details</Label>
-                                    <Input value={formData.family.siblings} onChange={(e) => handleInputChange('family', 'siblings', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">No. Of Brother</Label>
+                                    <Input value={formData.family.numBrothers} onChange={(e) => handleInputChange('family', 'numBrothers', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
-                                <div className="col-span-full space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Address</Label>
-                                    <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" />
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">No. Of Sister</Label>
+                                    <Input value={formData.family.numSisters} onChange={(e) => handleInputChange('family', 'numSisters', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
                         </div>
 
-                         {/* 5. Hobbies & Interests Section */}
-                         <div className="space-y-6">
-                            <Badge className="bg-orange-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Hobbies & Interests</Badge>
-                            <div className="grid gap-4">
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Interests (e.g. Traveling, Reading)</Label>
-                                    <Input value={formData.personal.interests} onChange={(e) => handleInputChange('personal', 'interests', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Hobbies (e.g. Painting, Guitar)</Label>
-                                    <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Favorite Cuisine / Food</Label>
-                                    <Input value={formData.personal.favoriteFood} onChange={(e) => handleInputChange('personal', 'favoriteFood', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 6. Contact Section */}
+                        {/* 5. Contact Section */}
                         <div className="space-y-6">
                             <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Contact Details</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Primary Phone / WhatsApp</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Phone No.</Label>
                                     <Input value={formData.contact.primaryPhone} onChange={(e) => handleInputChange('contact', 'primaryPhone', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Personal Email</Label>
-                                    <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Residence Address</Label>
-                                    <Textarea value={formData.contact.address} onChange={(e) => handleInputChange('contact', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" placeholder="Enter your full residential address..." />
+                                    <Textarea value={formData.contact.address} onChange={(e) => handleInputChange('contact', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" placeholder="Enter address..." />
                                 </div>
                             </div>
                         </div>
@@ -460,12 +423,12 @@ export default function MarriageBiodataGenerator() {
                         style={{ 
                             width: '210mm', 
                             minHeight: '297mm', 
-                            padding: selectedTemplate === 'canva-pro' ? '0' : '15mm',
+                            padding: selectedTemplate === 'canva-pro' || selectedTemplate === 'royal-gold' ? '0' : '15mm',
                             color: '#333'
                         }}
                     >
-                        {/* BORDER DESIGN (Not used for Canva Pro) */}
-                        {selectedTemplate !== 'canva-pro' && (
+                        {/* BORDER DESIGN */}
+                        {selectedTemplate !== 'canva-pro' && selectedTemplate !== 'royal-gold' && (
                             borderStyle === 'decorative' ? (
                                 <DecorativeBorder color={themeColor} />
                             ) : (
@@ -477,7 +440,9 @@ export default function MarriageBiodataGenerator() {
                         )}
 
                         {/* TEMPLATES */}
-                        {selectedTemplate === 'canva-pro' ? (
+                        {selectedTemplate === 'royal-gold' ? (
+                            <TemplateRoyalGold themeColor={themeColor} formData={formData} profilePic={profilePic} />
+                        ) : selectedTemplate === 'canva-pro' ? (
                             <TemplateCanvaPro themeColor={themeColor} formData={formData} profilePic={profilePic} />
                         ) : (
                             <>
@@ -618,6 +583,131 @@ function Section({ title, themeColor, template, children }: { title: string, the
                 {children}
             </div>
         </section>
+    );
+}
+
+// TEMPLATE: ROYAL GOLD (MATCHING USER IMAGE)
+function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null }) {
+    const goldColor = "#f3cc8a";
+    
+    return (
+        <div className="w-full h-full relative p-12 overflow-hidden flex flex-col" style={{ background: `linear-gradient(to bottom, ${themeColor}, #0a040d)` }}>
+            {/* Corners */}
+            <div className="absolute top-6 left-6 size-24 pointer-events-none opacity-60">
+                <svg viewBox="0 0 100 100" fill="none" stroke={goldColor} strokeWidth="1.5">
+                    <path d="M5,40 L5,5 C5,5 35,5 35,5" />
+                    <circle cx="10" cy="10" r="2" fill={goldColor} />
+                    <path d="M5,15 C20,15 15,30 30,30" opacity="0.4" />
+                </svg>
+            </div>
+            <div className="absolute top-6 right-6 size-24 pointer-events-none opacity-60 rotate-90">
+                <svg viewBox="0 0 100 100" fill="none" stroke={goldColor} strokeWidth="1.5">
+                    <path d="M5,40 L5,5 C5,5 35,5 35,5" />
+                    <circle cx="10" cy="10" r="2" fill={goldColor} />
+                </svg>
+            </div>
+            <div className="absolute bottom-6 left-6 size-24 pointer-events-none opacity-60 -rotate-90">
+                <svg viewBox="0 0 100 100" fill="none" stroke={goldColor} strokeWidth="1.5">
+                    <path d="M5,40 L5,5 C5,5 35,5 35,5" />
+                    <circle cx="10" cy="10" r="2" fill={goldColor} />
+                </svg>
+            </div>
+            <div className="absolute bottom-6 right-6 size-24 pointer-events-none opacity-60 rotate-180">
+                <svg viewBox="0 0 100 100" fill="none" stroke={goldColor} strokeWidth="1.5">
+                    <path d="M5,40 L5,5 C5,5 35,5 35,5" />
+                    <circle cx="10" cy="10" r="2" fill={goldColor} />
+                </svg>
+            </div>
+
+            {/* Ganesh Watermark */}
+            <div className="absolute top-[40%] right-[5%] size-[300px] opacity-[0.08] pointer-events-none">
+                 <svg viewBox="0 0 100 100" fill={goldColor}>
+                    <path d="M50,10 C40,10 30,20 30,35 C30,45 35,50 40,55 C35,65 30,70 30,80 C30,90 40,95 50,95 C60,95 70,90 70,80 C70,70 65,65 60,55 C65,50 70,45 70,35 C70,20 60,10 50,10 Z M50,20 C55,20 60,25 60,35 C60,45 55,50 50,50 C45,50 40,45 40,35 C40,25 45,20 50,20 Z" />
+                 </svg>
+            </div>
+
+            {/* Header */}
+            <header className="flex flex-col items-center mb-10 z-10">
+                <div className="size-16 mb-2">
+                    <svg viewBox="0 0 100 100" fill={goldColor}>
+                        <path d="M50,10 C40,10 30,20 30,35 C30,45 35,50 40,55 C35,65 30,70 30,80 C30,90 40,95 50,95 C60,95 70,90 70,80 C70,70 65,65 60,55 C65,50 70,45 70,35 C70,20 60,10 50,10 Z M50,20 C55,20 60,25 60,35 C60,45 55,50 50,50 C45,50 40,45 40,35 C40,25 45,20 50,20 Z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-black tracking-widest text-[#f3cc8a]">ॐ गणेशाय नमः</h2>
+            </header>
+
+            <div className="grid grid-cols-12 gap-6 flex-1 z-10">
+                {/* Details Section */}
+                <div className="col-span-8 flex flex-col gap-6">
+                    <div className="space-y-1 mb-4">
+                         <h1 className="text-4xl font-black tracking-tight" style={{ color: goldColor }}>{formData.personal.fullName}</h1>
+                    </div>
+                    
+                    <div className="space-y-2.5">
+                        <RoyalRow label="Date of Birth" value={formData.personal.dob} color={goldColor} />
+                        <RoyalRow label="Place of Birth" value={formData.personal.placeOfBirth} color={goldColor} />
+                        <RoyalRow label="Rashi" value={formData.personal.rashi} color={goldColor} />
+                        <RoyalRow label="Religion" value={formData.personal.religion} color={goldColor} />
+                        <RoyalRow label="Caste" value={formData.personal.caste} color={goldColor} />
+                        <RoyalRow label="Sub Caste" value={formData.personal.subCaste} color={goldColor} />
+                        <RoyalRow label="Gotra" value={formData.personal.gotra} color={goldColor} />
+                        <RoyalRow label="Complexion" value={formData.personal.complexion} color={goldColor} />
+                        <RoyalRow label="Height" value={formData.personal.height} color={goldColor} />
+                        <RoyalRow label="Education" value={formData.education.qualification} color={goldColor} />
+                        <RoyalRow label="Occupation" value={formData.education.occupation} color={goldColor} />
+                    </div>
+
+                    <div className="mt-8">
+                        <h3 className="text-2xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Family Details</h3>
+                        <div className="space-y-2.5">
+                            <RoyalRow label="Father's Name" value={formData.family.fatherName} color={goldColor} />
+                            <RoyalRow label="Occupation" value={formData.family.fatherOccupation} color={goldColor} />
+                            <RoyalRow label="Mother's Name" value={formData.family.motherName} color={goldColor} />
+                            <RoyalRow label="Occupation" value={formData.family.motherOccupation} color={goldColor} />
+                            <RoyalRow label="No. Of Brother" value={formData.family.numBrothers} color={goldColor} />
+                            <RoyalRow label="No. Of Sister" value={formData.family.numSisters} color={goldColor} />
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <h3 className="text-2xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Contact Details</h3>
+                        <div className="space-y-2.5">
+                            <RoyalRow label="Phone no." value={formData.contact.primaryPhone} color={goldColor} />
+                            <RoyalRow label="Address" value={formData.contact.address} color={goldColor} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Photo Section */}
+                <div className="col-span-4 flex flex-col items-center">
+                    <div className="w-full aspect-[4/5] p-2 border-2 shadow-2xl relative bg-black/20" style={{ borderColor: goldColor }}>
+                        {profilePic ? (
+                            <img src={profilePic} alt="profile" className="size-full object-cover" />
+                        ) : (
+                            <div className="size-full flex items-center justify-center"><User2 className="size-16 opacity-20" color={goldColor} /></div>
+                        )}
+                    </div>
+                </div>
+            </div>
+            
+            <footer className="mt-10 pt-6 border-t flex justify-center items-center gap-4 opacity-30" style={{ borderColor: `${goldColor}22` }}>
+                 <div className="size-8">
+                    <svg viewBox="0 0 100 100" fill={goldColor}>
+                        <path d="M50,10 C40,10 30,20 30,35 C30,45 35,50 40,55 C35,65 30,70 30,80 C30,90 40,95 50,95 C60,95 70,90 70,80 C70,70 65,65 60,55 C65,50 70,45 70,35 C70,20 60,10 50,10 Z M50,20 C55,20 60,25 60,35 C60,45 55,50 50,50 C45,50 40,45 40,35 C40,25 45,20 50,20 Z" />
+                    </svg>
+                 </div>
+            </footer>
+        </div>
+    );
+}
+
+function RoyalRow({ label, value, color }: { label: string, value: string, color: string }) {
+    return (
+        <div className="flex items-baseline text-lg font-medium">
+            <span className="w-44 shrink-0" style={{ color: color }}>{label}</span>
+            <span className="w-8 text-center shrink-0" style={{ color: color }}>:</span>
+            <span className="flex-1" style={{ color: color }}>{value || "---"}</span>
+        </div>
     );
 }
 
