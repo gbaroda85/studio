@@ -243,55 +243,54 @@ export default function ImageCompressor() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left: Workspace Area */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4">
             <Card 
                 className={cn(
                     "border-2 border-dashed transition-all duration-300 relative overflow-hidden bg-card/50",
-                    "hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10",
+                    "hover:border-primary/80 hover:shadow-xl hover:shadow-primary/5",
                     isDragOver && "border-primary bg-primary/5", 
-                    results.length > 0 ? "p-3 md:p-4" : "p-6 md:p-12 text-center"
+                    results.length > 0 ? "p-2 md:p-3" : "p-4 md:p-8 text-center"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
                 {results.length === 0 ? (
-                    <div className="flex flex-col items-center gap-6 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-16 md:size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                            <UploadCloud className="size-8 md:size-10" />
+                    <div className="flex flex-col items-center gap-4 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                        <div className="size-12 md:size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <UploadCloud className="size-6 md:size-8" />
                         </div>
-                        <div className="space-y-2">
-                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Bulk Compression Workspace</p>
-                            <p className="text-sm text-muted-foreground font-medium">
-                                <span className="text-primary font-black">Drag and drop</span> or Click to upload photos
+                        <div className="space-y-1">
+                            <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Bulk Compression</p>
+                            <p className="text-xs text-muted-foreground font-medium">
+                                <span className="text-primary font-black">Drop images</span> or Click to upload
                             </p>
-                            <p className="text-[10px] md:text-xs text-muted-foreground italic opacity-70">Up to 50 images at once. Private local processing.</p>
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <div className="flex justify-between items-center px-2">
-                            <Badge variant="secondary" className="font-black text-[10px] px-3 py-1 rounded-full uppercase bg-primary/10 text-primary border-primary/20">
-                                {results.length} Files Queued
+                            <Badge variant="secondary" className="font-black text-[9px] px-2 py-0.5 rounded-full uppercase bg-primary/10 text-primary border-primary/20">
+                                {results.length} Files
                             </Badge>
-                            <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-8 text-[10px] uppercase hover:bg-destructive/10">
-                                <Trash2 className="size-3 mr-1.5"/> Clear All
+                            <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-7 text-[9px] uppercase">
+                                <Trash2 className="size-3 mr-1"/> Clear
                             </Button>
                         </div>
-                        <ScrollArea className="h-[300px] md:h-[350px] pr-2 md:pr-4">
-                            <div className="grid gap-3">
+                        <ScrollArea className="h-[250px] md:h-[300px] pr-2">
+                            <div className="grid gap-2">
                                 {results.map((res) => (
-                                    <div key={res.id} className="flex items-center justify-between p-2 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 hover:border-primary/40 transition-all group shadow-sm">
-                                        <div className="flex items-center gap-3 md:gap-4 truncate">
-                                            <div className="size-12 md:size-16 rounded-xl overflow-hidden bg-muted border-2 shrink-0 relative shadow-sm">
+                                    <div key={res.id} className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 rounded-xl border-2 hover:border-primary/40 transition-all shadow-sm">
+                                        <div className="flex items-center gap-3 truncate">
+                                            <div className="size-10 md:size-12 rounded-lg overflow-hidden bg-muted border shrink-0 relative">
                                                 <Image src={res.originalDataUrl} alt="prev" fill className="object-cover" />
                                             </div>
                                             <div className="truncate">
-                                                <p className="text-[10px] md:text-xs font-black truncate max-w-[80px] md:max-w-[200px] uppercase tracking-tight">{res.name}</p>
-                                                <div className="flex flex-wrap items-center gap-1.5 mt-0.5 md:mt-1">
-                                                    <span className="text-[8px] md:text-[10px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
+                                                <p className="text-[9px] md:text-[10px] font-black truncate max-w-[80px] md:max-w-[200px] uppercase">{res.name}</p>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="text-[7px] md:text-[8px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
                                                     {res.newSize > 0 && (
                                                         <>
-                                                            <span className="text-muted-foreground scale-75">→</span>
-                                                            <span className="text-[8px] md:text-[10px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span>
+                                                            <span className="text-muted-foreground">→</span>
+                                                            <span className="text-[7px] md:text-[8px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span>
                                                         </>
                                                     )}
                                                 </div>
@@ -300,68 +299,66 @@ export default function ImageCompressor() {
 
                                         <div className="flex items-center gap-1 md:gap-2 shrink-0">
                                             {res.isProcessing ? (
-                                                <Loader2 className="size-4 md:size-5 animate-spin text-primary" />
+                                                <Loader2 className="size-3 md:size-4 animate-spin text-primary" />
                                             ) : res.newSize > 0 ? (
-                                                <div className="flex items-center gap-1 md:gap-2">
-                                                    <Badge className="bg-green-500 hover:bg-green-500 text-white text-[7px] md:text-[9px] font-black">-{res.savings.toFixed(0)}%</Badge>
+                                                <div className="flex items-center gap-1">
+                                                    <Badge className="bg-green-500 text-white text-[6px] md:text-[8px] font-black">-{res.savings.toFixed(0)}%</Badge>
                                                     
                                                     <Dialog>
                                                         <DialogTrigger asChild>
-                                                            <Button size="icon" variant="outline" className="size-7 md:size-9 rounded-lg md:rounded-xl border-2 hover:bg-primary/5">
-                                                                <Eye className="size-3.5 md:size-4 text-primary" />
+                                                            <Button size="icon" variant="outline" className="size-6 md:size-8 rounded-lg border hover:bg-primary/5">
+                                                                <Eye className="size-3 md:size-3.5 text-primary" />
                                                             </Button>
                                                         </DialogTrigger>
-                                                        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-4 md:p-6">
+                                                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4">
                                                             <DialogHeader>
-                                                                <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm md:text-lg">
-                                                                    <ArrowLeftRight className="text-primary size-4 md:size-5" /> Quality Check
+                                                                <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm">
+                                                                    <ArrowLeftRight className="text-primary size-4" /> Quality Check
                                                                 </DialogTitle>
                                                             </DialogHeader>
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 py-4">
-                                                                <div className="space-y-2 md:space-y-3">
-                                                                    <div className="flex justify-between items-center bg-muted/30 p-2 rounded-lg">
-                                                                        <span className="text-[8px] md:text-[10px] font-black uppercase text-muted-foreground">ORIGINAL</span>
-                                                                        <Badge variant="outline" className="font-mono text-[9px]">{formatBytes(res.originalSize)}</Badge>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                                                                <div className="space-y-2">
+                                                                    <div className="flex justify-between items-center bg-muted/30 p-1.5 rounded-lg">
+                                                                        <span className="text-[8px] font-black uppercase text-muted-foreground">ORIGINAL</span>
+                                                                        <Badge variant="outline" className="font-mono text-[8px]">{formatBytes(res.originalSize)}</Badge>
                                                                     </div>
-                                                                    <div className="aspect-square relative rounded-xl overflow-hidden border-2 bg-white flex items-center justify-center">
-                                                                        <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-2" />
+                                                                    <div className="aspect-square relative rounded-lg overflow-hidden border bg-white flex items-center justify-center">
+                                                                        <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-1" />
                                                                     </div>
                                                                 </div>
-                                                                <div className="space-y-2 md:space-y-3">
-                                                                    <div className="flex justify-between items-center bg-green-500/10 p-2 rounded-lg">
-                                                                        <Badge className="bg-green-500 text-white font-mono text-[9px]">OPTIMIZED</Badge>
-                                                                        <span className="text-[8px] md:text-[10px] font-black uppercase text-green-700">{formatBytes(res.newSize)} (-{res.savings.toFixed(1)}%)</span>
+                                                                <div className="space-y-2">
+                                                                    <div className="flex justify-between items-center bg-green-500/10 p-1.5 rounded-lg">
+                                                                        <Badge className="bg-green-500 text-white font-mono text-[8px]">OPTIMIZED</Badge>
+                                                                        <span className="text-[8px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
                                                                     </div>
-                                                                    <div className="aspect-square relative rounded-xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center">
-                                                                        <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-2" />
+                                                                    <div className="aspect-square relative rounded-lg overflow-hidden border-green-500/20 bg-white flex items-center justify-center">
+                                                                        <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-1" />
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <CardFooter className="p-0 pt-2">
-                                                                <Button className="w-full h-12 md:h-14 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg" onClick={() => downloadFile(res)}>
-                                                                    DOWNLOAD IMAGE <Download className="ml-2 size-4 md:size-5" />
+                                                                <Button className="w-full h-10 bg-green-600 hover:bg-green-700 font-black text-xs" onClick={() => downloadFile(res)}>
+                                                                    DOWNLOAD <Download className="ml-2 size-3" />
                                                                 </Button>
                                                             </CardFooter>
                                                         </DialogContent>
                                                     </Dialog>
 
-                                                    <Button size="icon" variant="outline" className="size-7 md:size-9 rounded-lg md:rounded-xl border-2 border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
-                                                        <Download className="size-3.5 md:size-4 text-green-600" />
+                                                    <Button size="icon" variant="outline" className="size-6 md:size-8 rounded-lg border border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
+                                                        <Download className="size-3 md:size-3.5 text-green-600" />
                                                     </Button>
                                                 </div>
-                                            ) : (
-                                                <Badge variant="outline" className="text-[7px] md:text-[9px] font-black uppercase opacity-40">Ready</Badge>
-                                            )}
-                                            <Button variant="ghost" size="icon" className="size-6 md:size-8 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
-                                                <X className="size-3.5 md:size-4" />
+                                            ) : null}
+                                            <Button variant="ghost" size="icon" className="size-6 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
+                                                <X className="size-3" />
                                             </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </ScrollArea>
-                        <Button variant="outline" className="w-full border-2 border-dashed h-12 md:h-14 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
-                            <Layers className="size-4 mr-2" /> ADD MORE FILES
+                        <Button variant="outline" className="w-full border-dashed h-10 rounded-xl font-black text-[9px] uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
+                            <Layers className="size-3 mr-2" /> ADD IMAGES
                         </Button>
                     </div>
                 )}
@@ -369,50 +366,50 @@ export default function ImageCompressor() {
             </Card>
 
             {allProcessed && results.length > 1 && (
-                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-2xl md:rounded-[2rem] animate-in zoom-in-95 duration-500">
-                    <CardContent className="p-4 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 md:gap-8">
-                        <div className="flex items-center gap-3 md:gap-5 text-center sm:text-left">
-                            <div className="size-12 md:size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-xl shadow-green-500/30 shrink-0 mx-auto sm:mx-0">
-                                <CheckCircle2 className="size-6 md:size-8" />
+                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-xl animate-in zoom-in-95 duration-500">
+                    <CardContent className="p-3 md:p-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
+                                <CheckCircle2 className="size-5" />
                             </div>
                             <div>
-                                <p className="text-base md:text-lg font-black uppercase tracking-tighter text-green-800">Batch Complete!</p>
-                                <p className="text-[10px] md:text-xs text-green-700 font-medium">Download everything in one ZIP archive.</p>
+                                <p className="text-xs font-black uppercase tracking-tighter text-green-800">Complete</p>
+                                <p className="text-[8px] text-green-700 font-medium">ZIP Download ready.</p>
                             </div>
                         </div>
-                        <Button size="lg" className="w-full sm:w-auto h-14 md:h-16 px-6 md:px-10 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95" onClick={downloadAllAsZip}>
-                            <Download className="mr-2 md:mr-3 size-5 md:size-6" /> DOWNLOAD ZIP
+                        <Button size="sm" className="h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-xs rounded-xl shadow-lg" onClick={downloadAllAsZip}>
+                            <Download className="mr-2 size-4" /> DOWNLOAD ALL
                         </Button>
                     </CardContent>
                 </Card>
             )}
         </div>
 
-        {/* Right: Settings & Optimizer Suite */}
-        <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2rem] bg-white dark:bg-slate-950">
-                <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
-                    <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-5 md:size-6 text-primary" /> Optimizer Panel
+        {/* Right: Settings */}
+        <div className="lg:col-span-5 space-y-4">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl bg-white dark:bg-slate-950">
+                <CardHeader className="bg-primary/5 border-b p-3 md:p-4">
+                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 text-primary" /> Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 md:p-8 space-y-6 md:space-y-8">
+                <CardContent className="p-4 md:p-6 space-y-6">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 p-1 md:p-1.5 bg-muted/50 rounded-xl md:rounded-2xl border-2">
-                            <TabsTrigger value="target" className="font-black text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl">
-                                <Target className="size-3 mr-1.5 md:mr-2" /> Target Size
+                        <TabsList className="grid w-full grid-cols-2 h-10 p-1 bg-muted rounded-xl border">
+                            <TabsTrigger value="target" className="font-black text-[8px] md:text-[9px] uppercase rounded-lg">
+                                <Target className="size-2.5 mr-1" /> Target Size
                             </TabsTrigger>
-                            <TabsTrigger value="manual" className="font-black text-[9px] md:text-[10px] uppercase rounded-lg md:rounded-xl">
-                                <Settings2 className="size-3 mr-1.5 md:mr-2" /> Quality %
+                            <TabsTrigger value="manual" className="font-black text-[8px] md:text-[9px] uppercase rounded-lg">
+                                <Settings2 className="size-2.5 mr-1" /> Quality
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="target" className="pt-4 md:pt-8 space-y-4 md:space-y-6 animate-in fade-in duration-500">
-                             <div className="space-y-4">
-                                <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                    Target Size per image
+                        <TabsContent value="target" className="pt-4 space-y-4 animate-in fade-in duration-500">
+                             <div className="space-y-3">
+                                <Label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                                    Target Size
                                 </Label>
-                                <div className="grid grid-cols-4 gap-1.5 md:gap-2 mb-2">
+                                <div className="grid grid-cols-4 gap-1">
                                     {QUICK_SIZES.map((size) => (
                                         <Button
                                             key={size}
@@ -420,94 +417,83 @@ export default function ImageCompressor() {
                                             size="sm"
                                             onClick={() => setTargetSizeValue(size)}
                                             className={cn(
-                                                "rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase h-8 md:h-9 transition-all border-2",
-                                                targetSizeValue === size ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                "rounded-lg font-black text-[8px] md:text-[9px] uppercase h-7 border",
+                                                targetSizeValue === size ? "bg-primary text-white border-primary shadow-sm" : ""
                                             )}
                                         >
                                             {size}K
                                         </Button>
                                     ))}
                                 </div>
-                                <div className="flex flex-col sm:flex-row gap-2">
-                                    <div className="relative group flex-1">
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
                                         <Input 
                                             type="number" 
                                             value={targetSizeValue} 
                                             onChange={(e) => setTargetSizeValue(e.target.value)} 
-                                            className="h-12 md:h-16 text-xl md:text-3xl font-black focus-visible:ring-primary border-2 rounded-xl md:rounded-2xl pl-6 md:pl-8 bg-muted/10 w-full"
+                                            className="h-10 text-xl font-black border-2 rounded-xl pl-4 bg-muted/5 w-full"
                                         />
                                     </div>
                                     <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                        <SelectTrigger className="w-full sm:w-28 h-12 md:h-16 font-black text-sm md:text-xl border-2 rounded-xl md:rounded-2xl uppercase">
+                                        <SelectTrigger className="w-20 h-10 font-black text-xs border-2 rounded-xl uppercase">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                            <SelectItem value="kb" className="font-bold py-2 md:py-3 uppercase">KB</SelectItem>
-                                            <SelectItem value="mb" className="font-bold py-2 md:py-3 uppercase">MB</SelectItem>
+                                        <SelectContent className="rounded-xl border-2">
+                                            <SelectItem value="kb" className="font-bold py-1 uppercase">KB</SelectItem>
+                                            <SelectItem value="mb" className="font-bold py-1 uppercase">MB</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                </div>
-                                <div className="p-3 md:p-4 bg-primary/5 rounded-xl md:rounded-2xl border-2 border-primary/10">
-                                    <p className="text-[9px] md:text-[10px] text-primary/80 font-bold leading-relaxed">
-                                        <span className="font-black uppercase mr-1">Pro Engine:</span> Adaptive scaling active to prevent pixelation at small sizes.
-                                    </p>
                                 </div>
                              </div>
                         </TabsContent>
 
-                        <TabsContent value="manual" className="pt-4 md:pt-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
-                            <div className="space-y-4 md:space-y-6">
+                        <TabsContent value="manual" className="pt-4 space-y-4 animate-in fade-in duration-500">
+                            <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Quality</Label>
-                                    <Badge className="font-mono font-black text-sm md:text-base px-3 md:px-4 py-0.5 md:py-1 bg-primary text-white rounded-lg shadow-md">{quality[0]}%</Badge>
+                                    <Label className="text-[9px] font-black uppercase text-muted-foreground">Quality</Label>
+                                    <Badge className="font-mono font-black text-[10px] px-2 bg-primary text-white rounded shadow-sm">{quality[0]}%</Badge>
                                 </div>
-                                <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-2 md:py-4" />
+                                <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-2" />
                             </div>
                         </TabsContent>
                     </Tabs>
 
-                    <div className="space-y-3 md:space-y-4 pt-4 border-t-2 border-dashed">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest">Output Format</Label>
+                    <div className="space-y-2 pt-2 border-t border-dashed">
+                        <Label className="text-[8px] md:text-[9px] font-black uppercase text-muted-foreground tracking-widest">Output Format</Label>
                         <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
-                            <SelectTrigger className="h-12 md:h-14 font-black text-xs md:text-sm border-2 rounded-xl md:rounded-2xl bg-background"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-10 font-black text-[10px] border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger>
                             <SelectContent className="rounded-xl border-2">
-                                <SelectItem value="jpeg" className="font-bold py-2 md:py-3">JPEG (Best for Photos)</SelectItem>
-                                <SelectItem value="webp" className="font-bold py-2 md:py-3">WEBP (Next-Gen)</SelectItem>
-                                <SelectItem value="png" className="font-bold py-2 md:py-3">PNG (High Clarity)</SelectItem>
+                                <SelectItem value="jpeg" className="font-bold py-1">JPEG (Smallest)</SelectItem>
+                                <SelectItem value="webp" className="font-bold py-1">WEBP (Modern)</SelectItem>
+                                <SelectItem value="png" className="font-bold py-1">PNG (Lossless)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-4 md:p-8 border-t-2">
+                <CardFooter className="bg-muted/10 p-4 border-t">
                     <Button 
-                        className="w-full h-14 md:h-18 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
+                        className="w-full h-12 md:h-14 text-sm md:text-base font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl transition-all active:scale-95 disabled:opacity-50" 
                         disabled={results.length === 0 || isBulkProcessing}
                         onClick={startBulkCompression}
                     >
                         {isBulkProcessing ? (
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <Loader2 className="size-5 md:size-7 animate-spin" />
-                                <span className="uppercase text-sm md:text-base">OPTIMIZING...</span>
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="size-4 animate-spin" />
+                                <span className="uppercase text-xs">PROCESSING...</span>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <Zap className="size-5 md:size-7 text-yellow-400 fill-yellow-400" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">PROCESS QUEUE</span>
+                            <div className="flex items-center gap-2">
+                                <Zap className="size-4 text-yellow-400 fill-yellow-400" />
+                                <span className="uppercase tracking-tighter">OPTIMIZE NOW</span>
                             </div>
                         )}
                     </Button>
                 </CardFooter>
             </Card>
 
-            {/* Privacy Promise */}
-            <div className="p-4 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-3 md:gap-4 items-center shadow-sm">
-                <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="size-5 md:size-6 text-green-600" />
-                </div>
-                <div>
-                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Security Lock Active</p>
-                    <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight">Processing happens locally in RAM. No cloud storage.</p>
-                </div>
+            <div className="p-3 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3 items-center">
+                <ShieldCheck className="size-4 text-green-600" />
+                <p className="text-[9px] text-green-700 font-bold uppercase">100% Secure Local RAM Processing</p>
             </div>
         </div>
       </div>
