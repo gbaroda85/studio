@@ -91,7 +91,6 @@ const CATEGORIES = [
       { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
       { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
-      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
     ]
   },
   {

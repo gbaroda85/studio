@@ -54,10 +54,10 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Image Tools (Rearranged as per request)
+  // Image Tools
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
-  { icon: Crop, title: "Smart Crop", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
+  { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "image" },
   { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
@@ -72,9 +72,9 @@ const ALL_TOOLS = [
   // PDF Tools
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF files instantly.", href: "/docx-to-pdf", colorClass: "bg-blue-500", category: "pdf" },
   { icon: Lock, title: "Vault PDF Locker", description: "Seal your documents with real AES password encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", category: "pdf" },
-  { icon: FileArchive, title: "PDF Optimizer", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
+  { icon: FileArchive, title: "Compress PDF", description: "Shrink massive PDFs for easy email and portal uploads.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf" },
   { icon: Scissors, title: "Split & Extract", description: "Visually select and extract specific pages from PDF.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf" },
-  { icon: Merge, title: "Bulk Merge", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
+  { icon: Merge, title: "Merge PDF", description: "Combine hundreds of documents into one secure file.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF (Supports Aadhaar).", href: "/unlock-pdf", colorClass: "bg-teal-500", category: "pdf" },
   { icon: Crop, title: "Crop PDF", description: "Trim margins or fix perspective of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", category: "pdf" },
   { icon: ScanLine, title: "Scan to PDF", description: "Turn your camera into a professional document scanner.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", category: "pdf" },

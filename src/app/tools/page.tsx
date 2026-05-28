@@ -145,13 +145,6 @@ function ToolsPageContent() {
       icon: FileScan,
       color: 'text-teal-500',
     },
-    {
-      href: '/aadhaar-printer',
-      labelKey: 'aadhaar_printer_label',
-      descriptionKey: 'aadhaar_printer_description',
-      icon: Printer,
-      color: 'text-orange-600',
-    },
   ];
 
   const pdfFeatures = [
