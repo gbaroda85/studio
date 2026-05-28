@@ -58,6 +58,7 @@ const ALL_TOOLS = [
   // Image Tools (13)
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
+  { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "image" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "image" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
@@ -68,7 +69,6 @@ const ALL_TOOLS = [
   { icon: FileOutput, title: "Image to JPG", description: "Convert any image format to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image" },
   { icon: FileOutput, title: "Image to PNG", description: "Convert image formats to lossless PNG.", href: "/image-to-png", colorClass: "bg-sky-500", category: "image" },
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
-  { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
   
   // PDF Tools (12)
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF files instantly.", href: "/docx-to-pdf", colorClass: "bg-blue-500", category: "pdf" },

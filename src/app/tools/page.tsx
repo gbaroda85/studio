@@ -82,6 +82,13 @@ function ToolsPageContent() {
       color: 'text-fuchsia-500',
     },
     {
+      href: '/crop-image',
+      labelKey: 'crop_image_label',
+      descriptionKey: 'crop_image_description',
+      icon: Crop,
+      color: 'text-blue-500',
+    },
+    {
       href: '/marriage-biodata',
       labelKey: 'Marriage Bio Data',
       descriptionKey: 'Design a professional marriage biodata for A4 printing.',
@@ -94,13 +101,6 @@ function ToolsPageContent() {
       descriptionKey: 'passport_photo_description',
       icon: UserCircle,
       color: 'text-emerald-500',
-    },
-    {
-      href: '/crop-image',
-      labelKey: 'crop_image_label',
-      descriptionKey: 'crop_image_description',
-      icon: Crop,
-      color: 'text-blue-500',
     },
     {
       href: '/remove-background',
