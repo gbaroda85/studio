@@ -24,7 +24,9 @@ import {
     Settings2,
     ShieldCheck,
     Zap,
-    SeparatorHorizontal
+    Frame,
+    Layers,
+    Type
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -46,6 +48,22 @@ const THEME_COLORS = [
     { name: "Deep Gold", value: "#B8860B" },
     { name: "Premium Teal", value: "#008080" },
     { name: "Charcoal", value: "#333333" },
+];
+
+const TEMPLATES = [
+    { id: 'royal', name: 'Royal Heritage', description: 'Traditional gold & maroon accents' },
+    { id: 'modern', name: 'Modern Minimal', description: 'Clean layout & airy spacing' },
+    { id: 'floral', name: 'Floral Elegance', description: 'Decorative flower patterns' },
+    { id: 'vintage', name: 'Vintage Classic', description: 'Double borders & serif fonts' },
+    { id: 'slate', name: 'Professional Slate', description: 'Bold headers & grid layout' },
+];
+
+const BORDER_STYLES = [
+    { id: 'solid', name: 'Solid Line' },
+    { id: 'double', name: 'Double Line' },
+    { id: 'dashed', name: 'Dashed' },
+    { id: 'dotted', name: 'Dotted' },
+    { id: 'decorative', name: 'Floral Design' },
 ];
 
 const INITIAL_DATA = {
@@ -94,6 +112,8 @@ export default function MarriageBiodataGenerator() {
     const [formData, setFormData] = useState(INITIAL_DATA);
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
     const [themeColor, setThemeColor] = useState("#800000");
+    const [selectedTemplate, setSelectedTemplate] = useState('royal');
+    const [borderStyle, setBorderStyle] = useState('double');
     const [isExporting, setIsExporting] = useState(false);
     
     const previewRef = useRef<HTMLDivElement>(null);
@@ -123,7 +143,7 @@ export default function MarriageBiodataGenerator() {
         setIsExporting(true);
         try {
             const canvas = await html2canvas(previewRef.current, {
-                scale: 3, // High quality
+                scale: 3, 
                 useCORS: true,
                 backgroundColor: '#ffffff'
             });
@@ -151,6 +171,14 @@ export default function MarriageBiodataGenerator() {
         setFormData(INITIAL_DATA);
         setProfilePic("https://picsum.photos/seed/portrait1/400/500");
         setThemeColor("#800000");
+        setSelectedTemplate('royal');
+        setBorderStyle('double');
+    };
+
+    // Helper for Border Style
+    const getBorderStyle = () => {
+        if (borderStyle === 'decorative') return 'solid'; // handled separately
+        return borderStyle;
     };
 
     return (
@@ -162,180 +190,157 @@ export default function MarriageBiodataGenerator() {
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                <Settings2 className="size-6 text-primary" /> STUDIO PANEL
+                                <Settings2 className="size-6 text-primary" /> BIODATA STUDIO
                             </CardTitle>
                             <Button variant="ghost" size="sm" onClick={handleReset} className="font-black text-[10px] uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-10">
                         
-                        {/* Section: Photo */}
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                <Camera className="size-3" /> Profile Picture
-                            </Label>
-                            <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-muted/30 rounded-3xl border-2 border-dashed">
-                                <div className="size-24 rounded-2xl overflow-hidden bg-white border-2 border-white shadow-xl shrink-0">
-                                    {profilePic ? (
-                                        <img src={profilePic} alt="prev" className="size-full object-cover" />
-                                    ) : (
-                                        <div className="size-full flex items-center justify-center text-muted-foreground/30"><User className="size-10" /></div>
-                                    )}
+                        {/* Section: Design Styles */}
+                        <div className="space-y-6">
+                             <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Layers className="size-3" /> Select Template
+                                </Label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {TEMPLATES.map(t => (
+                                        <button 
+                                            key={t.id}
+                                            onClick={() => setSelectedTemplate(t.id)}
+                                            className={cn(
+                                                "p-4 rounded-2xl border-2 text-left transition-all",
+                                                selectedTemplate === t.id ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted hover:border-primary/40"
+                                            )}
+                                        >
+                                            <p className="font-black text-[10px] uppercase tracking-wider">{t.name}</p>
+                                            <p className="text-[8px] text-muted-foreground font-bold mt-1 uppercase">{t.description}</p>
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="space-y-3 w-full">
-                                    <p className="text-[10px] font-bold text-muted-foreground text-center sm:text-left leading-tight uppercase">High-res portrait recommended.</p>
-                                    <Button size="sm" variant="outline" className="w-full h-10 rounded-xl font-black text-[10px] border-2 uppercase" onClick={() => fileInputRef.current?.click()}>
-                                        <Plus className="size-3 mr-1.5" /> UPLOAD NEW PHOTO
-                                    </Button>
-                                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-                                </div>
-                            </div>
+                             </div>
+
+                             <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Frame className="size-3" /> Outline Border Style
+                                </Label>
+                                <Select value={borderStyle} onValueChange={setBorderStyle}>
+                                    <SelectTrigger className="h-11 rounded-xl border-2 font-black uppercase text-[10px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-2">
+                                        {BORDER_STYLES.map(s => (
+                                            <SelectItem key={s.id} value={s.id} className="font-bold text-[10px] uppercase">{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                             </div>
                         </div>
 
-                        {/* Section: Themes */}
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                <Palette className="size-3" /> Visual Themes
-                            </Label>
-                            <div className="flex flex-wrap gap-3">
-                                {THEME_COLORS.map(c => (
-                                    <button 
-                                        key={c.value} 
-                                        onClick={() => setThemeColor(c.value)}
-                                        className={cn(
-                                            "h-10 px-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all",
-                                            themeColor === c.value ? "border-primary ring-4 ring-primary/10 shadow-lg scale-105" : "border-white/10 hover:border-primary/40"
-                                        )}
-                                    >
-                                        <div className="size-4 rounded-full shadow-inner" style={{ backgroundColor: c.value }} />
-                                        <span className="text-[10px] font-black uppercase">{c.name}</span>
-                                    </button>
-                                ))}
+                        <Separator className="opacity-10" />
+
+                        {/* Section: Themes & Photo */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Palette className="size-3" /> Theme Colors
+                                </Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {THEME_COLORS.map(c => (
+                                        <button 
+                                            key={c.value} 
+                                            onClick={() => setThemeColor(c.value)}
+                                            className={cn(
+                                                "size-10 rounded-xl border-2 transition-all flex items-center justify-center",
+                                                themeColor === c.value ? "border-primary ring-4 ring-primary/10 scale-110" : "border-white/10"
+                                            )}
+                                            style={{ backgroundColor: c.value }}
+                                        >
+                                            {themeColor === c.value && <CheckCircle2 className="size-4 text-white" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Camera className="size-3" /> Photo Upload
+                                </Label>
+                                <Button size="sm" variant="outline" className="w-full h-11 rounded-xl font-black text-[10px] border-2 uppercase" onClick={() => fileInputRef.current?.click()}>
+                                    <Plus className="size-3 mr-1.5" /> UPLOAD PHOTO
+                                </Button>
+                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
                             </div>
                         </div>
 
                         <Separator className="opacity-10" />
 
-                        {/* Section: Personal Info */}
-                        <div className="space-y-6">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-100 flex items-center w-fit gap-2">
-                                <User className="size-3" /> Personal Information
-                            </Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2 col-span-1 sm:col-span-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Full Name</Label>
-                                    <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-12 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Date of Birth</Label>
-                                    <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Time of Birth</Label>
-                                    <Input value={formData.personal.tob} onChange={(e) => handleInputChange('personal', 'tob', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Place of Birth</Label>
-                                    <Input value={formData.personal.placeOfBirth} onChange={(e) => handleInputChange('personal', 'placeOfBirth', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Height</Label>
-                                    <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Section: Career & Education */}
-                        <div className="space-y-6 pt-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 flex items-center w-fit gap-2">
-                                <Briefcase className="size-3" /> Education & Career
-                            </Label>
-                            <div className="grid gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Highest Qualification</Label>
-                                    <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase opacity-50">Occupation</Label>
-                                        <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-11 rounded-xl font-bold" />
+                        {/* Data Sections */}
+                        <div className="space-y-8">
+                            {/* Personal */}
+                            <div className="space-y-4">
+                                <Badge className="bg-rose-500 text-white font-black text-[9px] px-3 py-1 uppercase">Personal Info</Badge>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="col-span-full space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Full Name</Label>
+                                        <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase opacity-50">Annual Income</Label>
-                                        <Input value={formData.education.annualIncome} onChange={(e) => handleInputChange('education', 'annualIncome', e.target.value)} className="h-11 rounded-xl font-bold" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">DOB</Label>
+                                        <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Height</Label>
+                                        <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Section: Family */}
-                        <div className="space-y-6 pt-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 flex items-center w-fit gap-2">
-                                <Home className="size-3" /> Family Background
-                            </Label>
-                            <div className="grid gap-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase opacity-50">Father's Name</Label>
-                                        <Input value={formData.family.fatherName} onChange={(e) => handleInputChange('family', 'fatherName', e.target.value)} className="h-11 rounded-xl font-bold" />
+                            {/* Education & Career */}
+                            <div className="space-y-4">
+                                <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase">Education & Career</Badge>
+                                <div className="grid gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Qualification</Label>
+                                        <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase opacity-50">Father's Occupation</Label>
-                                        <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-11 rounded-xl font-bold" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Occupation</Label>
+                                            <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Income</Label>
+                                            <Input value={formData.education.annualIncome} onChange={(e) => handleInputChange('education', 'annualIncome', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Mama's Family / Background</Label>
-                                    <Input value={formData.family.mamaFamily} onChange={(e) => handleInputChange('family', 'mamaFamily', e.target.value)} className="h-11 rounded-xl font-bold" placeholder="e.g. Sethi family from Mumbai" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Residential Address</Label>
-                                    <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-xl font-medium text-sm min-h-[80px]" />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Section: Astrology */}
-                        <div className="space-y-6 pt-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 flex items-center w-fit gap-2">
-                                <Star className="size-3" /> Astrological Info
-                            </Label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <div className="space-y-1.5">
-                                    <Label className="text-[8px] font-black uppercase opacity-50">Rashi</Label>
-                                    <Input value={formData.astrological.rashi} onChange={(e) => handleInputChange('astrological', 'rashi', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[8px] font-black uppercase opacity-50">Nakshatra</Label>
-                                    <Input value={formData.astrological.nakshatra} onChange={(e) => handleInputChange('astrological', 'nakshatra', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[8px] font-black uppercase opacity-50">Gotra</Label>
-                                    <Input value={formData.astrological.gotra} onChange={(e) => handleInputChange('astrological', 'gotra', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Section: Contact */}
-                        <div className="space-y-6 pt-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 flex items-center w-fit gap-2">
-                                <Phone className="size-3" /> Contact Details
-                            </Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Mobile Number</Label>
-                                    <Input value={formData.contact.primaryPhone} onChange={(e) => handleInputChange('contact', 'primaryPhone', e.target.value)} className="h-11 rounded-xl font-bold" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase opacity-50">Email Address</Label>
-                                    <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-11 rounded-xl font-bold" />
+                            {/* Family */}
+                            <div className="space-y-4">
+                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase">Family Background</Badge>
+                                <div className="grid gap-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Father's Name</Label>
+                                            <Input value={formData.family.fatherName} onChange={(e) => handleInputChange('family', 'fatherName', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Father's Occ.</Label>
+                                            <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Address</Label>
+                                        <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-lg min-h-[60px]" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-6 md:p-8 border-t">
-                         <Button onClick={exportToPdf} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 group">
+                         <Button onClick={exportToPdf} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 group">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" />}
                             EXPORT AS A4 PDF
                         </Button>
@@ -358,7 +363,10 @@ export default function MarriageBiodataGenerator() {
                 <div className="w-full overflow-x-auto pb-10 flex justify-center bg-slate-200 dark:bg-slate-900 rounded-[3rem] p-4 md:p-10 shadow-inner">
                     <div 
                         ref={previewRef}
-                        className="bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden"
+                        className={cn(
+                            "bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-all duration-500",
+                            selectedTemplate === 'slate' ? 'font-sans' : 'font-body'
+                        )}
                         style={{ 
                             width: '210mm', 
                             minHeight: '297mm', 
@@ -366,141 +374,121 @@ export default function MarriageBiodataGenerator() {
                             color: '#333'
                         }}
                     >
-                        {/* THEME ELEMENTS */}
-                        <div className="absolute inset-0 border-[15px] border-double opacity-10 pointer-events-none" style={{ borderColor: themeColor }} />
-                        <div className="absolute top-0 left-0 w-full h-2 pointer-events-none" style={{ backgroundColor: themeColor }} />
-                        
-                        {/* HEADER */}
-                        <div className="flex flex-col items-center mb-10 space-y-4">
-                            <div className="flex items-center justify-center gap-4 text-center">
-                                <div className="h-px w-20 bg-muted-foreground/30" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground">OM GANESHAY NAMAHA</span>
-                                <div className="h-px w-20 bg-muted-foreground/30" />
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black font-headline text-center uppercase tracking-widest pt-4" style={{ color: themeColor }}>
-                                Bio Data
-                            </h2>
-                            <div className="w-48 h-1 mx-auto rounded-full" style={{ backgroundColor: themeColor, opacity: 0.2 }} />
-                        </div>
+                        {/* BORDER DESIGN */}
+                        {borderStyle === 'decorative' ? (
+                             <DecorativeBorder color={themeColor} />
+                        ) : (
+                            <div className="absolute inset-[10mm] pointer-events-none" style={{ 
+                                border: `4px ${getBorderStyle()} ${themeColor}`,
+                                opacity: 0.2
+                            }} />
+                        )}
 
-                        <div className="grid grid-cols-12 gap-10">
+                        {/* TEMPLATE SPECIFIC ELEMENTS */}
+                        {selectedTemplate === 'royal' && <TemplateRoyal themeColor={themeColor} />}
+                        {selectedTemplate === 'floral' && <TemplateFloral themeColor={themeColor} />}
+                        {selectedTemplate === 'slate' && <TemplateSlate themeColor={themeColor} />}
+
+                        {/* COMMON CONTENT WRAPPER */}
+                        <div className={cn(
+                            "relative z-10 w-full h-full flex flex-col",
+                            selectedTemplate === 'modern' && "items-start",
+                            selectedTemplate === 'vintage' && "items-center"
+                        )}>
                             
-                            {/* CONTENT AREA */}
-                            <div className="col-span-8 space-y-10">
-                                
-                                {/* 1. PERSONAL */}
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-black border-b-2 pb-1 inline-block uppercase tracking-widest" style={{ color: themeColor, borderColor: themeColor }}>
-                                        Personal Details
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-y-3">
-                                        <DataRow label="Full Name" value={formData.personal.fullName} />
-                                        <DataRow label="Date of Birth" value={formData.personal.dob} />
-                                        <DataRow label="Time of Birth" value={formData.personal.tob} />
-                                        <DataRow label="Place of Birth" value={formData.personal.placeOfBirth} />
-                                        <DataRow label="Height" value={formData.personal.height} />
-                                        <DataRow label="Complexion" value={formData.personal.complexion} />
-                                        <DataRow label="Blood Group" value={formData.personal.bloodGroup} />
+                            {/* HEADER */}
+                            <header className={cn(
+                                "w-full mb-12",
+                                selectedTemplate === 'vintage' ? 'text-center' : '',
+                                selectedTemplate === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
+                            )}>
+                                {selectedTemplate !== 'slate' && (
+                                     <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
+                                        <div className="h-px w-20 bg-current" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
+                                        <div className="h-px w-20 bg-current" />
                                     </div>
-                                </section>
+                                )}
+                                <h2 className={cn(
+                                    "text-4xl md:text-6xl font-black font-headline tracking-widest uppercase text-center",
+                                    selectedTemplate === 'vintage' && "font-serif italic capitalize tracking-normal",
+                                    selectedTemplate === 'slate' && "text-left text-5xl"
+                                )} style={{ color: themeColor }}>
+                                    Bio Data
+                                </h2>
+                                {selectedTemplate === 'royal' && <div className="w-48 h-1 mx-auto mt-2 rounded-full opacity-20" style={{ backgroundColor: themeColor }} />}
+                            </header>
 
-                                {/* 2. EDUCATION & CAREER */}
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-black border-b-2 pb-1 inline-block uppercase tracking-widest" style={{ color: themeColor, borderColor: themeColor }}>
-                                        Career & Education
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-y-3">
-                                        <DataRow label="Education" value={formData.education.qualification} />
-                                        <DataRow label="Institution" value={formData.education.institution} />
-                                        <DataRow label="Occupation" value={formData.education.occupation} />
-                                        <DataRow label="Annual Income" value={formData.education.annualIncome} />
-                                    </div>
-                                </section>
+                            <div className="grid grid-cols-12 gap-10 w-full flex-1">
+                                {/* MAIN CONTENT */}
+                                <div className="col-span-8 space-y-10">
+                                    <Section 
+                                        title="Personal Details" 
+                                        themeColor={themeColor} 
+                                        template={selectedTemplate}
+                                    >
+                                        <Row label="Full Name" value={formData.personal.fullName} />
+                                        <Row label="Date of Birth" value={formData.personal.dob} />
+                                        <Row label="Time of Birth" value={formData.personal.tob} />
+                                        <Row label="Place of Birth" value={formData.personal.placeOfBirth} />
+                                        <Row label="Height" value={formData.personal.height} />
+                                        <Row label="Complexion" value={formData.personal.complexion} />
+                                        <Row label="Blood Group" value={formData.personal.bloodGroup} />
+                                    </Section>
 
-                                {/* 3. FAMILY */}
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-black border-b-2 pb-1 inline-block uppercase tracking-widest" style={{ color: themeColor, borderColor: themeColor }}>
-                                        Family Details
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-y-3">
-                                        <DataRow label="Father Name" value={formData.family.fatherName} />
-                                        <DataRow label="Father Occ." value={formData.family.fatherOccupation} />
-                                        <DataRow label="Mother Name" value={formData.family.motherName} />
-                                        <DataRow label="Mother Occ." value={formData.family.motherOccupation} />
-                                        <DataRow label="Siblings" value={formData.family.siblings} />
-                                        <DataRow label="Mama's Family" value={formData.family.mamaFamily} />
-                                        <div className="flex items-start gap-4 text-sm leading-relaxed">
-                                            <span className="w-32 font-black text-muted-foreground/60 shrink-0 uppercase text-[10px]">Address</span>
+                                    <Section 
+                                        title="Career & Education" 
+                                        themeColor={themeColor} 
+                                        template={selectedTemplate}
+                                    >
+                                        <Row label="Education" value={formData.education.qualification} />
+                                        <Row label="Institution" value={formData.education.institution} />
+                                        <Row label="Occupation" value={formData.education.occupation} />
+                                        <Row label="Income" value={formData.education.annualIncome} />
+                                    </Section>
+
+                                    <Section 
+                                        title="Family Profile" 
+                                        themeColor={themeColor} 
+                                        template={selectedTemplate}
+                                    >
+                                        <Row label="Father Name" value={formData.family.fatherName} />
+                                        <Row label="Mother Name" value={formData.family.motherName} />
+                                        <Row label="Siblings" value={formData.family.siblings} />
+                                        <div className="flex items-start gap-4 text-sm leading-relaxed mt-2">
+                                            <span className="w-32 font-black text-muted-foreground/50 shrink-0 uppercase text-[10px]">Address</span>
                                             <span className="font-bold">{formData.family.address}</span>
                                         </div>
-                                    </div>
-                                </section>
+                                    </Section>
+                                </div>
 
-                                {/* 4. HOROSCOPE */}
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-black border-b-2 pb-1 inline-block uppercase tracking-widest" style={{ color: themeColor, borderColor: themeColor }}>
-                                        Astrological Info
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-y-3 gap-x-8">
-                                        <DataRow label="Rashi" value={formData.astrological.rashi} />
-                                        <DataRow label="Gotra" value={formData.astrological.gotra} />
-                                        <DataRow label="Nakshatra" value={formData.astrological.nakshatra} />
-                                        <DataRow label="Gan" value={formData.astrological.gan} />
-                                        <DataRow label="Manglik" value={formData.astrological.manglik} />
-                                    </div>
-                                </section>
-
-                                {/* 5. CONTACT */}
-                                <section className="bg-muted/30 p-6 rounded-3xl space-y-4">
-                                    <h3 className="text-lg font-black uppercase tracking-widest" style={{ color: themeColor }}>
-                                        Contact Details
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <Phone className="size-4 opacity-40" />
-                                            <span className="font-black text-sm">{formData.contact.primaryPhone}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <FileText className="size-4 opacity-40" />
-                                            <span className="font-black text-sm">{formData.contact.email}</span>
-                                        </div>
-                                    </div>
-                                </section>
-
-                            </div>
-
-                            {/* RIGHT SIDEBAR OF A4: PHOTO & ICONOGRAPHY */}
-                            <div className="col-span-4 space-y-12">
-                                {/* Photo Container */}
-                                <div className="space-y-3">
-                                     <div 
-                                        className="w-full aspect-[4/5] bg-white p-2 shadow-2xl border-[1px] border-slate-200 flex items-center justify-center overflow-hidden"
-                                        style={{ transform: 'rotate(2deg)' }}
-                                    >
+                                {/* SIDEBAR CONTENT (PHOTO) */}
+                                <div className="col-span-4 flex flex-col items-center gap-12">
+                                    <div className={cn(
+                                        "w-full aspect-[4/5] bg-white p-2 shadow-2xl relative",
+                                        selectedTemplate === 'royal' && "rotate-2 border-[1px] border-slate-200",
+                                        selectedTemplate === 'modern' && "rounded-3xl overflow-hidden shadow-none border-4",
+                                        selectedTemplate === 'floral' && "border-double border-4"
+                                    )} style={{ borderColor: themeColor }}>
                                         {profilePic ? (
-                                            <img src={profilePic} alt="profile" className="size-full object-cover" />
+                                            <img src={profilePic} alt="profile" className="size-full object-cover rounded-[inherit]" />
                                         ) : (
-                                            <div className="size-full flex items-center justify-center bg-slate-50 text-slate-300">
-                                                <User className="size-20" />
-                                            </div>
+                                            <div className="size-full flex items-center justify-center bg-slate-50"><User className="size-20 opacity-10" /></div>
                                         )}
                                     </div>
-                                    <p className="text-[10px] font-black text-center text-muted-foreground uppercase tracking-widest opacity-50">LATEST PHOTOGRAPH</p>
-                                </div>
-
-                                <div className="space-y-10 pt-10 text-center opacity-10 flex flex-col items-center">
-                                     <Heart className="size-20" style={{ fill: themeColor }} />
-                                     <Sparkles className="size-16" style={{ color: themeColor }} />
-                                     <MapPin className="size-20" style={{ color: themeColor }} />
+                                    
+                                    <div className="flex flex-col items-center gap-10 opacity-5">
+                                        <Heart className="size-24 fill-current" style={{ color: themeColor }} />
+                                        <Sparkles className="size-20" style={{ color: themeColor }} />
+                                        <Star className="size-16 fill-current" style={{ color: themeColor }} />
+                                    </div>
                                 </div>
                             </div>
 
-                        </div>
-                        
-                        {/* FOOTER */}
-                        <div className="absolute bottom-10 left-0 w-full px-12">
-                             <div className="h-px w-full bg-slate-200 mb-4" />
-                             <p className="text-[9px] font-black text-center text-muted-foreground uppercase tracking-[0.4em]">GR7 SMART GENERATOR • PREMIUM IDENTITY STUDIO</p>
+                            {/* FOOTER */}
+                            <footer className="mt-auto pt-10 border-t border-slate-100 text-center">
+                                <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30">GR7 PREMIUM BIODATA STUDIO • FOR AUSPICIOUS BEGINNINGS</p>
+                            </footer>
                         </div>
                     </div>
                 </div>
@@ -509,7 +497,7 @@ export default function MarriageBiodataGenerator() {
                 <div className="no-print mt-6 flex items-center gap-4 text-muted-foreground/60 text-[10px] font-black uppercase">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                     <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 100% PRIVATE</div>
-                    <div className="flex items-center gap-1.5"><Heart className="size-3 text-rose-500 fill-rose-500" /> MADE WITH LOVE</div>
+                    <div className="flex items-center gap-1.5"><Heart className="size-3 text-rose-500 fill-rose-500" /> PREMIUM STUDIO</div>
                 </div>
 
             </div>
@@ -532,11 +520,78 @@ export default function MarriageBiodataGenerator() {
     );
 }
 
-function DataRow({ label, value }: { label: string, value: string }) {
+// SUB-COMPONENTS
+
+function Row({ label, value }: { label: string, value: string }) {
     return (
         <div className="flex items-center gap-4 text-sm">
-            <span className="w-32 font-black text-muted-foreground/60 shrink-0 uppercase text-[10px] tracking-tight">{label}</span>
+            <span className="w-32 font-black text-muted-foreground/40 shrink-0 uppercase text-[9px] tracking-tight">{label}</span>
             <span className="font-bold border-b border-dotted flex-1 pb-1">{value || "---"}</span>
+        </div>
+    );
+}
+
+function Section({ title, themeColor, template, children }: { title: string, themeColor: string, template: string, children: React.ReactNode }) {
+    return (
+        <section className="space-y-5">
+            <div className={cn(
+                "flex items-center gap-4",
+                template === 'vintage' ? 'justify-center' : ''
+            )}>
+                <h3 className={cn(
+                    "text-lg font-black uppercase tracking-widest px-4 py-1",
+                    template === 'slate' ? 'bg-muted rounded-lg' : 'border-l-4'
+                )} style={{ color: themeColor, borderColor: themeColor }}>
+                    {title}
+                </h3>
+                {template !== 'slate' && <div className="h-px bg-slate-100 flex-1" />}
+            </div>
+            <div className={cn(
+                "grid grid-cols-1 gap-y-3",
+                template === 'slate' && "bg-slate-50/50 p-6 rounded-2xl"
+            )}>
+                {children}
+            </div>
+        </section>
+    );
+}
+
+// TEMPLATE OVERLAYS
+
+function TemplateRoyal({ themeColor }: { themeColor: string }) {
+    return (
+        <>
+            <div className="absolute top-0 left-0 w-full h-4" style={{ backgroundColor: themeColor }} />
+            <div className="absolute top-0 left-0 size-40 opacity-5 rotate-45 -translate-x-20 -translate-y-20 border-[20px]" style={{ borderColor: themeColor }} />
+            <div className="absolute bottom-0 right-0 size-40 opacity-5 rotate-45 translate-x-20 translate-y-20 border-[20px]" style={{ borderColor: themeColor }} />
+        </>
+    );
+}
+
+function TemplateFloral({ themeColor }: { themeColor: string }) {
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-5">
+             <div className="absolute -top-10 -left-10 size-64 rounded-full border-[30px]" style={{ borderColor: themeColor }} />
+             <div className="absolute -bottom-10 -right-10 size-64 rounded-full border-[30px]" style={{ borderColor: themeColor }} />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[400px] border-2 rounded-full" style={{ borderColor: themeColor }} />
+        </div>
+    );
+}
+
+function TemplateSlate({ themeColor }: { themeColor: string }) {
+    return (
+        <div className="absolute top-0 left-0 w-2 h-full opacity-20" style={{ backgroundColor: themeColor }} />
+    );
+}
+
+function DecorativeBorder({ color }: { color: string }) {
+    return (
+        <div className="absolute inset-[8mm] pointer-events-none">
+             <div className="absolute top-0 left-0 size-16 border-t-8 border-l-8" style={{ borderColor: color }} />
+             <div className="absolute top-0 right-0 size-16 border-t-8 border-r-8" style={{ borderColor: color }} />
+             <div className="absolute bottom-0 left-0 size-16 border-b-8 border-l-8" style={{ borderColor: color }} />
+             <div className="absolute bottom-0 right-0 size-16 border-b-8 border-r-8" style={{ borderColor: color }} />
+             <div className="absolute inset-0 border-2 opacity-10" style={{ borderColor: color }} />
         </div>
     );
 }
