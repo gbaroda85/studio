@@ -94,7 +94,6 @@ export default function ResumeBuilder() {
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
     const [activeSection, setActiveSection] = useState('template');
     const [selectedTemplate, setSelectedTemplate] = useState('canva-pro');
-    const [themeColor, setThemeColor] = useState(IMAGE_PURPLE);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,7 +121,7 @@ export default function ResumeBuilder() {
     };
 
     return (
-        <div className="w-full max-w-[1700px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20">
+        <div className="w-full max-w-[1700px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 relative">
             
             {/* LEFT: STUDIO EDITOR (Hidden on Print) */}
             <div className="lg:col-span-5 space-y-6 no-print">
@@ -155,12 +154,7 @@ export default function ResumeBuilder() {
                                             {TEMPLATES.map(t => (
                                                 <button 
                                                     key={t.id}
-                                                    onClick={() => {
-                                                        setSelectedTemplate(t.id);
-                                                        if(t.id === 'royal-gold' || t.id === 'heritage') setThemeColor("#1a1a1a");
-                                                        else if(t.id === 'canva-pro') setThemeColor(IMAGE_PURPLE);
-                                                        else setThemeColor("#0a8491");
-                                                    }}
+                                                    onClick={() => setSelectedTemplate(t.id)}
                                                     className={cn(
                                                         "p-4 rounded-2xl border-2 text-left transition-all",
                                                         selectedTemplate === t.id ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted hover:border-primary/40"
@@ -259,21 +253,24 @@ export default function ResumeBuilder() {
                 </Card>
             </div>
 
-            {/* RIGHT: LIVE FULL PAGE PREVIEW (Hidden on Print) */}
-            <div className="lg:col-span-7 flex flex-col items-center sticky top-24 no-print pb-20">
-                <div className="w-full flex items-center justify-between mb-4 px-4">
+            {/* RIGHT: LIVE FULL PAGE PREVIEW (Direct A4 View) */}
+            <div className="lg:col-span-7 flex flex-col items-center no-print">
+                <div className="w-full flex items-center justify-between mb-6 px-4">
                     <div className="flex items-center gap-2">
                         <Eye className="size-4 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Direct A4 Studio View</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Page Direct View</span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-xl animate-pulse">LIVE RENDER</Badge>
+                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-xl">STUDIO PREVIEW</Badge>
                 </div>
 
-                <div className="w-full overflow-y-auto max-h-[85vh] bg-slate-300 dark:bg-slate-900/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 flex justify-center custom-scrollbar">
-                    <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} />
+                {/* THE WRAPPER THAT ALLOWS FULL NATURAL HEIGHT */}
+                <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 transition-all">
+                    <div className="relative transform-gpu scale-[0.6] sm:scale-[0.8] lg:scale-[0.95] xl:scale-100 origin-top">
+                         <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} />
+                    </div>
                 </div>
 
-                <div className="mt-6 flex items-center gap-6 text-muted-foreground/40 text-[10px] font-black uppercase tracking-widest">
+                <div className="mt-8 flex items-center gap-6 text-muted-foreground/40 text-[10px] font-black uppercase tracking-widest">
                     <div className="flex items-center gap-2"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                     <div className="flex items-center gap-2"><Zap className="size-3 text-yellow-500" /> 100% PRIVATE</div>
                     <div className="flex items-center gap-2"><Sparkles className="size-3 text-primary" /> ATS OPTIMIZED</div>
@@ -281,8 +278,8 @@ export default function ResumeBuilder() {
             </div>
 
             {/* THE ACTUAL PRINT LAYER - VISIBLE ONLY ON PRINT */}
-            <div className="hidden print:block absolute inset-0 bg-white z-[99999]">
-                 <div className="w-[210mm] min-h-[297mm] mx-auto bg-white flex justify-center">
+            <div className="hidden print:block fixed inset-0 bg-white z-[99999]">
+                 <div className="w-[210mm] min-h-[297mm] mx-auto bg-white flex justify-center items-start pt-0">
                     <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} />
                  </div>
             </div>
@@ -297,31 +294,32 @@ export default function ResumeBuilder() {
                         background: white !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        height: 100% !important;
+                        height: auto !important;
                         width: 100% !important;
                         overflow: visible !important;
                     }
                     body * {
                         visibility: hidden !important;
+                        overflow: visible !important;
+                        height: auto !important;
                     }
                     .print-target, .print-target * {
                         visibility: visible !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
                     }
                     .no-print { display: none !important; }
                     
-                    /* The actual container for print - Absolute Layout */
+                    /* Force the target to sit at the absolute top of the print paper */
                     .print-target {
-                        position: fixed !important;
+                        position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
                         width: 210mm !important;
                         height: 297mm !important;
-                        display: flex !important;
-                        justify-content: center !important;
+                        display: block !important;
                         background: white !important;
                         z-index: 99999999 !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
                         box-shadow: none !important;
                         border: none !important;
                     }
@@ -341,7 +339,7 @@ function ResumeContent({ data, template, profilePic }: { data: typeof INITIAL_RE
     };
     
     return (
-        <div className="print-target shadow-[0_60px_100px_-20px_rgba(0,0,0,0.4)] border">
+        <div className="print-target shadow-2xl border">
             {templates[template] || templates['canva-pro']}
         </div>
     );
@@ -595,3 +593,4 @@ function TemplateModernEdge({ data, profilePic }: { data: typeof INITIAL_RESUME_
         </div>
     );
 }
+
