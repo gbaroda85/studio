@@ -26,7 +26,7 @@ export default function MarriageBiodataPage() {
                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Heart className="size-3 fill-rose-600" /> PREMIUM WEDDING STUDIO
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Marriage <span className="text-gradient-hero">Bio Data</span> Maker
                 </h1>
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
