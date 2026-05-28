@@ -31,7 +31,8 @@ import {
     X,
     User2,
     Linkedin,
-    Github
+    Github,
+    CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -46,72 +47,68 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CORPORATE_TEAL = "#0a8491";
+const IMAGE_PURPLE = "#6d28d9";
 
 const INITIAL_RESUME_DATA = {
     personal: {
-        fullName: "Sanjay Singh",
-        title: "Senior Full Stack Engineer",
-        email: "sanjay.singh@email.com",
-        phone: "+91 98765 43210",
-        location: "Bangalore, India",
-        website: "sanjaydev.me",
-        linkedin: "linkedin.com/in/sanjaydev",
-        github: "github.com/sanjaydev",
+        fullName: "Logan Osborne",
+        title: "Student",
+        email: "logan@email.com",
+        phone: "+012 3456 7890",
+        location: "123 Street, Great City, CT1234",
+        website: "logan.dev",
+        linkedin: "linkedin.com/in/logan",
+        github: "github.com/logan",
     },
-    summary: "Expert Full Stack Developer with 5+ years of specializing in Next.js 15, React, and Firebase. Proven expertise in building high-scale industrial applications with complex logic, including real-time shift management and financial engines for EPF/HRA calculations. Committed to clean code, modular architecture, and high-performance UI/UX design.",
+    summary: "Hardworking Student seeking employment. I am ready to utilize my skills and passion for furthering a company's mission. Technologically adept, offering experience with various social media platforms, office technology programs, and advanced computer skills. I am bringing forth a positive attitude, willingness, and motivation to learn new programs.",
     skills: [
-        { name: "Frontend Architecture", level: 92 },
-        { name: "Next.js & React 19", level: 88 },
-        { name: "Firebase (Real-time DB)", level: 85 },
-        { name: "UI Engineering", level: 90 },
-        { name: "Project Management", level: 78 }
+        { name: "Communication Skills", level: 90 },
+        { name: "Motivated Attitude", level: 85 },
+        { name: "Office Technology Skills", level: 80 },
+        { name: "Social Media Platforms", level: 75 }
     ],
-    hardSkills: ["TypeScript", "Tailwind CSS", "Node.js", "Jest", "Docker", "Figma Design"],
+    hardSkills: ["Python", "React", "Data Analysis", "Public Speaking"],
     languages: [
-        { name: "English", level: "Native / Professional" },
-        { name: "Hindi", level: "Native / Bilingual" }
+        { name: "English", level: "Excellent" },
+        { name: "Dutch", level: "Intermediate" }
     ],
     experience: [
         {
-            company: "Tech Solutions Inc.",
-            position: "Senior UI Engineer",
-            duration: "2021 - Present",
-            description: "• Architected core component library using Next.js 15 and Tailwind.\n• Integrated real-time Firestore synchronization for dashboard metrics.\n• Reduced site load times by 40% using advanced ISR and caching strategies."
-        },
-        {
-            company: "Cloud Systems Studio",
-            position: "Full Stack Developer",
-            duration: "2018 - 2021",
-            description: "• Developed scalable REST APIs for e-commerce platforms.\n• Implemented complex UI states using Redux and Framer Motion."
+            company: "Big Apple Bookstore, New York",
+            position: "Sales Associate",
+            duration: "September 2023 - March 2026",
+            description: "• Greeted customers and assisted them with finding books.\n• Offered literary suggestions based on the needs and desires of the customer.\n• Followed directions from my Supervisor and managed projects with precision.\n• Organized books and adhered to the policies and mission of the bookstore."
         }
     ],
     projects: [
         {
-            name: "Shiftrack - Industrial Suite",
-            link: "shiftrack.io",
-            description: "A mission-critical management app for shift workers. Engineered the frontend UI for complex data visualization, automated salary engine for HRA/EPF/Allowance calculations, and real-time attendance tracking via Firebase Cloud Functions."
-        },
-        {
-            name: "GR7 Multi-Tools Hub",
-            link: "gr7tools.com",
-            description: "A premium local-first file processing suite. Built with Next.js, implementing high-fidelity PDF manipulation and image optimization logic using WASM for 100% data privacy."
+            name: "Community Literacy Drive",
+            link: "project.com",
+            description: "Organized a monthly book reading session for underprivileged children, increasing attendance by 40% over six months."
         }
     ],
     education: [
         {
-            school: "Indian Institute of Technology (IIT)",
-            degree: "B.Tech in Computer Science",
-            year: "2014 - 2018"
+            school: "New York University, New York",
+            degree: "Bachelor of Communications",
+            year: "2022 - 2026",
+            honors: "summa cum laude (GPA: 4.0/4.0)"
+        },
+        {
+            school: "Regis High School, New York",
+            degree: "High School Diploma",
+            year: "2018 - 2022"
         }
     ],
     certifications: [
-        "Google Professional Cloud Architect",
-        "Meta Senior Frontend Engineer (Certified)"
+        { name: "Honorary Student", year: "2026", issuer: "New York University" },
+        { name: "LifeSaver Volunteer Award", year: "2025", issuer: "American Volunteer Association" }
     ]
 };
 
 const TEMPLATES = [
-  { id: 'asymmetric', name: 'Elite Asymmetric', description: 'Two-column modern professional' },
+  { id: 'canva-pro', name: 'Pro Canvas (Modern)', description: 'Wavy blobs & purple accents (As per Image)' },
+  { id: 'asymmetric', name: 'Elite Asymmetric', description: 'Two-column corporate style' },
   { id: 'classic', name: 'Classic Professional', description: 'Clean top-down academic style' },
   { id: 'minimal', name: 'Minimalist Clean', description: 'Simple typography and spacing' },
 ];
@@ -123,8 +120,8 @@ interface ResumeBuilderProps {
 export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProps) {
     const { toast } = useToast();
     const [data, setData] = useState(INITIAL_RESUME_DATA);
-    const [activeSection, setActiveSection] = useState('personal');
-    const [selectedTemplate, setSelectedTemplate] = useState('asymmetric');
+    const [activeSection, setActiveSection] = useState('template');
+    const [selectedTemplate, setSelectedTemplate] = useState('canva-pro');
     
     const handlePersonalChange = (field: string, value: string) => {
         setData(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
@@ -154,10 +151,10 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
 
     if (!isPrintMode) {
         return (
-            <div className="w-full max-w-[1700px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20">
+            <div className="w-full max-w-[1700px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 no-print">
                 
                 {/* LEFT: STUDIO EDITOR */}
-                <div className="lg:col-span-5 space-y-6 no-print">
+                <div className="lg:col-span-5 space-y-6">
                     <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <div className="flex items-center justify-between">
@@ -219,6 +216,10 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
                                                 </div>
                                             </div>
                                             <div className="space-y-1.5">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Residence / Location</Label>
+                                                <Input value={data.personal.location} onChange={(e) => handlePersonalChange('location', e.target.value)} className="h-11 rounded-xl border-2 font-bold" />
+                                            </div>
+                                            <div className="space-y-1.5">
                                                 <Label className="text-[9px] font-black uppercase opacity-60">Impactful Profile Summary</Label>
                                                 <Textarea value={data.summary} onChange={(e) => setData(prev => ({ ...prev, summary: e.target.value }))} className="rounded-2xl border-2 font-bold min-h-[140px] leading-relaxed" />
                                             </div>
@@ -227,8 +228,21 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
 
                                     <TabsContent value="skills" className="space-y-8 mt-0">
                                         <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Technical Matrix</Badge>
-                                        <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed space-y-4">
-                                            <p className="text-[10px] font-bold text-muted-foreground italic uppercase">Pro Tip: Use the 'Bio' tab to update names, and the templates will automatically visualize your expertise.</p>
+                                        <div className="space-y-4">
+                                            {data.skills.map((s, i) => (
+                                                <div key={i} className="flex gap-4 items-center">
+                                                    <Input value={s.name} onChange={(e) => {
+                                                        const updated = [...data.skills];
+                                                        updated[i].name = e.target.value;
+                                                        setData(prev => ({ ...prev, skills: updated }));
+                                                    }} className="h-9 text-xs font-bold" />
+                                                    <Input type="number" value={s.level} onChange={(e) => {
+                                                        const updated = [...data.skills];
+                                                        updated[i].level = Number(e.target.value);
+                                                        setData(prev => ({ ...prev, skills: updated }));
+                                                    }} className="h-9 w-20 text-xs font-bold" />
+                                                </div>
+                                            ))}
                                         </div>
                                     </TabsContent>
 
@@ -264,36 +278,25 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
                                     
                                     <TabsContent value="projects" className="space-y-6 mt-0">
                                          <div className="flex items-center justify-between">
-                                            <Badge className="bg-rose-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Complex Projects</Badge>
-                                            <Button size="sm" onClick={() => setData(prev => ({ ...prev, projects: [...prev.projects, { name: "", link: "", description: "" }] }))} className="h-8 text-[9px] font-black bg-primary rounded-lg"><Plus className="size-3 mr-1" /> Add Project</Button>
+                                            <Badge className="bg-rose-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Education & Projects</Badge>
                                         </div>
-                                        {data.projects.map((proj, idx) => (
-                                            <Card key={idx} className="p-5 border-2 rounded-2xl space-y-4 bg-muted/5 group relative border-muted">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-1.5">
-                                                        <Label className="text-[8px] font-black uppercase opacity-40">Title</Label>
-                                                        <Input value={proj.name} onChange={(e) => {
-                                                            const updated = [...data.projects];
-                                                            updated[idx] = { ...updated[idx], name: e.target.value };
-                                                            setData(prev => ({ ...prev, projects: updated }));
-                                                        }} className="h-9 text-xs font-bold" />
-                                                    </div>
-                                                    <div className="space-y-1.5">
-                                                        <Label className="text-[8px] font-black uppercase opacity-40">Link</Label>
-                                                        <Input value={proj.link} onChange={(e) => {
-                                                            const updated = [...data.projects];
-                                                            updated[idx] = { ...updated[idx], link: e.target.value };
-                                                            setData(prev => ({ ...prev, projects: updated }));
-                                                        }} className="h-9 text-xs font-bold" />
-                                                    </div>
+                                        {data.education.map((edu, idx) => (
+                                            <Card key={idx} className="p-5 border-2 rounded-2xl space-y-4 bg-muted/5 border-muted">
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[8px] font-black uppercase opacity-40">School / Univ</Label>
+                                                    <Input value={edu.school} onChange={(e) => {
+                                                        const updated = [...data.education];
+                                                        updated[idx].school = e.target.value;
+                                                        setData(prev => ({ ...prev, education: updated }));
+                                                    }} className="h-9 text-xs font-bold" />
                                                 </div>
                                                 <div className="space-y-1.5">
-                                                    <Label className="text-[8px] font-black uppercase opacity-40">Details</Label>
-                                                    <Textarea value={proj.description} onChange={(e) => {
-                                                         const updated = [...data.projects];
-                                                         updated[idx] = { ...updated[idx], description: e.target.value };
-                                                         setData(prev => ({ ...prev, projects: updated }));
-                                                    }} className="text-xs min-h-[100px] font-medium" />
+                                                    <Label className="text-[8px] font-black uppercase opacity-40">Degree</Label>
+                                                    <Input value={edu.degree} onChange={(e) => {
+                                                        const updated = [...data.education];
+                                                        updated[idx].degree = e.target.value;
+                                                        setData(prev => ({ ...prev, education: updated }));
+                                                    }} className="h-9 text-xs font-bold" />
                                                 </div>
                                             </Card>
                                         ))}
@@ -335,6 +338,7 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
         );
     }
 
+    // THIS IS THE PRINT-ONLY RENDER
     return (
         <div className="w-full flex justify-center bg-white">
             <ResumeContent data={data} template={selectedTemplate} />
@@ -348,7 +352,151 @@ export default function ResumeBuilder({ isPrintMode = false }: ResumeBuilderProp
 function ResumeContent({ data, template }: { data: typeof INITIAL_RESUME_DATA, template: string }) {
     if (template === 'classic') return <TemplateClassic data={data} />;
     if (template === 'minimal') return <TemplateMinimal data={data} />;
+    if (template === 'canva-pro') return <TemplateCanvaPro data={data} />;
     return <TemplateAsymmetric data={data} />;
+}
+
+/* --- CANVA PRO TEMPLATE (MATCHING USER IMAGE) --- */
+function TemplateCanvaPro({ data }: { data: typeof INITIAL_RESUME_DATA }) {
+    return (
+        <div className="bg-white relative overflow-hidden flex flex-col print-fix-container" style={{ width: '210mm', minHeight: '297mm', color: '#1e293b', fontFamily: "'Inter', sans-serif" }} id="resume-a4">
+            
+            {/* Top Left Blob Shape */}
+            <div className="absolute top-0 left-0 size-80 pointer-events-none opacity-20 -translate-x-20 -translate-y-20 z-0">
+                <svg viewBox="0 0 100 100" fill={IMAGE_PURPLE}>
+                    <path d="M0,0 C30,10 70,0 100,30 C110,60 80,90 40,100 C10,110 0,70 0,40 Z" />
+                </svg>
+            </div>
+
+            {/* Bottom Right Blob Shape */}
+            <div className="absolute bottom-0 right-0 size-96 pointer-events-none opacity-10 translate-x-24 translate-y-24 z-0">
+                <svg viewBox="0 0 100 100" fill={IMAGE_PURPLE}>
+                    <path d="M100,100 C70,90 30,100 0,70 C-10,40 20,10 60,0 C90,-10 100,30 100,60 Z" />
+                </svg>
+            </div>
+
+            <header className="relative z-10 w-full pt-16 px-16 flex items-start justify-between">
+                <div className="flex items-center gap-10">
+                    {/* Circular Profile Frame */}
+                    <div className="size-48 rounded-full border-[6px] border-white shadow-2xl overflow-hidden bg-slate-50 shrink-0 relative">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-transparent" />
+                        <div className="size-full flex items-center justify-center">
+                            <User2 className="size-24 text-slate-200" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <h1 className="text-5xl font-black tracking-tighter text-slate-900 leading-none">{data.personal.fullName}</h1>
+                        <p className="text-2xl font-bold text-slate-400 uppercase tracking-widest">{data.personal.title}</p>
+                        
+                        <div className="pt-6 space-y-2">
+                            <div className="flex items-center gap-3 text-[13px] font-bold text-slate-600">
+                                <div className="size-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600"><Mail className="size-3.5"/></div>
+                                {data.personal.email}
+                            </div>
+                            <div className="flex items-center gap-3 text-[13px] font-bold text-slate-600">
+                                <div className="size-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600"><Phone className="size-3.5"/></div>
+                                {data.personal.phone}
+                            </div>
+                            <div className="flex items-center gap-3 text-[13px] font-bold text-slate-600">
+                                <div className="size-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600"><MapPin className="size-3.5"/></div>
+                                {data.personal.location}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div className="relative z-10 w-full px-16 pt-16 flex flex-col gap-12 flex-1">
+                {/* Profile Block */}
+                <section className="space-y-4">
+                    <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Profile</h3>
+                    <p className="text-[14px] leading-relaxed text-slate-600 font-medium text-justify">{data.summary}</p>
+                </section>
+
+                <Separator className="bg-purple-100" />
+
+                <div className="grid grid-cols-12 gap-16 flex-1">
+                    {/* Left Column: Education & Experience */}
+                    <div className="col-span-7 space-y-12">
+                        <section className="space-y-6">
+                            <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Education</h3>
+                            <div className="space-y-8">
+                                {data.education.map((edu, i) => (
+                                    <div key={i} className="space-y-1">
+                                        <p className="text-[12px] font-bold text-slate-400">{edu.school}, {edu.year}</p>
+                                        <h4 className="text-[16px] font-black text-slate-800">{edu.degree}</h4>
+                                        {edu.honors && <p className="text-[13px] font-black text-slate-900 mt-1">Honors: {edu.honors}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="space-y-6">
+                            <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Employment History</h3>
+                            <div className="space-y-10">
+                                {data.experience.map((exp, i) => (
+                                    <div key={i} className="space-y-4 page-break-avoid">
+                                        <div className="space-y-1">
+                                            <p className="text-[12px] font-bold text-slate-400">{exp.company}</p>
+                                            <p className="text-[12px] font-bold text-slate-400">{exp.duration}</p>
+                                            <h4 className="text-[16px] font-black text-slate-800 uppercase">{exp.position}</h4>
+                                        </div>
+                                        <div className="space-y-2.5">
+                                            {exp.description.split('\n').map((line, lIdx) => (
+                                                <div key={lIdx} className="flex items-start gap-3">
+                                                    <CheckCircle className="size-3.5 text-slate-300 mt-0.5 shrink-0" />
+                                                    <p className="text-[13px] leading-relaxed text-slate-600 font-medium">{line.replace('• ', '')}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Right Column: Skills & Others */}
+                    <div className="col-span-5 space-y-12 pl-6 border-l border-purple-50">
+                        <section className="space-y-6">
+                            <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Skills</h3>
+                            <div className="space-y-4">
+                                {data.skills.map((s, i) => (
+                                    <p key={i} className="text-[14px] font-bold text-slate-700">{s.name}</p>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="space-y-6">
+                            <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Certificates</h3>
+                            <div className="space-y-6">
+                                {data.certifications.map((c, i) => (
+                                    <div key={i} className="space-y-1">
+                                        <h4 className="text-[14px] font-black text-slate-800">{c.name} ({c.year})</h4>
+                                        <p className="text-[12px] font-bold text-slate-400">{c.issuer}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="space-y-6">
+                            <h3 className="text-2xl font-black text-purple-700 uppercase tracking-tight">Languages</h3>
+                            <div className="space-y-4">
+                                {data.languages.map((l, i) => (
+                                    <p key={i} className="text-[14px] font-bold text-slate-700">{l.name} — <span className="text-slate-400 font-medium italic">{l.level}</span></p>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <footer className="mt-auto py-10 text-center border-t border-slate-50 opacity-20">
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">GR7 PROFESSIONAL RESUME ENGINE • A4 INDUSTRIAL FORMAT</p>
+                </footer>
+            </div>
+            <ResumeStyles />
+        </div>
+    );
 }
 
 /* --- ASYMMETRIC TEMPLATE --- */
@@ -575,23 +723,34 @@ function ResumeStyles() {
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
                 }
-                body {
+                html, body {
                     margin: 0 !important;
                     padding: 0 !important;
+                    height: 297mm !important;
+                    width: 210mm !important;
+                    overflow: hidden !important;
                     background: white !important;
                 }
                 /* Hide EVERYTHING except our resume target */
                 body > *:not(main),
                 header, footer, nav, 
+                aside:not(.print-fix-container aside),
                 .no-print, 
                 button, 
                 [role="navigation"],
-                [role="banner"] {
+                [role="banner"],
+                [role="complementary"] {
                     display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
                 }
-                /* Target the specific resume component rendered in the hidden print block */
+                main {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                /* Target the specific resume component */
                 .print-fix-container {
-                    display: block !important;
+                    display: flex !important;
                     visibility: visible !important;
                     position: fixed !important;
                     left: 0 !important;
@@ -602,16 +761,18 @@ function ResumeStyles() {
                     padding: 0 !important;
                     box-shadow: none !important;
                     background-color: white !important;
-                    z-index: 999999 !important;
+                    z-index: 9999999 !important;
+                    page-break-after: avoid !important;
                 }
                 .page-break-avoid {
                     page-break-inside: avoid !important;
                 }
                 .print-force-color {
-                    background-color: #0a8491 !important;
+                    background-color: ${CORPORATE_TEAL} !important;
                     color: white !important;
                 }
             }
         `}</style>
     );
 }
+
