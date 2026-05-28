@@ -26,7 +26,9 @@ import {
     Zap,
     Frame,
     Layers,
-    Type
+    Type,
+    Mail,
+    User2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -36,13 +38,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const THEME_COLORS = [
+    { name: "Dusty Rose", value: "#7A404F" },
     { name: "Royal Maroon", value: "#800000" },
     { name: "Navy Blue", value: "#000080" },
     { name: "Deep Gold", value: "#B8860B" },
@@ -51,6 +53,7 @@ const THEME_COLORS = [
 ];
 
 const TEMPLATES = [
+    { id: 'canva-pro', name: 'Pro Canvas', description: 'Side-column asymmetric layout' },
     { id: 'royal', name: 'Royal Heritage', description: 'Traditional gold & maroon accents' },
     { id: 'modern', name: 'Modern Minimal', description: 'Clean layout & airy spacing' },
     { id: 'floral', name: 'Floral Elegance', description: 'Decorative flower patterns' },
@@ -68,42 +71,45 @@ const BORDER_STYLES = [
 
 const INITIAL_DATA = {
     personal: {
-        fullName: "Aarav Sharma",
-        dob: "15 May 1995",
+        fullName: "Jane Doe",
+        gender: "Female",
+        maritalStatus: "Single",
+        religion: "Hindu",
+        caste: "Brahmin",
+        dob: "15-01-1990",
         tob: "10:30 AM",
         placeOfBirth: "New Delhi, India",
-        height: "5' 10\"",
+        height: "5 feet 10 inches",
         complexion: "Fair",
-        bloodGroup: "B+",
-        hobbies: "Traveling, Photography, Classical Music"
+        bloodGroup: "A+",
+        hobbies: "Reading, Playing Guitar, Painting",
+        interests: "Traveling, Photography",
+        favoriteFood: "Italian"
     },
     education: {
-        qualification: "M.Tech in Computer Science",
-        institution: "IIT Delhi",
-        occupation: "Senior Software Engineer",
-        company: "Google India",
-        annualIncome: "₹ 35 LPA"
-    },
-    astrological: {
-        rashi: "Leo (Simha)",
-        nakshatra: "Magha",
-        gotra: "Vashishta",
-        manglik: "No",
-        gan: "Dev"
+        qualification: "Bachelor's in Computer Science",
+        institution: "XYZ University",
+        graduationYear: "2012",
+        intermediate: "DEF College (2010)",
+        highSchool: "ABC School (2008)",
+        occupation: "Software Engineer",
+        company: "Tech Solutions Inc.",
+        workLocation: "New Delhi, India",
+        annualIncome: "$75,000"
     },
     family: {
-        fatherName: "Mr. Ramesh Sharma",
-        fatherOccupation: "Retired Govt. Officer",
-        motherName: "Mrs. Sunita Sharma",
-        motherOccupation: "Homemaker",
-        siblings: "1 Elder Sister (Married)",
+        fatherName: "James Doe",
+        fatherOccupation: "Engineer",
+        motherName: "Mary Doe",
+        motherOccupation: "Teacher",
+        siblings: "2 brothers, 1 sister",
         mamaFamily: "Bhardwaj family from Jaipur",
-        address: "H.No 142, Sector 15, Dwarka, New Delhi - 110075"
+        address: "123 Main Street, New Delhi, 110075"
     },
     contact: {
-        primaryPhone: "+91 98765 43210",
-        emergencyPhone: "+91 99887 76655",
-        email: "aarav.sharma@example.com"
+        primaryPhone: "(123) 456-7890",
+        email: "jane.doe@email.com",
+        address: "123 Main Street, [City, State], [Zip Code]"
     }
 };
 
@@ -111,8 +117,8 @@ export default function MarriageBiodataGenerator() {
     const { toast } = useToast();
     const [formData, setFormData] = useState(INITIAL_DATA);
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
-    const [themeColor, setThemeColor] = useState("#800000");
-    const [selectedTemplate, setSelectedTemplate] = useState('royal');
+    const [themeColor, setThemeColor] = useState("#7A404F");
+    const [selectedTemplate, setSelectedTemplate] = useState('canva-pro');
     const [borderStyle, setBorderStyle] = useState('double');
     const [isExporting, setIsExporting] = useState(false);
     
@@ -158,7 +164,7 @@ export default function MarriageBiodataGenerator() {
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`Marriage-Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
+            pdf.save(`Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
             toast({ title: "Success!", description: "High-quality PDF downloaded." });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate PDF.' });
@@ -170,14 +176,13 @@ export default function MarriageBiodataGenerator() {
     const handleReset = () => {
         setFormData(INITIAL_DATA);
         setProfilePic("https://picsum.photos/seed/portrait1/400/500");
-        setThemeColor("#800000");
-        setSelectedTemplate('royal');
+        setThemeColor("#7A404F");
+        setSelectedTemplate('canva-pro');
         setBorderStyle('double');
     };
 
-    // Helper for Border Style
     const getBorderStyle = () => {
-        if (borderStyle === 'decorative') return 'solid'; // handled separately
+        if (borderStyle === 'decorative') return 'solid';
         return borderStyle;
     };
 
@@ -285,12 +290,47 @@ export default function MarriageBiodataGenerator() {
                                         <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
                                     <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Gender</Label>
+                                        <Input value={formData.personal.gender} onChange={(e) => handleInputChange('personal', 'gender', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Marital Status</Label>
+                                        <Input value={formData.personal.maritalStatus} onChange={(e) => handleInputChange('personal', 'maritalStatus', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Religion</Label>
+                                        <Input value={formData.personal.religion} onChange={(e) => handleInputChange('personal', 'religion', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Caste</Label>
+                                        <Input value={formData.personal.caste} onChange={(e) => handleInputChange('personal', 'caste', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
                                         <Label className="text-[8px] font-black uppercase opacity-50">DOB</Label>
                                         <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-[8px] font-black uppercase opacity-50">Height</Label>
                                         <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Hobbies</Label>
+                                        <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contact Details */}
+                            <div className="space-y-4">
+                                <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase">Contact Details</Badge>
+                                <div className="grid gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Phone</Label>
+                                        <Input value={formData.contact.primaryPhone} onChange={(e) => handleInputChange('contact', 'primaryPhone', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Email</Label>
+                                        <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
                                 </div>
                             </div>
@@ -300,8 +340,12 @@ export default function MarriageBiodataGenerator() {
                                 <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase">Education & Career</Badge>
                                 <div className="grid gap-4">
                                     <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Qualification</Label>
+                                        <Label className="text-[8px] font-black uppercase opacity-50">Highest Qualification</Label>
                                         <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[8px] font-black uppercase opacity-50">College/University</Label>
+                                        <Input value={formData.education.institution} onChange={(e) => handleInputChange('education', 'institution', e.target.value)} className="h-10 rounded-lg font-bold" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
@@ -328,6 +372,16 @@ export default function MarriageBiodataGenerator() {
                                         <div className="space-y-1.5">
                                             <Label className="text-[8px] font-black uppercase opacity-50">Father's Occ.</Label>
                                             <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Mother's Name</Label>
+                                            <Input value={formData.family.motherName} onChange={(e) => handleInputChange('family', 'motherName', e.target.value)} className="h-10 rounded-lg font-bold" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-50">Siblings</Label>
+                                            <Input value={formData.family.siblings} onChange={(e) => handleInputChange('family', 'siblings', e.target.value)} className="h-10 rounded-lg font-bold" />
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
@@ -370,130 +424,105 @@ export default function MarriageBiodataGenerator() {
                         style={{ 
                             width: '210mm', 
                             minHeight: '297mm', 
-                            padding: '15mm',
+                            padding: selectedTemplate === 'canva-pro' ? '0' : '15mm',
                             color: '#333'
                         }}
                     >
-                        {/* BORDER DESIGN */}
-                        {borderStyle === 'decorative' ? (
-                             <DecorativeBorder color={themeColor} />
-                        ) : (
-                            <div className="absolute inset-[10mm] pointer-events-none" style={{ 
-                                border: `4px ${getBorderStyle()} ${themeColor}`,
-                                opacity: 0.2
-                            }} />
+                        {/* BORDER DESIGN (Not used for Canva Pro) */}
+                        {selectedTemplate !== 'canva-pro' && (
+                            borderStyle === 'decorative' ? (
+                                <DecorativeBorder color={themeColor} />
+                            ) : (
+                                <div className="absolute inset-[10mm] pointer-events-none" style={{ 
+                                    border: `4px ${getBorderStyle()} ${themeColor}`,
+                                    opacity: 0.2
+                                }} />
+                            )
                         )}
 
-                        {/* TEMPLATE SPECIFIC ELEMENTS */}
-                        {selectedTemplate === 'royal' && <TemplateRoyal themeColor={themeColor} />}
-                        {selectedTemplate === 'floral' && <TemplateFloral themeColor={themeColor} />}
-                        {selectedTemplate === 'slate' && <TemplateSlate themeColor={themeColor} />}
+                        {/* TEMPLATES */}
+                        {selectedTemplate === 'canva-pro' ? (
+                            <TemplateCanvaPro themeColor={themeColor} formData={formData} profilePic={profilePic} />
+                        ) : (
+                            <>
+                                {selectedTemplate === 'royal' && <TemplateRoyal themeColor={themeColor} />}
+                                {selectedTemplate === 'floral' && <TemplateFloral themeColor={themeColor} />}
+                                {selectedTemplate === 'slate' && <TemplateSlate themeColor={themeColor} />}
 
-                        {/* COMMON CONTENT WRAPPER */}
-                        <div className={cn(
-                            "relative z-10 w-full h-full flex flex-col",
-                            selectedTemplate === 'modern' && "items-start",
-                            selectedTemplate === 'vintage' && "items-center"
-                        )}>
-                            
-                            {/* HEADER */}
-                            <header className={cn(
-                                "w-full mb-12",
-                                selectedTemplate === 'vintage' ? 'text-center' : '',
-                                selectedTemplate === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
-                            )}>
-                                {selectedTemplate !== 'slate' && (
-                                     <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
-                                        <div className="h-px w-20 bg-current" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
-                                        <div className="h-px w-20 bg-current" />
-                                    </div>
-                                )}
-                                <h2 className={cn(
-                                    "text-4xl md:text-6xl font-black font-headline tracking-widest uppercase text-center",
-                                    selectedTemplate === 'vintage' && "font-serif italic capitalize tracking-normal",
-                                    selectedTemplate === 'slate' && "text-left text-5xl"
-                                )} style={{ color: themeColor }}>
-                                    Bio Data
-                                </h2>
-                                {selectedTemplate === 'royal' && <div className="w-48 h-1 mx-auto mt-2 rounded-full opacity-20" style={{ backgroundColor: themeColor }} />}
-                            </header>
-
-                            <div className="grid grid-cols-12 gap-10 w-full flex-1">
-                                {/* MAIN CONTENT */}
-                                <div className="col-span-8 space-y-10">
-                                    <Section 
-                                        title="Personal Details" 
-                                        themeColor={themeColor} 
-                                        template={selectedTemplate}
-                                    >
-                                        <Row label="Full Name" value={formData.personal.fullName} />
-                                        <Row label="Date of Birth" value={formData.personal.dob} />
-                                        <Row label="Time of Birth" value={formData.personal.tob} />
-                                        <Row label="Place of Birth" value={formData.personal.placeOfBirth} />
-                                        <Row label="Height" value={formData.personal.height} />
-                                        <Row label="Complexion" value={formData.personal.complexion} />
-                                        <Row label="Blood Group" value={formData.personal.bloodGroup} />
-                                    </Section>
-
-                                    <Section 
-                                        title="Career & Education" 
-                                        themeColor={themeColor} 
-                                        template={selectedTemplate}
-                                    >
-                                        <Row label="Education" value={formData.education.qualification} />
-                                        <Row label="Institution" value={formData.education.institution} />
-                                        <Row label="Occupation" value={formData.education.occupation} />
-                                        <Row label="Income" value={formData.education.annualIncome} />
-                                    </Section>
-
-                                    <Section 
-                                        title="Family Profile" 
-                                        themeColor={themeColor} 
-                                        template={selectedTemplate}
-                                    >
-                                        <Row label="Father Name" value={formData.family.fatherName} />
-                                        <Row label="Mother Name" value={formData.family.motherName} />
-                                        <Row label="Siblings" value={formData.family.siblings} />
-                                        <div className="flex items-start gap-4 text-sm leading-relaxed mt-2">
-                                            <span className="w-32 font-black text-muted-foreground/50 shrink-0 uppercase text-[10px]">Address</span>
-                                            <span className="font-bold">{formData.family.address}</span>
-                                        </div>
-                                    </Section>
-                                </div>
-
-                                {/* SIDEBAR CONTENT (PHOTO) */}
-                                <div className="col-span-4 flex flex-col items-center gap-12">
-                                    <div className={cn(
-                                        "w-full aspect-[4/5] bg-white p-2 shadow-2xl relative",
-                                        selectedTemplate === 'royal' && "rotate-2 border-[1px] border-slate-200",
-                                        selectedTemplate === 'modern' && "rounded-3xl overflow-hidden shadow-none border-4",
-                                        selectedTemplate === 'floral' && "border-double border-4"
-                                    )} style={{ borderColor: themeColor }}>
-                                        {profilePic ? (
-                                            <img src={profilePic} alt="profile" className="size-full object-cover rounded-[inherit]" />
-                                        ) : (
-                                            <div className="size-full flex items-center justify-center bg-slate-50"><User className="size-20 opacity-10" /></div>
+                                <div className={cn(
+                                    "relative z-10 w-full h-full flex flex-col",
+                                    selectedTemplate === 'modern' && "items-start",
+                                    selectedTemplate === 'vintage' && "items-center"
+                                )}>
+                                    <header className={cn(
+                                        "w-full mb-12",
+                                        selectedTemplate === 'vintage' ? 'text-center' : '',
+                                        selectedTemplate === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
+                                    )}>
+                                        {selectedTemplate !== 'slate' && (
+                                            <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
+                                                <div className="h-px w-20 bg-current" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
+                                                <div className="h-px w-20 bg-current" />
+                                            </div>
                                         )}
-                                    </div>
-                                    
-                                    <div className="flex flex-col items-center gap-10 opacity-5">
-                                        <Heart className="size-24 fill-current" style={{ color: themeColor }} />
-                                        <Sparkles className="size-20" style={{ color: themeColor }} />
-                                        <Star className="size-16 fill-current" style={{ color: themeColor }} />
-                                    </div>
-                                </div>
-                            </div>
+                                        <h2 className={cn(
+                                            "text-4xl md:text-6xl font-black font-headline tracking-widest uppercase text-center",
+                                            selectedTemplate === 'vintage' && "font-serif italic capitalize tracking-normal",
+                                            selectedTemplate === 'slate' && "text-left text-5xl"
+                                        )} style={{ color: themeColor }}>
+                                            Bio Data
+                                        </h2>
+                                        {selectedTemplate === 'royal' && <div className="w-48 h-1 mx-auto mt-2 rounded-full opacity-20" style={{ backgroundColor: themeColor }} />}
+                                    </header>
 
-                            {/* FOOTER */}
-                            <footer className="mt-auto pt-10 border-t border-slate-100 text-center">
-                                <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30">GR7 PREMIUM BIODATA STUDIO • FOR AUSPICIOUS BEGINNINGS</p>
-                            </footer>
-                        </div>
+                                    <div className="grid grid-cols-12 gap-10 w-full flex-1">
+                                        <div className="col-span-8 space-y-10">
+                                            <Section title="Personal Details" themeColor={themeColor} template={selectedTemplate}>
+                                                <Row label="Full Name" value={formData.personal.fullName} />
+                                                <Row label="Date of Birth" value={formData.personal.dob} />
+                                                <Row label="Height" value={formData.personal.height} />
+                                                <Row label="Hobbies" value={formData.personal.hobbies} />
+                                            </Section>
+                                            <Section title="Career & Education" themeColor={themeColor} template={selectedTemplate}>
+                                                <Row label="Education" value={formData.education.qualification} />
+                                                <Row label="Occupation" value={formData.education.occupation} />
+                                                <Row label="Income" value={formData.education.annualIncome} />
+                                            </Section>
+                                            <Section title="Family Profile" themeColor={themeColor} template={selectedTemplate}>
+                                                <Row label="Father Name" value={formData.family.fatherName} />
+                                                <Row label="Mother Name" value={formData.family.motherName} />
+                                                <Row label="Siblings" value={formData.family.siblings} />
+                                                <div className="flex items-start gap-4 text-sm leading-relaxed mt-2">
+                                                    <span className="w-32 font-black text-muted-foreground/50 shrink-0 uppercase text-[10px]">Address</span>
+                                                    <span className="font-bold">{formData.family.address}</span>
+                                                </div>
+                                            </Section>
+                                        </div>
+                                        <div className="col-span-4 flex flex-col items-center gap-12">
+                                            <div className={cn(
+                                                "w-full aspect-[4/5] bg-white p-2 shadow-2xl relative",
+                                                selectedTemplate === 'royal' && "rotate-2 border-[1px] border-slate-200",
+                                                selectedTemplate === 'modern' && "rounded-3xl overflow-hidden shadow-none border-4",
+                                                selectedTemplate === 'floral' && "border-double border-4"
+                                            )} style={{ borderColor: themeColor }}>
+                                                {profilePic ? (
+                                                    <img src={profilePic} alt="profile" className="size-full object-cover rounded-[inherit]" />
+                                                ) : (
+                                                    <div className="size-full flex items-center justify-center bg-slate-50"><User className="size-20 opacity-10" /></div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <footer className="mt-auto pt-10 border-t border-slate-100 text-center">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30">GR7 PREMIUM BIODATA STUDIO • FOR AUSPICIOUS BEGINNINGS</p>
+                                    </footer>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* ZOOM INFO */}
                 <div className="no-print mt-6 flex items-center gap-4 text-muted-foreground/60 text-[10px] font-black uppercase">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                     <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 100% PRIVATE</div>
@@ -556,8 +585,159 @@ function Section({ title, themeColor, template, children }: { title: string, the
     );
 }
 
-// TEMPLATE OVERLAYS
+// TEMPLATE: CANVA PRO (SIDEBAR ASYMMETRIC)
+function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null }) {
+    const lighterColor = themeColor + '33'; // 20% opacity
+    
+    return (
+        <div className="w-full h-full flex bg-[#FDFBF7]">
+            {/* Sidebar (Left Column) */}
+            <div className="w-[38%] h-full min-h-[297mm] flex flex-col text-white p-8 space-y-12" style={{ backgroundColor: themeColor }}>
+                <div className="h-[120px]" /> {/* Spacer for photo */}
+                
+                {/* Contact Section */}
+                <div className="space-y-8">
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Contact</h3>
+                    <div className="space-y-6">
+                        <div className="flex items-start gap-3">
+                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Phone className="size-4" /></div>
+                            <div><p className="text-[9px] font-black uppercase opacity-60">Phone</p><p className="text-xs font-bold">{formData.contact.primaryPhone}</p></div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Mail className="size-4" /></div>
+                            <div className="overflow-hidden"><p className="text-[9px] font-black uppercase opacity-60">Email</p><p className="text-xs font-bold break-all">{formData.contact.email}</p></div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><MapPin className="size-4" /></div>
+                            <div><p className="text-[9px] font-black uppercase opacity-60">Address</p><p className="text-xs font-bold leading-tight">{formData.contact.address}</p></div>
+                        </div>
+                    </div>
+                </div>
 
+                {/* Personal Info Section */}
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Personal Info</h3>
+                    <div className="space-y-4">
+                        <SidebarItem label="Name" value={formData.personal.fullName} />
+                        <SidebarItem label="Date of Birth" value={formData.personal.dob} />
+                        <SidebarItem label="Gender" value={formData.personal.gender} />
+                        <SidebarItem label="Marital Status" value={formData.personal.maritalStatus} />
+                        <SidebarItem label="Religion" value={formData.personal.religion} />
+                        <SidebarItem label="Caste" value={formData.personal.caste} />
+                        <SidebarItem label="Height" value={formData.personal.height} />
+                        <SidebarItem label="Complexion" value={formData.personal.complexion} />
+                        <SidebarItem label="Blood Group" value={formData.personal.bloodGroup} />
+                    </div>
+                </div>
+
+                {/* Career Section */}
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Career</h3>
+                    <div className="space-y-4">
+                        <SidebarItem label="Job" value={formData.education.occupation} />
+                        <SidebarItem label="Company" value={formData.education.company} />
+                        <SidebarItem label="Location" value={formData.education.workLocation} />
+                        <SidebarItem label="Annual Income" value={formData.education.annualIncome} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content (Right Column) */}
+            <div className="flex-1 p-12 space-y-12">
+                <div className="flex items-center justify-between mb-8">
+                     <h1 className="text-7xl font-black tracking-tighter" style={{ color: themeColor }}>
+                        {formData.personal.fullName.split(' ')[0]} <span className="block text-5xl opacity-80 mt-[-10px]">{formData.personal.fullName.split(' ').slice(1).join(' ')}</span>
+                     </h1>
+                </div>
+
+                {/* Relative Positioning Container for Vertical Line */}
+                <div className="relative pl-8 space-y-12">
+                    {/* Vertical Connecting Line */}
+                    <div className="absolute left-0 top-6 bottom-6 w-0.5" style={{ backgroundColor: themeColor, opacity: 0.2 }} />
+
+                    {/* Section: Family Details */}
+                    <MainSection title="Family Details" themeColor={themeColor} lighterColor={lighterColor}>
+                        <MainRow label="Father's Name" value={formData.family.fatherName} themeColor={themeColor} />
+                        <MainRow label="Father's Job" value={formData.family.fatherOccupation} themeColor={themeColor} />
+                        <MainRow label="Mother's Name" value={formData.family.motherName} themeColor={themeColor} />
+                        <MainRow label="Mother's Job" value={formData.family.motherOccupation} themeColor={themeColor} />
+                        <MainRow label="Siblings" value={formData.family.siblings} themeColor={themeColor} />
+                    </MainSection>
+
+                    {/* Section: Education */}
+                    <MainSection title="Education" themeColor={themeColor} lighterColor={lighterColor}>
+                        <MainRow label="Highest Degree" value={formData.education.qualification} themeColor={themeColor} />
+                        <MainRow label="College" value={formData.education.institution} themeColor={themeColor} />
+                        <MainRow label="Graduation Year" value={formData.education.graduationYear} themeColor={themeColor} />
+                    </MainSection>
+
+                    {/* Section: Other Qualifications */}
+                    <MainSection title="Other Qualifications" themeColor={themeColor} lighterColor={lighterColor}>
+                        <MainRow label="High School" value={formData.education.highSchool} themeColor={themeColor} />
+                        <MainRow label="Intermediate" value={formData.education.intermediate} themeColor={themeColor} />
+                    </MainSection>
+
+                    {/* Section: Hobbies & Interests */}
+                    <MainSection title="Hobbies and Interests" themeColor={themeColor} lighterColor={lighterColor}>
+                        <MainRow label="Hobbies" value={formData.personal.hobbies} themeColor={themeColor} />
+                        <MainRow label="Interests" value={formData.personal.interests || formData.personal.hobbies} themeColor={themeColor} />
+                        <MainRow label="Favorite Food" value={formData.personal.favoriteFood || "Indian Cuisine"} themeColor={themeColor} />
+                    </MainSection>
+                </div>
+            </div>
+
+            {/* Profile Photo - Absolute Floating */}
+            <div className="absolute top-12 left-[38%] -translate-x-1/2 z-50">
+                 <div className="size-[180px] rounded-full border-[10px] border-[#FDFBF7] shadow-2xl overflow-hidden bg-white">
+                    {profilePic ? (
+                        <img src={profilePic} alt="bio" className="size-full object-cover" />
+                    ) : (
+                        <div className="size-full flex items-center justify-center bg-slate-50"><User2 className="size-20 opacity-10" /></div>
+                    )}
+                 </div>
+                 {/* Decorative Ring */}
+                 <div className="absolute inset-[-15px] rounded-full border-2 border-dashed pointer-events-none opacity-20" style={{ borderColor: themeColor }} />
+            </div>
+
+            {/* Background Decorative Shapes */}
+            <div className="absolute top-0 right-0 size-64 bg-slate-100 rounded-bl-full -z-0 opacity-50" style={{ backgroundColor: lighterColor }} />
+            <div className="absolute bottom-0 right-0 w-full h-12 -z-0" style={{ backgroundColor: lighterColor }} />
+        </div>
+    );
+}
+
+function SidebarItem({ label, value }: { label: string, value: string }) {
+    return (
+        <div className="flex flex-col gap-0.5">
+            <span className="text-[8px] font-black uppercase opacity-50 tracking-wider">{label}</span>
+            <span className="text-xs font-bold">{value || "---"}</span>
+        </div>
+    );
+}
+
+function MainSection({ title, themeColor, lighterColor, children }: { title: string, themeColor: string, lighterColor: string, children: React.ReactNode }) {
+    return (
+        <div className="space-y-4">
+            <div className="inline-flex px-8 py-2.5 rounded-full text-white font-black text-sm uppercase tracking-widest" style={{ backgroundColor: themeColor, boxShadow: `10px 10px 0px ${lighterColor}` }}>
+                {title}
+            </div>
+            <div className="space-y-2 pt-2">
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function MainRow({ label, value, themeColor }: { label: string, value: string, themeColor: string }) {
+    return (
+        <div className="flex items-baseline gap-4 py-1">
+            <span className="w-36 text-sm font-black uppercase opacity-70 tracking-tight shrink-0" style={{ color: themeColor }}>{label}</span>
+            <span className="text-base font-bold text-slate-800">{value || "---"}</span>
+        </div>
+    );
+}
+
+// TEMPLATE: ROYAL
 function TemplateRoyal({ themeColor }: { themeColor: string }) {
     return (
         <>
@@ -568,6 +748,7 @@ function TemplateRoyal({ themeColor }: { themeColor: string }) {
     );
 }
 
+// TEMPLATE: FLORAL
 function TemplateFloral({ themeColor }: { themeColor: string }) {
     return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-5">
@@ -578,12 +759,14 @@ function TemplateFloral({ themeColor }: { themeColor: string }) {
     );
 }
 
+// TEMPLATE: SLATE
 function TemplateSlate({ themeColor }: { themeColor: string }) {
     return (
         <div className="absolute top-0 left-0 w-2 h-full opacity-20" style={{ backgroundColor: themeColor }} />
     );
 }
 
+// COMPONENT: DECORATIVE BORDER
 function DecorativeBorder({ color }: { color: string }) {
     return (
         <div className="absolute inset-[8mm] pointer-events-none">
