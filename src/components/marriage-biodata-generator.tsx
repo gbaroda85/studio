@@ -28,7 +28,10 @@ import {
     Layers,
     Type,
     Mail,
-    User2
+    User2,
+    GraduationCap,
+    Users2,
+    Coffee
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -95,21 +98,21 @@ const INITIAL_DATA = {
         occupation: "Software Engineer",
         company: "Tech Solutions Inc.",
         workLocation: "New Delhi, India",
-        annualIncome: "$75,000"
+        annualIncome: "₹ 15,00,000 PA"
     },
     family: {
-        fatherName: "James Doe",
-        fatherOccupation: "Engineer",
-        motherName: "Mary Doe",
-        motherOccupation: "Teacher",
+        fatherName: "Mr. James Doe",
+        fatherOccupation: "Structural Engineer",
+        motherName: "Mrs. Mary Doe",
+        motherOccupation: "Principal (Retired)",
         siblings: "2 brothers, 1 sister",
         mamaFamily: "Bhardwaj family from Jaipur",
-        address: "123 Main Street, New Delhi, 110075"
+        address: "123 Main Street, Vasant Vihar, New Delhi, 110075"
     },
     contact: {
-        primaryPhone: "(123) 456-7890",
+        primaryPhone: "+91 98765 43210",
         email: "jane.doe@email.com",
-        address: "123 Main Street, [City, State], [Zip Code]"
+        address: "123 Main Street, New Delhi, India"
     }
 };
 
@@ -151,7 +154,8 @@ export default function MarriageBiodataGenerator() {
             const canvas = await html2canvas(previewRef.current, {
                 scale: 3, 
                 useCORS: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                logging: false,
             });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
             const pdf = new jsPDF({
@@ -163,7 +167,7 @@ export default function MarriageBiodataGenerator() {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
             pdf.save(`Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
             toast({ title: "Success!", description: "High-quality PDF downloaded." });
         } catch (error) {
@@ -190,23 +194,23 @@ export default function MarriageBiodataGenerator() {
         <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4">
             
             {/* LEFT: INPUT FORM */}
-            <div className="lg:col-span-5 space-y-6 animate-in slide-in-from-left duration-500 h-full max-h-screen lg:overflow-y-auto pr-2 custom-scrollbar no-print">
+            <div className="lg:col-span-5 space-y-6 animate-in slide-in-from-left duration-500 h-full max-h-[90vh] lg:overflow-y-auto pr-2 custom-scrollbar no-print pb-20">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                <Settings2 className="size-6 text-primary" /> BIODATA STUDIO
+                                <Settings2 className="size-6 text-primary" /> STUDIO PANEL
                             </CardTitle>
-                            <Button variant="ghost" size="sm" onClick={handleReset} className="font-black text-[10px] uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                            <Button variant="ghost" size="sm" onClick={handleReset} className="font-black text-[10px] uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-10">
                         
-                        {/* Section: Design Styles */}
+                        {/* 1. Visual Styling Section */}
                         <div className="space-y-6">
                              <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                    <Layers className="size-3" /> Select Template
+                                    <Layers className="size-3" /> Select Template Style
                                 </Label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {TEMPLATES.map(t => (
@@ -225,185 +229,201 @@ export default function MarriageBiodataGenerator() {
                                 </div>
                              </div>
 
-                             <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                    <Frame className="size-3" /> Outline Border Style
-                                </Label>
-                                <Select value={borderStyle} onValueChange={setBorderStyle}>
-                                    <SelectTrigger className="h-11 rounded-xl border-2 font-black uppercase text-[10px]">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2">
-                                        {BORDER_STYLES.map(s => (
-                                            <SelectItem key={s.id} value={s.id} className="font-bold text-[10px] uppercase">{s.name}</SelectItem>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                        <Palette className="size-3" /> Colors
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {THEME_COLORS.map(c => (
+                                            <button 
+                                                key={c.value} 
+                                                onClick={() => setThemeColor(c.value)}
+                                                className={cn(
+                                                    "size-8 rounded-xl border-2 transition-all flex items-center justify-center",
+                                                    themeColor === c.value ? "border-primary ring-4 ring-primary/10 scale-110" : "border-white/10"
+                                                )}
+                                                style={{ backgroundColor: c.value }}
+                                            >
+                                                {themeColor === c.value && <CheckCircle2 className="size-4 text-white" />}
+                                            </button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                        <Camera className="size-3" /> Photo
+                                    </Label>
+                                    <Button size="sm" variant="outline" className="w-full h-10 rounded-xl font-black text-[10px] border-2 uppercase border-dashed" onClick={() => fileInputRef.current?.click()}>
+                                        <Plus className="size-3 mr-1.5" /> UPLOAD PHOTO
+                                    </Button>
+                                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                                </div>
                              </div>
                         </div>
 
                         <Separator className="opacity-10" />
 
-                        {/* Section: Themes & Photo */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                             <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                    <Palette className="size-3" /> Theme Colors
-                                </Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {THEME_COLORS.map(c => (
-                                        <button 
-                                            key={c.value} 
-                                            onClick={() => setThemeColor(c.value)}
-                                            className={cn(
-                                                "size-10 rounded-xl border-2 transition-all flex items-center justify-center",
-                                                themeColor === c.value ? "border-primary ring-4 ring-primary/10 scale-110" : "border-white/10"
-                                            )}
-                                            style={{ backgroundColor: c.value }}
-                                        >
-                                            {themeColor === c.value && <CheckCircle2 className="size-4 text-white" />}
-                                        </button>
-                                    ))}
+                        {/* 2. Personal Information Section */}
+                        <div className="space-y-6">
+                            <Badge className="bg-rose-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Personal Details</Badge>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="col-span-full space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Full Name</Label>
+                                    <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-10 rounded-lg font-bold border-2 focus:ring-primary/20" />
                                 </div>
-                            </div>
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                    <Camera className="size-3" /> Photo Upload
-                                </Label>
-                                <Button size="sm" variant="outline" className="w-full h-11 rounded-xl font-black text-[10px] border-2 uppercase" onClick={() => fileInputRef.current?.click()}>
-                                    <Plus className="size-3 mr-1.5" /> UPLOAD PHOTO
-                                </Button>
-                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Gender</Label>
+                                    <Input value={formData.personal.gender} onChange={(e) => handleInputChange('personal', 'gender', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Marital Status</Label>
+                                    <Input value={formData.personal.maritalStatus} onChange={(e) => handleInputChange('personal', 'maritalStatus', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Religion</Label>
+                                    <Input value={formData.personal.religion} onChange={(e) => handleInputChange('personal', 'religion', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Caste</Label>
+                                    <Input value={formData.personal.caste} onChange={(e) => handleInputChange('personal', 'caste', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Date of Birth</Label>
+                                    <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Time of Birth</Label>
+                                    <Input value={formData.personal.tob} onChange={(e) => handleInputChange('personal', 'tob', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Height</Label>
+                                    <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Complexion</Label>
+                                    <Input value={formData.personal.complexion} onChange={(e) => handleInputChange('personal', 'complexion', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Blood Group</Label>
+                                    <Input value={formData.personal.bloodGroup} onChange={(e) => handleInputChange('personal', 'bloodGroup', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Birth Place</Label>
+                                    <Input value={formData.personal.placeOfBirth} onChange={(e) => handleInputChange('personal', 'placeOfBirth', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
                             </div>
                         </div>
 
-                        <Separator className="opacity-10" />
-
-                        {/* Data Sections */}
-                        <div className="space-y-8">
-                            {/* Personal */}
-                            <div className="space-y-4">
-                                <Badge className="bg-rose-500 text-white font-black text-[9px] px-3 py-1 uppercase">Personal Info</Badge>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="col-span-full space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Full Name</Label>
-                                        <Input value={formData.personal.fullName} onChange={(e) => handleInputChange('personal', 'fullName', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Gender</Label>
-                                        <Input value={formData.personal.gender} onChange={(e) => handleInputChange('personal', 'gender', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Marital Status</Label>
-                                        <Input value={formData.personal.maritalStatus} onChange={(e) => handleInputChange('personal', 'maritalStatus', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Religion</Label>
-                                        <Input value={formData.personal.religion} onChange={(e) => handleInputChange('personal', 'religion', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Caste</Label>
-                                        <Input value={formData.personal.caste} onChange={(e) => handleInputChange('personal', 'caste', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">DOB</Label>
-                                        <Input value={formData.personal.dob} onChange={(e) => handleInputChange('personal', 'dob', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Height</Label>
-                                        <Input value={formData.personal.height} onChange={(e) => handleInputChange('personal', 'height', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Hobbies</Label>
-                                        <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
+                        {/* 3. Career & Education Section */}
+                        <div className="space-y-6">
+                            <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Education & Career</Badge>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="col-span-full space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Highest Qualification</Label>
+                                    <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="col-span-full space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Institution/College</Label>
+                                    <Input value={formData.education.institution} onChange={(e) => handleInputChange('education', 'institution', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Graduation Year</Label>
+                                    <Input value={formData.education.graduationYear} onChange={(e) => handleInputChange('education', 'graduationYear', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Occupation</Label>
+                                    <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label>
+                                    <Input value={formData.education.company} onChange={(e) => handleInputChange('education', 'company', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Work Location</Label>
+                                    <Input value={formData.education.workLocation} onChange={(e) => handleInputChange('education', 'workLocation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Annual Income</Label>
+                                    <Input value={formData.education.annualIncome} onChange={(e) => handleInputChange('education', 'annualIncome', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Contact Details */}
-                            <div className="space-y-4">
-                                <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase">Contact Details</Badge>
-                                <div className="grid gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Phone</Label>
-                                        <Input value={formData.contact.primaryPhone} onChange={(e) => handleInputChange('contact', 'primaryPhone', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Email</Label>
-                                        <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
+                        {/* 4. Family Information Section */}
+                        <div className="space-y-6">
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Family Profile</Badge>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Father's Name</Label>
+                                    <Input value={formData.family.fatherName} onChange={(e) => handleInputChange('family', 'fatherName', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Father's Occ.</Label>
+                                    <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Mother's Name</Label>
+                                    <Input value={formData.family.motherName} onChange={(e) => handleInputChange('family', 'motherName', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Mother's Occ.</Label>
+                                    <Input value={formData.family.motherOccupation} onChange={(e) => handleInputChange('family', 'motherOccupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="col-span-full space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Siblings Details</Label>
+                                    <Input value={formData.family.siblings} onChange={(e) => handleInputChange('family', 'siblings', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="col-span-full space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Residential Address</Label>
+                                    <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-xl border-2 font-bold min-h-[80px]" />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Education & Career */}
-                            <div className="space-y-4">
-                                <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase">Education & Career</Badge>
-                                <div className="grid gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Highest Qualification</Label>
-                                        <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">College/University</Label>
-                                        <Input value={formData.education.institution} onChange={(e) => handleInputChange('education', 'institution', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Occupation</Label>
-                                            <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Income</Label>
-                                            <Input value={formData.education.annualIncome} onChange={(e) => handleInputChange('education', 'annualIncome', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                    </div>
+                        {/* 5. Contact Section */}
+                        <div className="space-y-6">
+                            <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Contact Details</Badge>
+                            <div className="grid gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Primary Phone / WhatsApp</Label>
+                                    <Input value={formData.contact.primaryPhone} onChange={(e) => handleInputChange('contact', 'primaryPhone', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Personal Email</Label>
+                                    <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Family */}
-                            <div className="space-y-4">
-                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase">Family Background</Badge>
-                                <div className="grid gap-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Father's Name</Label>
-                                            <Input value={formData.family.fatherName} onChange={(e) => handleInputChange('family', 'fatherName', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Father's Occ.</Label>
-                                            <Input value={formData.family.fatherOccupation} onChange={(e) => handleInputChange('family', 'fatherOccupation', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Mother's Name</Label>
-                                            <Input value={formData.family.motherName} onChange={(e) => handleInputChange('family', 'motherName', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[8px] font-black uppercase opacity-50">Siblings</Label>
-                                            <Input value={formData.family.siblings} onChange={(e) => handleInputChange('family', 'siblings', e.target.value)} className="h-10 rounded-lg font-bold" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-50">Address</Label>
-                                        <Textarea value={formData.family.address} onChange={(e) => handleInputChange('family', 'address', e.target.value)} className="rounded-lg min-h-[60px]" />
-                                    </div>
+                         {/* 6. Hobbies & Interests */}
+                         <div className="space-y-6">
+                            <Badge className="bg-orange-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Hobbies & Interests</Badge>
+                            <div className="grid gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Hobbies (Separate by Comma)</Label>
+                                    <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Favorite Cuisine / Food</Label>
+                                    <Input value={formData.personal.favoriteFood} onChange={(e) => handleInputChange('personal', 'favoriteFood', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
                         </div>
 
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t">
+                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-4">
                          <Button onClick={exportToPdf} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 group">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" />}
                             EXPORT AS A4 PDF
                         </Button>
+                        <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest opacity-60">Industrial 300DPI Render Output</p>
                     </CardFooter>
                 </Card>
             </div>
 
             {/* RIGHT: REAL-TIME PREVIEW */}
-            <div className="lg:col-span-7 flex flex-col items-center sticky top-24">
+            <div className="lg:col-span-7 flex flex-col items-center sticky top-24 pb-20">
                 
                 <div className="w-full flex items-center justify-between mb-4 no-print px-4">
                     <div className="flex items-center gap-2">
@@ -596,34 +616,34 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
                 <div className="h-[120px]" /> {/* Spacer for photo */}
                 
                 {/* Contact Section */}
-                <div className="space-y-8">
-                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Contact</h3>
-                    <div className="space-y-6">
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2 flex items-center gap-2"><Phone className="size-4" /> Contact</h3>
+                    <div className="space-y-5">
                         <div className="flex items-start gap-3">
-                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Phone className="size-4" /></div>
-                            <div><p className="text-[9px] font-black uppercase opacity-60">Phone</p><p className="text-xs font-bold">{formData.contact.primaryPhone}</p></div>
+                            <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><Phone className="size-3" /></div>
+                            <div><p className="text-[7px] font-black uppercase opacity-60">Mobile</p><p className="text-[10px] font-bold">{formData.contact.primaryPhone}</p></div>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Mail className="size-4" /></div>
-                            <div className="overflow-hidden"><p className="text-[9px] font-black uppercase opacity-60">Email</p><p className="text-xs font-bold break-all">{formData.contact.email}</p></div>
+                            <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><Mail className="size-3" /></div>
+                            <div className="overflow-hidden"><p className="text-[7px] font-black uppercase opacity-60">Email</p><p className="text-[10px] font-bold break-all">{formData.contact.email}</p></div>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="size-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><MapPin className="size-4" /></div>
-                            <div><p className="text-[9px] font-black uppercase opacity-60">Address</p><p className="text-xs font-bold leading-tight">{formData.contact.address}</p></div>
+                            <div className="size-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5"><MapPin className="size-3" /></div>
+                            <div><p className="text-[7px] font-black uppercase opacity-60">Residence</p><p className="text-[9px] font-bold leading-tight">{formData.contact.address}</p></div>
                         </div>
                     </div>
                 </div>
 
                 {/* Personal Info Section */}
                 <div className="space-y-6">
-                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Personal Info</h3>
-                    <div className="space-y-4">
-                        <SidebarItem label="Name" value={formData.personal.fullName} />
-                        <SidebarItem label="Date of Birth" value={formData.personal.dob} />
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2 flex items-center gap-2"><User2 className="size-4" /> Personal</h3>
+                    <div className="space-y-3.5">
                         <SidebarItem label="Gender" value={formData.personal.gender} />
-                        <SidebarItem label="Marital Status" value={formData.personal.maritalStatus} />
-                        <SidebarItem label="Religion" value={formData.personal.religion} />
-                        <SidebarItem label="Caste" value={formData.personal.caste} />
+                        <SidebarItem label="Status" value={formData.personal.maritalStatus} />
+                        <SidebarItem label="Religion / Caste" value={`${formData.personal.religion} - ${formData.personal.caste}`} />
+                        <SidebarItem label="Birth Date" value={formData.personal.dob} />
+                        <SidebarItem label="Birth Time" value={formData.personal.tob} />
+                        <SidebarItem label="Birth Place" value={formData.personal.placeOfBirth} />
                         <SidebarItem label="Height" value={formData.personal.height} />
                         <SidebarItem label="Complexion" value={formData.personal.complexion} />
                         <SidebarItem label="Blood Group" value={formData.personal.bloodGroup} />
@@ -632,11 +652,11 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
 
                 {/* Career Section */}
                 <div className="space-y-6">
-                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2">Career</h3>
-                    <div className="space-y-4">
-                        <SidebarItem label="Job" value={formData.education.occupation} />
-                        <SidebarItem label="Company" value={formData.education.company} />
-                        <SidebarItem label="Location" value={formData.education.workLocation} />
+                    <h3 className="text-xl font-black uppercase tracking-[0.2em] border-b border-white/20 pb-2 flex items-center gap-2"><Briefcase className="size-4" /> Career</h3>
+                    <div className="space-y-3.5">
+                        <SidebarItem label="Occupation" value={formData.education.occupation} />
+                        <SidebarItem label="Organization" value={formData.education.company} />
+                        <SidebarItem label="Work Location" value={formData.education.workLocation} />
                         <SidebarItem label="Annual Income" value={formData.education.annualIncome} />
                     </div>
                 </div>
@@ -656,32 +676,29 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
                     <div className="absolute left-0 top-6 bottom-6 w-0.5" style={{ backgroundColor: themeColor, opacity: 0.2 }} />
 
                     {/* Section: Family Details */}
-                    <MainSection title="Family Details" themeColor={themeColor} lighterColor={lighterColor}>
+                    <MainSection title="Family Details" themeColor={themeColor} lighterColor={lighterColor} icon={<Users2 className="size-4" />}>
                         <MainRow label="Father's Name" value={formData.family.fatherName} themeColor={themeColor} />
-                        <MainRow label="Father's Job" value={formData.family.fatherOccupation} themeColor={themeColor} />
+                        <MainRow label="Father's Occ." value={formData.family.fatherOccupation} themeColor={themeColor} />
                         <MainRow label="Mother's Name" value={formData.family.motherName} themeColor={themeColor} />
-                        <MainRow label="Mother's Job" value={formData.family.motherOccupation} themeColor={themeColor} />
+                        <MainRow label="Mother's Occ." value={formData.family.motherOccupation} themeColor={themeColor} />
                         <MainRow label="Siblings" value={formData.family.siblings} themeColor={themeColor} />
+                        <MainRow label="Residence" value={formData.family.address} themeColor={themeColor} />
                     </MainSection>
 
                     {/* Section: Education */}
-                    <MainSection title="Education" themeColor={themeColor} lighterColor={lighterColor}>
+                    <MainSection title="Education" themeColor={themeColor} lighterColor={lighterColor} icon={<GraduationCap className="size-4" />}>
                         <MainRow label="Highest Degree" value={formData.education.qualification} themeColor={themeColor} />
-                        <MainRow label="College" value={formData.education.institution} themeColor={themeColor} />
-                        <MainRow label="Graduation Year" value={formData.education.graduationYear} themeColor={themeColor} />
-                    </MainSection>
-
-                    {/* Section: Other Qualifications */}
-                    <MainSection title="Other Qualifications" themeColor={themeColor} lighterColor={lighterColor}>
+                        <MainRow label="College / Univ." value={formData.education.institution} themeColor={themeColor} />
+                        <MainRow label="Grad. Year" value={formData.education.graduationYear} themeColor={themeColor} />
+                        <MainRow label="Inter / +2" value={formData.education.intermediate} themeColor={themeColor} />
                         <MainRow label="High School" value={formData.education.highSchool} themeColor={themeColor} />
-                        <MainRow label="Intermediate" value={formData.education.intermediate} themeColor={themeColor} />
                     </MainSection>
 
                     {/* Section: Hobbies & Interests */}
-                    <MainSection title="Hobbies and Interests" themeColor={themeColor} lighterColor={lighterColor}>
+                    <MainSection title="Interests" themeColor={themeColor} lighterColor={lighterColor} icon={<Coffee className="size-4" />}>
                         <MainRow label="Hobbies" value={formData.personal.hobbies} themeColor={themeColor} />
-                        <MainRow label="Interests" value={formData.personal.interests || formData.personal.hobbies} themeColor={themeColor} />
-                        <MainRow label="Favorite Food" value={formData.personal.favoriteFood || "Indian Cuisine"} themeColor={themeColor} />
+                        <MainRow label="Interests" value={formData.personal.interests} themeColor={themeColor} />
+                        <MainRow label="Favorite Food" value={formData.personal.favoriteFood} themeColor={themeColor} />
                     </MainSection>
                 </div>
             </div>
@@ -709,19 +726,19 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
 function SidebarItem({ label, value }: { label: string, value: string }) {
     return (
         <div className="flex flex-col gap-0.5">
-            <span className="text-[8px] font-black uppercase opacity-50 tracking-wider">{label}</span>
-            <span className="text-xs font-bold">{value || "---"}</span>
+            <span className="text-[7px] font-black uppercase opacity-50 tracking-wider">{label}</span>
+            <span className="text-[11px] font-bold leading-tight">{value || "---"}</span>
         </div>
     );
 }
 
-function MainSection({ title, themeColor, lighterColor, children }: { title: string, themeColor: string, lighterColor: string, children: React.ReactNode }) {
+function MainSection({ title, themeColor, lighterColor, icon, children }: { title: string, themeColor: string, lighterColor: string, icon?: React.ReactNode, children: React.ReactNode }) {
     return (
         <div className="space-y-4">
-            <div className="inline-flex px-8 py-2.5 rounded-full text-white font-black text-sm uppercase tracking-widest" style={{ backgroundColor: themeColor, boxShadow: `10px 10px 0px ${lighterColor}` }}>
-                {title}
+            <div className="inline-flex items-center gap-2 px-8 py-2 rounded-full text-white font-black text-sm uppercase tracking-widest" style={{ backgroundColor: themeColor, boxShadow: `8px 8px 0px ${lighterColor}` }}>
+                {icon} {title}
             </div>
-            <div className="space-y-2 pt-2">
+            <div className="space-y-1.5 pt-2">
                 {children}
             </div>
         </div>
@@ -730,9 +747,9 @@ function MainSection({ title, themeColor, lighterColor, children }: { title: str
 
 function MainRow({ label, value, themeColor }: { label: string, value: string, themeColor: string }) {
     return (
-        <div className="flex items-baseline gap-4 py-1">
-            <span className="w-36 text-sm font-black uppercase opacity-70 tracking-tight shrink-0" style={{ color: themeColor }}>{label}</span>
-            <span className="text-base font-bold text-slate-800">{value || "---"}</span>
+        <div className="flex items-baseline gap-4 py-1 group border-b border-slate-50 last:border-0">
+            <span className="w-32 text-[11px] font-black uppercase opacity-60 tracking-tight shrink-0" style={{ color: themeColor }}>{label}</span>
+            <span className="text-sm font-bold text-slate-800 leading-snug">{value || "---"}</span>
         </div>
     );
 }
