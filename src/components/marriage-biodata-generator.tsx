@@ -327,7 +327,7 @@ export default function MarriageBiodataGenerator() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="col-span-full space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Education</Label>
-                                    <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                    <Input value={formData.education.qualification} onChange={(e) => handleInputChange('education', 'qualification', e.target.value)} className="h-10 rounded-lg font-bold border-2 focus:ring-primary/20" />
                                 </div>
                                 <div className="col-span-full space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Occupation</Label>
@@ -468,9 +468,9 @@ export default function MarriageBiodataGenerator() {
                                             </div>
                                         )}
                                         <h2 className={cn(
-                                            "text-4xl md:text-6xl font-black font-headline tracking-widest uppercase text-center",
+                                            "text-3xl md:text-5xl font-black font-headline tracking-widest uppercase text-center",
                                             selectedTemplate === 'vintage' && "font-serif italic capitalize tracking-normal",
-                                            selectedTemplate === 'slate' && "text-left text-5xl"
+                                            selectedTemplate === 'slate' && "text-left text-4xl"
                                         )} style={{ color: themeColor }}>
                                             Bio Data
                                         </h2>
@@ -640,7 +640,7 @@ function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: s
                 {/* Details Section */}
                 <div className="col-span-8 flex flex-col gap-6">
                     <div className="space-y-1 mb-4">
-                         <h1 className="text-4xl font-black tracking-tight" style={{ color: goldColor }}>{formData.personal.fullName}</h1>
+                         <h1 className="text-3xl font-black tracking-tight" style={{ color: goldColor }}>{formData.personal.fullName}</h1>
                     </div>
                     
                     <div className="space-y-2.5">
@@ -658,7 +658,7 @@ function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: s
                     </div>
 
                     <div className="mt-8">
-                        <h3 className="text-2xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Family Details</h3>
+                        <h3 className="text-xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Family Details</h3>
                         <div className="space-y-2.5">
                             <RoyalRow label="Father's Name" value={formData.family.fatherName} color={goldColor} />
                             <RoyalRow label="Occupation" value={formData.family.fatherOccupation} color={goldColor} />
@@ -670,7 +670,7 @@ function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: s
                     </div>
 
                     <div className="mt-8">
-                        <h3 className="text-2xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Contact Details</h3>
+                        <h3 className="text-xl font-black uppercase tracking-widest border-b pb-1 mb-4" style={{ color: goldColor, borderColor: `${goldColor}44` }}>Contact Details</h3>
                         <div className="space-y-2.5">
                             <RoyalRow label="Phone no." value={formData.contact.primaryPhone} color={goldColor} />
                             <RoyalRow label="Address" value={formData.contact.address} color={goldColor} />
@@ -703,7 +703,7 @@ function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: s
 
 function RoyalRow({ label, value, color }: { label: string, value: string, color: string }) {
     return (
-        <div className="flex items-baseline text-lg font-medium">
+        <div className="flex items-baseline text-base font-medium">
             <span className="w-44 shrink-0" style={{ color: color }}>{label}</span>
             <span className="w-8 text-center shrink-0" style={{ color: color }}>:</span>
             <span className="flex-1" style={{ color: color }}>{value || "---"}</span>
@@ -773,8 +773,8 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
             {/* Main Content (Right Column) */}
             <div className="flex-1 p-12 space-y-12">
                 <div className="flex items-center justify-between mb-8 pl-16">
-                     <h1 className="text-7xl font-black tracking-tighter" style={{ color: themeColor }}>
-                        {formData.personal.fullName.split(' ')[0]} <span className="block text-5xl opacity-80 mt-[-10px]">{formData.personal.fullName.split(' ').slice(1).join(' ')}</span>
+                     <h1 className="text-5xl font-black tracking-tighter" style={{ color: themeColor }}>
+                        {formData.personal.fullName.split(' ')[0]} <span className="block text-3xl opacity-80 mt-[-5px]">{formData.personal.fullName.split(' ').slice(1).join(' ')}</span>
                      </h1>
                 </div>
 
