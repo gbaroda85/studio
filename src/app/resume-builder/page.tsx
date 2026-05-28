@@ -41,7 +41,7 @@ export default function ResumeBuilderPage() {
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-20 no-print">
             <HowToGuide title="Professional Resume Builder" steps={[
-                "Select Template: Pick from Elite, Classic, or Minimalist styles.",
+                "Select Template: Pick from Royal Gold, Canva Pro, or Modern styles.",
                 "Personal Info: Add your name, title, and professional contact links.",
                 "Summary: Write an impactful professional bio focused on achievements.",
                 "Experience: Detail your work history with clean bullets for ATS parsing.",
@@ -79,38 +79,9 @@ export default function ResumeBuilderPage() {
                     </div>
                 </div>
             </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Resume FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Why should I use the Classic template?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            The **Classic** template is best for academic roles or conservative industries (Law, Government) where a single-column, traditional serif font is expected.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">How do I save it as a PDF?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Click the **"Print"** button. In the print dialog, select **"Save as PDF"** as the destination. Our CSS automatically centers the resume on an A4 sheet for you.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for my private work history?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. **GR7 Tools** processes all data 100% locally in your RAM. Once you close the tab, your data is wiped.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            </section>
         </div>
 
-        {/* HIDDEN PRINT COMPONENT FOR CTRL+P */}
+        {/* HIDDEN PRINT COMPONENT TARGET */}
         <div className="hidden print:block w-full">
             <ResumeBuilder isPrintMode={true} />
         </div>
