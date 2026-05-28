@@ -85,9 +85,9 @@ const INITIAL_DATA = {
         height: "5 feet 10 inches",
         complexion: "Fair",
         bloodGroup: "A+",
-        hobbies: "Reading, Playing Guitar, Painting",
+        hobbies: "Reading, Painting",
         interests: "Traveling, Photography",
-        favoriteFood: "Italian"
+        favoriteFood: "Italian, Indian"
     },
     education: {
         qualification: "Bachelor's in Computer Science",
@@ -332,6 +332,14 @@ export default function MarriageBiodataGenerator() {
                                     <Input value={formData.education.graduationYear} onChange={(e) => handleInputChange('education', 'graduationYear', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Inter / +2 Details</Label>
+                                    <Input value={formData.education.intermediate} onChange={(e) => handleInputChange('education', 'intermediate', e.target.value)} className="h-10 rounded-lg font-bold border-2" placeholder="e.g. DEF College (2010)" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">High School Details</Label>
+                                    <Input value={formData.education.highSchool} onChange={(e) => handleInputChange('education', 'highSchool', e.target.value)} className="h-10 rounded-lg font-bold border-2" placeholder="e.g. ABC School (2008)" />
+                                </div>
+                                <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Occupation</Label>
                                     <Input value={formData.education.occupation} onChange={(e) => handleInputChange('education', 'occupation', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
@@ -381,7 +389,26 @@ export default function MarriageBiodataGenerator() {
                             </div>
                         </div>
 
-                        {/* 5. Contact Section */}
+                         {/* 5. Hobbies & Interests Section */}
+                         <div className="space-y-6">
+                            <Badge className="bg-orange-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Hobbies & Interests</Badge>
+                            <div className="grid gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Interests (e.g. Traveling, Reading)</Label>
+                                    <Input value={formData.personal.interests} onChange={(e) => handleInputChange('personal', 'interests', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Hobbies (e.g. Painting, Guitar)</Label>
+                                    <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Favorite Cuisine / Food</Label>
+                                    <Input value={formData.personal.favoriteFood} onChange={(e) => handleInputChange('personal', 'favoriteFood', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 6. Contact Section */}
                         <div className="space-y-6">
                             <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Contact Details</Badge>
                             <div className="grid gap-4">
@@ -392,21 +419,6 @@ export default function MarriageBiodataGenerator() {
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Personal Email</Label>
                                     <Input value={formData.contact.email} onChange={(e) => handleInputChange('contact', 'email', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                            </div>
-                        </div>
-
-                         {/* 6. Hobbies & Interests */}
-                         <div className="space-y-6">
-                            <Badge className="bg-orange-500 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Hobbies & Interests</Badge>
-                            <div className="grid gap-4">
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Hobbies (Separate by Comma)</Label>
-                                    <Input value={formData.personal.hobbies} onChange={(e) => handleInputChange('personal', 'hobbies', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Favorite Cuisine / Food</Label>
-                                    <Input value={formData.personal.favoriteFood} onChange={(e) => handleInputChange('personal', 'favoriteFood', e.target.value)} className="h-10 rounded-lg font-bold border-2" />
                                 </div>
                             </div>
                         </div>
@@ -696,8 +708,8 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
 
                     {/* Section: Hobbies & Interests */}
                     <MainSection title="Interests" themeColor={themeColor} lighterColor={lighterColor} icon={<Coffee className="size-4" />}>
-                        <MainRow label="Hobbies" value={formData.personal.hobbies} themeColor={themeColor} />
                         <MainRow label="Interests" value={formData.personal.interests} themeColor={themeColor} />
+                        <MainRow label="Hobbies" value={formData.personal.hobbies} themeColor={themeColor} />
                         <MainRow label="Favorite Food" value={formData.personal.favoriteFood} themeColor={themeColor} />
                     </MainSection>
                 </div>
