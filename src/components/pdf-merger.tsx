@@ -204,7 +204,7 @@ export default function PdfMerger() {
                     </CardHeader>
                     <CardContent className="p-3 md:p-6">
                         {pdfFiles.length === 0 ? (
-                            <div className="border-3 border-dashed border-muted-foreground/30 rounded-[1.5rem] md:rounded-3xl p-6 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                            <div className="border-3 border-dashed border-muted-foreground/30 rounded-[1.5rem] md:rounded-3xl p-6 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                                 <div className="size-12 md:size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <UploadCloud className="size-6 md:size-10" />
                                 </div>

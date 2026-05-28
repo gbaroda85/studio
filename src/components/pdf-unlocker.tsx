@@ -251,7 +251,7 @@ export default function PdfUnlocker() {
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
                 >
-                    <CardContent className="p-10 md:p-24 flex flex-col items-center justify-center space-y-6">
+                    <CardContent className="p-10 md:p-12 flex flex-col items-center justify-center space-y-6">
                         <div className="relative group">
                             <UploadCloud className="size-12 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                             <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />

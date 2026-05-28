@@ -273,7 +273,7 @@ export default function PdfToImageConverter() {
                     <CardDescription>Extract pages as HD images with absolute alignment control.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                         <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <div>
                             <p className="text-xl font-bold">Drop PDF document here</p>

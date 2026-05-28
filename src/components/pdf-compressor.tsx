@@ -242,7 +242,7 @@ export default function PdfCompressor() {
                     <CardDescription>Exactly hit target sizes with high-fidelity sharpness logic.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-6 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-6 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
                         <div className="relative">
                             <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                             <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />

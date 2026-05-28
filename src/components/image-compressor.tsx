@@ -249,14 +249,14 @@ export default function ImageCompressor() {
                     "border-2 border-dashed transition-all duration-300 relative overflow-hidden bg-card/50",
                     "hover:-translate-y-1 hover:scale-[1.01] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/10",
                     isDragOver && "border-primary bg-primary/5", 
-                    results.length > 0 ? "p-3 md:p-4" : "p-6 md:p-24 text-center"
+                    results.length > 0 ? "p-3 md:p-4" : "p-6 md:p-12 text-center"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
                 {results.length === 0 ? (
                     <div className="flex flex-col items-center gap-6 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-20 md:size-24 rounded-[2rem] md:rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                            <UploadCloud className="size-10 md:size-12" />
+                        <div className="size-16 md:size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                            <UploadCloud className="size-8 md:size-10" />
                         </div>
                         <div className="space-y-2">
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Bulk Compression Workspace</p>
@@ -276,7 +276,7 @@ export default function ImageCompressor() {
                                 <Trash2 className="size-3 mr-1.5"/> Clear All
                             </Button>
                         </div>
-                        <ScrollArea className="h-[400px] md:h-[500px] pr-2 md:pr-4">
+                        <ScrollArea className="h-[300px] md:h-[350px] pr-2 md:pr-4">
                             <div className="grid gap-3">
                                 {results.map((res) => (
                                     <div key={res.id} className="flex items-center justify-between p-2 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 hover:border-primary/40 transition-all group shadow-sm">

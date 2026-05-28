@@ -152,7 +152,7 @@ export default function PdfLocker() {
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
         >
-            <CardContent className="p-10 md:p-24 flex flex-col items-center justify-center space-y-6">
+            <CardContent className="p-10 md:p-12 flex flex-col items-center justify-center space-y-6">
                 <div className="relative group">
                     <UploadCloud className="size-12 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                     <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
@@ -225,7 +225,7 @@ export default function PdfLocker() {
                     ) : isProcessing ? (
                         <div className="w-full max-w-sm space-y-6 md:space-y-8 text-center">
                             <div className="relative inline-block">
-                                <Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary opacity-20 stroke-[3]" />
+                                <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                 <Lock className="absolute inset-0 m-auto h-8 w-8 md:h-12 md:w-12 text-primary animate-pulse" />
                             </div>
                             <div className="space-y-3 md:space-y-4">

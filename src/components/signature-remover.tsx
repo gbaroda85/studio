@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react";
@@ -189,7 +188,7 @@ export default function SignatureRemover() {
         </CardHeader>
         <CardContent>
           <div
-            className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/50 transition-all group"
+            className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-8 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/50 transition-all group"
             onClick={() => fileInputRef.current?.click()}
           >
             <div className="relative">

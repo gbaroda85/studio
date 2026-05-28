@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -237,7 +236,7 @@ export default function PdfWatermarker() {
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <div
-            className="border-3 border-dashed border-muted-foreground/30 rounded-2xl md:rounded-3xl p-8 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+            className="border-3 border-dashed border-muted-foreground/30 rounded-2xl md:rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
             onClick={() => fileInputRef.current?.click()}
           >
             <div className="relative">
@@ -401,7 +400,7 @@ export default function PdfWatermarker() {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page 1...</p>
                             </div>
                         ) : originalPageImage ? (
-                            <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden">
+                            <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
                                 <img src={originalPageImage} alt="Preview" className="w-full h-auto block" />
                                 
                                 {/* FLOATING WATERMARK PREVIEW OVERLAY */}

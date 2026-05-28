@@ -304,7 +304,7 @@ export default function ImageResizer() {
           <CardDescription>Zero-Blur Engine: Iterative downsampling + Convolution Sharpening.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
             <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
             <div>
                 <p className="text-xl font-bold">Drop photo to Resize</p>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -342,7 +341,7 @@ export default function BackgroundRemover() {
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
             onClick={() => fileInputRef.current?.click()}
         >
-            <CardContent className="p-10 md:p-20 flex flex-col items-center justify-center space-y-6">
+            <CardContent className="p-10 md:p-12 flex flex-col items-center justify-center space-y-6">
                 <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                 <div className="text-center">
                     <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Click to Upload Photo</p>
