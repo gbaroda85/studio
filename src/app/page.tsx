@@ -58,11 +58,11 @@ const ALL_TOOLS = [
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
-  { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "featured_home" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "featured_home" },
   
-  // Other Image Tools
+  // Other Image Tools (Hidden from Home Page Featured, but in search and category tabs)
+  { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image_internal" },
   { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
   { icon: PenLine, title: "Signature Remover", description: "Identify and remove signatures from images automatically.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
   { icon: Sparkles, title: "Pro HD Enhancer", description: "Improve photo quality, colors, and lighting professionally.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
