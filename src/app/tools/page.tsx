@@ -68,6 +68,13 @@ function ToolsPageContent() {
 
   const imageFeatures = [
     {
+      href: '/image-to-pdf',
+      labelKey: 'image_to_pdf_label',
+      descriptionKey: 'image_to_pdf_description',
+      icon: FileDigit,
+      color: 'text-red-500',
+    },
+    {
       href: '/image-compress',
       labelKey: 'image_compress_label',
       descriptionKey: 'image_compress_description',
@@ -143,13 +150,6 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_png_description',
       icon: FileOutput,
       color: 'text-sky-500',
-    },
-    {
-      href: '/image-to-pdf',
-      labelKey: 'image_to_pdf_label',
-      descriptionKey: 'image_to_pdf_description',
-      icon: FileDigit,
-      color: 'text-red-500',
     },
   ];
 

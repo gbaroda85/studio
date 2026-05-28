@@ -80,6 +80,7 @@ const CATEGORIES = [
     icon: ImageIcon,
     color: "text-blue-500",
     tools: [
+      { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
       { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
       { href: '/marriage-biodata', label: 'Marriage Bio Data', icon: Heart },
@@ -90,7 +91,6 @@ const CATEGORIES = [
       { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
-      { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
       { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
     ]

@@ -55,7 +55,8 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Image Tools (13)
+  // Image Tools (13) - Image to PDF is now FIRST
+  { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
   { icon: Crop, title: "Smart Crop", description: "Crop and straighten images with perspective correction.", href: "/crop-image", colorClass: "bg-cyan-500", category: "image" },
@@ -68,7 +69,6 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local high-speed processing.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image" },
   { icon: FileOutput, title: "Image to JPG", description: "Convert any image format to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image" },
   { icon: FileOutput, title: "Image to PNG", description: "Convert image formats to lossless PNG.", href: "/image-to-png", colorClass: "bg-sky-500", category: "image" },
-  { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },
   
   // PDF Tools (12)
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF files instantly.", href: "/docx-to-pdf", colorClass: "bg-blue-500", category: "pdf" },
