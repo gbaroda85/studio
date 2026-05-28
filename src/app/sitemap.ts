@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Image Tools
     '/image-compress',
     '/image-resize',
+    '/marriage-biodata',
     '/crop-image',
     '/remove-background',
     '/remove-signature',

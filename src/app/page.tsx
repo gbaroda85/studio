@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -44,7 +45,8 @@ import {
   Star,
   Infinity,
   Printer,
-  Lock
+  Lock,
+  Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,9 +55,10 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Image Tools (12)
+  // Image Tools (13)
   { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
+  { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "image" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "image" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
   { icon: Eraser, title: "Background Remover", description: "Extract subjects from any photo in high definition.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
@@ -135,7 +138,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Section - Balanced Spacing */}
+      {/* Hero Section */}
       <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#001D39] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -156,7 +159,6 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          {/* Quick Access Action Category Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
             <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
@@ -178,7 +180,7 @@ export default function Page() {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary" />
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'ocr', 'emi', 'compress')"
+                placeholder="Search tools... (e.g. 'ocr', 'biodata', 'compress')"
                 className="w-full pl-16 pr-6 h-16 text-lg rounded-3xl bg-white dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -225,55 +227,6 @@ export default function Page() {
                         {ALL_TOOLS.filter(t => t.category === 'pdf').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
-
-                {/* Why Choose Section */}
-                <section className="py-20 mt-32 bg-white dark:bg-black/20 w-full flex justify-center border-t border-border/50 rounded-[4rem] shadow-inner">
-                    <div className="w-full max-w-6xl px-8 md:px-16 text-center">
-                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase">Why Choose GR7 Tools?</h2>
-                    <p className="text-slate-500 dark:text-slate-300 font-bold mb-20 text-lg">Built with cutting-edge technology for professional results</p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-                        {/* Pillar 1: Secure */}
-                        <div className="flex flex-col items-center group">
-                        <div className="size-24 rounded-full bg-green-500 flex items-center justify-center text-white shadow-2xl shadow-green-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
-                            <ShieldCheck className="size-12" />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">100% Secure</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
-                            All files are processed locally in your browser. No data is uploaded to our servers, ensuring complete privacy.
-                            </p>
-                        </div>
-                        </div>
-
-                        {/* Pillar 2: Fast */}
-                        <div className="flex flex-col items-center group">
-                        <div className="size-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-2xl shadow-blue-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
-                            <Zap className="size-12 fill-white/20" />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Lightning Fast</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
-                            Advanced algorithms ensure rapid processing of your files without compromising on quality or performance.
-                            </p>
-                        </div>
-                        </div>
-
-                        {/* Pillar 3: Quality */}
-                        <div className="flex flex-col items-center group">
-                        <div className="size-24 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white shadow-2xl shadow-purple-500/30 transition-transform group-hover:scale-110 duration-500 mb-8">
-                            <Star className="size-12 fill-white/20" />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Professional Quality</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed max-w-[280px] mx-auto">
-                            Industry-standard compression and processing techniques deliver professional-grade results every time.
-                            </p>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                </section>
             </>
           )}
         </div>

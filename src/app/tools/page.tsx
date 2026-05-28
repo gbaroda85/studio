@@ -49,7 +49,8 @@ import {
   PenLine,
   LayoutGrid,
   UserCircle,
-  Lock
+  Lock,
+  Heart
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -79,6 +80,13 @@ function ToolsPageContent() {
       descriptionKey: 'resize_image_description',
       icon: Maximize,
       color: 'text-fuchsia-500',
+    },
+    {
+      href: '/marriage-biodata',
+      labelKey: 'Marriage Bio Data',
+      descriptionKey: 'Design a professional marriage biodata for A4 printing.',
+      icon: Heart,
+      color: 'text-rose-500',
     },
     {
       href: '/passport-photo',
@@ -390,7 +398,7 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          {/* Search Bar - Sleeker & Within Hero Section */}
+          {/* Search Bar */}
           <div className="relative max-w-xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
@@ -407,7 +415,6 @@ function ToolsPageContent() {
         </div>
       </section>
 
-      {/* Added bottom padding pb-32 to ensure cards don't touch the footer */}
       <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4 pb-32">
         {isSearching ? (
             <div className="space-y-20">
@@ -426,8 +433,8 @@ function ToolsPageContent() {
                     {features.map((feature) => (
                         <FeatureCard
                         key={feature.href}
-                        title={t(feature.labelKey)}
-                        description={t(feature.descriptionKey)}
+                        title={t(feature.labelKey) || feature.labelKey}
+                        description={t(feature.descriptionKey) || feature.descriptionKey}
                         href={feature.href}
                         icon={feature.icon}
                         color={feature.color}
@@ -440,7 +447,7 @@ function ToolsPageContent() {
                 <div className="text-center py-24 bg-muted/10 rounded-[3rem] border-4 border-dashed">
                 <Search className="mx-auto h-20 w-20 mb-6 text-muted-foreground/30" />
                 <p className="text-2xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
-                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term like 'PDF', 'Compress', or 'Calc'.</p>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term like 'PDF', 'Biodata', or 'Calc'.</p>
                 </div>
             )}
             </div>
@@ -461,8 +468,8 @@ function ToolsPageContent() {
                     {features.map((feature) => (
                     <FeatureCard
                         key={feature.href}
-                        title={t(feature.labelKey)}
-                        description={t(feature.descriptionKey)}
+                        title={t(feature.labelKey) || feature.labelKey}
+                        description={t(feature.descriptionKey) || feature.descriptionKey}
                         href={feature.href}
                         icon={feature.icon}
                         color={feature.color}
