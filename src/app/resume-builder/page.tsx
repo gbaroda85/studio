@@ -43,9 +43,9 @@ export default function ResumeBuilderPage() {
             <HowToGuide title="Professional Resume Builder" steps={[
                 "Select Template: Pick from Royal Gold, Canva Pro, or Modern styles.",
                 "Personal Info: Add your name, title, and professional contact links.",
+                "Photo: Upload a professional headshot for all templates.",
                 "Summary: Write an impactful professional bio focused on achievements.",
                 "Experience: Detail your work history with clean bullets for ATS parsing.",
-                "Skills: Templates will automatically visualize your expertise levels.",
                 "Print: Click 'Print as Premium A4 PDF' to get your document."
             ]} />
 
@@ -79,11 +79,6 @@ export default function ResumeBuilderPage() {
                     </div>
                 </div>
             </section>
-        </div>
-
-        {/* HIDDEN PRINT COMPONENT TARGET */}
-        <div className="hidden print:block w-full">
-            <ResumeBuilder isPrintMode={true} />
         </div>
     </main>
   );
