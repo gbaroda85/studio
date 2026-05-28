@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -33,7 +32,7 @@ import {
     GraduationCap,
     Users2,
     Coffee,
-    Image as ImageIcon
+    ImageIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -46,7 +45,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf';
 
 const THEME_COLORS = [
     { name: "Royal Purple", value: "#2d0b3a" },
