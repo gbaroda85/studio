@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { Contact2, ShieldCheck, HelpCircle, FileText, Printer, Star } from 'lucide-react';
 import ResumeBuilder from '@/components/resume-builder';
@@ -40,12 +41,12 @@ export default function ResumeBuilderPage() {
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-20 no-print">
             <HowToGuide title="Professional Resume Builder" steps={[
-                "Personal Info: Add your name, job title, and professional contact links.",
-                "Summary: Write an impactful professional bio focused on your key achievements.",
-                "Experience: Detail your work history with bullet points for maximum ATS readability.",
-                "Technical Skills: List your core stack (e.g., Next.js, Firebase, UI Design).",
-                "Featured Projects: Highlight complex apps like 'Shiftrack' with specific features.",
-                "Print: Press Ctrl+P (Cmd+P) to get a pixel-perfect A4 PDF document."
+                "Select Template: Pick from Elite, Classic, or Minimalist styles.",
+                "Personal Info: Add your name, title, and professional contact links.",
+                "Summary: Write an impactful professional bio focused on achievements.",
+                "Experience: Detail your work history with clean bullets for ATS parsing.",
+                "Skills: Templates will automatically visualize your expertise levels.",
+                "Print: Click 'Print as Premium A4 PDF' to get your document."
             ]} />
 
             {/* Deep SEO Content */}
@@ -64,7 +65,7 @@ export default function ResumeBuilderPage() {
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <Contact2 className="text-blue-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest">ATS-Ready</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Uses a semantic single-column layout that automated Applicant Tracking Systems can parse with 100% accuracy.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Uses semantic layouts that automated Applicant Tracking Systems can parse with 100% accuracy.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <Printer className="text-primary size-10" />
@@ -88,21 +89,21 @@ export default function ResumeBuilderPage() {
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Why is the layout so minimalist?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Why should I use the Classic template?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Modern recruiting depends on clarity. Busy layouts with too many colors or images often fail ATS scans. Our minimalist approach focuses on **visual hierarchy and readability**, which are the top priorities for recruiters at top-tier companies.
+                            The **Classic** template is best for academic roles or conservative industries (Law, Government) where a single-column, traditional serif font is expected.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">How do I save it as a PDF?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Simply use your browser's print function (**Ctrl+P** or **Cmd+P**). Set the "Destination" to **"Save as PDF"**. Our tool automatically removes all website UI elements and centers the resume on an A4 canvas for you.
+                            Click the **"Print"** button. In the print dialog, select **"Save as PDF"** as the destination. Our CSS automatically centers the resume on an A4 sheet for you.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Is it safe for my private work history?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. **GR7 Tools** is built on privacy. We do not have a database to store resumes. All data you enter stays in your computer's temporary memory (RAM) and is cleared when you close the tab.
+                            Absolutely. **GR7 Tools** processes all data 100% locally in your RAM. Once you close the tab, your data is wiped.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
