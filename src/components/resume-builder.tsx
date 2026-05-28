@@ -121,7 +121,7 @@ export default function ResumeBuilder() {
     };
 
     return (
-        <div className="w-full max-w-[1700px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 relative">
+        <div className="w-full max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 relative">
             
             {/* LEFT: STUDIO EDITOR (Hidden on Print) */}
             <div className="lg:col-span-5 space-y-6 no-print">
@@ -254,18 +254,17 @@ export default function ResumeBuilder() {
             </div>
 
             {/* RIGHT: LIVE FULL PAGE PREVIEW (Direct A4 View) */}
-            <div className="lg:col-span-7 flex flex-col items-center no-print">
+            <div className="lg:col-span-7 flex flex-col items-center no-print w-full overflow-visible">
                 <div className="w-full flex items-center justify-between mb-6 px-4">
                     <div className="flex items-center gap-2">
                         <Eye className="size-4 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Page Direct View</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct View</span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-xl">STUDIO PREVIEW</Badge>
+                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-xl">REAL-TIME SYNC</Badge>
                 </div>
 
-                {/* THE WRAPPER THAT ALLOWS FULL NATURAL HEIGHT */}
-                <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 transition-all">
-                    <div className="relative transform-gpu scale-[0.6] sm:scale-[0.8] lg:scale-[0.95] xl:scale-100 origin-top">
+                <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 transition-all min-h-[1000px] overflow-visible">
+                    <div className="relative transform-gpu scale-[0.55] sm:scale-[0.8] lg:scale-[0.95] xl:scale-100 origin-top h-auto">
                          <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} />
                     </div>
                 </div>
@@ -278,18 +277,15 @@ export default function ResumeBuilder() {
             </div>
 
             {/* THE ACTUAL PRINT LAYER - VISIBLE ONLY ON PRINT */}
-            <div className="hidden print:block fixed inset-0 bg-white z-[99999]">
-                 <div className="w-[210mm] min-h-[297mm] mx-auto bg-white flex justify-center items-start pt-0">
-                    <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} />
+            <div className="hidden print:block fixed inset-0 bg-white z-[999999]">
+                 <div className="w-[210mm] min-h-[297mm] mx-auto bg-white flex justify-center items-start pt-0 border-0">
+                    <ResumeContent data={data} template={selectedTemplate} profilePic={profilePic} isPrint />
                  </div>
             </div>
 
             <style jsx global>{`
                 @media print {
-                    @page {
-                        size: A4 portrait;
-                        margin: 0;
-                    }
+                    /* Strict reset for all browser layouts */
                     html, body {
                         background: white !important;
                         margin: 0 !important;
@@ -298,30 +294,35 @@ export default function ResumeBuilder() {
                         width: 100% !important;
                         overflow: visible !important;
                     }
-                    body * {
-                        visibility: hidden !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                    }
-                    .print-target, .print-target * {
-                        visibility: visible !important;
+                    /* Force Background Colors */
+                    * {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
+                        overflow: visible !important;
+                    }
+                    /* HIDE EVERYTHING ELSE */
+                    body > *:not(.hidden.print\:block) {
+                        display: none !important;
+                    }
+                    /* SHOW ONLY THE PRINT TARGET */
+                    .hidden.print\:block {
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
                     .no-print { display: none !important; }
-                    
-                    /* Force the target to sit at the absolute top of the print paper */
                     .print-target {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        width: 210mm !important;
-                        height: 297mm !important;
-                        display: block !important;
-                        background: white !important;
-                        z-index: 99999999 !important;
                         box-shadow: none !important;
                         border: none !important;
+                        margin: 0 !important;
+                    }
+                    @page {
+                        size: A4 portrait;
+                        margin: 0;
                     }
                 }
             `}</style>
@@ -329,7 +330,7 @@ export default function ResumeBuilder() {
     );
 }
 
-function ResumeContent({ data, template, profilePic }: { data: typeof INITIAL_RESUME_DATA, template: string, profilePic: string | null }) {
+function ResumeContent({ data, template, profilePic, isPrint }: { data: typeof INITIAL_RESUME_DATA, template: string, profilePic: string | null, isPrint?: boolean }) {
     const templates: Record<string, React.ReactNode> = {
         'royal-gold': <TemplateRoyalGold data={data} profilePic={profilePic} />,
         'heritage': <TemplateHeritage data={data} profilePic={profilePic} />,
@@ -339,7 +340,7 @@ function ResumeContent({ data, template, profilePic }: { data: typeof INITIAL_RE
     };
     
     return (
-        <div className="print-target shadow-2xl border">
+        <div className={cn("print-target shadow-2xl border bg-white", isPrint && "shadow-none border-0")}>
             {templates[template] || templates['canva-pro']}
         </div>
     );
@@ -593,4 +594,3 @@ function TemplateModernEdge({ data, profilePic }: { data: typeof INITIAL_RESUME_
         </div>
     );
 }
-
