@@ -184,8 +184,8 @@ export default function SignatureRemover() {
           <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
             <ScanSearch className="h-10 w-10" />
           </div>
-          <CardTitle className="text-2xl font-black">Signature Extractor Pro</CardTitle>
-          <CardDescription>Extract clean signatures from paper photos. Ideal for digital docs.</CardDescription>
+          <CardTitle className="text-2xl font-black uppercase">Signature BG Remover</CardTitle>
+          <CardDescription>Extract clean signatures from paper photos by removing background and shadows.</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -198,7 +198,7 @@ export default function SignatureRemover() {
             </div>
             <div>
                 <p className="text-xl font-bold">Drop photo or Click to select</p>
-                <p className="text-sm text-muted-foreground mt-2">Works best with black/blue ink on plain paper</p>
+                <p className="text-sm text-muted-foreground mt-2">Extracts ink and makes paper background 100% transparent.</p>
             </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -227,7 +227,7 @@ export default function SignatureRemover() {
                 <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl relative">
                     <CardHeader className="bg-primary/5 p-3 border-b flex flex-row items-center justify-between">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5">
-                            <Sparkles className="h-3 w-3" /> Result (Transparent)
+                            <Sparkles className="h-3 w-3" /> Clean Result (Transparent)
                         </CardTitle>
                         {resultImageSrc && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                     </CardHeader>
@@ -271,7 +271,7 @@ export default function SignatureRemover() {
             <Card className="border-2 shadow-xl border-primary/10">
                 <CardHeader className="bg-primary/5 border-b">
                     <CardTitle className="text-lg flex items-center gap-2 font-bold">
-                        <Settings2 className="h-5 w-5 text-primary" /> Fine-Tune Panel
+                        <Settings2 className="h-5 w-5 text-primary" /> Adjustment Studio
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-8">
@@ -284,7 +284,7 @@ export default function SignatureRemover() {
                             <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{sensitivity[0]}</span>
                         </div>
                         <Slider min={5} max={150} step={1} value={sensitivity} onValueChange={setSensitivity} />
-                        <p className="text-[9px] text-muted-foreground italic">Increase this if you see dots or "grit" in the background.</p>
+                        <p className="text-[9px] text-muted-foreground italic">Increase this to remove paper shadows and grit from the background.</p>
                     </div>
 
                     <div className="space-y-4 pt-4 border-t">
@@ -301,9 +301,9 @@ export default function SignatureRemover() {
                     <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3">
                         <FileType className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Tip</p>
+                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Extraction Tip</p>
                             <p className="text-[9px] text-green-600/80 font-medium leading-relaxed">
-                                Use the sensitivity slider to wipe out shadows. The background is now 100% transparent for documents.
+                                This tool isolates the ink from the paper. Use it to get a clean signature that you can overlay on any digital form or PDF.
                             </p>
                         </div>
                     </div>
@@ -317,4 +317,3 @@ export default function SignatureRemover() {
     </div>
   );
 }
-

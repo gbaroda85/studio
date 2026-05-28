@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Smart Signature Extractor - Clean Signatures from Documents Online (Transparent PNG)',
-  description: 'Extract clean, transparent signatures from document photos using advanced local processing. Perfect for digital signing, PDFs, and official forms. 100% private and secure.',
+  title: 'Smart Signature BG Remover - Extract Clean signatures from Documents Online',
+  description: 'Extract clean, transparent signatures from document photos by removing paper backgrounds using advanced local processing. Perfect for digital signing.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +28,7 @@ export default function RemoveSignaturePage() {
         </div>
 
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="Smart Signature Remover" steps={[
+            <HowToGuide title="Signature Background Remover" steps={[
                 "Upload Image: Take a clear photo of your signature on white paper.",
                 "Extract: Click 'Start Cleaning' to let our engine isolate the ink.",
                 "Adjust: Use 'Sensitivity' to remove paper shadows or gray spots.",
@@ -40,7 +40,7 @@ export default function RemoveSignaturePage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl font-black uppercase tracking-tight">Digitize Your Hand-written Signature</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">In the era of digital documents, having a clean signature file is essential. Our <strong>Smart Signature Extractor</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">In the era of digital documents, having a clean signature file is essential. Our <strong>Smart Signature BG Remover</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
@@ -71,20 +71,20 @@ export default function RemoveSignaturePage() {
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">What is the best way to take a signature photo?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">What is the best way to take a signature photo?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Use a **dark black or blue pen** on a clean **plain white paper**. Avoid using ruled (lined) paper. Take the photo in bright, natural light without flash to minimize harsh shadows.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Why is my signature looking "grainy"?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">Why is my signature looking "grainy"?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             If the photo is too dark or grainy, try increasing the **"Ink Darkness"** slider. This will boost the contrast of the extracted lines. If there is still "noise", increase the **"Sensitivity"** slider.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Is this valid for IBPS or SSC bank forms?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionTrigger className="text-lg font-bold text-left">Is this valid for IBPS or SSC bank forms?</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Yes! After extracting the signature here, you can use our **"Image Resize"** tool to set it to the exact 140x60px required by IBPS and SSC portals.
                         </AccordionContent>
                     </AccordionItem>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -64,7 +65,7 @@ const ALL_TOOLS = [
   // Other Image Tools (Internal - Hidden from Home Page Featured)
   { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image_internal" },
   { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image_internal" },
-  { icon: PenLine, title: "Signature Remover", description: "Identify and remove signatures from images automatically.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image_internal" },
+  { icon: PenLine, title: "Signature BG Remover", description: "Extract clean, transparent signatures by removing paper background from photos.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image_internal" },
   { icon: Sparkles, title: "Pro HD Enhancer", description: "Improve photo quality, colors, and lighting professionally.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image_internal" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image_internal" },
   { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image_internal" },
