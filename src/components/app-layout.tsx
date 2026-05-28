@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -50,7 +49,8 @@ import {
   Waves,
   Printer,
   Lock,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -82,17 +82,16 @@ const CATEGORIES = [
     tools: [
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
-      { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
-      { href: '/marriage-biodata', label: 'Marriage Bio Data', icon: Heart },
-      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
-      { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
       { href: '/crop-image', label: 'crop_image_label', icon: Crop },
+      { href: '/image-resize', label: 'resize_image_label', icon: Maximize },
       { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
       { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
-      { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
-      { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
-      { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
+      { href: '/enhance-photo', label: 'enhance_photo_label', icon: Sparkles },
+      { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
       { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
+      { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
+      { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
+      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
     ]
   },
   {

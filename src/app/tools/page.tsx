@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -50,7 +49,9 @@ import {
   LayoutGrid,
   UserCircle,
   Lock,
-  Heart
+  Heart,
+  Sparkles,
+  Printer
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -82,13 +83,6 @@ function ToolsPageContent() {
       color: 'text-green-500',
     },
     {
-      href: '/image-resize',
-      labelKey: 'resize_image_label',
-      descriptionKey: 'resize_image_description',
-      icon: Maximize,
-      color: 'text-fuchsia-500',
-    },
-    {
       href: '/crop-image',
       labelKey: 'crop_image_label',
       descriptionKey: 'crop_image_description',
@@ -96,18 +90,11 @@ function ToolsPageContent() {
       color: 'text-blue-500',
     },
     {
-      href: '/marriage-biodata',
-      labelKey: 'Marriage Bio Data',
-      descriptionKey: 'Design a professional marriage biodata for A4 printing.',
-      icon: Heart,
-      color: 'text-rose-500',
-    },
-    {
-      href: '/passport-photo',
-      labelKey: 'passport_photo_label',
-      descriptionKey: 'passport_photo_description',
-      icon: UserCircle,
-      color: 'text-emerald-500',
+      href: '/image-resize',
+      labelKey: 'resize_image_label',
+      descriptionKey: 'resize_image_description',
+      icon: Maximize,
+      color: 'text-fuchsia-500',
     },
     {
       href: '/remove-background',
@@ -127,15 +114,15 @@ function ToolsPageContent() {
       href: '/enhance-photo',
       labelKey: 'enhance_photo_label',
       descriptionKey: 'enhance_photo_description',
-      icon: Wand2,
+      icon: Sparkles,
       color: 'text-violet-500',
     },
     {
-      href: '/image-to-text',
-      labelKey: 'image_to_text_label',
-      descriptionKey: 'image_to_text_description',
-      icon: FileScan,
-      color: 'text-teal-500',
+      href: '/passport-photo',
+      labelKey: 'passport_photo_label',
+      descriptionKey: 'passport_photo_description',
+      icon: UserCircle,
+      color: 'text-emerald-500',
     },
     {
       href: '/image-to-jpg',
@@ -150,6 +137,20 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_png_description',
       icon: FileOutput,
       color: 'text-sky-500',
+    },
+    {
+      href: '/image-to-text',
+      labelKey: 'image_to_text_label',
+      descriptionKey: 'image_to_text_description',
+      icon: FileScan,
+      color: 'text-teal-500',
+    },
+    {
+      href: '/aadhaar-printer',
+      labelKey: 'aadhaar_printer_label',
+      descriptionKey: 'aadhaar_printer_description',
+      icon: Printer,
+      color: 'text-orange-600',
     },
   ];
 
