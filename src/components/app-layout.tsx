@@ -143,7 +143,6 @@ const CATEGORIES = [
     icon: Archive,
     color: "text-violet-500",
     tools: [
-      { href: '/resume-builder', label: 'resume_builder_label', icon: Contact2 },
       { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
       { href: '/create-zip', label: 'create_zip_label', icon: Archive },
       { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },

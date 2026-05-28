@@ -55,7 +55,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pressure-converter',
     
     // File Tools
-    '/resume-builder',
     '/create-zip',
     '/unzip-file'
   ];

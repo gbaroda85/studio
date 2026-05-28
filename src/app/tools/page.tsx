@@ -244,13 +244,6 @@ function ToolsPageContent() {
 
   const fileFeatures = [
     {
-      href: '/resume-builder',
-      labelKey: 'resume_builder_label',
-      descriptionKey: 'resume_builder_description',
-      icon: Contact2,
-      color: 'text-blue-600',
-    },
-    {
       href: '/aadhaar-printer',
       labelKey: 'aadhaar_printer_label',
       descriptionKey: 'aadhaar_printer_description',
