@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -21,7 +20,9 @@ import {
     X,
     FileText,
     Palette,
-    Sparkles
+    Sparkles,
+    Settings2,
+    SeparatorHorizontal
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -32,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
