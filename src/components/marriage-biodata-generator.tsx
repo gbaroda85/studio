@@ -32,7 +32,8 @@ import {
     User2,
     GraduationCap,
     Users2,
-    Coffee
+    Coffee,
+    Image as ImageIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -45,7 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import jsPDF from 'jsPDF';
 
 const THEME_COLORS = [
     { name: "Royal Purple", value: "#2d0b3a" },
@@ -63,14 +64,6 @@ const TEMPLATES = [
     { id: 'modern', name: 'Modern Minimal', description: 'Clean layout & airy spacing' },
     { id: 'floral', name: 'Floral Elegance', description: 'Decorative flower patterns' },
     { id: 'vintage', name: 'Vintage Classic', description: 'Double borders & serif fonts' },
-];
-
-const BORDER_STYLES = [
-    { id: 'solid', name: 'Solid Line' },
-    { id: 'double', name: 'Double Line' },
-    { id: 'dashed', name: 'Dashed' },
-    { id: 'dotted', name: 'Dotted' },
-    { id: 'decorative', name: 'Floral Design' },
 ];
 
 const INITIAL_DATA = {
@@ -126,6 +119,7 @@ export default function MarriageBiodataGenerator() {
     const { toast } = useToast();
     const [formData, setFormData] = useState(INITIAL_DATA);
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
+    const [godLogo, setGodLogo] = useState<string | null>(null);
     const [themeColor, setThemeColor] = useState("#2d0b3a");
     const [selectedTemplate, setSelectedTemplate] = useState('royal-gold');
     const [borderStyle, setBorderStyle] = useState('double');
@@ -133,6 +127,7 @@ export default function MarriageBiodataGenerator() {
     
     const previewRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const logoInputRef = useRef<HTMLInputElement>(null);
 
     const handleInputChange = (section: keyof typeof INITIAL_DATA, field: string, value: string) => {
         setFormData(prev => ({
@@ -150,6 +145,16 @@ export default function MarriageBiodataGenerator() {
             const reader = new FileReader();
             reader.onload = (event) => setProfilePic(event.target?.result as string);
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleGodLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => setGodLogo(event.target?.result as string);
+            reader.readAsDataURL(file);
+            toast({ title: "Logo Uploaded", description: "PNG Logo set at the center top." });
         }
     };
 
@@ -186,6 +191,7 @@ export default function MarriageBiodataGenerator() {
     const handleReset = () => {
         setFormData(INITIAL_DATA);
         setProfilePic("https://picsum.photos/seed/portrait1/400/500");
+        setGodLogo(null);
         setThemeColor("#2d0b3a");
         setSelectedTemplate('royal-gold');
         setBorderStyle('double');
@@ -258,12 +264,25 @@ export default function MarriageBiodataGenerator() {
                                 </div>
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                                        <Camera className="size-3" /> Photo Upload
+                                        <Camera className="size-3" /> Photo & God Logo
                                     </Label>
-                                    <Button size="sm" variant="outline" className="w-full h-10 rounded-xl font-black text-[10px] border-2 uppercase border-dashed" onClick={() => fileInputRef.current?.click()}>
-                                        <Plus className="size-3 mr-1.5" /> UPLOAD PHOTO
-                                    </Button>
+                                    <div className="flex flex-col gap-2">
+                                        <Button size="sm" variant="outline" className="w-full h-10 rounded-xl font-black text-[10px] border-2 uppercase border-dashed" onClick={() => fileInputRef.current?.click()}>
+                                            <ImageIcon className="size-3 mr-1.5" /> CANDIDATE PHOTO
+                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button size="sm" variant="outline" className="flex-1 h-10 rounded-xl font-black text-[10px] border-2 uppercase border-dashed" onClick={() => logoInputRef.current?.click()}>
+                                                <Sparkles className="size-3 mr-1.5" /> GOD LOGO (PNG)
+                                            </Button>
+                                            {godLogo && (
+                                                <Button size="icon" variant="destructive" className="h-10 w-10 rounded-xl" onClick={() => setGodLogo(null)}>
+                                                    <X className="size-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
                                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                                    <input ref={logoInputRef} type="file" className="hidden" accept="image/png" onChange={handleGodLogoUpload} />
                                 </div>
                              </div>
                         </div>
@@ -441,9 +460,9 @@ export default function MarriageBiodataGenerator() {
 
                         {/* TEMPLATES */}
                         {selectedTemplate === 'royal-gold' ? (
-                            <TemplateRoyalGold themeColor={themeColor} formData={formData} profilePic={profilePic} />
+                            <TemplateRoyalGold themeColor={themeColor} formData={formData} profilePic={profilePic} godLogo={godLogo} />
                         ) : selectedTemplate === 'canva-pro' ? (
-                            <TemplateCanvaPro themeColor={themeColor} formData={formData} profilePic={profilePic} />
+                            <TemplateCanvaPro themeColor={themeColor} formData={formData} profilePic={profilePic} godLogo={godLogo} />
                         ) : (
                             <>
                                 {selectedTemplate === 'royal' && <TemplateRoyal themeColor={themeColor} />}
@@ -460,7 +479,14 @@ export default function MarriageBiodataGenerator() {
                                         selectedTemplate === 'vintage' ? 'text-center' : '',
                                         selectedTemplate === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
                                     )}>
-                                        {selectedTemplate !== 'slate' && (
+                                        {/* Center God Logo */}
+                                        {godLogo && (
+                                            <div className="flex justify-center mb-6">
+                                                <img src={godLogo} alt="God Logo" className="h-16 w-auto object-contain" />
+                                            </div>
+                                        )}
+
+                                        {selectedTemplate !== 'slate' && !godLogo && (
                                             <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
                                                 <div className="h-px w-20 bg-current" />
                                                 <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
@@ -587,7 +613,7 @@ function Section({ title, themeColor, template, children }: { title: string, the
 }
 
 // TEMPLATE: ROYAL GOLD (MATCHING USER IMAGE)
-function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null }) {
+function TemplateRoyalGold({ themeColor, formData, profilePic, godLogo }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null }) {
     const goldColor = "#f3cc8a";
     
     return (
@@ -628,10 +654,14 @@ function TemplateRoyalGold({ themeColor, formData, profilePic }: { themeColor: s
 
             {/* Header */}
             <header className="flex flex-col items-center mb-10 z-10">
-                <div className="size-16 mb-2">
-                    <svg viewBox="0 0 100 100" fill={goldColor}>
-                        <path d="M50,10 C40,10 30,20 30,35 C30,45 35,50 40,55 C35,65 30,70 30,80 C30,90 40,95 50,95 C60,95 70,90 70,80 C70,70 65,65 60,55 C65,50 70,45 70,35 C70,20 60,10 50,10 Z M50,20 C55,20 60,25 60,35 C60,45 55,50 50,50 C45,50 40,45 40,35 C40,25 45,20 50,20 Z" />
-                    </svg>
+                <div className="size-20 mb-2 flex items-center justify-center">
+                    {godLogo ? (
+                        <img src={godLogo} alt="God Logo" className="max-w-full max-h-full object-contain" />
+                    ) : (
+                        <svg viewBox="0 0 100 100" fill={goldColor}>
+                            <path d="M50,10 C40,10 30,20 30,35 C30,45 35,50 40,55 C35,65 30,70 30,80 C30,90 40,95 50,95 C60,95 70,90 70,80 C70,70 65,65 60,55 C65,50 70,45 70,35 C70,20 60,10 50,10 Z M50,20 C55,20 60,25 60,35 C60,45 55,50 50,50 C45,50 40,45 40,35 C40,25 45,20 50,20 Z" />
+                        </svg>
+                    )}
                 </div>
                 <h2 className="text-xl font-black tracking-widest text-[#f3cc8a]">ॐ गणेशाय नमः</h2>
             </header>
@@ -712,7 +742,7 @@ function RoyalRow({ label, value, color }: { label: string, value: string, color
 }
 
 // TEMPLATE: CANVA PRO (SIDEBAR ASYMMETRIC)
-function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null }) {
+function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null }) {
     const lighterColor = themeColor + '33'; // 20% opacity
     
     return (
@@ -772,11 +802,16 @@ function TemplateCanvaPro({ themeColor, formData, profilePic }: { themeColor: st
 
             {/* Main Content (Right Column) */}
             <div className="flex-1 p-12 space-y-12">
-                <div className="flex items-center justify-between mb-8 pl-16">
+                <header className="flex flex-col items-center mb-8 pl-16">
+                     {godLogo && (
+                        <div className="flex justify-center mb-4">
+                            <img src={godLogo} alt="God Logo" className="h-14 w-auto object-contain" />
+                        </div>
+                     )}
                      <h1 className="text-5xl font-black tracking-tighter" style={{ color: themeColor }}>
                         {formData.personal.fullName.split(' ')[0]} <span className="block text-3xl opacity-80 mt-[-5px]">{formData.personal.fullName.split(' ').slice(1).join(' ')}</span>
                      </h1>
-                </div>
+                </header>
 
                 {/* Relative Positioning Container for Vertical Line */}
                 <div className="relative pl-8 space-y-12">
