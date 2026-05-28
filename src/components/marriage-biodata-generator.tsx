@@ -22,6 +22,8 @@ import {
     Palette,
     Sparkles,
     Settings2,
+    ShieldCheck,
+    Zap,
     SeparatorHorizontal
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
