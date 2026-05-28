@@ -140,7 +140,7 @@ export default function AgeCalculator() {
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 py-2 animate-in fade-in duration-700 mx-auto">
       
-      {/* Left: Input Selection - More Compact */}
+      {/* Left: Input Selection */}
       <div className="lg:col-span-4 flex flex-col gap-4">
         <Card className="border-2 shadow-xl overflow-hidden glass-card rounded-[2rem]">
           <CardHeader className="bg-primary/5 border-b p-5">
@@ -209,7 +209,7 @@ export default function AgeCalculator() {
         </Card>
       </div>
 
-      {/* Right: Results Dashboard - Refined Typography */}
+      {/* Right: Results Dashboard */}
       <div className="lg:col-span-8 space-y-6">
         {!stats ? (
            <Card className="h-full border-2 border-dashed flex flex-col items-center justify-center p-12 text-center gap-6 opacity-30 min-h-[400px] rounded-[2.5rem] bg-muted/5">
@@ -226,7 +226,7 @@ export default function AgeCalculator() {
         ) : (
            <div className="space-y-6 animate-in zoom-in-95 duration-500">
               
-              {/* PRIMARY AGE: PROFESSIONAL SIZING */}
+              {/* PRIMARY AGE */}
               <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 neon-border">
                  <CardHeader className="bg-primary/5 p-4 border-b text-center">
                     <CardTitle className="text-[9px] font-black uppercase tracking-[0.4em] text-primary flex items-center justify-center gap-2">
@@ -251,7 +251,7 @@ export default function AgeCalculator() {
                  </CardContent>
               </Card>
 
-              {/* NEXT BIRTHDAY - COMPACT BANNER */}
+              {/* NEXT BIRTHDAY */}
               <Card className="border-none shadow-xl rounded-[2rem] bg-gradient-to-br from-primary/10 via-background to-accent/5 overflow-hidden">
                   <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
                       <div className="flex items-center gap-5">
@@ -280,8 +280,8 @@ export default function AgeCalculator() {
                   </CardContent>
               </Card>
 
-              {/* TOTAL ANALYTICS - SMALLER CARDS */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {/* TOTAL ANALYTICS - GRID FIXED FOR LONG NUMBERS */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                   <CompactStat icon={Activity} label="Months" value={stats.total.months.toLocaleString()} color="text-indigo-500" />
                   <CompactStat icon={CalendarDays} label="Weeks" value={stats.total.weeks.toLocaleString()} color="text-emerald-500" />
                   <CompactStat icon={Clock} label="Days" value={stats.total.days.toLocaleString()} color="text-rose-500" />
@@ -303,9 +303,11 @@ function CompactStat({ icon: Icon, label, value, color }: { icon: any, label: st
                 <div className={cn("size-8 rounded-lg bg-white dark:bg-slate-900 border shadow-sm flex items-center justify-center", color)}>
                     <Icon className="size-4" />
                 </div>
-                <div className="space-y-0.5 overflow-hidden w-full">
-                    <p className="text-[8px] font-black uppercase text-muted-foreground opacity-50 truncate">{label}</p>
-                    <p className="text-sm font-black tracking-tight truncate">{value}</p>
+                <div className="space-y-0.5 w-full overflow-hidden">
+                    <p className="text-[8px] font-black uppercase text-muted-foreground opacity-50 tracking-widest">{label}</p>
+                    <p className="text-[11px] md:text-sm font-black tracking-tight leading-tight break-all">
+                        {value}
+                    </p>
                 </div>
             </CardContent>
         </Card>
