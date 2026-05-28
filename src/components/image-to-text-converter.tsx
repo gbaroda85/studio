@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -109,7 +110,7 @@ export default function ImageToTextConverter() {
     try {
       const processedSrc = await preProcessImage(originalImageSrc);
       setProgress(15);
-      setStatusText("Starting AI Engine...");
+      setStatusText("Starting Engine...");
 
       const worker = await createWorker('eng+hin', 1, {
         logger: m => {
@@ -247,7 +248,7 @@ export default function ImageToTextConverter() {
                         <div className="space-y-4 w-full max-w-[280px] md:max-w-sm">
                             <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
                             <Progress value={progress} className="h-2 shadow-inner" />
-                            <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Local neural threads active...</p>
+                            <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Local processing threads active...</p>
                         </div>
                     </div>
                  )}

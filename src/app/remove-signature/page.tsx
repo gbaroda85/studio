@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser } from 'lucide-react';
 import SignatureRemover from '@/components/signature-remover';
@@ -11,8 +12,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'AI Signature Extractor - Clean Signatures from Documents Online (Transparent PNG)',
-  description: 'Extract clean, transparent signatures from document photos using local AI. Perfect for digital signing, PDFs, and official forms. 100% private and secure.',
+  title: 'Smart Signature Extractor - Clean Signatures from Documents Online (Transparent PNG)',
+  description: 'Extract clean, transparent signatures from document photos using advanced local processing. Perfect for digital signing, PDFs, and official forms. 100% private and secure.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -27,9 +28,9 @@ export default function RemoveSignaturePage() {
         </div>
 
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="AI Signature Remover" steps={[
+            <HowToGuide title="Smart Signature Remover" steps={[
                 "Upload Image: Take a clear photo of your signature on white paper.",
-                "Extract: Click 'Start Cleaning' to let our AI isolate the ink.",
+                "Extract: Click 'Start Cleaning' to let our engine isolate the ink.",
                 "Adjust: Use 'Sensitivity' to remove paper shadows or gray spots.",
                 "Boost Ink: Enhance the darkness of the signature if it's too light.",
                 "Download: Save as a high-quality transparent PNG for digital docs."
@@ -39,7 +40,7 @@ export default function RemoveSignaturePage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl font-black uppercase tracking-tight">Digitize Your Hand-written Signature</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">In the era of digital documents, having a clean signature file is essential. Our <strong>AI Signature Extractor</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">In the era of digital documents, having a clean signature file is essential. Our <strong>Smart Signature Extractor</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">

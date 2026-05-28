@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Bulk AI Image Compressor - Reduce Multiple JPG/PNG to 20kb, 50kb Online',
-  description: 'Professional bulk image compression for SSC, UPSC, IBPS and Bank forms. Reduce hundreds of photos to exact KB size instantly without quality loss using smart adaptive scaling.',
+  title: 'Bulk Image Optimizer - Reduce Multiple JPG/PNG to 20kb, 50kb Online',
+  description: 'Professional bulk image optimization for SSC, UPSC, IBPS and Bank forms. Reduce hundreds of photos to exact KB size instantly without quality loss using smart adaptive scaling.',
 };
 
 export default function ImageCompressPage() {
@@ -27,10 +27,10 @@ export default function ImageCompressPage() {
 
         <div className="w-full max-w-4xl space-y-16 px-4 mx-auto">
             {/* Guide Section */}
-            <HowToGuide title="Bulk Image Compressor" steps={[
+            <HowToGuide title="Bulk Image Optimizer" steps={[
                 "Upload Images: Drag and drop multiple JPG, PNG, or WebP files into the workspace.",
                 "Set Target: Enter a fixed KB size (e.g., 20KB for SSC) or use manual quality percentages.",
-                "Processing: Our local AI engine optimizes all photos in one go using browser threads.",
+                "Processing: Our local optimization engine optimizes all photos in one go using browser threads.",
                 "Download: Save individual results instantly or get everything in a secure ZIP file."
             ]} />
 
@@ -41,7 +41,7 @@ export default function ImageCompressPage() {
                         <Scaling className="size-10 text-primary" />
                     </div>
                     <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Smart Adaptive Compression</h2>
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Smart Adaptive Optimization</h2>
                         <p className="text-muted-foreground leading-relaxed">
                             Compressing a 2MB photo to 100KB is mathematically difficult. Standard tools often create "banding" or "pixelation" on faces. Our <strong>GR7 Smart Engine</strong> automatically balances JPEG quality with subtle dimension resizing. If quality drops too low, we slightly reduce the pixels to ensure your photo remains clear, crisp, and acceptable for government portals.
                         </p>
@@ -54,10 +54,10 @@ export default function ImageCompressPage() {
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
                         <Wand2 className="text-primary size-8" />
-                        Professional Grade Batch Compression
+                        Professional Grade Batch Optimization
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Standard online tools limit you to one photo at a time or store your data on cloud servers. Our <strong>Bulk Image Compressor</strong> allows you to process entire batches for <strong>SSC, UPSC, and IBPS</strong> portals with 100% privacy.
+                        Standard online tools limit you to one photo at a time or store your data on cloud servers. Our <strong>Bulk Image Optimizer</strong> allows you to process entire batches for <strong>SSC, UPSC, and IBPS</strong> portals with 100% privacy.
                     </p>
                 </div>
                 
@@ -84,7 +84,7 @@ export default function ImageCompressPage() {
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Image Compression FAQs</h2>
+                    <h2 className="text-3xl font-black uppercase tracking-tight">Image Optimization FAQs</h2>
                     <p className="text-muted-foreground font-medium">Everything you need to know about our local optimization tech.</p>
                 </div>
 

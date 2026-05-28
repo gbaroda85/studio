@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -199,7 +200,7 @@ export default function BackgroundRemover() {
     setIsProcessing(true);
     setSubjectImageSrc(null);
     setProgress(5);
-    setStatusText("Initializing AI Engine...");
+    setStatusText("Initializing Engine...");
 
     try {
       const imglyModule = await import("@imgly/background-removal");
@@ -209,7 +210,7 @@ export default function BackgroundRemover() {
         progress: (item: string, index: number, total: number) => {
             const p = Math.round((index / total) * 100);
             setProgress(p);
-            if (item.includes("model")) setStatusText("Loading Neural Model...");
+            if (item.includes("model")) setStatusText("Loading Core System...");
             else setStatusText("Extracting Subject...");
         },
         output: { format: "image/png", quality: 1.0 }
@@ -221,7 +222,7 @@ export default function BackgroundRemover() {
       toast({ title: "Precision Success", description: "Background isolated with zero artifacts." });
     } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "AI Limit", description: "Processing failed. Using original." });
+      toast({ variant: "destructive", title: "Processing Error", description: "Operation failed. Using original." });
       setSubjectImageSrc(source);
       setStage('studio');
     } finally {
@@ -329,10 +330,10 @@ export default function BackgroundRemover() {
                 </div>
             </div>
             <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                AI <span className="text-gradient-hero">Background</span> Remover
+                Smart <span className="text-gradient-hero">Background</span> Remover
             </h1>
             <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
-                Isolate subjects with pixel-level precision. <br/>100% Private local AI.
+                Isolate subjects with pixel-level precision. <br/>100% Private local processing.
             </p>
         </motion.div>
 
@@ -353,7 +354,7 @@ export default function BackgroundRemover() {
 
         <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest">
             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-            <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT AI</div>
+            <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT PROCESSING</div>
             <div className="flex items-center gap-1.5"><ImageIcon className="size-3.5 text-primary" /> TRANSPARENT PNG</div>
         </div>
       </div>
@@ -366,7 +367,7 @@ export default function BackgroundRemover() {
               <CardHeader className="glass-panel border-b p-4 md:py-6 md:px-8 flex flex-row items-center justify-between">
                   <div>
                       <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">Step 1: Check Quality</CardTitle>
-                      <CardDescription className="font-bold text-[9px] md:text-[10px] uppercase opacity-60">Review your photo before AI extraction.</CardDescription>
+                      <CardDescription className="font-bold text-[9px] md:text-[10px] uppercase opacity-60">Review your photo before extraction.</CardDescription>
                   </div>
               </CardHeader>
               <CardContent className="p-6 md:p-12 flex justify-center bg-black/5 min-h-[300px] md:min-h-[400px]">
@@ -457,10 +458,10 @@ export default function BackgroundRemover() {
                 <Settings2 className="size-6 md:size-8" />
             </div>
             <div>
-                <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter">AI Studio <span className="text-primary">Dashboard</span></h2>
+                <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter">Pro Studio <span className="text-primary">Dashboard</span></h2>
                 <div className="flex items-center justify-center md:justify-start gap-2 mt-1">
                     <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20">HD 300DPI</Badge>
-                    <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">LOCAL AI</Badge>
+                    <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">LOCAL PROCESSING</Badge>
                 </div>
             </div>
         </div>
@@ -493,7 +494,7 @@ export default function BackgroundRemover() {
                                 <div className="space-y-4 w-full max-w-[280px] md:max-w-sm">
                                     <p className="font-black text-xl md:text-3xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
                                     <Progress value={progress} className="h-2 shadow-inner bg-primary/10" />
-                                    <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Local neural threads active...</p>
+                                    <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">Local processing threads active...</p>
                                 </div>
                             </motion.div>
                         ) : previewImageSrc ? (
@@ -611,7 +612,7 @@ export default function BackgroundRemover() {
                 <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10 flex flex-col gap-4">
                     <div className="flex items-center justify-center gap-4 md:gap-6 opacity-40 text-[8px] md:text-[9px] font-black uppercase tracking-widest">
                         <div className="flex items-center gap-1"><ShieldCheck className="size-3" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1"><Zap className="size-3 text-yellow-500" /> GPU BOOST</div>
+                        <div className="flex items-center gap-1"><Zap className="size-3 text-yellow-500" /> HARDWARE BOOST</div>
                     </div>
                 </CardFooter>
             </Card>

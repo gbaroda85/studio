@@ -45,7 +45,7 @@ When you deploy, you MUST add these 2 environment variables in the Vercel/Fireba
 ---
 
 ## Features
-- **AI Image Processing**: Compression, Resizing, BG Removal, Enhancement.
+- **Smart Image Processing**: Compression, Resizing, BG Removal, Enhancement.
 - **PDF Suite**: Secure Locking, Unlocking, Merging, Splitting, Conversion.
 - **Tools Hub**: 40+ utilities for daily productivity.
 

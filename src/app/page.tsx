@@ -56,15 +56,15 @@ import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
   // Image Tools (13)
-  { icon: Shrink, title: "AI Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
+  { icon: Shrink, title: "Smart Image Compress", description: "Reduce image size up to 95% with zero visual loss.", href: "/image-compress", colorClass: "bg-blue-600", category: "image" },
   { icon: Maximize, title: "Smart Resize", description: "Resize to exact pixels or MM for application forms.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design a professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "image" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "image" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
   { icon: Eraser, title: "Background Remover", description: "Extract subjects from any photo in high definition.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
-  { icon: Sparkles, title: "AI HD Enhancer", description: "Fix blurry photos and restore lost details instantly.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
-  { icon: PenLine, title: "Signature Remover", description: "Clean signatures from documents using AI.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
-  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local AI.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image" },
+  { icon: Sparkles, title: "Pro HD Enhancer", description: "Fix blurry photos and restore lost details instantly.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
+  { icon: PenLine, title: "Signature Remover", description: "Clean signatures from documents using advanced processing.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
+  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local high-speed processing.", href: "/image-to-text", colorClass: "bg-teal-500", category: "image" },
   { icon: FileOutput, title: "Image to JPG", description: "Convert any image format to standard JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", category: "image" },
   { icon: FileOutput, title: "Image to PNG", description: "Convert image formats to lossless PNG.", href: "/image-to-png", colorClass: "bg-sky-500", category: "image" },
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "image" },

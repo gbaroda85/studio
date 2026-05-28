@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
@@ -55,7 +56,7 @@ export default function AadhaarPrinterPage() {
                         Professional Document Studio
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Whether it is your <strong>PAN Card, Driving Licence, or e-Aadhaar</strong>, our studio uses Canvas AI to lock your documents to exact government-standard dimensions (8.56cm x 5.4cm).
+                        Whether it is your <strong>PAN Card, Driving Licence, or e-Aadhaar</strong>, our studio uses smart canvas technology to lock your documents to exact government-standard dimensions (8.56cm x 5.4cm).
                     </p>
                 </div>
                 

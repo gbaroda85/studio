@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Image to Text (OCR) - Extract Text from Photos Online Securely',
-  description: 'AI-powered local OCR tool to extract text from documents, screenshots, and notes. Supports English and Hindi with 100% privacy.',
+  description: 'Smart local OCR tool to extract text from documents, screenshots, and notes. Supports English and Hindi with 100% privacy.',
 };
 
 export default function ImageToTextPage() {
@@ -26,9 +26,9 @@ export default function ImageToTextPage() {
         </div>
         
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="AI Image to Text (OCR)" steps={[
+            <HowToGuide title="Smart Image to Text (OCR)" steps={[
                 "Upload Image: Select an image containing text (like a screenshot or a scanned document).",
-                "Extract Text: Click the 'Extract Text' button to start the AI-powered OCR process.",
+                "Extract Text: Click the 'Extract Text' button to start the professional OCR process.",
                 "Review & Copy: The extracted text will appear in the textbox. You can edit it or copy it to your clipboard.",
                 "Convert Another: Click 'Start Over' to process a new image.",
             ]} />
@@ -43,8 +43,8 @@ export default function ImageToTextPage() {
                                 <SearchCode className="text-primary" />
                             </div>
                             <div>
-                                <h3 className="font-black uppercase text-sm">Neural Pattern Recognition</h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed mt-1">Our tool uses Tesseract.js, a port of the famous Tesseract OCR engine, optimized to run directly in your browser. It recognizes characters by analyzing pixel patterns using neural networks.</p>
+                                <h3 className="font-black uppercase text-sm">Character Recognition</h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed mt-1">Our tool uses Tesseract.js, a port of the famous Tesseract OCR engine, optimized to run directly in your browser. It recognizes characters by analyzing pixel patterns instantly.</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
@@ -97,7 +97,7 @@ export default function ImageToTextPage() {
                     <AccordionItem value="item-3" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold">Why is local OCR better than online OCR?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base">
-                            Online OCR services store your images on their servers to train their AI. Local OCR keeps your images on <strong>your device</strong>, making it the only safe choice for sensitive documents like ID cards or legal contracts.
+                            Online OCR services store your images on their servers. Local OCR keeps your images on <strong>your device</strong>, making it the only safe choice for sensitive documents like ID cards or legal contracts.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

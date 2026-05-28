@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { Eraser, ShieldCheck, Zap, HelpCircle, Target, Sparkles, Layers } from 'lucide-react';
 import BackgroundRemover from '@/components/background-remover';
@@ -11,8 +12,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'AI Background Remover - Remove BG from Photos Online Instantly (Free)',
-  description: 'Professional local AI tool to remove background from images. Create high-definition transparent PNGs or passport photos with custom backgrounds. 100% private and secure.',
+  title: 'Smart Background Remover - Remove BG from Photos Online Instantly (Free)',
+  description: 'Professional local tool to remove background from images. Create high-definition transparent PNGs or passport photos with custom backgrounds. 100% private and secure.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -27,9 +28,9 @@ export default function RemoveBackgroundPage() {
         </div>
 
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="AI Background Remover" steps={[
+            <HowToGuide title="Smart Background Remover" steps={[
                 "Upload Photo: Select an image with a clear face or object.",
-                "AI Processing: Our local neural engine extracts the subject in HD.",
+                "Automatic Processing: Our local engine extracts the subject in HD.",
                 "Custom Background: Choose from Royal Blue, Navy, or White for official use.",
                 "Fine-Tune: Adjust the frame or add a professional border.",
                 "Download: Save as a high-quality transparent PNG or solid JPEG."
@@ -39,7 +40,7 @@ export default function RemoveBackgroundPage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl font-black uppercase tracking-tight">Professional ID Studio in your Browser</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">No need to visit a photo studio or use expensive software like Photoshop. Our <strong>AI Background Remover</strong> uses state-of-the-art WASM technology to run a neural network directly on your device CPU.</p>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">No need to visit a photo studio or use expensive software like Photoshop. Our <strong>Smart Background Remover</strong> uses state-of-the-art WASM technology to run processing directly on your device CPU.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
@@ -72,7 +73,7 @@ export default function RemoveBackgroundPage() {
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Why is this tool safer than "Cloud" removers?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Cloud-based background removers store your photos on their servers to train their AI. This is a massive privacy risk for your personal ID photos. Our tool runs the AI **locally in your browser RAM**, meaning your photo never touches the internet.
+                            Cloud-based background removers store your photos on their servers. This is a massive privacy risk for your personal ID photos. Our tool runs processing **locally in your browser RAM**, meaning your photo never touches the internet.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
@@ -84,7 +85,7 @@ export default function RemoveBackgroundPage() {
                     <AccordionItem value="item-3" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Can it remove backgrounds from complex objects?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes, our neural model is trained on a wide variety of subjects including humans, pets, and e-commerce products. It performs exceptionally well with distinct contrast between the subject and background.
+                            Yes, our model is trained on a wide variety of subjects including humans, pets, and e-commerce products. It performs exceptionally well with distinct contrast between the subject and background.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from "react";
@@ -220,8 +221,8 @@ export default function PhotoEnhancer() {
           <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
             <Wand2 className="h-10 w-10" />
           </div>
-          <CardTitle className="text-2xl font-black uppercase">AI HD Photo Enhancer</CardTitle>
-          <CardDescription>Restore lost details, fix lighting, and sharpen edges using local AI.</CardDescription>
+          <CardTitle className="text-2xl font-black uppercase">Pro HD Photo Enhancer</CardTitle>
+          <CardDescription>Restore lost details, fix lighting, and sharpen edges instantly.</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -241,7 +242,7 @@ export default function PhotoEnhancer() {
         </CardContent>
         <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE LOCAL</div>
-            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT AI</div>
+            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT PROCESSING</div>
             <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD OUTPUT</div>
         </CardFooter>
       </Card>
@@ -357,7 +358,7 @@ export default function PhotoEnhancer() {
                     
                     <Button className="w-full h-12 md:h-14 font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl md:rounded-2xl group relative overflow-hidden text-[10px] md:text-xs" onClick={handleAutoEnhance} disabled={isProcessing}>
                         <Zap className="mr-2 h-5 md:h-6 w-5 md:w-6 text-yellow-400 group-hover:scale-125 transition-transform" />
-                        AI AUTO-ENHANCE PRESET
+                        SMART AUTO-ENHANCE PRESET
                     </Button>
 
                     <div className="space-y-6 md:space-y-8">

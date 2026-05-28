@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Professional Passport Photo Maker - Create ID Photos Online with AI (HD)',
-  description: 'Create professional passport-sized photos for India, USA, and UK instantly. Features AI background removal, rotation, and high-DPI scaling. 100% private local processing.',
+  title: 'Professional Passport Photo Maker - Create ID Photos Online (HD)',
+  description: 'Create professional passport-sized photos for India, USA, and UK instantly. Features background removal, rotation, and high-DPI scaling. 100% private local processing.',
 };
 
 export default function PassportPhotoPage() {
@@ -21,7 +21,7 @@ export default function PassportPhotoPage() {
     "Upload Photo: Select a clear, well-lit photo of your face.",
     "Select Size: Choose from presets like India (3.5x4.5cm) or USA (2x2in).",
     "Crop & Align: Use the crop tool to center your face perfectly.",
-    "AI Background: Click 'AI REMOVE' to isolate the subject with one click.",
+    "Background Cleanup: Click 'AUTO REMOVE' to isolate the subject with one click.",
     "Studio Adjust: Rotate, scale, and choose a background color (White/Blue).",
     "Download: Save your 300 DPI HD photo ready for printing."
   ];
@@ -42,7 +42,7 @@ export default function PassportPhotoPage() {
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Standard ID Photo Requirements</h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Meeting official document standards is critical. A slight tilt or wrong background can lead to form rejection. Our <strong>AI Studio</strong> ensures your photos meet strict government criteria.
+                        Meeting official document standards is critical. A slight tilt or wrong background can lead to form rejection. Our <strong>Pro Studio</strong> ensures your photos meet strict government criteria.
                     </p>
                 </div>
                 
@@ -54,8 +54,8 @@ export default function PassportPhotoPage() {
                     </div>
                     <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
                         <FileCheck className="text-emerald-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">AI Isolation</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Our local neural engine performs pixel-level edge detection to remove messy backgrounds instantly.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest">Smart Isolation</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Our local engine performs pixel-level edge detection to remove messy backgrounds instantly.</p>
                     </div>
                     <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
                         <Printer className="text-rose-500 size-10" />
@@ -77,7 +77,7 @@ export default function PassportPhotoPage() {
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Which background color is required for Indian Passports?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            For **Indian Passport and Visa** applications, a **Pure White** background is mandatory. Use our 'AI Remove' tool and then select the White color preset in the Studio stage.
+                            For **Indian Passport and Visa** applications, a **Pure White** background is mandatory. Use our 'Auto Remove' tool and then select the White color preset in the Studio stage.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
