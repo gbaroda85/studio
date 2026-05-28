@@ -63,7 +63,7 @@ const ALL_TOOLS = [
   
   // Other Image Tools (Hidden from Home Page Featured, but in search and category tabs)
   { icon: Maximize, title: "Smart Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", category: "image_internal" },
-  { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image" },
+  { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "image_internal" },
   { icon: PenLine, title: "Signature Remover", description: "Identify and remove signatures from images automatically.", href: "/remove-signature", colorClass: "bg-orange-500", category: "image" },
   { icon: Sparkles, title: "Pro HD Enhancer", description: "Improve photo quality, colors, and lighting professionally.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "image" },
   { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos for any country standard.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "image" },
