@@ -34,7 +34,8 @@ import {
     Image as ImageIcon,
     Plus,
     Droplets,
-    Scan
+    Scan,
+    Layout
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -451,7 +452,7 @@ export default function ScannerToPdf() {
                                 <Maximize className="size-6 text-primary" /> Adjustment Panel
                             </CardTitle>
                             <div className="flex items-center gap-3">
-                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
+                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border w-full md:w-auto">
                                     <TabsList className="grid grid-cols-2 h-8">
                                         <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
                                         <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
