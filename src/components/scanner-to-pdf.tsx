@@ -81,15 +81,17 @@ export default function ScannerToPdf() {
         };
     });
 
-    setPages(prev => [...prev, ...newItems]);
-    
-    // Automatically select the LAST added item so it appears in the positioning panel
-    if (newItems.length > 0) {
-        setSelectedId(newItems[newItems.length - 1].id);
-    }
+    // We use a functional state update to ensure selectedId is set to the NEWEST added item
+    setPages(prev => {
+        const updated = [...prev, ...newItems];
+        if (newItems.length > 0) {
+            setSelectedId(newItems[newItems.length - 1].id);
+        }
+        return updated;
+    });
 
     e.target.value = "";
-    toast({ title: "Page Added", description: "Image is now ready for positioning." });
+    toast({ title: "Page Added", description: "Image loaded and selected for positioning." });
   };
 
   const handleRemovePage = (id: string) => {
