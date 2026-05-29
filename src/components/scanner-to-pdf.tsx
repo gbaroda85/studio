@@ -10,7 +10,6 @@ import {
     Download, 
     X, 
     Loader2, 
-    FileDigit, 
     UploadCloud,
     CheckCircle2,
     Zap, 
@@ -52,15 +51,15 @@ import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 
 /**
- * 6-DOT PERSPECTIVE WARP LOGIC
- * Correctly maps 4 major corners while ignoring side-handles for math
+ * INDUSTRIAL GRADE PERSPECTIVE WARP
+ * Correctly maps 4 major corners while handling 6-dot UI handles
  */
 interface Point { x: number; y: number; }
 
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
     // Points Index: 0:TL, 1:TR, 2:MR, 3:BR, 4:BL, 5:ML
-    // Corners are: TL(0), TR(1), BR(3), BL(4)
+    // Primary Corners are: TL(0), TR(1), BR(3), BL(4)
     const corners = [src[0], src[1], src[3], src[4]];
     
     for (let i = 0; i < 4; i++) {
@@ -100,7 +99,7 @@ export default function ScannerToPdf() {
   const [stage, setStage] = useState<Stage>('viewfinder');
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
-  const [activeFilter, setActiveFilter] = useState<ScanFilter>('magic');
+  const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -115,7 +114,7 @@ export default function ScannerToPdf() {
   const [rectCrop, setRectCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
-  // 6 Points: 0:TL, 1:TR, 2:MR, 3:BR, 4:BL, 5:ML
+  // 6 Points UI
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
       { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -169,11 +168,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * ADOBE-GRADE REGION AWARE DOCUMENT ENGINE
-   * Implements:
-   * 1. Illumination Map Normalization (Dividing by Background Estimation)
-   * 2. Content Segmentation (Masking text vs photos)
-   * 3. Adaptive Sigmoid Mapping for soft enhancement (Readable, not hard binary)
+   * PREMIUM SEGMENTATION & ENHANCEMENT ENGINE
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -183,7 +178,7 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. DYNAMIC PERSPECTIVE WARP (FIXED LANDSCAPE CUTTING)
+    // 1. DYNAMIC PERSPECTIVE WARP (ORIENTATION AWARE)
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -192,7 +187,6 @@ export default function ScannerToPdf() {
         canvas.height = Math.max(100, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // Calculate physical distances for aspect-correct output
         const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
         const w2 = Math.hypot(points[3].x - points[4].x, points[3].y - points[4].y);
         const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
@@ -236,63 +230,58 @@ export default function ScannerToPdf() {
         }
     }
 
-    // 2. ADOBE-LEVEL REGION-AWARE PROCESSING PIPELINE
+    // 2. ADOBE/CAMSCANNER STYLE ILLUMINATION NORMALIZATION
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Step A: Background Illumination Map (sampling local max luma)
-        let rSum = 0, gSum = 0, bSum = 0;
-        const samplingStep = Math.max(1, Math.floor(len / 4000)); 
+        // Step A: Sample background white level (paper estimate)
         let samples = [];
-        for (let i = 0; i < len; i += 4 * samplingStep) {
+        const skip = Math.max(4, Math.floor(len / 4000));
+        for (let i = 0; i < len; i += skip * 4) {
             const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
             samples.push(luma);
         }
         samples.sort((a,b) => a-b);
-        const bgLumaRef = samples[Math.floor(samples.length * 0.95)] || 220; // 95th percentile as paper estimate
-        
+        const bgRef = samples[Math.floor(samples.length * 0.95)] || 230;
+
+        // Step B: Normalized Content Enhancement
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             const chroma = Math.max(r, g, b) - Math.min(r, g, b);
             
-            // Content segmentation: Is it a logo/photo or document background?
-            const isNeutral = chroma < 40; 
-            const isTextCandidate = isNeutral && luma < bgLumaRef * 0.85;
+            // Intelligence: Segment Photos/Stamps from Paper/Text
+            const isPhoto = chroma > 45 || luma < 50; 
 
-            if (activeFilter === 'magic' || activeFilter === 'document') {
-                // Soft Illumination normalization
-                const normFactor = 255 / Math.max(128, bgLumaRef);
-                if (isNeutral) {
-                    const enhanced = Math.min(255, luma * normFactor);
-                    const contrastBoost = luma < 100 ? 0.85 : 1.1; 
-                    pixels[i] = pixels[i+1] = pixels[i+2] = enhanced * contrastBoost;
+            if (activeFilter === 'document' || activeFilter === 'magic') {
+                const norm = 255 / Math.max(128, bgRef);
+                if (!isPhoto) {
+                    const enhanced = Math.min(255, luma * norm);
+                    // Adaptive contrast mapping for text darkening
+                    const finalVal = enhanced < 120 ? enhanced * 0.7 : enhanced;
+                    pixels[i] = pixels[i+1] = pixels[i+2] = finalVal;
                 } else {
-                    // Protected layer for logos/stamps
-                    pixels[i] = Math.min(255, r * 1.15);
-                    pixels[i+1] = Math.min(255, g * 1.15);
-                    pixels[i+2] = Math.min(255, b * 1.15);
+                    // Protected photo layer: preserve color saturation
+                    pixels[i] = Math.min(255, r * 1.1);
+                    pixels[i+1] = Math.min(255, g * 1.1);
+                    pixels[i+2] = Math.min(255, b * 1.1);
                 }
             } else if (activeFilter === 'bw') {
-                // Adaptive soft thresholding (Adobe style)
-                if (luma > bgLumaRef * 0.75) {
-                    pixels[i] = pixels[i+1] = pixels[i+2] = 255; // Paper whitening
-                } else if (isTextCandidate) {
-                    const val = Math.max(0, (luma / bgLumaRef) * 128); // Deepening text but not binary
+                if (!isPhoto) {
+                    const val = luma > bgRef * 0.7 ? 255 : Math.max(0, luma * 0.6);
                     pixels[i] = pixels[i+1] = pixels[i+2] = val;
                 } else {
-                    // Protected photo/signature layer in B&W
-                    pixels[i] = pixels[i+1] = pixels[i+2] = luma * 1.05;
+                    // Preserve photos in grayscale rather than harsh thresholding
+                    pixels[i] = pixels[i+1] = pixels[i+2] = luma;
                 }
             } else if (activeFilter === 'gray') {
-                pixels[i] = pixels[i+1] = pixels[i+2] = Math.min(255, luma * (255 / bgLumaRef));
+                pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             } else if (activeFilter === 'photo') {
-                // HDR-like color recovery
-                pixels[i] = Math.min(255, r * 1.1);
-                pixels[i+1] = Math.min(255, g * 1.1);
-                pixels[i+2] = Math.min(255, b * 1.1);
+                pixels[i] = Math.min(255, r * 1.15);
+                pixels[i+1] = Math.min(255, g * 1.15);
+                pixels[i+2] = Math.min(255, b * 1.15);
             }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -304,8 +293,10 @@ export default function ScannerToPdf() {
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage) {
         const timer = setTimeout(async () => {
+            setIsProcessing(true);
             const res = await applyIntelligentScan();
             setLiveResultSrc(res);
+            setIsProcessing(false);
         }, 150);
         return () => clearTimeout(timer);
     }
@@ -331,7 +322,7 @@ export default function ScannerToPdf() {
           reader.onload = () => { setCurrentRawImage(reader.result as string); setStage('adjust'); };
           reader.readAsDataURL(file);
       }
-  }
+  };
 
   const handleRotateSource = () => {
     if (!currentRawImage) return;
@@ -363,28 +354,6 @@ export default function ScannerToPdf() {
     setStage('stack');
     setCurrentRawImage(null);
     setLiveResultSrc(null);
-  };
-
-  const handleBuildPdf = async () => {
-    setIsBuildingPdf(true);
-    try {
-        const pdf = new jsPDF();
-        for (let i = 0; i < scannedPages.length; i++) {
-            if (i > 0) pdf.addPage();
-            const src = scannedPages[i].processedSrc;
-            const props = pdf.getImageProperties(src);
-            const pw = pdf.internal.pageSize.getWidth();
-            const ph = pdf.internal.pageSize.getHeight();
-            const ratio = Math.min(pw / props.width, ph / props.height);
-            pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
-        }
-        pdf.save(`Clean-Scan-${Date.now()}.pdf`);
-        toast({ title: "PDF Ready", description: "All pages bundled successfully." });
-    } catch (e) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate PDF.' });
-    } finally {
-        setIsBuildingPdf(false);
-    }
   };
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
@@ -427,7 +396,6 @@ export default function ScannerToPdf() {
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4">
         
-        {/* VIEWFINDER STAGE */}
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-6">
@@ -441,7 +409,7 @@ export default function ScannerToPdf() {
                         )}
                         <div className="absolute bottom-6 right-6 z-20">
                              <Button variant="secondary" className="h-12 rounded-xl font-black uppercase text-[10px] shadow-2xl px-6" onClick={() => fileInputRef.current?.click()}>
-                                <ImageIcon className="mr-2 size-4 text-primary" /> OPEN GALLERY
+                                <ImageIcon className="mr-2 size-4 text-primary" /> UPLOAD PHOTO
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                         </div>
@@ -472,8 +440,19 @@ export default function ScannerToPdf() {
                             </div>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-muted/10">
-                            <Button disabled={scannedPages.length === 0 || isBuildingPdf} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase tracking-widest" onClick={handleBuildPdf}>
-                                {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2 size-5" />} GENERATE BUNDLE ({scannedPages.length})
+                            <Button disabled={scannedPages.length === 0 || isBuildingPdf} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase tracking-widest" onClick={() => {
+                                const pdf = new jsPDF();
+                                scannedPages.forEach((p, i) => {
+                                    if(i > 0) pdf.addPage();
+                                    const props = pdf.getImageProperties(p.processedSrc);
+                                    const pw = pdf.internal.pageSize.getWidth();
+                                    const ph = pdf.internal.pageSize.getHeight();
+                                    const ratio = Math.min(pw / props.width, ph / props.height);
+                                    pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio);
+                                });
+                                pdf.save('GR7-Scan-Bundle.pdf');
+                            }}>
+                                <Download className="mr-2 size-5" /> GENERATE BUNDLE ({scannedPages.length})
                             </Button>
                         </CardFooter>
                     </Card>
@@ -481,15 +460,14 @@ export default function ScannerToPdf() {
             </div>
         )}
 
-        {/* ADJUSTMENT STUDIO STAGE */}
         {stage === 'adjust' && currentRawImage && (
             <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] animate-in zoom-in-95 duration-500 bg-slate-900">
                 <CardHeader className="bg-white/5 border-b border-white/5 p-4 flex flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                         <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Maximize className="size-6" /></div>
-                         <div>
-                            <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white">Region Aware Editor</CardTitle>
-                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Soft Illumination Normalization Active</CardDescription>
+                    <div className="flex items-center gap-4 text-white">
+                         <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
+                         <div className="text-left">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
+                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Content-Aware Masking Active</CardDescription>
                          </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -506,13 +484,12 @@ export default function ScannerToPdf() {
                 <CardContent className="p-0 grid lg:grid-cols-2 min-h-[500px] md:min-h-[750px] relative overflow-hidden select-none"
                              onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                     
-                    {/* EDITING WINDOW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative bg-slate-950">
-                        <Badge className="absolute top-4 left-4 z-20 bg-primary text-black font-black text-[9px] uppercase">Alignment Source</Badge>
+                        <Badge className="absolute top-4 left-4 z-20 bg-primary text-black font-black text-[9px] uppercase tracking-widest">Alignment Source</Badge>
                         <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[55vh] md:max-h-[65vh]">
-                                    <img ref={imgRef} src={currentRawImage} alt="rect" className="max-h-[55vh] md:max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[55vh] md:max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
@@ -540,20 +517,19 @@ export default function ScannerToPdf() {
                         </div>
                     </div>
 
-                    {/* LIVE HD RESULT WINDOW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-800 relative h-full shadow-inner">
-                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white/20 font-black text-[10px] uppercase tracking-widest shadow-xl">REAL-TIME HD VIEW</Badge>
+                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white/20 font-black text-[10px] uppercase tracking-widest shadow-xl animate-pulse">LIVE HD VIEW</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
-                             <div className="relative bg-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] rounded-sm border-[8px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden aspect-auto transition-all duration-300">
+                             <div className="relative bg-white shadow-3xl rounded-sm border-[8px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden transition-all duration-300">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin text-primary size-12" />}
                              </div>
                              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 w-full max-w-2xl px-4">
-                                <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" color="text-yellow-400" />
-                                <FilterBtn active={activeFilter === 'document'} onClick={() => setActiveFilter('document')} icon={FileText} label="Doc Pro" color="text-blue-400" />
+                                <FilterBtn active={activeFilter === 'document'} onClick={() => setActiveFilter('document')} icon={FileText} label="DOC PRO" color="text-blue-400" />
+                                <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="MAGIC" color="text-yellow-400" />
                                 <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="ADOBE B/W" color="text-slate-400" />
-                                <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="Natural" color="text-purple-400" />
-                                <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="Gray" color="text-sky-400" />
-                                <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="Raw" color="text-rose-400" />
+                                <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="NATURAL" color="text-purple-400" />
+                                <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="GRAY" color="text-sky-400" />
+                                <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="RAW" color="text-rose-400" />
                              </div>
                         </div>
                     </div>
@@ -571,7 +547,6 @@ export default function ScannerToPdf() {
             </Card>
         )}
 
-        {/* SCAN STACK STAGE */}
         {stage === 'stack' && (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -586,9 +561,20 @@ export default function ScannerToPdf() {
                     </div>
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl font-black uppercase text-xs border-2 tracking-widest px-8 bg-white dark:bg-slate-900" onClick={() => setStage('viewfinder')}>
-                            <Plus className="mr-2 size-5" /> SCAN MORE
+                            <Plus className="mr-2 size-5" /> SCAN NEXT
                         </Button>
-                        <Button className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleBuildPdf} disabled={isBuildingPdf}>
+                        <Button className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={() => {
+                            const pdf = new jsPDF();
+                            scannedPages.forEach((p, i) => {
+                                if(i > 0) pdf.addPage();
+                                const props = pdf.getImageProperties(p.processedSrc);
+                                const pw = pdf.internal.pageSize.getWidth();
+                                const ph = pdf.internal.pageSize.getHeight();
+                                const ratio = Math.min(pw / props.width, ph / props.height);
+                                pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
+                            });
+                            pdf.save('GR7-Document-Scan.pdf');
+                        }} disabled={isBuildingPdf}>
                             {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} EXPORT AS PDF ({scannedPages.length})
                         </Button>
                     </div>
@@ -633,4 +619,3 @@ function FilterBtn({ active, onClick, icon: Icon, label, color }: { active: bool
         </button>
     );
 }
-
