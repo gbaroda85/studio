@@ -34,7 +34,6 @@ import {
     Monitor,
     Smartphone,
     SearchCode,
-    Check,
     Type,
     Frame,
     Wand2,
@@ -50,17 +49,14 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 
-/**
- * INDUSTRIAL GRADE PERSPECTIVE WARP
- * Correctly maps 4 major corners while handling 6-dot UI handles
- */
 interface Point { x: number; y: number; }
 
+/**
+ * Robust Perspective Transformation Matrix Solver
+ */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
-    // Points Index: 0:TL, 1:TR, 2:MR, 3:BR, 4:BL, 5:ML
-    // Primary Corners are: TL(0), TR(1), BR(3), BL(4)
-    const corners = [src[0], src[1], src[3], src[4]];
+    const corners = [src[0], src[1], src[3], src[4]]; // Index mapping for 6-dot setup
     
     for (let i = 0; i < 4; i++) {
         p.push([dst[i].x, dst[i].y, 1, 0, 0, 0, -dst[i].x * corners[i].x, -dst[i].y * corners[i].x, corners[i].x]);
@@ -110,18 +106,18 @@ export default function ScannerToPdf() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBuildingPdf, setIsBuildingPdf] = useState(false);
 
-  // Rect Crop States
-  const [rectCrop, setRectCrop] = useState<Crop>();
-  const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
-  
-  // 6 Points UI
+  // Points UI (6-dot configuration for better edge control)
   const [points, setPoints] = useState<Point[]>([
-      { x: 10, y: 10 }, { x: 90, y: 10 },
-      { x: 90, y: 50 }, { x: 90, y: 90 },
-      { x: 10, y: 90 }, { x: 10, y: 50 }
+      { x: 10, y: 10 }, { x: 90, y: 10 }, // Top
+      { x: 90, y: 50 },                  // Right Mid
+      { x: 90, y: 90 }, { x: 10, y: 90 }, // Bottom
+      { x: 10, y: 50 }                   // Left Mid
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
+  
+  const [rectCrop, setRectCrop] = useState<Crop>();
+  const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -168,7 +164,8 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * PREMIUM SEGMENTATION & ENHANCEMENT ENGINE
+   * PREMIUM SCAN ENHANCEMENT PIPELINE
+   * Local adaptive processing for crisp results
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -178,13 +175,13 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. DYNAMIC PERSPECTIVE WARP (ORIENTATION AWARE)
+    // 1. DYNAMIC PERSPECTIVE WARP
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        canvas.width = Math.max(100, c.width * scaleX);
-        canvas.height = Math.max(100, c.height * scaleY);
+        canvas.width = Math.max(10, c.width * scaleX);
+        canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
         const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
@@ -192,10 +189,10 @@ export default function ScannerToPdf() {
         const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
         const h2 = Math.hypot(points[3].x - points[1].x, points[3].y - points[1].y);
         
-        const targetWidth = Math.max(100, Math.max(w1, w2) * (image.naturalWidth / 100));
-        const targetHeight = Math.max(100, Math.max(h1, h2) * (image.naturalHeight / 100));
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+        const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
+        const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
+        canvas.width = Math.max(10, targetWidth);
+        canvas.height = Math.max(10, targetHeight);
 
         const srcPxPoints = points.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
         const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
@@ -230,58 +227,59 @@ export default function ScannerToPdf() {
         }
     }
 
-    // 2. ADOBE/CAMSCANNER STYLE ILLUMINATION NORMALIZATION
+    // 2. INDUSTRIAL ILLUMINATION NORMALIZATION (Shadow Removal)
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Step A: Sample background white level (paper estimate)
-        let samples = [];
+        // Auto-Paper-White Balance
+        let hist = new Array(256).fill(0);
         const skip = Math.max(4, Math.floor(len / 4000));
         for (let i = 0; i < len; i += skip * 4) {
-            const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
-            samples.push(luma);
+            const luma = Math.round(0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
+            hist[luma]++;
         }
-        samples.sort((a,b) => a-b);
-        const bgRef = samples[Math.floor(samples.length * 0.95)] || 230;
+        let whiteRef = 255;
+        let count = 0;
+        for (let i = 255; i >= 0; i--) {
+            count += hist[i];
+            if (count > (len / (skip * 4)) * 0.05) { whiteRef = i; break; }
+        }
 
-        // Step B: Normalized Content Enhancement
+        const normFactor = 255 / Math.max(whiteRef, 128);
+
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             const chroma = Math.max(r, g, b) - Math.min(r, g, b);
             
-            // Intelligence: Segment Photos/Stamps from Paper/Text
-            const isPhoto = chroma > 45 || luma < 50; 
+            // Protected Region: Preserve photos/stamps/logos
+            const isProtected = chroma > 40 || luma < 40;
 
             if (activeFilter === 'document' || activeFilter === 'magic') {
-                const norm = 255 / Math.max(128, bgRef);
-                if (!isPhoto) {
-                    const enhanced = Math.min(255, luma * norm);
-                    // Adaptive contrast mapping for text darkening
-                    const finalVal = enhanced < 120 ? enhanced * 0.7 : enhanced;
-                    pixels[i] = pixels[i+1] = pixels[i+2] = finalVal;
+                if (!isProtected) {
+                    const enhanced = Math.min(255, luma * normFactor);
+                    const contrastFix = enhanced < 130 ? enhanced * 0.8 : 255;
+                    pixels[i] = pixels[i+1] = pixels[i+2] = contrastFix;
                 } else {
-                    // Protected photo layer: preserve color saturation
-                    pixels[i] = Math.min(255, r * 1.1);
-                    pixels[i+1] = Math.min(255, g * 1.1);
-                    pixels[i+2] = Math.min(255, b * 1.1);
+                    pixels[i] = Math.min(255, r * 1.15);
+                    pixels[i+1] = Math.min(255, g * 1.15);
+                    pixels[i+2] = Math.min(255, b * 1.15);
                 }
             } else if (activeFilter === 'bw') {
-                if (!isPhoto) {
-                    const val = luma > bgRef * 0.7 ? 255 : Math.max(0, luma * 0.6);
+                if (!isProtected) {
+                    const val = luma > whiteRef * 0.75 ? 255 : 0;
                     pixels[i] = pixels[i+1] = pixels[i+2] = val;
                 } else {
-                    // Preserve photos in grayscale rather than harsh thresholding
                     pixels[i] = pixels[i+1] = pixels[i+2] = luma;
                 }
             } else if (activeFilter === 'gray') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             } else if (activeFilter === 'photo') {
-                pixels[i] = Math.min(255, r * 1.15);
-                pixels[i+1] = Math.min(255, g * 1.15);
-                pixels[i+2] = Math.min(255, b * 1.15);
+                pixels[i] = Math.min(255, r * 1.2);
+                pixels[i+1] = Math.min(255, g * 1.2);
+                pixels[i+2] = Math.min(255, b * 1.2);
             }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -337,11 +335,6 @@ export default function ScannerToPdf() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
-        setPoints([
-            { x: 10, y: 10 }, { x: 90, y: 10 },
-            { x: 90, y: 50 }, { x: 90, y: 90 },
-            { x: 10, y: 90 }, { x: 10, y: 50 }
-        ]);
     };
   };
 
@@ -380,18 +373,21 @@ export default function ScannerToPdf() {
     setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
-        if (draggingPoint === 2) { 
+        if (draggingPoint === 2) { // Right edge handle
             next[1].x = x; next[2].x = x; next[3].x = x;
-        } else if (draggingPoint === 5) {
+        } else if (draggingPoint === 5) { // Left edge handle
             next[0].x = x; next[5].x = x; next[4].x = x;
         } else {
             next[draggingPoint] = { x, y };
+            // Auto-update mid points
             if (draggingPoint === 0 || draggingPoint === 4) next[5] = { x: (next[0].x + next[4].x)/2, y: (next[0].y + next[4].y)/2 };
             if (draggingPoint === 1 || draggingPoint === 3) next[2] = { x: (next[1].x + next[3].x)/2, y: (next[1].y + next[3].y)/2 };
         }
         return next;
     });
   };
+
+  const handleMouseUp = () => setDraggingPoint(null);
 
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4">
@@ -407,7 +403,7 @@ export default function ScannerToPdf() {
                                 <Button onClick={startCamera} className="bg-primary text-black font-black uppercase text-xs rounded-xl h-12 px-8">Retry Camera Access</Button>
                             </div>
                         )}
-                        <div className="absolute bottom-6 right-6 z-20">
+                        <div className="absolute bottom-6 right-6 z-20 flex gap-2">
                              <Button variant="secondary" className="h-12 rounded-xl font-black uppercase text-[10px] shadow-2xl px-6" onClick={() => fileInputRef.current?.click()}>
                                 <ImageIcon className="mr-2 size-4 text-primary" /> UPLOAD PHOTO
                             </Button>
@@ -440,7 +436,7 @@ export default function ScannerToPdf() {
                             </div>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-muted/10">
-                            <Button disabled={scannedPages.length === 0 || isBuildingPdf} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase tracking-widest" onClick={() => {
+                            <Button disabled={scannedPages.length === 0} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase tracking-widest" onClick={() => {
                                 const pdf = new jsPDF();
                                 scannedPages.forEach((p, i) => {
                                     if(i > 0) pdf.addPage();
@@ -448,11 +444,11 @@ export default function ScannerToPdf() {
                                     const pw = pdf.internal.pageSize.getWidth();
                                     const ph = pdf.internal.pageSize.getHeight();
                                     const ratio = Math.min(pw / props.width, ph / props.height);
-                                    pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio);
+                                    pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
                                 });
                                 pdf.save('GR7-Scan-Bundle.pdf');
                             }}>
-                                <Download className="mr-2 size-5" /> GENERATE BUNDLE ({scannedPages.length})
+                                <Download className="mr-2 size-5" /> EXPORT AS PDF ({scannedPages.length})
                             </Button>
                         </CardFooter>
                     </Card>
@@ -467,7 +463,7 @@ export default function ScannerToPdf() {
                          <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
                          <div className="text-left">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
-                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Content-Aware Masking Active</CardDescription>
+                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">CamScanner Engine Active</CardDescription>
                          </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -477,12 +473,12 @@ export default function ScannerToPdf() {
                                 <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4 data-[state=active]:bg-white data-[state=active]:text-black">SCANNER</TabsTrigger>
                             </TabsList>
                         </Tabs>
-                        <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-11 w-11 border-2 border-white/10 rounded-xl text-white bg-white/5 hover:bg-white/10"><RotateCw className="size-5" /></Button>
+                        <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 border-white/10 rounded-xl text-white bg-white/5 hover:bg-white/10"><RotateCw className="size-5" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-white hover:bg-white/10"><X /></Button>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 grid lg:grid-cols-2 min-h-[500px] md:min-h-[750px] relative overflow-hidden select-none"
-                             onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                             onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                     
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative bg-slate-950">
                         <Badge className="absolute top-4 left-4 z-20 bg-primary text-black font-black text-[9px] uppercase tracking-widest">Alignment Source</Badge>
@@ -521,7 +517,7 @@ export default function ScannerToPdf() {
                         <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white/20 font-black text-[10px] uppercase tracking-widest shadow-xl animate-pulse">LIVE HD VIEW</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
                              <div className="relative bg-white shadow-3xl rounded-sm border-[8px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden transition-all duration-300">
-                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin text-primary size-12" />}
+                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <div className="p-20 text-white animate-pulse"><Loader2 className="animate-spin size-12" /></div>}
                              </div>
                              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 w-full max-w-2xl px-4">
                                 <FilterBtn active={activeFilter === 'document'} onClick={() => setActiveFilter('document')} icon={FileText} label="DOC PRO" color="text-blue-400" />
@@ -537,7 +533,7 @@ export default function ScannerToPdf() {
                 <CardFooter className="bg-black/40 p-6 border-t border-white/5 flex justify-between items-center gap-4">
                     <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase opacity-50 tracking-[0.2em] text-white">
                          <div className="flex items-center gap-2"><ShieldCheck className="size-5 text-green-500"/> LOCAL RAM</div>
-                         <div className="flex items-center gap-2"><Zap className="size-5 text-yellow-500"/> SOFT ENHANCE</div>
+                         <div className="flex items-center gap-2"><Zap className="size-5 text-yellow-500"/> HD ENCODE</div>
                          <div className="flex items-center gap-2"><Layers className="size-5 text-primary"/> REGION SAFE</div>
                     </div>
                     <Button className="h-16 rounded-2xl bg-primary text-black font-black text-xl px-16 group shadow-3xl hover:scale-105 transition-all" onClick={handleConfirmAdd}>
@@ -573,9 +569,9 @@ export default function ScannerToPdf() {
                                 const ratio = Math.min(pw / props.width, ph / props.height);
                                 pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
                             });
-                            pdf.save('GR7-Document-Scan.pdf');
-                        }} disabled={isBuildingPdf}>
-                            {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} EXPORT AS PDF ({scannedPages.length})
+                            pdf.save('GR7-Scan-Bundle.pdf');
+                        }}>
+                            <Download className="mr-3 size-6" /> EXPORT AS PDF ({scannedPages.length})
                         </Button>
                     </div>
                 </div>
