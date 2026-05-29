@@ -24,7 +24,8 @@ import {
     ChevronRight,
     Camera,
     RefreshCcw,
-    Settings2
+    Settings2,
+    Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
