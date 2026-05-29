@@ -31,7 +31,8 @@ import {
     Layout,
     Sun,
     Droplets,
-    Scan
+    Plus,
+    FileStack
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -41,11 +42,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
-import * as pdfjs from 'pdfjs-dist';
-
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-}
 
 interface Point {
     x: number;
@@ -129,7 +125,6 @@ export default function ScannerToPdf() {
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
-    // Default 6-point layout
     setPoints([
         { x: 10, y: 10 }, { x: 90, y: 10 },
         { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -137,14 +132,9 @@ export default function ScannerToPdf() {
     ]);
   };
 
-  /**
-   * MATHEMATICALLY CORRECT PERSPECTIVE SOLVER
-   * Maps destination square to source quadrilateral
-   */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // Standard 4-corner warp logic (TL, TR, BR, BL)
-    // corners mapping from our 6-point array: 0, 1, 3, 4
+    // Key Corner Mapping for 6-dot setup: 0(TL), 1(TR), 3(BR), 4(BL)
     const corners = [src[0], src[1], src[3], src[4]];
     
     for (let i = 0; i < 4; i++) {
@@ -219,6 +209,7 @@ export default function ScannerToPdf() {
                         const dstIdx = (y * canvas.width + x) * 4;
                         const srcIdx = (sy * image.naturalWidth + sx) * 4;
                         imgData.data[dstIdx] = srcPixels[srcIdx];
+                        imgData.data[dstIdx+1] = srcPixels[srcPixels + 1]; // Simplified
                         imgData.data[dstIdx+1] = srcPixels[srcIdx+1];
                         imgData.data[dstIdx+2] = srcPixels[srcIdx+2];
                         imgData.data[dstIdx+3] = srcPixels[srcIdx+3];
@@ -229,12 +220,11 @@ export default function ScannerToPdf() {
         }
     }
 
-    // PREMIUM ENHANCEMENT PIPELINE
+    // PREMIUM FILTERS ENGINE
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
-
-        // 1. Calculate Average Luma for Adaptive Normalization
+        
         let totalLuma = 0;
         for (let i = 0; i < pixels.length; i += 4) {
             totalLuma += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
@@ -247,16 +237,13 @@ export default function ScannerToPdf() {
             const chroma = Math.max(r, g, b) - Math.min(r, g, b);
 
             if (activeFilter === 'magic' || activeFilter === 'photo') {
-                // High-Pass Color Preservation
-                const factor = luma < 120 ? 1.15 : (luma > 200 ? 1.4 : 1.25);
+                const factor = luma < 120 ? 1.15 : (luma > 200 ? 1.35 : 1.25);
                 pixels[i] = Math.min(255, r * factor);
                 pixels[i+1] = Math.min(255, g * factor);
                 pixels[i+2] = Math.min(255, b * factor);
             } else if (activeFilter === 'bw') {
-                // Adaptive Document Thresholding
                 const thresh = avgLuma * 0.95;
-                // Preserve dark ink and colorful stamps
-                if (chroma > 40 && luma < 200) {
+                if (chroma > 40 && luma < 200) { // Keep stamps
                      pixels[i] = r; pixels[i+1] = g; pixels[i+2] = b;
                 } else {
                     const val = luma > thresh ? 255 : (luma < 60 ? 0 : luma * 0.6);
@@ -282,45 +269,6 @@ export default function ScannerToPdf() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
 
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      let cx, cy;
-      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
-      setDraggingPoint(idx);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
-    if (e.cancelable) e.preventDefault();
-    let cx, cy;
-    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
-
-    setMagnifierPos({ x, y });
-    setPoints(prev => {
-        const next = [...prev];
-        // Linked interaction for 6-dot handles
-        if (draggingPoint === 2) { // Right Mid
-            next[1].x = x; next[2].x = x; next[3].x = x;
-        } else if (draggingPoint === 5) { // Left Mid
-            next[0].x = x; next[5].x = x; next[4].x = x;
-        } else {
-            next[draggingPoint] = { x, y };
-            // Update mid points relative to corners
-            if (draggingPoint === 0 || draggingPoint === 4) next[5] = { x: (next[0].x + next[4].x)/2, y: (next[0].y + next[4].y)/2 };
-            if (draggingPoint === 1 || draggingPoint === 3) next[2] = { x: (next[1].x + next[3].x)/2, y: (next[1].y + next[3].y)/2 };
-        }
-        return next;
-    });
-  };
-
   const handleCapture = () => {
     if (!videoRef.current) return;
     const canvas = document.createElement('canvas');
@@ -345,7 +293,6 @@ export default function ScannerToPdf() {
 
   const handleRotateSource = () => {
     if (!currentRawImage) return;
-    setIsProcessing(true);
     const img = new window.Image();
     img.src = currentRawImage;
     img.onload = () => {
@@ -357,11 +304,10 @@ export default function ScannerToPdf() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
-        setIsProcessing(false);
     };
   };
 
-  const handleConfirmPage = () => {
+  const handleConfirmAdd = () => {
     if (!liveResultSrc) return;
     setScannedPages(prev => [...prev, {
         id: Math.random().toString(36).substr(2, 9),
@@ -370,6 +316,8 @@ export default function ScannerToPdf() {
         filter: activeFilter
     }]);
     setStage('stack');
+    setCurrentRawImage(null);
+    setLiveResultSrc(null);
   };
 
   const handleBuildPdf = async () => {
@@ -384,8 +332,45 @@ export default function ScannerToPdf() {
         const ratio = Math.min(pw / props.width, ph / props.height);
         pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
     }
-    pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
+    pdf.save(`Document-Scan-${Date.now()}.pdf`);
     setIsBuildingPdf(false);
+  };
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      let cx, cy;
+      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
+      setDraggingPoint(idx);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current) return;
+    if (e.cancelable) e.preventDefault();
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+
+    setMagnifierPos({ x, y });
+    setPoints(prev => {
+        const next = [...prev];
+        if (draggingPoint === 2) { // MR
+            next[1].x = x; next[2].x = x; next[3].x = x;
+        } else if (draggingPoint === 5) { // ML
+            next[0].x = x; next[5].x = x; next[4].x = x;
+        } else {
+            next[draggingPoint] = { x, y };
+            if (draggingPoint === 0 || draggingPoint === 4) next[5] = { x: (next[0].x + next[4].x)/2, y: (next[0].y + next[4].y)/2 };
+            if (draggingPoint === 1 || draggingPoint === 3) next[2] = { x: (next[1].x + next[3].x)/2, y: (next[1].y + next[3].y)/2 };
+        }
+        return next;
+    });
   };
 
   return (
@@ -404,12 +389,12 @@ export default function ScannerToPdf() {
                         )}
                         <div className="absolute bottom-6 right-6 z-20">
                              <Button variant="secondary" className="h-12 rounded-xl font-black uppercase text-[9px] shadow-2xl" onClick={() => fileInputRef.current?.click()}>
-                                <ImageIcon className="mr-2 size-4" /> UPLOAD PHOTO
+                                <ImageIcon className="mr-2 size-4" /> GALLERY
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                         </div>
                     </Card>
-                    <div className="mt-6"><Button onClick={handleCapture} className="h-20 w-full bg-gradient-button text-white font-black text-xl rounded-2xl shadow-3xl">SCAN DOCUMENT</Button></div>
+                    <div className="mt-6"><Button onClick={handleCapture} className="h-20 w-full bg-gradient-button text-white font-black text-xl rounded-2xl shadow-3xl">SCAN CURRENT PAGE</Button></div>
                 </div>
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] min-h-[400px]">
@@ -427,7 +412,7 @@ export default function ScannerToPdf() {
                                 ))}
                             </div>
                         </CardContent>
-                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-primary font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>{isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2" />} BUILD PDF</Button></CardFooter>
+                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-primary font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>{isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2" />} GENERATE PDF ({scannedPages.length})</Button></CardFooter>
                     </Card>
                 </div>
             </div>
@@ -452,7 +437,6 @@ export default function ScannerToPdf() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 bg-slate-900 grid lg:grid-cols-2 min-h-[500px] md:min-h-[700px] relative overflow-hidden select-none">
-                    {/* LEFT: EDITING WINDOW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative h-full"
                          onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
@@ -487,12 +471,11 @@ export default function ScannerToPdf() {
                         </div>
                     </div>
 
-                    {/* RIGHT: LIVE HD RESULT */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-800 relative h-full">
                         <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white">LIVE HD PREVIEW</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
-                             <div className="relative bg-white shadow-3xl rounded-sm border-[6px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden">
-                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block" alt="result" /> : <Loader2 className="animate-spin text-primary size-10" />}
+                             <div className="relative bg-white shadow-3xl rounded-sm border-[6px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden aspect-auto">
+                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin text-primary size-10" />}
                              </div>
                              <div className="grid grid-cols-5 gap-2 w-full max-w-lg no-print">
                                 <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" />
@@ -509,11 +492,56 @@ export default function ScannerToPdf() {
                          <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500"/> SECURE RAM</div>
                          <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500"/> HD ENCODE</div>
                     </div>
-                    <Button className="h-16 rounded-2xl bg-primary text-black font-black text-lg px-12 group shadow-2xl" onClick={handleConfirmPage}>
+                    <Button className="h-16 rounded-2xl bg-primary text-black font-black text-lg px-12 group shadow-2xl" onClick={handleConfirmAdd}>
                         CONFIRM & ADD <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                 </CardFooter>
             </Card>
+        )}
+
+        {stage === 'stack' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-lg border border-green-500/20">
+                            <FileStack className="size-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tighter">Scan Bundle</h2>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">{scannedPages.length} Pages Extracted</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <Button variant="outline" className="flex-1 md:flex-none h-12 rounded-xl font-black uppercase text-[10px] border-2" onClick={() => setStage('viewfinder')}>
+                            <Plus className="mr-2 size-4" /> SCAN MORE
+                        </Button>
+                        <Button className="flex-1 md:flex-none h-12 px-8 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>
+                            <Download className="mr-2 size-4" /> DOWNLOAD PDF
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {scannedPages.map((page, i) => (
+                        <Card key={page.id} className="group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 bg-white shadow-xl hover:border-primary/40 transition-all hover:-translate-y-1">
+                            <img src={page.processedSrc} className="size-full object-cover" alt={`p${i+1}`} />
+                            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">{i + 1}</div>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <Button size="icon" variant="destructive" className="size-10 rounded-xl" onClick={() => setScannedPages(prev => prev.filter(p => p.id !== page.id))}><Trash2 className="size-5" /></Button>
+                            </div>
+                        </Card>
+                    ))}
+                    <button 
+                        className="aspect-[3/4] border-2 border-dashed border-muted-foreground/20 rounded-2xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all group"
+                        onClick={() => setStage('viewfinder')}
+                    >
+                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                            <Plus className="size-6" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Add Page</span>
+                    </button>
+                </div>
+            </div>
         )}
     </div>
   );
