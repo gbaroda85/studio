@@ -165,6 +165,10 @@ export default function ScannerToPdf() {
     ]);
   };
 
+  /**
+   * Premium Region-Aware Scan Logic
+   * Calibrated for readability and shadow removal.
+   */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage) return "";
@@ -173,6 +177,7 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
+    // Step 1: Perspective / Rect Crop
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -223,17 +228,19 @@ export default function ScannerToPdf() {
         }
     }
 
+    // Step 2: Advanced Filtering (Region-Aware)
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const len = pixels.length;
 
+        // Illumination Normalization
         let bgSum = 0;
         let bgCount = 0;
         const skip = Math.max(8, Math.floor(len / 4000));
         for (let i = 0; i < len; i += skip * 4) {
             const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
-            if (luma > 100) { bgSum += luma; bgCount++; }
+            if (luma > 110) { bgSum += luma; bgCount++; }
         }
         
         const whitePoint = bgCount > 0 ? bgSum / bgCount : 220;
@@ -245,39 +252,39 @@ export default function ScannerToPdf() {
             const normalizedLuma = Math.min(255, luma * normFactor);
 
             if (activeFilter === 'bw') {
+                // Adaptive soft sigmoidal threshold for BW PRO
                 let val;
                 if (normalizedLuma < 135) {
-                    val = Math.pow(normalizedLuma / 135, 1.3) * 60;
+                    val = Math.pow(normalizedLuma / 135, 1.4) * 55; // Dark Text
                 } else if (normalizedLuma > 200) {
-                    val = 255;
+                    val = 255; // Clean Paper
                 } else {
                     const t = (normalizedLuma - 135) / 65;
-                    val = 60 + t * (255 - 60);
+                    val = 55 + t * (255 - 55); // Smooth Transition
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'document') {
+                // MAGIC/DOC Mode: High readability, preserved detail
                 let val;
                 if (normalizedLuma > 195) val = 255;
-                else if (normalizedLuma < 120) val = normalizedLuma * 0.45;
+                else if (normalizedLuma < 110) val = normalizedLuma * 0.4;
                 else {
-                    const t = (normalizedLuma - 120) / 75;
-                    val = 50 + t * (255 - 50);
+                    const t = (normalizedLuma - 110) / 85;
+                    val = 45 + t * (255 - 45);
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'magic') {
-                pixels[i] = Math.min(255, r * normFactor * 1.08);
-                pixels[i+1] = Math.min(255, g * normFactor * 1.08);
-                pixels[i+2] = Math.min(255, b * normFactor * 1.08);
-                for (let j = 0; j < 3; j++) {
-                    const c = pixels[i+j];
-                    pixels[i+j] = c > 210 ? 255 : c < 90 ? c * 0.75 : c;
-                }
-            } else if (activeFilter === 'gray') {
-                pixels[i] = pixels[i+1] = pixels[i+2] = luma;
+                // Color Magic: Preserves signatures/stamps
+                pixels[i] = Math.min(255, r * normFactor * 1.05);
+                pixels[i+1] = Math.min(255, g * normFactor * 1.05);
+                pixels[i+2] = Math.min(255, b * normFactor * 1.05);
             } else if (activeFilter === 'photo') {
+                // PHOTO: Balanced brightness boost (+15% with offset)
                 pixels[i] = Math.min(255, r * 1.15 + 10);
                 pixels[i+1] = Math.min(255, g * 1.15 + 10);
                 pixels[i+2] = Math.min(255, b * 1.15 + 10);
+            } else if (activeFilter === 'gray') {
+                pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -395,48 +402,32 @@ export default function ScannerToPdf() {
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
-                    {/* ENHANCED MOBILE CAMERA VIEW */}
+                    {/* FULL FRAME MOBILE CAMERA */}
                     <div className="relative w-full overflow-hidden bg-black rounded-[2rem] md:rounded-[3rem] shadow-3xl h-[65vh] md:h-[600px] border-4 border-white/10">
                         <video 
                             ref={videoRef} 
-                            className={cn(
-                                "w-full h-full",
-                                // On mobile, cover the space to feel native. On desktop, contain to see full frame.
-                                "object-cover md:object-contain",
-                                !hasCameraPermission && "hidden"
-                            )} 
+                            className="w-full h-full object-cover md:object-contain"
                             autoPlay 
                             muted 
                             playsInline 
                         />
-                        
-                        {/* Overlay Controls */}
                         {!hasCameraPermission && hasCameraPermission !== null && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-black/60 backdrop-blur-sm z-30">
                                 <Smartphone className="size-16 mb-4 text-white/20" />
-                                <p className="text-white font-bold mb-6">Camera permission is required to scan documents.</p>
+                                <p className="text-white font-bold mb-6">Camera permission required.</p>
                                 <Button onClick={startCamera} className="bg-primary text-black font-black uppercase rounded-xl h-12 px-8">Allow Camera</Button>
                             </div>
                         )}
-
                         <div className="absolute top-6 left-6 z-20">
                              <Badge className="bg-black/60 backdrop-blur-md text-white font-black text-[10px] px-3 py-1 border border-white/20 uppercase tracking-widest">
-                                {hasCameraPermission ? "ENVIRONMENT MODE ACTIVE" : "CONNECTING..."}
+                                {hasCameraPermission ? "HD SCANNER ACTIVE" : "CONNECTING..."}
                              </Badge>
                         </div>
-
                         <div className="absolute bottom-6 left-6 z-20">
                              <Button variant="secondary" className="h-10 md:h-12 rounded-xl font-black uppercase text-[10px] shadow-2xl px-5 md:px-6 bg-white/80 hover:bg-white backdrop-blur-md" onClick={() => fileInputRef.current?.click()}>
                                 <ImageIcon className="mr-2 size-4 text-primary" /> ALBUM
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-                        </div>
-                        
-                        {/* Shutter Button Visual Only */}
-                        <div className="absolute bottom-6 right-6 hidden md:flex">
-                             <div className="size-12 rounded-full border-4 border-white/50 flex items-center justify-center">
-                                <div className="size-8 rounded-full bg-white" />
-                             </div>
                         </div>
                     </div>
 
@@ -444,7 +435,6 @@ export default function ScannerToPdf() {
                         onClick={handleCapture} 
                         className="h-20 w-full bg-primary text-black font-black text-2xl rounded-3xl shadow-3xl transform active:scale-95 transition-all group overflow-hidden relative"
                     >
-                        <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                         <Camera className="mr-3 size-8" /> CAPTURE DOCUMENT
                     </Button>
                 </div>
@@ -460,7 +450,7 @@ export default function ScannerToPdf() {
                                 {scannedPages.map((p, i) => (
                                     <div key={p.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 bg-white shadow-lg group hover:border-primary transition-all">
                                         <img src={p.processedSrc} className="size-full object-cover" alt="scan" />
-                                        <div className="absolute top-1.5 left-1.5 size-6 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10">{i+1}</div>
+                                        <div className="absolute top-1.5 left-1.5 size-6 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">{i+1}</div>
                                         <Button size="icon" variant="destructive" className="absolute top-1.5 right-1.5 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-4" /></Button>
                                     </div>
                                 ))}
@@ -473,7 +463,7 @@ export default function ScannerToPdf() {
                             </div>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-muted/10">
-                            <Button disabled={scannedPages.length === 0} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={() => {
+                            <Button disabled={scannedPages.length === 0} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-2xl shadow-xl uppercase" onClick={() => {
                                 const pdf = new jsPDF();
                                 scannedPages.forEach((p, i) => {
                                     if(i > 0) pdf.addPage();
@@ -499,19 +489,16 @@ export default function ScannerToPdf() {
                     <CardHeader className="bg-white/5 border-b border-white/5 p-4 flex flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-white">
                              <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
-                             <div className="text-left">
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment</CardTitle>
-                                <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Align Corners</CardDescription>
-                             </div>
+                             <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-white/10 p-1 rounded-xl border border-white/10">
                                 <TabsList className="grid grid-cols-2 h-9 bg-transparent">
-                                    <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-3 data-[state=active]:bg-white data-[state=active]:text-black">RECT</TabsTrigger>
-                                    <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-3 data-[state=active]:bg-white data-[state=active]:text-black">SCAN</TabsTrigger>
+                                    <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-3">RECT</TabsTrigger>
+                                    <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-3">SCAN</TabsTrigger>
                                 </TabsList>
                             </Tabs>
-                            <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 border-white/10 rounded-xl text-white bg-white/5 hover:bg-white/10"><RotateCw className="size-5" /></Button>
+                            <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 border-white/10 rounded-xl text-white bg-white/5"><RotateCw className="size-5" /></Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 min-h-[500px]"
@@ -528,10 +515,10 @@ export default function ScannerToPdf() {
                                         <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-8 ring-primary/20" : "bg-primary/80")}
+                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125 ring-8 ring-primary/20" : "bg-primary/80")}
                                              style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                              onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                            <div className="size-3 bg-white rounded-full shadow-inner" />
+                                            <div className="size-3 bg-white rounded-full" />
                                         </div>
                                     ))}
                                     {draggingPoint !== null && (
@@ -539,7 +526,6 @@ export default function ScannerToPdf() {
                                             <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
                                                 style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                             />
-                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="size-6 border-2 border-red-500 rounded-full bg-white/50" /></div>
                                         </div>
                                     )}
                                 </div>
@@ -548,7 +534,7 @@ export default function ScannerToPdf() {
                     </CardContent>
                     <CardFooter className="bg-black/60 p-4 border-t border-white/5 flex justify-center">
                          <div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
-                            <Move className="h-4 w-4 text-primary animate-pulse" /> Precision dots active
+                            <Move className="h-4 w-4 text-primary animate-pulse" /> Precision handles active
                         </div>
                     </CardFooter>
                 </Card>
@@ -557,13 +543,13 @@ export default function ScannerToPdf() {
                     <CardHeader className="bg-green-600/5 border-b p-4 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4">
                             <div className="size-12 rounded-2xl bg-green-600/10 flex items-center justify-center text-green-600 shadow-md"><Eye className="size-6" /></div>
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter">HD Studio View</CardTitle>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">HD Result Preview</CardTitle>
                          </div>
                          <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')}><X /></Button>
                     </CardHeader>
                     <CardContent className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 h-full">
                          <div className="relative bg-white shadow-3xl rounded-sm border-[6px] md:border-[12px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[60vh] object-contain block h-auto" alt="result" /> : <div className="p-20 text-muted-foreground animate-pulse flex flex-col items-center gap-4"><Loader2 className="animate-spin size-10" /><p className="text-[10px] font-black uppercase">Filtering...</p></div>}
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[60vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                          </div>
                          
                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 w-full mt-10">
@@ -577,7 +563,7 @@ export default function ScannerToPdf() {
                     </CardContent>
                     <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-4">
                         <Button variant="outline" className="flex-1 h-16 rounded-2xl font-black uppercase text-xs border-2" onClick={() => setStage('viewfinder')}>CANCEL</Button>
-                        <Button className="flex-[2] h-16 rounded-2xl bg-primary text-black font-black text-xl px-12 group shadow-3xl hover:scale-105 transition-all" onClick={handleConfirmAdd}>
+                        <Button className="flex-[2] h-16 rounded-2xl bg-primary text-black font-black text-xl px-12 group shadow-3xl transition-all" onClick={handleConfirmAdd}>
                             CONFIRM & ADD <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </CardFooter>
@@ -593,13 +579,13 @@ export default function ScannerToPdf() {
                             <FileStack className="size-8" />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter">Scan Stack</h2>
+                            <h2 className="text-3xl font-black uppercase tracking-tighter">Scan Bundle</h2>
                             <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} Pages Captured</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl font-black uppercase text-xs border-2 tracking-widest px-8 bg-white dark:bg-slate-900 shadow-md" onClick={() => setStage('viewfinder')}>
-                            <Plus className="mr-2 size-5" /> NEXT PAGE
+                            <Plus className="mr-2 size-5" /> SCAN MORE
                         </Button>
                         <Button className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={() => {
                             const pdf = new jsPDF();
@@ -613,7 +599,7 @@ export default function ScannerToPdf() {
                             });
                             pdf.save(`GR7-Final-Scan-${Date.now()}.pdf`);
                         }}>
-                            <Download className="mr-3 size-6" /> EXPORT PDF ({scannedPages.length})
+                            <Download className="mr-3 size-6" /> EXPORT PDF
                         </Button>
                     </div>
                 </div>

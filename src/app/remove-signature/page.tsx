@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser } from 'lucide-react';
 import SignatureRemover from '@/components/signature-remover';
@@ -12,8 +11,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Smart Signature BG Remover - Extract Clean signatures from Documents Online',
-  description: 'Extract clean, transparent signatures from document photos by removing paper backgrounds using advanced local processing. Perfect for digital signing.',
+  title: 'Signature Background Remover',
+  description: 'Extract clean, transparent signatures from photos instantly. Remove paper backgrounds and shadows locally for digital signing. 100% private.',
 };
 
 export const dynamic = 'force-dynamic';

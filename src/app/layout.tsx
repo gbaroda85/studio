@@ -8,10 +8,10 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: {
-    default: 'GR7 Tools - 100% Private Image & PDF Utility Suite',
+    default: 'GR7 Tools - Fast & Private Image/PDF Toolkit',
     template: '%s | GR7 Tools',
   },
-  description: 'Fast, secure, and private browser-based online tools. Compress images, resize photos for SSC/UPSC, remove backgrounds, unlock Aadhaar PDF, and calculate EMI. 100% private - No files are uploaded to any server.',
+  description: '100% Private local browser tools. Compress images, resize photos for SSC/UPSC, remove background, unlock Aadhaar PDF, and more without server uploads.',
   metadataBase: new URL('https://www.gr7imagepdf.com'),
   alternates: {
     canonical: 'https://www.gr7imagepdf.com',
@@ -26,25 +26,13 @@ export const metadata: Metadata = {
     ],
   },
   keywords: [
-    'image to pdf converter',
-    'pdf to image converter',
-    'split pdf pages',
-    'merge multiple pdfs',
-    'image compressor',
-    'pdf merger',
-    'online image resizer',
-    'ocr converter',
-    'remove background ai',
-    'secure pdf tools',
+    'image to pdf',
+    'remove background',
     'ssc photo resizer',
-    'upsc signature tool',
-    'aadhaar pdf unlocker',
-    'image to text converter',
-    'extract text from image',
-    'html to pdf online',
-    'compress pdf to 100kb',
-    'calculate loan emi',
-    'age calculator online'
+    'aadhaar pdf unlock',
+    'signature background remover',
+    'image compressor',
+    'private pdf tools'
   ],
   authors: [{ name: 'Gaurav S' }],
   creator: 'Gaurav S',
@@ -58,9 +46,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://www.gr7imagepdf.com',
-    siteName: 'GR7 Tools Hub',
-    title: 'GR7 Image PDF Tools Hub - Fast, Private & Secure Online Suite',
-    description: 'Compress, convert, and edit images/PDFs with 100% privacy. One-click tools for SSC/UPSC/IBPS forms and Aadhaar unlocking.',
+    siteName: 'GR7 Tools',
+    title: 'GR7 Tools - Private & Fast Online Studio',
+    description: 'Professional Image and PDF manipulation using high-performance local processing.',
     images: [
       {
         url: 'https://picsum.photos/seed/gr7tools/1200/630',
