@@ -1,7 +1,7 @@
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
-import { useState, useRef, useEffect, useCallback, type SyntheticEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, type SyntheticEvent, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import { 
@@ -16,15 +16,11 @@ import {
     Zap, 
     ShieldCheck, 
     ScanLine,
-    Monitor,
     ImageIcon,
-    Plus,
-    Droplets,
     RotateCw,
     Sparkles,
     Maximize,
     Move,
-    SearchCode,
     FileText,
     ChevronRight,
     Eye,
@@ -33,13 +29,14 @@ import {
     Settings2,
     Layout,
     Sun,
-    Type
+    Droplets,
+    Scan
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -134,20 +131,17 @@ export default function ScannerToPdf() {
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
+    // Auto-fit to document bounds roughly
     setPoints([
-        { x: 10, y: 10 }, { x: 90, y: 10 },
-        { x: 90, y: 50 }, { x: 90, y: 90 },
-        { x: 10, y: 90 }, { x: 10, y: 50 }
+        { x: 5, y: 5 }, { x: 95, y: 5 },
+        { x: 95, y: 50 }, { x: 95, y: 95 },
+        { x: 5, y: 95 }, { x: 5, y: 50 }
     ]);
   };
 
-  /**
-   * Safe Perspective Matrix Solver (Homography)
-   */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // Only use corners: TL(0), TR(1), BR(3), BL(4)
-    const corners = [src[0], src[1], src[3], src[4]];
+    const corners = [src[0], src[1], src[3], src[4]]; // TL, TR, BR, BL
     
     for (let i = 0; i < 4; i++) {
         p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
@@ -172,10 +166,6 @@ export default function ScannerToPdf() {
     return x;
   };
 
-  /**
-   * INTELLIGENT DOCUMENT ENHANCEMENT ENGINE
-   * Separately processes Text vs Photo/Color elements.
-   */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage) return "";
@@ -184,7 +174,6 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // Step 1: Geometric Transformation (Crop or Warp)
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -236,12 +225,12 @@ export default function ScannerToPdf() {
         }
     }
 
-    // Step 2: Intelligent Enhancement Logic
+    // PREMIUM ENHANCEMENT
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
 
-        // Adaptive engine: Detect background vs foreground
+        // Adaptive background estimation
         let totalLuma = 0;
         for (let i = 0; i < pixels.length; i += 4) {
             totalLuma += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
@@ -254,23 +243,18 @@ export default function ScannerToPdf() {
             const saturation = Math.max(r, g, b) - Math.min(r, g, b);
 
             if (activeFilter === 'magic' || activeFilter === 'photo') {
-                // Documents (Magic Color): High Contrast + Shadow Removal
-                // Heuristic: If saturation is high, it's a stamp or photo - preserve it.
                 if (activeFilter === 'magic' && saturation < 30) {
-                    // Text processing
-                    const factor = luma < avgLuma ? 1.4 : 1.7; // Deep darks, Bright whites
+                    const factor = luma < avgLuma ? 1.4 : 1.7;
                     pixels[i] = Math.min(255, r * factor);
                     pixels[i+1] = Math.min(255, g * factor);
                     pixels[i+2] = Math.min(255, b * factor);
                 } else {
-                    // Photo preservation
                     const boost = 1.15;
                     pixels[i] = Math.min(255, r * boost);
                     pixels[i+1] = Math.min(255, g * boost);
                     pixels[i+2] = Math.min(255, b * boost);
                 }
             } else if (activeFilter === 'bw') {
-                // Adaptive B&W logic
                 const threshold = avgLuma * 0.85;
                 const val = (luma > threshold && saturation < 25) ? 255 : (luma < 60 ? 0 : luma * 0.6);
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
@@ -294,6 +278,15 @@ export default function ScannerToPdf() {
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
+
+  const updateMagnifier = (clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    setMagnifierPos({ x, y });
+    return { x, y };
+  };
 
   const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
@@ -320,15 +313,6 @@ export default function ScannerToPdf() {
       setDraggingPoint(idx);
   };
 
-  const updateMagnifier = (clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
-    return { x, y };
-  };
-
   const handleCapture = () => {
     if (!videoRef.current) return;
     const canvas = document.createElement('canvas');
@@ -341,6 +325,18 @@ export default function ScannerToPdf() {
       setStage('adjust');
     }
   };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+              setCurrentRawImage(reader.result as string);
+              setStage('adjust');
+          };
+          reader.readAsDataURL(file);
+      }
+  }
 
   const handleRotateSource = () => {
     if (!currentRawImage) return;
@@ -383,7 +379,7 @@ export default function ScannerToPdf() {
         const ratio = Math.min(pw / props.width, ph / props.height);
         pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
     }
-    pdf.save(`Scan-${Date.now()}.pdf`);
+    pdf.save(`Studio-Scan-${Date.now()}.pdf`);
     setIsBuildingPdf(false);
   };
 
@@ -393,7 +389,7 @@ export default function ScannerToPdf() {
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8">
-                    <Card className="border-2 shadow-2xl overflow-hidden bg-black relative rounded-2xl md:rounded-[3rem] aspect-video sm:aspect-square md:aspect-video flex items-center justify-center">
+                    <Card className="border-2 shadow-2xl overflow-hidden bg-black relative rounded-2xl md:rounded-[3rem] aspect-video flex items-center justify-center">
                         <video ref={videoRef} className={cn("w-full h-full object-contain", !hasCameraPermission && "hidden")} autoPlay muted playsInline />
                         {hasCameraPermission === false && (
                             <div className="p-12 text-center space-y-6 text-white w-full">
@@ -421,8 +417,10 @@ export default function ScannerToPdf() {
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
-                            <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Layout className="size-5" /> Stack</CardTitle>
-                            <Badge className="bg-primary">{scannedPages.length}</Badge>
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
+                                <Layout className="size-5 text-primary" /> Page Stack
+                            </CardTitle>
+                            <Badge variant="outline" className="font-black text-primary border-primary/20">{scannedPages.length}</Badge>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             <div className="grid grid-cols-2 gap-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar p-1">
@@ -450,11 +448,14 @@ export default function ScannerToPdf() {
                 <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg"><Maximize className="size-5" /></div>
-                         <div><CardTitle className="text-xl font-black uppercase tracking-tighter leading-none">Studio Edit</CardTitle></div>
+                         <div><CardTitle className="text-xl font-black uppercase tracking-tighter leading-none">Studio Editor</CardTitle></div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
-                            <TabsList className="h-8"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">Rect</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">Scanner</TabsTrigger></TabsList>
+                            <TabsList className="h-8">
+                                <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
+                                <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
+                            </TabsList>
                         </Tabs>
                         <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 rounded-xl"><RotateCw className="size-5" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')}><X /></Button>
@@ -477,14 +478,14 @@ export default function ScannerToPdf() {
                                         <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[1.0]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-9 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                        <div key={i} className={cn("absolute size-8 md:size-9 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
                                              style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                              onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                            <div className="size-2.5 bg-white rounded-full" />
+                                            <div className="size-2 md:size-2.5 bg-white rounded-full" />
                                         </div>
                                     ))}
                                     {draggingPoint !== null && (
-                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white ring-4 ring-white/50">
+                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white ring-4 ring-white/50">
                                             <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
                                                 style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                             />
@@ -494,33 +495,37 @@ export default function ScannerToPdf() {
                                 </div>
                             )}
                         </div>
-                        <div className="mt-4 flex items-center gap-2 text-[9px] font-black uppercase text-muted-foreground"><Move className="size-3 text-primary"/> Drag dots to align edges</div>
+                        <div className="mt-4 flex items-center gap-2 text-[9px] font-black uppercase text-muted-foreground"><Move className="size-3 text-primary"/> Drag dots to document edges</div>
                     </div>
 
                     {/* RIGHT: LIVE RESULT */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-300/50 dark:bg-black/40 relative h-full">
-                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white">LIVE HD PREVIEW</Badge>
+                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white">LIVE HD RESULT</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
                              <div className="relative bg-white shadow-3xl rounded-sm border-[6px] border-white transform transition-transform hover:scale-[1.01] max-w-full min-h-[300px] flex items-center justify-center">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block" alt="result" /> : <Loader2 className="animate-spin text-primary size-10" />}
                              </div>
-                             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 w-full max-w-lg">
-                                <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" />
-                                <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="B&W" />
-                                <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="Photo" />
-                                <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="Gray" />
-                                <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="Raw" />
+                             
+                             <div className="space-y-4 w-full max-w-lg">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Visual Presets</Label>
+                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 w-full">
+                                    <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" />
+                                    <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="B&W" />
+                                    <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="Photo" />
+                                    <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="Gray" />
+                                    <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="Raw" />
+                                </div>
                              </div>
                         </div>
                     </div>
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 p-6 md:p-8 border-t flex justify-between gap-6">
-                    <div className="hidden sm:flex items-center gap-4 text-[9px] font-black uppercase opacity-40">
+                    <div className="hidden sm:flex items-center gap-6 text-[9px] font-black uppercase opacity-40">
                          <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500"/> Privacy Secure</div>
-                         <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500"/> 300 DPI Rendering</div>
+                         <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500"/> HD RE-SAMPLING</div>
                     </div>
                     <div className="flex gap-4 w-full sm:w-auto">
-                        <Button variant="outline" className="flex-1 sm:h-16 h-12 rounded-2xl font-black uppercase text-xs" onClick={() => setStage('viewfinder')}>Cancel</Button>
+                        <Button variant="outline" className="flex-1 sm:h-16 h-12 rounded-2xl font-black uppercase text-xs" onClick={() => setStage('viewfinder')}>CANCEL</Button>
                         <Button className="flex-[2] sm:h-16 h-12 rounded-2xl bg-primary text-black font-black text-lg px-12 group" onClick={handleConfirmPage}>
                             CONFIRM & ADD <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
@@ -551,7 +556,7 @@ export default function ScannerToPdf() {
                 </div>
                 <Card className="w-full max-w-2xl bg-slate-950 text-white rounded-[3rem] p-10 shadow-2xl relative overflow-hidden text-center">
                     <div className="absolute top-0 right-0 size-40 bg-primary/10 blur-[60px]" />
-                    <h3 className="text-3xl font-black uppercase tracking-tighter mb-8">Export Full Document</h3>
+                    <h3 className="text-3xl font-black uppercase tracking-tighter mb-8">Generate Multi-Page PDF</h3>
                     <Button className="h-20 w-full max-w-sm bg-primary text-black font-black text-2xl rounded-2xl shadow-xl active:scale-95" onClick={handleBuildPdf} disabled={isBuildingPdf}>
                         {isBuildingPdf ? <Loader2 className="animate-spin mr-3"/> : <Download className="mr-3"/>} GENERATE PDF
                     </Button>
@@ -565,8 +570,8 @@ export default function ScannerToPdf() {
 function FilterBtn({ active, onClick, icon: Icon, label }: { active: boolean, onClick: () => void, icon: any, label: string }) {
     return (
         <button onClick={onClick} className={cn(
-            "flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all group",
-            active ? "bg-white border-primary shadow-lg scale-105" : "bg-white/50 border-transparent opacity-60"
+            "flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all group flex-1",
+            active ? "bg-white border-primary shadow-lg scale-105" : "bg-white/50 border-transparent opacity-60 hover:opacity-100"
         )}>
             <div className={cn("size-8 rounded-lg flex items-center justify-center", active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
                 <Icon className="size-4" />
