@@ -165,8 +165,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * Premium Enhancement Pipeline
-   * Features division-based normalization for background cleaning
+   * Premium Enhancement Pipeline - Corrected for distinct Magic/Doc filters
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -231,42 +230,49 @@ export default function ScannerToPdf() {
         const pixels = imageData.data;
         const len = pixels.length;
 
-        let hist = new Array(256).fill(0);
+        // Background estimation for shadow removal
+        let bgSum = 0;
+        let bgCount = 0;
         const skip = Math.max(4, Math.floor(len / 4000));
         for (let i = 0; i < len; i += skip * 4) {
-            const luma = Math.round(0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
-            hist[luma]++;
+            const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
+            if (luma > 120) { bgSum += luma; bgCount++; }
         }
         
-        let whiteRef = 240;
-        let count = 0;
-        for (let i = 255; i >= 0; i--) {
-            count += hist[i];
-            if (count > (len / (skip * 4)) * 0.08) { whiteRef = i; break; }
-        }
-
-        const normFactor = 255 / Math.max(whiteRef, 120);
+        const whitePoint = bgCount > 0 ? bgSum / bgCount : 240;
+        const normFactor = 255 / Math.max(whitePoint, 150);
 
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-            const chroma = Math.max(r, g, b) - Math.min(r, g, b);
-            const isInk = luma < whiteRef * 0.8 && chroma < 50;
 
-            if (activeFilter === 'document' || activeFilter === 'magic') {
-                const enhanced = Math.min(255, luma * normFactor);
-                const finalVal = isInk ? enhanced * 0.75 : Math.min(255, enhanced * 1.1);
-                pixels[i] = pixels[i+1] = pixels[i+2] = finalVal;
-                if (finalVal > 220) { pixels[i] = pixels[i+1] = pixels[i+2] = 255; }
+            if (activeFilter === 'document') {
+                // DOC PRO: Grayscale High Contrast
+                const normalized = Math.min(255, luma * normFactor);
+                let val;
+                if (normalized < 140) val = normalized * 0.7; // Darken text
+                else if (normalized > 190) val = 255; // Force white paper
+                else val = normalized;
+                pixels[i] = pixels[i+1] = pixels[i+2] = val;
+            } else if (activeFilter === 'magic') {
+                // MAGIC: Color Enhancement + Shadow Removal
+                pixels[i] = Math.min(255, r * normFactor * 1.1);
+                pixels[i+1] = Math.min(255, g * normFactor * 1.1);
+                pixels[i+2] = Math.min(255, b * normFactor * 1.1);
+                // Soft boost contrast
+                for (let j = 0; j < 3; j++) {
+                    const c = pixels[i+j];
+                    pixels[i+j] = c > 210 ? 255 : c < 80 ? c * 0.8 : c;
+                }
             } else if (activeFilter === 'bw') {
-                const val = luma > whiteRef * 0.72 ? 255 : 0;
+                const val = (luma * normFactor) > 128 ? 255 : 0;
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'gray') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             } else if (activeFilter === 'photo') {
-                pixels[i] = Math.min(255, r * 1.15);
-                pixels[i+1] = Math.min(255, g * 1.15);
-                pixels[i+2] = Math.min(255, b * 1.15);
+                pixels[i] = Math.min(255, r * 1.1);
+                pixels[i+1] = Math.min(255, g * 1.1);
+                pixels[i+2] = Math.min(255, b * 1.1);
             }
         }
         ctx.putImageData(imageData, 0, 0);
