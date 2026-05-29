@@ -58,7 +58,6 @@ interface Point { x: number; y: number; }
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
     // We need 4 corners for homography (TL, TR, BR, BL)
-    // From 6-dot setup: 0=TL, 1=TR, 3=BR, 4=BL
     const corners = [src[0], src[1], src[3], src[4]]; 
     
     for (let i = 0; i < 4; i++) {
@@ -165,7 +164,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * Premium Enhancement Pipeline - Recalibrated for BW PRO and Magic
+   * Premium Enhancement Pipeline - Recalibrated for Photo-Safe BW PRO
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -230,7 +229,6 @@ export default function ScannerToPdf() {
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Background estimation for division normalization (Shadow removal)
         let bgSum = 0;
         let bgCount = 0;
         const skip = Math.max(8, Math.floor(len / 4000));
@@ -248,32 +246,40 @@ export default function ScannerToPdf() {
             const normalizedLuma = Math.min(255, luma * normFactor);
 
             if (activeFilter === 'bw') {
-                // BW PRO: Recalibrated for Deep Ink and Clear Text
-                // We use a steep curve to catch faint text but ignore noise
+                // BW PRO: Photo-Safe Sigmoidal Mapping
+                // Preserve mid-tones (face) while darkening text
                 let val;
-                if (normalizedLuma < 170) {
-                    // This is Text/Ink area - make it dark and solid
-                    val = Math.max(0, (normalizedLuma - 40) * 0.5); 
-                } else if (normalizedLuma > 210) {
-                    // This is paper area - make it pure white
+                if (normalizedLuma < 135) {
+                    // TEXT REGION: Map 0-135 to 0-80 with a curve
+                    val = Math.pow(normalizedLuma / 135, 1.3) * 60;
+                } else if (normalizedLuma > 200) {
+                    // PAPER REGION: Clean White
                     val = 255;
                 } else {
-                    // Transition smoothing to prevent pixelated edges
-                    val = Math.min(255, (normalizedLuma - 170) * 6);
+                    // PHOTO/MIDTONE REGION: Wide ramp to keep facial details
+                    // Map 135 -> 60, 200 -> 255
+                    const t = (normalizedLuma - 135) / 65;
+                    val = 60 + t * (255 - 60);
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'document') {
-                // DOC PRO: Premium Grayscale High Contrast
-                const val = normalizedLuma > 185 ? 255 : normalizedLuma < 130 ? normalizedLuma * 0.7 : normalizedLuma;
+                // DOC PRO: Premium Clear Grayscale
+                let val;
+                if (normalizedLuma > 195) val = 255;
+                else if (normalizedLuma < 120) val = normalizedLuma * 0.5;
+                else {
+                    const t = (normalizedLuma - 120) / 75;
+                    val = 60 + t * (255 - 60);
+                }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'magic') {
-                // MAGIC: Preserve Colors (Signatures/Photos) but brighten background
-                pixels[i] = Math.min(255, r * normFactor * 1.1);
-                pixels[i+1] = Math.min(255, g * normFactor * 1.1);
-                pixels[i+2] = Math.min(255, b * normFactor * 1.1);
+                // MAGIC: Vibrant Colors + Clean Background
+                pixels[i] = Math.min(255, r * normFactor * 1.05);
+                pixels[i+1] = Math.min(255, g * normFactor * 1.05);
+                pixels[i+2] = Math.min(255, b * normFactor * 1.05);
                 for (let j = 0; j < 3; j++) {
                     const c = pixels[i+j];
-                    pixels[i+j] = c > 215 ? 255 : c < 90 ? c * 0.75 : c;
+                    pixels[i+j] = c > 215 ? 255 : c < 100 ? c * 0.8 : c;
                 }
             } else if (activeFilter === 'gray') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
@@ -480,7 +486,7 @@ export default function ScannerToPdf() {
                             <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 border-white/10 rounded-xl text-white bg-white/5 hover:bg-white/10"><RotateCw className="size-5" /></Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 min-h-[500px]"
+                    <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 min-h-[500px]"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                         <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                             {cropMode === 'rect' ? (
@@ -623,4 +629,3 @@ function FilterBtn({ active, onClick, icon: Icon, label, color }: { active: bool
         </button>
     );
 }
-
