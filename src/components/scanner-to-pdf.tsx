@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type ChangeEvent } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import { 
@@ -52,39 +52,48 @@ export default function ScannerToPdf() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle local file uploads or camera capture
-  const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    files.forEach(file => {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const id = Math.random().toString(36).substr(2, 9);
-                const newPage: ScannedPage = {
-                    id,
-                    src: event.target?.result as string,
-                    name: file.name || `Scan-${Date.now()}.jpg`,
-                    vAlign: 'center'
-                };
-                setPages(prev => {
-                    const updated = [...prev, newPage];
-                    if (!selectedId) setSelectedId(id);
-                    return updated;
-                });
-            };
-            reader.readAsDataURL(file);
+  // Cleanup blob URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      pages.forEach(page => {
+        if (page.src.startsWith('blob:')) {
+          URL.revokeObjectURL(page.src);
         }
+      });
+    };
+  }, []);
+
+  // Handle local file uploads or camera capture with instant ObjectURL
+  const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const filesList = e.target.files;
+    if (!filesList || filesList.length === 0) return;
+
+    const newItems: ScannedPage[] = Array.from(filesList).map(file => {
+        const id = Math.random().toString(36).substr(2, 9);
+        return {
+            id,
+            src: URL.createObjectURL(file), // Direct and instant
+            name: file.name || `Scan-${Date.now()}.jpg`,
+            vAlign: 'center'
+        };
     });
-    
-    // Reset inputs so same file can be re-selected
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
+
+    setPages(prev => {
+        const updated = [...prev, ...newItems];
+        if (!selectedId && updated.length > 0) setSelectedId(updated[0].id);
+        return updated;
+    });
+
+    // Reset input so same file/camera action can be repeated
+    e.target.value = "";
+    toast({ title: "Page Added", description: `${newItems.length} new scan(s) loaded.` });
   };
 
   const handleRemovePage = (id: string) => {
     setPages(prev => {
+        const item = prev.find(p => p.id === id);
+        if (item?.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
+        
         const filtered = prev.filter(p => p.id !== id);
         if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[0].id : null);
         return filtered;
@@ -106,7 +115,11 @@ export default function ScannerToPdf() {
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        
         const rotatedSrc = canvas.toDataURL('image/jpeg', 0.9);
+        // Revoke old blob if it was a blob
+        if (item.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
+        
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
     };
   };
@@ -140,35 +153,42 @@ export default function ScannerToPdf() {
             if (i > 0) pdf.addPage();
             
             const pageData = pages[i];
-            const props = pdf.getImageProperties(pageData.src);
-            
-            // Standard scaling to fit A4 width with margins
-            const margin = 10;
-            const safeWidth = pageWidth - (margin * 2);
-            const safeHeight = pageHeight - (margin * 2);
-            
-            const ratio = Math.min(safeWidth / props.width, safeHeight / props.height);
-            const finalW = props.width * ratio;
-            const finalH = props.height * ratio;
+            const img = new window.Image();
+            img.src = pageData.src;
 
-            const x = (pageWidth - finalW) / 2;
-            let y;
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    const imgProps = pdf.getImageProperties(img);
+                    const margin = 10;
+                    const safeWidth = pageWidth - (margin * 2);
+                    const safeHeight = pageHeight - (margin * 2);
+                    
+                    const ratio = Math.min(safeWidth / imgProps.width, safeHeight / imgProps.height);
+                    const finalW = imgProps.width * ratio;
+                    const finalH = imgProps.height * ratio;
 
-            if (pageData.vAlign === 'top') {
-                y = margin;
-            } else if (pageData.vAlign === 'bottom') {
-                y = pageHeight - finalH - margin;
-            } else {
-                y = (pageHeight - finalH) / 2;
-            }
+                    const x = (pageWidth - finalW) / 2;
+                    let y;
 
-            pdf.addImage(pageData.src, 'JPEG', x, y, finalW, finalH, undefined, 'FAST');
+                    if (pageData.vAlign === 'top') {
+                        y = margin;
+                    } else if (pageData.vAlign === 'bottom') {
+                        y = pageHeight - finalH - margin;
+                    } else {
+                        y = (pageHeight - finalH) / 2;
+                    }
+
+                    pdf.addImage(pageData.src, 'JPEG', x, y, finalW, finalH, undefined, 'FAST');
+                    resolve(null);
+                };
+                img.onerror = () => reject(new Error("Image Load Failed"));
+            });
         }
 
         pdf.save(`GR7-Scan-Bundle-${Date.now()}.pdf`);
-        toast({ title: "PDF Exported", description: "Standard A4 layout saved successfully." });
+        toast({ title: "PDF Exported", description: "Document saved successfully." });
     } catch (e) {
-        toast({ variant: 'destructive', title: 'Export Failed' });
+        toast({ variant: 'destructive', title: 'Export Failed', description: "Check file permissions." });
     } finally {
         setIsGenerating(false);
     }
@@ -189,21 +209,20 @@ export default function ScannerToPdf() {
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                                 <FileStack className="size-6 text-primary" /> BUNDLE STUDIO
                             </CardTitle>
-                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">Add scans and set page layouts.</CardDescription>
+                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">Capture or upload to start bundle.</CardDescription>
                          </div>
                          <div className="flex gap-2">
-                             <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-destructive hover:bg-destructive/5"><Trash2 className="size-3 mr-1" /> Clear</Button>
+                             <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-destructive hover:bg-destructive/5"><Trash2 className="size-3 mr-1" /> Clear All</Button>
                          </div>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8">
                         {pages.length === 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Native Camera Trigger */}
                                 <div 
                                     className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"
                                     onClick={() => cameraInputRef.current?.click()}
                                 >
-                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
                                         <Camera className="size-8" />
                                     </div>
                                     <div className="text-center">
@@ -213,7 +232,6 @@ export default function ScannerToPdf() {
                                     <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
                                 </div>
 
-                                {/* Gallery Upload */}
                                 <div 
                                     className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
                                     onClick={() => fileInputRef.current?.click()}
@@ -223,7 +241,7 @@ export default function ScannerToPdf() {
                                     </div>
                                     <div className="text-center">
                                         <p className="text-base font-black uppercase tracking-tighter">Photo Gallery</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select existing files</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple files</p>
                                     </div>
                                     <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
                                 </div>
@@ -241,7 +259,6 @@ export default function ScannerToPdf() {
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10" : "hover:border-primary/40"
                                                 )}
                                             >
-                                                {/* Visual Alignment Preview in Thumbnail */}
                                                 <div className={cn(
                                                     "absolute inset-0 flex flex-col p-1 transition-all duration-300",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
