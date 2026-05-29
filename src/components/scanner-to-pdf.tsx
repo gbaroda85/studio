@@ -58,6 +58,7 @@ interface Point { x: number; y: number; }
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
     // We need 4 corners for homography (TL, TR, BR, BL)
+    // 6-dot setup indices: 0=TL, 1=TR, 3=BR, 4=BL
     const corners = [src[0], src[1], src[3], src[4]]; 
     
     for (let i = 0; i < 4; i++) {
@@ -164,7 +165,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * Premium Enhancement Pipeline - Recalibrated for Photo-Safe BW PRO
+   * Premium Enhancement Pipeline - Recalibrated for Studio Clarity
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -247,46 +248,42 @@ export default function ScannerToPdf() {
 
             if (activeFilter === 'bw') {
                 // BW PRO: Photo-Safe Sigmoidal Mapping
-                // Preserve mid-tones (face) while darkening text
                 let val;
                 if (normalizedLuma < 135) {
-                    // TEXT REGION: Map 0-135 to 0-80 with a curve
                     val = Math.pow(normalizedLuma / 135, 1.3) * 60;
                 } else if (normalizedLuma > 200) {
-                    // PAPER REGION: Clean White
                     val = 255;
                 } else {
-                    // PHOTO/MIDTONE REGION: Wide ramp to keep facial details
-                    // Map 135 -> 60, 200 -> 255
                     const t = (normalizedLuma - 135) / 65;
                     val = 60 + t * (255 - 60);
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'document') {
-                // DOC PRO: Premium Clear Grayscale
+                // DOC PRO: High-Contrast Grayscale
                 let val;
                 if (normalizedLuma > 195) val = 255;
-                else if (normalizedLuma < 120) val = normalizedLuma * 0.5;
+                else if (normalizedLuma < 120) val = normalizedLuma * 0.45;
                 else {
                     const t = (normalizedLuma - 120) / 75;
-                    val = 60 + t * (255 - 60);
+                    val = 50 + t * (255 - 50);
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'magic') {
-                // MAGIC: Vibrant Colors + Clean Background
-                pixels[i] = Math.min(255, r * normFactor * 1.05);
-                pixels[i+1] = Math.min(255, g * normFactor * 1.05);
-                pixels[i+2] = Math.min(255, b * normFactor * 1.05);
+                // MAGIC: Vibrant Color with Clean Background
+                pixels[i] = Math.min(255, r * normFactor * 1.08);
+                pixels[i+1] = Math.min(255, g * normFactor * 1.08);
+                pixels[i+2] = Math.min(255, b * normFactor * 1.08);
                 for (let j = 0; j < 3; j++) {
                     const c = pixels[i+j];
-                    pixels[i+j] = c > 215 ? 255 : c < 100 ? c * 0.8 : c;
+                    pixels[i+j] = c > 210 ? 255 : c < 90 ? c * 0.75 : c;
                 }
             } else if (activeFilter === 'gray') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             } else if (activeFilter === 'photo') {
-                pixels[i] = Math.min(255, r * 1.05);
-                pixels[i+1] = Math.min(255, g * 1.05);
-                pixels[i+2] = Math.min(255, b * 1.05);
+                // PHOTO: Studio Brightness Boosted (Calibrated for premium clarity)
+                pixels[i] = Math.min(255, r * 1.15 + 10);
+                pixels[i+1] = Math.min(255, g * 1.15 + 10);
+                pixels[i+2] = Math.min(255, b * 1.15 + 10);
             }
         }
         ctx.putImageData(imageData, 0, 0);
