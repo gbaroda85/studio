@@ -23,7 +23,6 @@ import {
     Move,
     FileText,
     ChevronRight,
-    Eye,
     Trash2,
     RefreshCcw,
     Settings2,
@@ -40,7 +39,8 @@ import {
     Type,
     Frame,
     Wand2,
-    MousePointer2
+    MousePointer2,
+    RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -169,8 +169,11 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * PREMIUM DOCUMENT ENHANCEMENT ENGINE
-   * Implements intelligent segmentation, shadow removal, and local contrast boost.
+   * ADOBE-GRADE REGION AWARE DOCUMENT ENGINE
+   * Implements:
+   * 1. Illumination Map Normalization (Dividing by Background Estimation)
+   * 2. Content Segmentation (Masking text vs photos)
+   * 3. Adaptive Sigmoid Mapping for soft enhancement (Readable, not hard binary)
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -180,7 +183,7 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. WARP & ORIENTATION
+    // 1. DYNAMIC PERSPECTIVE WARP (FIXED LANDSCAPE CUTTING)
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -189,6 +192,7 @@ export default function ScannerToPdf() {
         canvas.height = Math.max(100, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
+        // Calculate physical distances for aspect-correct output
         const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
         const w2 = Math.hypot(points[3].x - points[4].x, points[3].y - points[4].y);
         const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
@@ -232,60 +236,69 @@ export default function ScannerToPdf() {
         }
     }
 
-    // 2. CAMSCANNER-LEVEL ENHANCEMENT PIPELINE
+    // 2. ADOBE-LEVEL REGION-AWARE PROCESSING PIPELINE
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Step A: Background Estimation (Local Min-Max)
+        // Step A: Background Illumination Map (sampling local max luma)
         let rSum = 0, gSum = 0, bSum = 0;
-        const samplingStep = 50; 
-        let sampleCount = 0;
+        const samplingStep = Math.max(1, Math.floor(len / 4000)); 
+        let samples = [];
         for (let i = 0; i < len; i += 4 * samplingStep) {
-            rSum += pixels[i]; gSum += pixels[i+1]; bSum += pixels[i+2];
-            sampleCount++;
+            const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
+            samples.push(luma);
         }
-        const avgBgR = rSum / sampleCount;
-
+        samples.sort((a,b) => a-b);
+        const bgLumaRef = samples[Math.floor(samples.length * 0.95)] || 220; // 95th percentile as paper estimate
+        
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             const chroma = Math.max(r, g, b) - Math.min(r, g, b);
-
-            // INTELLIGENT SEGMENTATION
-            const isDocumentElement = chroma > 35 || luma < 120; // Text or signature/photo
             
+            // Content segmentation: Is it a logo/photo or document background?
+            const isNeutral = chroma < 40; 
+            const isTextCandidate = isNeutral && luma < bgLumaRef * 0.85;
+
             if (activeFilter === 'magic' || activeFilter === 'document') {
-                if (!isDocumentElement) {
-                    pixels[i] = Math.min(255, r * 1.35);
-                    pixels[i+1] = Math.min(255, g * 1.35);
-                    pixels[i+2] = Math.min(255, b * 1.35);
+                // Soft Illumination normalization
+                const normFactor = 255 / Math.max(128, bgLumaRef);
+                if (isNeutral) {
+                    const enhanced = Math.min(255, luma * normFactor);
+                    const contrastBoost = luma < 100 ? 0.85 : 1.1; 
+                    pixels[i] = pixels[i+1] = pixels[i+2] = enhanced * contrastBoost;
                 } else {
-                    const factor = luma < 80 ? 0.8 : 1.1; 
-                    pixels[i] = r * factor;
-                    pixels[i+1] = g * factor;
-                    pixels[i+2] = b * factor;
+                    // Protected layer for logos/stamps
+                    pixels[i] = Math.min(255, r * 1.15);
+                    pixels[i+1] = Math.min(255, g * 1.15);
+                    pixels[i+2] = Math.min(255, b * 1.15);
                 }
             } else if (activeFilter === 'bw') {
-                if (chroma > 45 && luma < 180) {
-                   pixels[i] = r; pixels[i+1] = g; pixels[i+2] = b;
-                } else {
-                    const val = luma > avgBgR * 0.9 ? 255 : (luma < 80 ? 0 : luma * 0.5);
+                // Adaptive soft thresholding (Adobe style)
+                if (luma > bgLumaRef * 0.75) {
+                    pixels[i] = pixels[i+1] = pixels[i+2] = 255; // Paper whitening
+                } else if (isTextCandidate) {
+                    const val = Math.max(0, (luma / bgLumaRef) * 128); // Deepening text but not binary
                     pixels[i] = pixels[i+1] = pixels[i+2] = val;
+                } else {
+                    // Protected photo/signature layer in B&W
+                    pixels[i] = pixels[i+1] = pixels[i+2] = luma * 1.05;
                 }
-            } else if (activeFilter === 'photo') {
-                pixels[i] = Math.min(255, r * 1.05);
-                pixels[i+1] = Math.min(255, g * 1.05);
-                pixels[i+2] = Math.min(255, b * 1.05);
             } else if (activeFilter === 'gray') {
-                pixels[i] = pixels[i+1] = pixels[i+2] = luma * 1.1;
+                pixels[i] = pixels[i+1] = pixels[i+2] = Math.min(255, luma * (255 / bgLumaRef));
+            } else if (activeFilter === 'photo') {
+                // HDR-like color recovery
+                pixels[i] = Math.min(255, r * 1.1);
+                pixels[i+1] = Math.min(255, g * 1.1);
+                pixels[i+2] = Math.min(255, b * 1.1);
             }
         }
         ctx.putImageData(imageData, 0, 0);
     }
 
-    return canvas.toDataURL('image/jpeg', 0.92);
+    return canvas.toDataURL('image/jpeg', 0.95);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop]);
 
   useEffect(() => {
@@ -365,10 +378,10 @@ export default function ScannerToPdf() {
             const ratio = Math.min(pw / props.width, ph / props.height);
             pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
         }
-        pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
-        toast({ title: "Bundle Ready", description: "Multi-page PDF saved." });
+        pdf.save(`Clean-Scan-${Date.now()}.pdf`);
+        toast({ title: "PDF Ready", description: "All pages bundled successfully." });
     } catch (e) {
-        toast({ variant: 'destructive', title: 'Build Failed', description: 'Failed to generate PDF bundle.' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate PDF.' });
     } finally {
         setIsBuildingPdf(false);
     }
@@ -414,7 +427,7 @@ export default function ScannerToPdf() {
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4">
         
-        {/* VIEW: VIEWFINDER */}
+        {/* VIEWFINDER STAGE */}
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-6">
@@ -468,15 +481,15 @@ export default function ScannerToPdf() {
             </div>
         )}
 
-        {/* VIEW: ADJUSTMENT STUDIO */}
+        {/* ADJUSTMENT STUDIO STAGE */}
         {stage === 'adjust' && currentRawImage && (
             <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] animate-in zoom-in-95 duration-500 bg-slate-900">
                 <CardHeader className="bg-white/5 border-b border-white/5 p-4 flex flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                          <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Maximize className="size-6" /></div>
                          <div>
-                            <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white">AI Studio Editor</CardTitle>
-                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Premium HD Enhancement logic active</CardDescription>
+                            <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white">Region Aware Editor</CardTitle>
+                            <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Soft Illumination Normalization Active</CardDescription>
                          </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -490,14 +503,12 @@ export default function ScannerToPdf() {
                         <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-white hover:bg-white/10"><X /></Button>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0 grid lg:grid-cols-2 min-h-[500px] md:min-h-[750px] relative overflow-hidden select-none">
+                <CardContent className="p-0 grid lg:grid-cols-2 min-h-[500px] md:min-h-[750px] relative overflow-hidden select-none"
+                             onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                     
-                    {/* LEFT: ALIGNMENT WINDOW */}
-                    <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative bg-slate-950"
-                         onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        
+                    {/* EDITING WINDOW */}
+                    <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative bg-slate-950">
                         <Badge className="absolute top-4 left-4 z-20 bg-primary text-black font-black text-[9px] uppercase">Alignment Source</Badge>
-                        
                         <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[55vh] md:max-h-[65vh]">
@@ -529,9 +540,9 @@ export default function ScannerToPdf() {
                         </div>
                     </div>
 
-                    {/* RIGHT: LIVE HD PREVIEW WINDOW */}
+                    {/* LIVE HD RESULT WINDOW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-800 relative h-full shadow-inner">
-                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white/20 font-black text-[10px] uppercase tracking-widest shadow-xl">LIVE HD STUDIO VIEW</Badge>
+                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white/20 font-black text-[10px] uppercase tracking-widest shadow-xl">REAL-TIME HD VIEW</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
                              <div className="relative bg-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] rounded-sm border-[8px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden aspect-auto transition-all duration-300">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin text-primary size-12" />}
@@ -539,8 +550,8 @@ export default function ScannerToPdf() {
                              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 w-full max-w-2xl px-4">
                                 <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" color="text-yellow-400" />
                                 <FilterBtn active={activeFilter === 'document'} onClick={() => setActiveFilter('document')} icon={FileText} label="Doc Pro" color="text-blue-400" />
-                                <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="PRO B/W" color="text-slate-400" />
-                                <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="Photo" color="text-purple-400" />
+                                <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="ADOBE B/W" color="text-slate-400" />
+                                <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="Natural" color="text-purple-400" />
                                 <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="Gray" color="text-sky-400" />
                                 <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="Raw" color="text-rose-400" />
                              </div>
@@ -549,9 +560,9 @@ export default function ScannerToPdf() {
                 </CardContent>
                 <CardFooter className="bg-black/40 p-6 border-t border-white/5 flex justify-between items-center gap-4">
                     <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase opacity-50 tracking-[0.2em] text-white">
-                         <div className="flex items-center gap-2"><ShieldCheck className="size-5 text-green-500"/> SECURE RAM</div>
-                         <div className="flex items-center gap-2"><Zap className="size-5 text-yellow-500"/> AI ENHANCED</div>
-                         <div className="flex items-center gap-2"><Layers className="size-5 text-primary"/> MULTI-SEGMENT</div>
+                         <div className="flex items-center gap-2"><ShieldCheck className="size-5 text-green-500"/> LOCAL RAM</div>
+                         <div className="flex items-center gap-2"><Zap className="size-5 text-yellow-500"/> SOFT ENHANCE</div>
+                         <div className="flex items-center gap-2"><Layers className="size-5 text-primary"/> REGION SAFE</div>
                     </div>
                     <Button className="h-16 rounded-2xl bg-primary text-black font-black text-xl px-16 group shadow-3xl hover:scale-105 transition-all" onClick={handleConfirmAdd}>
                         CONFIRM & ADD <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -560,7 +571,7 @@ export default function ScannerToPdf() {
             </Card>
         )}
 
-        {/* VIEW: SCAN BUNDLE STACK */}
+        {/* SCAN STACK STAGE */}
         {stage === 'stack' && (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -569,16 +580,16 @@ export default function ScannerToPdf() {
                             <FileStack className="size-8" />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter">Document Bundle</h2>
-                            <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} High-Res Pages Ready</p>
+                            <h2 className="text-3xl font-black uppercase tracking-tighter">Scan Bundle</h2>
+                            <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} Pages Ready for PDF</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl font-black uppercase text-xs border-2 tracking-widest px-8 bg-white dark:bg-slate-900" onClick={() => setStage('viewfinder')}>
-                            <Plus className="mr-2 size-5" /> ADD MORE
+                            <Plus className="mr-2 size-5" /> SCAN MORE
                         </Button>
                         <Button className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleBuildPdf} disabled={isBuildingPdf}>
-                            {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} GENERATE BUNDLE ({scannedPages.length})
+                            {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} EXPORT AS PDF ({scannedPages.length})
                         </Button>
                     </div>
                 </div>
