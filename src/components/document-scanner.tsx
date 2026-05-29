@@ -24,21 +24,16 @@ import {
     Trash2,
     RefreshCcw,
     Settings2,
-    Layout,
-    Sun,
-    Droplets,
     Plus,
     FileStack,
     Layers,
-    Monitor,
     Smartphone,
     SearchCode,
     Type,
-    Frame,
     Wand2,
-    MousePointer2,
     RotateCcw,
-    Eye
+    Eye,
+    Droplets
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -52,7 +47,7 @@ import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from
 interface Point { x: number; y: number; }
 
 /**
- * Homography Matrix Solver
+ * Homography Matrix Solver for Perspective Correction
  */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
@@ -97,8 +92,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
@@ -118,41 +112,6 @@ export default function DocumentScanner() {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
-  const stopCamera = useCallback(() => {
-    if(videoRef.current && videoRef.current.srcObject){
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    if (typeof window === 'undefined' || !navigator.mediaDevices) return;
-    stopCamera();
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-            facingMode: { ideal: "environment" }, 
-            width: { ideal: 1920 }, 
-            height: { ideal: 1080 } 
-        } 
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setHasCameraPermission(true);
-      }
-    } catch (error) {
-      setHasCameraPermission(false);
-    }
-  }, [stopCamera]);
-
-  useEffect(() => {
-    if (stage === 'viewfinder') startCamera();
-    else stopCamera();
-    return () => stopCamera();
-  }, [stage, startCamera, stopCamera]);
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -239,12 +198,15 @@ export default function DocumentScanner() {
             const normalizedLuma = Math.min(255, luma * normFactor);
 
             if (activeFilter === 'bw') {
+                // PREMIUM BW PRO: Deep Ink Text with Face Detail Protection
                 let val;
-                if (normalizedLuma < 135) val = Math.pow(normalizedLuma / 135, 1.4) * 55;
-                else if (normalizedLuma > 200) val = 255;
-                else {
-                    const t = (normalizedLuma - 135) / 65;
-                    val = 55 + t * (255 - 55);
+                if (normalizedLuma < 140) {
+                    val = Math.pow(normalizedLuma / 140, 1.8) * 40; 
+                } else if (normalizedLuma > 210) {
+                    val = 255;
+                } else {
+                    const t = (normalizedLuma - 140) / 70;
+                    val = 40 + t * (255 - 40);
                 }
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'document') {
@@ -261,6 +223,7 @@ export default function DocumentScanner() {
                 pixels[i+1] = Math.min(255, g * normFactor * 1.05);
                 pixels[i+2] = Math.min(255, b * normFactor * 1.05);
             } else if (activeFilter === 'photo') {
+                // PHOTO: 15% Brightness boost + 10 Offset for studio look
                 pixels[i] = Math.min(255, r * 1.15 + 10);
                 pixels[i+1] = Math.min(255, g * 1.15 + 10);
                 pixels[i+2] = Math.min(255, b * 1.15 + 10);
@@ -291,26 +254,17 @@ export default function DocumentScanner() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
 
-  const handleCapture = () => {
-    if (!videoRef.current) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
-      setStage('adjust');
-    }
-  };
-
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
           const reader = new FileReader();
-          reader.onload = () => { setCurrentRawImage(reader.result as string); setStage('adjust'); };
+          reader.onload = () => { 
+              setCurrentRawImage(reader.result as string); 
+              setStage('adjust'); 
+          };
           reader.readAsDataURL(file);
       }
+      e.target.value = "";
   };
 
   const handleRotateSource = () => {
@@ -383,40 +337,44 @@ export default function DocumentScanner() {
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
-                    <div className="relative w-full overflow-hidden bg-black rounded-[2rem] md:rounded-[3rem] shadow-3xl h-[65vh] md:h-[600px] border-4 border-white/10">
-                        <video 
-                            ref={videoRef} 
-                            className="w-full h-full object-cover md:object-contain"
-                            autoPlay 
-                            muted 
-                            playsInline 
-                        />
-                        {!hasCameraPermission && hasCameraPermission !== null && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-black/60 backdrop-blur-sm z-30">
-                                <Smartphone className="size-16 mb-4 text-white/20" />
-                                <p className="text-white font-bold mb-6">Camera permission required.</p>
-                                <Button onClick={startCamera} className="bg-primary text-black font-black uppercase rounded-xl h-12 px-8">Allow Camera</Button>
+                    <Card className="w-full border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl">
+                        <CardHeader className="pt-12 md:pt-20">
+                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse">
+                                <ScanLine className="size-10" />
                             </div>
-                        )}
-                        <div className="absolute top-6 left-6 z-20">
-                             <Badge className="bg-black/60 backdrop-blur-md text-white font-black text-[10px] px-3 py-1 border border-white/20 uppercase tracking-widest">
-                                AI SCANNER ACTIVE
-                             </Badge>
-                        </div>
-                        <div className="absolute bottom-6 left-6 z-20">
-                             <Button variant="secondary" className="h-10 md:h-12 rounded-xl font-black uppercase text-[10px] shadow-2xl px-5 md:px-6 bg-white/80 hover:bg-white backdrop-blur-md" onClick={() => fileInputRef.current?.click()}>
-                                <ImageIcon className="mr-2 size-4 text-primary" /> ALBUM
-                            </Button>
-                            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-                        </div>
-                    </div>
+                            <CardTitle className="text-3xl md:text-5xl font-black uppercase tracking-tighter">AI Document Scanner</CardTitle>
+                            <CardDescription className="text-sm md:text-lg font-bold">Premium filters. Native full-screen capture.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-12 md:pb-20 px-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                                <div 
+                                    className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"
+                                    onClick={() => cameraInputRef.current?.click()}
+                                >
+                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
+                                        <Camera className="size-8" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-base font-black uppercase tracking-tighter">Capture Photo</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Open Native Camera</p>
+                                    </div>
+                                </div>
 
-                    <Button 
-                        onClick={handleCapture} 
-                        className="h-20 w-full bg-primary text-black font-black text-2xl rounded-3xl shadow-3xl transform active:scale-95 transition-all group overflow-hidden relative"
-                    >
-                        <Camera className="mr-3 size-8" /> CAPTURE DOCUMENT
-                    </Button>
+                                <div 
+                                    className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
+                                        <UploadCloud className="size-8" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-base font-black uppercase tracking-tighter">Pick from Album</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select local file</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="lg:col-span-4">
@@ -453,7 +411,7 @@ export default function DocumentScanner() {
                                     const ratio = Math.min(pw / props.width, ph / props.height);
                                     pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
                                 });
-                                pdf.save(`GR7-Scan-${Date.now()}.pdf`);
+                                pdf.save(`GR7-Premium-Scan-${Date.now()}.pdf`);
                             }}>
                                 <Download className="mr-3 size-6" /> EXPORT PDF
                             </Button>
@@ -606,6 +564,10 @@ export default function DocumentScanner() {
                 </div>
             </div>
         )}
+
+        {/* HIDDEN INPUTS FOR NATIVE CAMERA */}
+        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleNativeCapture} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleNativeCapture} />
     </div>
   );
 }
