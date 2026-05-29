@@ -52,7 +52,7 @@ import {
   Heart,
   Sparkles,
   Printer,
-  Contact2
+  Camera
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -150,6 +150,20 @@ function ToolsPageContent() {
 
   const pdfFeatures = [
     {
+      href: '/document-scan',
+      labelKey: 'document_scan_label',
+      descriptionKey: 'document_scan_description',
+      icon: Sparkles,
+      color: 'text-primary',
+    },
+    {
+      href: '/scan-to-pdf',
+      labelKey: 'scan_to_pdf_label',
+      descriptionKey: 'scan_to_pdf_description',
+      icon: Camera,
+      color: 'text-indigo-500',
+    },
+    {
       href: '/docx-to-pdf',
       labelKey: 'word_to_pdf_label',
       descriptionKey: 'word_to_pdf_description',
@@ -197,13 +211,6 @@ function ToolsPageContent() {
       descriptionKey: 'crop_pdf_description',
       icon: Crop,
       color: 'text-amber-600',
-    },
-    {
-      href: '/scan-to-pdf',
-      labelKey: 'scan_to_pdf_label',
-      descriptionKey: 'scan_to_pdf_description',
-      icon: ScanLine,
-      color: 'text-indigo-500',
     },
     {
       href: '/pdf-to-image',
@@ -380,7 +387,6 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* Hero Header Section */}
       <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 rounded-b-[3rem] shadow-2xl shadow-primary/5 mx-auto mb-6">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
@@ -400,7 +406,6 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          {/* Search Bar */}
           <div className="relative max-w-xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
@@ -449,7 +454,7 @@ function ToolsPageContent() {
                 <div className="text-center py-24 bg-muted/10 rounded-[3rem] border-4 border-dashed">
                 <Search className="mx-auto h-20 w-20 mb-6 text-muted-foreground/30" />
                 <p className="text-2xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
-                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term like 'PDF', 'Biodata', or 'Calc'.</p>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term.</p>
                 </div>
             )}
             </div>
