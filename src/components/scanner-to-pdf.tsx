@@ -136,7 +136,7 @@ export default function ScannerToPdf() {
     const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
     setRectCrop(initialCrop);
     
-    // Initial 6 handles setup
+    // Reset points with safe coverage
     setPoints([
         { x: 10, y: 10 }, { x: 90, y: 10 },
         { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -145,12 +145,12 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * Safe Perspective Solver
-   * Picks correct corners from the 6-dot array
+   * Safe Perspective Solver - Index Robust
    */
   const solvePerspective = (src: Point[], dst: Point[]) => {
-    const corners = [src[0], src[1], src[3], src[4]]; // Index-safe picking of corners
-    if (!corners[0] || !corners[1] || !corners[2] || !corners[3]) return null;
+    // 6-dot index map: 0:TL, 1:TR, 3:BR, 4:BL (Corners)
+    const corners = [src[0], src[1], src[3], src[4]];
+    if (corners.some(c => !c)) return null;
 
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -159,6 +159,7 @@ export default function ScannerToPdf() {
         p.push([s.x, s.y, 1, 0, 0, 0, -s.x * d.x, -s.y * d.x, d.x]);
         p.push([0, 0, 0, s.x, s.y, 1, -s.x * d.y, -s.y * d.y, d.y]);
     }
+    
     const n = 8;
     for (let i = 0; i < n; i++) {
         let max = i;
@@ -179,7 +180,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * PREMIUM ENHANCEMENT ENGINE
+   * ADVANCED IMAGE PROCESSING (CamScanner Logic)
    */
   const applyCorrection = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -189,6 +190,7 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
+    // 1. CROP / WARP
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -198,7 +200,7 @@ export default function ScannerToPdf() {
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
         const corners = [points[0], points[1], points[3], points[4]];
-        if (!corners[0]) return "";
+        if (corners.some(c => !c)) return "";
 
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
@@ -244,11 +246,11 @@ export default function ScannerToPdf() {
         }
     }
 
-    const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = processedData.data;
-
-    // --- ENHANCEMENT FILTERS ---
+    // 2. FILTERS (Adaptive Engine)
     if (activeFilter !== 'original') {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+
         for (let i = 0; i < pixels.length; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
@@ -258,28 +260,27 @@ export default function ScannerToPdf() {
                 pixels[i] = Math.min(255, r * factor);
                 pixels[i+1] = Math.min(255, g * factor);
                 pixels[i+2] = Math.min(255, b * factor);
-                if (luma > 180) pixels[i] = pixels[i+1] = pixels[i+2] = 255;
+                if (luma > 185) pixels[i] = pixels[i+1] = pixels[i+2] = 255; // White boost
             } else if (activeFilter === 'bw') {
-                const threshold = 130;
-                const val = luma > threshold ? 255 : (luma < 70 ? 0 : luma * 0.4);
+                const val = luma > 135 ? 255 : (luma < 75 ? 0 : luma * 0.35);
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'grayscale') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             }
         }
-        ctx.putImageData(processedData, 0, 0);
+        ctx.putImageData(imageData, 0, 0);
     }
 
-    return canvas.toDataURL('image/jpeg', 0.95);
+    return canvas.toDataURL('image/jpeg', 0.9);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop]);
 
-  // LIVE UPDATE LOOP
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage) {
-        const timer = setTimeout(async () => {
+        const runCorrection = async () => {
             const res = await applyCorrection();
-            setLiveResultSrc(res);
-        }, 60);
+            if (res) setLiveResultSrc(res);
+        };
+        const timer = setTimeout(runCorrection, 100);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyCorrection]);
@@ -293,12 +294,12 @@ export default function ScannerToPdf() {
     return { x, y };
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     if (e.cancelable) e.preventDefault();
     
     let clientX, clientY;
-    if ('touches' in e) { clientX = (e as React.TouchEvent).touches[0].clientX; clientY = (e as React.TouchEvent).touches[0].clientY; }
+    if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
     else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
     
     const pos = updateMagnifier(clientX, clientY);
@@ -309,12 +310,12 @@ export default function ScannerToPdf() {
             return next;
         });
     }
-  }, [draggingPoint, updateMagnifier]);
+  };
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       if (e.cancelable) e.preventDefault();
       let clientX, clientY;
-      if ('touches' in e) { clientX = (e as React.TouchEvent).touches[0].clientX; clientY = (e as React.TouchEvent).touches[0].clientY; }
+      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
       else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
       updateMagnifier(clientX, clientY);
       setDraggingPoint(idx);
@@ -331,6 +332,7 @@ export default function ScannerToPdf() {
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       setCurrentRawImage(dataUrl);
       setStage('adjust');
+      setLiveResultSrc(null);
     }
   };
 
@@ -342,6 +344,7 @@ export default function ScannerToPdf() {
         const src = reader.result?.toString() || null;
         setCurrentRawImage(src);
         setStage('adjust');
+        setLiveResultSrc(null);
       };
       reader.readAsDataURL(file);
     }
@@ -392,7 +395,7 @@ export default function ScannerToPdf() {
         const ratio = Math.min(pw / imgProps.width, ph / imgProps.height);
         pdf.addImage(src, 'JPEG', (pw - imgProps.width * ratio) / 2, (ph - imgProps.height * ratio) / 2, imgProps.width * ratio, imgProps.height * ratio, undefined, 'FAST');
     }
-    pdf.save(`Scan-Document-${Date.now()}.pdf`);
+    pdf.save(`GR7-Scan-${Date.now()}.pdf`);
     setIsBuildingPdf(false);
   };
 
@@ -561,14 +564,14 @@ export default function ScannerToPdf() {
                             </div>
                         </div>
 
-                        {/* RIGHT: LIVE RESULT WINDOW */}
-                        <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-300/50 dark:bg-black/40 relative">
+                        {/* RIGHT: LIVE RESULT WINDOW (Dynamic Container) */}
+                        <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-300/50 dark:bg-black/40 relative h-full">
                              <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-green-600 text-white font-black text-[8px] uppercase shadow-lg border-2 border-white animate-pulse flex items-center gap-1.5"><Eye className="size-2.5"/> Live HD Engine</Badge>
                              
-                             <div className="w-full flex flex-col items-center gap-6">
-                                <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm overflow-hidden border-[8px] border-white transform transition-transform hover:scale-[1.02] max-w-full">
+                             <div className="w-full flex flex-col items-center gap-6 justify-center">
+                                <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm overflow-hidden border-[4px] md:border-[8px] border-white transform transition-transform hover:scale-[1.02] max-w-full flex items-center justify-center">
                                     {liveResultSrc ? (
-                                        <img src={liveResultSrc} className="max-w-full max-h-[65vh] w-auto h-auto object-contain block" alt="live-result" />
+                                        <img src={liveResultSrc} className="max-w-full max-h-[70vh] w-auto h-auto object-contain block" alt="live-result" />
                                     ) : (
                                         <div className="size-64 flex flex-col items-center justify-center gap-4 text-muted-foreground/30">
                                             <Loader2 className="size-10 animate-spin" />
