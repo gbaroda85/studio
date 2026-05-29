@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -38,7 +37,8 @@ import {
     Frame,
     Wand2,
     MousePointer2,
-    RotateCcw
+    RotateCcw,
+    Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -52,12 +52,13 @@ import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from
 interface Point { x: number; y: number; }
 
 /**
- * Robust Perspective Matrix Solver
- * Uses TL, TR, BR, BL corners to compute homography matrix
+ * Homography Matrix Solver
+ * Finds matrix H such that src = H * dst
  */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
-    // Index mapping for 6-dot setup: 0=TL, 1=TR, 3=BR, 4=BL
+    // We only need the 4 corners for homography (TL, TR, BR, BL)
+    // In our 6-dot setup: 0=TL, 1=TR, 3=BR, 4=BL
     const corners = [src[0], src[1], src[3], src[4]]; 
     
     for (let i = 0; i < 4; i++) {
@@ -107,7 +108,7 @@ export default function ScannerToPdf() {
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 6-Dot Logic: 0=TL, 1=TR, 2=RightMid, 3=BR, 4=BL, 5=LeftMid
+  // 6-Dot setup: 0=TL, 1=TR, 2=RightMid, 3=BR, 4=BL, 5=LeftMid
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
       { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -164,8 +165,8 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * PREMIUM SCAN ENHANCEMENT ENGINE
-   * Division-based shadow removal + Adaptive Text Normalization
+   * Premium Enhancement Pipeline
+   * Features division-based normalization for background cleaning
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -175,7 +176,6 @@ export default function ScannerToPdf() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. DYNAMIC PERSPECTIVE WARP (LANDSCAPE AWARE)
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -184,7 +184,6 @@ export default function ScannerToPdf() {
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // Calculate physical distances to prevent stretching
         const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
         const w2 = Math.hypot(points[3].x - points[4].x, points[3].y - points[4].y);
         const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
@@ -227,13 +226,11 @@ export default function ScannerToPdf() {
         }
     }
 
-    // 2. INDUSTRIAL LIGHTING NORMALIZATION (Division method like Clear Scanner)
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Estimate background illumination map (Paper detection)
         let hist = new Array(256).fill(0);
         const skip = Math.max(4, Math.floor(len / 4000));
         for (let i = 0; i < len; i += skip * 4) {
@@ -260,7 +257,6 @@ export default function ScannerToPdf() {
                 const enhanced = Math.min(255, luma * normFactor);
                 const finalVal = isInk ? enhanced * 0.75 : Math.min(255, enhanced * 1.1);
                 pixels[i] = pixels[i+1] = pixels[i+2] = finalVal;
-                // Tint to pure white paper
                 if (finalVal > 220) { pixels[i] = pixels[i+1] = pixels[i+2] = 255; }
             } else if (activeFilter === 'bw') {
                 const val = luma > whiteRef * 0.72 ? 255 : 0;
@@ -283,10 +279,15 @@ export default function ScannerToPdf() {
     if (stage === 'adjust' && currentRawImage) {
         const timer = setTimeout(async () => {
             setIsProcessing(true);
-            const res = await applyIntelligentScan();
-            setLiveResultSrc(res);
-            setIsProcessing(false);
-        }, 200);
+            try {
+                const res = await applyIntelligentScan();
+                setLiveResultSrc(res);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setIsProcessing(false);
+            }
+        }, 250);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
@@ -364,7 +365,6 @@ export default function ScannerToPdf() {
     setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
-        // Handle logic: Side handles (2 and 5) shift full edges
         if (draggingPoint === 2) { next[1].x = x; next[2].x = x; next[3].x = x; }
         else if (draggingPoint === 5) { next[0].x = x; next[5].x = x; next[4].x = x; }
         else {
@@ -447,7 +447,6 @@ export default function ScannerToPdf() {
 
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-2 gap-8 items-stretch animate-in zoom-in-95 duration-500">
-                {/* Adjustment Source Panel */}
                 <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-900 flex flex-col h-full">
                     <CardHeader className="bg-white/5 border-b border-white/5 p-4 flex flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-white">
@@ -506,7 +505,6 @@ export default function ScannerToPdf() {
                     </CardFooter>
                 </Card>
 
-                {/* HD Live Preview Panel */}
                 <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col h-full">
                     <CardHeader className="bg-green-600/5 border-b p-4 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4">
