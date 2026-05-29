@@ -31,7 +31,8 @@ import {
     FileText,
     ChevronRight,
     Eye,
-    Trash2
+    Trash2,
+    RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -144,15 +145,19 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * solvePerspective logic
-   * Expects EXACTLY 4 points in src and 4 points in dst
+   * Safe Perspective Solver
+   * Picks correct corners from the 6-dot array
    */
   const solvePerspective = (src: Point[], dst: Point[]) => {
+    const corners = [src[0], src[1], src[3], src[4]]; // Index-safe picking of corners
+    if (!corners[0] || !corners[1] || !corners[2] || !corners[3]) return null;
+
     const p = [];
-    const corners = [src[0], src[1], src[3], src[4]]; // Using TL, TR, BR, BL
     for (let i = 0; i < 4; i++) {
-        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
+        const s = corners[i];
+        const d = dst[i];
+        p.push([s.x, s.y, 1, 0, 0, 0, -s.x * d.x, -s.y * d.x, d.x]);
+        p.push([0, 0, 0, s.x, s.y, 1, -s.x * d.y, -s.y * d.y, d.y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -175,7 +180,6 @@ export default function ScannerToPdf() {
 
   /**
    * PREMIUM ENHANCEMENT ENGINE
-   * This logic mimics CamScanner quality using local normalization and adaptive sharpening.
    */
   const applyCorrection = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -194,7 +198,8 @@ export default function ScannerToPdf() {
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
         const corners = [points[0], points[1], points[3], points[4]];
-        
+        if (!corners[0]) return "";
+
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
         const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
@@ -205,15 +210,13 @@ export default function ScannerToPdf() {
         canvas.width = Math.max(1, targetWidth);
         canvas.height = Math.max(1, targetHeight);
 
-        const srcPoints = corners.map(p => ({ 
-            x: p.x * (image.naturalWidth / 100), 
-            y: p.y * (image.naturalHeight / 100) 
-        }));
+        const srcPoints = corners.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
         const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
         
-        const h = solvePerspective(dstPoints, srcPoints);
+        const h = solvePerspective(srcPoints, dstPoints);
+        if (!h) return "";
+
         const imgData = ctx.createImageData(canvas.width, canvas.height);
-        
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth;
         srcCanvas.height = image.naturalHeight;
@@ -244,65 +247,27 @@ export default function ScannerToPdf() {
     const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = processedData.data;
 
-    // --- PREMIUM SCAN FILTERS ---
+    // --- ENHANCEMENT FILTERS ---
     if (activeFilter !== 'original') {
         for (let i = 0; i < pixels.length; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
 
             if (activeFilter === 'magic') {
-                /**
-                 * CamScanner style 'Magic Color'
-                 * Intelligent Contrast Stretch + Shadow Flattening
-                 */
-                const factor = luma < 130 ? 1.3 : 1.6;
+                const factor = luma < 128 ? 1.4 : 1.6;
                 pixels[i] = Math.min(255, r * factor);
                 pixels[i+1] = Math.min(255, g * factor);
                 pixels[i+2] = Math.min(255, b * factor);
-                // Background cleaning: push near-whites to pure white
-                if (luma > 180) {
-                    pixels[i] = pixels[i+1] = pixels[i+2] = Math.min(255, pixels[i] * 1.1);
-                }
+                if (luma > 180) pixels[i] = pixels[i+1] = pixels[i+2] = 255;
             } else if (activeFilter === 'bw') {
-                /**
-                 * Premium B&W Adaptive-like behavior
-                 * High-contrast text extraction while keeping signatures
-                 */
-                const avg = (r + g + b) / 3;
-                const final = avg > 140 ? 255 : (avg < 80 ? 0 : avg * 0.5);
-                pixels[i] = pixels[i+1] = pixels[i+2] = final;
+                const threshold = 130;
+                const val = luma > threshold ? 255 : (luma < 70 ? 0 : luma * 0.4);
+                pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'grayscale') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             }
         }
         ctx.putImageData(processedData, 0, 0);
-
-        // SHARPENING PASS (Convolution)
-        if (activeFilter === 'bw' || activeFilter === 'magic') {
-            const amount = 0.15;
-            const kernel = [0, -amount, 0, -amount, 4 * amount + 1, -amount, 0, -amount, 0];
-            const sharpened = ctx.createImageData(canvas.width, canvas.height);
-            const data = processedData.data;
-            const out = sharpened.data;
-            const w = canvas.width, h = canvas.height;
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const i = (y * w + x) * 4;
-                    let r=0, g=0, b=0;
-                    for(let ky=-1; ky<=1; ky++){
-                        for(let kx=-1; kx<=1; kx++){
-                            const scy = Math.min(h-1, Math.max(0, y+ky));
-                            const scx = Math.min(w-1, Math.max(0, x+kx));
-                            const off = (scy * w + scx) * 4;
-                            const wt = kernel[(ky+1)*3 + (kx+1)];
-                            r += data[off]*wt; g += data[off+1]*wt; b += data[off+2]*wt;
-                        }
-                    }
-                    out[i]=r; out[i+1]=g; out[i+2]=b; out[i+3]=data[i+3];
-                }
-            }
-            ctx.putImageData(sharpened, 0, 0);
-        }
     }
 
     return canvas.toDataURL('image/jpeg', 0.95);
@@ -314,7 +279,7 @@ export default function ScannerToPdf() {
         const timer = setTimeout(async () => {
             const res = await applyCorrection();
             setLiveResultSrc(res);
-        }, 50);
+        }, 60);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyCorrection]);
@@ -401,7 +366,7 @@ export default function ScannerToPdf() {
     };
   };
 
-  const handleConfirmAdjustment = async () => {
+  const handleConfirmAdjustment = () => {
     if (!liveResultSrc) return;
     const newPage: ScannedPage = {
         id: Math.random().toString(36).substr(2, 9),
@@ -596,7 +561,7 @@ export default function ScannerToPdf() {
                             </div>
                         </div>
 
-                        {/* RIGHT: LIVE RESULT WINDOW (DYNAMIC ASPECT FIX) */}
+                        {/* RIGHT: LIVE RESULT WINDOW */}
                         <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-300/50 dark:bg-black/40 relative">
                              <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-green-600 text-white font-black text-[8px] uppercase shadow-lg border-2 border-white animate-pulse flex items-center gap-1.5"><Eye className="size-2.5"/> Live HD Engine</Badge>
                              
