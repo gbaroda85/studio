@@ -85,7 +85,7 @@ export default function ScannerToPdf() {
   const [rectCrop, setRectCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
-  // 6 Points: TL, TR, MR, BR, BL, ML
+  // 6 Points: TL(0), TR(1), MR(2), BR(3), BL(4), ML(5)
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
       { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -140,7 +140,7 @@ export default function ScannerToPdf() {
     const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
     setRectCrop(initialCrop);
     
-    // Initial edges
+    // Initial 6 handles setup
     setPoints([
         { x: 10, y: 10 }, { x: 90, y: 10 },
         { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -187,8 +187,8 @@ export default function ScannerToPdf() {
         const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        canvas.width = c.width * scaleX;
-        canvas.height = c.height * scaleY;
+        canvas.width = (c.width * scaleX) || 1;
+        canvas.height = (c.height * scaleY) || 1;
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
         const corners = [points[0], points[1], points[3], points[4]];
@@ -199,14 +199,14 @@ export default function ScannerToPdf() {
         
         const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
         const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+        canvas.width = targetWidth || 1;
+        canvas.height = targetHeight || 1;
 
         const srcPoints = corners.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
         const h = solvePerspective(dstPoints, srcPoints);
-        const imgData = ctx.createImageData(targetWidth, targetHeight);
+        const imgData = ctx.createImageData(canvas.width, canvas.height);
         
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth;
@@ -216,13 +216,13 @@ export default function ScannerToPdf() {
         const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
 
         if (srcData) {
-            for (let y = 0; y < targetHeight; y++) {
-                for (let x = 0; x < targetWidth; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
                     const z = h[6] * x + h[7] * y + 1;
                     const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                     const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
                     if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
-                        const dstIdx = (y * targetWidth + x) * 4;
+                        const dstIdx = (y * canvas.width + x) * 4;
                         const srcIdx = (sy * image.naturalWidth + sx) * 4;
                         imgData.data[dstIdx] = srcData[srcIdx];
                         imgData.data[dstIdx+1] = srcData[srcIdx+1];
@@ -249,7 +249,7 @@ export default function ScannerToPdf() {
             pixels[i+2] = Math.min(255, b * factor);
         } else if (activeFilter === 'bw') {
             const avg = (r + g + b) / 3;
-            const res = avg > 150 ? 255 : 0;
+            const res = avg > 140 ? 255 : 0;
             pixels[i] = pixels[i+1] = pixels[i+2] = res;
         } else if (activeFilter === 'grayscale') {
             const gray = 0.299 * r + 0.587 * g + 0.114 * b;
@@ -257,7 +257,7 @@ export default function ScannerToPdf() {
         }
     }
     ctx.putImageData(processedData, 0, 0);
-    return canvas.toDataURL('image/jpeg', 0.95);
+    return canvas.toDataURL('image/jpeg', 0.9);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop]);
 
   // LIVE UPDATE LOOP
@@ -314,7 +314,49 @@ export default function ScannerToPdf() {
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
         setIsProcessing(false);
+        // Reset handles for new orientation
+        setPoints([
+            { x: 10, y: 10 }, { x: 90, y: 10 },
+            { x: 90, y: 50 }, { x: 90, y: 90 },
+            { x: 10, y: 90 }, { x: 10, y: 50 }
+        ]);
     };
+  };
+
+  const updateMagnifier = useCallback((clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    setMagnifierPos({ x, y });
+    return { x, y };
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current) return;
+    if (e.cancelable) e.preventDefault();
+    
+    let clientX, clientY;
+    if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+    else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
+    
+    const pos = updateMagnifier(clientX, clientY);
+    if (pos) {
+        setPoints(prev => {
+            const next = [...prev];
+            next[draggingPoint] = { x: pos.x, y: pos.y };
+            return next;
+        });
+    }
+  }, [draggingPoint, updateMagnifier]);
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      let clientX, clientY;
+      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
+      updateMagnifier(clientX, clientY);
+      setDraggingPoint(idx);
   };
 
   const handleConfirmAdjustment = async () => {
@@ -328,15 +370,6 @@ export default function ScannerToPdf() {
     setScannedPages(prev => [...prev, newPage]);
     setStage('stack');
     toast({ title: "Page Added", description: "Document stored in stack." });
-  };
-
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      let clientX, clientY;
-      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
-      updateMagnifier(clientX, clientY);
-      setDraggingPoint(idx);
   };
 
   const handleBuildPdf = async () => {
@@ -366,7 +399,7 @@ export default function ScannerToPdf() {
                         <CardHeader className="bg-muted/30 border-b py-2 px-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <ScanLine className="size-4 text-primary" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live Viewfinder</CardTitle>
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Scanner Viewfinder</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 relative aspect-[4/3] flex items-center justify-center overflow-hidden">
@@ -404,7 +437,7 @@ export default function ScannerToPdf() {
                         </CardContent>
                         <CardFooter className="p-4 md:p-8 bg-white dark:bg-slate-950 border-t">
                             <Button onClick={handleCapture} className="h-16 w-full bg-gradient-button text-white font-black text-lg md:text-xl rounded-2xl shadow-2xl transition-transform active:scale-95">
-                                <Zap className="mr-3 size-6 text-yellow-400" /> CAPTURE DOCUMENT
+                                <Zap className="mr-3 size-6 text-yellow-400" /> SCAN CURRENT PAGE
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                         </CardFooter>
@@ -423,7 +456,7 @@ export default function ScannerToPdf() {
                             {scannedPages.length === 0 ? (
                                 <div className="py-20 text-center opacity-30 space-y-4">
                                     <Monitor className="size-16 mx-auto" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest">Stack is empty</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest">No pages scanned yet</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
