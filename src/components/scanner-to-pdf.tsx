@@ -18,25 +18,19 @@ import {
     ShieldCheck, 
     ScanLine,
     Monitor,
-    Smartphone,
-    Trash2,
-    ChevronLeft,
-    ChevronRight,
-    Sparkles,
-    Palette,
-    Maximize,
-    Move,
-    Grid3X3,
-    RotateCw,
     ImageIcon,
     Plus,
     Droplets,
     Scan,
     Layout,
-    ArrowRightLeft,
-    Eye,
+    RotateCw,
+    Sparkles,
+    Maximize,
+    Move,
+    SearchCode,
     FileText,
-    SearchCode
+    ChevronRight,
+    Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -148,13 +142,15 @@ export default function ScannerToPdf() {
     ]);
   };
 
+  /**
+   * solvePerspective logic
+   * Expects EXACTLY 4 points in src and 4 points in dst
+   */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // Only use corners for warp: TL(0), TR(1), BR(3), BL(4)
-    const corners = [src[0], src[1], src[3], src[4]];
     for (let i = 0; i < 4; i++) {
-        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -191,7 +187,9 @@ export default function ScannerToPdf() {
         canvas.height = (c.height * scaleY) || 1;
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
+        // CORNERS ONLY: TL(0), TR(1), BR(3), BL(4)
         const corners = [points[0], points[1], points[3], points[4]];
+        
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
         const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
@@ -202,7 +200,10 @@ export default function ScannerToPdf() {
         canvas.width = targetWidth || 1;
         canvas.height = targetHeight || 1;
 
-        const srcPoints = corners.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
+        const srcPoints = corners.map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
         const h = solvePerspective(dstPoints, srcPoints);
@@ -271,6 +272,42 @@ export default function ScannerToPdf() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyCorrection]);
 
+  const updateMagnifier = useCallback((clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    setMagnifierPos({ x, y });
+    return { x, y };
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current) return;
+    if (e.cancelable) e.preventDefault();
+    
+    let clientX, clientY;
+    if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+    else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
+    
+    const pos = updateMagnifier(clientX, clientY);
+    if (pos) {
+        setPoints(prev => {
+            const next = [...prev];
+            next[draggingPoint] = { x: pos.x, y: pos.y };
+            return next;
+        });
+    }
+  }, [draggingPoint, updateMagnifier]);
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      let clientX, clientY;
+      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
+      updateMagnifier(clientX, clientY);
+      setDraggingPoint(idx);
+  };
+
   const handleCapture = () => {
     if (!videoRef.current || !hasCameraPermission) return;
     const canvas = document.createElement('canvas');
@@ -314,49 +351,7 @@ export default function ScannerToPdf() {
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
         setIsProcessing(false);
-        // Reset handles for new orientation
-        setPoints([
-            { x: 10, y: 10 }, { x: 90, y: 10 },
-            { x: 90, y: 50 }, { x: 90, y: 90 },
-            { x: 10, y: 90 }, { x: 10, y: 50 }
-        ]);
     };
-  };
-
-  const updateMagnifier = useCallback((clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
-    return { x, y };
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
-    if (e.cancelable) e.preventDefault();
-    
-    let clientX, clientY;
-    if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-    else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
-    
-    const pos = updateMagnifier(clientX, clientY);
-    if (pos) {
-        setPoints(prev => {
-            const next = [...prev];
-            next[draggingPoint] = { x: pos.x, y: pos.y };
-            return next;
-        });
-    }
-  }, [draggingPoint, updateMagnifier]);
-
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      let clientX, clientY;
-      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
-      updateMagnifier(clientX, clientY);
-      setDraggingPoint(idx);
   };
 
   const handleConfirmAdjustment = async () => {
