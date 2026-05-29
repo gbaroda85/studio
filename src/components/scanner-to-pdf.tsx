@@ -81,7 +81,7 @@ export default function ScannerToPdf() {
         };
     });
 
-    // We use a functional state update to ensure selectedId is set to the NEWEST added item
+    // Guaranteed selection of the newest item
     setPages(prev => {
         const updated = [...prev, ...newItems];
         if (newItems.length > 0) {
@@ -233,7 +233,6 @@ export default function ScannerToPdf() {
                                         <p className="text-base font-black uppercase tracking-tighter">Native Camera</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Full screen capture</p>
                                     </div>
-                                    <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
                                 </div>
 
                                 <div 
@@ -247,7 +246,6 @@ export default function ScannerToPdf() {
                                         <p className="text-base font-black uppercase tracking-tighter">Photo Gallery</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple files</p>
                                     </div>
-                                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
                                 </div>
                             </div>
                         ) : (
@@ -411,6 +409,11 @@ export default function ScannerToPdf() {
                 </Card>
             </div>
         </div>
+        
+        {/* Hidden inputs always rendered to keep refs valid */}
+        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
     </div>
   );
 }
+
