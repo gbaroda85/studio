@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
@@ -25,7 +26,9 @@ import {
     Camera,
     RefreshCcw,
     Settings2,
-    Plus
+    Plus,
+    Eye,
+    FileDigit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -61,7 +64,7 @@ export default function ScannerToPdf() {
         }
       });
     };
-  }, []);
+  }, [pages]);
 
   // Handle local file uploads or camera capture with instant ObjectURL
   const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -72,21 +75,21 @@ export default function ScannerToPdf() {
         const id = Math.random().toString(36).substr(2, 9);
         return {
             id,
-            src: URL.createObjectURL(file), // Direct and instant
+            src: URL.createObjectURL(file), 
             name: file.name || `Scan-${Date.now()}.jpg`,
             vAlign: 'center'
         };
     });
 
-    setPages(prev => {
-        const updated = [...prev, ...newItems];
-        if (!selectedId && updated.length > 0) setSelectedId(updated[0].id);
-        return updated;
-    });
+    setPages(prev => [...prev, ...newItems]);
+    
+    // Automatically select the LAST added item so it appears in the positioning panel
+    if (newItems.length > 0) {
+        setSelectedId(newItems[newItems.length - 1].id);
+    }
 
-    // Reset input so same file/camera action can be repeated
     e.target.value = "";
-    toast({ title: "Page Added", description: `${newItems.length} new scan(s) loaded.` });
+    toast({ title: "Page Added", description: "Image is now ready for positioning." });
   };
 
   const handleRemovePage = (id: string) => {
@@ -95,7 +98,7 @@ export default function ScannerToPdf() {
         if (item?.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
         
         const filtered = prev.filter(p => p.id !== id);
-        if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[0].id : null);
+        if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
         return filtered;
     });
   };
@@ -117,7 +120,6 @@ export default function ScannerToPdf() {
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         
         const rotatedSrc = canvas.toDataURL('image/jpeg', 0.9);
-        // Revoke old blob if it was a blob
         if (item.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
         
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
@@ -133,7 +135,7 @@ export default function ScannerToPdf() {
       const selected = pages.find(p => p.id === selectedId);
       if (!selected) return;
       setPages(prev => prev.map(p => ({ ...p, vAlign: selected.vAlign })));
-      toast({ title: "Applied to All", description: `All pages set to ${selected.vAlign} alignment.` });
+      toast({ title: "Applied to All", description: `All pages synchronized.` });
   };
 
   const handleDownloadPdf = async () => {
@@ -205,7 +207,7 @@ export default function ScannerToPdf() {
             <div className="lg:col-span-8 space-y-6">
                 <Card className="border-2 shadow-2xl overflow-hidden rounded-[2.5rem] bg-card/50">
                     <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
-                         <div className="space-y-1">
+                         <div className="space-y-1 text-left">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                                 <FileStack className="size-6 text-primary" /> BUNDLE STUDIO
                             </CardTitle>
@@ -327,7 +329,20 @@ export default function ScannerToPdf() {
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-4">
+                                {/* Visual Selected Page Preview */}
+                                <div className="space-y-2">
+                                    <Label className="text-[9px] font-black uppercase tracking-widest opacity-50">Current Selection</Label>
+                                    <div className="aspect-[3/4] w-32 mx-auto rounded-xl border-2 border-primary/20 bg-muted/20 overflow-hidden relative shadow-inner">
+                                        <div className={cn(
+                                            "absolute inset-0 flex flex-col p-1 transition-all duration-500",
+                                            selectedPage?.vAlign === 'top' ? 'justify-start' : selectedPage?.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                        )}>
+                                            <img src={selectedPage?.src} className="max-w-full max-h-[90%] object-contain mx-auto shadow-2xl" alt="selection" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                         <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                     </Label>
@@ -380,9 +395,9 @@ export default function ScannerToPdf() {
 
                         <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                             <Zap className="size-6 text-yellow-500 shrink-0" />
-                            <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
+                            <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                 <span className="font-black block mb-1 text-primary">A4 AUTO-FIT:</span>
-                                Photos are automatically scaled to fit standard A4 margins perfectly.
+                                Each capture is automatically scaled to fit standard A4 margins.
                             </p>
                         </div>
                     </CardContent>
