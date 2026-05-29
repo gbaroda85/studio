@@ -95,6 +95,7 @@ export default function DocumentScanner() {
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isImageReady, setIsImageReady] = useState(false);
 
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
@@ -113,11 +114,13 @@ export default function DocumentScanner() {
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
+    setIsImageReady(true); // Signal that image is finally in the DOM and ready
   };
 
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
-    if (!image || !currentRawImage) return "";
+    // Check for naturalWidth to ensure image is truly decoded
+    if (!image || !currentRawImage || !image.naturalWidth) return "";
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -233,7 +236,7 @@ export default function DocumentScanner() {
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop]);
 
   useEffect(() => {
-    if (stage === 'adjust' && currentRawImage) {
+    if (stage === 'adjust' && currentRawImage && isImageReady) {
         const timer = setTimeout(async () => {
             setIsProcessing(true);
             try {
@@ -244,17 +247,21 @@ export default function DocumentScanner() {
             } finally {
                 setIsProcessing(false);
             }
-        }, 200);
+        }, 300);
         return () => clearTimeout(timer);
     }
-  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
+  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan]);
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-          const url = URL.createObjectURL(file);
-          setCurrentRawImage(url); 
-          setStage('adjust'); 
+          const reader = new FileReader();
+          reader.onload = (event) => {
+              setCurrentRawImage(event.target?.result as string); 
+              setIsImageReady(false); // Reset ready state for the new image
+              setStage('adjust'); 
+          };
+          reader.readAsDataURL(file);
       }
       e.target.value = "";
   };
@@ -272,6 +279,7 @@ export default function DocumentScanner() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
+        setIsImageReady(false);
     };
   };
 
@@ -284,6 +292,7 @@ export default function DocumentScanner() {
     setStage('stack');
     setCurrentRawImage(null);
     setLiveResultSrc(null);
+    setIsImageReady(false);
   };
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
@@ -478,7 +487,7 @@ export default function DocumentScanner() {
                          <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')}><X /></Button>
                     </CardHeader>
                     <CardContent className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 h-full">
-                         <div className="relative bg-white shadow-3xl rounded-sm border-[6px] md:border-[12px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden">
+                         <div className="relative bg-white shadow-3xl rounded-sm border-[6px] md:border-[12px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden min-h-[300px]">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[60vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                          </div>
                          

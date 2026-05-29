@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import { 
@@ -24,7 +24,6 @@ import {
     ChevronRight,
     Camera,
     RefreshCcw,
-    Settings2,
     Plus,
     Eye,
     FileDigit
@@ -50,43 +49,48 @@ export default function ScannerToPdf() {
   const [pages, setPages] = useState<ScannedPage[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    return () => {
-      pages.forEach(page => {
-        if (page.src.startsWith('blob:')) {
-          URL.revokeObjectURL(page.src);
-        }
-      });
-    };
-  }, [pages]);
 
   const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
 
-    if (convertedPdfUrl) setConvertedPdfUrl(null);
+    setIsProcessing(true);
+    const newFilesArray = Array.from(filesList);
+    let loadedCount = 0;
 
-    const newItems: ScannedPage[] = Array.from(filesList).map(file => {
-        const id = Math.random().toString(36).substr(2, 9);
-        return {
-            id,
-            src: URL.createObjectURL(file), 
-            name: file.name || `Scan-${Date.now()}.jpg`,
-            vAlign: 'center'
+    newFilesArray.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const id = Math.random().toString(36).substr(2, 9);
+            const base64Src = event.target?.result as string;
+            
+            setPages(prev => {
+                const updated = [...prev, {
+                    id,
+                    src: base64Src,
+                    name: file.name || `Scan-${Date.now()}.jpg`,
+                    vAlign: 'center'
+                }];
+                // Auto-select the last added item
+                setSelectedId(id);
+                return updated;
+            });
+
+            loadedCount++;
+            if (loadedCount === newFilesArray.length) {
+                setIsProcessing(false);
+                toast({ title: "Images Added", description: `Successfully loaded ${newFilesArray.length} photos.` });
+            }
         };
-    });
-
-    setPages(prev => {
-        const updated = [...prev, ...newItems];
-        if (newItems.length > 0) {
-            setSelectedId(newItems[newItems.length - 1].id);
-        }
-        return updated;
+        reader.onerror = () => {
+            setIsProcessing(false);
+            toast({ variant: "destructive", title: "Error", description: "Failed to read some images." });
+        };
+        reader.readAsDataURL(file);
     });
 
     e.target.value = "";
@@ -94,9 +98,6 @@ export default function ScannerToPdf() {
 
   const handleRemovePage = (id: string) => {
     setPages(prev => {
-        const item = prev.find(p => p.id === id);
-        if (item?.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
-        
         const filtered = prev.filter(p => p.id !== id);
         if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
         return filtered;
@@ -120,8 +121,6 @@ export default function ScannerToPdf() {
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         
         const rotatedSrc = canvas.toDataURL('image/jpeg', 0.9);
-        if (item.src.startsWith('blob:')) URL.revokeObjectURL(item.src);
-        
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
     };
   };
@@ -214,7 +213,11 @@ export default function ScannerToPdf() {
                             <CardDescription className="text-[10px] font-bold uppercase opacity-60">Capture or upload to start bundle.</CardDescription>
                          </div>
                          <div className="flex gap-2">
-                             <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-destructive hover:bg-destructive/5"><Trash2 className="size-3 mr-1" /> Clear All</Button>
+                             {pages.length > 0 && (
+                                <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-destructive hover:bg-destructive/5">
+                                    <Trash2 className="size-3 mr-1" /> Clear All
+                                </Button>
+                             )}
                          </div>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8">
@@ -287,6 +290,13 @@ export default function ScannerToPdf() {
                                 </ScrollArea>
                             </div>
                         )}
+                        
+                        {isProcessing && (
+                            <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-center gap-3 animate-pulse">
+                                <Loader2 className="size-4 animate-spin text-primary" />
+                                <span className="text-[10px] font-black uppercase text-primary">Reading Photos...</span>
+                            </div>
+                        )}
                     </CardContent>
                     <CardFooter className="bg-muted/10 border-t p-4 flex justify-center gap-8">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
@@ -301,7 +311,7 @@ export default function ScannerToPdf() {
                 {pages.length > 0 && (
                     <Button 
                         onClick={handleDownloadPdf} 
-                        disabled={isGenerating}
+                        disabled={isGenerating || isProcessing}
                         className="h-20 w-full bg-primary text-black font-black text-2xl rounded-3xl shadow-3xl transform active:scale-95 transition-all group relative overflow-hidden"
                     >
                         {isGenerating ? <Loader2 className="animate-spin mr-3 size-8" /> : <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" />}
