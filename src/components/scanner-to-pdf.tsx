@@ -64,7 +64,6 @@ function solvePerspective(src: Point[], dst: Point[]) {
     const corners = [src[0], src[1], src[3], src[4]];
     
     for (let i = 0; i < 4; i++) {
-        if (!corners[i]) continue;
         p.push([dst[i].x, dst[i].y, 1, 0, 0, 0, -dst[i].x * corners[i].x, -dst[i].y * corners[i].x, corners[i].x]);
         p.push([0, 0, 0, dst[i].x, dst[i].y, 1, -dst[i].x * corners[i].y, -dst[i].y * corners[i].y, corners[i].y]);
     }
@@ -240,7 +239,6 @@ export default function ScannerToPdf() {
         const len = pixels.length;
 
         // Step A: Background Estimation (Local Min-Max)
-        // We calculate background color to remove shadows and glare.
         let rSum = 0, gSum = 0, bSum = 0;
         const samplingStep = 50; 
         let sampleCount = 0;
@@ -249,8 +247,6 @@ export default function ScannerToPdf() {
             sampleCount++;
         }
         const avgBgR = rSum / sampleCount;
-        const avgBgG = gSum / sampleCount;
-        const avgBgB = bSum / sampleCount;
 
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
@@ -258,19 +254,14 @@ export default function ScannerToPdf() {
             const chroma = Math.max(r, g, b) - Math.min(r, g, b);
 
             // INTELLIGENT SEGMENTATION
-            // High chroma + mid luma = signature/stamp/photo
-            // Low chroma + high luma = background
-            // Low chroma + low luma = text
             const isDocumentElement = chroma > 35 || luma < 120; // Text or signature/photo
             
             if (activeFilter === 'magic' || activeFilter === 'document') {
                 if (!isDocumentElement) {
-                    // Whitening the background (Illumination correction)
                     pixels[i] = Math.min(255, r * 1.35);
                     pixels[i+1] = Math.min(255, g * 1.35);
                     pixels[i+2] = Math.min(255, b * 1.35);
                 } else {
-                    // Crisp text enhancement
                     const factor = luma < 80 ? 0.8 : 1.1; 
                     pixels[i] = r * factor;
                     pixels[i+1] = g * factor;
@@ -278,15 +269,12 @@ export default function ScannerToPdf() {
                 }
             } else if (activeFilter === 'bw') {
                 if (chroma > 45 && luma < 180) {
-                   // PROTECTED COLOR MODE: Preserve signatures and stamps in B&W
                    pixels[i] = r; pixels[i+1] = g; pixels[i+2] = b;
                 } else {
-                    // Adaptive thresholding simulation
                     const val = luma > avgBgR * 0.9 ? 255 : (luma < 80 ? 0 : luma * 0.5);
                     pixels[i] = pixels[i+1] = pixels[i+2] = val;
                 }
             } else if (activeFilter === 'photo') {
-                // High-fidelity normalization
                 pixels[i] = Math.min(255, r * 1.05);
                 pixels[i+1] = Math.min(255, g * 1.05);
                 pixels[i+2] = Math.min(255, b * 1.05);
@@ -590,7 +578,7 @@ export default function ScannerToPdf() {
                             <Plus className="mr-2 size-5" /> ADD MORE
                         </Button>
                         <Button className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleBuildPdf} disabled={isBuildingPdf}>
-                            {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} SAVE AS PDF
+                            {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-3 size-6" />} GENERATE BUNDLE ({scannedPages.length})
                         </Button>
                     </div>
                 </div>
