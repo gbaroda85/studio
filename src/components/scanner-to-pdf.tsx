@@ -78,6 +78,7 @@ export default function ScannerToPdf() {
   const [rectCrop, setRectCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
+  // 6 Points: TL, TR, MR, BR, BL, ML
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
       { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -132,6 +133,7 @@ export default function ScannerToPdf() {
     const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
     setRectCrop(initialCrop);
     
+    // Automatic Edge Heuristic for 6 dots
     const marginX = 10;
     const marginY = 8;
     setPoints([
@@ -188,16 +190,27 @@ export default function ScannerToPdf() {
         const rotatedSrc = canvas.toDataURL('image/jpeg', 0.95);
         setCurrentRawImage(rotatedSrc);
         setIsProcessing(false);
+        // Reset points for new orientation
+        const marginX = 10;
+        const marginY = 8;
+        setPoints([
+            { x: marginX, y: marginY }, { x: 100 - marginX, y: marginY },
+            { x: 100 - marginX, y: 50 }, { x: 100 - marginX, y: 100 - marginY },
+            { x: marginX, y: 100 - marginY }, { x: marginX, y: 50 }
+        ]);
         toast({ title: "Rotated", description: "Image turned 90° clockwise." });
     };
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    const corners = [src[0], src[1], src[3], src[4]];
+    // src must be 4 corner points for the math
     for (let i = 0; i < 4; i++) {
-        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
+        const s = src[i];
+        const d = dst[i];
+        if (!s || !d) continue;
+        p.push([s.x, s.y, 1, 0, 0, 0, -s.x * d.x, -s.y * d.x, d.x]);
+        p.push([0, 0, 0, s.x, s.y, 1, -s.x * d.y, -s.y * d.y, d.y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -234,6 +247,7 @@ export default function ScannerToPdf() {
         canvas.height = completedRectCrop.height * scaleY;
         ctx.drawImage(image, completedRectCrop.x * scaleX, completedRectCrop.y * scaleY, completedRectCrop.width * scaleX, completedRectCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
+        // Correct corners from 6-point array: TL(0), TR(1), BR(3), BL(4)
         const corners = [points[0], points[1], points[3], points[4]];
         if (!corners[0] || !corners[1] || !corners[2] || !corners[3]) return "";
 
@@ -249,9 +263,10 @@ export default function ScannerToPdf() {
 
         const srcPoints = corners.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
-        const h = solvePerspective(srcPoints, dstPoints);
         
+        const h = solvePerspective(srcPoints, dstPoints);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
+        
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth;
         srcCanvas.height = image.naturalHeight;
@@ -287,13 +302,13 @@ export default function ScannerToPdf() {
 
         if (activeFilter === 'magic') {
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-            const factor = luma < 128 ? 1.1 : 1.25; 
+            const factor = luma < 128 ? 1.15 : 1.3; 
             pixels[i] = Math.min(255, r * factor);
             pixels[i+1] = Math.min(255, g * factor);
             pixels[i+2] = Math.min(255, b * factor);
         } else if (activeFilter === 'bw') {
             const avg = (r + g + b) / 3;
-            const res = avg > 128 ? 255 : 0;
+            const res = avg > 140 ? 255 : 0;
             pixels[i] = pixels[i+1] = pixels[i+2] = res;
         } else if (activeFilter === 'grayscale') {
             const gray = 0.299 * r + 0.587 * g + 0.114 * b;
