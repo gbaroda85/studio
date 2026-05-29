@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
@@ -51,11 +50,11 @@ export default function ScannerToPdf() {
   const [pages, setPages] = useState<ScannedPage[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Cleanup blob URLs to prevent memory leaks
   useEffect(() => {
     return () => {
       pages.forEach(page => {
@@ -66,10 +65,11 @@ export default function ScannerToPdf() {
     };
   }, [pages]);
 
-  // Handle local file uploads or camera capture with instant ObjectURL
   const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
+
+    if (convertedPdfUrl) setConvertedPdfUrl(null);
 
     const newItems: ScannedPage[] = Array.from(filesList).map(file => {
         const id = Math.random().toString(36).substr(2, 9);
@@ -81,7 +81,6 @@ export default function ScannerToPdf() {
         };
     });
 
-    // Guaranteed selection of the newest item
     setPages(prev => {
         const updated = [...prev, ...newItems];
         if (newItems.length > 0) {
@@ -91,7 +90,6 @@ export default function ScannerToPdf() {
     });
 
     e.target.value = "";
-    toast({ title: "Page Added", description: "Image loaded and selected for positioning." });
   };
 
   const handleRemovePage = (id: string) => {
@@ -329,7 +327,6 @@ export default function ScannerToPdf() {
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                {/* Visual Selected Page Preview */}
                                 <div className="space-y-2">
                                     <Label className="text-[9px] font-black uppercase tracking-widest opacity-50">Current Selection</Label>
                                     <div className="aspect-[3/4] w-32 mx-auto rounded-xl border-2 border-primary/20 bg-muted/20 overflow-hidden relative shadow-inner">
@@ -410,10 +407,8 @@ export default function ScannerToPdf() {
             </div>
         </div>
         
-        {/* Hidden inputs always rendered to keep refs valid */}
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
     </div>
   );
 }
-

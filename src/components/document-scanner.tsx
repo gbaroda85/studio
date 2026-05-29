@@ -46,9 +46,6 @@ import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from
 
 interface Point { x: number; y: number; }
 
-/**
- * Homography Matrix Solver for Perspective Correction
- */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
     const corners = [src[0], src[1], src[3], src[4]]; 
@@ -198,7 +195,6 @@ export default function DocumentScanner() {
             const normalizedLuma = Math.min(255, luma * normFactor);
 
             if (activeFilter === 'bw') {
-                // PREMIUM BW PRO: Deep Ink Text with Face Detail Protection
                 let val;
                 if (normalizedLuma < 140) {
                     val = Math.pow(normalizedLuma / 140, 1.8) * 40; 
@@ -223,7 +219,6 @@ export default function DocumentScanner() {
                 pixels[i+1] = Math.min(255, g * normFactor * 1.05);
                 pixels[i+2] = Math.min(255, b * normFactor * 1.05);
             } else if (activeFilter === 'photo') {
-                // PHOTO: 15% Brightness boost + 10 Offset for studio look
                 pixels[i] = Math.min(255, r * 1.15 + 10);
                 pixels[i+1] = Math.min(255, g * 1.15 + 10);
                 pixels[i+2] = Math.min(255, b * 1.15 + 10);
@@ -257,12 +252,9 @@ export default function DocumentScanner() {
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-          const reader = new FileReader();
-          reader.onload = () => { 
-              setCurrentRawImage(reader.result as string); 
-              setStage('adjust'); 
-          };
-          reader.readAsDataURL(file);
+          const url = URL.createObjectURL(file);
+          setCurrentRawImage(url); 
+          setStage('adjust'); 
       }
       e.target.value = "";
   };
@@ -565,7 +557,6 @@ export default function DocumentScanner() {
             </div>
         )}
 
-        {/* HIDDEN INPUTS FOR NATIVE CAMERA */}
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleNativeCapture} />
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleNativeCapture} />
     </div>
