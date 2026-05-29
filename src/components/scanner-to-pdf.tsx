@@ -27,11 +27,8 @@ import {
     Maximize,
     Move,
     Grid3X3,
-    Sun,
-    Contrast,
     RotateCw,
-    FileType,
-    Image as ImageIcon,
+    ImageIcon,
     Plus,
     Droplets,
     Scan,
@@ -45,6 +42,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import * as pdfjs from 'pdfjs-dist';
+
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
 interface Point {
     x: number;
@@ -68,17 +70,14 @@ export default function ScannerToPdf() {
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   
-  // Viewfinder State
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Adjustment State (Perspective & Rect)
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [rectCrop, setRectCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
-  // 6 Dots Logic: 4 Corners + 2 Mid-Height points
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
       { x: 90, y: 50 }, { x: 90, y: 90 },
@@ -90,12 +89,10 @@ export default function ScannerToPdf() {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Studio State
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('magic');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBuildingPdf, setIsBuildingPdf] = useState(false);
 
-  // 1. CAMERA MANAGEMENT
   const stopCamera = useCallback(() => {
     if(videoRef.current && videoRef.current.srcObject){
         const stream = videoRef.current.srcObject as MediaStream;
@@ -135,9 +132,8 @@ export default function ScannerToPdf() {
     const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
     setRectCrop(initialCrop);
     
-    // Better default edge detection (90% width, 85% height centering)
-    const marginX = 8;
-    const marginY = 6;
+    const marginX = 10;
+    const marginY = 8;
     setPoints([
         { x: marginX, y: marginY }, { x: 100 - marginX, y: marginY },
         { x: 100 - marginX, y: 50 }, { x: 100 - marginX, y: 100 - marginY },
@@ -170,6 +166,30 @@ export default function ScannerToPdf() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRotateSource = () => {
+    if (!currentRawImage) return;
+    setIsProcessing(true);
+    const img = new window.Image();
+    img.src = currentRawImage;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsProcessing(false);
+            return;
+        }
+        canvas.width = img.height;
+        canvas.height = img.width;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.95);
+        setCurrentRawImage(rotatedSrc);
+        setIsProcessing(false);
+        toast({ title: "Rotated", description: "Image turned 90° clockwise." });
+    };
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
@@ -215,6 +235,8 @@ export default function ScannerToPdf() {
         ctx.drawImage(image, completedRectCrop.x * scaleX, completedRectCrop.y * scaleY, completedRectCrop.width * scaleX, completedRectCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
         const corners = [points[0], points[1], points[3], points[4]];
+        if (!corners[0] || !corners[1] || !corners[2] || !corners[3]) return "";
+
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
         const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
@@ -257,7 +279,6 @@ export default function ScannerToPdf() {
         }
     }
 
-    // Apply Filter Logic
     const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = processedData.data;
 
@@ -326,7 +347,9 @@ export default function ScannerToPdf() {
     if (pos) {
         setPoints(prev => {
             const next = [...prev];
-            next[draggingPoint] = { x: pos.x, y: pos.y };
+            if (next[draggingPoint]) {
+                next[draggingPoint] = { x: pos.x, y: pos.y };
+            }
             return next;
         });
     }
@@ -458,6 +481,7 @@ export default function ScannerToPdf() {
                                         <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
+                                <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-8 w-8 text-primary border-primary/20"><RotateCw className="size-4" /></Button>
                                 <Button variant="ghost" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
                             </div>
                         </CardHeader>
@@ -473,7 +497,7 @@ export default function ScannerToPdf() {
                                     <div className="relative">
                                         <img ref={imgRef} src={currentRawImage} alt="raw capture" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain pointer-events-none block" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                            <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y} ${points[5].x},${points[5].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                            <polygon points={points.filter(p => !!p).map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                         </svg>
                                         {points.map((p, i) => (
                                             <div key={i} className={cn("absolute size-10 md:size-12 -ml-5 md:-ml-6 -mt-5 md:-mt-6 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/90")}
