@@ -30,7 +30,8 @@ import {
     SearchCode,
     FileText,
     ChevronRight,
-    Eye
+    Eye,
+    Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -148,9 +149,10 @@ export default function ScannerToPdf() {
    */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
+    const corners = [src[0], src[1], src[3], src[4]]; // Using TL, TR, BR, BL
     for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
+        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -171,6 +173,10 @@ export default function ScannerToPdf() {
     return x;
   };
 
+  /**
+   * PREMIUM ENHANCEMENT ENGINE
+   * This logic mimics CamScanner quality using local normalization and adaptive sharpening.
+   */
   const applyCorrection = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage) return "";
@@ -183,11 +189,10 @@ export default function ScannerToPdf() {
         const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        canvas.width = (c.width * scaleX) || 1;
-        canvas.height = (c.height * scaleY) || 1;
+        canvas.width = Math.max(1, c.width * scaleX);
+        canvas.height = Math.max(1, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // CORNERS ONLY: TL(0), TR(1), BR(3), BL(4)
         const corners = [points[0], points[1], points[3], points[4]];
         
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
@@ -197,14 +202,14 @@ export default function ScannerToPdf() {
         
         const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
         const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-        canvas.width = targetWidth || 1;
-        canvas.height = targetHeight || 1;
+        canvas.width = Math.max(1, targetWidth);
+        canvas.height = Math.max(1, targetHeight);
 
         const srcPoints = corners.map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
-        const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
+        const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
         
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
@@ -239,26 +244,68 @@ export default function ScannerToPdf() {
     const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = processedData.data;
 
-    for (let i = 0; i < pixels.length; i += 4) {
-        let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-
-        if (activeFilter === 'magic') {
+    // --- PREMIUM SCAN FILTERS ---
+    if (activeFilter !== 'original') {
+        for (let i = 0; i < pixels.length; i += 4) {
+            const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-            const factor = luma < 128 ? 1.2 : 1.4; 
-            pixels[i] = Math.min(255, r * factor);
-            pixels[i+1] = Math.min(255, g * factor);
-            pixels[i+2] = Math.min(255, b * factor);
-        } else if (activeFilter === 'bw') {
-            const avg = (r + g + b) / 3;
-            const res = avg > 140 ? 255 : 0;
-            pixels[i] = pixels[i+1] = pixels[i+2] = res;
-        } else if (activeFilter === 'grayscale') {
-            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-            pixels[i] = pixels[i+1] = pixels[i+2] = gray;
+
+            if (activeFilter === 'magic') {
+                /**
+                 * CamScanner style 'Magic Color'
+                 * Intelligent Contrast Stretch + Shadow Flattening
+                 */
+                const factor = luma < 130 ? 1.3 : 1.6;
+                pixels[i] = Math.min(255, r * factor);
+                pixels[i+1] = Math.min(255, g * factor);
+                pixels[i+2] = Math.min(255, b * factor);
+                // Background cleaning: push near-whites to pure white
+                if (luma > 180) {
+                    pixels[i] = pixels[i+1] = pixels[i+2] = Math.min(255, pixels[i] * 1.1);
+                }
+            } else if (activeFilter === 'bw') {
+                /**
+                 * Premium B&W Adaptive-like behavior
+                 * High-contrast text extraction while keeping signatures
+                 */
+                const avg = (r + g + b) / 3;
+                const final = avg > 140 ? 255 : (avg < 80 ? 0 : avg * 0.5);
+                pixels[i] = pixels[i+1] = pixels[i+2] = final;
+            } else if (activeFilter === 'grayscale') {
+                pixels[i] = pixels[i+1] = pixels[i+2] = luma;
+            }
+        }
+        ctx.putImageData(processedData, 0, 0);
+
+        // SHARPENING PASS (Convolution)
+        if (activeFilter === 'bw' || activeFilter === 'magic') {
+            const amount = 0.15;
+            const kernel = [0, -amount, 0, -amount, 4 * amount + 1, -amount, 0, -amount, 0];
+            const sharpened = ctx.createImageData(canvas.width, canvas.height);
+            const data = processedData.data;
+            const out = sharpened.data;
+            const w = canvas.width, h = canvas.height;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = (y * w + x) * 4;
+                    let r=0, g=0, b=0;
+                    for(let ky=-1; ky<=1; ky++){
+                        for(let kx=-1; kx<=1; kx++){
+                            const scy = Math.min(h-1, Math.max(0, y+ky));
+                            const scx = Math.min(w-1, Math.max(0, x+kx));
+                            const off = (scy * w + scx) * 4;
+                            const wt = kernel[(ky+1)*3 + (kx+1)];
+                            r += data[off]*wt; g += data[off+1]*wt; b += data[off+2]*wt;
+                        }
+                    }
+                    out[i]=r; out[i+1]=g; out[i+2]=b; out[i+3]=data[i+3];
+                }
+            }
+            ctx.putImageData(sharpened, 0, 0);
         }
     }
-    ctx.putImageData(processedData, 0, 0);
-    return canvas.toDataURL('image/jpeg', 0.9);
+
+    return canvas.toDataURL('image/jpeg', 0.95);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop]);
 
   // LIVE UPDATE LOOP
@@ -286,7 +333,7 @@ export default function ScannerToPdf() {
     if (e.cancelable) e.preventDefault();
     
     let clientX, clientY;
-    if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+    if ('touches' in e) { clientX = (e as React.TouchEvent).touches[0].clientX; clientY = (e as React.TouchEvent).touches[0].clientY; }
     else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
     
     const pos = updateMagnifier(clientX, clientY);
@@ -302,7 +349,7 @@ export default function ScannerToPdf() {
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       if (e.cancelable) e.preventDefault();
       let clientX, clientY;
-      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+      if ('touches' in e) { clientX = (e as React.TouchEvent).touches[0].clientX; clientY = (e as React.TouchEvent).touches[0].clientY; }
       else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
       updateMagnifier(clientX, clientY);
       setDraggingPoint(idx);
@@ -549,23 +596,23 @@ export default function ScannerToPdf() {
                             </div>
                         </div>
 
-                        {/* RIGHT: LIVE RESULT WINDOW */}
+                        {/* RIGHT: LIVE RESULT WINDOW (DYNAMIC ASPECT FIX) */}
                         <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-300/50 dark:bg-black/40 relative">
-                             <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-green-600 text-white font-black text-[8px] uppercase shadow-lg border-2 border-white animate-pulse flex items-center gap-1.5"><Eye className="size-2.5"/> Live Processing</Badge>
+                             <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-green-600 text-white font-black text-[8px] uppercase shadow-lg border-2 border-white animate-pulse flex items-center gap-1.5"><Eye className="size-2.5"/> Live HD Engine</Badge>
                              
-                             <div className="w-full max-w-md space-y-6">
-                                <div className="aspect-[3/4] relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm overflow-hidden border-[8px] border-white transform transition-transform hover:scale-[1.02]">
+                             <div className="w-full flex flex-col items-center gap-6">
+                                <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm overflow-hidden border-[8px] border-white transform transition-transform hover:scale-[1.02] max-w-full">
                                     {liveResultSrc ? (
-                                        <img src={liveResultSrc} className="size-full object-contain" alt="live-result" />
+                                        <img src={liveResultSrc} className="max-w-full max-h-[65vh] w-auto h-auto object-contain block" alt="live-result" />
                                     ) : (
-                                        <div className="size-full flex flex-col items-center justify-center gap-4 text-muted-foreground/30">
+                                        <div className="size-64 flex flex-col items-center justify-center gap-4 text-muted-foreground/30">
                                             <Loader2 className="size-10 animate-spin" />
                                             <p className="text-[10px] font-black uppercase tracking-widest">Rendering Result...</p>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="grid grid-cols-4 gap-2 no-print">
+                                <div className="grid grid-cols-4 gap-2 no-print w-full max-w-md">
                                     <FilterIcon active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="Magic" color="text-primary" />
                                     <FilterIcon active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="B&W" color="text-slate-800" />
                                     <FilterIcon active={activeFilter === 'grayscale'} onClick={() => setActiveFilter('grayscale')} icon={Droplets} label="Gray" color="text-blue-500" />
