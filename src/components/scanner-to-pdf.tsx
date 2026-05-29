@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -134,8 +133,7 @@ export default function ScannerToPdf() {
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // Key Corner Mapping for 6-dot setup: 0(TL), 1(TR), 3(BR), 4(BL)
-    const corners = [src[0], src[1], src[3], src[4]];
+    const corners = [src[0], src[1], src[3], src[4]]; // TL, TR, BR, BL
     
     for (let i = 0; i < 4; i++) {
         p.push([dst[i].x, dst[i].y, 1, 0, 0, 0, -dst[i].x * corners[i].x, -dst[i].y * corners[i].x, corners[i].x]);
@@ -181,10 +179,10 @@ export default function ScannerToPdf() {
         const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
         const h2 = Math.hypot(points[3].x - points[1].x, points[3].y - points[1].y);
         
-        const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
-        const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-        canvas.width = Math.max(1, targetWidth);
-        canvas.height = Math.max(1, targetHeight);
+        const targetWidth = Math.max(100, Math.max(w1, w2) * (image.naturalWidth / 100));
+        const targetHeight = Math.max(100, Math.max(h1, h2) * (image.naturalHeight / 100));
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
         const srcPxPoints = points.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
         const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
@@ -209,7 +207,6 @@ export default function ScannerToPdf() {
                         const dstIdx = (y * canvas.width + x) * 4;
                         const srcIdx = (sy * image.naturalWidth + sx) * 4;
                         imgData.data[dstIdx] = srcPixels[srcIdx];
-                        imgData.data[dstIdx+1] = srcPixels[srcPixels + 1]; // Simplified
                         imgData.data[dstIdx+1] = srcPixels[srcIdx+1];
                         imgData.data[dstIdx+2] = srcPixels[srcIdx+2];
                         imgData.data[dstIdx+3] = srcPixels[srcIdx+3];
@@ -220,7 +217,6 @@ export default function ScannerToPdf() {
         }
     }
 
-    // PREMIUM FILTERS ENGINE
     if (activeFilter !== 'original') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
@@ -243,7 +239,7 @@ export default function ScannerToPdf() {
                 pixels[i+2] = Math.min(255, b * factor);
             } else if (activeFilter === 'bw') {
                 const thresh = avgLuma * 0.95;
-                if (chroma > 40 && luma < 200) { // Keep stamps
+                if (chroma > 40 && luma < 200) { 
                      pixels[i] = r; pixels[i+1] = g; pixels[i+2] = b;
                 } else {
                     const val = luma > thresh ? 255 : (luma < 60 ? 0 : luma * 0.6);
@@ -279,6 +275,7 @@ export default function ScannerToPdf() {
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
       setStage('adjust');
+      toast({ title: 'Captured', description: 'Align document boundaries.' });
     }
   };
 
@@ -318,22 +315,29 @@ export default function ScannerToPdf() {
     setStage('stack');
     setCurrentRawImage(null);
     setLiveResultSrc(null);
+    toast({ title: "Page Added", description: "Scanned successfully." });
   };
 
   const handleBuildPdf = async () => {
     setIsBuildingPdf(true);
-    const pdf = new jsPDF();
-    for (let i = 0; i < scannedPages.length; i++) {
-        if (i > 0) pdf.addPage();
-        const src = scannedPages[i].processedSrc;
-        const props = pdf.getImageProperties(src);
-        const pw = pdf.internal.pageSize.getWidth();
-        const ph = pdf.internal.pageSize.getHeight();
-        const ratio = Math.min(pw / props.width, ph / props.height);
-        pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
+    try {
+        const pdf = new jsPDF();
+        for (let i = 0; i < scannedPages.length; i++) {
+            if (i > 0) pdf.addPage();
+            const src = scannedPages[i].processedSrc;
+            const props = pdf.getImageProperties(src);
+            const pw = pdf.internal.pageSize.getWidth();
+            const ph = pdf.internal.pageSize.getHeight();
+            const ratio = Math.min(pw / props.width, ph / props.height);
+            pdf.addImage(src, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
+        }
+        pdf.save(`Document-Scan-${Date.now()}.pdf`);
+        toast({ title: "PDF Downloaded", description: "Bundle saved to device." });
+    } catch (e) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to build PDF.' });
+    } finally {
+        setIsBuildingPdf(false);
     }
-    pdf.save(`Document-Scan-${Date.now()}.pdf`);
-    setIsBuildingPdf(false);
   };
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
@@ -387,7 +391,7 @@ export default function ScannerToPdf() {
                                 <Button onClick={startCamera} className="bg-primary rounded-xl font-black uppercase text-[10px]">Retry Camera</Button>
                             </div>
                         )}
-                        <div className="absolute bottom-6 right-6 z-20">
+                        <div className="absolute bottom-6 right-6 z-20 flex gap-2">
                              <Button variant="secondary" className="h-12 rounded-xl font-black uppercase text-[9px] shadow-2xl" onClick={() => fileInputRef.current?.click()}>
                                 <ImageIcon className="mr-2 size-4" /> GALLERY
                             </Button>
@@ -399,7 +403,7 @@ export default function ScannerToPdf() {
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
-                            <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Layout className="size-5 text-primary" /> Stack</CardTitle>
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Layout className="size-5 text-primary" /> Page Stack</CardTitle>
                             <Badge variant="outline" className="font-black text-primary border-primary/20">{scannedPages.length}</Badge>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
@@ -410,6 +414,12 @@ export default function ScannerToPdf() {
                                         <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-6 rounded-md opacity-0 group-hover:opacity-100 transition-all" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3" /></Button>
                                     </div>
                                 ))}
+                                {scannedPages.length === 0 && (
+                                    <div className="col-span-2 py-20 text-center opacity-20">
+                                        <FileStack className="size-12 mx-auto" />
+                                        <p className="text-[10px] font-black uppercase mt-2">Empty Stack</p>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                         <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-primary font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>{isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2" />} GENERATE PDF ({scannedPages.length})</Button></CardFooter>
@@ -429,7 +439,7 @@ export default function ScannerToPdf() {
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                             <TabsList className="h-8">
                                 <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
-                                <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
+                                <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><ScanLine className="size-3 mr-1.5" /> Scanner</TabsTrigger>
                             </TabsList>
                         </Tabs>
                         <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 rounded-xl"><RotateCw className="size-5" /></Button>
@@ -437,6 +447,7 @@ export default function ScannerToPdf() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 bg-slate-900 grid lg:grid-cols-2 min-h-[500px] md:min-h-[700px] relative overflow-hidden select-none">
+                    {/* LEFT: EDITING WINDOW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 border-r border-white/5 relative h-full"
                          onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
@@ -471,8 +482,9 @@ export default function ScannerToPdf() {
                         </div>
                     </div>
 
+                    {/* RIGHT: LIVE HD PREVIEW */}
                     <div className="flex flex-col items-center justify-center p-4 md:p-10 bg-slate-800 relative h-full">
-                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white">LIVE HD PREVIEW</Badge>
+                        <Badge className="absolute top-4 right-4 z-20 bg-green-600 text-white border-white font-black text-[9px] uppercase tracking-widest">LIVE HD PREVIEW</Badge>
                         <div className="w-full flex flex-col items-center gap-8">
                              <div className="relative bg-white shadow-3xl rounded-sm border-[6px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden aspect-auto">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block h-auto" alt="result" /> : <Loader2 className="animate-spin text-primary size-10" />}
@@ -488,7 +500,7 @@ export default function ScannerToPdf() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 p-6 border-t flex justify-between">
-                    <div className="hidden sm:flex items-center gap-6 text-[9px] font-black uppercase opacity-40">
+                    <div className="hidden sm:flex items-center gap-6 text-[9px] font-black uppercase opacity-40 tracking-widest">
                          <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500"/> SECURE RAM</div>
                          <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500"/> HD ENCODE</div>
                     </div>
@@ -508,14 +520,14 @@ export default function ScannerToPdf() {
                         </div>
                         <div>
                             <h2 className="text-2xl font-black uppercase tracking-tighter">Scan Bundle</h2>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">{scannedPages.length} Pages Extracted</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest">{scannedPages.length} Pages Extracted</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                        <Button variant="outline" className="flex-1 md:flex-none h-12 rounded-xl font-black uppercase text-[10px] border-2" onClick={() => setStage('viewfinder')}>
+                        <Button variant="outline" className="flex-1 md:flex-none h-12 rounded-xl font-black uppercase text-[10px] border-2 tracking-widest" onClick={() => setStage('viewfinder')}>
                             <Plus className="mr-2 size-4" /> SCAN MORE
                         </Button>
-                        <Button className="flex-1 md:flex-none h-12 px-8 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>
+                        <Button className="flex-1 md:flex-none h-12 px-8 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase tracking-widest" onClick={handleBuildPdf}>
                             <Download className="mr-2 size-4" /> DOWNLOAD PDF
                         </Button>
                     </div>
