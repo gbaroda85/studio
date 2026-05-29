@@ -32,7 +32,8 @@ import {
     Contrast,
     RotateCw,
     FileType,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -82,7 +83,6 @@ export default function ScannerToPdf() {
 
   // Studio State (Filters)
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('magic');
-  const [brightness, setBrightness] = useState(100);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBuildingPdf, setIsBuildingPdf] = useState(false);
 
@@ -236,9 +236,8 @@ export default function ScannerToPdf() {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             
             if (filter === 'magic') {
-                // Adaptive Contrast / Brightness Stretch
                 const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-                const factor = luma < 128 ? 1.1 : 1.25; // Boost highlights, preserve shadows
+                const factor = luma < 128 ? 1.1 : 1.25; 
                 r = Math.min(255, r * factor);
                 g = Math.min(255, g * factor);
                 b = Math.min(255, b * factor);
@@ -339,41 +338,60 @@ export default function ScannerToPdf() {
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
                     <Card className="border-2 shadow-2xl overflow-hidden bg-black relative rounded-2xl md:rounded-[3rem]">
-                        <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between no-print">
+                        <CardHeader className="bg-muted/30 border-b py-2 px-6 flex flex-row items-center justify-between no-print">
                             <div className="flex items-center gap-2">
                                 <ScanLine className="size-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Viewfinder</CardTitle>
                             </div>
                             <Badge className="bg-green-600 text-white font-black text-[9px] uppercase px-3 py-1">HD FOCUS ACTIVE</Badge>
                         </CardHeader>
-                        <CardContent className="p-0 relative aspect-[4/3] flex items-center justify-center">
+                        <CardContent className="p-0 relative aspect-[4/3] flex items-center justify-center overflow-hidden">
                             <video ref={videoRef} className={cn("w-full h-full object-contain", hasCameraPermission !== true && "hidden")} autoPlay muted playsInline />
                             
                             {hasCameraPermission === false && (
-                                <div className="p-12 text-center space-y-6 text-white">
+                                <div className="p-12 text-center space-y-6 text-white w-full">
                                     <Camera className="size-16 mx-auto opacity-20" />
-                                    <p className="font-black uppercase text-sm">Camera Permission Denied</p>
-                                    <Button onClick={startCamera} className="bg-primary rounded-xl">Retry Connection</Button>
+                                    <div className="space-y-4">
+                                        <p className="font-black uppercase text-sm">Camera Permission Denied</p>
+                                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                            <Button onClick={startCamera} className="bg-primary rounded-xl font-black uppercase text-[10px]">Retry Connection</Button>
+                                            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="rounded-xl font-black uppercase text-[10px]">
+                                                <UploadCloud className="mr-2 size-3.5" /> Manual Upload
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
                             {hasCameraPermission === true && (
-                                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                                    <div className="size-[80%] border-2 border-dashed border-white/40 rounded-xl relative">
-                                         <div className="absolute top-0 left-0 size-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
-                                         <div className="absolute top-0 right-0 size-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
-                                         <div className="absolute bottom-0 left-0 size-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
-                                         <div className="absolute bottom-0 right-0 size-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
+                                <>
+                                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                        <div className="size-[80%] border-2 border-dashed border-white/40 rounded-xl relative">
+                                            <div className="absolute top-0 left-0 size-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
+                                            <div className="absolute top-0 right-0 size-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
+                                            <div className="absolute bottom-0 left-0 size-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
+                                            <div className="absolute bottom-0 right-0 size-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
+                                        </div>
                                     </div>
-                                </div>
+                                    {/* Prominent Center Upload Option */}
+                                    <div className="absolute bottom-6 right-6 md:right-10 md:bottom-10 z-20">
+                                        <Button 
+                                            variant="secondary" 
+                                            className="h-10 md:h-12 rounded-xl font-black uppercase text-[9px] md:text-[10px] shadow-2xl ring-4 ring-black/20"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <ImageIcon className="mr-2 size-3.5" /> OR UPLOAD FILE
+                                        </Button>
+                                    </div>
+                                </>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 md:p-10 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
+                        <CardFooter className="p-4 md:p-10 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
                             <Button onClick={handleCapture} className="h-16 flex-[2] bg-gradient-button text-white font-black text-xl rounded-2xl shadow-2xl group active:scale-95 transition-all">
                                 <Zap className="mr-3 size-6 text-yellow-400 group-hover:scale-125 transition-transform" /> CAPTURE DOCUMENT
                             </Button>
                             <Button variant="outline" className="h-16 flex-1 border-2 font-black text-xs rounded-2xl uppercase" onClick={() => fileInputRef.current?.click()}>
-                                <UploadCloud className="mr-2 size-5" /> Import
+                                <UploadCloud className="mr-2 size-5" /> Import File
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                         </CardFooter>
@@ -386,7 +404,6 @@ export default function ScannerToPdf() {
                     </div>
                 </div>
 
-                {/* Side Stack Preview */}
                 <div className="lg:col-span-4 space-y-6">
                     <Card className="border-2 shadow-2xl border-primary/10 flex flex-col bg-card/50 rounded-[2rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
@@ -452,7 +469,6 @@ export default function ScannerToPdf() {
                             </div>
                         ))}
 
-                        {/* HIGH-PRECISION MAGNIFIER */}
                         {draggingPoint !== null && (
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                                 <div className="absolute inset-0 flex items-center justify-center">
@@ -484,7 +500,7 @@ export default function ScannerToPdf() {
                     <div className="flex gap-3 flex-1 justify-end">
                          <Button onClick={() => setPoints([{x:10, y:10}, {x:90, y:10}, {x:90, y:90}, {x:10, y:90}])} variant="outline" className="h-12 md:h-14 px-6 border-2 font-black text-[10px] uppercase rounded-xl">Reset Points</Button>
                          <Button className="h-12 md:h-14 px-12 bg-primary font-black text-base rounded-xl shadow-2xl group" onClick={() => setStage('studio')}>
-                            NEXT STEP <ChevronRightIcon className="ml-2 size-5 group-hover:translate-x-1 transition-transform" />
+                            NEXT STEP <ChevronRight className="ml-2 size-5 group-hover:translate-x-1 transition-transform" />
                          </Button>
                     </div>
                 </CardFooter>
@@ -685,7 +701,6 @@ function ScannedImagePreview({ originalSrc, filter, points, solvePerspective }: 
             const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
             const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
             
-            // Constrain display size for preview
             const displayScale = Math.min(800 / targetWidth, 1000 / targetHeight, 1);
             canvas.width = targetWidth * displayScale;
             canvas.height = targetHeight * displayScale;
@@ -720,7 +735,6 @@ function ScannedImagePreview({ originalSrc, filter, points, solvePerspective }: 
                 }
                 ctx.putImageData(imgData, 0, 0);
                 
-                // Filter logic
                 if (filter !== 'original') {
                     const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const d = pixels.data;
