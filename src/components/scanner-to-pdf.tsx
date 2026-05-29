@@ -57,8 +57,8 @@ interface Point { x: number; y: number; }
  */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
-    // We only need the 4 corners for homography (TL, TR, BR, BL)
-    // In our 6-dot setup: 0=TL, 1=TR, 3=BR, 4=BL
+    // We need 4 corners for homography (TL, TR, BR, BL)
+    // From 6-dot setup: 0=TL, 1=TR, 3=BR, 4=BL
     const corners = [src[0], src[1], src[3], src[4]]; 
     
     for (let i = 0; i < 4; i++) {
@@ -165,7 +165,7 @@ export default function ScannerToPdf() {
   };
 
   /**
-   * Premium Enhancement Pipeline - Corrected for distinct Magic/Doc filters
+   * Premium Enhancement Pipeline - Recalibrated for BW PRO and Magic
    */
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
@@ -230,49 +230,57 @@ export default function ScannerToPdf() {
         const pixels = imageData.data;
         const len = pixels.length;
 
-        // Background estimation for shadow removal
+        // Background estimation for division normalization (Shadow removal)
         let bgSum = 0;
         let bgCount = 0;
-        const skip = Math.max(4, Math.floor(len / 4000));
+        const skip = Math.max(8, Math.floor(len / 4000));
         for (let i = 0; i < len; i += skip * 4) {
             const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
-            if (luma > 120) { bgSum += luma; bgCount++; }
+            if (luma > 100) { bgSum += luma; bgCount++; }
         }
         
-        const whitePoint = bgCount > 0 ? bgSum / bgCount : 240;
+        const whitePoint = bgCount > 0 ? bgSum / bgCount : 220;
         const normFactor = 255 / Math.max(whitePoint, 150);
 
         for (let i = 0; i < len; i += 4) {
             const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+            const normalizedLuma = Math.min(255, luma * normFactor);
 
-            if (activeFilter === 'document') {
-                // DOC PRO: Grayscale High Contrast
-                const normalized = Math.min(255, luma * normFactor);
+            if (activeFilter === 'bw') {
+                // BW PRO: Recalibrated for Deep Ink and Clear Text
+                // We use a steep curve to catch faint text but ignore noise
                 let val;
-                if (normalized < 140) val = normalized * 0.7; // Darken text
-                else if (normalized > 190) val = 255; // Force white paper
-                else val = normalized;
+                if (normalizedLuma < 170) {
+                    // This is Text/Ink area - make it dark and solid
+                    val = Math.max(0, (normalizedLuma - 40) * 0.5); 
+                } else if (normalizedLuma > 210) {
+                    // This is paper area - make it pure white
+                    val = 255;
+                } else {
+                    // Transition smoothing to prevent pixelated edges
+                    val = Math.min(255, (normalizedLuma - 170) * 6);
+                }
+                pixels[i] = pixels[i+1] = pixels[i+2] = val;
+            } else if (activeFilter === 'document') {
+                // DOC PRO: Premium Grayscale High Contrast
+                const val = normalizedLuma > 185 ? 255 : normalizedLuma < 130 ? normalizedLuma * 0.7 : normalizedLuma;
                 pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'magic') {
-                // MAGIC: Color Enhancement + Shadow Removal
+                // MAGIC: Preserve Colors (Signatures/Photos) but brighten background
                 pixels[i] = Math.min(255, r * normFactor * 1.1);
                 pixels[i+1] = Math.min(255, g * normFactor * 1.1);
                 pixels[i+2] = Math.min(255, b * normFactor * 1.1);
-                // Soft boost contrast
                 for (let j = 0; j < 3; j++) {
                     const c = pixels[i+j];
-                    pixels[i+j] = c > 210 ? 255 : c < 80 ? c * 0.8 : c;
+                    pixels[i+j] = c > 215 ? 255 : c < 90 ? c * 0.75 : c;
                 }
-            } else if (activeFilter === 'bw') {
-                const val = (luma * normFactor) > 128 ? 255 : 0;
-                pixels[i] = pixels[i+1] = pixels[i+2] = val;
             } else if (activeFilter === 'gray') {
                 pixels[i] = pixels[i+1] = pixels[i+2] = luma;
             } else if (activeFilter === 'photo') {
-                pixels[i] = Math.min(255, r * 1.1);
-                pixels[i+1] = Math.min(255, g * 1.1);
-                pixels[i+2] = Math.min(255, b * 1.1);
+                pixels[i] = Math.min(255, r * 1.05);
+                pixels[i+1] = Math.min(255, g * 1.05);
+                pixels[i+2] = Math.min(255, b * 1.05);
             }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -293,7 +301,7 @@ export default function ScannerToPdf() {
             } finally {
                 setIsProcessing(false);
             }
-        }, 250);
+        }, 200);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, applyIntelligentScan]);
