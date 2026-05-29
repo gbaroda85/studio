@@ -77,11 +77,11 @@ export default function ScannerToPdf() {
   const [rectCrop, setRectCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
-  // 6 Dots Logic: 4 Corners + 2 Mid-Height points for better side alignment
+  // 6 Dots Logic: 4 Corners + 2 Mid-Height points
   const [points, setPoints] = useState<Point[]>([
       { x: 10, y: 10 }, { x: 90, y: 10 },
-      { x: 90, y: 50 }, { x: 90, y: 90 }, // Mid-right and Bottom-right
-      { x: 10, y: 90 }, { x: 10, y: 50 }  // Bottom-left and Mid-left
+      { x: 90, y: 50 }, { x: 90, y: 90 },
+      { x: 10, y: 90 }, { x: 10, y: 50 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -131,20 +131,12 @@ export default function ScannerToPdf() {
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    
-    // 1. Standard Rect Crop: Set to typical document ratio
-    const initialCrop = centerCrop(
-        { unit: '%', width: 85, height: 85 },
-        width,
-        height
-    );
+    const initialCrop = centerCrop({ unit: '%', width: 85, height: 85 }, width, height);
     setRectCrop(initialCrop);
     
-    // 2. Smart 6-Dot Heuristic
-    // We attempt to set dots near the visual "safe edges" of a standard document
-    const marginX = 10; // 10% horizontal margin
-    const marginY = 8;  // 8% vertical margin
-    
+    // Better default edge detection (90% width, 85% height centering)
+    const marginX = 8;
+    const marginY = 6;
     setPoints([
         { x: marginX, y: marginY }, { x: 100 - marginX, y: marginY },
         { x: 100 - marginX, y: 50 }, { x: 100 - marginX, y: 100 - marginY },
@@ -152,7 +144,6 @@ export default function ScannerToPdf() {
     ]);
   };
 
-  // 2. CAPTURE & IMPORT
   const handleCapture = () => {
     if (!videoRef.current || !hasCameraPermission) return;
     const canvas = document.createElement('canvas');
@@ -180,10 +171,8 @@ export default function ScannerToPdf() {
     }
   };
 
-  // 3. PERSPECTIVE LOGIC (Uses 4 corner points for Homography)
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // Only corners (indices 0, 1, 3, 4) are used for matrix math
     const corners = [src[0], src[1], src[3], src[4]];
     for (let i = 0; i < 4; i++) {
         p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
@@ -267,19 +256,29 @@ export default function ScannerToPdf() {
         }
     }
 
-    // Default "Magic" Filter for Scan look
+    // Apply Filter Logic
     const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = processedData.data;
+
     for (let i = 0; i < pixels.length; i += 4) {
         let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-        const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-        const factor = luma < 128 ? 1.05 : 1.15; 
-        pixels[i] = Math.min(255, r * factor);
-        pixels[i+1] = Math.min(255, g * factor);
-        pixels[i+2] = Math.min(255, b * factor);
+
+        if (activeFilter === 'magic') {
+            const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+            const factor = luma < 128 ? 1.1 : 1.25; 
+            pixels[i] = Math.min(255, r * factor);
+            pixels[i+1] = Math.min(255, g * factor);
+            pixels[i+2] = Math.min(255, b * factor);
+        } else if (activeFilter === 'bw') {
+            const avg = (r + g + b) / 3;
+            const res = avg > 128 ? 255 : 0;
+            pixels[i] = pixels[i+1] = pixels[i+2] = res;
+        } else if (activeFilter === 'grayscale') {
+            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            pixels[i] = pixels[i+1] = pixels[i+2] = gray;
+        }
     }
     ctx.putImageData(processedData, 0, 0);
-
     return canvas.toDataURL('image/jpeg', 0.95);
   };
 
@@ -290,15 +289,23 @@ export default function ScannerToPdf() {
         id: Math.random().toString(36).substr(2, 9),
         originalSrc: currentRawImage!,
         processedSrc: result,
-        filter: 'magic'
+        filter: activeFilter
     };
     setScannedPages(prev => [...prev, newPage]);
     setStage('stack');
     setIsProcessing(false);
-    toast({ title: "Page Added", description: "Perspective corrected and enhanced." });
+    toast({ title: "Page Added", description: "Filter and crop applied." });
   };
 
-  // 4. INTERACTION
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      let clientX, clientY;
+      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
+      updateMagnifier(clientX, clientY);
+      setDraggingPoint(idx);
+  };
+
   const updateMagnifier = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -324,15 +331,6 @@ export default function ScannerToPdf() {
     }
   }, [draggingPoint, updateMagnifier]);
 
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      let clientX, clientY;
-      if ('touches' in e) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-      else { clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY; }
-      updateMagnifier(clientX, clientY);
-      setDraggingPoint(idx);
-  };
-
   const handleBuildPdf = async () => {
     if (scannedPages.length === 0) return;
     setIsBuildingPdf(true);
@@ -350,7 +348,7 @@ export default function ScannerToPdf() {
     }
     pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
     setIsBuildingPdf(false);
-    toast({ title: "PDF Ready", description: "Downloaded locally in browser RAM." });
+    toast({ title: "PDF Ready", description: "Bundle exported successfully." });
   };
 
   return (
@@ -360,10 +358,10 @@ export default function ScannerToPdf() {
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-4">
                     <Card className="border-2 shadow-2xl overflow-hidden bg-black relative rounded-2xl md:rounded-[3rem]">
-                        <CardHeader className="bg-muted/30 border-b py-2 px-6 flex flex-row items-center justify-between no-print">
+                        <CardHeader className="bg-muted/30 border-b py-2 px-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <ScanLine className="size-4 text-primary" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Scanner Viewfinder</CardTitle>
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live Scanner</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 relative aspect-[4/3] flex items-center justify-center overflow-hidden">
@@ -373,10 +371,10 @@ export default function ScannerToPdf() {
                                 <div className="p-12 text-center space-y-6 text-white w-full">
                                     <Camera className="size-16 mx-auto opacity-20" />
                                     <div className="space-y-4">
-                                        <p className="font-black uppercase text-sm">Camera Offline</p>
+                                        <p className="font-black uppercase text-sm">Camera Restricted</p>
                                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                            <Button onClick={startCamera} className="bg-primary rounded-xl font-black uppercase text-[10px]">Retry Access</Button>
-                                            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="rounded-xl font-black uppercase text-[10px]">Upload Photo</Button>
+                                            <Button onClick={startCamera} className="bg-primary rounded-xl font-black uppercase text-[10px]">Allow Camera</Button>
+                                            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="rounded-xl font-black uppercase text-[10px]">Import Photo</Button>
                                         </div>
                                     </div>
                                 </div>
@@ -393,15 +391,15 @@ export default function ScannerToPdf() {
                                 </div>
                             )}
                             
-                            <div className="absolute bottom-6 right-6 md:right-10 md:bottom-10 z-20">
-                                <Button variant="secondary" className="h-10 md:h-12 rounded-xl font-black uppercase text-[9px] shadow-2xl ring-4 ring-black/20" onClick={() => fileInputRef.current?.click()}>
-                                    <ImageIcon className="mr-2 size-3.5" /> OR UPLOAD FILE
+                            <div className="absolute bottom-6 right-6 z-20">
+                                <Button variant="secondary" className="h-10 md:h-12 rounded-xl font-black uppercase text-[9px] shadow-2xl" onClick={() => fileInputRef.current?.click()}>
+                                    <ImageIcon className="mr-2 size-3.5" /> UPLOAD FILE
                                 </Button>
                             </div>
                         </CardContent>
                         <CardFooter className="p-4 md:p-8 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
-                            <Button onClick={handleCapture} className="h-14 flex-[2] bg-gradient-button text-white font-black text-lg md:text-xl rounded-2xl shadow-2xl group transition-all">
-                                <Zap className="mr-3 size-6 text-yellow-400 group-hover:scale-125 transition-transform" /> CAPTURE DOCUMENT
+                            <Button onClick={handleCapture} className="h-14 flex-[2] bg-gradient-button text-white font-black text-lg md:text-xl rounded-2xl shadow-2xl">
+                                <Zap className="mr-3 size-6 text-yellow-400" /> CAPTURE CURRENT PAGE
                             </Button>
                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                         </CardFooter>
@@ -412,7 +410,7 @@ export default function ScannerToPdf() {
                     <Card className="border-2 shadow-2xl border-primary/10 flex flex-col bg-card/50 rounded-[2rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
                             <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
-                                <FileDigit className="size-5 text-primary" /> Multi-Scan Stack
+                                <Layout className="size-5 text-primary" /> Page Stack
                             </CardTitle>
                             <Badge variant="outline" className="font-black text-primary border-primary/20">{scannedPages.length}</Badge>
                         </CardHeader>
@@ -420,7 +418,7 @@ export default function ScannerToPdf() {
                             {scannedPages.length === 0 ? (
                                 <div className="py-20 text-center opacity-30 space-y-4">
                                     <Monitor className="size-16 mx-auto" />
-                                    <p className="text-[10px] font-black uppercase">Wait for first scan</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Stack is empty</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
@@ -435,8 +433,8 @@ export default function ScannerToPdf() {
                             )}
                         </CardContent>
                         <CardFooter className="p-6 bg-muted/10 border-t">
-                            <Button disabled={scannedPages.length === 0} className="w-full h-14 bg-primary font-black text-sm rounded-xl shadow-xl active:scale-95" onClick={handleBuildPdf}>
-                                {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2 size-5" />} SAVE AS PDF
+                            <Button disabled={scannedPages.length === 0} className="w-full h-14 bg-primary font-black text-sm rounded-xl shadow-xl" onClick={handleBuildPdf}>
+                                {isBuildingPdf ? <Loader2 className="animate-spin mr-2"/> : <Download className="mr-2 size-5" />} EXPORT AS PDF
                             </Button>
                         </CardFooter>
                     </Card>
@@ -444,88 +442,115 @@ export default function ScannerToPdf() {
             </div>
         )}
 
-        {/* STAGE: ADJUST (RECT & 6-DOT SCANNER) */}
         {stage === 'adjust' && currentRawImage && (
-            <Card className="w-full max-w-5xl mx-auto shadow-2xl border-none overflow-hidden rounded-[2.5rem] animate-in zoom-in-95 duration-500">
-                <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                        <Maximize className="size-6 text-primary" /> Adjustment Studio
-                    </CardTitle>
-                    <div className="flex items-center gap-3">
-                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
-                            <TabsList className="grid grid-cols-2 h-8">
-                                <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
-                                <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-                        <Button variant="ghost" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] relative overflow-hidden select-none"
-                             onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                    
-                    <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white max-w-[90vw]">
-                        {cropMode === 'rect' ? (
-                            <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh] md:max-h-[70vh]">
-                                <img ref={imgRef} src={currentRawImage} alt="raw rect" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain block" onLoad={onImageLoad} />
-                            </ReactCrop>
-                        ) : (
-                            <div className="relative">
-                                <img ref={imgRef} src={currentRawImage} alt="raw capture" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain pointer-events-none block" onLoad={onImageLoad} />
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                    <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y} ${points[5].x},${points[5].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
-                                </svg>
-                                {points.map((p, i) => (
-                                    <div key={i} className={cn("absolute size-10 md:size-12 -ml-5 md:-ml-6 -mt-5 md:-mt-6 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/90")}
-                                         style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                         onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                        <div className="size-2.5 md:size-3 bg-white rounded-full shadow-inner" />
-                                    </div>
-                                ))}
+            <div className="grid lg:grid-cols-12 gap-8 items-start animate-in zoom-in-95 duration-500">
+                <div className="lg:col-span-8">
+                    <Card className="shadow-2xl border-none overflow-hidden rounded-[2.5rem]">
+                        <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                <Maximize className="size-6 text-primary" /> Adjustment Panel
+                            </CardTitle>
+                            <div className="flex items-center gap-3">
+                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
+                                    <TabsList className="grid grid-cols-2 h-8">
+                                        <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger>
+                                        <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                                <Button variant="ghost" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] relative overflow-hidden select-none"
+                                     onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                            
+                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white max-w-[90vw]">
+                                {cropMode === 'rect' ? (
+                                    <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh] md:max-h-[70vh]">
+                                        <img ref={imgRef} src={currentRawImage} alt="raw rect" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain block" onLoad={onImageLoad} />
+                                    </ReactCrop>
+                                ) : (
+                                    <div className="relative">
+                                        <img ref={imgRef} src={currentRawImage} alt="raw capture" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain pointer-events-none block" onLoad={onImageLoad} />
+                                        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                            <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y} ${points[5].x},${points[5].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                        </svg>
+                                        {points.map((p, i) => (
+                                            <div key={i} className={cn("absolute size-10 md:size-12 -ml-5 md:-ml-6 -mt-5 md:-mt-6 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/90")}
+                                                 style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
+                                                 onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
+                                                <div className="size-2.5 md:size-3 bg-white rounded-full shadow-inner" />
+                                            </div>
+                                        ))}
 
-                                {draggingPoint !== null && (
-                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
-                                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                                            <div className="w-full h-0.5 bg-green-500/50 absolute" />
-                                            <div className="h-full w-0.5 bg-green-500/50 absolute" />
-                                            <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
-                                        </div>
-                                        <img src={currentRawImage} alt="magnify" className="absolute max-w-none origin-top-left"
-                                            style={{ 
-                                                width: `${(imgRef.current?.width || 0) * 4}px`,
-                                                height: `${(imgRef.current?.height || 0) * 4}px`,
-                                                left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`,
-                                                top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)`
-                                            }} 
-                                        />
+                                        {draggingPoint !== null && (
+                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
+                                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                    <div className="w-full h-0.5 bg-green-500/50 absolute" />
+                                                    <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                                    <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
+                                                </div>
+                                                <img src={currentRawImage} alt="magnify" className="absolute max-w-none origin-top-left"
+                                                    style={{ 
+                                                        width: `${(imgRef.current?.width || 0) * 4}px`,
+                                                        height: `${(imgRef.current?.height || 0) * 4}px`,
+                                                        left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`,
+                                                        top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)`
+                                                    }} 
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        )}
-                    </div>
-                    
-                    <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
-                        <Move className="size-4 text-primary animate-pulse" /> 
-                        {cropMode === 'rect' ? "Adjust rectangular box" : "Drag 6 points to edges of document"}
-                    </div>
-                </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-between gap-4">
-                    <Button variant="ghost" onClick={() => setStage('viewfinder')} className="font-black text-[10px] uppercase h-12 px-8 rounded-xl">DISCARD</Button>
-                    <div className="flex gap-3 flex-1 justify-end">
-                         <Button onClick={() => setPoints([{x:10, y:10}, {x:90, y:10}, {x:90, y:50}, {x:90, y:90}, {x:10, y:90}, {x:10, y:50}])} variant="outline" className="h-12 px-6 border-2 font-black text-[10px] uppercase rounded-xl">Auto Reset</Button>
-                         <Button className="h-12 px-12 bg-primary font-black text-base rounded-xl shadow-2xl group" onClick={handleConfirmAdjustment} disabled={isProcessing}>
-                            {isProcessing ? <Loader2 className="animate-spin size-5 mr-2" /> : <ChevronRight className="mr-2 size-5" />}
-                            CONFIRM ADJUSTMENT
-                         </Button>
-                    </div>
-                </CardFooter>
-            </Card>
+                            
+                            <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
+                                <Move className="size-4 text-primary animate-pulse" /> 
+                                {cropMode === 'rect' ? "Adjust rectangular box" : "Drag 6 points to edges of document"}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="lg:col-span-4 space-y-6">
+                    <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50">
+                        <CardHeader className="bg-primary/5 border-b p-6">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                <Palette className="size-6 text-primary" /> Visual Styles
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-10">
+                            <div className="space-y-6">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Visual Presets</Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <FilterButton active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} title="Magic Color" sub="Auto-Balanced" />
+                                    <FilterButton active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} title="B&W" sub="Document High" />
+                                    <FilterButton active={activeFilter === 'grayscale'} onClick={() => setActiveFilter('grayscale')} icon={Droplets} title="Grayscale" sub="Ink Classic" />
+                                    <FilterButton active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={ImageIcon} title="Original" sub="Natural View" />
+                                </div>
+                            </div>
+
+                            <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                                <Zap className="size-6 text-yellow-500 shrink-0" />
+                                <div className="space-y-1">
+                                    <p className="text-[11px] font-black text-primary uppercase">Smart Enhancement</p>
+                                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed uppercase">Magic Color automatically reduces shadows and boosts text contrast.</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-4">
+                            <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" onClick={handleConfirmAdjustment} disabled={isProcessing}>
+                                {isProcessing ? <Loader2 className="animate-spin mr-2"/> : <CheckCircle2 className="mr-2 h-6 w-6" />}
+                                {isProcessing ? "PROCESSING..." : "CONFIRM ADJUSTMENT"}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </div>
+            </div>
         )}
 
-        {/* STAGE: STACK (POST-SCAN VIEW) */}
         {stage === 'stack' && (
             <div className="flex flex-col items-center gap-10 animate-in fade-in duration-500">
-                <div className="w-full max-w-4xl flex items-center justify-between">
+                <div className="w-full max-w-4xl flex items-center justify-between px-4">
                     <div className="flex items-center gap-4 text-left">
                         <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20">
                             <FileDigit className="size-7" />
@@ -582,4 +607,23 @@ export default function ScannerToPdf() {
         )}
     </div>
   );
+}
+
+function FilterButton({ active, onClick, icon: Icon, title, sub }: { active: boolean, onClick: () => void, icon: any, title: string, sub: string }) {
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                "p-4 rounded-2xl border-2 text-left transition-all relative overflow-hidden group",
+                active ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted hover:border-primary/40 bg-white dark:bg-slate-950"
+            )}
+        >
+            <div className={cn("size-8 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110", active ? "bg-primary text-white" : "bg-muted text-muted-foreground")}>
+                <Icon className="size-4" />
+            </div>
+            <p className="font-black text-[10px] uppercase tracking-wider leading-none">{title}</p>
+            <p className="text-[7px] text-muted-foreground font-bold mt-1 uppercase opacity-60 tracking-tight">{sub}</p>
+            {active && <div className="absolute top-2 right-2"><CheckCircle2 className="size-3 text-primary" /></div>}
+        </button>
+    );
 }
