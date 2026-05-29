@@ -14,8 +14,8 @@ import {
     UploadCloud,
     CheckCircle2,
     RefreshCcw,
-    Zap,
-    ShieldCheck,
+    Zap, 
+    ShieldCheck, 
     ScanLine,
     Monitor,
     Smartphone,
@@ -32,7 +32,8 @@ import {
     RotateCw,
     FileType,
     Image as ImageIcon,
-    Plus
+    Plus,
+    Droplets
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
