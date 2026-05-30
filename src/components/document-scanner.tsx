@@ -44,6 +44,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Point { x: number; y: number; }
 
@@ -75,7 +76,7 @@ function solvePerspective(src: Point[], dst: Point[]) {
 }
 
 type ScanFilter = 'original' | 'magic' | 'document' | 'bw' | 'photo' | 'gray';
-type Stage = 'viewfinder' | 'adjust' | 'stack';
+type Stage = 'viewfinder' | 'live-camera' | 'adjust' | 'stack';
 type CropMode = 'rect' | 'scanner';
 
 interface ScannedPage {
@@ -85,6 +86,7 @@ interface ScannedPage {
 
 export default function DocumentScanner() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [stage, setStage] = useState<Stage>('viewfinder');
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
@@ -92,6 +94,8 @@ export default function DocumentScanner() {
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
@@ -111,6 +115,49 @@ export default function DocumentScanner() {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  const stopCamera = useCallback(() => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+    }
+  }, [stream]);
+
+  const startCamera = async () => {
+    if (isMobile) {
+        cameraInputRef.current?.click();
+    } else {
+        try {
+            const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
+            });
+            setStream(mediaStream);
+            setStage('live-camera');
+            if (videoRef.current) {
+                videoRef.current.srcObject = mediaStream;
+            }
+        } catch (err) {
+            toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera. Please check permissions.' });
+        }
+    }
+  };
+
+  const captureFrame = () => {
+      if (!videoRef.current) return;
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+          ctx.drawImage(video, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+          setCurrentRawImage(dataUrl);
+          setIsImageReady(false);
+          stopCamera();
+          setStage('adjust');
+      }
+  };
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -252,6 +299,10 @@ export default function DocumentScanner() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan]);
 
+  useEffect(() => {
+      return () => stopCamera();
+  }, [stopCamera]);
+
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -350,14 +401,14 @@ export default function DocumentScanner() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                                 <div 
                                     className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"
-                                    onClick={() => cameraInputRef.current?.click()}
+                                    onClick={startCamera}
                                 >
                                     <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
                                         <Camera className="size-8" />
                                     </div>
                                     <div className="text-center">
                                         <p className="text-base font-black uppercase tracking-tighter">Capture Photo</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Open Native Camera</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Open Camera</p>
                                     </div>
                                 </div>
 
@@ -420,6 +471,24 @@ export default function DocumentScanner() {
                     </Card>
                 </div>
             </div>
+        )}
+
+        {stage === 'live-camera' && (
+            <Card className="w-full max-w-4xl border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-black relative aspect-video flex flex-col items-center justify-center mx-auto">
+                <video ref={videoRef} autoPlay playsInline className="size-full object-cover" />
+                <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20" />
+                <div className="absolute bottom-10 flex items-center gap-6">
+                    <Button variant="outline" size="icon" className="size-14 rounded-full border-2 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20" onClick={() => { stopCamera(); setStage('viewfinder'); }}>
+                        <X className="size-8" />
+                    </Button>
+                    <button className="size-20 rounded-full border-4 border-white bg-white/20 backdrop-blur-md flex items-center justify-center group active:scale-95 transition-all" onClick={captureFrame}>
+                        <div className="size-14 rounded-full bg-white group-hover:scale-90 transition-transform shadow-xl" />
+                    </button>
+                </div>
+                <div className="absolute top-6 right-6">
+                    <Badge className="bg-red-600 text-white font-black px-4 py-1.5 rounded-full animate-pulse">LIVE FEED</Badge>
+                </div>
+            </Card>
         )}
 
         {stage === 'adjust' && currentRawImage && (
@@ -536,7 +605,7 @@ export default function DocumentScanner() {
                                 const ratio = Math.min(pw / props.width, ph / props.height);
                                 pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
                             });
-                            pdf.save(`GR7-Scan-${Date.now()}.pdf`);
+                            pdf.save(`GR7-Premium-Scan-${Date.now()}.pdf`);
                         }}>
                             <Download className="mr-3 size-6" /> EXPORT PDF
                         </Button>
