@@ -130,18 +130,17 @@ export default function DocumentScanner() {
         setIsVideoLoading(true);
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                video: { 
+                    facingMode: 'environment', 
+                    width: { ideal: 1920 }, 
+                    height: { ideal: 1080 } 
+                },
                 audio: false
             });
             setStream(mediaStream);
             setStage('live-camera');
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
-                videoRef.current.onloadedmetadata = () => {
-                    videoRef.current?.play().catch(console.error);
-                    setIsVideoLoading(false);
-                };
-            }
+            // We don't assign srcObject here because video element might not be rendered yet.
+            // Handled by useEffect now.
         } catch (err) {
             setIsVideoLoading(false);
             toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera. Please check permissions.' });
@@ -149,13 +148,48 @@ export default function DocumentScanner() {
     }
   };
 
+  // Robustly handle stream attachment to video element
+  useEffect(() => {
+    if (stage === 'live-camera' && stream && videoRef.current) {
+        const video = videoRef.current;
+        video.srcObject = stream;
+        
+        const handleLoaded = () => {
+            console.log("Video metadata loaded");
+            video.play().catch(err => {
+                console.warn("Autoplay blocked or failed:", err);
+                setIsVideoLoading(false);
+            });
+        };
+
+        const handleCanPlay = () => {
+            console.log("Video can play now");
+            setIsVideoLoading(false);
+        };
+
+        video.addEventListener('loadedmetadata', handleLoaded);
+        video.addEventListener('canplay', handleCanPlay);
+        
+        // Safety timeout to hide loader if events don't fire but video starts
+        const safetyTimer = setTimeout(() => {
+            setIsVideoLoading(false);
+        }, 3500);
+
+        return () => {
+            video.removeEventListener('loadedmetadata', handleLoaded);
+            video.removeEventListener('canplay', handleCanPlay);
+            clearTimeout(safetyTimer);
+        };
+    }
+  }, [stage, stream]);
+
   const captureFrame = () => {
       if (!videoRef.current) return;
       const video = videoRef.current;
       
-      // Ensure video has actual dimensions
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-          toast({ variant: 'destructive', title: 'Capture Error', description: 'Video feed not ready. Please wait.' });
+      // Check if video is truly ready
+      if (video.readyState < 2) {
+          toast({ variant: 'destructive', title: 'Capture Error', description: 'Camera feed not ready yet.' });
           return;
       }
 
@@ -403,7 +437,7 @@ export default function DocumentScanner() {
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
-                    <Card className="w-full border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl">
+                    <Card className="w-full border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl dark:hover:shadow-primary/20">
                         <CardHeader className="pt-12 md:pt-20">
                             <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse">
                                 <ScanLine className="size-10" />
@@ -490,9 +524,9 @@ export default function DocumentScanner() {
         {stage === 'live-camera' && (
             <Card className="w-full max-w-4xl border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-black relative aspect-video flex flex-col items-center justify-center mx-auto min-h-[300px]">
                 {isVideoLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4">
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md gap-4">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-white text-xs font-black uppercase tracking-widest">Initializing Camera...</p>
+                        <p className="text-white text-xs font-black uppercase tracking-widest animate-pulse">Initializing Camera...</p>
                     </div>
                 )}
                 <video 
@@ -503,7 +537,7 @@ export default function DocumentScanner() {
                     className="size-full object-cover"
                 />
                 <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20" />
-                <div className="absolute bottom-10 flex items-center gap-6">
+                <div className="absolute bottom-10 flex items-center gap-6 z-20">
                     <Button variant="outline" size="icon" className="size-14 rounded-full border-2 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20" onClick={() => { stopCamera(); setStage('viewfinder'); }}>
                         <X className="size-8" />
                     </Button>
@@ -539,7 +573,7 @@ export default function DocumentScanner() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
                         <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh]">
+                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh]">
                                     <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[60vh] w-auto object-contain block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
