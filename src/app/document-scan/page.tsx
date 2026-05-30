@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck, Zap, Sparkles } from 'lucide-react';
 import DocumentScanner from '@/components/document-scanner';
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'AI Document Scan',
+  title: 'Document Scan',
   description: 'Premium mobile scanner with AI filters. BW PRO, Magic Color, and high-fidelity text enhancement.',
 };
 
@@ -25,10 +26,10 @@ export default function DocumentScanPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">
-            <HowToGuide title="AI Document Scanner" steps={[
+            <HowToGuide title="Document Scanner" steps={[
                 "Camera: Allow camera access and point at your document.",
                 "Capture: Click the large button to snap a clear photo.",
-                "Adjust: Drag the 6 precision dots to the corners of your document.",
+                "Adjust: Drag the 4 precision dots to the corners of your document.",
                 "Filters: Choose 'BW PRO' for sharp text or 'Magic' for vibrant colors.",
                 "Export: Bundle multiple pages and download as a professional PDF."
             ]} />
@@ -37,7 +38,7 @@ export default function DocumentScanPage() {
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
                         <Sparkles className="text-primary size-8" />
-                        Premium AI Engine
+                        Premium Extraction Engine
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
                         Our <strong>Document Scanner</strong> uses neural-inspired division normalization to remove shadows, fix glare, and sharpen text lines exactly like top mobile apps.

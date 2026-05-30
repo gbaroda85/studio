@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -114,12 +115,11 @@ export default function DocumentScanner() {
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
-    setIsImageReady(true); // Signal that image is finally in the DOM and ready
+    setIsImageReady(true);
   };
 
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
-    // Check for naturalWidth to ensure image is truly decoded
     if (!image || !currentRawImage || !image.naturalWidth) return "";
 
     const canvas = document.createElement('canvas');
@@ -258,7 +258,7 @@ export default function DocumentScanner() {
           const reader = new FileReader();
           reader.onload = (event) => {
               setCurrentRawImage(event.target?.result as string); 
-              setIsImageReady(false); // Reset ready state for the new image
+              setIsImageReady(false);
               setStage('adjust'); 
           };
           reader.readAsDataURL(file);
@@ -343,10 +343,10 @@ export default function DocumentScanner() {
                             <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse">
                                 <ScanLine className="size-10" />
                             </div>
-                            <CardTitle className="text-3xl md:text-5xl font-black uppercase tracking-tighter">AI Document Scanner</CardTitle>
+                            <CardTitle className="text-3xl md:text-5xl font-black uppercase tracking-tighter">Document Scanner</CardTitle>
                             <CardDescription className="text-sm md:text-lg font-bold">Premium filters. Native full-screen capture.</CardDescription>
                         </CardHeader>
-                        <CardContent className="pb-12 md:pb-20 px-6">
+                        <CardContent className="pb-12 md:pt-20 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                                 <div 
                                     className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"

@@ -269,7 +269,7 @@ export default function PdfCompressor() {
 
                 <Card className={cn(
                     "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
-                    dragActive && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                 >
