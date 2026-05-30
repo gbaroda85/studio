@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -212,7 +213,7 @@ export default function MarriageBiodataGenerator() {
                             <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
                                 <Settings2 className="size-6 text-primary" /> STUDIO PANEL
                             </CardTitle>
-                            <Button variant="ghost" size="sm" onClick={handleReset} className="font-black text-[10px] uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                            <Button variant="ghost" size="sm" onClick={handleReset} className="font-black text-[10px] uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-1" /> Restore</Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-10">
@@ -431,7 +432,7 @@ export default function MarriageBiodataGenerator() {
                 </div>
 
                 {/* THE A4 CANVAS */}
-                <div className="w-full overflow-x-auto pb-10 flex justify-center bg-slate-200 dark:bg-slate-900 rounded-[3rem] p-4 md:p-10 shadow-inner">
+                <div className="w-full overflow-x-auto pb-10 flex justify-center bg-slate-200 dark:bg-slate-950 rounded-[3rem] p-4 md:p-10 shadow-inner">
                     <div 
                         ref={previewRef}
                         className={cn(
@@ -445,107 +446,14 @@ export default function MarriageBiodataGenerator() {
                             color: '#333'
                         }}
                     >
-                        {/* BORDER DESIGN */}
-                        {selectedTemplate !== 'canva-pro' && selectedTemplate !== 'royal-gold' && (
-                            borderStyle === 'decorative' ? (
-                                <DecorativeBorder color={themeColor} />
-                            ) : (
-                                <div className="absolute inset-[10mm] pointer-events-none" style={{ 
-                                    border: `4px ${getBorderStyle()} ${themeColor}`,
-                                    opacity: 0.2
-                                }} />
-                            )
-                        )}
-
-                        {/* TEMPLATES */}
-                        {selectedTemplate === 'royal-gold' ? (
-                            <TemplateRoyalGold themeColor={themeColor} formData={formData} profilePic={profilePic} godLogo={godLogo} />
-                        ) : selectedTemplate === 'canva-pro' ? (
-                            <TemplateCanvaPro themeColor={themeColor} formData={formData} profilePic={profilePic} godLogo={godLogo} />
-                        ) : (
-                            <>
-                                {selectedTemplate === 'royal' && <TemplateRoyal themeColor={themeColor} />}
-                                {selectedTemplate === 'floral' && <TemplateFloral themeColor={themeColor} />}
-                                {selectedTemplate === 'slate' && <TemplateSlate themeColor={themeColor} />}
-
-                                <div className={cn(
-                                    "relative z-10 w-full h-full flex flex-col",
-                                    selectedTemplate === 'modern' && "items-start",
-                                    selectedTemplate === 'vintage' && "items-center"
-                                )}>
-                                    <header className={cn(
-                                        "w-full mb-12",
-                                        selectedTemplate === 'vintage' ? 'text-center' : '',
-                                        selectedTemplate === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
-                                    )}>
-                                        {/* Center God Logo */}
-                                        {godLogo && (
-                                            <div className="flex justify-center mb-6">
-                                                <img src={godLogo} alt="God Logo" className="h-16 w-auto object-contain" />
-                                            </div>
-                                        )}
-
-                                        {selectedTemplate !== 'slate' && !godLogo && (
-                                            <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
-                                                <div className="h-px w-20 bg-current" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
-                                                <div className="h-px w-20 bg-current" />
-                                            </div>
-                                        )}
-                                        <h2 className={cn(
-                                            "text-3xl md:text-5xl font-black font-headline tracking-widest uppercase text-center",
-                                            selectedTemplate === 'vintage' && "font-serif italic capitalize tracking-normal",
-                                            selectedTemplate === 'slate' && "text-left text-4xl"
-                                        )} style={{ color: themeColor }}>
-                                            Bio Data
-                                        </h2>
-                                        {selectedTemplate === 'royal' && <div className="w-48 h-1 mx-auto mt-2 rounded-full opacity-20" style={{ backgroundColor: themeColor }} />}
-                                    </header>
-
-                                    <div className="grid grid-cols-12 gap-10 w-full flex-1">
-                                        <div className="col-span-8 space-y-10">
-                                            <Section title="Personal Details" themeColor={themeColor} template={selectedTemplate}>
-                                                <Row label="Full Name" value={formData.personal.fullName} />
-                                                <Row label="Date of Birth" value={formData.personal.dob} />
-                                                <Row label="Height" value={formData.personal.height} />
-                                                <Row label="Hobbies" value={formData.personal.hobbies} />
-                                            </Section>
-                                            <Section title="Career & Education" themeColor={themeColor} template={selectedTemplate}>
-                                                <Row label="Education" value={formData.education.qualification} />
-                                                <Row label="Occupation" value={formData.education.occupation} />
-                                                <Row label="Income" value={formData.education.annualIncome} />
-                                            </Section>
-                                            <Section title="Family Profile" themeColor={themeColor} template={selectedTemplate}>
-                                                <Row label="Father Name" value={formData.family.fatherName} />
-                                                <Row label="Mother Name" value={formData.family.motherName} />
-                                                <Row label="Siblings" value={formData.family.siblings} />
-                                                <div className="flex items-start gap-4 text-sm leading-relaxed mt-2">
-                                                    <span className="w-32 font-black text-muted-foreground/50 shrink-0 uppercase text-[10px]">Address</span>
-                                                    <span className="font-bold">{formData.family.address}</span>
-                                                </div>
-                                            </Section>
-                                        </div>
-                                        <div className="col-span-4 flex flex-col items-center gap-12">
-                                            <div className={cn(
-                                                "w-full aspect-[4/5] bg-white p-2 shadow-2xl relative",
-                                                selectedTemplate === 'royal' && "rotate-2 border-[1px] border-slate-200",
-                                                selectedTemplate === 'modern' && "rounded-3xl overflow-hidden shadow-none border-4",
-                                                selectedTemplate === 'floral' && "border-double border-4"
-                                            )} style={{ borderColor: themeColor }}>
-                                                {profilePic ? (
-                                                    <img src={profilePic} alt="profile" className="size-full object-cover rounded-[inherit]" />
-                                                ) : (
-                                                    <div className="size-full flex items-center justify-center bg-slate-50"><User className="size-20 opacity-10" /></div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <footer className="mt-auto pt-10 border-t border-slate-100 text-center">
-                                        <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30">GR7 PREMIUM BIODATA STUDIO • FOR AUSPICIOUS BEGINNINGS</p>
-                                    </footer>
-                                </div>
-                            </>
-                        )}
+                        <ResumeContent 
+                            formData={formData} 
+                            template={selectedTemplate} 
+                            profilePic={profilePic} 
+                            themeColor={themeColor} 
+                            godLogo={godLogo}
+                            borderStyle={borderStyle}
+                        />
                     </div>
                 </div>
 
@@ -568,6 +476,11 @@ export default function MarriageBiodataGenerator() {
                 @media print {
                     .no-print { display: none !important; }
                     body { background: white !important; }
+                    .print-target {
+                        box-shadow: none !important;
+                        border: none !important;
+                        margin: 0 !important;
+                    }
                 }
             `}</style>
 
@@ -611,12 +524,112 @@ function Section({ title, themeColor, template, children }: { title: string, the
     );
 }
 
+function ResumeContent({ formData, template, profilePic, themeColor, godLogo, borderStyle }: { formData: typeof INITIAL_DATA, template: string, profilePic: string | null, themeColor: string, godLogo: string | null, borderStyle: string }) {
+    if (template === 'royal-gold') return <TemplateRoyalGold formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} />;
+    if (template === 'canva-pro') return <TemplateCanvaPro formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} />;
+    
+    return (
+        <div className="relative w-full min-h-[297mm] h-full flex flex-col">
+            {/* BORDER DESIGN */}
+            {borderStyle === 'decorative' ? (
+                <DecorativeBorder color={themeColor} />
+            ) : (
+                <div className="absolute inset-[10mm] pointer-events-none" style={{ 
+                    border: `4px ${borderStyle === 'double' ? 'double' : 'solid'} ${themeColor}`,
+                    opacity: 0.2
+                }} />
+            )}
+
+            {template === 'royal' && <TemplateRoyal themeColor={themeColor} />}
+            {template === 'floral' && <TemplateFloral themeColor={themeColor} />}
+            {template === 'slate' && <TemplateSlate themeColor={themeColor} />}
+
+            <div className={cn(
+                "relative z-10 w-full h-full flex flex-col p-[15mm]",
+                template === 'modern' && "items-start",
+                template === 'vintage' && "items-center"
+            )}>
+                <header className={cn(
+                    "w-full mb-12",
+                    template === 'vintage' ? 'text-center' : '',
+                    template === 'slate' ? 'bg-muted/30 p-8 rounded-3xl mb-8' : ''
+                )}>
+                    {/* Center God Logo */}
+                    {godLogo && (
+                        <div className="flex justify-center mb-6">
+                            <img src={godLogo} alt="God Logo" className="h-16 w-auto object-contain" />
+                        </div>
+                    )}
+
+                    {template !== 'slate' && !godLogo && (
+                        <div className="flex items-center justify-center gap-4 text-center opacity-30 mb-6">
+                            <div className="h-px w-20 bg-current" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.5em]">OM GANESHAY NAMAHA</span>
+                            <div className="h-px w-20 bg-current" />
+                        </div>
+                    )}
+                    <h2 className={cn(
+                        "text-3xl md:text-5xl font-black font-headline tracking-widest uppercase text-center",
+                        template === 'vintage' && "font-serif italic capitalize tracking-normal",
+                        template === 'slate' && "text-left text-4xl"
+                    )} style={{ color: themeColor }}>
+                        Bio Data
+                    </h2>
+                    {template === 'royal' && <div className="w-48 h-1 mx-auto mt-2 rounded-full opacity-20" style={{ backgroundColor: themeColor }} />}
+                </header>
+
+                <div className="grid grid-cols-12 gap-10 w-full flex-1">
+                    <div className="col-span-8 space-y-10">
+                        <Section title="Personal Details" themeColor={themeColor} template={template}>
+                            <Row label="Full Name" value={formData.personal.fullName} />
+                            <Row label="Date of Birth" value={formData.personal.dob} />
+                            <Row label="Height" value={formData.personal.height} />
+                            <Row label="Hobbies" value={formData.personal.hobbies} />
+                        </Section>
+                        <Section title="Career & Education" themeColor={themeColor} template={template}>
+                            <Row label="Education" value={formData.education.qualification} />
+                            <Row label="Occupation" value={formData.education.occupation} />
+                            <Row label="Income" value={formData.education.annualIncome} />
+                        </Section>
+                        <Section title="Family Profile" themeColor={themeColor} template={template}>
+                            <Row label="Father Name" value={formData.family.fatherName} />
+                            <Row label="Mother Name" value={formData.family.motherName} />
+                            <Row label="Siblings" value={formData.family.siblings} />
+                            <div className="flex items-start gap-4 text-sm leading-relaxed mt-2 text-left">
+                                <span className="w-32 font-black text-muted-foreground/50 shrink-0 uppercase text-[10px]">Address</span>
+                                <span className="font-bold">{formData.family.address}</span>
+                            </div>
+                        </Section>
+                    </div>
+                    <div className="col-span-4 flex flex-col items-center gap-12">
+                        <div className={cn(
+                            "w-full aspect-[4/5] bg-white p-2 shadow-2xl relative",
+                            template === 'royal' && "rotate-2 border-[1px] border-slate-200",
+                            template === 'modern' && "rounded-3xl overflow-hidden shadow-none border-4",
+                            template === 'floral' && "border-double border-4"
+                        )} style={{ borderColor: themeColor }}>
+                            {profilePic ? (
+                                <img src={profilePic} alt="profile" className="size-full object-cover rounded-[inherit]" />
+                            ) : (
+                                <div className="size-full flex items-center justify-center bg-slate-50"><User className="size-20 opacity-10" /></div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <footer className="mt-auto pt-10 border-t border-slate-100 text-center">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30">GR7 PREMIUM BIODATA STUDIO • FOR AUSPICIOUS BEGINNINGS</p>
+                </footer>
+            </div>
+        </div>
+    );
+}
+
 // TEMPLATE: ROYAL GOLD (MATCHING USER IMAGE)
 function TemplateRoyalGold({ themeColor, formData, profilePic, godLogo }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null }) {
     const goldColor = "#f3cc8a";
     
     return (
-        <div className="w-full h-full relative p-12 overflow-hidden flex flex-col" style={{ background: `linear-gradient(to bottom, ${themeColor}, #0a040d)` }}>
+        <div className="w-[210mm] min-h-[297mm] h-full relative p-12 overflow-hidden flex flex-col text-left" style={{ background: `linear-gradient(to bottom, ${themeColor}, #0a040d)` }}>
             {/* Corners */}
             <div className="absolute top-6 left-6 size-24 pointer-events-none opacity-60">
                 <svg viewBox="0 0 100 100" fill="none" stroke={goldColor} strokeWidth="1.5">
@@ -745,7 +758,7 @@ function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo }: { theme
     const lighterColor = themeColor + '33'; // 20% opacity
     
     return (
-        <div className="w-full h-full flex bg-[#FDFBF7]">
+        <div className="w-[210mm] min-h-[297mm] h-full flex bg-[#FDFBF7] relative text-left">
             {/* Sidebar (Left Column) */}
             <div className="w-[38%] h-full min-h-[297mm] flex flex-col text-white p-8 space-y-12" style={{ backgroundColor: themeColor }}>
                 <div className="h-[120px]" /> {/* Spacer for photo */}
