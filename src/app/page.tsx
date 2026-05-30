@@ -26,7 +26,8 @@ import {
   Printer,
   FileArchive,
   Merge,
-  Scissors
+  Scissors,
+  UserCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,7 +42,7 @@ const ALL_TOOLS = [
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "featured" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "featured" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "featured" },
-  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDFs into one document instantly.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "featured" },
+  { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-emerald-600", category: "featured" },
   { icon: Eraser, title: "Background Remover", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "featured" },
   { icon: Sparkles, title: "Enhance Photo", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "featured" },
   
