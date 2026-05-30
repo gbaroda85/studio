@@ -63,7 +63,6 @@ export default function PdfWatermarker() {
     }
   }, [watermarkedPdfUrl]);
 
-  // Handle file upload and initial page render
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
       setPdfFile(file);
@@ -123,6 +122,11 @@ export default function PdfWatermarker() {
         const pages = pdfDoc.getPages();
         const margin = 50;
 
+        // PDF rotation is counter-clockwise for positive values.
+        // CSS rotation is clockwise for positive values.
+        // To match the preview, we keep the rotation value as is because both follow the same sign logic usually, 
+        // BUT the visual "ultha" happens because of pivot math and coordinate flips.
+        
         for (const page of pages) {
             const { width, height } = page.getSize();
             const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
@@ -131,15 +135,17 @@ export default function PdfWatermarker() {
             let x = 0, y = 0;
 
             if (position === 'center' || position.startsWith('diagonal')) {
-                // Correct centering with rotation
-                // We calculate pivot point so midpoint of text string is at page center
+                // CENTERING MATH FOR ROTATED TEXT
+                // C = (W/2, H/2)
+                // R = Rotation Matrix
+                // T = Offset to local center (textWidth/2, textHeight/2)
+                // Anchor = C - R * T
                 const rad = (rotation * Math.PI) / 180;
                 const cos = Math.cos(rad);
                 const sin = Math.sin(rad);
 
-                // Pivot point math to center rotated text baseline
-                x = (width / 2) - ((textWidth / 2) * cos - (textHeight / 4) * sin);
-                y = (height / 2) - ((textWidth / 2) * sin + (textHeight / 4) * cos);
+                x = (width / 2) - ((textWidth / 2) * cos - (textHeight / 2) * sin);
+                y = (height / 2) - ((textWidth / 2) * sin + (textHeight / 2) * cos);
             } else {
                 switch (position) {
                     case 'top-left': x = margin; y = height - margin - textHeight; break;
@@ -191,18 +197,16 @@ export default function PdfWatermarker() {
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  // Calculate CSS for Preview Overlay to match PDF units
   const getPreviewStyle = () => {
       const styles: React.CSSProperties = {
           position: 'absolute',
           pointerEvents: 'none',
           color: 'rgba(0,0,0,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${fontSize * 0.8}px`, // Slight scale factor for browser rendering
+          fontSize: `${fontSize * 0.8}px`, 
           fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
-          transform: `rotate(${rotation}deg)`,
           transition: 'all 0.1s ease-out'
       };
 
@@ -217,6 +221,7 @@ export default function PdfWatermarker() {
               case 'bottom-left': styles.bottom = '8%'; styles.left = '8%'; break;
               case 'bottom-right': styles.bottom = '8%'; styles.right = '8%'; break;
           }
+          styles.transform = `rotate(${rotation}deg)`;
       }
       return styles;
   }
