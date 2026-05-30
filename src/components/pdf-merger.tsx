@@ -29,7 +29,8 @@ import {
     ArrowUpAz,
     Repeat,
     Sparkles,
-    Plus
+    Plus,
+    Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -242,7 +243,7 @@ export default function PdfMerger() {
                                         <Trash2 className="size-3 mr-1"/> Clear All
                                     </Button>
                                 </div>
-                                <ScrollArea className="h-[300px] md:h-[450px] pr-2">
+                                <ScrollArea className="h-[300px] md:h-[450px] pr-2 custom-scrollbar">
                                     <div className="space-y-2">
                                         {pdfFiles.map((file, index) => (
                                              <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
@@ -391,7 +392,7 @@ export default function PdfMerger() {
 
                     <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed">
                         <Button 
-                            className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
+                            className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
                             onClick={handleMergePdfs} 
                             disabled={pdfFiles.length < 2 || isMerging}
                         >
