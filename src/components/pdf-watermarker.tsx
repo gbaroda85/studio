@@ -50,7 +50,7 @@ export default function PdfWatermarker() {
   const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState(60);
-  const [rotation, setRotation] = useState(-45);
+  const [rotation, setRotation] = useState(-45); // CSS degrees (Clockwise is positive)
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
@@ -122,11 +122,17 @@ export default function PdfWatermarker() {
         const pages = pdfDoc.getPages();
         const margin = 50;
 
-        // PDF rotation is counter-clockwise for positive values.
-        // CSS rotation is clockwise for positive values.
-        // To match the preview, we keep the rotation value as is because both follow the same sign logic usually, 
-        // BUT the visual "ultha" happens because of pivot math and coordinate flips.
-        
+        /**
+         * CRITICAL SYNC LOGIC:
+         * 1. CSS rotate(45deg) is clockwise. 
+         * 2. PDF-lib rotate(degrees(45)) is counter-clockwise.
+         * Therefore, we must invert the sign to match visual expectation.
+         */
+        const pdfRotation = -rotation; 
+        const rad = (pdfRotation * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
         for (const page of pages) {
             const { width, height } = page.getSize();
             const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
@@ -135,15 +141,9 @@ export default function PdfWatermarker() {
             let x = 0, y = 0;
 
             if (position === 'center' || position.startsWith('diagonal')) {
-                // CENTERING MATH FOR ROTATED TEXT
-                // C = (W/2, H/2)
-                // R = Rotation Matrix
-                // T = Offset to local center (textWidth/2, textHeight/2)
-                // Anchor = C - R * T
-                const rad = (rotation * Math.PI) / 180;
-                const cos = Math.cos(rad);
-                const sin = Math.sin(rad);
-
+                // TRIGNOMETRIC CENTERING MATH
+                // Calculates the origin (x,y) such that the rotated text bounding box
+                // is perfectly centered on the page canvas.
                 x = (width / 2) - ((textWidth / 2) * cos - (textHeight / 2) * sin);
                 y = (height / 2) - ((textWidth / 2) * sin + (textHeight / 2) * cos);
             } else {
@@ -162,7 +162,7 @@ export default function PdfWatermarker() {
                 size: fontSize,
                 color: rgb(0.5, 0.5, 0.5),
                 opacity: opacity[0] / 100,
-                rotate: degrees(rotation),
+                rotate: degrees(pdfRotation),
             });
         }
 
@@ -170,7 +170,7 @@ export default function PdfWatermarker() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setWatermarkedPdfUrl(url);
-        toast({ title: "Success!", description: "Watermark embedded in all pages." });
+        toast({ title: "Success!", description: "Watermark embedded perfectly aligned." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
