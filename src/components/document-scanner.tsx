@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -96,6 +95,7 @@ export default function DocumentScanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
@@ -127,16 +127,23 @@ export default function DocumentScanner() {
     if (isMobile) {
         cameraInputRef.current?.click();
     } else {
+        setIsVideoLoading(true);
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                audio: false
             });
             setStream(mediaStream);
             setStage('live-camera');
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
+                videoRef.current.onloadedmetadata = () => {
+                    videoRef.current?.play().catch(console.error);
+                    setIsVideoLoading(false);
+                };
             }
         } catch (err) {
+            setIsVideoLoading(false);
             toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera. Please check permissions.' });
         }
     }
@@ -145,6 +152,13 @@ export default function DocumentScanner() {
   const captureFrame = () => {
       if (!videoRef.current) return;
       const video = videoRef.current;
+      
+      // Ensure video has actual dimensions
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+          toast({ variant: 'destructive', title: 'Capture Error', description: 'Video feed not ready. Please wait.' });
+          return;
+      }
+
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -474,8 +488,20 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'live-camera' && (
-            <Card className="w-full max-w-4xl border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-black relative aspect-video flex flex-col items-center justify-center mx-auto">
-                <video ref={videoRef} autoPlay playsInline className="size-full object-cover" />
+            <Card className="w-full max-w-4xl border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-black relative aspect-video flex flex-col items-center justify-center mx-auto min-h-[300px]">
+                {isVideoLoading && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <p className="text-white text-xs font-black uppercase tracking-widest">Initializing Camera...</p>
+                    </div>
+                )}
+                <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className="size-full object-cover"
+                />
                 <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20" />
                 <div className="absolute bottom-10 flex items-center gap-6">
                     <Button variant="outline" size="icon" className="size-14 rounded-full border-2 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20" onClick={() => { stopCamera(); setStage('viewfinder'); }}>
