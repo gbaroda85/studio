@@ -25,8 +25,8 @@ export default function AgeCalculatorPage() {
                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Trophy className="size-3" /> LIFE ANALYTICS STUDIO
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-                    Age <span className="text-gradient-hero">Pro Calculator</span>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
+                    Age <span className="text-gradient-hero">Calculator</span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
                     Go beyond years. Explore your lifetime in weeks, days, and seconds with mathematical precision.
