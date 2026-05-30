@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Slider } from './ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -47,17 +47,15 @@ export default function PdfWatermarker() {
   const [isDragOver, setIsDragOver] = useState(false);
   
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
-  const [position, setPosition] = useState<WatermarkPosition>('center');
+  const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState(60);
   const [rotation, setRotation] = useState(-45);
   
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
@@ -71,7 +69,6 @@ export default function PdfWatermarker() {
       setPdfFile(file);
       setWatermarkedPdfUrl(null);
       setOriginalPageImage(null);
-      setPreviewImage(null);
       setIsGeneratingPreview(true);
 
       try {
@@ -111,7 +108,7 @@ export default function PdfWatermarker() {
       setPosition(value);
       if(value === 'diagonal-bottom-up') setRotation(-45);
       else if(value === 'diagonal-top-down') setRotation(45);
-      else setRotation(0);
+      else if(value === 'center') setRotation(0);
   }
 
   const handleApplyWatermark = async () => {
@@ -124,33 +121,32 @@ export default function PdfWatermarker() {
         const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
         const pages = pdfDoc.getPages();
-        const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-        const textHeight = font.heightAtSize(fontSize);
         const margin = 50;
 
         for (const page of pages) {
             const { width, height } = page.getSize();
+            const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+            const textHeight = font.heightAtSize(fontSize);
+
             let x = 0, y = 0;
 
-            switch (position) {
-                case 'top-left': x = margin; y = height - margin - textHeight; break;
-                case 'top-right': x = width - textWidth - margin; y = height - margin - textHeight; break;
-                case 'bottom-left': x = margin; y = margin; break;
-                case 'bottom-right': x = width - textWidth - margin; y = margin; break;
-                default: // center & diagonals
-                    x = (width - textWidth) / 2;
-                    y = (height - textHeight) / 2;
-                    break;
-            }
-
-            // Correction for rotation centering if it's center
             if (position === 'center' || position.startsWith('diagonal')) {
+                // Correct centering with rotation
+                // We calculate pivot point so midpoint of text string is at page center
                 const rad = (rotation * Math.PI) / 180;
-                const cos = Math.abs(Math.cos(rad));
-                const sin = Math.abs(Math.sin(rad));
-                // Simplified visual centering offset
-                x = (width - (textWidth * cos)) / 2;
-                y = (height - (textWidth * sin)) / 2;
+                const cos = Math.cos(rad);
+                const sin = Math.sin(rad);
+
+                // Pivot point math to center rotated text baseline
+                x = (width / 2) - ((textWidth / 2) * cos - (textHeight / 4) * sin);
+                y = (height / 2) - ((textWidth / 2) * sin + (textHeight / 4) * cos);
+            } else {
+                switch (position) {
+                    case 'top-left': x = margin; y = height - margin - textHeight; break;
+                    case 'top-right': x = width - textWidth - margin; y = height - margin - textHeight; break;
+                    case 'bottom-left': x = margin; y = margin; break;
+                    case 'bottom-right': x = width - textWidth - margin; y = margin; break;
+                }
             }
 
             page.drawText(watermarkText, {
@@ -170,6 +166,7 @@ export default function PdfWatermarker() {
         setWatermarkedPdfUrl(url);
         toast({ title: "Success!", description: "Watermark embedded in all pages." });
     } catch (error) {
+        console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
     } finally {
         setIsProcessing(false);
@@ -189,34 +186,37 @@ export default function PdfWatermarker() {
       setOriginalPageImage(null);
       setWatermarkedPdfUrl(null);
       setWatermarkText('CONFIDENTIAL');
+      setPosition('diagonal-bottom-up');
+      setRotation(-45);
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  // Calculate CSS for Preview Overlay
+  // Calculate CSS for Preview Overlay to match PDF units
   const getPreviewStyle = () => {
       const styles: React.CSSProperties = {
           position: 'absolute',
           pointerEvents: 'none',
-          color: 'rgba(0,0,0,0.5)', // Preview uses darker for visibility
+          color: 'rgba(0,0,0,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${fontSize}px`,
-          fontWeight: 'black',
+          fontSize: `${fontSize * 0.8}px`, // Slight scale factor for browser rendering
+          fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
           transform: `rotate(${rotation}deg)`,
-          transition: 'all 0.2s ease-out'
+          transition: 'all 0.1s ease-out'
       };
 
-      switch (position) {
-          case 'top-left': styles.top = '10%'; styles.left = '10%'; break;
-          case 'top-right': styles.top = '10%'; styles.right = '10%'; break;
-          case 'bottom-left': styles.bottom = '10%'; styles.left = '10%'; break;
-          case 'bottom-right': styles.bottom = '10%'; styles.right = '10%'; break;
-          default: // center
-              styles.top = '50%';
-              styles.left = '50%';
-              styles.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-              break;
+      if (position === 'center' || position.startsWith('diagonal')) {
+          styles.top = '50%';
+          styles.left = '50%';
+          styles.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+      } else {
+          switch (position) {
+              case 'top-left': styles.top = '8%'; styles.left = '8%'; break;
+              case 'top-right': styles.top = '8%'; styles.right = '8%'; break;
+              case 'bottom-left': styles.bottom = '8%'; styles.left = '8%'; break;
+              case 'bottom-right': styles.bottom = '8%'; styles.right = '8%'; break;
+          }
       }
       return styles;
   }
@@ -311,9 +311,9 @@ export default function PdfWatermarker() {
                             <Select value={position} onValueChange={(v) => handlePositionChange(v as WatermarkPosition)}>
                                 <SelectTrigger className="h-12 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
                                 <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                    <SelectItem value="center" className="font-bold">Perfect Center</SelectItem>
                                     <SelectItem value="diagonal-bottom-up" className="font-bold">Diagonal (Standard)</SelectItem>
                                     <SelectItem value="diagonal-top-down" className="font-bold">Diagonal (Reverse)</SelectItem>
+                                    <SelectItem value="center" className="font-bold">Perfect Center</SelectItem>
                                     <SelectItem value="top-left" className="font-bold">Top Left</SelectItem>
                                     <SelectItem value="top-right" className="font-bold">Top Right</SelectItem>
                                     <SelectItem value="bottom-left" className="font-bold">Bottom Left</SelectItem>
@@ -405,8 +405,7 @@ export default function PdfWatermarker() {
                                 
                                 {/* FLOATING WATERMARK PREVIEW OVERLAY */}
                                 <div 
-                                    className="absolute inset-0 z-10 select-none overflow-hidden flex items-center justify-center pointer-events-none"
-                                    style={{ padding: '20px' }}
+                                    className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none"
                                 >
                                     <div style={getPreviewStyle()}>
                                         {watermarkText}
