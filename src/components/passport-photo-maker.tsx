@@ -485,9 +485,9 @@ export default function PassportPhotoMaker() {
                             </div>
                         </div>
                         <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                            Premium <span className="text-gradient-hero">AI Studio</span>
+                            PASSPORT PHOTO MAKER <span className="text-gradient-hero">STUDIO</span>
                         </h1>
-                        <p className="text-xs md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                        <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                             Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
                         </p>
                     </motion.div>
