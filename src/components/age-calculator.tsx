@@ -212,15 +212,15 @@ export default function AgeCalculator() {
       {/* Right: Results Dashboard */}
       <div className="lg:col-span-8 space-y-6">
         {!stats ? (
-           <Card className="h-full border-2 border-dashed flex flex-col items-center justify-center p-12 text-center gap-6 opacity-30 min-h-[400px] rounded-[2.5rem] bg-muted/5">
+           <Card className="h-full border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-12 text-center gap-6 min-h-[400px] rounded-[2.5rem] bg-white/50 dark:bg-white/5 shadow-inner">
               <div className="relative">
-                 <div className="size-20 rounded-full border-2 border-dashed border-primary animate-spin-slow flex items-center justify-center" style={{ animationDuration: '10s' }}>
-                    <CalendarDays className="size-8" />
+                 <div className="size-24 rounded-full border-2 border-dashed border-primary/30 animate-spin-slow flex items-center justify-center">
+                    <CalendarDays className="size-10 text-primary/20" />
                  </div>
               </div>
               <div className="space-y-2">
-                 <h3 className="text-xl font-black uppercase tracking-tighter">Waiting for Date</h3>
-                 <p className="text-xs font-bold max-w-[200px] mx-auto opacity-60">Please pick your birthday on the left to see results.</p>
+                 <h3 className="text-xl font-black uppercase tracking-tighter text-slate-400">Waiting for Date</h3>
+                 <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px] mx-auto text-slate-400/60 leading-relaxed">Select your birthday on the left to unlock your life analytics profile</p>
               </div>
            </Card>
         ) : (

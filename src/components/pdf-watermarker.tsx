@@ -121,22 +121,21 @@ export default function PdfWatermarker() {
         
         const pages = pdfDoc.getPages();
 
-        // 1. Direction Sync: CSS rotate(-45) is tilted up-right. 
-        // In PDF-lib, rotate(45) is tilted up-right.
-        // So we invert the sign.
+        // Direction Sync: CSS rotate(-45) is tilted up-right. 
+        // In PDF-lib, degrees(45) is counter-clockwise (tilted up-right).
+        // So we use -rotation.
         const pdfRotation = -rotation; 
         const rad = (pdfRotation * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
 
-        // 2. Text Metrics
         const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
         const textHeight = font.heightAtSize(fontSize);
 
-        // 3. Center Pivot Math
-        // We want the text center to be at the target point.
-        // We calculate (x, y) which is the bottom-left baseline such that after rotation around (x, y),
-        // the string is centered where we want it.
+        // STRICT CENTERING MATH
+        // We want the VISUAL CENTER of the rotated text to be at (targetCX, targetCY).
+        // The drawing origin (x, y) is the bottom-left baseline.
+        // We adjust (x, y) such that rotating around it places the text center perfectly.
         const centerXOffset = (textWidth / 2) * cos - (textHeight / 2) * sin;
         const centerYOffset = (textWidth / 2) * sin + (textHeight / 2) * cos;
 
@@ -145,7 +144,6 @@ export default function PdfWatermarker() {
             let targetCX, targetCY;
             const margin = 50; 
 
-            // 4. Calculate visual center target
             if (position === 'center' || position.startsWith('diagonal')) {
                 targetCX = width / 2;
                 targetCY = height / 2;
@@ -173,7 +171,6 @@ export default function PdfWatermarker() {
                 }
             }
 
-            // 5. Final draw coordinates
             const x = targetCX! - centerXOffset;
             const y = targetCY! - centerYOffset;
 
@@ -192,7 +189,7 @@ export default function PdfWatermarker() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setWatermarkedPdfUrl(url);
-        toast({ title: "Success!", description: "Watermark applied to all pages." });
+        toast({ title: "Success!", description: "Watermark applied correctly." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
@@ -225,7 +222,7 @@ export default function PdfWatermarker() {
           pointerEvents: 'none',
           color: 'rgba(0,0,0,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${fontSize * 0.84}px`, // Adjusted ratio for 500px container vs 595pt A4
+          fontSize: `${fontSize * 0.84}px`, 
           fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
