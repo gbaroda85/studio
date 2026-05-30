@@ -50,7 +50,7 @@ export default function PdfWatermarker() {
   const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState(60);
-  const [rotation, setRotation] = useState(-45); // CSS degrees
+  const [rotation, setRotation] = useState(-45); // CSS Degrees
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
@@ -107,9 +107,7 @@ export default function PdfWatermarker() {
       setPosition(value);
       if(value === 'diagonal-bottom-up') setRotation(-45);
       else if(value === 'diagonal-top-down') setRotation(45);
-      else if(value === 'center') setRotation(0);
-      else if(value.includes('top')) setRotation(0);
-      else if(value.includes('bottom')) setRotation(0);
+      else setRotation(0);
   }
 
   const handleApplyWatermark = async () => {
@@ -123,51 +121,59 @@ export default function PdfWatermarker() {
         
         const pages = pdfDoc.getPages();
 
-        // 1. Direction Sync: Invert rotation sign to match CSS preview (CCW in pdf-lib)
+        // 1. Direction Sync: CSS rotate(-45) is tilted up-right. 
+        // In PDF-lib, rotate(45) is tilted up-right.
+        // So we invert the sign.
         const pdfRotation = -rotation; 
         const rad = (pdfRotation * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
 
-        // 2. Metrics
+        // 2. Text Metrics
         const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
         const textHeight = font.heightAtSize(fontSize);
 
-        // 3. Offset to move from bottom-left origin to text center after rotation
+        // 3. Center Pivot Math
+        // We want the text center to be at the target point.
+        // We calculate (x, y) which is the bottom-left baseline such that after rotation around (x, y),
+        // the string is centered where we want it.
         const centerXOffset = (textWidth / 2) * cos - (textHeight / 2) * sin;
         const centerYOffset = (textWidth / 2) * sin + (textHeight / 2) * cos;
 
         for (const page of pages) {
             const { width, height } = page.getSize();
             let targetCX, targetCY;
-            const m = 60; // Standard margin for corners
+            const margin = 50; 
 
-            // 4. Calculate target visual center for every mode
+            // 4. Calculate visual center target
             if (position === 'center' || position.startsWith('diagonal')) {
                 targetCX = width / 2;
                 targetCY = height / 2;
             } else {
                 switch (position) {
                     case 'top-left':
-                        targetCX = m + textWidth / 2;
-                        targetCY = height - m - textHeight / 2;
+                        targetCX = margin + textWidth / 2;
+                        targetCY = height - margin - textHeight / 2;
                         break;
                     case 'top-right':
-                        targetCX = width - m - textWidth / 2;
-                        targetCY = height - m - textHeight / 2;
+                        targetCX = width - margin - textWidth / 2;
+                        targetCY = height - margin - textHeight / 2;
                         break;
                     case 'bottom-left':
-                        targetCX = m + textWidth / 2;
-                        targetCY = m + textHeight / 2;
+                        targetCX = margin + textWidth / 2;
+                        targetCY = margin + textHeight / 2;
                         break;
                     case 'bottom-right':
-                        targetCX = width - m - textWidth / 2;
-                        targetCY = m + textHeight / 2;
+                        targetCX = width - margin - textWidth / 2;
+                        targetCY = margin + textHeight / 2;
                         break;
+                    default:
+                        targetCX = width / 2;
+                        targetCY = height / 2;
                 }
             }
 
-            // 5. Final draw coordinates using center-pivot math
+            // 5. Final draw coordinates
             const x = targetCX! - centerXOffset;
             const y = targetCY! - centerYOffset;
 
@@ -186,7 +192,7 @@ export default function PdfWatermarker() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setWatermarkedPdfUrl(url);
-        toast({ title: "Success!", description: "Watermark applied to all positions." });
+        toast({ title: "Success!", description: "Watermark applied to all pages." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
@@ -219,12 +225,13 @@ export default function PdfWatermarker() {
           pointerEvents: 'none',
           color: 'rgba(0,0,0,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${fontSize * 0.8}px`, 
+          fontSize: `${fontSize * 0.84}px`, // Adjusted ratio for 500px container vs 595pt A4
           fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
           transition: 'all 0.1s ease-out',
-          lineHeight: '1'
+          lineHeight: '1',
+          zIndex: 40
       };
 
       if (position === 'center' || position.startsWith('diagonal')) {
@@ -235,22 +242,10 @@ export default function PdfWatermarker() {
           const m = "8%";
           styles.transform = `rotate(${rotation}deg)`;
           switch (position) {
-              case 'top-left': 
-                styles.top = m; styles.left = m; 
-                styles.transformOrigin = 'center';
-                break;
-              case 'top-right': 
-                styles.top = m; styles.right = m; 
-                styles.transformOrigin = 'center';
-                break;
-              case 'bottom-left': 
-                styles.bottom = m; styles.left = m; 
-                styles.transformOrigin = 'center';
-                break;
-              case 'bottom-right': 
-                styles.bottom = m; styles.right = m; 
-                styles.transformOrigin = 'center';
-                break;
+              case 'top-left': styles.top = m; styles.left = m; break;
+              case 'top-right': styles.top = m; styles.right = m; break;
+              case 'bottom-left': styles.bottom = m; styles.left = m; break;
+              case 'bottom-right': styles.bottom = m; styles.right = m; break;
           }
       }
       return styles;
@@ -397,7 +392,7 @@ export default function PdfWatermarker() {
                                 ) : (
                                     <div className="flex items-center gap-2 md:gap-3">
                                         <Copyright className="size-6 md:size-8 text-white group-hover:rotate-12 transition-transform" />
-                                        <span className="uppercase tracking-tighter text-lg md:text-2xl">APPLY TO ALL</span>
+                                        <span className="uppercase tracking-tighter text-lg md:text-2xl">APPLY WATERMARK</span>
                                     </div>
                                 )}
                             </Button>
