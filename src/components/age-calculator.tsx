@@ -142,7 +142,7 @@ export default function AgeCalculator() {
       
       {/* Left: Input Selection */}
       <div className="lg:col-span-4 flex flex-col gap-4">
-        <Card className="border-2 shadow-xl overflow-hidden glass-card rounded-[2rem]">
+        <Card className="border-2 shadow-xl overflow-hidden glass-card rounded-[2rem] hover:-translate-y-1 hover:shadow-2xl hover:border-primary/40 transition-all duration-300">
           <CardHeader className="bg-primary/5 border-b p-5">
             <div className="flex items-center gap-3">
                <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
@@ -195,13 +195,13 @@ export default function AgeCalculator() {
           <CardFooter className="p-5 bg-muted/10 border-t flex flex-col gap-3">
              <Button 
                 onClick={handleCalculate} 
-                className="w-full h-12 bg-primary text-sm font-black rounded-xl shadow-lg group"
+                className="w-full h-12 bg-primary text-sm font-black rounded-xl shadow-lg group hover:scale-[1.02] active:scale-95 transition-all"
              >
                 <Calculator className="mr-2 h-4 w-4" /> 
                 RE-CALCULATE
              </Button>
              {stats && (
-               <Button variant="ghost" onClick={handleReset} className="w-full text-[9px] font-black uppercase tracking-widest text-destructive h-8">
+               <Button variant="ghost" onClick={handleReset} className="w-full text-[9px] font-black uppercase tracking-widest text-destructive h-8 hover:bg-destructive/5">
                   <RefreshCcw className="mr-1.5 h-3 w-3" /> Reset
                </Button>
              )}
@@ -212,14 +212,14 @@ export default function AgeCalculator() {
       {/* Right: Results Dashboard */}
       <div className="lg:col-span-8 space-y-6">
         {!stats ? (
-           <Card className="h-full border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-12 text-center gap-6 min-h-[400px] rounded-[2.5rem] bg-white/50 dark:bg-white/5 shadow-inner">
+           <Card className="h-full border-2 border-dashed border-primary/20 flex flex-col items-center justify-center p-12 text-center gap-6 min-h-[400px] rounded-[2.5rem] bg-white/50 dark:bg-white/5 shadow-inner group hover:border-primary/40 transition-all duration-500">
               <div className="relative">
-                 <div className="size-24 rounded-full border-2 border-dashed border-primary/30 animate-spin-slow flex items-center justify-center">
-                    <CalendarDays className="size-10 text-primary/20" />
+                 <div className="size-24 rounded-full border-2 border-dashed border-primary/30 animate-spin-slow flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CalendarDays className="size-10 text-primary/20 group-hover:text-primary/40 transition-colors" />
                  </div>
               </div>
               <div className="space-y-2">
-                 <h3 className="text-xl font-black uppercase tracking-tighter text-slate-400">Waiting for Date</h3>
+                 <h3 className="text-xl font-black uppercase tracking-tighter text-slate-400 group-hover:text-slate-500 transition-colors">Waiting for Date</h3>
                  <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px] mx-auto text-slate-400/60 leading-relaxed">Select your birthday on the left to unlock your life analytics profile</p>
               </div>
            </Card>
@@ -227,35 +227,35 @@ export default function AgeCalculator() {
            <div className="space-y-6 animate-in zoom-in-95 duration-500">
               
               {/* PRIMARY AGE */}
-              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 neon-border">
+              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 neon-border hover:scale-[1.01] transition-all duration-300">
                  <CardHeader className="bg-primary/5 p-4 border-b text-center">
                     <CardTitle className="text-[9px] font-black uppercase tracking-[0.4em] text-primary flex items-center justify-center gap-2">
                        <Star className="size-3 fill-primary" /> YOUR EXACT AGE PROFILE
                     </CardTitle>
                  </CardHeader>
                  <CardContent className="p-6 md:p-10 flex justify-center items-center gap-4 md:gap-12">
-                    <div className="flex flex-col items-center gap-1 group">
-                       <span className="text-5xl md:text-7xl font-black text-primary transition-transform group-hover:scale-105">{stats.primary.years}</span>
+                    <div className="flex flex-col items-center gap-1 group/item">
+                       <span className="text-5xl md:text-7xl font-black text-primary transition-transform group-hover/item:scale-110">{stats.primary.years}</span>
                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">Years Old</span>
                     </div>
                     <Separator orientation="vertical" className="h-16 opacity-20" />
-                    <div className="flex flex-col items-center gap-1 group">
-                       <span className="text-5xl md:text-7xl font-black text-primary/80 transition-transform group-hover:scale-105">{stats.primary.months}</span>
+                    <div className="flex flex-col items-center gap-1 group/item">
+                       <span className="text-5xl md:text-7xl font-black text-primary/80 transition-transform group-hover/item:scale-110">{stats.primary.months}</span>
                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">Months</span>
                     </div>
                     <Separator orientation="vertical" className="h-16 opacity-20" />
-                    <div className="flex flex-col items-center gap-1 group">
-                       <span className="text-5xl md:text-7xl font-black text-primary/60 transition-transform group-hover:scale-105">{stats.primary.days}</span>
+                    <div className="flex flex-col items-center gap-1 group/item">
+                       <span className="text-5xl md:text-7xl font-black text-primary/60 transition-transform group-hover/item:scale-110">{stats.primary.days}</span>
                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">Days</span>
                     </div>
                  </CardContent>
               </Card>
 
               {/* NEXT BIRTHDAY */}
-              <Card className="border-none shadow-xl rounded-[2rem] bg-gradient-to-br from-primary/10 via-background to-accent/5 overflow-hidden">
+              <Card className="border-none shadow-xl rounded-[2rem] bg-gradient-to-br from-primary/10 via-background to-accent/5 overflow-hidden hover:shadow-2xl transition-all duration-300">
                   <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
                       <div className="flex items-center gap-5">
-                         <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shrink-0">
+                         <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shrink-0 group-hover:rotate-12 transition-transform">
                             <Gift className="size-8" />
                          </div>
                          <div className="text-center md:text-left">
@@ -266,7 +266,7 @@ export default function AgeCalculator() {
                          </div>
                       </div>
                       
-                      <div className="flex items-center gap-6 bg-white/50 dark:bg-black/20 p-4 rounded-2xl border shadow-inner">
+                      <div className="flex items-center gap-6 bg-white/50 dark:bg-black/20 p-4 rounded-2xl border shadow-inner hover:bg-white transition-colors">
                          <div className="text-center">
                             <p className="text-2xl md:text-4xl font-black">{stats.nextBirthday.months}</p>
                             <p className="text-[8px] font-black uppercase opacity-40">Months</p>
@@ -298,9 +298,9 @@ export default function AgeCalculator() {
 
 function CompactStat({ icon: Icon, label, value, color }: { icon: any, label: string, value: string, color: string }) {
     return (
-        <Card className="border shadow-md hover:shadow-lg transition-all rounded-2xl overflow-hidden bg-card/50">
+        <Card className="border shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 rounded-2xl overflow-hidden bg-card/50 group">
             <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                <div className={cn("size-8 rounded-lg bg-white dark:bg-slate-900 border shadow-sm flex items-center justify-center", color)}>
+                <div className={cn("size-8 rounded-lg bg-white dark:bg-slate-900 border shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform", color)}>
                     <Icon className="size-4" />
                 </div>
                 <div className="space-y-0.5 w-full overflow-hidden">
