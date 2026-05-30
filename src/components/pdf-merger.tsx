@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -209,7 +210,7 @@ export default function PdfMerger() {
             {/* Left Column: Stack & Selection */}
             <div className="lg:col-span-7 space-y-4">
                 <Card className={cn(
-                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
+                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -280,7 +281,7 @@ export default function PdfMerger() {
                 </Card>
 
                 {mergedPdfUrl && (
-                    <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden bg-card/50 rounded-[2.5rem]">
+                    <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden bg-card/50 rounded-[2.5rem] hover:-translate-y-1 transition-all">
                         <CardHeader className="bg-green-500/5 py-3 border-b border-green-500/20">
                             <CardTitle className="text-[10px] font-black uppercase flex items-center justify-center gap-2 text-green-700 tracking-[0.2em]">
                                 <Eye className="size-3 text-green-600" /> VISUAL PREVIEW CONFIRMATION
@@ -327,7 +328,7 @@ export default function PdfMerger() {
 
             {/* Right Column: Settings & Actions */}
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                             <LayoutList className="size-6 text-primary" /> Stack Control

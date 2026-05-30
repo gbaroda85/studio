@@ -262,13 +262,13 @@ export default function PdfCompressor() {
                     <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                         Pro PDF <span className="text-gradient-hero">Optimizer</span>
                     </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                         Shrink documents to exact KB targets. <br/>100% Private high-fidelity local re-sampling.
                     </p>
                 </div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -307,7 +307,7 @@ export default function PdfCompressor() {
     return (
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-in fade-in duration-500 px-4">
             <div className="lg:col-span-7">
-                <Card className="shadow-2xl border-primary/10 overflow-hidden h-full bg-card/50 rounded-[2.5rem]">
+                <Card className="shadow-2xl border-primary/10 overflow-hidden h-full bg-card/50 rounded-[2.5rem] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30">
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                         <div className="flex items-center gap-3 truncate pr-4">
                             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -391,7 +391,7 @@ export default function PdfCompressor() {
             </div>
 
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                         <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
                             <Settings2 className="size-6 text-primary" /> Optimizer Settings

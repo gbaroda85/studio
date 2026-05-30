@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -19,7 +20,9 @@ import {
     Eye, 
     LayoutGrid, 
     RefreshCcw,
-    MousePointer2
+    MousePointer2,
+    Zap,
+    ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
@@ -227,26 +230,30 @@ export default function PdfSplitter() {
     if (!pdfFile) {
         return (
             <Card
-                className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
+                className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary ring-4 ring-primary/20")}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
-                <CardHeader>
-                    <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-                        <Scissors className="h-8 w-8" />
-                    </div>
-                    <CardTitle>Visual PDF Splitter</CardTitle>
-                    <CardDescription>Select pages visually to extract them into a new document.</CardDescription>
+                <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                    <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                        <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <div>
-                            <p className="text-xl font-bold">Drop PDF here to Split</p>
-                            <p className="text-sm text-muted-foreground mt-2">Pages will be rendered for visual selection.</p>
+                <CardContent className="p-10 md:p-16">
+                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                        <div className="relative">
+                            <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <Zap className="absolute -top-2 -right-2 size-6 text-yellow-500 animate-pulse" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
+                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Pages will be rendered for visual selection.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                 </CardContent>
+                <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> VISUAL SELECTION</div>
+                    <div className="flex items-center gap-1.5"><Scissors className="size-3 text-rose-500" /> INSTANT SPLIT</div>
+                </CardFooter>
             </Card>
         );
     }
@@ -255,30 +262,30 @@ export default function PdfSplitter() {
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-4 space-y-6">
-                    <Card className="shadow-xl border-primary/10">
-                        <CardHeader className="bg-muted/30 border-b">
-                            <CardTitle className="text-lg flex items-center gap-2">
+                    <Card className="shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 hover:-translate-y-1">
+                        <CardHeader className="bg-muted/30 border-b p-6">
+                            <CardTitle className="text-lg flex items-center gap-2 font-black uppercase tracking-tighter">
                                 <Scissors className="text-primary h-5 w-5" />
                                 Extraction Settings
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-6 pt-6">
+                        <CardContent className="space-y-6 p-6 md:p-8">
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm font-bold">
                                     <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Source Info</span>
                                     <Badge variant="outline" className="font-mono">{totalPages} Pages</Badge>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="pages" className="text-xs font-black uppercase text-primary">Pages to extract</Label>
+                                    <Label htmlFor="pages" className="text-[10px] font-black uppercase text-primary">Pages to extract</Label>
                                     <Input 
                                         id="pages" 
                                         type="text" 
                                         value={pageRanges} 
                                         onChange={(e) => handleRangeInputChange(e.target.value)}
                                         placeholder="e.g., 1-3, 5, 8"
-                                        className="h-12 text-lg font-bold border-2 focus-visible:ring-primary"
+                                        className="h-12 text-lg font-bold border-2 focus-visible:ring-primary rounded-xl"
                                     />
-                                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                    <p className="text-[9px] text-muted-foreground leading-relaxed uppercase font-bold opacity-60">
                                         Type page numbers or ranges, or <strong>click pages</strong> on the right to select them.
                                     </p>
                                 </div>
@@ -295,31 +302,31 @@ export default function PdfSplitter() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="flex flex-col gap-3 border-t bg-muted/10 p-6">
+                        <CardFooter className="flex flex-col gap-3 border-t bg-muted/10 p-6 md:p-8">
                             {!splitPdfUrl ? (
                                 <Button 
                                     onClick={handleSplitPdf} 
                                     disabled={isProcessing || !pageRanges} 
-                                    className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-lg"
+                                    className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-lg rounded-xl transition-all active:scale-95"
                                 >
                                     {isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Scissors className="mr-2 h-5 w-5"/>}
                                     {isProcessing ? "SPLITTING..." : "EXTRACT PAGES"}
                                 </Button>
                             ) : (
-                                <Button onClick={handleDownload} className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl">
+                                <Button onClick={handleDownload} className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-xl transition-all active:scale-95">
                                     <Download className="mr-2 h-6 w-6" /> DOWNLOAD PDF
                                 </Button>
                             )}
-                            <Button variant="ghost" onClick={resetState} className="w-full text-xs font-bold text-muted-foreground h-10">
-                                <RefreshCcw className="h-3 w-3 mr-1.5" /> Start Over / Change File
+                            <Button variant="ghost" onClick={resetState} className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground h-10 hover:bg-destructive/5 hover:text-destructive">
+                                <RefreshCcw className="h-3 w-3 mr-1.5" /> Start Over
                             </Button>
                         </CardFooter>
                     </Card>
                 </div>
 
                 <div className="lg:col-span-8">
-                    <Card className="border-2 border-foreground/5 shadow-2xl overflow-hidden h-[calc(100vh-200px)] flex flex-col">
-                        <CardHeader className="bg-muted/30 border-b py-4 flex flex-row items-center justify-between">
+                    <Card className="border-2 border-foreground/5 shadow-2xl overflow-hidden h-[calc(100vh-200px)] flex flex-col rounded-[2rem] transition-all hover:border-primary/30">
+                        <CardHeader className="bg-muted/30 border-b py-4 px-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <LayoutGrid className="h-4 w-4 text-muted-foreground" />
                                 <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Select Pages Visually</CardTitle>
@@ -328,7 +335,7 @@ export default function PdfSplitter() {
                                 {isRendering && (
                                     <div className="flex items-center gap-2">
                                         <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                                        <span className="text-[10px] font-bold text-primary uppercase animate-pulse">Rendering Previews...</span>
+                                        <span className="text-[10px] font-bold text-primary uppercase animate-pulse">Rendering...</span>
                                     </div>
                                 )}
                                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-muted-foreground/60">
@@ -336,15 +343,15 @@ export default function PdfSplitter() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="flex-1 p-6 overflow-hidden">
-                            <ScrollArea className="h-full pr-4">
+                        <CardContent className="flex-1 p-6 overflow-hidden bg-slate-50 dark:bg-slate-900/50 shadow-inner">
+                            <ScrollArea className="h-full pr-4 custom-scrollbar">
                                 {isRendering && previews.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-32 space-y-4">
                                         <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
                                         <p className="text-sm font-bold text-muted-foreground uppercase tracking-tighter">Preparing Visual Grid...</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-2">
                                         {Array.from({ length: totalPages }).map((_, i) => {
                                             const pageNum = i + 1;
                                             const isSelected = selectedPages.includes(pageNum);

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef } from 'react';
@@ -87,13 +88,13 @@ export default function DocxToPdf() {
           <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
               Word to <span className="text-gradient-hero">PDF Pro</span>
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
               Convert DOCX files to high-quality PDF instantly. <br/>100% Private local browser mapping.
           </p>
       </div>
 
       <Card className={cn(
-        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
+        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
         dragActive && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
       )}>
         <CardHeader className="bg-muted/30 border-b p-6 text-center">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
@@ -102,7 +103,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
@@ -246,7 +247,7 @@ export default function PdfUnlocker() {
                 </div>
 
                 <Card
-                    className={cn("w-full max-w-xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
+                    className={cn("w-full max-w-xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50 hover:-translate-y-1 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
                 >
@@ -273,7 +274,7 @@ export default function PdfUnlocker() {
     }
     
     return (
-        <Card className="w-full max-w-md shadow-2xl border-primary/10 overflow-hidden animate-in fade-in zoom-in-95 duration-300 mx-4">
+        <Card className="w-full max-w-md shadow-2xl border-primary/10 overflow-hidden animate-in fade-in zoom-in-95 duration-300 mx-4 transition-all hover:border-primary/30 hover:-translate-y-1">
             <CardHeader className="bg-muted/30 border-b p-4">
                 <CardTitle className="text-base flex items-center gap-2">
                     {isChecking ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : isProtected ? <Lock className="text-primary h-4 w-4" /> : <CheckCircle2 className="text-green-500 h-4 w-4" />}

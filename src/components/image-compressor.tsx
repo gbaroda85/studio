@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -247,7 +248,7 @@ export default function ImageCompressor() {
         <div className="lg:col-span-7 space-y-4">
             <Card 
                 className={cn(
-                    "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
+                    "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -266,7 +267,7 @@ export default function ImageCompressor() {
                         >
                             <div className="relative">
                                 <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>
@@ -378,7 +379,7 @@ export default function ImageCompressor() {
             </Card>
 
             {allProcessed && results.length > 1 && (
-                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-xl">
+                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-xl hover:-translate-y-1 transition-all">
                     <CardContent className="p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
                         <div className="flex items-center gap-5">
                             <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
@@ -400,7 +401,7 @@ export default function ImageCompressor() {
 
         {/* Right: Settings */}
         <div className="lg:col-span-5 space-y-4">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                 <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                     <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
                         <Settings2 className="size-6 text-primary" /> Optimizer Settings
