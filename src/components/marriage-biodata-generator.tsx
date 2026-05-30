@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -440,7 +439,7 @@ export default function MarriageBiodataGenerator() {
             </div>
 
             {/* RIGHT: REAL-TIME PREVIEW */}
-            <div className="lg:col-span-7 flex flex-col items-center sticky top-24 pb-20 no-print">
+            <div className="lg:col-span-7 flex flex-col items-center no-print w-full overflow-visible">
                 
                 <div className="w-full flex items-center justify-between mb-4 px-4">
                     <div className="flex items-center gap-2">
@@ -669,7 +668,7 @@ function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo }: { theme
             <div className="w-[35%] h-full min-h-[297mm] flex flex-col text-white p-8 space-y-10" style={{ backgroundColor: themeColor }}>
                 <div className="h-[140px]" />
                 <div className="space-y-6">
-                    <h3 className="text-xl font-black uppercase tracking-widest border-b border-white/20 pb-2 flex items-center gap-2"><User Circle className="size-4" /> Personal</h3>
+                    <h3 className="text-xl font-black uppercase tracking-widest border-b border-white/20 pb-2 flex items-center gap-2"><UserCircle className="size-4" /> Personal</h3>
                     <div className="space-y-4">
                         <SidebarItem label="Status" value={formData.personal.maritalStatus} />
                         <SidebarItem label="Religion/Caste" value={`${formData.personal.religion}/${formData.personal.caste}`} />
