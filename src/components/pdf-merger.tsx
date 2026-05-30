@@ -28,7 +28,8 @@ import {
     ArrowDownAz,
     ArrowUpAz,
     Repeat,
-    Sparkles
+    Sparkles,
+    Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
