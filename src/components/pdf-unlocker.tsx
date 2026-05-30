@@ -238,7 +238,7 @@ export default function PdfUnlocker() {
                         </div>
                     </div>
                     <h1 className="text-xl md:text-3xl font-black font-headline tracking-tighter uppercase leading-none">
-                        Universal <span className="text-gradient-hero">PDF Unlocker</span>
+                        <span className="text-gradient-hero">PDF Unlocker</span>
                     </h1>
                     <p className="text-[9px] md:text-xs text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
                         Unlock Aadhaar & Bank PDFs locally.

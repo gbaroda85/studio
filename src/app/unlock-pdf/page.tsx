@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, FileText, Info, Key, Unlock } from 'lucide-react';
 import PdfUnlocker from '@/components/pdf-unlocker';
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Universal PDF Unlocker - Remove Password from Aadhaar & Bank PDFs',
+  title: 'PDF Unlocker - Remove Password from Aadhaar & Bank PDFs',
   description: 'Remove password protection from encrypted PDFs locally. 100% private tool for Aadhaar cards, bank statements, and credit card bills. No data leaves your device.',
 };
 
