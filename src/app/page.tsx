@@ -23,7 +23,10 @@ import {
   Heart,
   Calculator,
   Camera,
-  Printer
+  Printer,
+  FileArchive,
+  Merge,
+  Scissors
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,20 +35,22 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
-  // Top Featured Tools (Home Page Grid)
-  { icon: Sparkles, title: "AI Document Scan", description: "Premium AI scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", category: "featured" },
+  // VISUAL PROCESSOR SECTION (Featured)
+  { icon: Sparkles, title: "Document Scan", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", category: "featured" },
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "featured" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "featured" },
   { icon: Heart, title: "Marriage Bio Data", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", category: "featured" },
   { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", category: "featured" },
+  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDFs into one document instantly.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "featured" },
+  { icon: Eraser, title: "Background Remover", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "featured" },
+  { icon: Sparkles, title: "Enhance Photo", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", category: "featured" },
   
-  // Other core tools
-  { icon: Camera, title: "Scan to PDF", description: "Standard document bundle creator from camera.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", category: "other" },
-  { icon: Lock, title: "Vault PDF Locker", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", category: "other" },
-  { icon: Eraser, title: "Background Remover", description: "Automatically remove the background from any image.", href: "/remove-background", colorClass: "bg-rose-500", category: "other" },
-  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image using local high-speed processing.", href: "/image-to-text", colorClass: "bg-teal-500", category: "other" },
-  { icon: Calculator, title: "EMI Calculator", description: "Calculate monthly loan payments and interest.", href: "/loan-calculator", colorClass: "bg-indigo-600", category: "other" },
-  { icon: Cake, title: "Age Calculator", description: "Find out your exact age in years, months, and days.", href: "/age-calculator", colorClass: "bg-rose-500", category: "other" },
+  // PDF TOOLKIT SECTION (Strict Sequence)
+  { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", category: "pdf-kit" },
+  { icon: Lock, title: "Vault PDF Locker", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", category: "pdf-kit" },
+  { icon: FileArchive, title: "PDF Optimizer", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", category: "pdf-kit" },
+  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", category: "pdf-kit" },
+  { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", category: "pdf-kit" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => (
@@ -111,6 +116,10 @@ export default function Page() {
               <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-emerald-500/50 transition-all group">
+              <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            </Link>
           </div>
 
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
@@ -144,16 +153,16 @@ export default function Page() {
             <>
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">FEATURED UTILITIES</span>
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Top Solutions</h2>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">VISUAL PROCESSOR</h2>
                         <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-black text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
                             <Link href="/tools">EXPLORE ALL <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 5).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'featured').map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
@@ -163,7 +172,7 @@ export default function Page() {
                     </div>
                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'other').map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
             </>
