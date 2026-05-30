@@ -246,139 +246,151 @@ export default function ImageCompressor() {
         <div className="lg:col-span-7 space-y-4">
             <Card 
                 className={cn(
-                    "border-2 border-dashed transition-all duration-300 relative overflow-hidden bg-card/50",
-                    "hover:border-primary/80 hover:shadow-xl hover:shadow-primary/5",
-                    isDragOver && "border-primary bg-primary/5", 
-                    results.length > 0 ? "p-2 md:p-3" : "p-4 md:p-8 text-center"
+                    "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem]",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             >
-                {results.length === 0 ? (
-                    <div className="flex flex-col items-center gap-4 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="size-12 md:size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                            <UploadCloud className="size-6 md:size-8" />
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Bulk Compression</p>
-                            <p className="text-xs text-muted-foreground font-medium">
-                                <span className="text-primary font-black">Drop images</span> or Click to upload
-                            </p>
-                        </div>
+                <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                        {results.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] uppercase px-3 py-1 rounded-full">{results.length} IMAGES</Badge>}
                     </div>
-                ) : (
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center px-2">
-                            <Badge variant="secondary" className="font-black text-[9px] px-2 py-0.5 rounded-full uppercase bg-primary/10 text-primary border-primary/20">
-                                {results.length} Files
-                            </Badge>
-                            <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-7 text-[9px] uppercase">
-                                <Trash2 className="size-3 mr-1"/> Clear
-                            </Button>
-                        </div>
-                        <ScrollArea className="h-[250px] md:h-[300px] pr-2">
-                            <div className="grid gap-2">
-                                {results.map((res) => (
-                                    <div key={res.id} className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 rounded-xl border-2 hover:border-primary/40 transition-all shadow-sm">
-                                        <div className="flex items-center gap-3 truncate">
-                                            <div className="size-10 md:size-12 rounded-lg overflow-hidden bg-muted border shrink-0 relative">
-                                                <Image src={res.originalDataUrl} alt="prev" fill className="object-cover" />
-                                            </div>
-                                            <div className="truncate">
-                                                <p className="text-[9px] md:text-[10px] font-black truncate max-w-[80px] md:max-w-[200px] uppercase">{res.name}</p>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-[7px] md:text-[8px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
-                                                    {res.newSize > 0 && (
-                                                        <>
-                                                            <span className="text-muted-foreground">→</span>
-                                                            <span className="text-[7px] md:text-[8px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-1 md:gap-2 shrink-0">
-                                            {res.isProcessing ? (
-                                                <Loader2 className="size-3 md:size-4 animate-spin text-primary" />
-                                            ) : res.newSize > 0 ? (
-                                                <div className="flex items-center gap-1">
-                                                    <Badge className="bg-green-500 text-white text-[6px] md:text-[8px] font-black">-{res.savings.toFixed(0)}%</Badge>
-                                                    
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <Button size="icon" variant="outline" className="size-6 md:size-8 rounded-lg border hover:bg-primary/5">
-                                                                <Eye className="size-3 md:size-3.5 text-primary" />
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4">
-                                                            <DialogHeader>
-                                                                <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm">
-                                                                    <ArrowLeftRight className="text-primary size-4" /> Quality Check
-                                                                </DialogTitle>
-                                                            </DialogHeader>
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
-                                                                <div className="space-y-2">
-                                                                    <div className="flex justify-between items-center bg-muted/30 p-1.5 rounded-lg">
-                                                                        <span className="text-[8px] font-black uppercase text-muted-foreground">ORIGINAL</span>
-                                                                        <Badge variant="outline" className="font-mono text-[8px]">{formatBytes(res.originalSize)}</Badge>
-                                                                    </div>
-                                                                    <div className="aspect-square relative rounded-lg overflow-hidden border bg-white flex items-center justify-center">
-                                                                        <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-1" />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="space-y-2">
-                                                                    <div className="flex justify-between items-center bg-green-500/10 p-1.5 rounded-lg">
-                                                                        <Badge className="bg-green-500 text-white font-mono text-[8px]">OPTIMIZED</Badge>
-                                                                        <span className="text-[8px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
-                                                                    </div>
-                                                                    <div className="aspect-square relative rounded-lg overflow-hidden border-green-500/20 bg-white flex items-center justify-center">
-                                                                        <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-1" />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <CardFooter className="p-0 pt-2">
-                                                                <Button className="w-full h-10 bg-green-600 hover:bg-green-700 font-black text-xs" onClick={() => downloadFile(res)}>
-                                                                    DOWNLOAD <Download className="ml-2 size-3" />
-                                                                </Button>
-                                                            </CardFooter>
-                                                        </DialogContent>
-                                                    </Dialog>
-
-                                                    <Button size="icon" variant="outline" className="size-6 md:size-8 rounded-lg border border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
-                                                        <Download className="size-3 md:size-3.5 text-green-600" />
-                                                    </Button>
-                                                </div>
-                                            ) : null}
-                                            <Button variant="ghost" size="icon" className="size-6 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
-                                                <X className="size-3" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
+                </CardHeader>
+                <CardContent className={cn(results.length === 0 ? "p-10 md:p-12" : "p-4 md:p-6")}>
+                    {results.length === 0 ? (
+                        <div 
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
                             </div>
-                        </ScrollArea>
-                        <Button variant="outline" className="w-full border-dashed h-10 rounded-xl font-black text-[9px] uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={() => fileInputRef.current?.click()}>
-                            <Layers className="size-3 mr-2" /> ADD IMAGES
-                        </Button>
-                    </div>
-                )}
+                            <div className="text-center">
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">Adaptive scaling & batching active.</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center px-1">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Optimization Stack</p>
+                                <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-7 text-[9px] uppercase">
+                                    <Trash2 className="size-3 mr-1"/> Clear All
+                                </Button>
+                            </div>
+                            <ScrollArea className="h-[300px] md:h-[450px] pr-2 custom-scrollbar">
+                                <div className="grid gap-2">
+                                    {results.map((res) => (
+                                        <div key={res.id} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
+                                            <div className="flex items-center gap-4 truncate">
+                                                <div className="size-12 rounded-xl overflow-hidden bg-muted border shrink-0 relative shadow-inner">
+                                                    <Image src={res.originalDataUrl} alt="prev" fill className="object-cover" />
+                                                </div>
+                                                <div className="truncate text-left">
+                                                    <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[300px] uppercase tracking-tight" title={res.name}>{res.name}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[8px] md:text-[9px] text-muted-foreground font-mono">{formatBytes(res.originalSize)}</span>
+                                                        {res.newSize > 0 && (
+                                                            <>
+                                                                <span className="text-muted-foreground text-[10px]">→</span>
+                                                                <span className="text-[8px] md:text-[9px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                {res.isProcessing ? (
+                                                    <Loader2 className="size-4 md:size-5 animate-spin text-primary" />
+                                                ) : res.newSize > 0 ? (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Badge className="bg-green-500 text-white text-[8px] font-black">-{res.savings.toFixed(0)}%</Badge>
+                                                        
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 hover:bg-primary/5">
+                                                                    <Eye className="size-4 text-primary" />
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+                                                                <DialogHeader>
+                                                                    <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm md:text-lg">
+                                                                        <ArrowLeftRight className="text-primary size-5" /> Precision Analysis
+                                                                    </DialogTitle>
+                                                                </DialogHeader>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex justify-between items-center bg-muted/30 p-2 rounded-xl">
+                                                                            <span className="text-[10px] font-black uppercase text-muted-foreground">Original</span>
+                                                                            <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(res.originalSize)}</Badge>
+                                                                        </div>
+                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
+                                                                            <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-2" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex justify-between items-center bg-green-500/10 p-2 rounded-xl">
+                                                                            <Badge className="bg-green-500 text-white font-mono text-[10px]">Optimized</Badge>
+                                                                            <span className="text-[10px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
+                                                                        </div>
+                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center shadow-inner">
+                                                                            <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-2" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <CardFooter className="p-0 pt-4">
+                                                                    <Button className="w-full h-12 md:h-14 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg" onClick={() => downloadFile(res)}>
+                                                                        DOWNLOAD OPTIMIZED <Download className="ml-2 size-4" />
+                                                                    </Button>
+                                                                </CardFooter>
+                                                            </DialogContent>
+                                                        </Dialog>
+
+                                                        <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 border-green-500/50 hover:bg-green-500/5" onClick={() => downloadFile(res)}>
+                                                            <Download className="size-4 text-green-600" />
+                                                        </Button>
+                                                    </div>
+                                                ) : null}
+                                                <Button variant="ghost" size="icon" className="size-8 rounded-full text-muted-foreground hover:text-destructive" onClick={() => removeFile(res.id)}>
+                                                    <X className="size-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                        <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE IMAGES
+                                    </Button>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    )}
+                </CardContent>
+                <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> ADAPTIVE SCALE</div>
+                    <div className="flex items-center gap-1.5"><Layers className="size-3 text-purple-500" /> BATCH READY</div>
+                </CardFooter>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={onFileChange} />
             </Card>
 
             {allProcessed && results.length > 1 && (
-                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-xl animate-in zoom-in-95 duration-500">
-                    <CardContent className="p-3 md:p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="size-5" />
+                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-xl">
+                    <CardContent className="p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
+                                <CheckCircle2 className="size-9" />
+                                <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
                             </div>
-                            <div>
-                                <p className="text-xs font-black uppercase tracking-tighter text-green-800">Complete</p>
-                                <p className="text-[8px] text-green-700 font-medium">ZIP Download ready.</p>
+                            <div className="text-left">
+                                <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">Complete!</p>
+                                <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Archive bundle ready for download</p>
                             </div>
                         </div>
-                        <Button size="sm" className="h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-xs rounded-xl shadow-lg" onClick={downloadAllAsZip}>
-                            <Download className="mr-2 size-4" /> DOWNLOAD ALL
+                        <Button size="lg" className="w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-green-700 text-lg font-black shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={downloadAllAsZip}>
+                            <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> DOWNLOAD ZIP BUNDLE
                         </Button>
                     </CardContent>
                 </Card>
@@ -387,113 +399,134 @@ export default function ImageCompressor() {
 
         {/* Right: Settings */}
         <div className="lg:col-span-5 space-y-4">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl bg-white dark:bg-slate-950">
-                <CardHeader className="bg-primary/5 border-b p-3 md:p-4">
-                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-4 text-primary" /> Settings
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
+                <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
+                    <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-6 text-primary" /> Optimizer Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 md:p-6 space-y-6">
+                <CardContent className="p-6 md:p-8 space-y-10">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-10 p-1 bg-muted rounded-xl border">
-                            <TabsTrigger value="target" className="font-black text-[8px] md:text-[9px] uppercase rounded-lg">
-                                <Target className="size-2.5 mr-1" /> Target Size
+                        <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1.5 bg-muted rounded-2xl border-2">
+                            <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
+                                <Target className="h-4 w-4 mr-2" /> Target Size
                             </TabsTrigger>
-                            <TabsTrigger value="manual" className="font-black text-[8px] md:text-[9px] uppercase rounded-lg">
-                                <Settings2 className="size-2.5 mr-1" /> Quality
+                            <TabsTrigger value="manual" className="font-black text-[10px] uppercase rounded-xl transition-all">
+                                <Settings2 className="h-4 w-4 mr-2" /> Quality Mode
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="target" className="pt-4 space-y-4 animate-in fade-in duration-500">
-                             <div className="space-y-3">
-                                <Label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                                    Target Size
-                                </Label>
-                                <div className="grid grid-cols-4 gap-1">
-                                    {QUICK_SIZES.map((size) => (
-                                        <Button
-                                            key={size}
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setTargetSizeValue(size)}
-                                            className={cn(
-                                                "rounded-lg font-black text-[8px] md:text-[9px] uppercase h-7 border",
-                                                targetSizeValue === size ? "bg-primary text-white border-primary shadow-sm" : ""
-                                            )}
-                                        >
-                                            {size}K
-                                        </Button>
-                                    ))}
-                                </div>
-                                <div className="flex gap-2">
-                                    <div className="relative flex-1">
-                                        <Input 
-                                            type="number" 
-                                            value={targetSizeValue} 
-                                            onChange={(e) => setTargetSizeValue(e.target.value)} 
-                                            className="h-10 text-xl font-black border-2 rounded-xl pl-4 bg-muted/5 w-full"
-                                        />
+                        <TabsContent value="target" className="space-y-6 animate-in fade-in duration-500">
+                             <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                        <Zap className="size-3 text-yellow-500" /> Government Form Presets
+                                    </Label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {QUICK_SIZES.map((size) => (
+                                            <Button
+                                                key={size}
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setTargetSizeValue(size);
+                                                    setTargetUnit('kb');
+                                                }}
+                                                className={cn(
+                                                    "rounded-xl font-black text-[10px] uppercase h-10 border-2 transition-all",
+                                                    targetSizeValue === size && targetUnit === 'kb' ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                )}
+                                            >
+                                                {size}K
+                                            </Button>
+                                        ))}
                                     </div>
-                                    <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                        <SelectTrigger className="w-20 h-10 font-black text-xs border-2 rounded-xl uppercase">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-2">
-                                            <SelectItem value="kb" className="font-bold py-1 uppercase">KB</SelectItem>
-                                            <SelectItem value="mb" className="font-bold py-1 uppercase">MB</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                </div>
+                                <div className="space-y-3 pt-4 border-t border-dashed">
+                                    <Label htmlFor="target-val" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Custom Limit</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1 group">
+                                            <Input 
+                                                id="target-val" 
+                                                type="number" 
+                                                value={targetSizeValue} 
+                                                onChange={(e) => setTargetSizeValue(e.target.value)} 
+                                                className="h-16 text-3xl font-black focus-visible:ring-primary border-2 rounded-2xl bg-background pl-8"
+                                            />
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/20 font-black text-xl uppercase pointer-events-none">{targetUnit}</div>
+                                        </div>
+                                        <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
+                                            <SelectTrigger className="w-24 h-16 font-black text-lg border-2 rounded-2xl shadow-sm">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                <SelectItem value="kb" className="font-black py-3">KB</SelectItem>
+                                                <SelectItem value="mb" className="font-black py-3">MB</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                              </div>
                         </TabsContent>
 
-                        <TabsContent value="manual" className="pt-4 space-y-4 animate-in fade-in duration-500">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-[9px] font-black uppercase text-muted-foreground">Quality</Label>
-                                    <Badge className="font-mono font-black text-[10px] px-2 bg-primary text-white rounded shadow-sm">{quality[0]}%</Badge>
+                        <TabsContent value="manual" className="space-y-6 animate-in fade-in duration-500">
+                            <div className="space-y-8 py-4">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center px-1">
+                                        <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Compression Strength</Label>
+                                        <Badge className="font-mono font-black text-base px-4 py-1 bg-primary text-white rounded-xl shadow-lg">{quality[0]}%</Badge>
+                                    </div>
+                                    <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-4" />
+                                    <div className="flex justify-between text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
+                                        <span>Max Shrink</span>
+                                        <span>Best Quality</span>
+                                    </div>
                                 </div>
-                                <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-2" />
                             </div>
                         </TabsContent>
                     </Tabs>
 
-                    <div className="space-y-2 pt-2 border-t border-dashed">
-                        <Label className="text-[8px] md:text-[9px] font-black uppercase text-muted-foreground tracking-widest">Output Format</Label>
+                    <div className="space-y-3 pt-6 border-t border-dashed border-primary/10">
+                        <Label htmlFor="format" className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Target Format</Label>
                         <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
-                            <SelectTrigger className="h-10 font-black text-[10px] border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger>
-                            <SelectContent className="rounded-xl border-2">
-                                <SelectItem value="jpeg" className="font-bold py-1">JPEG (Smallest)</SelectItem>
-                                <SelectItem value="webp" className="font-bold py-1">WEBP (Modern)</SelectItem>
-                                <SelectItem value="png" className="font-bold py-1">PNG (Lossless)</SelectItem>
+                            <SelectTrigger id="format" className="h-12 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger>
+                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal - Smallest)</SelectItem>
+                                <SelectItem value="webp" className="font-bold py-2">WEBP (Modern - HD)</SelectItem>
+                                <SelectItem value="png" className="font-bold py-2">PNG (Lossless - Clean)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-4 border-t">
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
                     <Button 
-                        className="w-full h-12 md:h-14 text-sm md:text-base font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl transition-all active:scale-95 disabled:opacity-50" 
+                        className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
                         disabled={results.length === 0 || isBulkProcessing}
                         onClick={startBulkCompression}
                     >
                         {isBulkProcessing ? (
-                            <div className="flex items-center gap-2">
-                                <Loader2 className="size-4 animate-spin" />
-                                <span className="uppercase text-xs">PROCESSING...</span>
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="size-6 md:size-8 animate-spin" />
+                                <span className="uppercase text-sm md:text-base tracking-tighter">PROCESSING...</span>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2">
-                                <Zap className="size-4 text-yellow-400 fill-yellow-400" />
-                                <span className="uppercase tracking-tighter">OPTIMIZE NOW</span>
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <Zap className="size-6 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">OPTIMIZE NOW</span>
                             </div>
                         )}
                     </Button>
                 </CardFooter>
             </Card>
 
-            <div className="p-3 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3 items-center">
-                <ShieldCheck className="size-4 text-green-600" />
-                <p className="text-[9px] text-green-700 font-bold uppercase">100% Secure Local RAM Processing</p>
+            <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+                <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="size-5 md:size-6 text-green-600" />
+                </div>
+                <div>
+                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
+                    <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Your photos never touch any server. All processing is local.</p>
+                </div>
             </div>
         </div>
       </div>
