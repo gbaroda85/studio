@@ -697,6 +697,14 @@ export default function DocumentScanner() {
                                         ))}
                                         {draggingPoint !== null && (
                                             <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    {/* Precision Crosshair Overlay */}
+                                                    <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
+                                                        <div className="w-full h-0.5 bg-green-500/50 absolute" />
+                                                        <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                                        <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
+                                                    </div>
+                                                </div>
                                                 <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
                                                     style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                                 />
