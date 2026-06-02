@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     default: 'GR7 Tools - 100% Private Image & PDF Studio (No Upload)',
     template: '%s | GR7 Tools',
   },
-  description: 'Fastest local browser tools. Compress images to 20kb/50kb, SSC/UPSC photo resizer, remove background, unlock Aadhaar PDF, and merge files without server uploads. 100% Secure & Private.',
+  description: 'Fastest local browser tools. Compress images to 20kb/50kb for SSC & UPSC, resize photos, remove background, unlock Aadhaar PDF, and merge files without server uploads. 100% Secure & Private.',
   metadataBase: new URL('https://www.gr7imagepdf.com'),
   alternates: {
     canonical: 'https://www.gr7imagepdf.com',
@@ -26,21 +26,20 @@ export const metadata: Metadata = {
     ],
   },
   keywords: [
-    'image to pdf converter',
-    'remove background free',
     'ssc photo signature resizer',
-    'upsc image resizer',
+    'compress image to 20kb online',
+    'compress image to 50kb online',
     'aadhaar pdf password remover',
-    'bank statement unlocker',
-    'signature background remover',
-    'compress image to 20kb',
-    'compress image to 50kb',
-    'bulk image optimizer',
-    'private pdf editor',
-    'merge pdf without upload',
-    'online marriage biodata maker',
-    'passport photo maker india',
-    'gr7 tools'
+    'bank statement password unlocker',
+    'upsc image resizer tool',
+    'ibps photo signature compressor',
+    'remove background from signature online',
+    'online marriage biodata maker free',
+    'passport photo maker india online',
+    'merge pdf without uploading to server',
+    'image to pdf converter high quality',
+    'gr7 tools',
+    'private image editor online'
   ],
   authors: [{ name: 'Gaurav S' }],
   creator: 'Gaurav S',
@@ -55,8 +54,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://www.gr7imagepdf.com',
     siteName: 'GR7 Tools Hub',
-    title: 'GR7 Tools - Private & Fast Online Image/PDF Studio',
-    description: 'Professional Image and PDF manipulation using high-performance local processing. No server storage, total privacy.',
+    title: 'GR7 Tools - 100% Private Online Image & PDF Studio',
+    description: 'Professional Image and PDF manipulation using high-performance local processing. No server storage, total privacy for SSC, UPSC and Banking documents.',
     images: [
       {
         url: 'https://picsum.photos/seed/gr7tools/1200/630',
@@ -85,7 +84,7 @@ export default function RootLayout({
     "@type": "WebSite",
     "name": "GR7 Tools",
     "url": "https://www.gr7imagepdf.com",
-    "description": "100% Private local browser tools for Images, PDFs, and Calculators.",
+    "description": "100% Private local browser tools for Images, PDFs, and Calculators. Specialized for SSC, UPSC, and Banking application forms.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://www.gr7imagepdf.com/tools?search={search_term_string}",
@@ -99,13 +98,13 @@ export default function RootLayout({
     "name": "GR7 Image & PDF Tools Hub",
     "operatingSystem": "All",
     "applicationCategory": "MultimediaApplication",
-    "description": "A suite of high-performance image and PDF tools that work locally in the browser for maximum privacy.",
+    "description": "A suite of high-performance image and PDF tools that work locally in the browser for maximum privacy. Includes SSC/UPSC resizers and Aadhaar tools.",
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD"
     },
-    "featureList": "Image Compression, PDF Merging, Background Removal, Aadhaar Printing, Passport Photo Making"
+    "featureList": "Image Compression, PDF Merging, Background Removal, Aadhaar Printing, Passport Photo Making, SSC Photo Resizing"
   };
 
   return (

@@ -3,46 +3,34 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
   
-  // Array of all valid routes to ensure GSC discovery
-  const routes = [
-    '',
-    '/tools',
-    '/privacy-policy',
-    '/terms-of-service',
-    
-    // Image Tools (High priority for indexing)
+  // High-traffic tools paths based on trending searches
+  const highPriorityTools = [
     '/image-compress',
     '/image-resize',
     '/marriage-biodata',
-    '/crop-image',
+    '/passport-photo',
+    '/unlock-pdf',
+    '/merge-pdf',
     '/remove-background',
     '/remove-signature',
-    '/enhance-photo',
-    '/passport-photo',
     '/aadhaar-printer',
-    '/image-to-text',
-    '/image-to-jpg',
-    '/image-to-png',
-    '/image-to-pdf',
-    
-    // PDF Tools
+    '/image-to-pdf'
+  ];
+
+  const otherTools = [
     '/docx-to-pdf',
     '/lock-pdf',
     '/compress-pdf',
-    '/merge-pdf',
     '/split-pdf',
     '/crop-pdf',
     '/scan-to-pdf',
     '/document-scan',
-    '/unlock-pdf',
     '/pdf-to-image',
     '/html-to-pdf',
     '/text-to-pdf',
     '/add-watermark',
     '/add-page-numbers',
     '/edit-pdf',
-    
-    // Calculator Tools
     '/standard-calculator',
     '/loan-calculator',
     '/age-calculator',
@@ -50,24 +38,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/fuel-cost-calculator',
     '/interest-calculator',
     '/sales-tax-calculator',
-    
-    // Converter Tools
     '/acceleration-converter',
     '/area-converter',
     '/fuel-converter',
     '/pressure-converter',
-    
-    // File Tools
     '/create-zip',
-    '/unzip-file'
+    '/unzip-file',
+    '/crop-image',
+    '/image-to-text',
+    '/image-to-jpg',
+    '/image-to-png'
   ];
 
-  return routes.map((route) => {
-    // Assign priorities based on page importance
+  const corePages = ['', '/tools', '/privacy-policy', '/terms-of-service'];
+
+  const allRoutes = [...corePages, ...highPriorityTools, ...otherTools];
+
+  return allRoutes.map((route) => {
+    // Assigning high priority to home and popular tools for faster indexing
     let priority = 0.8;
     if (route === '') priority = 1.0;
     if (route === '/tools') priority = 0.9;
-    if (['/image-compress', '/merge-pdf', '/passport-photo', '/unlock-pdf', '/marriage-biodata'].includes(route)) priority = 0.95;
+    if (highPriorityTools.includes(route)) priority = 0.95;
 
     return {
       url: `${baseUrl}${route}`,
