@@ -523,13 +523,13 @@ export default function PdfEditor() {
             )}
 
             {!pdfFile ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-200/50 dark:bg-slate-900/10">
+                <div className="flex-1 flex flex-col items-center justify-start pt-2 px-6 bg-slate-200/50 dark:bg-slate-900/10">
                     <Card className={cn("w-full max-w-2xl glass-card border-2 border-dashed shadow-2xl rounded-[2.5rem] transition-all", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
                         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
                     >
-                        <CardContent className="p-16 md:p-24 flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
-                            <div className="relative"><UploadCloud className="size-20 md:size-24 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" /></div>
-                            <div className="text-center px-4"><p className="text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p><p className="text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p></div>
+                        <CardContent className="p-12 md:p-16 flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
+                            <div className="relative"><UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" /></div>
+                            <div className="text-center px-4"><p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p><p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p></div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                     </Card>
