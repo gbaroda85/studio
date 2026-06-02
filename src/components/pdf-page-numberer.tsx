@@ -1,17 +1,41 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { UploadCloud, Download, Loader2, NotebookPen } from 'lucide-react';
+import { 
+    UploadCloud, 
+    Download, 
+    Loader2, 
+    NotebookPen, 
+    Settings2, 
+    Eye, 
+    ShieldCheck, 
+    Zap, 
+    RefreshCcw, 
+    Hash, 
+    Layout, 
+    Maximize, 
+    Sparkles,
+    CheckCircle2,
+    Palette,
+    AlignLeft,
+    AlignCenter,
+    AlignRight
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from './ui/badge';
+
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
 type PageNumberPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
@@ -31,14 +55,14 @@ function parsePageRanges(ranges: string, maxPage: number): number[] {
                     result.add(i);
                 }
             } else {
-                return []; // Invalid range
+                return [];
             }
         } else {
             const page = parseInt(trimmedPart, 10);
             if (!isNaN(page) && page > 0 && page <= maxPage) {
                 result.add(page);
             } else if (trimmedPart !== '') {
-                 return []; // Invalid page number
+                 return [];
             }
         }
     }
@@ -49,15 +73,20 @@ export default function PdfPageNumberer() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [position, setPosition] = useState<PageNumberPosition>('bottom-center');
-  const [format, setFormat] = useState('{page}');
+  const [format, setFormat] = useState('Page {page} of {total}');
   const [fontSize, setFontSize] = useState(12);
   const [pageRange, setPageRange] = useState('all');
   const [customRange, setCustomRange] = useState('');
+  
   const [numberedPdfUrl, setNumberedPdfUrl] = useState<string | null>(null);
+  const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
+  const [totalPagesPreview, setTotalPagesPreview] = useState(0);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => {
@@ -65,18 +94,37 @@ export default function PdfPageNumberer() {
     }
   }, [numberedPdfUrl]);
 
-  useEffect(() => {
-    if (numberedPdfUrl) {
-        URL.revokeObjectURL(numberedPdfUrl);
-        setNumberedPdfUrl(null);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [position, format, fontSize, pageRange, customRange]);
-
-  const handleFileChange = (file: File | null) => {
+  const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
-      resetState();
       setPdfFile(file);
+      setNumberedPdfUrl(null);
+      setOriginalPageImage(null);
+      setIsGeneratingPreview(true);
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+        const pdf = await loadingTask.promise;
+        setTotalPagesPreview(pdf.numPages);
+        
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        if (context) {
+            context.fillStyle = '#FFFFFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: context, viewport }).promise;
+            setOriginalPageImage(canvas.toDataURL('image/jpeg', 0.9));
+        }
+      } catch (e) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF for preview.' });
+      } finally {
+        setIsGeneratingPreview(false);
+      }
     } else if (file) {
       toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
     }
@@ -88,10 +136,7 @@ export default function PdfPageNumberer() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   const handleAddPageNumbers = async () => {
-    if (!pdfFile) {
-        toast({variant: 'destructive', title: 'No PDF', description: 'Please upload a PDF file first.'});
-        return;
-    }
+    if (!pdfFile) return;
     setIsProcessing(true);
 
     try {
@@ -101,7 +146,7 @@ export default function PdfPageNumberer() {
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 40;
+        const margin = 30;
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -152,10 +197,10 @@ export default function PdfPageNumberer() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setNumberedPdfUrl(url);
-        toast({title: "Success!", description: "Page numbers added. Your PDF is ready for download."});
+        toast({title: "Success!", description: "Page numbers added to all pages."});
     } catch (error) {
         console.error(error);
-        toast({variant: 'destructive', title: 'Error', description: 'Failed to add page numbers. The PDF might be encrypted.'});
+        toast({variant: 'destructive', title: 'Error', description: 'Failed to process document.'});
     } finally {
         setIsProcessing(false);
     }
@@ -166,104 +211,262 @@ export default function PdfPageNumberer() {
     const link = document.createElement('a');
     link.href = numberedPdfUrl;
     link.download = `numbered-${pdfFile.name}`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   }
 
   const resetState = () => {
       setPdfFile(null);
-      if (numberedPdfUrl) {
-          URL.revokeObjectURL(numberedPdfUrl);
-          setNumberedPdfUrl(null);
-      }
+      setOriginalPageImage(null);
+      setNumberedPdfUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  const getPreviewStyle = () => {
+      const styles: React.CSSProperties = {
+          position: 'absolute',
+          pointerEvents: 'none',
+          color: '#000000',
+          fontSize: `${fontSize * 0.8}px`,
+          fontWeight: '700',
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          transition: 'all 0.2s ease-out',
+          zIndex: 40
+      };
+
+      const m = "6%";
+      switch (position) {
+          case 'top-left': styles.top = m; styles.left = m; break;
+          case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
+          case 'top-right': styles.top = m; styles.right = m; break;
+          case 'bottom-left': styles.bottom = m; styles.left = m; break;
+          case 'bottom-right': styles.bottom = m; styles.right = m; break;
+          case 'bottom-center':
+          default:
+              styles.bottom = m; styles.left = '50%'; styles.transform = 'translateX(-50%)';
+              break;
+      }
+      return styles;
   }
   
   if (!pdfFile) {
     return (
       <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
+        className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
       >
         <CardHeader>
-          <CardTitle>Add Page Numbers to PDF</CardTitle>
-          <CardDescription>Upload a PDF to add page numbers.</CardDescription>
+          <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-2xl bg-primary/10 text-primary">
+            <Hash className="h-8 md:h-10 w-8 md:w-10" />
+          </div>
+          <CardTitle className="text-xl md:text-3xl font-black uppercase tracking-tight">PDF Page Numbering</CardTitle>
+          <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60">Add professional numbering with live studio preview.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
-            <UploadCloud className="h-16 w-16 text-muted-foreground" />
-            <p className="text-muted-foreground"><span className="text-primary font-semibold">Click to upload</span> or drag and drop</p>
+        <CardContent className="p-4 md:p-6">
+          <div
+            className="border-3 border-dashed border-muted-foreground/30 rounded-2xl md:rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="relative">
+                <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
+            </div>
+            <div>
+                <p className="text-lg md:text-xl font-bold uppercase tracking-tighter">Drop PDF here to Begin</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-medium">100% Private local RAM processing.</p>
+            </div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </CardContent>
+        <CardFooter className="justify-center gap-4 md:gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+            <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO FORMATS</div>
+        </CardFooter>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-2xl">
-        <CardHeader>
-            <CardTitle>Page Numbering Options</CardTitle>
-            <CardDescription>File: {pdfFile.name}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label htmlFor="position">Position</Label>
-                    <Select value={position} onValueChange={(v) => setPosition(v as PageNumberPosition)} disabled={isProcessing}>
-                        <SelectTrigger id="position"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="bottom-center">Bottom Center</SelectItem>
-                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                            <SelectItem value="top-center">Top Center</SelectItem>
-                            <SelectItem value="top-left">Top Left</SelectItem>
-                            <SelectItem value="top-right">Top Right</SelectItem>
-                        </SelectContent>
-                    </Select>
+    <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 flex flex-col gap-6 md:gap-8">
+        
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+            <div className="flex items-center gap-4">
+                <div className="size-12 md:size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                    <Settings2 className="size-6 md:size-8" />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="format">Format</Label>
-                    <Input id="format" value={format} onChange={(e) => setFormat(e.target.value)} placeholder="{page} of {total}" disabled={isProcessing} />
-                    <p className="text-xs text-muted-foreground">Use {'{page}'} and {'{total}'}</p>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="font-size">Font Size</Label>
-                    <Input id="font-size" type="number" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} disabled={isProcessing} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="page-range">Pages to Number</Label>
-                    <Select value={pageRange} onValueChange={setPageRange} disabled={isProcessing}>
-                        <SelectTrigger id="page-range"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All pages</SelectItem>
-                            <SelectItem value="custom">Custom range</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div>
+                    <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter">Numbering <span className="text-primary">Studio</span></h2>
+                    <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20 truncate max-w-[150px]">{pdfFile.name}</Badge>
+                        <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">LIVE HD PREVIEW</Badge>
+                    </div>
                 </div>
             </div>
-            {pageRange === 'custom' && (
-                <div className="space-y-2 animate-in fade-in">
-                    <Label htmlFor="custom-range">Custom Range</Label>
-                    <Input id="custom-range" value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="e.g., 1, 3-5, 8" disabled={isProcessing} />
-                </div>
-            )}
-        </CardContent>
-        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-            <Button variant="outline" onClick={resetState}>Upload Another</Button>
-            {!numberedPdfUrl ? (
-                <Button onClick={handleAddPageNumbers} disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : <NotebookPen className="mr-2" />}
-                    Add Page Numbers
-                </Button>
-            ) : (
-                <Button onClick={handleDownload}>
-                    <Download className="mr-2" />
-                    Download PDF
-                </Button>
-            )}
-        </CardFooter>
-    </Card>
-  )
+            <Button variant="outline" onClick={resetState} className="w-full md:w-auto h-10 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-4 md:px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RefreshCcw className="mr-2 size-3 md:size-4" /> Change File
+            </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+            
+            {/* Sidebar: Controls */}
+            <div className="lg:col-span-4 space-y-6">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+                    <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
+                        <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
+                            <Palette className="size-5 text-primary" /> Configuration
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2">
+                                <Layout className="size-3" /> Position Preset
+                            </Label>
+                            <Select value={position} onValueChange={(v) => setPosition(v as PageNumberPosition)}>
+                                <SelectTrigger className="h-12 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                                <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                    <SelectItem value="bottom-center" className="font-bold">Bottom Center</SelectItem>
+                                    <SelectItem value="bottom-left" className="font-bold">Bottom Left</SelectItem>
+                                    <SelectItem value="bottom-right" className="font-bold">Bottom Right</SelectItem>
+                                    <SelectItem value="top-center" className="font-bold">Top Center</SelectItem>
+                                    <SelectItem value="top-left" className="font-bold">Top Left</SelectItem>
+                                    <SelectItem value="top-right" className="font-bold">Top Right</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2">
+                                <NotebookPen className="size-3" /> Number Format
+                            </Label>
+                            <Input 
+                                value={format} 
+                                onChange={(e) => setFormat(e.target.value)}
+                                placeholder="e.g. Page {page} of {total}"
+                                className="h-12 border-2 font-bold rounded-xl bg-background shadow-inner"
+                            />
+                            <p className="text-[9px] text-muted-foreground font-bold uppercase opacity-50">Use {'{page}'} and {'{total}'} as variables.</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size (pt)</Label>
+                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
+                            </div>
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Range</Label>
+                                <Select value={pageRange} onValueChange={setPageRange}>
+                                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl border-2">
+                                        <SelectItem value="all" className="font-bold">All Pages</SelectItem>
+                                        <SelectItem value="custom" className="font-bold">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {pageRange === 'custom' && (
+                            <div className="space-y-2 animate-in slide-in-from-top-2">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Custom Range</Label>
+                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="e.g. 1, 3-5, 8" className="h-10 border-2 font-bold rounded-xl" />
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="bg-muted/10 p-5 md:p-8 border-t">
+                        {!numberedPdfUrl ? (
+                            <Button 
+                                className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                onClick={handleAddPageNumbers}
+                                disabled={isProcessing || !format}
+                            >
+                                {isProcessing ? (
+                                    <div className="flex items-center gap-3">
+                                        <Loader2 className="size-6 md:size-8 animate-spin" />
+                                        <span className="uppercase text-sm md:text-base">CALCULATING...</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                        <Hash className="size-6 md:size-8 text-white group-hover:scale-125 transition-transform" />
+                                        <span className="uppercase tracking-tighter text-lg md:text-2xl">ADD NUMBERS</span>
+                                    </div>
+                                )}
+                            </Button>
+                        ) : (
+                            <Button size="lg" className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
+                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE PDF
+                            </Button>
+                        )}
+                    </CardFooter>
+                </Card>
+            </div>
+
+            {/* Workspace: Live Preview */}
+            <div className="lg:col-span-8">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[3rem]">
+                    <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Eye className="size-4 text-primary" />
+                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Document Preview</CardTitle>
+                        </div>
+                        {numberedPdfUrl && (
+                             <div className="flex items-center gap-1.5 text-green-600">
+                                <CheckCircle2 className="size-3 md:size-4" />
+                                <span className="text-[8px] md:text-[10px] font-black uppercase">Ready</span>
+                             </div>
+                        )}
+                    </CardHeader>
+                    <CardContent className="p-6 md:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden">
+                        {isGeneratingPreview ? (
+                            <div className="flex flex-col items-center gap-6 text-center">
+                                <div className="relative">
+                                    <Loader2 className="size-16 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
+                                    <Eye className="absolute inset-0 m-auto size-6 md:size-8 text-primary animate-pulse" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page 1...</p>
+                            </div>
+                        ) : originalPageImage ? (
+                            <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
+                                <img src={originalPageImage} alt="Preview" className="w-full h-auto block" />
+                                
+                                {/* FLOATING PAGE NUMBER PREVIEW OVERLAY */}
+                                <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-[8%]">
+                                    <div style={getPreviewStyle()}>
+                                        {format
+                                            .replace('{page}', '1')
+                                            .replace('{total}', String(totalPagesPreview))}
+                                    </div>
+                                </div>
+                                
+                                <div className="absolute top-2 right-2 opacity-20">
+                                    <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE 1 VIEW</Badge>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center gap-4 opacity-30">
+                                <UploadCloud className="size-20" />
+                                <p className="text-xs font-black uppercase">Upload a document to see preview</p>
+                            </div>
+                        )}
+                        
+                        {!numberedPdfUrl && originalPageImage && (
+                            <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
+                                <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" /> 
+                                Real-time Studio Sync Active
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-6 md:gap-12">
+                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                            <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
+                        </div>
+                        <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                            <Zap className="size-4 text-yellow-500" /> 300 DPI RENDER
+                        </div>
+                    </CardFooter>
+                </Card>
+            </div>
+        </div>
+    </div>
+  );
 }
