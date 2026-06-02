@@ -74,8 +74,13 @@ export default function PdfUnlocker() {
     const checkEncryption = async (arrayBuffer: ArrayBuffer) => {
         setIsChecking(true);
         try {
-            // Try loading without password
-            const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+            // Try loading without password to see if it's actually protected
+            const loadingTask = pdfjs.getDocument({ 
+                data: new Uint8Array(arrayBuffer),
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
+            });
             await loadingTask.promise;
             setIsProtected(false);
         } catch (error: any) {
@@ -103,9 +108,9 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
-            toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
+            toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
     };
 
@@ -131,7 +136,10 @@ export default function PdfUnlocker() {
         try {
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(arrayBuffer),
-                password: password
+                password: password,
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
             });
             const pdf = await loadingTask.promise;
 
@@ -146,10 +154,7 @@ export default function PdfUnlocker() {
                 setStatusText(`Decrypting Page ${i} of ${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // 1. Original dimensions in PDF points
                 const viewport = page.getViewport({ scale: 1.0 });
-                
-                // 2. High-res dimensions for rendering sharpness
                 const renderViewport = page.getViewport({ scale: 2.2 }); 
                 
                 const canvas = document.createElement('canvas');
@@ -162,21 +167,16 @@ export default function PdfUnlocker() {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Render page at high scale
                     await page.render({ canvasContext: context, viewport: renderViewport }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     
-                    // Determine orientation for current page
                     const orientation = viewport.width > viewport.height ? 'l' : 'p';
                     
-                    // Add fresh page with exact original dimensions
                     if (i === 1) {
                         newPdf.deletePage(1);
                     }
                     
                     newPdf.addPage([viewport.width, viewport.height], orientation);
-                    
-                    // Draw high-res image exactly into the original bounds
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
