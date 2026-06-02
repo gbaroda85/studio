@@ -69,20 +69,22 @@ const ALL_TOOLS = [
   { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
 
-  // PDF TOOLS
+  // PDF TOOLS - LIMITED TO 4 FOR HOME PAGE (STYLING ONLY)
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Lock, title: "Vault PDF Locker", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF Optimizer", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
   { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
-  { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-kit" },
-  { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-kit" },
-  { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]", category: "pdf-kit" },
-  { icon: Camera, title: "Scan to PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
-  { icon: ImageIcon, title: "PDF to Image", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf-kit" },
-  { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf-kit" },
-  { icon: FileText, title: "Text to PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", lightBg: "bg-[#f1f5f9]", category: "pdf-kit" },
-  { icon: Copyright, title: "Add Watermark", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
-  { icon: NotebookPen, title: "Add Page Numbers", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "pdf-kit" },
+
+  // HIDDEN FROM HOME BUT IN SEARCH INDEX
+  { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
+  { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-extra" },
+  { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]", category: "pdf-extra" },
+  { icon: Camera, title: "Scan to PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "pdf-extra" },
+  { icon: ImageIcon, title: "PDF to Image", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf-extra" },
+  { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf-extra" },
+  { icon: FileText, title: "Text to PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", lightBg: "bg-[#f1f5f9]", category: "pdf-extra" },
+  { icon: Copyright, title: "Add Watermark", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "pdf-extra" },
+  { icon: NotebookPen, title: "Add Page Numbers", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "pdf-extra" },
 
   // CALCULATORS
   { icon: Calculator, title: "Standard Calculator", description: "For your everyday calculations.", href: "/standard-calculator", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "calculator" },
@@ -108,8 +110,8 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
   <Link href={href} className="group">
     <Card className={cn(
       "h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 overflow-hidden relative rounded-[2.5rem] hover:-translate-y-2",
-      lightBg, // Beautiful Light Mode background
-      "dark:bg-card" // Professional standard Dark Mode background
+      lightBg, // Colourful background for Light Mode
+      "dark:bg-card" // Professional dark background for Dark Mode
     )}>
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-5">
