@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -45,7 +46,8 @@ import {
     ArrowUpRight,
     Eraser,
     MousePointer,
-    Pencil
+    Pencil,
+    ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -259,7 +261,7 @@ export default function PdfEditor() {
         addElementToCurrentPage({
             id,
             type: 'text',
-            text: "Double-click to Edit",
+            text: "Click to Type",
             x: 40,
             y: 40,
             size: 20,
@@ -310,7 +312,7 @@ export default function PdfEditor() {
             color: "#FFFFFF",
             opacity: 100
         });
-        toast({ title: "Mask Tool Active", description: "Use the white block to hide text or logos." });
+        toast({ title: "Whiteout Active", description: "Position this block over any logo or watermark to hide it." });
     };
 
     const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,6 +362,14 @@ export default function PdfEditor() {
         }
     };
 
+    const clearSignature = () => {
+        const canvas = sigCanvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
     /**
      * MOUSE INTERACTION
      */
@@ -378,13 +388,13 @@ export default function PdfEditor() {
         const rect = containerRef.current.getBoundingClientRect();
         const zFactor = zoom / 100;
         
-        const deltaX = ((e.clientX - dragStartPos.x) / (rect.width * zFactor)) * 100;
-        const deltaY = ((e.clientY - dragStartPos.y) / (rect.height * zFactor)) * 100;
+        const deltaX = ((e.clientX - dragStartPos.x) / (rect.width)) * 100;
+        const deltaY = ((e.clientY - dragStartPos.y) / (rect.height)) * 100;
 
         updateElement(selectedPageIndex, selectedElementId, { 
             x: Math.max(0, Math.min(100, dragInitialElPos.x + deltaX)),
             y: Math.max(0, Math.min(100, dragInitialElPos.y + deltaY))
-        }, false); // Don't save history while dragging
+        }, false); 
     };
 
     const handleMouseUp = () => {
@@ -447,7 +457,7 @@ export default function PdfEditor() {
                         else copiedPage.drawRectangle(config);
                     } else if (el.type === 'arrow') {
                         const c = hexToRgb(el.color);
-                        const length = el.width; 
+                        const length = (el.width / 100) * width; 
                         copiedPage.drawLine({
                             start: { x: elX, y: elY },
                             end: { 
@@ -462,8 +472,8 @@ export default function PdfEditor() {
                         const response = await fetch(el.src);
                         const imgBuffer = await response.arrayBuffer();
                         const embeddedImg = el.src.includes('png') ? await finalPdfDoc.embedPng(imgBuffer) : await finalPdfDoc.embedJpg(imgBuffer);
-                        const imgW = el.width;
-                        const imgH = el.width * (embeddedImg.height / embeddedImg.width);
+                        const imgW = (el.width / 100) * width;
+                        const imgH = imgW * (embeddedImg.height / embeddedImg.width);
                         copiedPage.drawImage(embeddedImg, { x: elX, y: elY - imgH, width: imgW, height: imgH, rotate: degrees(-el.rotation), opacity: el.opacity / 100 });
                     }
                 }
@@ -553,7 +563,6 @@ export default function PdfEditor() {
                                         className={cn("relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white", selectedPageIndex === i ? "border-primary ring-2 ring-primary/40 scale-[1.02]" : "border-white/5 opacity-40 hover:opacity-100")}>
                                         <div className="size-full flex items-center justify-center p-1" style={{ transform: `rotate(${p.rotation}deg)` }}><img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`P${i+1}`} /></div>
                                         <div className="absolute top-1 left-1 size-5 rounded bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{i+1}</div>
-                                        <div className="absolute bottom-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><Button size="icon" variant="secondary" className="size-6 rounded" onClick={(e) => { e.stopPropagation(); handleRotatePage(i); }}><RotateCw className="size-3"/></Button></div>
                                     </div>
                                 ))}
                             </div>
@@ -572,8 +581,8 @@ export default function PdfEditor() {
                                             className={cn("absolute z-10 cursor-move transition-shadow", selectedElementId === el.id ? "ring-2 ring-primary ring-offset-1 rounded-sm shadow-2xl" : "hover:ring-1 hover:ring-primary/40")}
                                             style={{ left: `${el.x}%`, top: `${el.y}%`, transform: `rotate(${-selectedPage.rotation}deg)` }}>
                                             {el.type === 'text' ? <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px', opacity: el.opacity/100 }}>{el.text}</div> :
-                                             el.type === 'shape' ? <div style={{ width: `${el.width}vw`, height: `${el.height}vh`, backgroundColor: el.color, opacity: el.opacity / 100, borderRadius: el.shapeType === 'circle' ? '999px' : '0' }} /> :
-                                             el.type === 'mask' ? <div style={{ width: `${el.width}vw`, height: `${el.height}vh`, backgroundColor: el.color, opacity: el.opacity / 100 }} /> :
+                                             el.type === 'shape' ? <div style={{ width: `${el.width}px`, height: `${el.height}px`, backgroundColor: el.color, opacity: el.opacity / 100, borderRadius: el.shapeType === 'circle' ? '999px' : '0' }} /> :
+                                             el.type === 'mask' ? <div style={{ width: `${el.width}px`, height: `${el.height}px`, backgroundColor: el.color, opacity: el.opacity / 100 }} /> :
                                              el.type === 'arrow' ? <div style={{ width: `${el.width}px`, height: '2px', backgroundColor: el.color, opacity: el.opacity/100, transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center' }} className="relative"><div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[8px]" style={{ borderLeftColor: el.color }} /></div> :
                                              <div style={{ width: `${el.width}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>}
                                         </motion.div>
@@ -605,21 +614,21 @@ export default function PdfEditor() {
                                     )}
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'shape') && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Width</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Height</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { height: v[0] })} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Width (px)</Label></div><Slider min={5} max={800} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Height (px)</Label></div><Slider min={5} max={800} value={[selectedElement.height]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { height: v[0] })} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#000000', '#ffff00', '#ADD8E6'].map(c => <button key={c} onClick={() => updateElement(selectedPageIndex!, selectedElementId!, { color: c })} className={cn("size-6 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-white/10")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
                                     {selectedElement.type === 'arrow' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Length</Label></div><Slider min={20} max={300} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Length</Label></div><Slider min={20} max={600} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Angle</Label></div><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { rotation: v[0] })} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#0000FF', '#00FF00'].map(c => <button key={c} onClick={() => updateElement(selectedPageIndex!, selectedElementId!, { color: c })} className={cn("size-6 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-white/10")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
                                     {selectedElement.type === 'image' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Size</Label></div><Slider min={20} max={600} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Size</Label></div><Slider min={20} max={800} value={[selectedElement.width]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Rotation</Label></div><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement(selectedPageIndex!, selectedElementId!, { rotation: v[0] })} /></div>
                                         </div>
                                     )}
@@ -639,17 +648,19 @@ export default function PdfEditor() {
                         <div className="bg-white rounded-2xl overflow-hidden border-4 border-primary/20 shadow-2xl">
                              <canvas ref={sigCanvasRef} width={400} height={200} className="cursor-crosshair" 
                                      onMouseDown={(e) => {
+                                         const rect = sigCanvasRef.current!.getBoundingClientRect();
                                          const ctx = sigCanvasRef.current?.getContext("2d");
                                          if(!ctx) return;
                                          ctx.beginPath(); ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
-                                         ctx.moveTo(e.nativeEvent.offsetX, e.clientY - sigCanvasRef.current!.getBoundingClientRect().top);
+                                         ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
                                          (sigCanvasRef.current as any).isDrawing = true;
                                      }}
                                      onMouseMove={(e) => {
                                          if(!(sigCanvasRef.current as any).isDrawing) return;
+                                         const rect = sigCanvasRef.current!.getBoundingClientRect();
                                          const ctx = sigCanvasRef.current?.getContext("2d");
                                          if(!ctx) return;
-                                         ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY); ctx.stroke();
+                                         ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); ctx.stroke();
                                      }}
                                      onMouseUp={() => (sigCanvasRef.current as any).isDrawing = false}
                              />
@@ -657,10 +668,7 @@ export default function PdfEditor() {
                         <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Use mouse or touch to draw above</p>
                     </div>
                     <DialogFooter className="grid grid-cols-2 gap-3">
-                        <Button variant="ghost" className="h-12 rounded-xl text-white/60 hover:text-white" onClick={() => {
-                            const ctx = sigCanvasRef.current?.getContext("2d");
-                            ctx?.clearRect(0,0,400,200);
-                        }}><RefreshCcw className="size-4 mr-2"/> Clear</Button>
+                        <Button variant="ghost" className="h-12 rounded-xl text-white/60 hover:text-white" onClick={clearSignature}><RefreshCcw className="size-4 mr-2"/> Clear</Button>
                         <Button className="h-12 rounded-xl bg-primary text-black font-black" onClick={saveSignature}><Plus className="size-4 mr-2"/> Add to Page</Button>
                     </DialogFooter>
                 </DialogContent>
