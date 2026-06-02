@@ -29,9 +29,9 @@ export default function EditPdfPage() {
     <main className="flex-1 flex flex-col items-center w-full min-h-screen">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4 no-print">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+        <div className="w-full flex flex-col items-center mb-6 px-4">
+            <div className="w-full max-w-5xl text-center mb-6 space-y-3 no-print animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-1 shadow-sm">
                     <FilePenLine className="size-3" /> INDUSTRIAL DOCUMENT STUDIO
                 </div>
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
