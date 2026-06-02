@@ -99,13 +99,13 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
-      { href: '/edit-pdf', label: 'edit_pdf_label', icon: FilePenLine },
+      { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/docx-to-pdf', label: 'word_to_pdf_label', icon: FileText },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
-      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
       { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
+      { href: '/edit-pdf', label: 'edit_pdf_label', icon: FilePenLine },
+      { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
       { href: '/split-pdf', label: 'split_pdf_label', icon: Scissors },
-      { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/crop-pdf', label: 'crop_pdf_label', icon: Crop },
       { href: '/pdf-to-image', label: 'pdf_to_image_label', icon: ImageIcon },
       { href: '/html-to-pdf', label: 'html_to_pdf_label', icon: FileCode },
@@ -339,7 +339,7 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-20 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
+    <header className="h-20 sticky top-0 bg-gradient-to-r from-background/90 via-white/80 to-secondary/60 dark:from-slate-950/80 dark:via-slate-950/80 dark:to-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
       <div className="w-full h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
