@@ -79,13 +79,13 @@ const ALL_TOOLS = [
   { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
   { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-extra" },
-  { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]", category: "pdf-extra" },
-  { icon: Camera, title: "Scan to PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "pdf-extra" },
-  { icon: ImageIcon, title: "PDF to Image", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf-extra" },
-  { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf-extra" },
-  { icon: FileText, title: "Text to PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", lightBg: "bg-[#f1f5f9]", category: "pdf-extra" },
-  { icon: Copyright, title: "Add Watermark", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "pdf-extra" },
-  { icon: NotebookPen, title: "Add Page Numbers", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "pdf-extra" },
+  { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]" },
+  { icon: Camera, title: "Scan to PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]" },
+  { icon: ImageIcon, title: "PDF to Image", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]" },
+  { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]" },
+  { icon: FileText, title: "Text to PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", lightBg: "bg-[#f1f5f9]" },
+  { icon: Copyright, title: "Add Watermark", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]" },
+  { icon: NotebookPen, title: "Add Page Numbers", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]" },
 
   // CALCULATORS
   { icon: Calculator, title: "Standard Calculator", description: "For your everyday calculations.", href: "/standard-calculator", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "calculator" },
@@ -183,11 +183,11 @@ export default function Page() {
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary" />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary" />
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'biodata', 'compress')"
-                className="w-full pl-16 pr-6 h-16 text-lg rounded-3xl bg-white dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-white dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
