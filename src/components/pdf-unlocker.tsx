@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// HARDCODED STABLE VERSION FOR WORKER
+// STABLE CDN WORKER FIX
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
@@ -35,7 +35,6 @@ if (typeof window !== 'undefined') {
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];

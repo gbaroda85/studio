@@ -51,10 +51,9 @@ import jsPDF from 'jspdf';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
-// HARDCODED STABLE VERSION FOR WORKER
-const PDF_JS_VERSION = '4.2.67';
-if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+// Initialize PDF.js worker
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
 
 type Workflow = 'a4' | 'separate';
@@ -124,9 +123,6 @@ export default function AadhaarPrinter() {
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(bufferCopy),
             password: pass,
-            cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-            cMapPacked: true,
-            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
         });
         
         const pdf = await loadingTask.promise;
@@ -340,7 +336,7 @@ export default function AadhaarPrinter() {
         ctx.drawImage(
             image,
             completedRectCrop.x * scaleX,
-            completedRectCrop.y * scaleY,
+            completedCrop.y * scaleY,
             completedRectCrop.width * scaleX,
             completedRectCrop.height * scaleY,
             0,
