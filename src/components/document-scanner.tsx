@@ -101,6 +101,8 @@ export default function DocumentScanner() {
   // Fine-tune states
   const [brightness, setBrightness] = useState([100]);
   const [contrast, setContrast] = useState([100]);
+  const [sharpness, setSharpness] = useState([0]);
+  const [blur, setBlur] = useState([0]);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -226,6 +228,11 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
+    // Apply Blur pre-pass
+    if (blur[0] > 0) {
+        ctx.filter = `blur(${blur[0]}px)`;
+    }
+
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -275,6 +282,7 @@ export default function DocumentScanner() {
             ctx.putImageData(imgData, 0, 0);
         }
     }
+    ctx.filter = 'none';
 
     // Apply Filters and Fine-tune (Brightness/Contrast)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -339,10 +347,47 @@ export default function DocumentScanner() {
         pixels[i+1] = Math.max(0, Math.min(255, g));
         pixels[i+2] = Math.max(0, Math.min(255, b));
     }
+    
+    // Apply Sharpness Pass (Convolution)
+    if (sharpness[0] > 0) {
+        const factor = sharpness[0] / 5;
+        const kernel = [
+            0, -factor, 0,
+            -factor, 1 + (4 * factor), -factor,
+            0, -factor, 0
+        ];
+        const outputPixels = new Uint8ClampedArray(pixels.length);
+        const w = canvas.width;
+        const h = canvas.height;
+
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const dstIdx = (y * w + x) * 4;
+                let r = 0, g = 0, b = 0;
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const scy = Math.min(h - 1, Math.max(0, y + ky));
+                        const scx = Math.min(w - 1, Math.max(0, x + kx));
+                        const srcIdx = (scy * w + scx) * 4;
+                        const weight = kernel[(ky + 1) * 3 + (kx + 1)];
+                        r += pixels[srcIdx] * weight;
+                        g += pixels[srcIdx + 1] * weight;
+                        b += pixels[srcIdx + 2] * weight;
+                    }
+                }
+                outputPixels[dstIdx] = Math.max(0, Math.min(255, r));
+                outputPixels[dstIdx + 1] = Math.max(0, Math.min(255, g));
+                outputPixels[dstIdx + 2] = Math.max(0, Math.min(255, b));
+                outputPixels[dstIdx + 3] = pixels[dstIdx + 3];
+            }
+        }
+        pixels.set(outputPixels);
+    }
+
     ctx.putImageData(imageData, 0, 0);
 
     return canvas.toDataURL('image/jpeg', 0.95);
-  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast]);
+  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, sharpness, blur]);
 
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage && isImageReady) {
@@ -359,7 +404,7 @@ export default function DocumentScanner() {
         }, 300);
         return () => clearTimeout(timer);
     }
-  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast]);
+  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, sharpness, blur]);
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -404,6 +449,8 @@ export default function DocumentScanner() {
     setIsImageReady(false);
     setBrightness([100]);
     setContrast([100]);
+    setSharpness([0]);
+    setBlur([0]);
   };
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
@@ -687,7 +734,7 @@ export default function DocumentScanner() {
                             </div>
                         </CardHeader>
                         <CardContent className="flex-1 p-6 flex flex-col bg-slate-200 dark:bg-slate-900 shadow-inner overflow-y-auto custom-scrollbar">
-                            <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden mb-8">
+                            <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[200px]">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full h-auto block" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
                                 {isProcessing && <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] flex items-center justify-center"><Loader2 className="animate-spin size-8 text-primary" /></div>}
                             </div>
@@ -721,6 +768,20 @@ export default function DocumentScanner() {
                                             <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{contrast[0]}%</span>
                                         </div>
                                         <Slider min={50} max={150} value={contrast} onValueChange={setContrast} className="py-2" />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center px-1">
+                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Zap className="size-3 text-primary" /> Sharpness</Label>
+                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{sharpness[0]}</span>
+                                        </div>
+                                        <Slider min={0} max={10} step={0.5} value={sharpness} onValueChange={setSharpness} className="py-2" />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center px-1">
+                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Droplets className="size-3 text-blue-500" /> Blur</Label>
+                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{blur[0]}px</span>
+                                        </div>
+                                        <Slider min={0} max={5} step={0.5} value={blur} onValueChange={setBlur} className="py-2" />
                                     </div>
                                 </div>
                             </div>
