@@ -38,8 +38,7 @@ import {
     Share2,
     Sun,
     Contrast,
-    FileArchive,
-    Separator
+    FileArchive
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -49,6 +48,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -630,8 +630,8 @@ export default function DocumentScanner() {
                                 <Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase" onClick={handleExportPdf}>
                                     <FileText className="mr-3 size-5" /> EXPORT AS PDF
                                 </Button>
-                                <Button disabled={scannedPages.length === 0} variant="outline" className="w-full h-14 border-2 font-black text-sm rounded-xl uppercase" onClick={handleExportImages}>
-                                    <FileArchive className="mr-3 size-5" /> EXPORT AS IMAGES
+                                <Button disabled={scannedPages.length === 0} variant="outline" className="w-full h-14 px-6 border-2 font-black text-sm rounded-xl uppercase shadow-xl tracking-widest" onClick={handleExportImages}>
+                                    <ImageIcon className="mr-3 size-5" /> SAVE AS IMAGE
                                 </Button>
                                 <Button disabled={scannedPages.length === 0} variant="secondary" className="w-full h-14 font-black text-sm rounded-xl uppercase" onClick={handleShare}>
                                     <Share2 className="mr-3 size-5" /> SHARE DOCUMENT
@@ -671,7 +671,7 @@ export default function DocumentScanner() {
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in zoom-in-95 duration-500">
                 <div className="lg:col-span-8">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col h-full">
-                        <CardHeader className="bg-white/5 border-b border-white/5 p-4 flex flex-row items-center justify-between gap-4">
+                        <CardHeader className="bg-white/5 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-4 text-white">
                                 <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
                                 <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment</CardTitle>
@@ -727,7 +727,7 @@ export default function DocumentScanner() {
 
                 <div className="lg:col-span-4 flex flex-col h-full gap-6">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col flex-1">
-                        <CardHeader className="bg-green-600/5 border-b p-4 flex flex-row items-center justify-between">
+                        <CardHeader className="bg-green-600/5 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="size-10 rounded-xl bg-green-600/10 flex items-center justify-center text-green-600 shadow-md"><Eye className="size-5" /></div>
                                 <CardTitle className="text-lg font-black uppercase tracking-tighter text-slate-800 dark:text-slate-100">Studio Preview</CardTitle>
@@ -817,7 +817,7 @@ export default function DocumentScanner() {
                             {isExporting ? <Loader2 className="animate-spin size-5" /> : <Download className="mr-2 size-5" />} EXPORT PDF
                         </Button>
                         <Button disabled={isExporting} variant="outline" className="flex-1 md:flex-none h-14 px-6 border-2 font-black text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={handleExportImages}>
-                            <ImageIcon className="mr-2 size-5" /> SAVE IMAGES
+                            <ImageIcon className="mr-2 size-5" /> SAVE AS IMAGE
                         </Button>
                         <Button variant="secondary" className="size-14 rounded-2xl shadow-xl flex items-center justify-center shrink-0" onClick={handleShare}>
                             <Share2 className="size-6" />
