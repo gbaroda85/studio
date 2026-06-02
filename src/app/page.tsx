@@ -42,7 +42,9 @@ import {
   Fuel,
   Waves,
   Archive,
-  ArchiveRestore
+  ArchiveRestore,
+  MonitorCheck,
+  Trophy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,13 +63,6 @@ const ALL_TOOLS = [
   { icon: Eraser, title: "Background Remover", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-[#faf5ff]", category: "featured" },
   { icon: Sparkles, title: "Enhance Photo", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", lightBg: "bg-[#f5f3ff]", category: "featured" },
   
-  // IMAGE TOOLS
-  { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", lightBg: "bg-[#fefce8]", category: "image" },
-  { icon: FileOutput, title: "Image to PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
-  { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
-
   // PDF TOOLS - REORDERED
   { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
@@ -76,6 +71,11 @@ const ALL_TOOLS = [
   { icon: FilePenLine, title: "Edit PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
 
   // HIDDEN FROM HOME BUT IN SEARCH INDEX
+  { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", lightBg: "bg-[#fefce8]", category: "image" },
+  { icon: FileOutput, title: "Image to PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
+  { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
   { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
   { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-extra" },
   { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]", category: "pdf-extra" },
@@ -195,7 +195,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-8 pb-32 bg-background w-full flex justify-center">
+      <section className="pt-8 pb-12 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -236,6 +236,66 @@ export default function Page() {
                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').map((tool, i) => <ToolCard key={i} {...tool} />)}
+                    </div>
+                </div>
+
+                {/* WHY CHOOSE GR7 SECTION */}
+                <div className="mb-32 py-16 px-8 bg-slate-100 dark:bg-slate-900/40 rounded-[3rem] border-2 border-white/10 shadow-inner overflow-hidden relative">
+                    <div className="absolute top-0 right-0 size-64 bg-primary/5 blur-3xl rounded-full" />
+                    <div className="absolute bottom-0 left-0 size-64 bg-accent/5 blur-3xl rounded-full" />
+                    
+                    <div className="relative z-10 text-center space-y-16">
+                        <div className="space-y-4">
+                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-black uppercase text-[10px] tracking-widest shadow-sm">CORE PRINCIPLES</Badge>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
+                            <p className="text-sm md:text-base text-muted-foreground font-bold max-w-2xl mx-auto uppercase opacity-60">The only professional studio built entirely on privacy-first architecture.</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+                            <div className="space-y-6 group">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-green-500/30 group-hover:-translate-y-2 transition-all duration-300">
+                                    <ShieldCheck className="size-10 text-green-500" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-black uppercase tracking-tight">100% Private</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 group">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-blue-500/30 group-hover:-translate-y-2 transition-all duration-300">
+                                    <Zap className="size-10 text-blue-500" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-black uppercase tracking-tight">Native Performance</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 group">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-primary/30 group-hover:-translate-y-2 transition-all duration-300">
+                                    <Trophy className="size-10 text-primary" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-black uppercase tracking-tight">Studio Quality</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-8">
+                             <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-white/5">
+                                <div className="flex items-center -space-x-3">
+                                    {[1,2,3,4].map(i => (
+                                        <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black">U{i}</div>
+                                    ))}
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-[10px] font-black uppercase leading-none">Trusted by 10,000+ Users</p>
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">For official document management</p>
+                                </div>
+                             </div>
+                        </div>
                     </div>
                 </div>
             </>
