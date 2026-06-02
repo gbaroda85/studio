@@ -49,8 +49,8 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 
 interface Point { x: number; y: number; }
 
@@ -228,7 +228,6 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // Apply Blur pre-pass
     if (blur[0] > 0) {
         ctx.filter = `blur(${blur[0]}px)`;
     }
@@ -284,7 +283,6 @@ export default function DocumentScanner() {
     }
     ctx.filter = 'none';
 
-    // Apply Filters and Fine-tune (Brightness/Contrast)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const len = pixels.length;
@@ -338,7 +336,6 @@ export default function DocumentScanner() {
             r = g = b = luma;
         }
 
-        // Apply Manual Fine-tune (Brightness & Contrast)
         r = ((r / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
         g = ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
         b = ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
@@ -348,7 +345,6 @@ export default function DocumentScanner() {
         pixels[i+2] = Math.max(0, Math.min(255, b));
     }
     
-    // Apply Sharpness Pass (Convolution)
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 5;
         const kernel = [
@@ -490,9 +486,6 @@ export default function DocumentScanner() {
 
   const handleMouseUp = () => setDraggingPoint(null);
 
-  /**
-   * Export Handlers
-   */
   const handleExportPdf = () => {
     setIsExporting(true);
     const pdf = new jsPDF();
@@ -800,27 +793,27 @@ export default function DocumentScanner() {
         {stage === 'stack' && (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-5 w-full md:w-auto">
                         <div className="size-16 rounded-3xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-2xl border border-green-500/20">
                             <FileStack className="size-8" />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter">Scan Bundle</h2>
+                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Scan Bundle</h2>
                             <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} Pages Captured</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl font-black uppercase text-xs border-2 tracking-widest px-8 bg-white dark:bg-slate-900 shadow-md" onClick={() => setStage('viewfinder')}>
-                            <Plus className="mr-2 size-5" /> SCAN MORE
+                    <div className="grid grid-cols-2 md:flex md:items-center gap-3 w-full md:w-auto">
+                        <Button variant="outline" className="h-14 rounded-2xl font-black uppercase text-[10px] md:text-xs border-2 tracking-widest px-4 md:px-8 bg-white dark:bg-slate-900 shadow-md" onClick={() => setStage('viewfinder')}>
+                            <Plus className="mr-2 size-4 md:size-5" /> SCAN MORE
                         </Button>
-                        <Button disabled={isExporting} className="flex-1 md:flex-none h-14 px-6 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleExportPdf}>
-                            {isExporting ? <Loader2 className="animate-spin size-5" /> : <Download className="mr-2 size-5" />} EXPORT PDF
+                        <Button disabled={isExporting} className="h-14 px-4 md:px-6 bg-green-600 hover:bg-green-700 text-white font-black text-[10px] md:text-sm rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleExportPdf}>
+                            {isExporting ? <Loader2 className="animate-spin size-4 md:size-5" /> : <Download className="mr-2 size-4 md:size-5" />} EXPORT PDF
                         </Button>
-                        <Button disabled={isExporting} variant="outline" className="flex-1 md:flex-none h-14 px-6 border-2 font-black text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={handleExportImages}>
-                            <ImageIcon className="mr-2 size-5" /> SAVE AS IMAGE
+                        <Button disabled={isExporting} variant="outline" className="h-14 px-4 md:px-6 border-2 font-black text-[10px] md:text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={handleExportImages}>
+                            <ImageIcon className="mr-2 size-4 md:size-5" /> SAVE IMAGES
                         </Button>
-                        <Button variant="secondary" className="size-14 rounded-2xl shadow-xl flex items-center justify-center shrink-0" onClick={handleShare}>
-                            <Share2 className="size-6" />
+                        <Button variant="secondary" className="h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase" onClick={handleShare}>
+                            <Share2 className="size-4 md:size-6" /> <span className="md:hidden">SHARE</span>
                         </Button>
                     </div>
                 </div>
