@@ -195,7 +195,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-16 pb-32 bg-background w-full flex justify-center">
+      <section className="pt-4 pb-32 bg-background w-full flex justify-center">
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
