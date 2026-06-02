@@ -76,6 +76,7 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_pdf_description',
       icon: FileDigit,
       color: 'text-red-500',
+      lightBg: 'bg-[#fff1f2]'
     },
     {
       href: '/image-compress',
@@ -83,6 +84,7 @@ function ToolsPageContent() {
       descriptionKey: 'image_compress_description',
       icon: Shrink,
       color: 'text-blue-600',
+      lightBg: 'bg-[#fefce8]'
     },
     {
       href: '/crop-image',
@@ -90,6 +92,7 @@ function ToolsPageContent() {
       descriptionKey: 'crop_image_description',
       icon: Crop,
       color: 'text-cyan-500',
+      lightBg: 'bg-[#ecfeff]'
     },
     {
       href: '/image-resize',
@@ -97,6 +100,7 @@ function ToolsPageContent() {
       descriptionKey: 'resize_image_description',
       icon: Maximize,
       color: 'text-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/remove-background',
@@ -104,6 +108,7 @@ function ToolsPageContent() {
       descriptionKey: 'remove_background_description',
       icon: Eraser,
       color: 'text-rose-500',
+      lightBg: 'bg-[#faf5ff]'
     },
     {
       href: '/remove-signature',
@@ -111,6 +116,7 @@ function ToolsPageContent() {
       descriptionKey: 'remove_signature_description',
       icon: PenLine,
       color: 'text-orange-500',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/enhance-photo',
@@ -118,6 +124,7 @@ function ToolsPageContent() {
       descriptionKey: 'enhance_photo_description',
       icon: Sparkles,
       color: 'text-purple-600',
+      lightBg: 'bg-[#f5f3ff]'
     },
     {
       href: '/passport-photo',
@@ -125,6 +132,7 @@ function ToolsPageContent() {
       descriptionKey: 'passport_photo_description',
       icon: UserCircle,
       color: 'text-emerald-600',
+      lightBg: 'bg-[#f0fdfa]'
     },
     {
       href: '/image-to-jpg',
@@ -132,6 +140,7 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_jpg_description',
       icon: FileOutput,
       color: 'text-yellow-500',
+      lightBg: 'bg-[#fefce8]'
     },
     {
       href: '/image-to-png',
@@ -139,6 +148,7 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_png_description',
       icon: FileOutput,
       color: 'text-sky-500',
+      lightBg: 'bg-[#ecfeff]'
     },
     {
       href: '/image-to-text',
@@ -146,30 +156,18 @@ function ToolsPageContent() {
       descriptionKey: 'image_to_text_description',
       icon: FileScan,
       color: 'text-teal-500',
+      lightBg: 'bg-[#f0fdfa]'
     },
   ];
 
   const pdfFeatures = [
     {
-      href: '/edit-pdf',
-      labelKey: 'edit_pdf_label',
-      descriptionKey: 'edit_pdf_description',
-      icon: FilePenLine,
-      color: 'text-indigo-600',
-    },
-    {
-      href: '/document-scan',
-      labelKey: 'document_scan_label',
-      descriptionKey: 'document_scan_description',
-      icon: Sparkles,
-      color: 'text-primary',
-    },
-    {
-      href: '/scan-to-pdf',
-      labelKey: 'scan_to_pdf_label',
-      descriptionKey: 'scan_to_pdf_description',
-      icon: Camera,
-      color: 'text-indigo-500',
+      href: '/merge-pdf',
+      labelKey: 'merge_pdf_label',
+      descriptionKey: 'merge_pdf_description',
+      icon: Merge,
+      color: 'text-emerald-600',
+      lightBg: 'bg-[#f0fdf4]'
     },
     {
       href: '/docx-to-pdf',
@@ -177,6 +175,7 @@ function ToolsPageContent() {
       descriptionKey: 'word_to_pdf_description',
       icon: FileText,
       color: 'text-blue-500',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/lock-pdf',
@@ -184,13 +183,7 @@ function ToolsPageContent() {
       descriptionKey: 'lock_pdf_description',
       icon: Lock,
       color: 'text-slate-900',
-    },
-    {
-      href: '/unlock-pdf',
-      labelKey: 'unlock_pdf_label',
-      descriptionKey: 'unlock_pdf_description',
-      icon: Unlock,
-      color: 'text-teal-500',
+      lightBg: 'bg-[#f8fafc]'
     },
     {
       href: '/compress-pdf',
@@ -198,13 +191,39 @@ function ToolsPageContent() {
       descriptionKey: 'compress_pdf_description',
       icon: FileArchive,
       color: 'text-rose-600',
+      lightBg: 'bg-[#fff1f2]'
     },
     {
-      href: '/merge-pdf',
-      labelKey: 'merge_pdf_label',
-      descriptionKey: 'merge_pdf_description',
-      icon: Merge,
-      color: 'text-emerald-600',
+      href: '/edit-pdf',
+      labelKey: 'edit_pdf_label',
+      descriptionKey: 'edit_pdf_description',
+      icon: FilePenLine,
+      color: 'text-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/document-scan',
+      labelKey: 'document_scan_label',
+      descriptionKey: 'document_scan_description',
+      icon: Sparkles,
+      color: 'text-primary',
+      lightBg: 'bg-[#f0fdf4]'
+    },
+    {
+      href: '/scan-to-pdf',
+      labelKey: 'scan_to_pdf_label',
+      descriptionKey: 'scan_to_pdf_description',
+      icon: Camera,
+      color: 'text-indigo-500',
+      lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/unlock-pdf',
+      labelKey: 'unlock_pdf_label',
+      descriptionKey: 'unlock_pdf_description',
+      icon: Unlock,
+      color: 'text-teal-500',
+      lightBg: 'bg-[#f0fdfa]'
     },
     {
       href: '/split-pdf',
@@ -212,6 +231,7 @@ function ToolsPageContent() {
       descriptionKey: 'split_pdf_description',
       icon: Scissors,
       color: 'text-cyan-600',
+      lightBg: 'bg-[#ecfeff]'
     },
     {
       href: '/crop-pdf',
@@ -219,6 +239,7 @@ function ToolsPageContent() {
       descriptionKey: 'crop_pdf_description',
       icon: Crop,
       color: 'text-amber-600',
+      lightBg: 'bg-[#fffbeb]'
     },
     {
       href: '/pdf-to-image',
@@ -226,6 +247,7 @@ function ToolsPageContent() {
       descriptionKey: 'pdf_to_image_description',
       icon: ImageIcon,
       color: 'text-orange-500',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/html-to-pdf',
@@ -233,6 +255,7 @@ function ToolsPageContent() {
       descriptionKey: 'html_to_pdf_description',
       icon: FileCode,
       color: 'text-orange-600',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/text-to-pdf',
@@ -240,6 +263,7 @@ function ToolsPageContent() {
       descriptionKey: 'text_to_pdf_description',
       icon: FileText,
       color: 'text-slate-500',
+      lightBg: 'bg-[#f1f5f9]'
     },
     {
       href: '/add-watermark',
@@ -247,6 +271,7 @@ function ToolsPageContent() {
       descriptionKey: 'add_watermark_description',
       icon: Copyright,
       color: 'text-rose-500',
+      lightBg: 'bg-[#fff1f2]'
     },
     {
       href: '/add-page-numbers',
@@ -254,6 +279,7 @@ function ToolsPageContent() {
       descriptionKey: 'add_page_numbers_description',
       icon: NotebookPen,
       color: 'text-lime-500',
+      lightBg: 'bg-[#f7fee7]'
     },
   ];
 
@@ -264,6 +290,7 @@ function ToolsPageContent() {
       descriptionKey: 'aadhaar_printer_description',
       icon: Printer,
       color: 'text-orange-600',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/create-zip',
@@ -271,6 +298,7 @@ function ToolsPageContent() {
       descriptionKey: 'create_zip_description',
       icon: Archive,
       color: 'text-violet-500',
+      lightBg: 'bg-[#f5f3ff]'
     },
     {
       href: '/unzip-file',
@@ -278,6 +306,7 @@ function ToolsPageContent() {
       descriptionKey: 'unzip_file_description',
       icon: ArchiveRestore,
       color: 'text-stone-500',
+      lightBg: 'bg-[#f8fafc]'
     },
   ];
 
@@ -288,6 +317,7 @@ function ToolsPageContent() {
       descriptionKey: 'standard_calculator_description',
       icon: Calculator,
       color: 'text-cyan-500',
+      lightBg: 'bg-[#ecfeff]'
     },
     {
       href: '/loan-calculator',
@@ -295,6 +325,7 @@ function ToolsPageContent() {
       descriptionKey: 'loan_emi_calculator_description',
       icon: Landmark,
       color: 'text-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/age-calculator',
@@ -302,6 +333,7 @@ function ToolsPageContent() {
       descriptionKey: 'age_calculator_description',
       icon: Cake,
       color: 'text-rose-500',
+      lightBg: 'bg-[#fff1f2]'
     },
     {
       href: '/percentage-calculator',
@@ -309,6 +341,7 @@ function ToolsPageContent() {
       descriptionKey: 'percentage_calculator_description',
       icon: Percent,
       color: 'text-blue-500',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/fuel-cost-calculator',
@@ -316,6 +349,7 @@ function ToolsPageContent() {
       descriptionKey: 'fuel_cost_calculator_description',
       icon: Route,
       color: 'text-rose-500',
+      lightBg: 'bg-[#fff1f2]'
     },
     {
       href: '/interest-calculator',
@@ -323,6 +357,7 @@ function ToolsPageContent() {
       descriptionKey: 'interest_calculator_description',
       icon: Coins,
       color: 'text-yellow-600',
+      lightBg: 'bg-[#fefce8]'
     },
     {
       href: '/sales-tax-calculator',
@@ -330,6 +365,7 @@ function ToolsPageContent() {
       descriptionKey: 'sales_tax_calculator_description',
       icon: Receipt,
       color: 'text-indigo-500',
+      lightBg: 'bg-[#eff6ff]'
     },
   ];
   
@@ -340,6 +376,7 @@ function ToolsPageContent() {
       descriptionKey: 'acceleration_converter_description',
       icon: Gauge,
       color: 'text-emerald-500',
+      lightBg: 'bg-[#f0fdf4]'
     },
     {
       href: '/area-converter',
@@ -347,6 +384,7 @@ function ToolsPageContent() {
       descriptionKey: 'area_converter_description',
       icon: AreaChart,
       color: 'text-lime-500',
+      lightBg: 'bg-[#f7fee7]'
     },
     {
       href: '/fuel-converter',
@@ -354,6 +392,7 @@ function ToolsPageContent() {
       descriptionKey: 'fuel_converter_description',
       icon: Fuel,
       color: 'text-orange-500',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/pressure-converter',
@@ -361,6 +400,7 @@ function ToolsPageContent() {
       descriptionKey: 'pressure_converter_description',
       icon: Waves,
       color: 'text-sky-500',
+      lightBg: 'bg-[#f0f9ff]'
     },
   ];
 
@@ -453,6 +493,7 @@ function ToolsPageContent() {
                         href={feature.href}
                         icon={feature.icon}
                         color={feature.color}
+                        lightBg={feature.lightBg}
                         />
                     ))}
                     </div>
@@ -488,6 +529,7 @@ function ToolsPageContent() {
                         href={feature.href}
                         icon={feature.icon}
                         color={feature.color}
+                        lightBg={feature.lightBg}
                     />
                     ))}
                 </div>

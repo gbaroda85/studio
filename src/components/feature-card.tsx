@@ -15,6 +15,7 @@ type FeatureCardProps = {
   href: string;
   icon: LucideIcon;
   color: string;
+  lightBg?: string;
 };
 
 export function FeatureCard({
@@ -23,14 +24,19 @@ export function FeatureCard({
   href,
   icon: Icon,
   color,
+  lightBg,
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <Card className="h-full relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl dark:group-hover:shadow-primary/20 border-2 border-border/50 dark:border-white/10 group-hover:border-primary/50 dark:group-hover:border-primary/40 bg-card rounded-[2rem]">
-        <CardHeader className="p-6">
+      <Card className={cn(
+        "h-full relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl dark:group-hover:shadow-primary/20 border-2 border-border/50 dark:border-white/10 group-hover:border-primary/50 dark:group-hover:border-primary/40 rounded-[2rem]",
+        lightBg || "bg-card", // Colourful for Light Mode
+        "dark:bg-card" // Professional Dark for Dark Mode
+      )}>
+        <CardHeader className="p-6 relative z-10">
           <div className="flex items-start justify-between mb-4">
-            <div className={cn("grid size-12 place-items-center rounded-xl bg-muted/50 transition-all group-hover:scale-110 group-hover:bg-primary/10 shadow-inner", color)}>
-              <Icon className="h-7 w-7" />
+            <div className={cn("grid size-12 place-items-center rounded-xl transition-all group-hover:scale-110 shadow-lg", color.replace('text-', 'bg-'))}>
+              <Icon className="h-7 w-7 text-white" />
             </div>
             <div className="size-9 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary text-primary group-hover:text-white transition-all shadow-sm">
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
