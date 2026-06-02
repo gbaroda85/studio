@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +14,7 @@ interface ToolNavigationProps {
 export function ToolNavigation({ href, label, className }: ToolNavigationProps) {
   return (
     <div className={cn(
-      "sticky top-20 z-40 w-full bg-background/60 backdrop-blur-xl border-b border-border/40 py-3 mb-8 flex justify-center animate-in fade-in slide-in-from-top-4 duration-500",
+      "sticky top-20 z-40 w-full bg-background/60 backdrop-blur-xl border-b border-border/40 py-4 mb-10 flex justify-center animate-in fade-in slide-in-from-top-4 duration-500",
       className
     )}>
       <div className="w-full max-w-7xl px-4 md:px-8">

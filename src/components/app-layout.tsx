@@ -391,7 +391,7 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center shrink-0">
       <div className="w-full px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2 space-y-6">
@@ -451,12 +451,12 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden">
       <AppHeader />
-      <main className="flex-1 flex flex-col w-full relative">
+      <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
-            <div className="w-full flex-1">
+            <div className="w-full flex-1 flex flex-col">
               {children}
             </div>
             <AppFooter />

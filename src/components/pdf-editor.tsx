@@ -17,7 +17,7 @@ import {
     Move, 
     CheckCircle2, 
     ShieldCheck, 
-    Zap,
+    Zap, 
     Settings2,
     Layers,
     ChevronUp,
@@ -338,7 +338,7 @@ export default function PdfEditor() {
      */
     if (!pdfFile) {
         return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+            <div className="w-full flex-1 flex flex-col items-center justify-center gap-6 px-4 py-12">
                 <Card className={cn(
                     "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
@@ -373,7 +373,7 @@ export default function PdfEditor() {
     const selectedElement = selectedPage?.elements.find(el => el.id === selectedElementId);
 
     return (
-        <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-4 animate-in fade-in duration-500 h-[calc(100vh-140px)]">
+        <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-4 animate-in fade-in duration-500 flex-1 overflow-hidden h-[calc(100vh-140px)]">
             
             {/* TOP TOOLBAR */}
             <div className="w-full h-16 bg-slate-900 border-b border-white/5 rounded-t-[2rem] flex items-center justify-between px-6 shrink-0">
@@ -458,7 +458,7 @@ export default function PdfEditor() {
                                         </div>
                                     ) : (
                                         <div style={{ width: `${el.width}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}>
-                                            <img src={el.src} className="w-full h-auto block" alt="ovl" />
+                                            <img src={el.src} className="size-full block" alt="ovl" />
                                         </div>
                                     )}
 
@@ -585,6 +585,7 @@ export default function PdfEditor() {
             </div>
             
             <input ref={overlayImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleAddImage} />
+            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
         </div>
     );
 }
