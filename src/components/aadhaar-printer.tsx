@@ -260,7 +260,7 @@ export default function AadhaarPrinter() {
 
   const handleFinalizeCrop = async () => {
     const image = imgRef.current;
-    if (!image) return;
+    if (!image || !image.naturalWidth) return;
     setIsProcessing(true);
 
     const canvas = document.createElement('canvas');
@@ -403,46 +403,37 @@ export default function AadhaarPrinter() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        
+        // Calculate movement delta
         const dx = x - prev[idx].x;
         const dy = y - prev[idx].y;
-        
-        // Update the point being dragged
-        next[idx] = { x, y };
 
-        // SYNC LOGIC for 8 Points: 0(TL), 1(TC), 2(TR), 3(RC), 4(BR), 5(BC), 6(BL), 7(LC)
-        if (idx === 0) { // TL
-            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
-            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-        } else if (idx === 2) { // TR
-            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
-            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
-        } else if (idx === 4) { // BR
-            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
-            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
-        } else if (idx === 6) { // BL
-            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
-            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-        } else if (idx === 1) { // TC (Top Mid): Move TL and TR synchronously
-            next[0].y += dy; next[2].y += dy;
-            // Update midpoints connected to moved corners
-            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
-        } else if (idx === 3) { // RC (Right Mid): Move TR and BR synchronously
-            next[2].x += dx; next[4].x += dx;
-            // Update midpoints connected to moved corners
-            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
-            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
-        } else if (idx === 5) { // BC (Bottom Mid): Move BL and BR synchronously
-            next[6].y += dy; next[4].y += dy;
-            // Update midpoints connected to moved corners
-            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
-        } else if (idx === 7) { // LC (Left Mid): Move TL and BL synchronously
-            next[0].x += dx; next[6].x += dx;
-            // Update midpoints connected to moved corners
-            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
-            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
+        // Move the core corners if dragged directly OR by midpoint
+        if ([0, 2, 4, 6].includes(idx)) {
+            next[idx] = { x, y };
+        } else {
+            // Dragging midpoint: Move both corners of that edge
+            if (idx === 1) { // TC (Top Center) -> Move TL(0) and TR(2)
+                next[0].y = Math.max(0, Math.min(100, next[0].y + dy));
+                next[2].y = Math.max(0, Math.min(100, next[2].y + dy));
+            } else if (idx === 3) { // RC (Right Center) -> Move TR(2) and BR(4)
+                next[2].x = Math.max(0, Math.min(100, next[2].x + dx));
+                next[4].x = Math.max(0, Math.min(100, next[4].x + dx));
+            } else if (idx === 5) { // BC (Bottom Center) -> Move BL(6) and BR(4)
+                next[6].y = Math.max(0, Math.min(100, next[6].y + dy));
+                next[4].y = Math.max(0, Math.min(100, next[4].y + dy));
+            } else if (idx === 7) { // LC (Left Center) -> Move TL(0) and BL(6)
+                next[0].x = Math.max(0, Math.min(100, next[0].x + dx));
+                next[6].x = Math.max(0, Math.min(100, next[6].x + dx));
+            }
         }
+
+        // AUTO RE-SYNC ALL MIDPOINTS to keep them centered between corners
+        // This is the key to preventing "chipkna" or sticking
+        next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 }; // TC
+        next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 }; // RC
+        next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 }; // BC
+        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 }; // LC
 
         return next;
     });
@@ -939,4 +930,3 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
-
