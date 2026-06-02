@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { 
     UploadCloud, 
@@ -25,7 +26,8 @@ import {
     RefreshCcw,
     FilePenLine,
     SearchCode,
-    Sparkles
+    Sparkles,
+    Maximize
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -141,7 +143,7 @@ export default function PdfEditor() {
         toast({ title: "Text Added", description: "Use sliders to position it." });
     };
 
-    const handleAddImage = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && selectedPageIndex !== null) {
             const reader = new FileReader();
@@ -506,8 +508,4 @@ export default function PdfEditor() {
             </div>
         </div>
     );
-}
-
-function degrees(deg: number) {
-    return deg;
 }
