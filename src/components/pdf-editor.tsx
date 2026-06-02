@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument, rgb, StandardFonts, degrees, hexToRgb } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { 
     UploadCloud, 
@@ -197,6 +196,10 @@ export default function PdfEditor() {
         }
     };
 
+    const handleRotatePage = (idx: number) => {
+        setPages(prev => prev.map((p, i) => i === idx ? { ...p, rotation: (p.rotation + 90) % 360 } : p));
+    };
+
     const updateTextOverlay = (pageIdx: number, textId: string, updates: Partial<OverlayText>) => {
         setPages(prev => prev.map((p, i) => i === pageIdx ? {
             ...p,
@@ -216,7 +219,7 @@ export default function PdfEditor() {
         setIsExporting(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             const activePages = pages.filter(p => !p.isDeleted);
             const finalPdfDoc = await PDFDocument.create();
 
@@ -292,6 +295,61 @@ export default function PdfEditor() {
             setIsExporting(false);
         }
     };
+
+    if (!pdfFile) {
+        return (
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+                <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-indigo-600/10 text-indigo-600 shadow-xl relative">
+                        <FilePenLine className="size-8" />
+                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                            <Sparkles className="size-2.5" />
+                        </div>
+                    </div>
+                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                        Professional <span className="text-gradient-hero">PDF Editor</span>
+                    </h1>
+                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                        Add text, signatures, and manage pages in your document. <br/>100% Private local browser studio.
+                    </p>
+                </div>
+
+                <Card className={cn(
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                )}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+                >
+                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-10 md:p-12">
+                        <div 
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Edit</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Vector-layer editing engine active.</p>
+                            </div>
+                        </div>
+                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> LIVE PREVIEW</div>
+                        <div className="flex items-center gap-1.5"><Type className="size-3 text-purple-500" /> TEXT & IMAGE</div>
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
 
     const selectedPage = selectedPageIndex !== null ? pages[selectedPageIndex] : null;
     const selectedText = selectedPage?.textOverlays.find(t => t.id === selectedElementId);
