@@ -53,7 +53,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 
 // Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
 
 type Workflow = 'a4' | 'separate';
@@ -97,10 +97,12 @@ export default function AadhaarPrinter() {
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
-  // 4-Dot Scanner States
+  // 8-Dot Scanner States (Corners + Midpoints)
   const [points, setPoints] = useState<Point[]>([
-    { x: 20, y: 20 }, { x: 80, y: 20 },
-    { x: 80, y: 80 }, { x: 20, y: 80 }
+    { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, // TL, TM, TR
+    { x: 85, y: 50 }, { x: 85, y: 85 },                   // RM, BR
+    { x: 50, y: 85 }, { x: 15, y: 85 },                   // BM, BL
+    { x: 15, y: 50 }                                      // LM
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -127,7 +129,7 @@ export default function AadhaarPrinter() {
         
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.0 });
+        const viewport = page.getViewport({ scale: 2.2 }); 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         
@@ -207,8 +209,10 @@ export default function AadhaarPrinter() {
 
   const resetPoints = () => {
     setPoints([
-        { x: 10, y: 10 }, { x: 90, y: 10 },
-        { x: 90, y: 90 }, { x: 10, y: 90 }
+        { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 },
+        { x: 85, y: 50 }, { x: 85, y: 85 },
+        { x: 50, y: 85 }, { x: 15, y: 85 },
+        { x: 15, y: 50 }
     ]);
   };
 
@@ -228,10 +232,12 @@ export default function AadhaarPrinter() {
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
+    // Only use the 4 corners for homography calculation (TL, TR, BR, BL)
+    const corners = [src[0], src[2], src[4], src[6]];
     const p = [];
     for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
+        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -264,10 +270,10 @@ export default function AadhaarPrinter() {
     let finalData = "";
 
     if (cropMode === 'scanner') {
-        const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
-        const w2 = Math.hypot(points[2].x - points[3].x, points[2].y - points[3].y);
-        const h1 = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
-        const h2 = Math.hypot(points[2].x - points[1].x, points[2].y - points[1].y);
+        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
+        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
+        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
+        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
         const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
         const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
@@ -275,6 +281,7 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
+        // Use corners for destination
         const srcPoints = points.map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
@@ -286,7 +293,7 @@ export default function AadhaarPrinter() {
             { x: 0, y: targetHeight }
         ];
 
-        const h = solvePerspective(dstPoints, srcPoints);
+        const h = solvePerspective(srcPoints, dstPoints);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
         
         const srcCanvas = document.createElement('canvas');
@@ -336,7 +343,7 @@ export default function AadhaarPrinter() {
         ctx.drawImage(
             image,
             completedRectCrop.x * scaleX,
-            completedCrop.y * scaleY,
+            completedRectCrop.y * scaleY,
             completedRectCrop.width * scaleX,
             completedRectCrop.height * scaleY,
             0,
@@ -395,7 +402,21 @@ export default function AadhaarPrinter() {
     setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
-        next[draggingPoint] = { x, y };
+        const idx = draggingPoint;
+        next[idx] = { x, y };
+
+        // Auto-update midpoints if corners are moved
+        if (idx === 0 || idx === 2) next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
+        if (idx === 2 || idx === 4) next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
+        if (idx === 4 || idx === 6) next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
+        if (idx === 6 || idx === 0) next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
+
+        // If dragging a midpoint, move corresponding edge
+        if (idx === 1) { next[0].y = y; next[2].y = y; }
+        if (idx === 3) { next[2].x = x; next[4].x = x; }
+        if (idx === 5) { next[4].y = y; next[6].y = y; }
+        if (idx === 7) { next[6].x = x; next[0].x = x; }
+
         return next;
     });
   }, [draggingPoint]);
@@ -707,7 +728,7 @@ export default function AadhaarPrinter() {
                         <div className="relative">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="scanner adjustment" className="max-h-[60vh] md:max-h-[70vh] w-auto object-contain pointer-events-none" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <polygon points={points.map(p => `${p.x},${p.y}`).join(' ')} className="fill-primary/20 stroke-primary stroke-[0.5]" />
+                                <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-8 md:size-14 -ml-4 md:-ml-7 -mt-4 md:-mt-7 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
@@ -746,7 +767,7 @@ export default function AadhaarPrinter() {
                   <div className="w-full py-4 md:py-10 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-8 py-1.5 md:py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-3 w-3 md:h-4 md:w-4 text-primary animate-pulse" /> 
-                          {cropMode === 'rect' ? "Drag box to any area" : "Drag 4 dots to corners"}
+                          {cropMode === 'rect' ? "Drag box to any area" : "Drag 8 dots to corners"}
                       </div>
                   </div>
               </CardContent>
