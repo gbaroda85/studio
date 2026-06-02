@@ -470,24 +470,24 @@ export default function PdfEditor() {
         <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-0 animate-in fade-in duration-500 h-[calc(100vh-140px)] overflow-hidden" 
              onMouseMove={handleMouseMoveGlobal} onMouseUp={handleMouseUpGlobal}>
             
-            {/* TOP TOOLBAR - Theme Aware Design */}
+            {/* TOP TOOLBAR - Theme Aware Fixed Design */}
             {pdfFile && (
-                <div className="w-full h-16 bg-slate-900 dark:bg-slate-950 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
+                <div className="w-full h-16 bg-slate-900 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
-                        <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl shrink-0">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white" onClick={handleRedo} disabled={historyIndex >= history.length - 1}><Redo2 className="size-4"/></Button>
+                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl shrink-0">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white" onClick={handleRedo} disabled={historyIndex >= history.length - 1}><Redo2 className="size-4"/></Button>
                         </div>
-                        <Separator orientation="vertical" className="h-6 opacity-20 mx-2" />
+                        <Separator orientation="vertical" className="h-6 opacity-10 mx-2" />
                         <div className="flex items-center gap-1 md:gap-2">
                             <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
                             
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button>
+                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary">Handwriting Signature</DialogTitle></DialogHeader>
@@ -505,7 +505,7 @@ export default function PdfEditor() {
                                 </DialogContent>
                             </Dialog>
 
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
                         </div>
                     </div>
 
@@ -515,7 +515,7 @@ export default function PdfEditor() {
                             <span className="text-[10px] font-black text-white/80 w-8 text-center">{zoom}%</span>
                             <Button variant="ghost" size="icon" className="h-6 w-6 text-white/60 hover:text-white" onClick={() => setZoom(z => Math.min(300, z + 10))}><ZoomIn className="size-3.5"/></Button>
                         </div>
-                        <Button className="bg-green-600 hover:bg-green-700 text-white font-black uppercase text-xs h-10 px-6 rounded-xl shadow-xl active:scale-95 transition-all" onClick={handleExport} disabled={isExporting}>
+                        <Button className="bg-green-600 hover:bg-green-700 text-white font-black uppercase text-xs h-10 px-6 rounded-xl shadow-xl active:scale-95 transition-all border-none" onClick={handleExport} disabled={isExporting}>
                             {isExporting ? <Loader2 className="animate-spin mr-2 size-4" /> : <Download className="mr-2 size-4" />} EXPORT PDF
                         </Button>
                     </div>
