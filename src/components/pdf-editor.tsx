@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees, hexToRgb } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { 
     UploadCloud, 
@@ -27,7 +27,12 @@ import {
     FilePenLine,
     SearchCode,
     Sparkles,
-    Maximize
+    Maximize,
+    Palette,
+    MousePointer2,
+    BringToFront,
+    Scale,
+    Layout
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -38,6 +43,7 @@ import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import confetti from 'canvas-confetti';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -50,6 +56,8 @@ interface OverlayText {
     x: number; 
     y: number;
     size: number;
+    color: string;
+    font: string;
 }
 
 interface OverlayImage {
@@ -59,6 +67,7 @@ interface OverlayImage {
     y: number;
     width: number;
     rotation: number;
+    opacity: number;
 }
 
 interface PageState {
@@ -78,7 +87,7 @@ export default function PdfEditor() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [pages, setPages] = useState<PageState[]>([]);
     const [selectedPageIndex, setSelectedId] = useState<number | null>(null);
-    const [activeEditType, setActiveEditType] = useState<'none' | 'text' | 'image'>('none');
+    const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const overlayImgInputRef = useRef<HTMLInputElement>(null);
@@ -120,7 +129,7 @@ export default function PdfEditor() {
                 }
                 setPages(initialPages);
                 if (initialPages.length > 0) setSelectedId(0);
-                toast({ title: "PDF Loaded", description: `${totalPages} pages ready for editing.` });
+                toast({ title: "PDF Loaded", description: `${totalPages} pages ready for professional editing.` });
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to read PDF.' });
             } finally {
@@ -131,16 +140,19 @@ export default function PdfEditor() {
 
     const handleAddText = () => {
         if (selectedPageIndex === null) return;
+        const id = Math.random().toString(36).substr(2, 9);
         const newText: OverlayText = {
-            id: Math.random().toString(36).substr(2, 9),
-            text: "Double click to edit",
-            x: 10,
-            y: 10,
-            size: 14
+            id,
+            text: "Add your text",
+            x: 20,
+            y: 20,
+            size: 18,
+            color: "#000000",
+            font: "Helvetica"
         };
         setPages(prev => prev.map((p, i) => i === selectedPageIndex ? { ...p, textOverlays: [...p.textOverlays, newText] } : p));
-        setActiveEditType('text');
-        toast({ title: "Text Added", description: "Use sliders to position it." });
+        setSelectedElementId(id);
+        toast({ title: "Text Layer Added" });
     };
 
     const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,30 +160,41 @@ export default function PdfEditor() {
         if (file && selectedPageIndex !== null) {
             const reader = new FileReader();
             reader.onload = (event) => {
+                const id = Math.random().toString(36).substr(2, 9);
                 const newImg: OverlayImage = {
-                    id: Math.random().toString(36).substr(2, 9),
+                    id,
                     src: event.target?.result as string,
                     x: 10,
-                    y: 20,
-                    width: 100,
-                    rotation: 0
+                    y: 30,
+                    width: 120,
+                    rotation: 0,
+                    opacity: 100
                 };
                 setPages(prev => prev.map((p, i) => i === selectedPageIndex ? { ...p, imageOverlays: [...p.imageOverlays, newImg] } : p));
-                setActiveEditType('image');
-                toast({ title: "Image Added", description: "Perfect for signatures or logos." });
+                setSelectedElementId(id);
+                toast({ title: "Image Layer Added", description: "Scale it using the studio sliders." });
             };
             reader.readAsDataURL(file);
         }
         e.target.value = "";
     };
 
-    const handleDeletePage = (idx: number) => {
-        setPages(prev => prev.map((p, i) => i === idx ? { ...p, isDeleted: true } : p));
-        if (selectedPageIndex === idx) setSelectedId(null);
+    const handleDeleteElement = (id: string) => {
+        if (selectedPageIndex === null) return;
+        setPages(prev => prev.map((p, i) => i === selectedPageIndex ? {
+            ...p,
+            textOverlays: p.textOverlays.filter(t => t.id !== id),
+            imageOverlays: p.imageOverlays.filter(img => img.id !== id)
+        } : p));
+        setSelectedElementId(null);
     };
 
-    const handleRotatePage = (idx: number) => {
-        setPages(prev => prev.map((p, i) => i === idx ? { ...p, rotation: (p.rotation + 90) % 360 } : p));
+    const handleDeletePage = (idx: number) => {
+        setPages(prev => prev.map((p, i) => i === idx ? { ...p, isDeleted: true } : p));
+        if (selectedPageIndex === idx) {
+            const nextActive = pages.findIndex((p, i) => !p.isDeleted && i !== idx);
+            setSelectedId(nextActive !== -1 ? nextActive : null);
+        }
     };
 
     const updateTextOverlay = (pageIdx: number, textId: string, updates: Partial<OverlayText>) => {
@@ -194,8 +217,6 @@ export default function PdfEditor() {
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
-            const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
             const activePages = pages.filter(p => !p.isDeleted);
             const finalPdfDoc = await PDFDocument.create();
 
@@ -206,14 +227,25 @@ export default function PdfEditor() {
 
                 // Apply Text Overlays
                 for (const t of pageState.textOverlays) {
+                    let font;
+                    if (t.font === 'Times') font = await finalPdfDoc.embedFont(StandardFonts.TimesRomanBold);
+                    else if (t.font === 'Courier') font = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+                    else font = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+
                     const pdfX = (t.x / 100) * width;
                     const pdfY = height - (t.y / 100) * height - t.size; 
+                    
+                    const hexColor = t.color || "#000000";
+                    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
+                    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
+                    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
+
                     copiedPage.drawText(t.text, {
                         x: pdfX,
                         y: pdfY,
                         size: t.size,
-                        font: helveticaFont,
-                        color: rgb(0, 0, 0)
+                        font,
+                        color: rgb(r, g, b)
                     });
                 }
 
@@ -230,7 +262,8 @@ export default function PdfEditor() {
                         y: pdfY,
                         width: img.width,
                         height: img.width * (embeddedImg.height / embeddedImg.width),
-                        rotate: degrees(-img.rotation)
+                        rotate: degrees(-img.rotation),
+                        opacity: img.opacity / 100
                     });
                 }
 
@@ -242,7 +275,7 @@ export default function PdfEditor() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `edited-${pdfFile.name}`;
+            link.download = `Studio-Edit-${pdfFile.name}`;
             link.click();
             
             confetti({
@@ -251,87 +284,50 @@ export default function PdfEditor() {
                 origin: { y: 0.6 },
                 colors: ['#48a9a4', '#fce7eb', '#ffffff']
             });
-            toast({ title: "Success!", description: "Edited PDF saved locally." });
+            toast({ title: "Success!", description: "Professional PDF exported." });
         } catch (e) {
             console.error(e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Check if the original PDF is secured." });
+            toast({ variant: 'destructive', title: "Export Failed", description: "Encryption error or corrupt file." });
         } finally {
             setIsExporting(false);
         }
     };
 
-    const handleReset = () => {
-        setPdfFile(null);
-        setPages([]);
-        setSelectedId(null);
-    };
-
     const selectedPage = selectedPageIndex !== null ? pages[selectedPageIndex] : null;
-
-    if (!pdfFile) {
-        return (
-            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
-                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}>
-                <CardHeader className="pt-12">
-                    <div className="mx-auto mb-4 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-inner">
-                        <FilePenLine className="h-10 w-10" />
-                    </div>
-                    <CardTitle className="text-3xl font-black uppercase tracking-tight">Professional PDF Editor</CardTitle>
-                    <CardDescription className="text-sm font-bold opacity-60 uppercase tracking-widest">Add Text, Images & Manage Pages Locally.</CardDescription>
-                </CardHeader>
-                <CardContent className="p-10 md:p-16">
-                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                        <div className="relative">
-                            <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-xl font-bold uppercase tracking-tight">Drop PDF to start editing</p>
-                            <p className="text-[10px] text-muted-foreground mt-2 font-bold uppercase opacity-60 tracking-widest">Supports Multi-page documents.</p>
-                        </div>
-                    </div>
-                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
-                </CardContent>
-                <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> 100% PRIVATE</div>
-                    <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> LIVE STUDIO</div>
-                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> BATCH ACTIONS</div>
-                </CardFooter>
-            </Card>
-        );
-    }
+    const selectedText = selectedPage?.textOverlays.find(t => t.id === selectedElementId);
+    const selectedImage = selectedPage?.imageOverlays.find(i => i.id === selectedElementId);
 
     return (
         <div className="w-full max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 animate-in fade-in duration-700">
             
-            {/* 1. PAGE STACK (LIST) */}
-            <div className="lg:col-span-3 space-y-4 h-full max-h-[85vh] flex flex-col">
+            {/* 1. LEFT SIDEBAR: PAGE NAVIGATION */}
+            <div className="lg:col-span-3 space-y-4 h-full max-h-[85vh] flex flex-col no-print">
                 <Card className="border-2 shadow-xl flex-1 flex flex-col overflow-hidden bg-card/50">
                     <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">DOCUMENT PAGES</CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                            <Layers className="size-3" /> PAGE STACK
+                        </CardTitle>
                         <Badge className="bg-primary text-white font-black">{pages.filter(p => !p.isDeleted).length}</Badge>
                     </CardHeader>
                     <CardContent className="p-0 flex-1 overflow-hidden">
                         <ScrollArea className="h-[600px] p-4">
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="space-y-4">
                                 {pages.map((p, i) => !p.isDeleted && (
                                     <div 
                                         key={i} 
-                                        onClick={() => setSelectedId(i)}
+                                        onClick={() => { setSelectedId(i); setSelectedElementId(null); }}
                                         className={cn(
                                             "relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white group shadow-md",
-                                            selectedPageIndex === i ? "border-primary ring-4 ring-primary/10 shadow-2xl" : "hover:border-primary/40"
+                                            selectedPageIndex === i ? "border-primary ring-4 ring-primary/10 shadow-2xl scale-[1.02]" : "hover:border-primary/40 opacity-70 hover:opacity-100"
                                         )}
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center p-2" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                            <img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`P${i+1}`} />
+                                            <img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`Page ${i+1}`} />
                                         </div>
-                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">P{i + 1}</div>
-                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1.5">
-                                            <Button size="icon" variant="secondary" className="h-8 w-8 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRotatePage(i); }}><RotateCw className="size-4" /></Button>
-                                            <Button size="icon" variant="destructive" className="h-8 w-8 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleDeletePage(i); }}><Trash2 className="size-4" /></Button>
+                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">P{i + 1}</div>
+                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all flex flex-col gap-1.5 translate-y-2 group-hover:translate-y-0">
+                                            <Button size="icon" variant="secondary" className="h-8 w-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); setPages(prev => prev.map((pg, idx) => idx === i ? { ...pg, rotation: (pg.rotation + 90) % 360 } : pg)); }}><RotateCw className="size-4" /></Button>
+                                            <Button size="icon" variant="destructive" className="h-8 w-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); handleDeletePage(i); }}><Trash2 className="size-4" /></Button>
                                         </div>
                                     </div>
                                 ))}
@@ -339,166 +335,253 @@ export default function PdfEditor() {
                         </ScrollArea>
                     </CardContent>
                     <CardFooter className="p-4 border-t bg-muted/10">
-                         <Button variant="outline" className="w-full font-black text-[10px] uppercase border-2 h-10" onClick={handleReset}><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
+                         <Button variant="ghost" onClick={() => setPdfFile(null)} className="w-full font-black text-[10px] uppercase border-2 h-10 hover:bg-destructive/5 hover:text-destructive">
+                             <RefreshCcw className="size-3 mr-2" /> Replace PDF
+                         </Button>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* 2. EDITOR STUDIO (CANVAS PREVIEW) */}
+            {/* 2. CENTER: LIVE EDITOR CANVAS */}
             <div className="lg:col-span-6 flex flex-col gap-6 items-center">
-                <Card className="w-full border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-900 flex flex-col min-h-[600px]">
-                    <CardHeader className="bg-white/5 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between">
+                <Card className="w-full border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2.5rem] bg-slate-900 flex flex-col min-h-[650px] relative">
+                    <CardHeader className="bg-white/5 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between z-20">
                          <div className="flex items-center gap-4 text-white">
                             <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
                             <div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Live Editor</CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase text-white/40">Page {selectedPageIndex !== null ? selectedPageIndex + 1 : '---'} in focus</CardDescription>
+                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Live Studio</CardTitle>
+                                <CardDescription className="text-[10px] font-bold uppercase text-white/40">Page {selectedPageIndex !== null ? selectedPageIndex + 1 : '---'} Editor</CardDescription>
                             </div>
                          </div>
                          <div className="flex gap-2">
-                             <Button variant="outline" size="sm" onClick={handleAddText} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl"><Type className="size-4 mr-2" /> Text</Button>
-                             <Button variant="outline" size="sm" onClick={() => overlayImgInputRef.current?.click()} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl"><ImageIcon className="size-4 mr-2" /> Image</Button>
+                             <Button variant="outline" size="sm" onClick={handleAddText} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl transition-all"><Type className="size-4 mr-2" /> Add Text</Button>
+                             <Button variant="outline" size="sm" onClick={() => overlayImgInputRef.current?.click()} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl transition-all"><ImageIcon className="size-4 mr-2" /> Add Image</Button>
                              <input ref={overlayImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleAddImage} />
                          </div>
                     </CardHeader>
-                    <CardContent className="p-8 flex items-center justify-center relative overflow-hidden bg-black/40 min-h-[500px]">
-                        {isProcessing && <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center text-white font-black animate-pulse uppercase tracking-[0.3em]">Processing...</div>}
+                    
+                    <CardContent className="p-8 flex items-center justify-center relative overflow-hidden bg-black/40 min-h-[500px] flex-1">
+                        {isProcessing && (
+                            <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-white">
+                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                <p className="font-black text-xs uppercase tracking-widest animate-pulse">Rendering Studio...</p>
+                            </div>
+                        )}
                         
                         {selectedPage ? (
-                            <div className="relative shadow-2xl border-4 border-white transform-gpu bg-white max-w-full" style={{ transform: `rotate(${selectedPage.rotation}deg)` }}>
+                            <div className="relative shadow-2xl border-8 border-white transform-gpu bg-white max-w-full" style={{ transform: `rotate(${selectedPage.rotation}deg)` }}>
                                 <img src={selectedPage.previewSrc!} alt="edit" className="max-h-[65vh] w-auto block object-contain" />
                                 
-                                {/* RENDER TEXT OVERLAYS */}
+                                {/* TEXT OVERLAYS */}
                                 {selectedPage.textOverlays.map(t => (
-                                    <div key={t.id} className="absolute z-10 p-1 border border-dashed border-primary/40 cursor-move hover:bg-primary/5 transition-colors"
-                                         style={{ left: `${t.x}%`, top: `${t.y}%`, fontSize: `${t.size}px`, fontWeight: '900', color: '#000', transform: `rotate(${-selectedPage.rotation}deg)` }}>
+                                    <div 
+                                        key={t.id} 
+                                        onClick={() => setSelectedElementId(t.id)}
+                                        className={cn(
+                                            "absolute z-10 p-1.5 cursor-pointer group select-none transition-all",
+                                            selectedElementId === t.id ? "ring-2 ring-primary ring-offset-2 bg-primary/5 rounded" : "hover:ring-1 hover:ring-primary/40"
+                                        )}
+                                        style={{ left: `${t.x}%`, top: `${t.y}%`, fontSize: `${t.size}px`, fontWeight: '900', color: t.color, fontFamily: t.font, transform: `rotate(${-selectedPage.rotation}deg)` }}
+                                    >
                                         {t.text}
+                                        {selectedElementId === t.id && (
+                                            <div className="absolute -top-6 -right-6 bg-destructive text-white rounded-full size-6 flex items-center justify-center shadow-lg" onClick={(e) => { e.stopPropagation(); handleDeleteElement(t.id); }}>
+                                                <Trash2 className="size-3" />
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
 
-                                {/* RENDER IMAGE OVERLAYS */}
+                                {/* IMAGE OVERLAYS */}
                                 {selectedPage.imageOverlays.map(img => (
-                                    <div key={img.id} className="absolute z-10 p-1 border border-dashed border-primary/40 cursor-move hover:bg-primary/5"
-                                         style={{ left: `${img.x}%`, top: `${img.y}%`, width: `${img.width}px`, transform: `rotate(${img.rotation - selectedPage.rotation}deg)` }}>
-                                        <img src={img.src} className="w-full h-auto" alt="overlay" />
+                                    <div 
+                                        key={img.id} 
+                                        onClick={() => setSelectedElementId(img.id)}
+                                        className={cn(
+                                            "absolute z-10 p-1 cursor-pointer group transition-all",
+                                            selectedElementId === img.id ? "ring-2 ring-primary ring-offset-2 bg-primary/5 rounded" : "hover:ring-1 hover:ring-primary/40"
+                                        )}
+                                        style={{ left: `${img.x}%`, top: `${img.y}%`, width: `${img.width}px`, opacity: img.opacity / 100, transform: `rotate(${img.rotation - selectedPage.rotation}deg)` }}
+                                    >
+                                        <img src={img.src} className="w-full h-auto block" alt="overlay" />
+                                        {selectedElementId === img.id && (
+                                            <div className="absolute -top-6 -right-6 bg-destructive text-white rounded-full size-6 flex items-center justify-center shadow-lg" onClick={(e) => { e.stopPropagation(); handleDeleteElement(img.id); }}>
+                                                <Trash2 className="size-3" />
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center gap-4 text-white/20">
-                                <FilePenLine className="size-20" />
-                                <p className="text-xs font-black uppercase tracking-widest">Select a page to start editing</p>
+                            <div className="flex flex-col items-center gap-6 text-white/10 p-12">
+                                <FilePenLine className="size-24" />
+                                <div className="text-center space-y-2">
+                                    <p className="text-lg font-black uppercase tracking-tighter">SELECT A PAGE</p>
+                                    <p className="text-xs font-bold uppercase opacity-50">Choose a thumbnail from the left stack to start editing</p>
+                                </div>
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-black/60 p-4 border-t border-white/5 flex justify-center">
-                         <div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
-                            <Move className="h-4 w-4 text-primary animate-pulse" /> Precision alignment active
+
+                    <CardFooter className="bg-black/60 p-4 border-t border-white/5 flex justify-center z-10">
+                         <div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                            <MousePointer2 className="h-4 w-4 text-primary animate-pulse" /> 
+                            Click items on page to edit specific properties
                         </div>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* 3. SETTINGS & EXPORT PANEL */}
-            <div className="lg:col-span-3 space-y-6">
+            {/* 3. RIGHT SIDEBAR: PROPERTIES PANEL */}
+            <div className="lg:col-span-3 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
-                            <Settings2 className="size-6 text-primary" /> STUDIO PANEL
+                            <Settings2 className="size-6 text-primary" /> PROPERTIES
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6 md:p-8 space-y-8">
-                        {selectedPage && (activeEditType === 'text' || activeEditType === 'image') ? (
-                            <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                <Tabs defaultValue={activeEditType} onValueChange={(v) => setActiveEditType(v as 'text' | 'image')}>
-                                    <TabsList className="grid w-full grid-cols-2 h-10 mb-6 bg-muted p-1 rounded-xl">
-                                        <TabsTrigger value="text" className="font-bold text-[9px] uppercase">Text Controls</TabsTrigger>
-                                        <TabsTrigger value="image" className="font-bold text-[9px] uppercase">Image Controls</TabsTrigger>
-                                    </TabsList>
-                                    
-                                    <TabsContent value="text" className="space-y-6">
-                                        {selectedPage.textOverlays.length > 0 ? (
-                                            <div className="space-y-6">
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">Content</Label>
-                                                    <Input value={selectedPage.textOverlays[selectedPage.textOverlays.length - 1].text} 
-                                                           onChange={(e) => updateTextOverlay(selectedPageIndex!, selectedPage.textOverlays[selectedPage.textOverlays.length - 1].id, { text: e.target.value })} 
-                                                           className="h-10 border-2 font-bold" />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">X-Position (%)</Label>
-                                                    <Slider value={[selectedPage.textOverlays[selectedPage.textOverlays.length - 1].x]} min={0} max={100} 
-                                                            onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedPage.textOverlays[selectedPage.textOverlays.length - 1].id, { x: v[0] })} />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">Y-Position (%)</Label>
-                                                    <Slider value={[selectedPage.textOverlays[selectedPage.textOverlays.length - 1].y]} min={0} max={100} 
-                                                            onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedPage.textOverlays[selectedPage.textOverlays.length - 1].id, { y: v[0] })} />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">Size (pt)</Label>
-                                                    <Slider value={[selectedPage.textOverlays[selectedPage.textOverlays.length - 1].size]} min={8} max={72} 
-                                                            onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedPage.textOverlays[selectedPage.textOverlays.length - 1].id, { size: v[0] })} />
+                    <CardContent className="p-6 md:p-8">
+                        <Tabs defaultValue="content" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 h-10 mb-6 bg-muted p-1 rounded-xl">
+                                <TabsTrigger value="content" className="font-bold text-[9px] uppercase">Active Item</TabsTrigger>
+                                <TabsTrigger value="page" className="font-bold text-[9px] uppercase">Page Actions</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="content" className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+                                {selectedText ? (
+                                    <div className="space-y-6">
+                                        <Badge className="bg-primary/10 text-primary font-black uppercase text-[10px] px-3 py-1 mb-2">TEXT SETTINGS</Badge>
+                                        <div className="space-y-2.5">
+                                            <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Text Content</Label>
+                                            <Input 
+                                                value={selectedText.text} 
+                                                onChange={(e) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { text: e.target.value })} 
+                                                className="h-10 border-2 font-bold focus-visible:ring-primary" 
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2.5">
+                                                <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Font Family</Label>
+                                                <Select value={selectedText.font} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { font: v })}>
+                                                    <SelectTrigger className="h-10 font-bold border-2"><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Helvetica" className="font-bold">Helvetica</SelectItem>
+                                                        <SelectItem value="Times" className="font-bold">Times Roman</SelectItem>
+                                                        <SelectItem value="Courier" className="font-bold">Courier</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2.5">
+                                                <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Text Color</Label>
+                                                <div className="flex gap-1.5 flex-wrap">
+                                                    {['#000000', '#FF0000', '#0000FF', '#008000', '#FFFFFF'].map(c => (
+                                                        <button key={c} onClick={() => updateTextOverlay(selectedPageIndex!, selectedElementId!, { color: c })}
+                                                            className={cn("size-6 rounded-full border-2 border-white shadow-sm ring-1 ring-slate-200", selectedText.color === c && "ring-primary ring-2")}
+                                                            style={{ backgroundColor: c }} />
+                                                    ))}
                                                 </div>
                                             </div>
-                                        ) : <p className="text-center py-10 opacity-30 text-[10px] font-bold uppercase">No text added yet</p>}
-                                    </TabsContent>
-
-                                    <TabsContent value="image" className="space-y-6">
-                                        {selectedPage.imageOverlays.length > 0 ? (
-                                            <div className="space-y-6">
-                                                 <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">Width (px)</Label>
-                                                    <Slider value={[selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].width]} min={20} max={500} 
-                                                            onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].id, { width: v[0] })} />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">X-Position (%)</Label>
-                                                    <Slider value={[selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].x]} min={0} max={100} 
-                                                            onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].id, { x: v[0] })} />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <Label className="text-[10px] font-black uppercase opacity-60">Y-Position (%)</Label>
-                                                    <Slider value={[selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].y]} min={0} max={100} 
-                                                            onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedPage.imageOverlays[selectedPage.imageOverlays.length - 1].id, { y: v[0] })} />
-                                                </div>
+                                        </div>
+                                        <div className="space-y-5 pt-2">
+                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label><span className="text-[10px] font-mono font-bold text-primary">{selectedText.size}pt</span></div>
+                                            <Slider value={[selectedText.size]} min={8} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { size: v[0] })} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase opacity-40">Horizontal %</Label>
+                                                <Slider value={[selectedText.x]} min={0} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { x: v[0] })} />
                                             </div>
-                                        ) : <p className="text-center py-10 opacity-30 text-[10px] font-bold uppercase">No image added yet</p>}
-                                    </TabsContent>
-                                </Tabs>
-                            </div>
-                        ) : (
-                            <div className="py-20 text-center opacity-30 space-y-4">
-                                 <FilePenLine className="size-14 mx-auto" />
-                                 <p className="text-xs font-black uppercase leading-relaxed tracking-widest">Awaiting Edits...<br/>Select tools above.</p>
-                            </div>
-                        )}
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase opacity-40">Vertical %</Label>
+                                                <Slider value={[selectedText.y]} min={0} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { y: v[0] })} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : selectedImage ? (
+                                    <div className="space-y-6">
+                                        <Badge className="bg-purple-500/10 text-purple-600 font-black uppercase text-[10px] px-3 py-1 mb-2">IMAGE SETTINGS</Badge>
+                                        <div className="space-y-5">
+                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Width Size</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.width}px</span></div>
+                                            <Slider value={[selectedImage.width]} min={20} max={500} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { width: v[0] })} />
+                                        </div>
+                                        <div className="space-y-5">
+                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Opacity</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.opacity}%</span></div>
+                                            <Slider value={[selectedImage.opacity]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { opacity: v[0] })} />
+                                        </div>
+                                        <div className="space-y-5">
+                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Rotation</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.rotation}°</span></div>
+                                            <Slider value={[selectedImage.rotation]} min={0} max={360} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { rotation: v[0] })} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase opacity-40">Horizontal %</Label>
+                                                <Slider value={[selectedImage.x]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { x: v[0] })} />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase opacity-40">Vertical %</Label>
+                                                <Slider value={[selectedImage.y]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { y: v[0] })} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="py-20 text-center opacity-30 space-y-4 flex flex-col items-center">
+                                         <MousePointer2 className="size-16 text-muted-foreground animate-bounce" />
+                                         <div className="space-y-1">
+                                            <p className="text-xs font-black uppercase leading-tight tracking-widest">Select Element</p>
+                                            <p className="text-[10px] font-bold uppercase">Click an item on the page to customize it.</p>
+                                         </div>
+                                    </div>
+                                )}
+                            </TabsContent>
 
-                        <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
-                            <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
-                            <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
-                                <span className="font-black block mb-1 text-primary">STUDIO LOCK:</span>
-                                All edits are rendered as native PDF vectors for absolute sharpness.
+                            <TabsContent value="page" className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                                {selectedPage ? (
+                                    <div className="space-y-4">
+                                        <Button variant="outline" className="w-full h-12 rounded-xl border-2 font-black uppercase text-[10px]" onClick={() => handleRotatePage(selectedPageIndex!)}>
+                                            <RotateCw className="size-4 mr-2" /> Rotate Page 90°
+                                        </Button>
+                                        <Button variant="outline" className="w-full h-12 rounded-xl border-2 font-black uppercase text-[10px] border-destructive/20 text-destructive hover:bg-destructive/5" onClick={() => handleDeletePage(selectedPageIndex!)}>
+                                            <Trash2 className="size-4 mr-2" /> Delete Page
+                                        </Button>
+                                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex gap-4 mt-6">
+                                            <Sparkles className="size-5 text-primary shrink-0" />
+                                            <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
+                                                Page-wide actions are permanent in this session. Be careful!
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : <p className="text-center py-20 opacity-30 text-xs font-bold">SELECT A PAGE FIRST</p>}
+                            </TabsContent>
+                        </Tabs>
+
+                        <div className="p-5 bg-muted/30 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex flex-col gap-4 mt-10">
+                            <div className="flex items-center gap-3">
+                                <ShieldCheck className="size-5 text-green-500" />
+                                <span className="text-[10px] font-black uppercase text-green-600">Secure Sanitization</span>
+                            </div>
+                            <p className="text-[9px] text-muted-foreground font-medium leading-relaxed uppercase">
+                                All overlays are re-serialized as native PDF content. Text remains searchable and images remain high resolution.
                             </p>
                         </div>
                     </CardContent>
+
                     <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
                         <Button 
-                            className="w-full h-20 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
-                            disabled={pages.length === 0 || isExporting}
+                            className="w-full h-16 md:h-20 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
+                            disabled={pages.filter(p => !p.isDeleted).length === 0 || isExporting}
                             onClick={handleExport}
                         >
                             {isExporting ? (
                                 <div className="flex items-center gap-3">
                                     <Loader2 className="size-8 animate-spin" />
-                                    <span className="uppercase tracking-tighter">EXPORTING...</span>
+                                    <span className="uppercase tracking-tighter">BUILDING PDF...</span>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-4">
-                                    <Download className="size-9" />
+                                    <Download className="size-8" />
                                     <div className="text-left">
                                         <span className="block uppercase tracking-tighter leading-none text-base md:text-xl">SAVE EDITS</span>
-                                        <span className="text-[8px] md:text-[10px] font-bold opacity-60 uppercase tracking-widest">DOWNLOAD FINAL PDF</span>
+                                        <span className="text-[9px] font-bold opacity-60 uppercase tracking-widest">DOWNLOAD FINAL FILE</span>
                                     </div>
                                 </div>
                             )}
