@@ -132,8 +132,8 @@ const COLORS = [
 ];
 
 const PRINT_SHEETS = [
-    { name: "4x6 Inch Sheet (8 Photos)", width: 6, height: 4, unit: 'inch', cols: 4, rows: 2 },
-    { name: "A4 Paper (Multi-Set)", width: 210, height: 297, unit: 'mm', cols: 5, rows: 6 },
+    { name: "4x6 Inch Sheet (Auto-Fit)", width: 6, height: 4, unit: 'inch' },
+    { name: "A4 Paper (Auto-Fit)", width: 210, height: 297, unit: 'mm' },
 ];
 
 const DPI = 300; 
@@ -233,6 +233,7 @@ export default function PassportPhotoMaker() {
         setBlur(0);
         setBorderWidth(0);
         setBgColor("#FFFFFF");
+        setBorderColor("#000000");
     };
 
     const handleAutoEnhance = () => {
@@ -441,12 +442,11 @@ export default function PassportPhotoMaker() {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, targetW, targetH);
 
-        // Get actual dimensions of the cropped photo
         const currentPreset = PRESETS[selectedPreset];
         let pw_mm, ph_mm;
 
         if (currentPreset.id === 'free') {
-            pw_mm = 35; ph_mm = 45; // Default if free
+            pw_mm = 35; ph_mm = 45; 
         } else if (currentPreset.id === 'custom') {
             pw_mm = parseFloat(customWidth); ph_mm = parseFloat(customHeight);
         } else {
@@ -456,11 +456,20 @@ export default function PassportPhotoMaker() {
         const photoW = (pw_mm / 25.4) * DPI;
         const photoH = (ph_mm / 25.4) * DPI;
         
-        const marginX = (targetW - (photoW * sheet.cols)) / (sheet.cols + 1);
-        const marginY = (targetH - (photoH * sheet.rows)) / (sheet.rows + 1);
+        // Dynamic Grid Calculation to avoid cutting
+        const cols = Math.floor(targetW / (photoW * 1.05)); // 5% buffer for margins
+        const rows = Math.floor(targetH / (photoH * 1.05));
+        
+        if (cols === 0 || rows === 0) {
+            toast({ variant: 'destructive', title: 'Format Error', description: 'Photo size is larger than paper.' });
+            return;
+        }
 
-        for (let r = 0; r < sheet.rows; r++) {
-            for (let c = 0; c < sheet.cols; c++) {
+        const marginX = (targetW - (photoW * cols)) / (cols + 1);
+        const marginY = (targetH - (photoH * rows)) / (rows + 1);
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
                 const x = marginX + c * (photoW + marginX);
                 const y = marginY + r * (photoH + marginY);
                 ctx.drawImage(sourceCanvas, x, y, photoW, photoH);
@@ -656,8 +665,30 @@ export default function PassportPhotoMaker() {
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Border (Frame)</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{borderWidth}%</span></div>
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Border Size</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{borderWidth}%</span></div>
                                                 <Slider min={0} max={5} step={0.1} value={[borderWidth]} onValueChange={(v) => setBorderWidth(v[0])} />
+                                            </div>
+                                            <div className="space-y-4 pt-2">
+                                                <Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Border Color</Label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {['#000000', '#FFFFFF', '#D3D3D3', '#FF0000', '#0000FF'].map(c => (
+                                                        <button 
+                                                            key={c} 
+                                                            onClick={() => setBorderColor(c)}
+                                                            className={cn(
+                                                                "size-7 rounded-lg border-2 transition-all",
+                                                                borderColor === c ? "border-primary ring-2 ring-primary/10 scale-110" : "border-white/10"
+                                                            )}
+                                                            style={{ backgroundColor: c }}
+                                                        />
+                                                    ))}
+                                                    <Input 
+                                                        type="color" 
+                                                        value={borderColor} 
+                                                        onChange={(e) => setBorderColor(e.target.value)} 
+                                                        className="w-8 h-8 p-1 rounded-md cursor-pointer border-none bg-transparent"
+                                                    />
+                                                </div>
                                             </div>
                                         </TabsContent>
                                     </ScrollArea>
@@ -708,7 +739,7 @@ export default function PassportPhotoMaker() {
                                 {PRINT_SHEETS.map((sheet, i) => (
                                     <Button key={i} variant="outline" className="h-16 md:h-20 w-full justify-start gap-3 md:gap-4 rounded-xl md:rounded-2xl border-2 hover:border-primary" onClick={() => renderPrintSheet(i)}>
                                         <div className="size-8 md:size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Layout className="size-4 md:size-5" /></div>
-                                        <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase">{sheet.name}</p><p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">300 DPI Rendering</p></div>
+                                        <div className="text-left"><p className="text-[10px] md:text-xs font-black uppercase">{sheet.name}</p><p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-70">HD Auto-Fit Grid</p></div>
                                     </Button>
                                 ))}
                             </CardContent>
