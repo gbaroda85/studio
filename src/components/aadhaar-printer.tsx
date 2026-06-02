@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -50,9 +51,10 @@ import jsPDF from 'jspdf';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
-// Initialize PDF.js worker
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// HARDCODED STABLE VERSION FOR WORKER
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type Workflow = 'a4' | 'separate';
@@ -115,32 +117,20 @@ export default function AadhaarPrinter() {
     setStage('upload');
   };
 
-  /**
-   * Robust PDF Rendering Logic
-   * Handles encrypted Aadhaar documents with CMaps and Standard Fonts support
-   */
   const processPdfWithPassword = async (buffer: ArrayBuffer, pass: string = "") => {
     setIsProcessing(true);
     try {
-        // We use .slice(0) to create a copy of the ArrayBuffer.
-        // This prevents the original buffer from being detached by the PDF.js worker,
-        // allowing us to reuse the same data for subsequent password attempts.
         const bufferCopy = buffer.slice(0);
-        
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(bufferCopy),
             password: pass,
-            // Character maps are essential for Aadhaar Hindi/Regional fonts
-            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
             cMapPacked: true,
-            // Standard fonts fallback
-            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
         });
         
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        
-        // 2.0 scale is ideal for A4 text clarity without hitting browser memory limits
         const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -156,7 +146,7 @@ export default function AadhaarPrinter() {
         await page.render({ 
             canvasContext: ctx, 
             viewport,
-            intent: 'print' // Optimized rendering for documents
+            intent: 'print'
         }).promise;
         
         setOriginalA4Src(canvas.toDataURL('image/jpeg', 0.95));
@@ -170,7 +160,7 @@ export default function AadhaarPrinter() {
             toast({ 
                 variant: 'destructive', 
                 title: 'Processing Failed', 
-                description: 'This document contains complex layers that failed to render. Please try a different scan.' 
+                description: 'Failed to render document.' 
             });
         }
     } finally {
@@ -387,7 +377,7 @@ export default function AadhaarPrinter() {
         setIsProcessing(false);
     }
     
-    toast({ title: "Adjustment Applied", description: `Image processed ${autoEnhance ? "with AI enhancement" : "normally"}.` });
+    toast({ title: "Adjustment Applied", description: `Image processed.` });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -467,9 +457,9 @@ export default function AadhaarPrinter() {
         pdf.addImage(backFinal, 'PNG', startX, startY + photoH + gap, photoW, photoH);
 
         pdf.save(`ID-Card-Ready-${Date.now()}.pdf`);
-        toast({ title: "PDF Downloaded", description: "Standard A4 layout saved." });
+        toast({ title: "PDF Downloaded" });
     } catch (e) {
-        toast({ variant: 'destructive', title: "Error", description: "Failed to generate PDF." });
+        toast({ variant: 'destructive', title: "Error" });
     } finally {
         setIsBuildingPdf(false);
     }

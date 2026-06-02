@@ -38,9 +38,10 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import confetti from 'canvas-confetti';
 
-// Initialize PDF.js worker
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// HARDCODED STABLE VERSION FOR WORKER
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 function formatBytes(bytes: number, decimals = 2): string {
@@ -131,7 +132,12 @@ export default function PdfMerger() {
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
         setIsGeneratingPreview(true);
         try {
-            const loadingTask = pdfjs.getDocument({ data: pdfBytes });
+            const loadingTask = pdfjs.getDocument({ 
+                data: pdfBytes,
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+            });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
             const pagesToRender = Math.min(pdf.numPages, 10); 
@@ -233,7 +239,7 @@ export default function PdfMerger() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDFs to Merge</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity bundling engine active.</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">High-fidelity bundling engine active.</p>
                                 </div>
                             </div>
                         ) : (

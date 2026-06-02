@@ -26,14 +26,16 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-// Initializing worker path
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// HARDCODED STABLE VERSION FOR WORKER
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
@@ -74,12 +76,12 @@ export default function PdfUnlocker() {
     const checkEncryption = async (arrayBuffer: ArrayBuffer) => {
         setIsChecking(true);
         try {
-            // Try loading without password to see if it's actually protected
+            const bufferCopy = arrayBuffer.slice(0);
             const loadingTask = pdfjs.getDocument({ 
-                data: new Uint8Array(arrayBuffer),
-                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                data: new Uint8Array(bufferCopy),
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
             await loadingTask.promise;
             setIsProtected(false);
@@ -134,12 +136,13 @@ export default function PdfUnlocker() {
         setProgress(10);
 
         try {
+            const bufferCopy = arrayBuffer.slice(0);
             const loadingTask = pdfjs.getDocument({ 
-                data: new Uint8Array(arrayBuffer),
+                data: new Uint8Array(bufferCopy),
                 password: password,
-                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
             const pdf = await loadingTask.promise;
 
@@ -167,7 +170,7 @@ export default function PdfUnlocker() {
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    await page.render({ canvasContext: context, viewport: renderViewport }).promise;
+                    await page.render({ canvasContext: context, viewport: renderViewport, intent: 'print' }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     
                     const orientation = viewport.width > viewport.height ? 'l' : 'p';
