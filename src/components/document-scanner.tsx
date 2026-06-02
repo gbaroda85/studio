@@ -38,7 +38,8 @@ import {
     Share2,
     Sun,
     Contrast,
-    FileArchive
+    FileArchive,
+    Separator
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -48,7 +49,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -813,10 +813,13 @@ export default function DocumentScanner() {
                         <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl font-black uppercase text-xs border-2 tracking-widest px-8 bg-white dark:bg-slate-900 shadow-md" onClick={() => setStage('viewfinder')}>
                             <Plus className="mr-2 size-5" /> SCAN MORE
                         </Button>
-                        <Button disabled={isExporting} className="flex-1 md:flex-none h-14 px-10 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleExportPdf}>
-                            {isExporting ? <Loader2 className="animate-spin size-6" /> : <Download className="mr-3 size-6" />} EXPORT PDF
+                        <Button disabled={isExporting} className="flex-1 md:flex-none h-14 px-6 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleExportPdf}>
+                            {isExporting ? <Loader2 className="animate-spin size-5" /> : <Download className="mr-2 size-5" />} EXPORT PDF
                         </Button>
-                        <Button variant="secondary" className="size-14 rounded-2xl shadow-xl flex items-center justify-center" onClick={handleShare}>
+                        <Button disabled={isExporting} variant="outline" className="flex-1 md:flex-none h-14 px-6 border-2 font-black text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={handleExportImages}>
+                            <ImageIcon className="mr-2 size-5" /> SAVE IMAGES
+                        </Button>
+                        <Button variant="secondary" className="size-14 rounded-2xl shadow-xl flex items-center justify-center shrink-0" onClick={handleShare}>
                             <Share2 className="size-6" />
                         </Button>
                     </div>
