@@ -3,13 +3,14 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
   
+  // Array of all valid routes to ensure GSC discovery
   const routes = [
     '',
     '/tools',
     '/privacy-policy',
     '/terms-of-service',
     
-    // Image Tools
+    // Image Tools (High priority for indexing)
     '/image-compress',
     '/image-resize',
     '/marriage-biodata',
@@ -39,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/text-to-pdf',
     '/add-watermark',
     '/add-page-numbers',
+    '/edit-pdf',
     
     // Calculator Tools
     '/standard-calculator',
@@ -60,10 +62,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/unzip-file'
   ];
 
-  return routes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: route === '' ? 1 : 0.8,
-  }));
+  return routes.map((route) => {
+    // Assign priorities based on page importance
+    let priority = 0.8;
+    if (route === '') priority = 1.0;
+    if (route === '/tools') priority = 0.9;
+    if (['/image-compress', '/merge-pdf', '/passport-photo', '/unlock-pdf', '/marriage-biodata'].includes(route)) priority = 0.95;
+
+    return {
+      url: `${baseUrl}${route}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: priority,
+    };
+  });
 }
