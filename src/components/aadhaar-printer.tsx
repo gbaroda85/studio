@@ -275,7 +275,6 @@ export default function AadhaarPrinter() {
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
         const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
-        // Ensure valid width/height to prevent white page
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         
@@ -395,38 +394,40 @@ export default function AadhaarPrinter() {
     }
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    const currentX = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const currentY = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
 
-    setMagnifierPos({ x, y });
+    setMagnifierPos({ x: currentX, y: currentY });
     
     setPoints(prev => {
+        if (draggingPoint === null || !prev[draggingPoint]) return prev;
+        
         const next = [...prev];
         const idx = draggingPoint;
-        const dx = x - prev[idx].x;
-        const dy = y - prev[idx].y;
+        const dx = currentX - prev[idx].x;
+        const dy = currentY - prev[idx].y;
 
-        // If dragging a corner (0,2,4,6)
+        // If dragging a corner (0:TL, 2:TR, 4:BR, 6:BL)
         if ([0, 2, 4, 6].includes(idx)) {
-            next[idx] = { x, y };
+            next[idx] = { x: currentX, y: currentY };
         } else {
-            // Dragging midpoint: Move both corresponding corners
-            if (idx === 1) { // Top Center moves TL and TR
+            // Dragging Midpoint (Smooth Edge Movement)
+            if (idx === 1) { // TC moves TL and TR
                 next[0].y = Math.max(0, Math.min(100, next[0].y + dy));
                 next[2].y = Math.max(0, Math.min(100, next[2].y + dy));
-            } else if (idx === 3) { // Right Center moves TR and BR
+            } else if (idx === 3) { // RC moves TR and BR
                 next[2].x = Math.max(0, Math.min(100, next[2].x + dx));
                 next[4].x = Math.max(0, Math.min(100, next[4].x + dx));
-            } else if (idx === 5) { // Bottom Center moves BL and BR
+            } else if (idx === 5) { // BC moves BL and BR
                 next[6].y = Math.max(0, Math.min(100, next[6].y + dy));
                 next[4].y = Math.max(0, Math.min(100, next[4].y + dy));
-            } else if (idx === 7) { // Left Center moves TL and BL
+            } else if (idx === 7) { // LC moves TL and BL
                 next[0].x = Math.max(0, Math.min(100, next[0].x + dx));
                 next[6].x = Math.max(0, Math.min(100, next[6].x + dx));
             }
         }
 
-        // Always re-calculate ALL midpoints to keep them centered between corners
+        // Re-calculate all midpoints strictly based on corners for perfect alignment
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 }; // TC
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 }; // RC
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 }; // BC
