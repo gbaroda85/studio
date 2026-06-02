@@ -58,14 +58,14 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass }: any) => 
   <Link href={href} className="group">
     <Card className="h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 bg-card overflow-hidden relative rounded-[2rem] hover:-translate-y-2">
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
-      <CardContent className="p-6">
-        <div className={cn(`size-12 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
-          <Icon className="size-6" />
+      <CardContent className="p-5">
+        <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
+          <Icon className="size-5" />
         </div>
-        <h3 className="text-xl font-black mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter">{title}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2 leading-relaxed font-semibold">{description}</p>
-        <div className="flex items-center text-primary font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
-          Launch Tool <ArrowRight className="ml-1 size-3.5" />
+        <h3 className="text-lg font-black mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter line-clamp-1">{title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-semibold h-8">{description}</p>
+        <div className="flex items-center text-primary font-black text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
+          Launch Tool <ArrowRight className="ml-1 size-3" />
         </div>
       </CardContent>
     </Card>
