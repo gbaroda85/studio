@@ -68,12 +68,12 @@ const ALL_TOOLS = [
   { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
 
-  // PDF TOOLS - ADDED EDIT PDF HERE
-  { icon: FilePenLine, title: "Edit PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
+  // PDF TOOLS - REORDERED
+  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
   { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Lock, title: "Vault PDF Locker", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF Optimizer", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
-  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
+  { icon: FilePenLine, title: "Edit PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
 
   // HIDDEN FROM HOME BUT IN SEARCH INDEX
   { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
