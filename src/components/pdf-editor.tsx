@@ -31,7 +31,12 @@ import {
     MousePointer2,
     BringToFront,
     Scale,
-    Layout
+    Layout,
+    Undo2,
+    Redo2,
+    ZoomIn,
+    ZoomOut,
+    PenTool
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -43,14 +48,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
 
+/**
+ * INTERFACES
+ */
 interface OverlayText {
     id: string;
+    type: 'text';
     text: string;
     x: number; 
     y: number;
@@ -61,6 +72,7 @@ interface OverlayText {
 
 interface OverlayImage {
     id: string;
+    type: 'image';
     src: string;
     x: number;
     y: number;
@@ -69,34 +81,79 @@ interface OverlayImage {
     opacity: number;
 }
 
+type Element = OverlayText | OverlayImage;
+
 interface PageState {
     index: number;
     rotation: number;
     isDeleted: boolean;
-    textOverlays: OverlayText[];
-    imageOverlays: OverlayImage[];
+    elements: Element[];
     previewSrc: string | null;
 }
 
+/**
+ * MAIN COMPONENT
+ */
 export default function PdfEditor() {
     const { toast } = useToast();
+    
+    // Core App State
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [pages, setPages] = useState<PageState[]>([]);
+    const [selectedPageIndex, setSelectedPageIndex] = useState<number | null>(null);
+    const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+    const [zoom, setZoom] = useState(100);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [pages, setPages] = useState<PageState[]>([]);
-    const [selectedPageIndex, setSelectedId] = useState<number | null>(null);
-    const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-    
+
+    // History for Undo/Redo
+    const [history, setHistory] = useState<PageState[][]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const overlayImgInputRef = useRef<HTMLInputElement>(null);
 
+    /**
+     * HISTORY MANAGEMENT
+     */
+    const saveToHistory = useCallback((currentPages: PageState[]) => {
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(JSON.parse(JSON.stringify(currentPages)));
+        if (newHistory.length > 30) newHistory.shift();
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+    }, [history, historyIndex]);
+
+    const handleUndo = () => {
+        if (historyIndex > 0) {
+            const prev = history[historyIndex - 1];
+            setPages(prev);
+            setHistoryIndex(historyIndex - 1);
+            toast({ title: "Undo Successful", description: "Reverted last change." });
+        }
+    };
+
+    const handleRedo = () => {
+        if (historyIndex < history.length - 1) {
+            const next = history[historyIndex + 1];
+            setPages(next);
+            setHistoryIndex(historyIndex + 1);
+            toast({ title: "Redo Successful" });
+        }
+    };
+
+    /**
+     * FILE LOADING
+     */
     const handleFileChange = async (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setIsProcessing(true);
             setPages([]);
-            setSelectedId(null);
+            setSelectedPageIndex(null);
+            setHistory([]);
+            setHistoryIndex(-1);
             
             try {
                 const arrayBuffer = await file.arrayBuffer();
@@ -106,7 +163,7 @@ export default function PdfEditor() {
 
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
+                    const viewport = page.getViewport({ scale: 2.0 });
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -115,43 +172,48 @@ export default function PdfEditor() {
                     if (context) {
                         context.fillStyle = '#FFFFFF';
                         context.fillRect(0, 0, canvas.width, canvas.height);
-                        await page.render({ canvasContext: context, viewport }).promise;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
                         initialPages.push({
                             index: i,
                             rotation: 0,
                             isDeleted: false,
-                            textOverlays: [],
-                            imageOverlays: [],
+                            elements: [],
                             previewSrc: canvas.toDataURL('image/jpeg', 0.8)
                         });
                     }
                 }
                 setPages(initialPages);
-                if (initialPages.length > 0) setSelectedId(0);
-                toast({ title: "PDF Loaded", description: `${totalPages} pages ready for professional editing.` });
+                saveToHistory(initialPages);
+                if (initialPages.length > 0) setSelectedPageIndex(0);
+                toast({ title: "PDF Loaded", description: `${totalPages} pages ready for premium editing.` });
             } catch (error) {
-                toast({ variant: 'destructive', title: 'Error', description: 'Failed to read PDF.' });
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to read PDF. Check if protected.' });
             } finally {
                 setIsProcessing(false);
             }
         }
     };
 
+    /**
+     * ELEMENT MANAGEMENT
+     */
     const handleAddText = () => {
         if (selectedPageIndex === null) return;
         const id = Math.random().toString(36).substr(2, 9);
         const newText: OverlayText = {
             id,
-            text: "Add your text",
-            x: 20,
-            y: 20,
-            size: 18,
+            type: 'text',
+            text: "Type here...",
+            x: 40,
+            y: 40,
+            size: 24,
             color: "#000000",
             font: "Helvetica"
         };
-        setPages(prev => prev.map((p, i) => i === selectedPageIndex ? { ...p, textOverlays: [...p.textOverlays, newText] } : p));
+        const updatedPages = pages.map((p, i) => i === selectedPageIndex ? { ...p, elements: [...p.elements, newText] } : p);
+        setPages(updatedPages);
+        saveToHistory(updatedPages);
         setSelectedElementId(id);
-        toast({ title: "Text Layer Added" });
     };
 
     const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,160 +224,121 @@ export default function PdfEditor() {
                 const id = Math.random().toString(36).substr(2, 9);
                 const newImg: OverlayImage = {
                     id,
+                    type: 'image',
                     src: event.target?.result as string,
-                    x: 10,
+                    x: 30,
                     y: 30,
-                    width: 120,
+                    width: 150,
                     rotation: 0,
                     opacity: 100
                 };
-                setPages(prev => prev.map((p, i) => i === selectedPageIndex ? { ...p, imageOverlays: [...p.imageOverlays, newImg] } : p));
+                const updatedPages = pages.map((p, i) => i === selectedPageIndex ? { ...p, elements: [...p.elements, newImg] } : p);
+                setPages(updatedPages);
+                saveToHistory(updatedPages);
                 setSelectedElementId(id);
-                toast({ title: "Image Layer Added", description: "Scale it using the studio sliders." });
             };
             reader.readAsDataURL(file);
         }
         e.target.value = "";
     };
 
-    const handleDeleteElement = (id: string) => {
-        if (selectedPageIndex === null) return;
-        setPages(prev => prev.map((p, i) => i === selectedPageIndex ? {
+    const updateElement = (pageIdx: number, elId: string, updates: Partial<Element>) => {
+        const updatedPages = pages.map((p, i) => i === pageIdx ? {
             ...p,
-            textOverlays: p.textOverlays.filter(t => t.id !== id),
-            imageOverlays: p.imageOverlays.filter(img => img.id !== id)
-        } : p));
+            elements: p.elements.map(el => el.id === elId ? { ...el, ...updates } : el)
+        } : p);
+        setPages(updatedPages);
+        // We debounce history for sliders? Let's keep it simple for now.
+    };
+
+    const commitChanges = () => saveToHistory(pages);
+
+    const handleDeleteElement = (id: string) => {
+        const updatedPages = pages.map((p, i) => i === selectedPageIndex ? {
+            ...p,
+            elements: p.elements.filter(el => el.id !== id)
+        } : p);
+        setPages(updatedPages);
+        saveToHistory(updatedPages);
         setSelectedElementId(null);
     };
 
-    const handleDeletePage = (idx: number) => {
-        setPages(prev => prev.map((p, i) => i === idx ? { ...p, isDeleted: true } : p));
-        if (selectedPageIndex === idx) {
-            const nextActive = pages.findIndex((p, i) => !p.isDeleted && i !== idx);
-            setSelectedId(nextActive !== -1 ? nextActive : null);
-        }
-    };
-
-    const handleRotatePage = (idx: number) => {
-        setPages(prev => prev.map((p, i) => i === idx ? { ...p, rotation: (p.rotation + 90) % 360 } : p));
-    };
-
-    const updateTextOverlay = (pageIdx: number, textId: string, updates: Partial<OverlayText>) => {
-        setPages(prev => prev.map((p, i) => i === pageIdx ? {
-            ...p,
-            textOverlays: p.textOverlays.map(t => t.id === textId ? { ...t, ...updates } : t)
-        } : p));
-    };
-
-    const updateImageOverlay = (pageIdx: number, imgId: string, updates: Partial<OverlayImage>) => {
-        setPages(prev => prev.map((p, i) => i === pageIdx ? {
-            ...p,
-            imageOverlays: p.imageOverlays.map(img => img.id === imgId ? { ...img, ...updates } : img)
-        } : p));
-    };
-
+    /**
+     * EXPORT LOGIC
+     */
     const handleExport = async () => {
         if (!pdfFile) return;
         setIsExporting(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-            const activePages = pages.filter(p => !p.isDeleted);
             const finalPdfDoc = await PDFDocument.create();
+            const activePages = pages.filter(p => !p.isDeleted);
 
             for (const pageState of activePages) {
                 const [copiedPage] = await finalPdfDoc.copyPages(pdfDoc, [pageState.index - 1]);
                 copiedPage.setRotation(degrees(pageState.rotation));
                 const { width, height } = copiedPage.getSize();
 
-                // Apply Text Overlays
-                for (const t of pageState.textOverlays) {
-                    let font;
-                    if (t.font === 'Times') font = await finalPdfDoc.embedFont(StandardFonts.TimesRomanBold);
-                    else if (t.font === 'Courier') font = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
-                    else font = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+                for (const el of pageState.elements) {
+                    if (el.type === 'text') {
+                        let font;
+                        if (el.font === 'Times') font = await finalPdfDoc.embedFont(StandardFonts.TimesRomanBold);
+                        else if (el.font === 'Courier') font = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+                        else font = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-                    const pdfX = (t.x / 100) * width;
-                    const pdfY = height - (t.y / 100) * height - t.size; 
-                    
-                    const hexColor = t.color || "#000000";
-                    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
-                    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
-                    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
+                        const r = parseInt(el.color.slice(1, 3), 16) / 255;
+                        const g = parseInt(el.color.slice(3, 5), 16) / 255;
+                        const b = parseInt(el.color.slice(5, 7), 16) / 255;
 
-                    copiedPage.drawText(t.text, {
-                        x: pdfX,
-                        y: pdfY,
-                        size: t.size,
-                        font,
-                        color: rgb(r, g, b)
-                    });
+                        copiedPage.drawText(el.text, {
+                            x: (el.x / 100) * width,
+                            y: height - (el.y / 100) * height - el.size,
+                            size: el.size,
+                            font,
+                            color: rgb(r, g, b)
+                        });
+                    } else if (el.type === 'image') {
+                        const imgBytes = await fetch(el.src).then(res => res.arrayBuffer());
+                        const embeddedImg = el.src.includes('png') ? await finalPdfDoc.embedPng(imgBytes) : await finalPdfDoc.embedJpg(imgBytes);
+                        
+                        copiedPage.drawImage(embeddedImg, {
+                            x: (el.x / 100) * width,
+                            y: height - (el.y / 100) * height - (el.width * (embeddedImg.height / embeddedImg.width)),
+                            width: el.width,
+                            height: el.width * (embeddedImg.height / embeddedImg.width),
+                            rotate: degrees(-el.rotation),
+                            opacity: el.opacity / 100
+                        });
+                    }
                 }
-
-                // Apply Image Overlays
-                for (const img of pageState.imageOverlays) {
-                    const imgBytes = await fetch(img.src).then(res => res.arrayBuffer());
-                    const isPng = img.src.includes('png');
-                    const embeddedImg = isPng ? await finalPdfDoc.embedPng(imgBytes) : await finalPdfDoc.embedJpg(imgBytes);
-                    const pdfX = (img.x / 100) * width;
-                    const pdfY = height - (img.y / 100) * height - (img.width * (embeddedImg.height / embeddedImg.width));
-
-                    copiedPage.drawImage(embeddedImg, {
-                        x: pdfX,
-                        y: pdfY,
-                        width: img.width,
-                        height: img.width * (embeddedImg.height / embeddedImg.width),
-                        rotate: degrees(-img.rotation),
-                        opacity: img.opacity / 100
-                    });
-                }
-
                 finalPdfDoc.addPage(copiedPage);
             }
 
             const pdfBytes = await finalPdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = URL.createObjectURL(blob);
             link.download = `Studio-Edit-${pdfFile.name}`;
             link.click();
             
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#48a9a4', '#fce7eb', '#ffffff']
-            });
-            toast({ title: "Success!", description: "Professional PDF exported." });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            toast({ title: "Success!", description: "High-quality PDF exported locally." });
         } catch (e) {
-            console.error(e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Encryption error or corrupt file." });
+            toast({ variant: 'destructive', title: "Export Failed" });
         } finally {
             setIsExporting(false);
         }
     };
 
+    /**
+     * RENDER CONDITIONS
+     */
     if (!pdfFile) {
         return (
             <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-                <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-indigo-600/10 text-indigo-600 shadow-xl relative">
-                        <FilePenLine className="size-8" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        Professional <span className="text-gradient-hero">PDF Editor</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Add text, signatures, and manage pages in your document. <br/>100% Private local browser studio.
-                    </p>
-                </div>
-
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -325,328 +348,260 @@ export default function PdfEditor() {
                     <CardHeader className="bg-muted/30 border-b p-6 text-center">
                         <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-10 md:p-12">
-                        <div 
-                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
+                    <CardContent className="p-10 md:p-16">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                            onClick={() => fileInputRef.current?.click()}>
                             <div className="relative">
                                 <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                <Zap className="absolute -top-2 -right-2 size-6 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Edit</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Vector-layer editing engine active.</p>
+                                <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">Professional vector editing engine.</p>
                             </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                     </CardContent>
-                    <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> LIVE PREVIEW</div>
-                        <div className="flex items-center gap-1.5"><Type className="size-3 text-purple-500" /> TEXT & IMAGE</div>
-                    </CardFooter>
                 </Card>
             </div>
         );
     }
 
     const selectedPage = selectedPageIndex !== null ? pages[selectedPageIndex] : null;
-    const selectedText = selectedPage?.textOverlays.find(t => t.id === selectedElementId);
-    const selectedImage = selectedPage?.imageOverlays.find(i => i.id === selectedElementId);
+    const selectedElement = selectedPage?.elements.find(el => el.id === selectedElementId);
 
     return (
-        <div className="w-full max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 pb-20 animate-in fade-in duration-700">
+        <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-4 animate-in fade-in duration-500 h-[calc(100vh-140px)]">
             
-            {/* 1. LEFT SIDEBAR: PAGE NAVIGATION */}
-            <div className="lg:col-span-3 space-y-4 h-full max-h-[85vh] flex flex-col no-print">
-                <Card className="border-2 shadow-xl flex-1 flex flex-col overflow-hidden bg-card/50">
-                    <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            <Layers className="size-3" /> PAGE STACK
-                        </CardTitle>
-                        <Badge className="bg-primary text-white font-black">{pages.filter(p => !p.isDeleted).length}</Badge>
-                    </CardHeader>
-                    <CardContent className="p-0 flex-1 overflow-hidden">
-                        <ScrollArea className="h-[600px] p-4">
-                            <div className="space-y-4">
-                                {pages.map((p, i) => !p.isDeleted && (
-                                    <div 
-                                        key={i} 
-                                        onClick={() => { setSelectedId(i); setSelectedElementId(null); }}
-                                        className={cn(
-                                            "relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white group shadow-md",
-                                            selectedPageIndex === i ? "border-primary ring-4 ring-primary/10 shadow-2xl scale-[1.02]" : "hover:border-primary/40 opacity-70 hover:opacity-100"
-                                        )}
-                                    >
-                                        <div className="absolute inset-0 flex items-center justify-center p-2" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                            <img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`Page ${i+1}`} />
-                                        </div>
-                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">P{i + 1}</div>
-                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all flex flex-col gap-1.5 translate-y-2 group-hover:translate-y-0">
-                                            <Button size="icon" variant="secondary" className="h-8 w-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); setPages(prev => prev.map((pg, idx) => idx === i ? { ...pg, rotation: (pg.rotation + 90) % 360 } : pg)); }}><RotateCw className="size-4" /></Button>
-                                            <Button size="icon" variant="destructive" className="h-8 w-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); handleDeletePage(i); }}><Trash2 className="size-4" /></Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
-                    </CardContent>
-                    <CardFooter className="p-4 border-t bg-muted/10">
-                         <Button variant="ghost" onClick={() => setPdfFile(null)} className="w-full font-black text-[10px] uppercase border-2 h-10 hover:bg-destructive/5 hover:text-destructive">
-                             <RefreshCcw className="size-3 mr-2" /> Replace PDF
-                         </Button>
-                    </CardFooter>
-                </Card>
+            {/* TOP TOOLBAR */}
+            <div className="w-full h-16 bg-slate-900 border-b border-white/5 rounded-t-[2rem] flex items-center justify-between px-6 shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white" onClick={handleRedo} disabled={historyIndex >= history.length - 1}><Redo2 className="size-4"/></Button>
+                    </div>
+                    <Separator orientation="vertical" className="h-6 opacity-10" />
+                    <div className="flex items-center gap-2">
+                        <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg hover:scale-105 transition-all" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> Add Text</Button>
+                        <Button size="sm" variant="outline" className="text-white border-white/10 hover:bg-white/5 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> Add Image</Button>
+                        <Button size="sm" variant="outline" className="text-white border-white/10 hover:bg-white/5 font-black uppercase text-[10px] h-9 px-4 rounded-lg" onClick={() => overlayImgInputRef.current?.click()}><PenTool className="size-3.5 mr-1.5"/> Signature</Button>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white/40" onClick={() => setZoom(z => Math.max(50, z - 10))}><ZoomOut className="size-3"/></Button>
+                        <span className="text-[10px] font-black text-white/60 w-12 text-center uppercase">{zoom}%</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white/40" onClick={() => setZoom(z => Math.min(200, z + 10))}><ZoomIn className="size-3"/></Button>
+                    </div>
+                    <Button className="bg-green-600 hover:bg-green-700 text-white font-black uppercase text-xs h-10 px-8 rounded-xl shadow-xl transition-all" onClick={handleExport} disabled={isExporting}>
+                        {isExporting ? <Loader2 className="animate-spin mr-2 size-4" /> : <Download className="mr-2 size-4" />} SAVE PDF
+                    </Button>
+                </div>
             </div>
 
-            {/* 2. CENTER: LIVE EDITOR CANVAS */}
-            <div className="lg:col-span-6 flex flex-col gap-6 items-center">
-                <Card className="w-full border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2.5rem] bg-slate-900 flex flex-col min-h-[650px] relative">
-                    <CardHeader className="bg-white/5 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between z-20">
-                         <div className="flex items-center gap-4 text-white">
-                            <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
-                            <div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Live Studio</CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase text-white/40">Page {selectedPageIndex !== null ? selectedPageIndex + 1 : '---'} Editor</CardDescription>
-                            </div>
-                         </div>
-                         <div className="flex gap-2">
-                             <Button variant="outline" size="sm" onClick={handleAddText} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl transition-all"><Type className="size-4 mr-2" /> Add Text</Button>
-                             <Button variant="outline" size="sm" onClick={() => overlayImgInputRef.current?.click()} disabled={selectedPageIndex === null} className="h-10 px-4 bg-white/10 text-white border-white/10 hover:bg-primary hover:text-black font-black uppercase text-[10px] rounded-xl transition-all"><ImageIcon className="size-4 mr-2" /> Add Image</Button>
-                             <input ref={overlayImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleAddImage} />
-                         </div>
-                    </CardHeader>
-                    
-                    <CardContent className="p-8 flex items-center justify-center relative overflow-hidden bg-black/40 min-h-[500px] flex-1">
-                        {isProcessing && (
-                            <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-white">
-                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
-                                <p className="font-black text-xs uppercase tracking-widest animate-pulse">Rendering Studio...</p>
-                            </div>
-                        )}
-                        
-                        {selectedPage ? (
-                            <div className="relative shadow-2xl border-8 border-white transform-gpu bg-white max-w-full" style={{ transform: `rotate(${selectedPage.rotation}deg)` }}>
-                                <img src={selectedPage.previewSrc!} alt="edit" className="max-h-[65vh] w-auto block object-contain" />
-                                
-                                {/* TEXT OVERLAYS */}
-                                {selectedPage.textOverlays.map(t => (
-                                    <div 
-                                        key={t.id} 
-                                        onClick={() => setSelectedElementId(t.id)}
-                                        className={cn(
-                                            "absolute z-10 p-1.5 cursor-pointer group select-none transition-all",
-                                            selectedElementId === t.id ? "ring-2 ring-primary ring-offset-2 bg-primary/5 rounded" : "hover:ring-1 hover:ring-primary/40"
-                                        )}
-                                        style={{ left: `${t.x}%`, top: `${t.y}%`, fontSize: `${t.size}px`, fontWeight: '900', color: t.color, fontFamily: t.font, transform: `rotate(${-selectedPage.rotation}deg)` }}
-                                    >
-                                        {t.text}
-                                        {selectedElementId === t.id && (
-                                            <div className="absolute -top-6 -right-6 bg-destructive text-white rounded-full size-6 flex items-center justify-center shadow-lg" onClick={(e) => { e.stopPropagation(); handleDeleteElement(t.id); }}>
-                                                <Trash2 className="size-3" />
-                                            </div>
-                                        )}
+            <div className="flex-1 flex overflow-hidden gap-4">
+                
+                {/* LEFT: PAGE STACK */}
+                <div className="w-64 bg-slate-900 border-r border-white/5 flex flex-col shrink-0 rounded-bl-[2rem] overflow-hidden">
+                    <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Navigation</span>
+                         <Badge className="bg-primary/20 text-primary border-primary/20">{pages.filter(p => !p.isDeleted).length}</Badge>
+                    </div>
+                    <ScrollArea className="flex-1 p-4">
+                        <div className="space-y-4">
+                            {pages.map((p, i) => !p.isDeleted && (
+                                <div key={i} onClick={() => { setSelectedPageIndex(i); setSelectedElementId(null); }}
+                                    className={cn(
+                                        "relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer group shadow-xl bg-white",
+                                        selectedPageIndex === i ? "border-primary ring-4 ring-primary/20 scale-[1.02]" : "border-white/5 opacity-40 hover:opacity-100"
+                                    )}>
+                                    <div className="size-full flex items-center justify-center p-2" style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                        <img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`P${i+1}`} />
                                     </div>
-                                ))}
-
-                                {/* IMAGE OVERLAYS */}
-                                {selectedPage.imageOverlays.map(img => (
-                                    <div 
-                                        key={img.id} 
-                                        onClick={() => setSelectedElementId(img.id)}
-                                        className={cn(
-                                            "absolute z-10 p-1 cursor-pointer group transition-all",
-                                            selectedElementId === img.id ? "ring-2 ring-primary ring-offset-2 bg-primary/5 rounded" : "hover:ring-1 hover:ring-primary/40"
-                                        )}
-                                        style={{ left: `${img.x}%`, top: `${img.y}%`, width: `${img.width}px`, opacity: img.opacity / 100, transform: `rotate(${img.rotation - selectedPage.rotation}deg)` }}
-                                    >
-                                        <img src={img.src} className="w-full h-auto block" alt="overlay" />
-                                        {selectedElementId === img.id && (
-                                            <div className="absolute -top-6 -right-6 bg-destructive text-white rounded-full size-6 flex items-center justify-center shadow-lg" onClick={(e) => { e.stopPropagation(); handleDeleteElement(img.id); }}>
-                                                <Trash2 className="size-3" />
-                                            </div>
-                                        )}
+                                    <div className="absolute top-2 left-2 size-6 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{i+1}</div>
+                                    <div className="absolute bottom-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+                                        <Button size="icon" variant="secondary" className="size-7 rounded-lg shadow-2xl" onClick={(e) => { e.stopPropagation(); setPages(prev => prev.map((pg, idx) => idx === i ? { ...pg, rotation: (pg.rotation + 90) % 360 } : pg)); }}><RotateCw className="size-3.5"/></Button>
+                                        <Button size="icon" variant="destructive" className="size-7 rounded-lg shadow-2xl" onClick={(e) => { e.stopPropagation(); setPages(prev => prev.map((pg, idx) => idx === i ? { ...pg, isDeleted: true } : pg)); }}><Trash2 className="size-3.5"/></Button>
                                     </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center gap-6 text-white/10 p-12">
-                                <FilePenLine className="size-24" />
-                                <div className="text-center space-y-2">
-                                    <p className="text-lg font-black uppercase tracking-tighter">SELECT A PAGE</p>
-                                    <p className="text-xs font-bold uppercase opacity-50">Choose a thumbnail from the left stack to start editing</p>
                                 </div>
-                            </div>
-                        )}
-                    </CardContent>
-
-                    <CardFooter className="bg-black/60 p-4 border-t border-white/5 flex justify-center z-10">
-                         <div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
-                            <MousePointer2 className="h-4 w-4 text-primary animate-pulse" /> 
-                            Click items on page to edit specific properties
+                            ))}
                         </div>
-                    </CardFooter>
-                </Card>
-            </div>
+                    </ScrollArea>
+                </div>
 
-            {/* 3. RIGHT SIDEBAR: PROPERTIES PANEL */}
-            <div className="lg:col-span-3 space-y-6 no-print">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
-                            <Settings2 className="size-6 text-primary" /> PROPERTIES
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 md:p-8">
-                        <Tabs defaultValue="content" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 h-10 mb-6 bg-muted p-1 rounded-xl">
-                                <TabsTrigger value="content" className="font-bold text-[9px] uppercase">Active Item</TabsTrigger>
-                                <TabsTrigger value="page" className="font-bold text-[9px] uppercase">Page Actions</TabsTrigger>
-                            </TabsList>
+                {/* CENTER: STUDIO CANVAS */}
+                <div className="flex-1 bg-black/40 flex items-start justify-center overflow-auto p-12 custom-scrollbar rounded-br-[2rem] border-t border-white/5 relative">
+                    {selectedPage ? (
+                        <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] bg-white transition-transform duration-300 origin-top" 
+                             style={{ transform: `scale(${zoom / 100}) rotate(${selectedPage.rotation}deg)` }}>
+                            
+                            <img src={selectedPage.previewSrc!} alt="edit" className="max-h-[80vh] w-auto block select-none pointer-events-none" />
 
-                            <TabsContent value="content" className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                {selectedText ? (
-                                    <div className="space-y-6">
-                                        <Badge className="bg-primary/10 text-primary font-black uppercase text-[10px] px-3 py-1 mb-2">TEXT SETTINGS</Badge>
-                                        <div className="space-y-2.5">
-                                            <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Text Content</Label>
-                                            <Input 
-                                                value={selectedText.text} 
-                                                onChange={(e) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { text: e.target.value })} 
-                                                className="h-10 border-2 font-bold focus-visible:ring-primary" 
-                                            />
+                            {/* DYNAMIC ELEMENTS LAYER */}
+                            {selectedPage.elements.map(el => (
+                                <motion.div 
+                                    key={el.id}
+                                    layoutId={el.id}
+                                    onClick={(e) => { e.stopPropagation(); setSelectedElementId(el.id); }}
+                                    className={cn(
+                                        "absolute z-10 cursor-move group transition-shadow",
+                                        selectedElementId === el.id ? "ring-2 ring-primary ring-offset-4 ring-offset-white rounded-sm shadow-2xl bg-primary/5" : "hover:ring-1 hover:ring-primary/40"
+                                    )}
+                                    style={{ left: `${el.x}%`, top: `${el.y}%`, transform: `rotate(${-selectedPage.rotation}deg)` }}
+                                >
+                                    {el.type === 'text' ? (
+                                        <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px' }}>
+                                            {el.text}
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2.5">
-                                                <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Font Family</Label>
-                                                <Select value={selectedText.font} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { font: v })}>
-                                                    <SelectTrigger className="h-10 font-bold border-2"><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Helvetica" className="font-bold">Helvetica</SelectItem>
-                                                        <SelectItem value="Times" className="font-bold">Times Roman</SelectItem>
-                                                        <SelectItem value="Courier" className="font-bold">Courier</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                    ) : (
+                                        <div style={{ width: `${el.width}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}>
+                                            <img src={el.src} className="w-full h-auto block" alt="ovl" />
+                                        </div>
+                                    )}
+
+                                    {/* FLOATING ACTION OVERLAY */}
+                                    <AnimatePresence>
+                                        {selectedElementId === el.id && (
+                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl p-1 rounded-xl shadow-2xl border border-white/10 z-50">
+                                                <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg" onClick={(e) => { e.stopPropagation(); handleDeleteElement(el.id); }}><Trash2 className="size-3"/></Button>
+                                                <div className="w-px h-4 bg-white/10 mx-1" />
+                                                <div className="flex gap-0.5">
+                                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-white" onClick={(e) => { e.stopPropagation(); updateElement(selectedPageIndex!, el.id, { y: el.y - 1 }); }}><ChevronUp className="size-3"/></Button>
+                                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-white" onClick={(e) => { e.stopPropagation(); updateElement(selectedPageIndex!, el.id, { y: el.y + 1 }); }}><ChevronDown className="size-3"/></Button>
+                                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-white" onClick={(e) => { e.stopPropagation(); updateElement(selectedPageIndex!, el.id, { x: el.x - 1 }); }}><ChevronLeft className="size-3"/></Button>
+                                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-white" onClick={(e) => { e.stopPropagation(); updateElement(selectedPageIndex!, el.id, { x: el.x + 1 }); }}><ChevronRight className="size-3"/></Button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-6 text-white/5 opacity-50 p-20">
+                             <FilePenLine className="size-32" />
+                             <p className="font-black uppercase tracking-[0.4em] text-xl">SELECT PAGE</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* RIGHT: PROPERTIES PANEL */}
+                <div className="w-80 bg-slate-900 border-l border-white/5 flex flex-col shrink-0 overflow-hidden">
+                    <div className="p-4 border-b border-white/5 bg-white/5 flex items-center gap-3">
+                         <Settings2 className="size-5 text-primary" />
+                         <span className="text-[11px] font-black uppercase tracking-widest text-white/60">Property Editor</span>
+                    </div>
+                    
+                    <ScrollArea className="flex-1 p-6">
+                        <AnimatePresence mode="wait">
+                            {selectedElement ? (
+                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
+                                    {selectedElement.type === 'text' ? (
+                                        <div className="space-y-6">
+                                            <div className="space-y-3">
+                                                <Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">TEXT CONTENT</Label>
+                                                <Input value={selectedElement.text} onChange={(e) => updateElement(selectedPageIndex!, selectedElementId!, { text: e.target.value })} onBlur={commitChanges} className="bg-white/5 border-white/10 text-white h-12 font-bold" />
                                             </div>
-                                            <div className="space-y-2.5">
-                                                <Label className="text-[10px] font-black uppercase opacity-60 tracking-widest">Text Color</Label>
-                                                <div className="flex gap-1.5 flex-wrap">
-                                                    {['#000000', '#FF0000', '#0000FF', '#008000', '#FFFFFF'].map(c => (
-                                                        <button key={c} onClick={() => updateTextOverlay(selectedPageIndex!, selectedElementId!, { color: c })}
-                                                            className={cn("size-6 rounded-full border-2 border-white shadow-sm ring-1 ring-slate-200", selectedText.color === c && "ring-primary ring-2")}
-                                                            style={{ backgroundColor: c }} />
-                                                    ))}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">FONT</Label>
+                                                    <Select value={selectedElement.font} onValueChange={(v) => { updateElement(selectedPageIndex!, selectedElementId!, { font: v }); commitChanges(); }}>
+                                                        <SelectTrigger className="h-10 bg-white/5 border-white/10 text-white font-bold"><SelectValue /></SelectTrigger>
+                                                        <SelectContent className="bg-slate-900 border-white/10 text-white">
+                                                            <SelectItem value="Helvetica" className="font-bold">Sans Serif</SelectItem>
+                                                            <SelectItem value="Times" className="font-bold">Serif</SelectItem>
+                                                            <SelectItem value="Courier" className="font-bold">Mono</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">COLOR</Label>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#00FF00'].map(c => (
+                                                            <button key={c} onClick={() => { updateElement(selectedPageIndex!, selectedElementId!, { color: c }); commitChanges(); }} 
+                                                                className={cn("size-6 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-white/10")} style={{ backgroundColor: c }} />
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="space-y-5 pt-2">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label><span className="text-[10px] font-mono font-bold text-primary">{selectedText.size}pt</span></div>
-                                            <Slider value={[selectedText.size]} min={8} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { size: v[0] })} />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
                                             <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase opacity-40">Horizontal %</Label>
-                                                <Slider value={[selectedText.x]} min={0} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { x: v[0] })} />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase opacity-40">Vertical %</Label>
-                                                <Slider value={[selectedText.y]} min={0} max={100} onValueChange={(v) => updateTextOverlay(selectedPageIndex!, selectedElementId!, { y: v[0] })} />
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">FONT SIZE</Label><span className="text-[10px] font-mono text-primary font-bold">{selectedElement.size}px</span></div>
+                                                <Slider min={10} max={100} value={[selectedElement.size]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { size: v[0] })} onPointerUp={commitChanges} />
                                             </div>
                                         </div>
-                                    </div>
-                                ) : selectedImage ? (
-                                    <div className="space-y-6">
-                                        <Badge className="bg-purple-500/10 text-purple-600 font-black uppercase text-[10px] px-3 py-1 mb-2">IMAGE SETTINGS</Badge>
-                                        <div className="space-y-5">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Width Size</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.width}px</span></div>
-                                            <Slider value={[selectedImage.width]} min={20} max={500} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { width: v[0] })} />
-                                        </div>
-                                        <div className="space-y-5">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Opacity</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.opacity}%</span></div>
-                                            <Slider value={[selectedImage.opacity]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { opacity: v[0] })} />
-                                        </div>
-                                        <div className="space-y-5">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Rotation</Label><span className="text-[10px] font-mono font-bold text-purple-600">{selectedImage.rotation}°</span></div>
-                                            <Slider value={[selectedImage.rotation]} min={0} max={360} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { rotation: v[0] })} />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                                    ) : (
+                                        <div className="space-y-8">
                                             <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase opacity-40">Horizontal %</Label>
-                                                <Slider value={[selectedImage.x]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { x: v[0] })} />
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">WIDTH SCALE</Label><span className="text-[10px] font-mono text-primary font-bold">{selectedElement.width}px</span></div>
+                                                <Slider min={20} max={600} value={[selectedElement.width]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { width: v[0] })} onPointerUp={commitChanges} />
                                             </div>
                                             <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase opacity-40">Vertical %</Label>
-                                                <Slider value={[selectedImage.y]} min={0} max={100} onValueChange={(v) => updateImageOverlay(selectedPageIndex!, selectedElementId!, { y: v[0] })} />
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">ROTATION</Label><span className="text-[10px] font-mono text-primary font-bold">{selectedElement.rotation}°</span></div>
+                                                <Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { rotation: v[0] })} onPointerUp={commitChanges} />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">OPACITY</Label><span className="text-[10px] font-mono text-primary font-bold">{selectedElement.opacity}%</span></div>
+                                                <Slider min={10} max={100} value={[selectedElement.opacity]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { opacity: v[0] })} onPointerUp={commitChanges} />
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="py-20 text-center opacity-30 space-y-4 flex flex-col items-center">
-                                         <MousePointer2 className="size-16 text-muted-foreground animate-bounce" />
-                                         <div className="space-y-1">
-                                            <p className="text-xs font-black uppercase leading-tight tracking-widest">Select Element</p>
-                                            <p className="text-[10px] font-bold uppercase">Click an item on the page to customize it.</p>
-                                         </div>
-                                    </div>
-                                )}
-                            </TabsContent>
+                                    )}
 
-                            <TabsContent value="page" className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                {selectedPage ? (
+                                    <Separator className="opacity-5" />
+
                                     <div className="space-y-4">
-                                        <Button variant="outline" className="w-full h-12 rounded-xl border-2 font-black uppercase text-[10px]" onClick={() => handleRotatePage(selectedPageIndex!)}>
-                                            <RotateCw className="size-4 mr-2" /> Rotate Page 90°
-                                        </Button>
-                                        <Button variant="outline" className="w-full h-12 rounded-xl border-2 font-black uppercase text-[10px] border-destructive/20 text-destructive hover:bg-destructive/5" onClick={() => handleDeletePage(selectedPageIndex!)}>
-                                            <Trash2 className="size-4 mr-2" /> Delete Page
-                                        </Button>
-                                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex gap-4 mt-6">
-                                            <Sparkles className="size-5 text-primary shrink-0" />
-                                            <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
-                                                Page-wide actions are permanent in this session. Be careful!
-                                            </p>
+                                        <Label className="text-[9px] font-black uppercase text-white/40 tracking-widest">Fine Positioning (%)</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[8px] opacity-30">X-POS</Label>
+                                                <Slider min={0} max={100} value={[selectedElement.x]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { x: v[0] })} onPointerUp={commitChanges} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[8px] opacity-30">Y-POS</Label>
+                                                <Slider min={0} max={100} value={[selectedElement.y]} onValueChange={(v) => updateElement(selectedPageIndex!, selectedElementId!, { y: v[0] })} onPointerUp={commitChanges} />
+                                            </div>
                                         </div>
                                     </div>
-                                ) : <p className="text-center py-20 opacity-30 text-xs font-bold">SELECT A PAGE FIRST</p>}
-                            </TabsContent>
-                        </Tabs>
-
-                        <div className="p-5 bg-muted/30 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex flex-col gap-4 mt-10">
-                            <div className="flex items-center gap-3">
-                                <ShieldCheck className="size-5 text-green-500" />
-                                <span className="text-[10px] font-black uppercase text-green-600">Secure Sanitization</span>
-                            </div>
-                            <p className="text-[9px] text-muted-foreground font-medium leading-relaxed uppercase">
-                                All overlays are re-serialized as native PDF content. Text remains searchable and images remain high resolution.
-                            </p>
-                        </div>
-                    </CardContent>
-
-                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2">
-                        <Button 
-                            className="w-full h-16 md:h-20 text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
-                            disabled={pages.filter(p => !p.isDeleted).length === 0 || isExporting}
-                            onClick={handleExport}
-                        >
-                            {isExporting ? (
-                                <div className="flex items-center gap-3">
-                                    <Loader2 className="size-8 animate-spin" />
-                                    <span className="uppercase tracking-tighter">BUILDING PDF...</span>
-                                </div>
+                                </motion.div>
                             ) : (
-                                <div className="flex items-center gap-4">
-                                    <Download className="size-8" />
-                                    <div className="text-left">
-                                        <span className="block uppercase tracking-tighter leading-none text-base md:text-xl">SAVE EDITS</span>
-                                        <span className="text-[9px] font-bold opacity-60 uppercase tracking-widest">DOWNLOAD FINAL FILE</span>
-                                    </div>
+                                <div className="py-20 text-center flex flex-col items-center gap-4 opacity-10">
+                                     <MousePointer2 className="size-16" />
+                                     <p className="text-[10px] font-black uppercase tracking-widest">Click element to edit</p>
                                 </div>
                             )}
-                        </Button>
-                    </CardFooter>
-                </Card>
+                        </AnimatePresence>
+                    </ScrollArea>
+
+                    <div className="p-6 bg-primary/5 border-t border-white/5 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <ShieldCheck className="size-4 text-green-500" />
+                            <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Safe Studio Mode</span>
+                        </div>
+                        <p className="text-[9px] text-white/30 font-medium leading-relaxed uppercase">All edits are stored in your device's RAM and re-serialized during export.</p>
+                    </div>
+                </div>
             </div>
+            
+            <input ref={overlayImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleAddImage} />
         </div>
     );
+}
+
+function ChevronLeft(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
 }
