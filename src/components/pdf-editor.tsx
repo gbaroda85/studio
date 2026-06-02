@@ -470,7 +470,7 @@ export default function PdfEditor() {
         <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-0 animate-in fade-in duration-500 h-[calc(100vh-140px)] overflow-hidden" 
              onMouseMove={handleMouseMoveGlobal} onMouseUp={handleMouseUpGlobal}>
             
-            {/* TOP TOOLBAR - Theme Aware Fixed Design */}
+            {/* TOP TOOLBAR */}
             {pdfFile && (
                 <div className="w-full h-16 bg-slate-900 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
@@ -523,15 +523,37 @@ export default function PdfEditor() {
             )}
 
             {!pdfFile ? (
-                <div className="flex-1 flex flex-col items-center justify-start pt-2 px-6 bg-slate-200/50 dark:bg-slate-900/10">
-                    <Card className={cn("w-full max-w-2xl glass-card border-2 border-dashed shadow-2xl rounded-[2.5rem] transition-all", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
+                <div className="flex-1 flex flex-col items-center justify-start pt-6 px-6 bg-slate-200/50 dark:bg-slate-900/10">
+                    <Card className={cn(
+                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                        isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                    )}
                         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
                     >
-                        <CardContent className="p-12 md:p-16 flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
-                            <div className="relative"><UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" /></div>
-                            <div className="text-center px-4"><p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p><p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p></div>
+                        <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 md:p-12">
+                            <div 
+                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <div className="relative">
+                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                </div>
+                                <div className="text-center px-4">
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p>
+                                    <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p>
+                                </div>
+                            </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
+                        <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                            <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> VISUAL EDIT</div>
+                            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> 300 DPI HD</div>
+                        </CardFooter>
                     </Card>
                 </div>
             ) : (

@@ -30,14 +30,14 @@ export default function EditPdfPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-2 px-4">
-            <div className="w-full max-w-5xl text-center mb-1 space-y-2 no-print animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-0 shadow-sm">
+            <div className="w-full max-w-5xl text-center mb-8 space-y-2 no-print animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <FilePenLine className="size-3" /> INDUSTRIAL DOCUMENT STUDIO
                 </div>
-                <h1 className="text-2xl md:text-5xl font-black tracking-tighter uppercase leading-none">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Smart <span className="text-gradient-hero">PDF Editor</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-[10px] md:text-sm">
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
                     Remove, Replace and Overwrite. The only truly private professional editor for your browser.
                 </p>
             </div>
