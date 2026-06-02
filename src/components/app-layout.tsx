@@ -51,7 +51,7 @@ import {
   Lock,
   Heart,
   Sparkles,
-  Contact2
+  FilePenLine
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -99,6 +99,7 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
+      { href: '/edit-pdf', label: 'edit_pdf_label', icon: FilePenLine },
       { href: '/docx-to-pdf', label: 'word_to_pdf_label', icon: FileText },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
       { href: '/unlock-pdf', label: 'unlock_pdf_label', icon: Unlock },
@@ -211,7 +212,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 group border-none shadow-none"
+            className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none"
           >
             <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
             <span className="hidden xl:inline">{t(category.name)}</span>

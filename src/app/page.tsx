@@ -27,7 +27,8 @@ import {
   FileArchive,
   Merge,
   Scissors,
-  UserCircle
+  UserCircle,
+  FilePenLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,6 +38,7 @@ import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
   // VISUAL PROCESSOR SECTION (Featured)
+  { icon: FilePenLine, title: "Edit PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", category: "featured" },
   { icon: Sparkles, title: "Document Scan", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", category: "featured" },
   { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", category: "featured" },
   { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", category: "featured" },

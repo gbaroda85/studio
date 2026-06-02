@@ -52,7 +52,8 @@ import {
   Heart,
   Sparkles,
   Printer,
-  Camera
+  Camera,
+  FilePenLine
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -149,6 +150,13 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/edit-pdf',
+      labelKey: 'edit_pdf_label',
+      descriptionKey: 'edit_pdf_description',
+      icon: FilePenLine,
+      color: 'text-indigo-600',
+    },
     {
       href: '/document-scan',
       labelKey: 'document_scan_label',
