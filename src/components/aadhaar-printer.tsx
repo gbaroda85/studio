@@ -98,7 +98,7 @@ export default function AadhaarPrinter() {
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
   // 8-Dot Scanner States (Corners + Midpoints)
-  // Indices: 0: TL, 1: TM, 2: TR, 3: RM, 4: BR, 5: BM, 6: BL, 7: LM
+  // Indices: 0: TL, 1: TC, 2: TR, 3: RC, 4: BR, 5: BC, 6: BL, 7: LC
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
     { x: 85, y: 50 }, { x: 85, y: 85 },                   
@@ -278,8 +278,8 @@ export default function AadhaarPrinter() {
         const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
         const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
         
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+        canvas.width = Math.max(targetWidth, 10);
+        canvas.height = Math.max(targetHeight, 10);
 
         const srcPoints = points.map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
@@ -287,13 +287,13 @@ export default function AadhaarPrinter() {
         }));
         const dstPoints = [
             { x: 0, y: 0 }, 
-            { x: targetWidth, y: 0 }, 
-            { x: targetWidth, y: targetHeight }, 
-            { x: 0, y: targetHeight }
+            { x: canvas.width, y: 0 }, 
+            { x: canvas.width, y: canvas.height }, 
+            { x: 0, y: canvas.height }
         ];
 
         const h = solvePerspective(srcPoints, dstPoints);
-        const imgData = ctx.createImageData(targetWidth, targetHeight);
+        const imgData = ctx.createImageData(canvas.width, canvas.height);
         
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth;
@@ -309,14 +309,14 @@ export default function AadhaarPrinter() {
         const srcData = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
 
         if (srcData) {
-            for (let y = 0; y < targetHeight; y++) {
-                for (let x = 0; x < targetWidth; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
                     const z = h[6] * x + h[7] * y + 1;
                     const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                     const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
                     
                     if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
-                        const dstIdx = (y * targetWidth + x) * 4;
+                        const dstIdx = (y * canvas.width + x) * 4;
                         const srcIdx = (sy * image.naturalWidth + sx) * 4;
                         imgData.data[dstIdx] = srcData[srcIdx];
                         imgData.data[dstIdx+1] = srcData[srcIdx+1];
@@ -332,8 +332,8 @@ export default function AadhaarPrinter() {
         if (!completedRectCrop) return;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        canvas.width = completedRectCrop.width * scaleX;
-        canvas.height = completedRectCrop.height * scaleY;
+        canvas.width = Math.max(completedRectCrop.width * scaleX, 10);
+        canvas.height = Math.max(completedRectCrop.height * scaleY, 10);
         
         if (autoEnhance) {
             ctx.filter = 'brightness(1.05) contrast(1.15) saturate(1.1) contrast(1.05)';
@@ -403,11 +403,13 @@ export default function AadhaarPrinter() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        const dx = x - prev[idx].x;
+        const dy = y - prev[idx].y;
         
         // Update the point being dragged
         next[idx] = { x, y };
 
-        // SYNC LOGIC: Corners (0,2,4,6) and Midpoints (1,3,5,7)
+        // SYNC LOGIC for 8 Points: 0(TL), 1(TC), 2(TR), 3(RC), 4(BR), 5(BC), 6(BL), 7(LC)
         if (idx === 0) { // TL
             next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
             next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
@@ -420,22 +422,26 @@ export default function AadhaarPrinter() {
         } else if (idx === 6) { // BL
             next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
             next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-        } else if (idx === 1) { // TM: Move Top Edge
-            const dy = y - prev[1].y;
+        } else if (idx === 1) { // TC (Top Mid): Move TL and TR synchronously
             next[0].y += dy; next[2].y += dy;
-            next[7].y = (next[0].y + next[6].y) / 2; next[3].y = (next[2].y + next[4].y) / 2;
-        } else if (idx === 3) { // RM: Move Right Edge
-            const dx = x - prev[3].x;
+            // Update midpoints connected to moved corners
+            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
+            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
+        } else if (idx === 3) { // RC (Right Mid): Move TR and BR synchronously
             next[2].x += dx; next[4].x += dx;
-            next[1].x = (next[0].x + next[2].x) / 2; next[5].x = (next[4].x + next[6].x) / 2;
-        } else if (idx === 5) { // BM: Move Bottom Edge
-            const dy = y - prev[5].y;
-            next[4].y += dy; next[6].y += dy;
-            next[3].y = (next[2].y + next[4].y) / 2; next[7].y = (next[0].y + next[6].y) / 2;
-        } else if (idx === 7) { // LM: Move Left Edge
-            const dx = x - prev[7].x;
-            next[6].x += dx; next[0].x += dx;
-            next[5].x = (next[4].x + next[6].x) / 2; next[1].x = (next[0].x + next[2].x) / 2;
+            // Update midpoints connected to moved corners
+            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
+            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
+        } else if (idx === 5) { // BC (Bottom Mid): Move BL and BR synchronously
+            next[6].y += dy; next[4].y += dy;
+            // Update midpoints connected to moved corners
+            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
+            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
+        } else if (idx === 7) { // LC (Left Mid): Move TL and BL synchronously
+            next[0].x += dx; next[6].x += dx;
+            // Update midpoints connected to moved corners
+            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
+            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
         }
 
         return next;
@@ -752,8 +758,8 @@ export default function AadhaarPrinter() {
                                 <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
-                                <div key={i} className={cn("absolute size-8 md:size-10 -ml-4 md:-ml-5 -mt-4 md:-mt-5 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
-                                    style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
+                                <div key={i} className={cn("absolute size-8 md:size-10 -ml-4 md:-ml-5 -mt-4 md:-mt-5 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform transform-gpu", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
+                                    style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none', willChange: 'transform' }}
                                     onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
                                     <div className="size-2 md:size-3 bg-white rounded-full shadow-inner" />
                                 </div>
@@ -933,3 +939,4 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
+
