@@ -98,11 +98,12 @@ export default function AadhaarPrinter() {
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
   // 8-Dot Scanner States (Corners + Midpoints)
+  // Indices: 0: TL, 1: TM, 2: TR, 3: RM, 4: BR, 5: BM, 6: BL, 7: LM
   const [points, setPoints] = useState<Point[]>([
-    { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, // TL, TM, TR
-    { x: 85, y: 50 }, { x: 85, y: 85 },                   // RM, BR
-    { x: 50, y: 85 }, { x: 15, y: 85 },                   // BM, BL
-    { x: 15, y: 50 }                                      // LM
+    { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
+    { x: 85, y: 50 }, { x: 85, y: 85 },                   
+    { x: 50, y: 85 }, { x: 15, y: 85 },                   
+    { x: 15, y: 50 }                                      
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -232,7 +233,6 @@ export default function AadhaarPrinter() {
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
-    // Only use the 4 corners for homography calculation (TL, TR, BR, BL)
     const corners = [src[0], src[2], src[4], src[6]];
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -281,7 +281,6 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
-        // Use corners for destination
         const srcPoints = points.map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
@@ -400,22 +399,44 @@ export default function AadhaarPrinter() {
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
 
     setMagnifierPos({ x, y });
+    
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        
+        // Update the point being dragged
         next[idx] = { x, y };
 
-        // Auto-update midpoints if corners are moved
-        if (idx === 0 || idx === 2) next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
-        if (idx === 2 || idx === 4) next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
-        if (idx === 4 || idx === 6) next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
-        if (idx === 6 || idx === 0) next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
-
-        // If dragging a midpoint, move corresponding edge
-        if (idx === 1) { next[0].y = y; next[2].y = y; }
-        if (idx === 3) { next[2].x = x; next[4].x = x; }
-        if (idx === 5) { next[4].y = y; next[6].y = y; }
-        if (idx === 7) { next[6].x = x; next[0].x = x; }
+        // SYNC LOGIC: Corners (0,2,4,6) and Midpoints (1,3,5,7)
+        if (idx === 0) { // TL
+            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
+            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
+        } else if (idx === 2) { // TR
+            next[1].x = (next[0].x + next[2].x) / 2; next[1].y = (next[0].y + next[2].y) / 2;
+            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
+        } else if (idx === 4) { // BR
+            next[3].x = (next[2].x + next[4].x) / 2; next[3].y = (next[2].y + next[4].y) / 2;
+            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
+        } else if (idx === 6) { // BL
+            next[5].x = (next[4].x + next[6].x) / 2; next[5].y = (next[4].y + next[6].y) / 2;
+            next[7].x = (next[0].x + next[6].x) / 2; next[7].y = (next[0].y + next[6].y) / 2;
+        } else if (idx === 1) { // TM: Move Top Edge
+            const dy = y - prev[1].y;
+            next[0].y += dy; next[2].y += dy;
+            next[7].y = (next[0].y + next[6].y) / 2; next[3].y = (next[2].y + next[4].y) / 2;
+        } else if (idx === 3) { // RM: Move Right Edge
+            const dx = x - prev[3].x;
+            next[2].x += dx; next[4].x += dx;
+            next[1].x = (next[0].x + next[2].x) / 2; next[5].x = (next[4].x + next[6].x) / 2;
+        } else if (idx === 5) { // BM: Move Bottom Edge
+            const dy = y - prev[5].y;
+            next[4].y += dy; next[6].y += dy;
+            next[3].y = (next[2].y + next[4].y) / 2; next[7].y = (next[0].y + next[6].y) / 2;
+        } else if (idx === 7) { // LM: Move Left Edge
+            const dx = x - prev[7].x;
+            next[6].x += dx; next[0].x += dx;
+            next[5].x = (next[4].x + next[6].x) / 2; next[1].x = (next[0].x + next[2].x) / 2;
+        }
 
         return next;
     });
@@ -731,10 +752,10 @@ export default function AadhaarPrinter() {
                                 <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
-                                <div key={i} className={cn("absolute size-8 md:size-14 -ml-4 md:-ml-7 -mt-4 md:-mt-7 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
+                                <div key={i} className={cn("absolute size-8 md:size-10 -ml-4 md:-ml-5 -mt-4 md:-mt-5 rounded-full border-2 md:border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-all", draggingPoint === i ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-primary/80 hover:bg-primary")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                     onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
-                                    <div className="size-2 md:size-4 bg-white rounded-full shadow-inner" />
+                                    <div className="size-2 md:size-3 bg-white rounded-full shadow-inner" />
                                 </div>
                             ))}
                         </div>
@@ -767,7 +788,7 @@ export default function AadhaarPrinter() {
                   <div className="w-full py-4 md:py-10 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
                        <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-8 py-1.5 md:py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
                           <Move className="h-3 w-3 md:h-4 md:w-4 text-primary animate-pulse" /> 
-                          {cropMode === 'rect' ? "Drag box to any area" : "Drag 8 dots to corners"}
+                          {cropMode === 'rect' ? "Drag box to any area" : "Drag dots to corners"}
                       </div>
                   </div>
               </CardContent>
