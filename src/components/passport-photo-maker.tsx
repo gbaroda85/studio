@@ -111,13 +111,13 @@ const useEditorStore = create<EditorState>((set, get) => ({
 const PRESETS = [
     { id: 'free', label: "Free Hand Crop (Manual)", width: 0, height: 0, unit: 'px' },
     { id: 'in_p', label: "India Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
-    { id: 'aadhaar', label: "Aadhaar Card (86x54mm) - Landscape", width: 86, height: 54, unit: 'mm' },
-    { id: 'pan', label: "PAN Card (85x55mm) - Landscape", width: 85, height: 55, unit: 'mm' },
+    { id: 'aadhaar', label: "Aadhaar Card (86x54mm)", width: 86, height: 54, unit: 'mm' },
+    { id: 'pan', label: "PAN Card (85x55mm)", width: 85, height: 55, unit: 'mm' },
     { id: 'us_v', label: "USA Visa / Passport (2x2in)", width: 2, height: 2, unit: 'inch' },
     { id: 'uk_p', label: "UK Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
     { id: 'ca_p', label: "Canada Passport (5x7cm)", width: 50, height: 70, unit: 'mm' },
     { id: 'dl', label: "Driving Licence (3.5x4.5cm)", width: 35, height: 45, unit: 'mm' },
-    { id: 'custom', label: "Custom Size (Input mm Below)", width: 0, height: 0, unit: 'mm' },
+    { id: 'custom', label: "Custom Size (Input mm)", width: 0, height: 0, unit: 'mm' },
 ];
 
 const COLORS = [
@@ -128,17 +128,14 @@ const COLORS = [
     { name: "Sky Blue", value: "#ADD8E6" },
     { name: "Light Grey", value: "#D3D3D3" },
     { name: "Black Frame", value: "#000000" },
-    { name: "Premium Teal", value: "#5cbdb9" },
 ];
 
 const PRINT_SHEETS = [
-    { name: "4x6 Inch Sheet (Auto-Fit)", width: 6, height: 4, unit: 'inch' },
-    { name: "A4 Paper (Auto-Fit)", width: 210, height: 297, unit: 'mm' },
+    { name: "4x6 Inch Glossy Sheet", width: 6, height: 4, unit: 'inch' },
+    { name: "A4 Photo Paper", width: 210, height: 297, unit: 'mm' },
 ];
 
 const DPI = 300; 
-
-type Stage = 'setup' | 'crop' | 'studio' | 'print';
 
 export default function PassportPhotoMaker() {
     const { toast } = useToast();
@@ -150,7 +147,7 @@ export default function PassportPhotoMaker() {
     const [progress, setProgress] = useState(0);
 
     // Core Settings
-    const [selectedPreset, setSelectedPreset] = useState<number>(1); // Default to India Passport
+    const [selectedPreset, setSelectedPreset] = useState<number>(1); 
     const [customWidth, setCustomWidth] = useState<string>("35");
     const [customHeight, setCustomHeight] = useState<string>("45");
     const [subjectImageSrc, setSubjectImageSrc] = useState<string | null>(null); 
@@ -287,7 +284,6 @@ export default function PassportPhotoMaker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // Use actual crop ratio if available
         const currentAspect = getAspectRatio() || (faceImg.width / faceImg.height);
         const targetW = 1200; 
         const targetH = targetW / currentAspect;
@@ -429,19 +425,6 @@ export default function PassportPhotoMaker() {
         const sourceCanvas = mainCanvasRef.current;
         if (!sourceCanvas) return;
 
-        const offScreenCanvas = document.createElement('canvas');
-        const ctx = offScreenCanvas.getContext('2d');
-        if (!ctx) return;
-
-        const targetW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
-        const targetH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
-        
-        offScreenCanvas.width = targetW;
-        offScreenCanvas.height = targetH;
-        
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, targetW, targetH);
-
         const currentPreset = PRESETS[selectedPreset];
         let pw_mm, ph_mm;
 
@@ -453,26 +436,56 @@ export default function PassportPhotoMaker() {
             pw_mm = currentPreset.width; ph_mm = currentPreset.height;
         }
 
-        const photoW = (pw_mm / 25.4) * DPI;
-        const photoH = (ph_mm / 25.4) * DPI;
-        
-        // Dynamic Grid Calculation to avoid cutting
-        const cols = Math.floor(targetW / (photoW * 1.05)); // 5% buffer for margins
-        const rows = Math.floor(targetH / (photoH * 1.05));
-        
-        if (cols === 0 || rows === 0) {
+        const photoW_px = (pw_mm / 25.4) * DPI;
+        const photoH_px = (ph_mm / 25.4) * DPI;
+
+        // Paper dimensions in pixels (6x4 inch is 1800x1200 at 300DPI)
+        const pW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
+        const pH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
+
+        // Try orientations to maximize fit
+        const orientations = [
+            { w: pW, h: pH },
+            { w: pH, h: pW }
+        ];
+
+        let bestFit = { w: pW, h: pH, cols: 0, rows: 0, total: -1 };
+        const gap = (2 / 25.4) * DPI; // Small 2mm gap between photos
+
+        orientations.forEach(o => {
+            const c = Math.floor((o.w - gap) / (photoW_px + gap));
+            const r = Math.floor((o.h - gap) / (photoH_px + gap));
+            const total = c * r;
+            if (total > bestFit.total) {
+                bestFit = { w: o.w, h: o.h, cols: c, rows: r, total };
+            }
+        });
+
+        if (bestFit.total <= 0) {
             toast({ variant: 'destructive', title: 'Format Error', description: 'Photo size is larger than paper.' });
             return;
         }
 
-        const marginX = (targetW - (photoW * cols)) / (cols + 1);
-        const marginY = (targetH - (photoH * rows)) / (rows + 1);
+        const offScreenCanvas = document.createElement('canvas');
+        offScreenCanvas.width = bestFit.w;
+        offScreenCanvas.height = bestFit.h;
+        const ctx = offScreenCanvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, bestFit.w, bestFit.h);
 
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const x = marginX + c * (photoW + marginX);
-                const y = marginY + r * (photoH + marginY);
-                ctx.drawImage(sourceCanvas, x, y, photoW, photoH);
+        // Center the grid on the sheet
+        const gridW = bestFit.cols * photoW_px + (bestFit.cols - 1) * gap;
+        const gridH = bestFit.rows * photoH_px + (bestFit.rows - 1) * gap;
+        const startX = (bestFit.w - gridW) / 2;
+        const startY = (bestFit.h - gridH) / 2;
+
+        for (let r = 0; r < bestFit.rows; r++) {
+            for (let c = 0; c < bestFit.cols; c++) {
+                const x = startX + c * (photoW_px + gap);
+                const y = startY + r * (photoH_px + gap);
+                ctx.drawImage(sourceCanvas, x, y, photoW_px, photoH_px);
             }
         }
         
