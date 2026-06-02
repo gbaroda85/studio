@@ -4,7 +4,6 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { useState, useRef, useEffect, useCallback, type SyntheticEvent, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import JSZip from 'jszip';
 import { 
     Camera, 
     Download, 
@@ -502,20 +501,16 @@ export default function DocumentScanner() {
     toast({ title: "PDF Exported", description: "All pages bundled into a PDF." });
   };
 
-  const handleExportImages = async () => {
+  const handleExportImages = () => {
     setIsExporting(true);
-    const zip = new JSZip();
     scannedPages.forEach((p, i) => {
-        const base64Data = p.processedSrc.split(',')[1];
-        zip.file(`page-${i+1}.jpg`, base64Data, { base64: true });
+        const link = document.createElement('a');
+        link.href = p.processedSrc;
+        link.download = `scan-page-${i + 1}.jpg`;
+        link.click();
     });
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `GR7-Scanned-Images-${Date.now()}.zip`;
-    link.click();
     setIsExporting(false);
-    toast({ title: "Images Exported", description: "Pages saved as a ZIP archive." });
+    toast({ title: "Images Saved", description: "All pages downloaded individually." });
   };
 
   const handleShare = async () => {
@@ -543,9 +538,10 @@ export default function DocumentScanner() {
             files: [file]
         });
         toast({ title: "Shared Successfully" });
-    } catch (e) {
-        console.error(e);
-        toast({ variant: 'destructive', title: 'Sharing Failed' });
+    } catch (e: any) {
+        if (e.name !== 'AbortError') {
+            toast({ variant: 'destructive', title: 'Sharing Failed' });
+        }
     }
   };
 
@@ -598,7 +594,7 @@ export default function DocumentScanner() {
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] h-full min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><FileStack className="size-6 text-primary" /> BUNDLE</CardTitle>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><FileStack className="size-6 text-primary" /> COLLECTION</CardTitle>
                             <Badge className="bg-primary text-black font-black px-3 py-1 rounded-full">{scannedPages.length}</Badge>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
@@ -624,7 +620,7 @@ export default function DocumentScanner() {
                                     <FileText className="mr-3 size-5" /> EXPORT AS PDF
                                 </Button>
                                 <Button disabled={scannedPages.length === 0} variant="outline" className="w-full h-14 px-6 border-2 font-black text-sm rounded-xl uppercase shadow-xl tracking-widest" onClick={handleExportImages}>
-                                    <ImageIcon className="mr-3 size-5" /> SAVE AS IMAGE
+                                    <ImageIcon className="mr-3 size-5" /> SAVE IMAGES
                                 </Button>
                                 <Button disabled={scannedPages.length === 0} variant="secondary" className="w-full h-14 font-black text-sm rounded-xl uppercase" onClick={handleShare}>
                                     <Share2 className="mr-3 size-5" /> SHARE DOCUMENT
@@ -798,7 +794,7 @@ export default function DocumentScanner() {
                             <FileStack className="size-8" />
                         </div>
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Scan Bundle</h2>
+                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Scan Collection</h2>
                             <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} Pages Captured</p>
                         </div>
                     </div>
