@@ -411,7 +411,7 @@ export default function DocumentScanner() {
                                     <p className="text-base font-black uppercase tracking-tighter">Capture Photo</p>
                                 </div>
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-16 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><UploadCloud className="size-8" /></div>
+                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform shadow-xl"><UploadCloud className="size-8" /></div>
                                     <p className="text-base font-black uppercase tracking-tighter">Pick from Album</p>
                                 </div>
                             </div>
