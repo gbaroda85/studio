@@ -95,11 +95,11 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune specifications
+  // Expert Specifications Defaults
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
-  const [sharpness, setSharpness] = useState([2]);
+  const [sharpness, setSharpness] = useState([2.5]);
   const [rotation, setRotation] = useState(0);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +113,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // 8-Point Scanner handles
+  // 8-Point Scanner handles (In Unrotated Coordinate Space)
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -184,17 +184,6 @@ export default function DocumentScanner() {
     setIsImageReady(true);
   };
 
-  // Sync Defaults
-  useEffect(() => {
-    if (activeFilter === 'document') {
-        setBrightness([145]); setContrast([96]); setSaturation([70]);
-    } else if (activeFilter === 'magic') {
-        setBrightness([110]); setContrast([110]); setSaturation([130]);
-    } else if (activeFilter === 'original') {
-        setBrightness([100]); setContrast([100]); setSaturation([100]);
-    }
-  }, [activeFilter]);
-
   const applyIntelligentScan = useCallback(async (): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
@@ -203,7 +192,7 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // Step 1: Content-Space Rotation (Sanitize Input)
+    // Content-Space Rotation Sanitization
     const tempCanvas = document.createElement('canvas');
     const tCtx = tempCanvas.getContext('2d');
     if (!tCtx) return "";
@@ -228,7 +217,6 @@ export default function DocumentScanner() {
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(tempCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // Perspective logic mapped to rotated viewport coordinate system
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: (p.x / 100) * tempCanvas.width, 
             y: (p.y / 100) * tempCanvas.height 
@@ -268,7 +256,7 @@ export default function DocumentScanner() {
         }
     }
 
-    // Apply Filter Pipeline
+    // Filter Processing
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
@@ -300,9 +288,9 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // Apply Sharpness HD (Kernel Convolution)
+    // High Sharpness Kernel
     if (sharpness[0] > 0) {
-        const factor = sharpness[0] / 4;
+        const factor = sharpness[0] / 3.5;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
         const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const src = currentData.data;
@@ -319,9 +307,7 @@ export default function DocumentScanner() {
                         const scx = Math.min(canvas.width - 1, Math.max(0, x + kx));
                         const srcOff = (scy * canvas.width + scx) * 4;
                         const wt = weights[(ky + 1) * 3 + (kx + 1)];
-                        r += src[srcOff] * wt;
-                        g += src[srcOff + 1] * wt;
-                        b += src[srcOff + 2] * wt;
+                        r += src[srcOff] * wt; g += src[srcOff + 1] * wt; b += src[srcOff + 2] * wt;
                     }
                 }
                 dst[i] = Math.max(0, Math.min(255, r));
@@ -343,21 +329,17 @@ export default function DocumentScanner() {
             const res = await applyIntelligentScan();
             setLiveResultSrc(res);
             setIsProcessing(false);
-        }, 150);
+        }, 200);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness, rotation]);
 
-  const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-              setCurrentRawImage(event.target?.result as string); 
-              setIsImageReady(false); setStage('adjust'); 
-          };
-          reader.readAsDataURL(file);
-      }
+  const handleConfirmAdd = () => {
+    if (!liveResultSrc) return;
+    const newPage = { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc };
+    setScannedPages(prev => [...prev, newPage]);
+    setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
+    toast({ title: "Page Added", description: "Doc bundle updated." });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -368,19 +350,38 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+    const xScreen = (cx - rect.left) / rect.width;
+    const yScreen = (cy - rect.top) / rect.height;
 
-    setMagnifierPos({ x, y });
+    // Inverse Rotation Matrix: Convert Visually Rotated Mouse to Content Space
+    const rad = (-rotation * Math.PI) / 180;
+    const dx = xScreen - 0.5;
+    const dy = yScreen - 0.5;
+    
+    let nx, ny;
+    if (rotation % 180 !== 0) {
+        // Swap bounds factor for aspect change
+        const aspect = rect.width / rect.height;
+        nx = (dx * Math.cos(rad) - dy * Math.sin(rad) * (1/aspect)) + 0.5;
+        ny = (dx * Math.sin(rad) * aspect + dy * Math.cos(rad)) + 0.5;
+    } else {
+        nx = (dx * Math.cos(rad) - dy * Math.sin(rad)) + 0.5;
+        ny = (dx * Math.sin(rad) + dy * Math.cos(rad)) + 0.5;
+    }
+
+    const finalX = Math.max(0, Math.min(100, nx * 100));
+    const finalY = Math.max(0, Math.min(100, ny * 100));
+
+    setMagnifierPos({ x: finalX, y: finalY });
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
-        if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
+        if ([0, 2, 4, 6].includes(idx)) { next[idx] = { x: finalX, y: finalY }; }
         else {
-            if (idx === 1) { next[0].y = y; next[2].y = y; } 
-            else if (idx === 3) { next[2].x = x; next[4].x = x; } 
-            else if (idx === 5) { next[6].y = y; next[4].y = y; } 
-            else if (idx === 7) { next[0].x = x; next[6].x = x; } 
+            if (idx === 1) { next[0].y = finalY; next[2].y = finalY; } 
+            else if (idx === 3) { next[2].x = finalX; next[4].x = finalX; } 
+            else if (idx === 5) { next[6].y = finalY; next[4].y = finalY; } 
+            else if (idx === 7) { next[0].x = finalX; next[6].x = finalX; } 
         }
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
@@ -388,29 +389,11 @@ export default function DocumentScanner() {
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  }, [draggingPoint, points]);
+  }, [draggingPoint, points, rotation]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       setDraggingPoint(idx);
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      let cx, cy;
-      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
-  };
-
-  const handleConfirmAdd = () => {
-    if (!liveResultSrc) return;
-    const newPage = {
-      id: Math.random().toString(36).substr(2, 9),
-      processedSrc: liveResultSrc
-    };
-    setScannedPages(prev => [...prev, newPage]);
-    setCurrentRawImage(null);
-    setLiveResultSrc(null);
-    setStage('viewfinder');
-    toast({ title: "Page Added", description: "The scanned page has been added to your collection." });
+      setMagnifierPos(points[idx]);
   };
 
   return (
@@ -474,47 +457,27 @@ export default function DocumentScanner() {
             </div>
         )}
 
-        {stage === 'live-camera' && !isMobile && (
-            <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-in zoom-in-95 duration-500">
-                <Card className="border-none shadow-3xl bg-black rounded-[2.5rem] overflow-hidden relative">
-                    <CardHeader className="absolute top-0 left-0 w-full z-10 p-6 flex flex-row items-center justify-between">
-                         <Badge className="bg-primary/20 text-primary font-black uppercase text-[10px]">LIVE FEED</Badge>
-                         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => { stopCamera(); setStage('viewfinder'); }}><X /></Button>
-                    </CardHeader>
-                    <CardContent className="p-0 bg-black aspect-video flex items-center justify-center">
-                        <video ref={videoRef} className="size-full object-cover" playsInline muted />
-                        {isVideoLoading && <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-xl"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>}
-                    </CardContent>
-                    <CardFooter className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-center w-full">
-                        <button className="size-20 rounded-full border-4 border-white bg-white/10 p-1 group hover:scale-110 active:scale-90 transition-all shadow-2xl" onClick={captureFrame}>
-                            <div className="size-full rounded-full bg-white group-hover:bg-primary transition-colors" />
-                        </button>
-                    </CardFooter>
-                </Card>
-            </div>
-        )}
-
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-right-4 duration-500">
+            <div className="grid lg:grid-cols-12 gap-6 items-stretch animate-in slide-in-from-right-4 duration-500">
                 <div className="lg:col-span-8 flex flex-col gap-4">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col flex-1 min-h-[500px]">
-                        <CardHeader className="bg-slate-900 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white">
-                            <CardTitle className="text-lg font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
-                            <div className="flex items-center gap-3">
-                                <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
+                        <CardHeader className="bg-slate-900 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white flex-wrap gap-4">
+                            <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
+                            <div className="flex items-center gap-2 md:gap-4 ml-auto">
+                                <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/20 text-white hover:bg-white/10" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-5" /></Button>
                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent">
+                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent w-[140px] md:w-[180px]">
                                         <TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger>
                                         <TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
-                                <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-white hover:bg-white/10"><X className="size-6"/></Button>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 h-full"
                                      onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                             
-                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                                 {cropMode === 'rect' ? (
                                     <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[65vh]">
                                         <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
@@ -572,7 +535,7 @@ export default function DocumentScanner() {
                                     <div className="space-y-6">
                                         <div className="flex items-center justify-between">
                                             <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Settings2 className="size-3"/> Fine Tuning</Label>
-                                            <Button variant="ghost" size="sm" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2]); }} className="text-[8px] font-black uppercase text-muted-foreground h-6 px-2"><RotateCcw className="size-2.5 mr-1" /> Reset</Button>
+                                            <Button variant="ghost" size="sm" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} className="text-[8px] font-black uppercase text-muted-foreground h-6 px-2"><RotateCcw className="size-2.5 mr-1" /> Reset</Button>
                                         </div>
                                         <div className="space-y-6">
                                             <div className="space-y-3">
@@ -610,3 +573,4 @@ export default function DocumentScanner() {
     </div>
   );
 }
+
