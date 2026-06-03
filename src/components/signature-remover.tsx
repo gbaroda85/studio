@@ -42,14 +42,14 @@ export default function SignatureRemover() {
   const [originalFileSize, setOriginalFileSize] = useState<number>(0);
   const [resultFileSize, setResultFileSize] = useState<number>(0);
   
-  // Controls for better cleaning
+  // High-precision controls
   const [sensitivity, setSensitivity] = useState([40]);
   const [boostInk, setBoostInk] = useState([20]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  // GLITCH-PROOF REFERENCES
+  // FROZEN MEMORY REFERENCES
   const originalPixelsRef = useRef<Uint8ClampedArray | null>(null);
   const originalDimsRef = useRef({ width: 0, height: 0 });
 
@@ -62,46 +62,6 @@ export default function SignatureRemover() {
     backgroundColor: "#ffffff"
   };
 
-  const handleFileChange = (file: File | null) => {
-    if (file && file.type.startsWith("image/")) {
-      setImageFile(file);
-      setOriginalFileSize(file.size);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const src = e.target?.result as string;
-        setOriginalImageSrc(src);
-        setResultImageSrc(null);
-        
-        const img = new window.Image();
-        img.src = src;
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            if (!ctx) return;
-            
-            ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            // Store original pixels in a frozen reference to prevent glitches
-            originalPixelsRef.current = new Uint8ClampedArray(imageData.data);
-            originalDimsRef.current = { width: img.width, height: img.height };
-            
-            processLocally();
-        };
-      };
-      reader.readAsDataURL(file);
-    } else if (file) {
-      toast({ variant: "destructive", title: "Invalid File Type", description: "Please select an image file." });
-    }
-  };
-
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
-  const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
-
   const processLocally = useCallback(() => {
     if (!originalPixelsRef.current || !canvasRef.current) return;
     
@@ -110,7 +70,7 @@ export default function SignatureRemover() {
     const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
     if (!ctx) return;
 
-    // Hard-lock canvas dimensions to prevent scaling glitches
+    // Hard-lock canvas dimensions
     canvas.width = w;
     canvas.height = h;
 
@@ -118,7 +78,7 @@ export default function SignatureRemover() {
     const targetData = ctx.createImageData(w, h);
     const targetPixels = targetData.data;
 
-    // Step 1: Calculate Max Luma from original once to handle paper brightness
+    // Find max brightness in original to baseline the "white" paper
     let maxLuma = 0;
     for (let i = 0; i < sourcePixels.length; i += 4) {
         const luma = 0.299 * sourcePixels[i] + 0.587 * sourcePixels[i+1] + 0.114 * sourcePixels[i+2];
@@ -128,7 +88,6 @@ export default function SignatureRemover() {
     const thresh = sensitivity[0];
     const inkFactor = 1 + (boostInk[0] / 100);
 
-    // Step 2: GLITCH-PROOF READ/WRITE Loop
     for (let i = 0; i < sourcePixels.length; i += 4) {
       const r = sourcePixels[i];
       const g = sourcePixels[i+1];
@@ -138,13 +97,13 @@ export default function SignatureRemover() {
       const diff = maxLuma - luma;
 
       if (diff > thresh) {
-        // High quality ink darkening
+        // High quality ink darkening logic
         targetPixels[i] = Math.max(0, r / inkFactor);
         targetPixels[i+1] = Math.max(0, g / inkFactor);
         targetPixels[i+2] = Math.max(0, b / inkFactor);
         targetPixels[i+3] = 255; 
       } else {
-        targetPixels[i+3] = 0; // Absolute transparency
+        targetPixels[i+3] = 0; // Transparent
       }
     }
 
@@ -154,14 +113,56 @@ export default function SignatureRemover() {
     setResultFileSize(Math.round((dataUrl.length - 22) * 0.75));
   }, [sensitivity, boostInk]);
 
+  const handleFileChange = (file: File | null) => {
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+      setOriginalFileSize(file.size);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const src = e.target?.result as string;
+        setOriginalImageSrc(src);
+        
+        const img = new window.Image();
+        img.src = src;
+        img.onload = () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+            if (!tempCtx) return;
+            
+            tempCtx.drawImage(img, 0, 0);
+            const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+            
+            // Initialize references
+            originalPixelsRef.current = new Uint8ClampedArray(imageData.data);
+            originalDimsRef.current = { width: img.width, height: img.height };
+            
+            // IMMEDIATE FIRST PROCESS
+            setTimeout(() => {
+                processLocally();
+            }, 0);
+        };
+      };
+      reader.readAsDataURL(file);
+    } else if (file) {
+      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image." });
+    }
+  };
+
   useEffect(() => {
     if (originalPixelsRef.current) {
         const timer = setTimeout(() => {
             processLocally();
-        }, 16); // 60fps response rate
+        }, 30);
         return () => clearTimeout(timer);
     }
   }, [sensitivity, boostInk, processLocally]);
+
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+  const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   const handleDownload = () => {
     if (!resultImageSrc || !imageFile) return;
@@ -169,7 +170,7 @@ export default function SignatureRemover() {
     link.href = resultImageSrc;
     const nameParts = imageFile.name.split(".");
     const name = nameParts.slice(0, -1).join(".");
-    link.download = `${name}-clean-signature.png`;
+    link.download = `${name}-transparent.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -181,6 +182,7 @@ export default function SignatureRemover() {
     setResultImageSrc(null);
     setIsProcessing(false);
     setSensitivity([40]);
+    setBoostInk([20]);
     originalPixelsRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -257,7 +259,6 @@ export default function SignatureRemover() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Main Viewport: Comparison */}
         <div className="lg:col-span-8">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -332,7 +333,7 @@ export default function SignatureRemover() {
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{sensitivity[0]}</span>
                             </div>
                             <Slider min={5} max={150} step={1} value={sensitivity} onValueChange={setSensitivity} className="py-2" />
-                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Adjust to remove shadows and background noise.</p>
+                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Adjust to remove paper color and shadows.</p>
                         </div>
 
                         <div className="space-y-4 pt-4 border-t border-white/5">
@@ -343,7 +344,7 @@ export default function SignatureRemover() {
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">+{boostInk[0]}%</span>
                             </div>
                             <Slider min={0} max={100} step={1} value={boostInk} onValueChange={setBoostInk} className="py-2" />
-                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Makes the signature strokes darker and clearer.</p>
+                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Makes the extracted ink darker and sharper.</p>
                         </div>
                     </div>
 
@@ -352,7 +353,7 @@ export default function SignatureRemover() {
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Pure Extraction Engine</p>
                             <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
-                                Read-only pixel processing ensures zero glitches during live adjustment.
+                                High-precision pixel processing ensures zero glitches during live adjustment.
                             </p>
                         </div>
                     </div>
