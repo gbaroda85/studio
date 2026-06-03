@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function SignatureRemover() {
@@ -39,6 +40,8 @@ export default function SignatureRemover() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [originalFileSize, setOriginalFileSize] = useState<number>(0);
+  const [resultFileSize, setResultFileSize] = useState<number>(0);
   
   // Controls for better cleaning
   const [sensitivity, setSensitivity] = useState([40]);
@@ -57,9 +60,11 @@ export default function SignatureRemover() {
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       setImageFile(file);
+      setOriginalFileSize(file.size);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setOriginalImageSrc(e.target?.result as string);
+        const src = e.target?.result as string;
+        setOriginalImageSrc(src);
         setResultImageSrc(null);
         setProgress(0);
         setSensitivity([40]);
@@ -123,7 +128,9 @@ export default function SignatureRemover() {
         }
 
         ctx.putImageData(imageData, 0, 0);
-        setResultImageSrc(canvas.toDataURL("image/png"));
+        const dataUrl = canvas.toDataURL("image/png");
+        setResultImageSrc(dataUrl);
+        setResultFileSize(Math.round((dataUrl.length - 22) * 0.75));
     };
   };
 
@@ -200,15 +207,9 @@ export default function SignatureRemover() {
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                 <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
-                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> TRANSPARENT</div>
+                <div className="flex items-center gap-1.5"><FileType className="size-3 text-primary" /> TRANSPARENT</div>
             </CardFooter>
         </Card>
-
-        <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest mt-2">
-            <span>PRIVATE & SECURE</span>
-            <span>NO SERVER UPLOADS</span>
-            <span>HD PNG EXPORT</span>
-        </div>
       </div>
     );
   }
@@ -235,38 +236,67 @@ export default function SignatureRemover() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Main Viewport: Before/After Comparison */}
         <div className="lg:col-span-8">
-            <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[2rem]">
-                <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[300px] md:min-h-[450px]" style={checkerboardStyle}>
-                    <AnimatePresence mode="wait">
-                        {isProcessing ? (
-                            <motion.div 
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-xl p-6 text-center gap-6"
-                            >
-                                <div className="relative">
-                                    <Loader2 className="h-14 w-14 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
-                                    <Eraser className="absolute inset-0 m-auto h-6 w-6 md:h-9 md:w-9 text-primary animate-pulse" />
-                                </div>
-                                <div className="space-y-3 w-full max-w-[250px] md:max-w-xs">
-                                    <p className="font-black text-lg md:text-xl text-primary animate-pulse uppercase tracking-tighter">Cleaning Ink...</p>
-                                    <Progress value={progress} className="h-1.5 shadow-inner" />
-                                </div>
-                            </motion.div>
-                        ) : resultImageSrc ? (
-                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative size-full p-4 md:p-8">
-                                <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 md:p-8 drop-shadow-2xl" />
-                            </motion.div>
-                        ) : (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative size-full p-4 md:p-8">
-                                <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 opacity-40 grayscale" />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <ArrowLeftRight className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Before & After Comparison</CardTitle>
+                    </div>
+                    {resultImageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">CLEANED</Badge>}
+                </CardHeader>
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px]">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
+                        {/* BEFORE */}
+                        <div className="space-y-3 flex flex-col h-full justify-center">
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
+                                <span className="text-[9px] font-mono opacity-40">{(originalFileSize / 1024).toFixed(1)} KB</span>
+                            </div>
+                            <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                <Image src={originalImageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
+                                <div className="absolute top-4 left-4"><Badge variant="outline" className="text-[8px] bg-white/80">BEFORE</Badge></div>
+                            </div>
+                        </div>
+
+                        {/* AFTER */}
+                        <div className="space-y-3 flex flex-col h-full justify-center">
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Cleaned Ink</span>
+                                {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{(resultFileSize / 1024).toFixed(1)} KB</span>}
+                            </div>
+                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden" style={checkerboardStyle}>
+                                <AnimatePresence mode="wait">
+                                    {resultImageSrc ? (
+                                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
+                                            <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 md:p-6 drop-shadow-2xl" />
+                                            <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
+                                        </motion.div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center gap-3 opacity-10 p-12 text-center">
+                                            <Loader2 className="size-12 animate-spin" />
+                                            <p className="text-[10px] font-black uppercase tracking-widest">Processing...</p>
+                                        </div>
+                                    )}
+                                </AnimatePresence>
+                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary/80">AFTER</Badge></div>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE LOCAL RAM</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><FileType className="size-4" /> TRANSPARENT PNG</div>
+                    </div>
+                </CardFooter>
             </Card>
         </div>
 
+        {/* Sidebar: Controls */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
