@@ -162,6 +162,19 @@ export default function DocumentScanner() {
     }
   }, [stage, stream]);
 
+  const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCurrentRawImage(event.target?.result as string);
+        setIsImageReady(false);
+        setStage('adjust');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const captureFrame = () => {
       if (!videoRef.current) return;
       const video = videoRef.current;
@@ -573,4 +586,3 @@ export default function DocumentScanner() {
     </div>
   );
 }
-
