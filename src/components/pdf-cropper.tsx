@@ -2,7 +2,7 @@
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
-import React, { useState, useRef, type SyntheticEvent, useCallback, useEffect } from 'react';
+import React, { useState, useRef, type SyntheticEvent, useCallback, useEffect, type ChangeEvent, type DragEvent } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
@@ -15,7 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
@@ -29,6 +30,7 @@ export default function PdfCropper() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isBuildingPdf, setIsBuildingPdf] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,8 +77,10 @@ export default function PdfCropper() {
     }
   }, [toast]);
 
-  useEffect(() => {
-    if (pdfFile) {
+  const handleFileChange = async (file: File | null) => {
+    if (file && file.type === 'application/pdf') {
+        setPdfFile(file);
+        setPageStates({});
         const reader = new FileReader();
         reader.onload = async (e) => {
             const buffer = e.target?.result as ArrayBuffer;
@@ -85,9 +89,25 @@ export default function PdfCropper() {
             setNumPages(pdfDocRef.current.numPages);
             loadPageImage(1);
         };
-        reader.readAsArrayBuffer(pdfFile);
+        reader.readAsArrayBuffer(file);
+    } else if (file) {
+        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
     }
-  }, [pdfFile, loadPageImage]);
+  };
+
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+  const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
+  const resetState = () => {
+    setPdfFile(null);
+    setPageImage(null);
+    setPageStates({});
+    setNumPages(0);
+    setCurrentPage(1);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   useEffect(() => {
     if (pdfDocRef.current) {
@@ -152,14 +172,12 @@ export default function PdfCropper() {
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         canvas.width = targetWidth; canvas.height = targetHeight;
         
-        // Use TL, TR, BR, BL corners for mapping
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
-        // Reverse mapping: Dst -> Src for pixel copying
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
         
@@ -225,7 +243,6 @@ export default function PdfCropper() {
             else if (idx === 5) { next[6].y = y; next[4].y = y; } 
             else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
-        // Sync midpoints
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
@@ -247,7 +264,7 @@ export default function PdfCropper() {
   return (
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 flex flex-col gap-8 pb-20">
         {!pdfFile ? (
-            <Card className={cn("w-full max-w-2xl text-center border-2 border-dashed mx-auto bg-card/50 rounded-[2.5rem] shadow-xl overflow-hidden", isDragOver && "border-primary ring-4 ring-primary/20")} onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if(e.dataTransfer.files[0]) setPdfFile(e.dataTransfer.files[0]); }} onClick={() => fileInputRef.current?.click()}>
+            <Card className={cn("w-full max-w-2xl text-center border-2 border-dashed mx-auto bg-card/50 rounded-[2.5rem] shadow-xl overflow-hidden", isDragOver && "border-primary ring-4 ring-primary/20")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
                 <CardContent className="p-20 flex flex-col items-center gap-6">
                     <div className="size-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary"><UploadCloud className="size-10" /></div>
                     <div className="space-y-2">
@@ -319,7 +336,7 @@ export default function PdfCropper() {
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-2 shadow-2xl overflow-hidden rounded-[2.5rem] bg-card/50 border-primary/10">
                         <CardHeader className="bg-primary/5 border-b p-6">
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2"><Settings2 className="size-5 text-primary" /> Studio Actions</CardTitle>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2"><Maximize className="size-5 text-primary" /> Studio Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 space-y-6">
                             <div className="space-y-4">
@@ -358,7 +375,7 @@ export default function PdfCropper() {
                                     {isBuildingPdf ? <Loader2 className="animate-spin mr-2" /> : <Download className="mr-2" />}
                                     DOWNLOAD {Object.values(pageStates).filter(s=>!!s.result).length} PAGE BUNDLE
                                 </Button>
-                                <Button variant="ghost" onClick={resetState} className="w-full h-10 font-black uppercase text-[10px] tracking-widest text-destructive hover:bg-destructive/5">
+                                <Button variant="ghost" onClick={resetState} className="w-full h-10 font-black uppercase text-[10px] tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive">
                                     <RefreshCcw className="size-3 mr-2" /> Start Over
                                 </Button>
                             </div>
@@ -375,6 +392,7 @@ export default function PdfCropper() {
                 </div>
             </div>
         )}
+        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
     </div>
   );
 }
