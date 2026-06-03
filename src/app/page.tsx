@@ -241,15 +241,15 @@ export default function Page() {
                 </div>
 
                 {/* WHY CHOOSE GR7 SECTION */}
-                <div className="mb-32 py-16 px-8 bg-slate-100 dark:bg-slate-900/40 rounded-[3rem] border-2 border-white/10 shadow-inner overflow-hidden relative">
-                    <div className="absolute top-0 right-0 size-64 bg-primary/5 blur-3xl rounded-full" />
-                    <div className="absolute bottom-0 left-0 size-64 bg-accent/5 blur-3xl rounded-full" />
+                <div className="mb-32 py-16 px-8 bg-primary/5 dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/10 dark:border-white/10 shadow-inner overflow-hidden relative">
+                    <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-3xl rounded-full" />
+                    <div className="absolute bottom-0 left-0 size-64 bg-accent/10 blur-3xl rounded-full" />
                     
                     <div className="relative z-10 text-center space-y-16">
                         <div className="space-y-4">
                             <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm">CORE PRINCIPLES</Badge>
                             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
-                            <p className="text-sm md:text-base text-muted-foreground font-bold max-w-2xl mx-auto uppercase opacity-60">The only professional studio built entirely on privacy-first architecture.</p>
+                            <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80">The only professional studio built entirely on privacy-first architecture.</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8 md:gap-12">
@@ -285,7 +285,7 @@ export default function Page() {
                         </div>
 
                         <div className="pt-8">
-                             <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-white/5">
+                             <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5">
                                 <div className="flex items-center -space-x-3">
                                     {[1,2,3,4].map(i => (
                                         <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">U{i}</div>
