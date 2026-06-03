@@ -88,14 +88,13 @@ export default function AadhaarPrinter() {
   const [backFinal, setBackFinal] = useState<string | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isBuildingPdf, setIsBuildingPdf] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
   // Rect Mode States
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
-  // 8-Dot Scanner States (TL, TC, TR, RC, BR, BC, BL, LC)
+  // 8-Dot Scanner States (Indices: 0=TL, 1=TC, 2=TR, 3=RC, 4=BR, 5=BC, 6=BL, 7=LC)
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
     { x: 85, y: 50 }, { x: 85, y: 85 },                   
@@ -227,8 +226,6 @@ export default function AadhaarPrinter() {
     if (!ctx) return;
 
     let finalData = "";
-
-    // INTRINSIC SCALE RATIO MATH
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
@@ -279,8 +276,8 @@ export default function AadhaarPrinter() {
         finalData = canvas.toDataURL("image/png");
     } else {
         if (!completedRectCrop) return;
-        canvas.width = completedRectCrop.width * scaleX;
-        canvas.height = completedRectCrop.height * scaleY;
+        canvas.width = Math.max(10, completedRectCrop.width * scaleX);
+        canvas.height = Math.max(10, completedRectCrop.height * scaleY);
         ctx.drawImage(image, completedRectCrop.x * scaleX, completedRectCrop.y * scaleY, completedRectCrop.width * scaleX, completedRectCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
         finalData = canvas.toDataURL("image/png");
     }
@@ -311,7 +308,7 @@ export default function AadhaarPrinter() {
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
+    if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     
     if (e.cancelable) e.preventDefault();
     const rect = containerRef.current.getBoundingClientRect();
@@ -322,32 +319,33 @@ export default function AadhaarPrinter() {
     const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
 
-    requestAnimationFrame(() => {
-        setMagnifierPos({ x, y });
-        setPoints(prev => {
-            const next = [...prev];
-            const idx = draggingPoint;
-            const dx = x - prev[idx].x;
-            const dy = y - prev[idx].y;
+    setMagnifierPos({ x, y });
+    setPoints(prev => {
+        const next = [...prev];
+        const idx = draggingPoint;
+        const dx = x - prev[idx].x;
+        const dy = y - prev[idx].y;
 
-            if ([0, 2, 4, 6].includes(idx)) {
-                next[idx] = { x, y };
-            } else {
-                if (idx === 1) { next[0].y += dy; next[2].y += dy; }
-                else if (idx === 3) { next[2].x += dx; next[4].x += dx; }
-                else if (idx === 5) { next[6].y += dy; next[4].y += dy; }
-                else if (idx === 7) { next[0].x += dx; next[6].x += dx; }
-            }
+        // Move target points
+        if ([0, 2, 4, 6].includes(idx)) {
+            next[idx] = { x, y };
+        } else {
+            // Midpoint Handles Logic: Move adjacent corners
+            if (idx === 1) { next[0].y = y; next[2].y = y; } // Top Edge
+            else if (idx === 3) { next[2].x = x; next[4].x = x; } // Right Edge
+            else if (idx === 5) { next[6].y = y; next[4].y = y; } // Bottom Edge
+            else if (idx === 7) { next[0].x = x; next[6].x = x; } // Left Edge
+        }
 
-            // Sync Midpoints
-            next[1] = { x: (next[0].x + next[2].x)/2, y: (next[0].y + next[2].y)/2 };
-            next[3] = { x: (next[2].x + next[4].x)/2, y: (next[2].y + next[4].y)/2 };
-            next[5] = { x: (next[4].x + next[6].x)/2, y: (next[4].y + next[6].y)/2 };
-            next[7] = { x: (next[6].x + next[0].x)/2, y: (next[6].y + next[0].y)/2 };
-            return next;
-        });
+        // Recalculate ALL midpoints based on current corner states to prevent drift
+        next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
+        next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
+        next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
+        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
+
+        return next;
     });
-  }, [draggingPoint]);
+  }, [draggingPoint, points]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
     setDraggingPoint(idx);
@@ -554,7 +552,7 @@ export default function AadhaarPrinter() {
 
             <div className="no-print">
                 <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
-                    <CardHeader className="bg-white/50 dark:bg-black/20 border-b p-4 text-center"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span></CardHeader>
+                    <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span></CardHeader>
                     <CardContent className="p-12 flex flex-col md:flex-row items-center justify-center gap-12">
                         {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
                             <div key={side.label} className="space-y-4">
