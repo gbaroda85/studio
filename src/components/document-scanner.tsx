@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -438,23 +437,23 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-right-4 duration-500">
                 <div className="lg:col-span-8">
-                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col h-full">
+                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col h-full min-h-[600px]">
                         <CardHeader className="bg-white/5 border-b p-6 flex flex-row items-center justify-between text-white">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
                                 <TabsList className="grid grid-cols-2 h-9 bg-transparent"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
                             </Tabs>
                         </CardHeader>
-                        <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 min-h-[500px]"
+                        <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 h-full"
                                      onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                             <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                                 {cropMode === 'rect' ? (
-                                    <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh]">
-                                        <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[60vh] w-auto object-contain block" onLoad={onImageLoad} />
+                                    <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[75vh]">
+                                        <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[75vh] w-auto object-contain block" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
                                     <div className="relative">
-                                        <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[75vh] w-auto pointer-events-none block object-contain" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                         </svg>
@@ -478,44 +477,46 @@ export default function DocumentScanner() {
                     </Card>
                 </div>
                 <div className="lg:col-span-4 flex flex-col gap-6">
-                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col flex-1">
-                        <CardHeader className="bg-primary/5 border-b p-6 text-slate-800 dark:text-white">
+                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col h-full">
+                        <CardHeader className="bg-primary/5 border-b p-6 text-slate-800 dark:text-white shrink-0">
                             <CardTitle className="text-lg font-black uppercase tracking-tighter">Render Filters</CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 p-6 flex flex-col bg-white dark:bg-slate-900 shadow-inner overflow-y-auto max-h-[600px] custom-scrollbar">
-                            <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[200px]">
-                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full h-auto block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
-                                {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
-                            </div>
-                            
-                            <div className="space-y-8">
-                                <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Intelligent Presets</Label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {['document', 'magic', 'bw', 'photo', 'gray', 'original'].map(f => (
-                                            <Button key={f} variant={activeFilter === f ? 'default' : 'outline'} className="text-[8px] font-black h-10 rounded-xl" onClick={() => setActiveFilter(f as ScanFilter)}>{f.toUpperCase()}</Button>
-                                        ))}
-                                    </div>
+                        <CardContent className="flex-1 p-6 flex flex-col bg-white dark:bg-slate-900 shadow-inner overflow-hidden">
+                            <ScrollArea className="h-full pr-2 custom-scrollbar">
+                                <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[300px] md:min-h-[400px]">
+                                    {liveResultSrc ? <img src={liveResultSrc} className="max-w-full h-full object-contain block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
+                                    {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
                                 </div>
-
-                                <Separator className="opacity-10" />
-
-                                <div className="space-y-6">
-                                    <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Fine Tuning</Label>
+                                
+                                <div className="space-y-8">
                                     <div className="space-y-4">
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Brightness</span><span className="text-[9px] font-mono font-black">{brightness[0]}%</span></div>
-                                            <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Intelligent Presets</Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {['document', 'magic', 'bw', 'photo', 'gray', 'original'].map(f => (
+                                                <Button key={f} variant={activeFilter === f ? 'default' : 'outline'} className="text-[8px] font-black h-10 rounded-xl" onClick={() => setActiveFilter(f as ScanFilter)}>{f.toUpperCase()}</Button>
+                                            ))}
                                         </div>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Contrast</span><span className="text-[9px] font-mono font-black">{contrast[0]}%</span></div>
-                                            <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                                    </div>
+
+                                    <Separator className="opacity-10" />
+
+                                    <div className="space-y-6 pb-4">
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Fine Tuning</Label>
+                                        <div className="space-y-4">
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Brightness</span><span className="text-[9px] font-mono font-black">{brightness[0]}%</span></div>
+                                                <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Contrast</span><span className="text-[9px] font-mono font-black">{contrast[0]}%</span></div>
+                                                <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ScrollArea>
                         </CardContent>
-                        <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3">
+                        <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3 shrink-0">
                             <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD</Button>
                             <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-muted-foreground" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                         </CardFooter>
