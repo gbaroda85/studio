@@ -28,12 +28,14 @@ import {
     Search,
     ChevronRight,
     Undo2,
-    Palette
+    Palette,
+    Settings2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
@@ -177,13 +179,13 @@ export default function ImageCropper() {
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         canvas.width = targetWidth; canvas.height = targetHeight;
 
-        // Perspective logic uses 4 corners from the 8 points
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
+        // Correct matrix ordering (Destination to Source mapping)
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
         const srcCanvas = document.createElement('canvas');
@@ -254,6 +256,8 @@ export default function ImageCropper() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        if (idx === null || !next[idx]) return prev;
+
         if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
         else {
             if (idx === 1) { next[0].y = y; next[2].y = y; } 
@@ -443,6 +447,7 @@ export default function ImageCropper() {
             </div>
         </div>
       </CardContent>
+      <canvas ref={canvasRef} className="hidden" />
     </Card>
   );
 }
