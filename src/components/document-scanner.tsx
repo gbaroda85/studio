@@ -42,7 +42,8 @@ import {
     Grid3X3,
     Monitor,
     ImageIcon,
-    Grip
+    Grip,
+    Circle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -91,7 +92,7 @@ function solvePerspective(src: Point[], dst: Point[]) {
 }
 
 type ScanFilter = 'original' | 'magic' | 'document' | 'bw' | 'photo' | 'gray';
-type Stage = 'viewfinder' | 'adjust';
+type Stage = 'viewfinder' | 'camera' | 'adjust';
 
 interface ScannedPage {
     id: string;
@@ -112,12 +113,13 @@ export default function DocumentScanner() {
   const [saturation, setSaturation] = useState([70]);
   const [sharpness, setSharpness] = useState([2.5]);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
+  const [isCameraStarting, setIsCameraStarting] = useState(false);
 
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
@@ -134,12 +136,60 @@ export default function DocumentScanner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const startCamera = () => {
-    // We explicitly click the capture input to force system camera on mobile
-    cameraInputRef.current?.click();
+  const startCamera = async () => {
+    setIsCameraStarting(true);
+    setStage('camera');
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            } 
+        });
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+        }
+    } catch (err) {
+        toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera device.' });
+        setStage('viewfinder');
+    } finally {
+        setIsCameraStarting(false);
+    }
   };
 
-  const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
+  const stopCamera = () => {
+      if (videoRef.current?.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          stream.getTracks().forEach(track => track.stop());
+          videoRef.current.srcObject = null;
+      }
+  };
+
+  const captureFrame = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        const data = canvas.toDataURL('image/jpeg', 1.0);
+        setCurrentRawImage(data);
+        setIsImageReady(false);
+        stopCamera();
+        setStage('adjust');
+        resetDots();
+    }
+  };
+
+  const resetDots = () => {
+    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
+  };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -147,7 +197,7 @@ export default function DocumentScanner() {
         setCurrentRawImage(event.target?.result as string);
         setIsImageReady(false);
         setStage('adjust');
-        setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
+        resetDots();
       };
       reader.readAsDataURL(file);
     }
@@ -212,7 +262,7 @@ export default function DocumentScanner() {
         cCtx.putImageData(imgData, 0, 0);
     }
 
-    // Filters
+    // Filter Processing
     const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
     const pixels = imageData.data;
     const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
@@ -220,6 +270,7 @@ export default function DocumentScanner() {
     for (let i = 0; i < pixels.length; i += 4) {
         let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
         const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+        
         if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
         else if (activeFilter === 'document') {
             const v = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
@@ -238,7 +289,7 @@ export default function DocumentScanner() {
     }
     cCtx.putImageData(imageData, 0, 0);
 
-    // Sharpness Kernel Engine
+    // Sharpness Logic
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -283,8 +334,7 @@ export default function DocumentScanner() {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        canvas.width = img.height;
-        canvas.height = img.width;
+        canvas.width = img.height; canvas.height = img.width;
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate(Math.PI / 2);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
@@ -337,23 +387,16 @@ export default function DocumentScanner() {
   };
 
   const resetAdjustments = () => {
-      setBrightness([145]);
-      setContrast([96]);
-      setSaturation([70]);
-      setSharpness([2.5]);
+      setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]);
       setActiveFilter('document');
       toast({ title: "Engine Reset", description: "Industrial defaults applied." });
   };
 
   const handleAiEnhance = () => {
-      // AI Enhance is specialized for HIGH CLARITY (different from Magic)
-      setBrightness([150]);
-      setContrast([140]);
-      setSaturation([115]);
-      setSharpness([6.0]); // Aggressive sharpness for restoration
+      setBrightness([150]); setContrast([150]); setSaturation([115]); setSharpness([6.5]);
       setActiveFilter('magic');
-      toast({ title: "AI Polish Active", description: "Dynamic range restoration and ultra-sharpness applied." });
-  }
+      toast({ title: "AI Polish Active", description: "Ultra-sharpness restoration mode." });
+  };
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12 overflow-x-hidden">
@@ -370,11 +413,11 @@ export default function DocumentScanner() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                                 <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
                                     <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest">Live Capture</p>
+                                    <p className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">Live Capture</p>
                                 </div>
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
                                     <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest">Gallery</p>
+                                    <p className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">Gallery</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -383,7 +426,7 @@ export default function DocumentScanner() {
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[3rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest">BUNDLE ({scannedPages.length})</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">BUNDLE ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
@@ -399,16 +442,29 @@ export default function DocumentScanner() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
+                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
                     </Card>
                 </div>
+            </div>
+        )}
+
+        {stage === 'camera' && (
+            <div className="flex flex-col items-center justify-center px-4 animate-in zoom-in-95 duration-500 min-h-[60vh]">
+                <Card className="w-full max-w-3xl border-none shadow-3xl rounded-[3rem] overflow-hidden bg-black relative">
+                    <div className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 text-white text-[10px] font-black uppercase tracking-widest"><ScanLine className="size-3 text-primary animate-pulse" /> Live Viewfinder</div>
+                    <video ref={videoRef} autoPlay playsInline className="w-full h-auto object-contain max-h-[75vh]" />
+                    {isCameraStarting && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-4"><Loader2 className="size-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-white">Opening Camera Studio...</p></div>}
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
+                        <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 transition-all ring-8 ring-white/20 border-8 border-slate-900" onClick={captureFrame} title="Capture Image"><Camera className="size-10"/></Button>
+                        <Button variant="ghost" onClick={() => { stopCamera(); setStage('viewfinder'); }} className="bg-black/40 text-white hover:bg-black/60 rounded-full px-6 font-black uppercase text-[10px] border border-white/10">Cancel Camera</Button>
+                    </div>
+                </Card>
             </div>
         )}
 
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1700px] mx-auto">
                 
-                {/* LEFT: ADJUSTMENT PANEL */}
                 <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
@@ -430,7 +486,7 @@ export default function DocumentScanner() {
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
                                     {points.map((p, i) => (
                                         <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:scale-110 active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
@@ -459,10 +515,9 @@ export default function DocumentScanner() {
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT: PREVIEW PANEL */}
                 <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
-                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle></div>
+                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">HD RESULT PREVIEW</CardTitle></div>
                          <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
                     <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
@@ -475,27 +530,27 @@ export default function DocumentScanner() {
                         <div className="w-full flex flex-col gap-4">
                              <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1 w-full">
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document Pro"><FileText className="size-5"/></Button>
+                                    <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }}><FileText className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-muted-foreground">Doc Pro</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
+                                    <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }}><Sparkles className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-muted-foreground">Magic</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'photo' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }} title="Photo High"><ImageIcon className="size-5"/></Button>
+                                    <Button variant={activeFilter === 'photo' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }}><ImageIcon className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-muted-foreground">Photo</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="BW PRO"><Highlighter className="size-5"/></Button>
+                                    <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }}><Highlighter className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-muted-foreground">BW Pro</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance} title="AI Enhancement"><Zap className="size-5"/></Button>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance}><Zap className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-indigo-600">AI Enhance</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult} title="Rotate Scan 90°"><RotateCw className="size-5"/></Button>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
                                 </div>
                                 
@@ -517,7 +572,7 @@ export default function DocumentScanner() {
                                                 
                                                 <div className="space-y-6 py-2">
                                                     <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-10px font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
+                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
                                                         <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
                                                     </div>
                                                     <div className="space-y-3">
@@ -540,7 +595,7 @@ export default function DocumentScanner() {
                                 </div>
 
                                 <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments} title="Reset Visuals"><RotateCcw className="size-5"/></Button>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments}><RotateCcw className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-rose-500">Reset</span>
                                 </div>
                              </div>
@@ -550,8 +605,8 @@ export default function DocumentScanner() {
             </div>
         )}
 
-        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleNativeCapture} />
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleNativeCapture} />
+        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFileUpload} />
     </div>
   );
 }
