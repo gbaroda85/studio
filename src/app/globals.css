@@ -6,7 +6,7 @@
   :root {
     /* Professional Palette - Light Mode (Interior Studio) */
     /* Light Theme (Interior Studio Palette) */
-    --background: 180 20% 96%;      /* Airy Studio Grey-Teal (#f2f8f8) */
+    --background: 180 20% 96%;      /* Airy Studio Grey-Teal (#f2f8f8) - Not Pure White */
     --foreground: 180 40% 15%;      /* Deep Navy Teal text */
     --card: 0 0% 100%;
     --card-foreground: 180 40% 15%;
@@ -96,12 +96,10 @@
 }
 
 .text-gradient-hero {
-  /* Updated to match the Hub Studio gradient for a consistent premium look */
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent;
 }
 
 .bg-gradient-button {
-  /* Match button style from the palette primary */
   @apply bg-gradient-to-r from-[#48a9a4] to-[#3aa39f] hover:from-[#3aa39f] hover:to-[#48a9a4] dark:from-[#7BBDE8] dark:to-[#49769F] text-white dark:text-slate-950 shadow-lg transition-all duration-300;
 }
 

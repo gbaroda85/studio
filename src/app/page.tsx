@@ -145,7 +145,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-white dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
@@ -156,7 +156,7 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-4 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-medium mb-4 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
@@ -240,7 +240,6 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* WHY CHOOSE GR7 SECTION */}
                 <div className="mb-32 py-16 px-8 bg-primary/5 dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/10 dark:border-white/10 shadow-inner overflow-hidden relative">
                     <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-3xl rounded-full" />
                     <div className="absolute bottom-0 left-0 size-64 bg-accent/10 blur-3xl rounded-full" />
