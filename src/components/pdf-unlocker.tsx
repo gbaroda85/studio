@@ -49,6 +49,7 @@ if (typeof window !== 'undefined') {
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
@@ -122,7 +123,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -224,7 +225,8 @@ export default function PdfUnlocker() {
         if (!unlockedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = unlockedPdfUrl;
-        link.download = `unlocked-${pdfFile.name}`;
+        // Updated filename logic
+        link.download = `GR7-Tools-${pdfFile.name}`;
         link.click();
     }
 

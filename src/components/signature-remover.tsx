@@ -156,8 +156,9 @@ export default function SignatureRemover() {
     if (!resultImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resultImageSrc;
-    const name = imageFile.name.split(".").slice(0, -1).join(".");
-    link.download = `${name}-transparent.png`;
+    // Updated filename logic
+    const name = imageFile.name.includes('.') ? imageFile.name.split(".").slice(0, -1).join(".") : imageFile.name;
+    link.download = `GR7-Tools-Signature-${name}.png`;
     link.click();
   };
 

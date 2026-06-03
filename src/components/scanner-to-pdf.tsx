@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
@@ -186,7 +187,8 @@ export default function ScannerToPdf() {
             });
         }
 
-        pdf.save(`GR7-Scan-Bundle-${Date.now()}.pdf`);
+        // Updated filename logic
+        pdf.save(`GR7-Tools-Scan-Bundle-${Date.now()}.pdf`);
         toast({ title: "PDF Exported", description: "Document saved successfully." });
     } catch (e) {
         toast({ variant: 'destructive', title: 'Export Failed', description: "Check file permissions." });
@@ -401,7 +403,7 @@ export default function ScannerToPdf() {
                         )}
 
                         <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
-                            <Zap className="size-6 text-yellow-500 shrink-0" />
+                            <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                 <span className="font-black block mb-1 text-primary">A4 AUTO-FIT:</span>
                                 Each capture is automatically scaled to fit standard A4 margins.

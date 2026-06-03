@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -102,7 +103,8 @@ export default function BackgroundRemover() {
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setOriginalImageSrc(e.target?.result as string);
+        const src = e.target?.result as string;
+        setOriginalImageSrc(src);
         setStage('preview');
       };
       reader.readAsDataURL(file);
@@ -277,10 +279,11 @@ export default function BackgroundRemover() {
   }, [updateComposite]);
 
   const handleDownload = () => {
-    if (!previewImageSrc) return;
+    if (!previewImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    link.download = `GR7-HD-Clean-${Date.now()}.png`;
+    // Updated filename logic
+    link.download = `GR7-Tools-Clean-${imageFile.name.split('.')[0]}.png`;
     link.click();
   };
 

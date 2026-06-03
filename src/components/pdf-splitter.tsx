@@ -212,7 +212,8 @@ export default function PdfSplitter() {
         if (!splitPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = splitPdfUrl;
-        link.download = `split-${pdfFile.name}`;
+        // Updated filename logic
+        link.download = `GR7-Tools-${pdfFile.name}`;
         link.click();
     }
     
@@ -247,7 +248,7 @@ export default function PdfSplitter() {
                             <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Pages will be rendered for visual selection.</p>
                         </div>
                     </div>
-                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
                 </CardContent>
                 <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>

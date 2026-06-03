@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
@@ -103,8 +104,10 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     if (!convertedSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = convertedSrc;
-    const name = imageFile.name.split(".").slice(0, -1).join(".");
-    link.download = `${name}.${outputFormat === 'jpeg' ? 'jpg' : outputFormat}`;
+    // Updated filename logic
+    const name = imageFile.name.includes('.') ? imageFile.name.split(".").slice(0, -1).join(".") : imageFile.name;
+    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+    link.download = `GR7-Tools-${name}.${ext}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

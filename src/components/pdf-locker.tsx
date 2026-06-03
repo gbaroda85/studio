@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -33,6 +34,7 @@ import confetti from 'canvas-confetti';
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
@@ -115,7 +117,8 @@ export default function PdfLocker() {
     const url = URL.createObjectURL(protectedBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `locked-${pdfFile.name}`;
+    // Updated filename logic
+    link.download = `GR7-Tools-${pdfFile.name}`;
     link.click();
     URL.revokeObjectURL(url);
   };

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -202,7 +203,8 @@ export default function PdfWatermarker() {
     if (!watermarkedPdfUrl || !pdfFile) return;
     const link = document.createElement('a');
     link.href = watermarkedPdfUrl;
-    link.download = `watermarked-${pdfFile.name}`;
+    // Updated filename logic
+    link.download = `GR7-Tools-${pdfFile.name}`;
     link.click();
   }
 

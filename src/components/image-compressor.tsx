@@ -215,22 +215,27 @@ export default function ImageCompressor() {
   const downloadFile = (res: CompressionResult) => {
     const link = document.createElement("a");
     link.href = res.dataUrl;
-    link.download = `optimized-${res.name.split('.')[0]}.${outputFormat}`;
+    // Updated filename logic
+    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+    const baseName = res.name.includes('.') ? res.name.split('.').slice(0, -1).join('.') : res.name;
+    link.download = `GR7-Tools-${baseName}.${ext}`;
     link.click();
   };
 
   const downloadAllAsZip = async () => {
     const zip = new JSZip();
+    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
     results.forEach(res => {
         if (res.newSize > 0) {
             const base64Data = res.dataUrl.split(",")[1];
-            zip.file(`optimized-${res.name.split('.')[0]}.${outputFormat}`, base64Data, { base64: true });
+            const baseName = res.name.includes('.') ? res.name.split('.').slice(0, -1).join('.') : res.name;
+            zip.file(`GR7-Tools-${baseName}.${ext}`, base64Data, { base64: true });
         }
     });
     const content = await zip.generateAsync({ type: "blob" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(content);
-    link.download = "optimized-batch.zip";
+    link.download = "GR7-Tools-optimized-batch.zip";
     link.click();
   };
 
@@ -271,7 +276,7 @@ export default function ImageCompressor() {
                             </div>
                             <div className="text-center">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">Adaptive scaling & batching active.</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Adaptive scaling & batching active.</p>
                             </div>
                         </div>
                     ) : (

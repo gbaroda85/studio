@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -379,7 +380,8 @@ export default function PassportPhotoMaker() {
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/jpeg', 1.0);
-        link.download = `GR7-Studio-Document-${Date.now()}.jpg`;
+        // Updated filename logic
+        link.download = `GR7-Tools-Passport-Photo-${Date.now()}.jpg`;
         link.click();
     };
 
@@ -772,7 +774,9 @@ export default function PassportPhotoMaker() {
                                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                                     <Button variant="outline" onClick={() => setStage('studio')} className="h-12 md:h-16 flex-1 rounded-xl md:rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
                                     <Button className="h-12 md:h-16 flex-[2] rounded-xl md:rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-lg" onClick={() => {
-                                        const link = document.createElement('a'); link.href = printSheetSrc; link.download = `Print-Sheet-${Date.now()}.jpg`; link.click();
+                                        const link = document.createElement('a'); link.href = printSheetSrc; 
+                                        // Updated filename logic
+                                        link.download = `GR7-Tools-Print-Sheet-${Date.now()}.jpg`; link.click();
                                     }}>DOWNLOAD SHEET</Button>
                                 </div>
                             </div>

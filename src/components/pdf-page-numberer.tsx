@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -210,7 +211,8 @@ export default function PdfPageNumberer() {
     if (!numberedPdfUrl || !pdfFile) return;
     const link = document.createElement('a');
     link.href = numberedPdfUrl;
-    link.download = `numbered-${pdfFile.name}`;
+    // Updated filename logic
+    link.download = `GR7-Tools-${pdfFile.name}`;
     link.click();
   }
 
@@ -320,7 +322,7 @@ export default function PdfPageNumberer() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
                         <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
                                 <Layout className="size-3" /> Position Preset
                             </Label>
                             <Select value={position} onValueChange={(v) => setPosition(v as PageNumberPosition)}>
@@ -337,7 +339,7 @@ export default function PdfPageNumberer() {
                         </div>
 
                         <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
                                 <NotebookPen className="size-3" /> Number Format
                             </Label>
                             <Input 

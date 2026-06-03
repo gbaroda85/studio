@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -266,9 +267,8 @@ export default function ImageResizer() {
     if (!resizedImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resizedImageSrc;
-    const nameParts = imageFile.name.split(".");
-    const name = nameParts.slice(0, -1).join(".");
-    link.download = `${name}-resized.${outputFormat}`;
+    // Updated filename logic
+    link.download = `GR7-Tools-${imageFile.name}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -309,6 +309,7 @@ export default function ImageResizer() {
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
@@ -527,4 +528,3 @@ export default function ImageResizer() {
     </div>
   );
 }
-

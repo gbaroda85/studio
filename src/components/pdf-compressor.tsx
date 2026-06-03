@@ -236,7 +236,8 @@ export default function PdfCompressor() {
         if (!compressedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = compressedPdfUrl;
-        link.download = `optimized-${pdfFile.name}`;
+        // Updated filename logic
+        link.download = `GR7-Tools-${pdfFile.name}`;
         link.click();
     }
 
@@ -289,7 +290,7 @@ export default function PdfCompressor() {
                         </div>
                         <div className="text-center">
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Optimize</p>
-                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">High-DPI text clarity engine active.</p>
+                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">High-DPI text clarity engine active.</p>
                         </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />

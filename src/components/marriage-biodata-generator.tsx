@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -179,11 +180,13 @@ export default function MarriageBiodataGenerator() {
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            pdf.save(`Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
+            // Updated filename logic
+            pdf.save(`GR7-Tools-Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
             toast({ title: "Success!", description: "High-quality PDF downloaded." });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate PDF.' });
         } finally {
+            setIsExporting(error);
             setIsExporting(false);
         }
     };

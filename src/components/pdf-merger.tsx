@@ -207,7 +207,8 @@ export default function PdfMerger() {
         if (!mergedPdfUrl) return;
         const link = document.createElement('a');
         link.href = mergedPdfUrl;
-        link.download = `merged-document-${Date.now()}.pdf`;
+        // Updated filename logic
+        link.download = `GR7-Tools-merged-document-${Date.now()}.pdf`;
         link.click();
     }
     
@@ -279,7 +280,7 @@ export default function PdfMerger() {
                         )}
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={(e) => handleFilesChange(e.target.files)} />
                     </CardContent>
-                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                    <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                         <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                         <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
                         <div className="flex items-center gap-1.5"><FileStack className="size-3 text-purple-500" /> PRO BUNDLING</div>
@@ -334,7 +335,7 @@ export default function PdfMerger() {
 
             {/* Right Column: Settings & Actions */}
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 hover:-translate-y-1">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                             <LayoutList className="size-6 text-primary" /> Stack Control

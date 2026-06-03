@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -446,7 +447,8 @@ export default function PdfEditor() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Edited-${pdfFile.name}`;
+            // Updated filename logic
+            link.download = `GR7-Tools-Edited-${pdfFile.name}`;
             link.click();
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "PDF Exported Successfully" });
