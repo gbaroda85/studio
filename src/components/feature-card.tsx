@@ -33,7 +33,7 @@ export function FeatureCard({
         lightBg || "bg-card", // Colourful for Light Mode
         "dark:bg-card" // Professional Dark for Dark Mode
       )}>
-        <CardHeader className="p-6 relative z-10">
+        <CardHeader className="p-6 relative z-10 text-left">
           <div className="flex items-start justify-between mb-4">
             <div className={cn("grid size-12 place-items-center rounded-xl transition-all group-hover:scale-110 shadow-lg", color.replace('text-', 'bg-'))}>
               <Icon className="h-7 w-7 text-white" />
@@ -42,8 +42,8 @@ export function FeatureCard({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
-          <CardTitle className="text-lg font-black mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight uppercase line-clamp-1">{title}</CardTitle>
-          <CardDescription className="text-sm text-slate-500 dark:text-slate-400 leading-tight font-semibold line-clamp-2 h-10">{description}</CardDescription>
+          <CardTitle className="text-lg font-bold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight line-clamp-1">{title}</CardTitle>
+          <CardDescription className="text-sm text-slate-500 dark:text-slate-400 leading-tight font-normal line-clamp-2 h-10">{description}</CardDescription>
         </CardHeader>
         <div className="absolute -bottom-10 -right-10 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-2xl" />
       </Card>

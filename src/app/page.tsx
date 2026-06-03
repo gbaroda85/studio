@@ -119,9 +119,9 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-5" />
         </div>
-        <h3 className="text-lg font-black mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase tracking-tighter line-clamp-1">{title}</h3>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-semibold h-8">{description}</p>
-        <div className="flex items-center text-primary font-black text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
+        <h3 className="text-lg font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">{title}</h3>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-normal h-8">{description}</p>
+        <div className="flex items-center text-primary font-bold text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
           Launch Tool <ArrowRight className="ml-1 size-3" />
         </div>
       </CardContent>
@@ -152,31 +152,31 @@ export default function Page() {
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-bold leading-relaxed animate-fade-in-up">
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up">
             <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
             <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-rose-500/50 transition-all group">
               <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
             <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-emerald-500/50 transition-all group">
               <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
@@ -200,7 +200,7 @@ export default function Page() {
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.2em] mb-12">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-12">
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
@@ -209,19 +209,19 @@ export default function Page() {
                 {filteredTools.length === 0 && (
                    <div className="text-center py-20 opacity-30">
                       <Search className="size-20 mx-auto mb-4" />
-                      <p className="font-black uppercase tracking-widest">No matching tools found.</p>
+                      <p className="font-bold uppercase tracking-widest">No matching tools found.</p>
                    </div>
                 )}
             </div>
           ) : (
             <>
                 <div className="mb-24">
-                    <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em] mb-3">
+                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3">
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">VISUAL PROCESSOR</h2>
-                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-black text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter">VISUAL PROCESSOR</h2>
+                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-bold text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
                             <Link href="/tools">EXPLORE ALL <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
                     </div>
@@ -231,10 +231,10 @@ export default function Page() {
                 </div>
 
                 <div className="mb-24">
-                    <div className="flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-[0.3em] mb-3">
+                    <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-[0.3em] mb-3">
                         <div className="w-12 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10">PDF Toolkit</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -247,8 +247,8 @@ export default function Page() {
                     
                     <div className="relative z-10 text-center space-y-16">
                         <div className="space-y-4">
-                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-black uppercase text-[10px] tracking-widest shadow-sm">CORE PRINCIPLES</Badge>
-                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
+                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm">CORE PRINCIPLES</Badge>
+                            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
                             <p className="text-sm md:text-base text-muted-foreground font-bold max-w-2xl mx-auto uppercase opacity-60">The only professional studio built entirely on privacy-first architecture.</p>
                         </div>
 
@@ -258,7 +258,7 @@ export default function Page() {
                                     <ShieldCheck className="size-10 text-green-500" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-black uppercase tracking-tight">100% Private</h3>
+                                    <h3 className="text-lg font-bold tracking-tight">100% Private</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).</p>
                                 </div>
                             </div>
@@ -268,7 +268,7 @@ export default function Page() {
                                     <Zap className="size-10 text-blue-500" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-black uppercase tracking-tight">Native Performance</h3>
+                                    <h3 className="text-lg font-bold tracking-tight">Native Performance</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.</p>
                                 </div>
                             </div>
@@ -278,7 +278,7 @@ export default function Page() {
                                     <Trophy className="size-10 text-primary" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-black uppercase tracking-tight">Studio Quality</h3>
+                                    <h3 className="text-lg font-bold tracking-tight">Studio Quality</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.</p>
                                 </div>
                             </div>
@@ -288,11 +288,11 @@ export default function Page() {
                              <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-white/5">
                                 <div className="flex items-center -space-x-3">
                                     {[1,2,3,4].map(i => (
-                                        <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black">U{i}</div>
+                                        <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">U{i}</div>
                                     ))}
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-[10px] font-black uppercase leading-none">Trusted by 10,000+ Users</p>
+                                    <p className="text-[10px] font-bold uppercase leading-none">Trusted by 10,000+ Users</p>
                                     <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">For official document management</p>
                                 </div>
                              </div>
