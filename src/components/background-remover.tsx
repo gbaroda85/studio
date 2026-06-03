@@ -21,7 +21,8 @@ import {
     Maximize,
     Scaling,
     RotateCw,
-    CheckCircle2
+    CheckCircle2,
+    Eye
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -32,10 +33,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -112,29 +111,10 @@ export default function BackgroundRemover() {
     }
   };
 
-  const handleRotateOriginal = () => {
-    if (!originalImageSrc) return;
-    setIsProcessing(true);
-    const img = new window.Image();
-    img.src = originalImageSrc;
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            setIsProcessing(false);
-            return;
-        }
-        canvas.width = img.height;
-        canvas.height = img.width;
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((90 * Math.PI) / 180);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        const rotatedSrc = canvas.toDataURL('image/png');
-        setOriginalImageSrc(rotatedSrc);
-        setIsProcessing(false);
-        toast({ title: "Rotated", description: "Photo orientation changed." });
-    };
-  };
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+  const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   const updateCropFromSettings = useCallback(() => {
     if (!imgRef.current) return;
@@ -240,10 +220,11 @@ export default function BackgroundRemover() {
 
     let targetW_px, targetH_px;
     
+    const img = new window.Image();
+    img.src = subjectImageSrc;
+    await new Promise(r => img.onload = r);
+
     if (selectedSizeIndex === '0') {
-        const img = new window.Image();
-        img.src = subjectImageSrc;
-        await new Promise(r => img.onload = r);
         targetW_px = img.width;
         targetH_px = img.height;
     } else {
@@ -263,36 +244,32 @@ export default function BackgroundRemover() {
     canvas.width = targetW_px;
     canvas.height = targetH_px;
 
-    const img = new window.Image();
-    img.src = subjectImageSrc;
-    img.onload = () => {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
-        if (bgColor !== 'transparent') {
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        } else {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+    if (bgColor !== 'transparent') {
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        const dw = img.width * scale;
-        const dh = (faceImg.height * (dw / faceImg.width));
-        const dx = (canvas.width - dw) / 2;
-        const dy = (canvas.height - dh) / 2;
-        
-        ctx.drawImage(img, dx, dy, dw, dh);
-        
-        if (borderWidth[0] > 0) {
-            ctx.strokeStyle = borderColor;
-            const strokePx = (borderWidth[0] / 100) * canvas.width;
-            ctx.lineWidth = strokePx; 
-            ctx.strokeRect(strokePx/2, strokePx/2, canvas.width - strokePx, canvas.height - strokePx);
-        }
+    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    const dx = (canvas.width - dw) / 2;
+    const dy = (canvas.height - dh) / 2;
+    
+    ctx.drawImage(img, dx, dy, dw, dh);
+    
+    if (borderWidth[0] > 0) {
+        ctx.strokeStyle = borderColor;
+        const strokePx = (borderWidth[0] / 100) * canvas.width;
+        ctx.lineWidth = strokePx; 
+        ctx.strokeRect(strokePx/2, strokePx/2, canvas.width - strokePx, canvas.height - strokePx);
+    }
 
-        setPreviewImageSrc(canvas.toDataURL("image/png", 1.0));
-    };
+    setPreviewImageSrc(canvas.toDataURL("image/png", 1.0));
   }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex]);
 
   useEffect(() => {
@@ -339,14 +316,14 @@ export default function BackgroundRemover() {
 
         <Card
             className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
                     <div className="relative">
                         <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -356,7 +333,7 @@ export default function BackgroundRemover() {
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
                     </div>
                 </div>
-                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
