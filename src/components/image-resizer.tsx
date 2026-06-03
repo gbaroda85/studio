@@ -76,7 +76,9 @@ export default function ImageResizer() {
   const [unit, setUnit] = useState<Unit>('px');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const convertPxToUnit = (px: number, targetUnit: Unit) => {
     if (targetUnit === 'px') return px;
@@ -174,12 +176,10 @@ export default function ImageResizer() {
       const targetWidth = convertUnitToPx(parseFloat(newDimensions.width), unit);
       const targetHeight = convertUnitToPx(parseFloat(newDimensions.height), unit);
 
-      // STEP 1: ITERATIVE DOWNSAMPLING (To prevent aliasing/blur)
       let curCanvas: HTMLCanvasElement | HTMLImageElement = img;
       let stepW = img.width;
       let stepH = img.height;
       
-      // Step down by 50% until we reach target * 2
       while (stepW > targetWidth * 2) {
           const nextW = Math.floor(stepW / 2);
           const nextH = Math.floor(stepH / 2);
@@ -197,7 +197,6 @@ export default function ImageResizer() {
           stepH = nextH;
       }
 
-      // STEP 2: FINAL RENDER
       const finalCanvas = document.createElement("canvas");
       finalCanvas.width = targetWidth;
       finalCanvas.height = targetHeight;
@@ -214,9 +213,7 @@ export default function ImageResizer() {
         
         finalCtx.drawImage(curCanvas, 0, 0, targetWidth, targetHeight);
 
-        // STEP 3: SUBTLE SHARPENING CONVOLUTION (For "Original-Like" crispness)
-        // This brings back the sharp edges lost during resizing interpolation
-        const amount = 0.08; // Amount of sharpening (Adjust for crystal clarity)
+        const amount = 0.08; 
         const weights = [0, -amount, 0, -amount, 4 * amount + 1, -amount, 0, -amount, 0];
         const imageData = finalCtx.getImageData(0, 0, targetWidth, targetHeight);
         const pixels = imageData.data;
@@ -228,7 +225,7 @@ export default function ImageResizer() {
                 const sy = y;
                 const sx = x;
                 const dstOff = (y * targetWidth + x) * 4;
-                let r = 0, g = 0, b = 0, a = 0;
+                let r = 0, g = 0, b = 0;
                 for (let cy = 0; cy < 3; cy++) {
                     for (let cx = 0; cx < 3; cx++) {
                         const scy = Math.min(targetHeight - 1, Math.max(0, sy + cy - 1));
@@ -238,19 +235,18 @@ export default function ImageResizer() {
                         r += pixels[srcOff] * wt;
                         g += pixels[srcOff + 1] * wt;
                         b += pixels[srcOff + 2] * wt;
-                        a += pixels[srcOff + 3] * wt;
                     }
                 }
                 dst[dstOff] = r;
                 dst[dstOff + 1] = g;
                 dst[dstOff + 2] = b;
-                dst[dstOff + 3] = pixels[dstOff + 3]; // Preserve original alpha
+                dst[dstOff + 3] = pixels[dstOff + 3]; 
             }
         }
         finalCtx.putImageData(output, 0, 0);
 
         const mimeType = `image/${outputFormat}`;
-        const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0); // 1.0 for Lossless extraction
+        const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0); 
         
         const blob = await (await fetch(resizedDataUrl)).blob();
         setResizedFileSize(blob.size);
@@ -292,55 +288,79 @@ export default function ImageResizer() {
 
   if (!originalImageSrc) {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 border-2 border-dashed", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader className="p-4 md:p-6">
-          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Scaling className="h-6 w-6" />
-          </div>
-          <CardTitle className="text-xl font-black">Pro HD Image Resizer</CardTitle>
-          <CardDescription className="text-xs">Precision re-sampling studio.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-6 md:p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-            <UploadCloud className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors" />
-            <div>
-                <p className="text-lg font-bold">Drop photo here</p>
-                <p className="text-[10px] text-muted-foreground mt-1">HD 300DPI extraction active.</p>
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <Scaling className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
             </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-        <CardFooter className="justify-center gap-4 text-[8px] text-muted-foreground font-black uppercase tracking-widest pb-4">
-            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> SHARP</div>
-            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD</div>
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> PRIVATE</div>
-        </CardFooter>
-      </Card>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Image <span className="text-gradient-hero">Resizer Studio</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Precision dimensions for official documents. <br/>100% Private local HD resampling.
+            </p>
+        </div>
+
+        <Card className={cn(
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+        )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 md:p-12">
+                <div 
+                    className={cn(
+                        "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                    )}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <div className="relative">
+                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center">
+                        <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
+                        <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> SHARP HD</div>
+                <div className="flex items-center gap-1.5"><Scaling className="size-3 text-primary" /> PRIVATE</div>
+            </CardFooter>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 animate-in fade-in duration-500 px-4">
+    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 pb-20">
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-5 space-y-6">
-          <Card className="border-2 shadow-xl border-primary/10 overflow-hidden">
-              <CardHeader className="bg-primary/5 border-b p-3">
-                  <CardTitle className="text-[10px] flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
-                    <Briefcase className="h-3 w-3" /> GOVT JOB PRESETS
+          <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+              <CardHeader className="bg-primary/5 border-b p-4">
+                  <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
+                    <Briefcase className="h-4 w-4" /> GOVT JOB PRESETS
                   </CardTitle>
               </CardHeader>
-              <CardContent className="p-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <CardContent className="p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {GOVT_PRESETS.map((preset) => (
-                      <Button key={preset.label} variant="outline" className="h-auto flex-row items-center justify-start p-2 gap-2 hover:border-primary hover:bg-primary/5 border rounded-lg transition-all" onClick={() => applyPreset(preset)}>
-                        <div className="size-6 rounded bg-primary/10 flex items-center justify-center shrink-0">
-                          <preset.icon className="h-3 w-3 text-primary" />
+                      <Button key={preset.label} variant="outline" className="h-auto flex-row items-center justify-start p-3 gap-3 hover:border-primary hover:bg-primary/5 border-2 rounded-xl transition-all" onClick={() => applyPreset(preset)}>
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <preset.icon className="h-4 w-4 text-primary" />
                         </div>
                         <div className="text-left overflow-hidden">
-                            <div className="text-[8px] font-black uppercase tracking-tight truncate">{preset.label}</div>
-                            <span className="text-[7px] text-muted-foreground font-mono">{preset.width}x{preset.height} px</span>
+                            <div className="text-[9px] font-black uppercase tracking-tight truncate">{preset.label}</div>
+                            <span className="text-[8px] text-muted-foreground font-mono">{preset.width}x{preset.height} px</span>
                         </div>
                       </Button>
                     ))}
@@ -348,137 +368,163 @@ export default function ImageResizer() {
               </CardContent>
           </Card>
 
-          <Card className="border-2 shadow-xl overflow-hidden">
-              <CardHeader className="bg-muted/30 border-b p-3">
-                  <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2">
-                    <Settings2 className="h-3 w-3" /> Dimension Settings
+          <Card className="border-2 shadow-xl overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+              <CardHeader className="bg-muted/30 border-b p-4">
+                  <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
+                    <Settings2 className="h-4 w-4" /> Dimension Settings
                   </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4 px-4 pb-4">
-                  <div className="space-y-2">
-                    <Label className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Select Unit</Label>
+              <CardContent className="space-y-6 p-6">
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
                     <div className="grid grid-cols-3 gap-2">
                         {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
-                            <Button key={u} variant={unit === u ? "default" : "outline"} className="h-8 text-[10px] font-bold rounded-lg border" onClick={() => handleUnitChange(u)}>
+                            <Button key={u} variant={unit === u ? "default" : "outline"} className="h-10 text-[10px] font-black rounded-xl border-2" onClick={() => handleUnitChange(u)}>
                                 {u.toUpperCase()}
                             </Button>
                         ))}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 items-center">
-                      <div className="space-y-1">
-                          <Label htmlFor="width" className="text-[9px] font-bold uppercase">Width ({unit})</Label>
-                          <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-9 text-base font-bold" />
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                      <div className="space-y-2">
+                          <Label htmlFor="width" className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
+                          <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
                       </div>
-                      <div className="space-y-1">
-                          <Label htmlFor="height" className="text-[9px] font-bold uppercase">Height ({unit})</Label>
-                          <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-9 text-base font-bold" />
+                      <div className="space-y-2">
+                          <Label htmlFor="height" className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
+                          <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
                       </div>
                   </div>
-                  <div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-lg">
-                      <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-3" />
-                      <Label htmlFor="aspect-ratio" className="text-[9px] font-bold cursor-pointer uppercase">Lock Aspect Ratio</Label>
+                  <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border">
+                      <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-4" />
+                      <Label htmlFor="aspect-ratio" className="text-[10px] font-black cursor-pointer uppercase opacity-60">Lock Aspect Ratio</Label>
                   </div>
-                  <div className="space-y-1.5 border-t pt-3">
-                      <Label htmlFor="format" className="text-[8px] font-black uppercase text-muted-foreground">Output Format</Label>
+                  <div className="space-y-3 border-t pt-4 border-dashed">
+                      <Label htmlFor="format" className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Output Format</Label>
                       <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isProcessing}>
-                          <SelectTrigger id="format" className="h-9 font-bold text-xs"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="jpeg" className="font-bold text-xs">JPEG (HD)</SelectItem>
-                              <SelectItem value="png" className="font-bold text-xs">PNG (Lossless)</SelectItem>
-                              <SelectItem value="webp" className="font-bold text-xs">WEBP (Web)</SelectItem>
+                          <SelectTrigger id="format" className="h-11 font-black text-xs border-2 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent className="rounded-xl border-2 shadow-2xl">
+                              <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal HD)</SelectItem>
+                              <SelectItem value="png" className="font-bold py-2">PNG (Lossless Extraction)</SelectItem>
+                              <SelectItem value="webp" className="font-bold py-2">WEBP (Modern Optimization)</SelectItem>
                           </SelectContent>
                       </Select>
                   </div>
               </CardContent>
-              <CardFooter className="flex flex-col gap-2 bg-muted/20 p-4 border-t">
-                  <Button className="w-full h-11 text-sm font-black bg-primary hover:bg-primary/90 shadow-lg" onClick={handleResize} disabled={isProcessing}>
-                      {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Maximize className="mr-2 h-4 w-4" />}
+              <CardFooter className="flex flex-col gap-3 bg-muted/20 p-6 border-t border-dashed">
+                  <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" onClick={handleResize} disabled={isProcessing}>
+                      {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Maximize className="mr-3 h-6 w-6" />}
                       {isProcessing ? "PROCESSING..." : "RESIZE IMAGE"}
                   </Button>
-                  <Button variant="ghost" onClick={handleReset} className="w-full text-[9px] font-bold uppercase tracking-widest h-8" disabled={isProcessing}>
-                      <RefreshCcw className="mr-1.5 h-2.5 w-2.5" /> Start Over
+                  <Button variant="ghost" onClick={handleReset} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive" disabled={isProcessing}>
+                      <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over
                   </Button>
               </CardFooter>
           </Card>
         </div>
 
         <div className="lg:col-span-7 space-y-6">
-            <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col">
-                <CardHeader className="bg-muted/30 border-b py-2 px-4 flex flex-row items-center justify-between">
+            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <ArrowLeftRight className="h-3 w-3 text-primary" />
-                        <CardTitle className="text-[10px] font-black uppercase tracking-tighter">HD Comparison</CardTitle>
+                        <ArrowLeftRight className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">HD Analysis & Comparison</CardTitle>
                     </div>
                     {resizedImageSrc && (
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button size="sm" variant="outline" className="h-7 font-black text-[8px] border uppercase">
-                                    <Eye className="size-2.5 mr-1" /> Zoom
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter">HD Pixel Proof</DialogTitle></DialogHeader>
-                                <div className="grid md:grid-cols-2 gap-4 py-4">
-                                    <div className="space-y-2">
-                                        <Badge variant="outline" className="w-full justify-center">ORIGINAL</Badge>
-                                        <div className="aspect-square relative rounded-xl overflow-hidden border bg-white flex items-center justify-center">
-                                            <Image src={originalImageSrc!} alt="original" fill className="object-contain p-1" />
+                        <div className="flex items-center gap-2">
+                            <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">READY</Badge>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8 font-black text-[9px] border-2 uppercase rounded-lg hover:bg-primary/5">
+                                        <Eye className="size-3.5 mr-1.5 text-primary" /> Zoom Check
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-6 md:p-10">
+                                    <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl">HD Pixel Proof Analysis</DialogTitle></DialogHeader>
+                                    <div className="grid md:grid-cols-2 gap-8 py-8">
+                                        <div className="space-y-4">
+                                            <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[11px] border-2">ORIGINAL CANVAS</Badge>
+                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
+                                                <Image src={originalImageSrc!} alt="original" fill className="object-contain p-4" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4 text-right">
+                                            <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[11px] border-2 border-white shadow-lg">RESIZED HD RENDER</Badge>
+                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center shadow-2xl">
+                                                <Image src={resizedImageSrc!} alt="resized" fill className="object-contain p-4" />
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-2 text-right">
-                                        <Badge className="w-full justify-center bg-primary">RESIZED</Badge>
-                                        <div className="aspect-square relative rounded-xl overflow-hidden border border-primary/20 bg-white flex items-center justify-center">
-                                            <Image src={resizedImageSrc!} alt="resized" fill className="object-contain p-1" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <CardFooter className="p-0 pt-2">
-                                    <Button className="w-full h-12 bg-green-600 hover:bg-green-700 font-black text-sm" onClick={handleDownload}>DOWNLOAD <Download className="ml-2 size-4" /></Button>
-                                </CardFooter>
-                            </DialogContent>
-                        </Dialog>
+                                    <CardFooter className="p-0 pt-4">
+                                        <Button className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 font-black text-lg md:text-xl rounded-2xl shadow-2xl" onClick={handleDownload}>
+                                            SAVE SHARP IMAGE <Download className="ml-3 size-6 md:size-7" />
+                                        </Button>
+                                    </CardFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     )}
                 </CardHeader>
-                <CardContent className="p-4 flex-1 bg-slate-50 dark:bg-slate-900/50">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner">
                     {isProcessing ? (
-                        <div className="h-full flex flex-col items-center justify-center gap-4">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary stroke-[2]" />
-                            <p className="text-[10px] font-black text-primary uppercase tracking-tighter animate-pulse">Processing...</p>
+                        <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
+                            <div className="relative">
+                                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                <Zap className="absolute inset-0 m-auto h-10 w-10 text-primary animate-pulse" />
+                            </div>
+                            <p className="text-sm font-black text-primary uppercase tracking-[0.3em] animate-pulse">Rendering HD Pixels...</p>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-2 gap-4 h-full">
-                            <div className="space-y-2 flex flex-col">
-                                <span className="text-[8px] font-black uppercase text-muted-foreground">Before</span>
-                                <div className="flex-1 relative aspect-square bg-white rounded-xl border shadow-inner flex items-center justify-center overflow-hidden min-h-[200px]">
-                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-2" />
+                        <div className="grid md:grid-cols-2 gap-8 h-full items-center">
+                            <div className="space-y-4 flex flex-col h-full justify-center">
+                                <div className="flex justify-between items-center px-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Source</span>
+                                    <span className="text-[10px] font-mono font-bold opacity-40">{formatBytes(originalFileSize)}</span>
                                 </div>
-                                <p className="text-center text-[8px] font-mono text-muted-foreground">{originalDimensions?.width}x{originalDimensions?.height}</p>
+                                <div className="relative aspect-[3/4] bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-6 grayscale opacity-40 transition-all group-hover:grayscale-0 group-hover:opacity-100" />
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white px-4 py-1 rounded-full font-mono text-[10px]">{originalDimensions?.width}x{originalDimensions?.height}</div>
+                                </div>
                             </div>
-                            <div className="space-y-2 flex flex-col">
-                                <span className="text-[8px] font-black uppercase text-primary">After</span>
-                                <div className="flex-1 relative aspect-square bg-white rounded-xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[200px] border-primary/10">
+                            <div className="space-y-4 flex flex-col h-full justify-center">
+                                <div className="flex justify-between items-center px-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
+                                    {resizedImageSrc && <span className="text-[10px] font-mono font-black text-primary">{formatBytes(resizedFileSize)}</span>}
+                                </div>
+                                <div className="relative aspect-[3/4] bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
                                     {resizedImageSrc ? (
-                                        <div className="relative size-full animate-in zoom-in-95 duration-500">
-                                            <Image src={resizedImageSrc} alt="After" fill className="object-contain p-2" />
-                                            <div className="absolute top-1.5 right-1.5"><div className="bg-green-500 text-white rounded-full p-0.5 shadow-md"><CheckCircle2 className="size-3" /></div></div>
+                                        <div className="relative size-full animate-in zoom-in-95 duration-500 p-2">
+                                            <Image src={resizedImageSrc} alt="After" fill className="object-contain p-4" />
+                                            <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center gap-1.5 opacity-10"><FileImage className="size-10" /><p className="text-[8px] font-black uppercase">Awaiting</p></div>
+                                        <div className="flex flex-col items-center justify-center gap-4 opacity-10 p-12 text-center">
+                                            <FileImage className="size-20" />
+                                            <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">Adjust settings<br/>and click resize</p>
+                                        </div>
+                                    )}
+                                    {resizedImageSrc && (
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full font-black text-[10px] shadow-lg">
+                                            {convertUnitToPx(parseFloat(newDimensions.width), unit)}x{convertUnitToPx(parseFloat(newDimensions.height), unit)} PX
+                                        </div>
                                     )}
                                 </div>
-                                {resizedImageSrc && <p className="text-center text-[8px] font-mono text-primary font-bold">{convertUnitToPx(parseFloat(newDimensions.width), unit)}x{convertUnitToPx(parseFloat(newDimensions.height), unit)}</p>}
                             </div>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-muted/10 border-t p-4">
-                    <Button className="w-full h-14 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl rounded-xl transition-all" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
-                        <Download className="mr-3 h-6 w-6" /> SAVE SHARP PHOTO
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                    <Button className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 group" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
+                        <Download className="mr-4 h-7 w-7 md:h-9 md:w-9 group-hover:translate-y-1 transition-transform" /> SAVE PROFESSIONAL IMAGE
                     </Button>
                 </CardFooter>
             </Card>
         </div>
+      </div>
+      
+      {/* Hidden processing canvas */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
+
