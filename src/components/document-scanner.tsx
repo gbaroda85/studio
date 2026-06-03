@@ -95,7 +95,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune defaults for Document mode
+  // Fine-tune specifications
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -184,7 +184,7 @@ export default function DocumentScanner() {
     setIsImageReady(true);
   };
 
-  // Sync Defaults with Filter Selection
+  // Sync Defaults
   useEffect(() => {
     if (activeFilter === 'document') {
         setBrightness([145]); setContrast([96]); setSaturation([70]);
@@ -203,7 +203,7 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. CONTENT-SPACE ROTATION
+    // Step 1: Content-Space Rotation (Sanitize Input)
     const tempCanvas = document.createElement('canvas');
     const tCtx = tempCanvas.getContext('2d');
     if (!tCtx) return "";
@@ -228,21 +228,11 @@ export default function DocumentScanner() {
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(tempCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // Perspective in rotated content-space
-        // We must map points to rotated space first
-        const angleRad = (rotation * Math.PI) / 180;
-        const cos = Math.cos(angleRad);
-        const sin = Math.sin(angleRad);
-
-        const mapPoint = (p: Point) => {
-            const dx = (p.x / 100) - 0.5;
-            const dy = (p.y / 100) - 0.5;
-            const nx = dx * cos - dy * sin + 0.5;
-            const ny = dx * sin + dy * cos + 0.5;
-            return { x: nx * tempCanvas.width, y: ny * tempCanvas.height };
-        };
-
-        const corners = [points[0], points[2], points[4], points[6]].map(mapPoint);
+        // Perspective logic mapped to rotated viewport coordinate system
+        const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
+            x: (p.x / 100) * tempCanvas.width, 
+            y: (p.y / 100) * tempCanvas.height 
+        }));
         
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
@@ -278,7 +268,7 @@ export default function DocumentScanner() {
         }
     }
 
-    // Apply Filters (Brightness, Contrast, Saturation)
+    // Apply Filter Pipeline
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
@@ -310,7 +300,7 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // Apply Sharpness (HD Convolution)
+    // Apply Sharpness HD (Kernel Convolution)
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 4;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -378,19 +368,8 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    const rx = (cx - rect.left) / rect.width;
-    const ry = (cy - rect.top) / rect.height;
-
-    // INVERSE ROTATION MATRIX for Coordinate Sync
-    const angleRad = (-rotation * Math.PI) / 180;
-    const cos = Math.cos(angleRad);
-    const sin = Math.sin(angleRad);
-    const dx = rx - 0.5, dy = ry - 0.5;
-    const nx = dx * cos - dy * sin + 0.5;
-    const ny = dx * sin + dy * cos + 0.5;
-
-    const x = Math.max(0, Math.min(100, nx * 100));
-    const y = Math.max(0, Math.min(100, ny * 100));
+    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
 
     setMagnifierPos({ x, y });
     setPoints(prev => {
@@ -409,7 +388,7 @@ export default function DocumentScanner() {
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  }, [draggingPoint, points, rotation]);
+  }, [draggingPoint, points]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       setDraggingPoint(idx);
@@ -419,6 +398,19 @@ export default function DocumentScanner() {
       if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
       else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
       setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
+  };
+
+  const handleConfirmAdd = () => {
+    if (!liveResultSrc) return;
+    const newPage = {
+      id: Math.random().toString(36).substr(2, 9),
+      processedSrc: liveResultSrc
+    };
+    setScannedPages(prev => [...prev, newPage]);
+    setCurrentRawImage(null);
+    setLiveResultSrc(null);
+    setStage('viewfinder');
+    toast({ title: "Page Added", description: "The scanned page has been added to your collection." });
   };
 
   return (
