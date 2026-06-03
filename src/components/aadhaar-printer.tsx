@@ -190,12 +190,16 @@ export default function AadhaarPrinter() {
     ]);
   };
 
+  /**
+   * Gaussian elimination for homography
+   * This solves the perspective transformation matrix.
+   */
   const solvePerspective = (src: Point[], dst: Point[]) => {
-    const corners = [src[0], src[2], src[4], src[6]];
     const p = [];
+    // We only use the 4 corners for the math
     for (let i = 0; i < 4; i++) {
-        p.push([corners[i].x, corners[i].y, 1, 0, 0, 0, -corners[i].x * dst[i].x, -corners[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, corners[i].x, corners[i].y, 1, -corners[i].x * dst[i].y, -corners[i].y * dst[i].y, dst[i].y]);
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -222,7 +226,7 @@ export default function AadhaarPrinter() {
     setIsProcessing(true);
 
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     let finalData = "";
@@ -230,6 +234,7 @@ export default function AadhaarPrinter() {
     const scaleY = image.naturalHeight / image.height;
 
     if (cropMode === 'scanner') {
+        // Calculate target dimensions based on perspective points
         const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
         const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
@@ -241,14 +246,21 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
+        // Map relative UI points to actual pixel coordinates for the 4 corners
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
-        const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
+        const dstPoints = [
+          { x: 0, y: 0 }, 
+          { x: canvas.width, y: 0 }, 
+          { x: canvas.width, y: canvas.height }, 
+          { x: 0, y: canvas.height }
+        ];
 
         const h = solvePerspective(srcPoints, dstPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
+        
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth; srcCanvas.height = image.naturalHeight;
         const srcCtx = srcCanvas.getContext('2d');
@@ -323,8 +335,7 @@ export default function AadhaarPrinter() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
-        const dx = x - prev[idx].x;
-        const dy = y - prev[idx].y;
+        if (idx === null || !next[idx]) return prev;
 
         // Move target points
         if ([0, 2, 4, 6].includes(idx)) {
