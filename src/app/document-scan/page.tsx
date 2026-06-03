@@ -35,8 +35,8 @@ export default function DocumentScanPage() {
                 </p>
             </div>
             
-            {/* The Main Tool Component */}
-            <div className="w-full max-w-[1700px] flex justify-center">
+            {/* The Main Tool Component - MADE COMPACT */}
+            <div className="w-full max-w-6xl flex justify-center">
                 <DocumentScanner />
             </div>
         </div>
