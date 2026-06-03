@@ -226,7 +226,6 @@ export default function DocumentScanner() {
             r = g = b = v;
         } else if (activeFilter === 'gray') r = g = b = luma;
         else if (activeFilter === 'photo') {
-            // Natural photo enhancement
             r = r * 1.05; g = g * 1.05; b = b * 1.05;
         }
 
@@ -239,7 +238,7 @@ export default function DocumentScanner() {
     }
     cCtx.putImageData(imageData, 0, 0);
 
-    // Sharpness
+    // Sharpness Kernel Engine
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -347,12 +346,13 @@ export default function DocumentScanner() {
   };
 
   const handleAiEnhance = () => {
-      setBrightness([165]);
-      setContrast([127]);
-      setSaturation([107]);
-      setSharpness([4.0]);
+      // AI Enhance is specialized for HIGH CLARITY (different from Magic)
+      setBrightness([150]);
+      setContrast([140]);
+      setSaturation([115]);
+      setSharpness([6.0]); // Aggressive sharpness for restoration
       setActiveFilter('magic');
-      toast({ title: "AI Enhancement Active", description: "Brightness and contrast boosted for premium quality." });
+      toast({ title: "AI Polish Active", description: "Dynamic range restoration and ultra-sharpness applied." });
   }
 
   return (
@@ -517,7 +517,7 @@ export default function DocumentScanner() {
                                                 
                                                 <div className="space-y-6 py-2">
                                                     <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
+                                                        <div className="flex justify-between items-center"><span className="text-10px font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
                                                         <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
                                                     </div>
                                                     <div className="space-y-3">
