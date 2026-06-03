@@ -50,12 +50,13 @@ export default function SignatureRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Subtle checkerboard that works in both modes
+  // FIXED LIGHT CHECKERBOARD: Always stays light even in dark mode
   const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
       "linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.05) 75%), linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.05) 75%)",
     backgroundSize: "20px 20px",
     backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+    backgroundColor: "#ffffff"
   };
 
   const handleFileChange = (file: File | null) => {
@@ -250,7 +251,7 @@ export default function SignatureRemover() {
                 </CardHeader>
                 <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px]">
                     <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
-                        {/* BEFORE */}
+                        {/* BEFORE: FORCED WHITE BACKGROUND */}
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
@@ -258,17 +259,17 @@ export default function SignatureRemover() {
                             </div>
                             <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
                                 <Image src={originalImageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
-                                <div className="absolute top-4 left-4"><Badge variant="outline" className="text-[8px] bg-white/80">BEFORE</Badge></div>
+                                <div className="absolute top-4 left-4"><Badge variant="outline" className="text-[8px] bg-white/80 border-slate-200 text-slate-800">BEFORE</Badge></div>
                             </div>
                         </div>
 
-                        {/* AFTER - THEME ADAPTIVE */}
+                        {/* AFTER: FORCED LIGHT CHECKERBOARD (Even in dark mode) */}
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Cleaned Ink</span>
                                 {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{(resultFileSize / 1024).toFixed(1)} KB</span>}
                             </div>
-                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden bg-background" style={checkerboardStyle}>
+                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden bg-white" style={checkerboardStyle}>
                                 <AnimatePresence mode="wait">
                                     {resultImageSrc ? (
                                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
@@ -282,7 +283,7 @@ export default function SignatureRemover() {
                                         </div>
                                     )}
                                 </AnimatePresence>
-                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary/80 uppercase">AFTER</Badge></div>
+                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary text-primary-foreground uppercase border-none">AFTER</Badge></div>
                             </div>
                         </div>
                     </div>
