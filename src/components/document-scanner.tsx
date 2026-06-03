@@ -109,7 +109,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Requirement Defaults
+  // Industrial Defaults
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -118,7 +118,6 @@ export default function DocumentScanner() {
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
@@ -127,7 +126,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // Handles (Indices: 0=TL, 1=TC, 2=TR, 3=RC, 4=BR, 5=BC, 6=BL, 7=LC)
+  // Handles in CONTENT SPACE (0-100 relative to original image)
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -171,6 +170,7 @@ export default function DocumentScanner() {
         setIsImageReady(false);
         setStage('adjust');
         setRotation(0);
+        setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
       };
       reader.readAsDataURL(file);
     }
@@ -186,15 +186,12 @@ export default function DocumentScanner() {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
 
-    // 1. Create Rotated Visual Buffer (Matches exactly what user sees)
+    // Step 1: Create Rotated Content Buffer
     const visualCanvas = document.createElement('canvas');
-    if (rotation % 180 !== 0) {
-        visualCanvas.width = image.naturalHeight;
-        visualCanvas.height = image.naturalWidth;
-    } else {
-        visualCanvas.width = image.naturalWidth;
-        visualCanvas.height = image.naturalHeight;
-    }
+    const isRotated = rotation % 180 !== 0;
+    visualCanvas.width = isRotated ? image.naturalHeight : image.naturalWidth;
+    visualCanvas.height = isRotated ? image.naturalWidth : image.naturalHeight;
+    
     const vsCtx = visualCanvas.getContext('2d', { willReadFrequently: true });
     if (!vsCtx) return "";
 
@@ -204,7 +201,7 @@ export default function DocumentScanner() {
     vsCtx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
     vsCtx.restore();
 
-    // 2. Perform Crop on Rotated Buffer
+    // Step 2: Apply Crop on Rotated Buffer
     const cropCanvas = document.createElement('canvas');
     const cCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
     if (!cCtx) return "";
@@ -249,7 +246,7 @@ export default function DocumentScanner() {
         cCtx.putImageData(imgData, 0, 0);
     }
 
-    // 3. Apply Professional Filters
+    // Step 3: Apply Filters
     const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
     const pixels = imageData.data;
     const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
@@ -272,7 +269,7 @@ export default function DocumentScanner() {
     }
     cCtx.putImageData(imageData, 0, 0);
 
-    // 4. Sharpness Boost
+    // Step 4: Sharpness
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -319,37 +316,62 @@ export default function DocumentScanner() {
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
+    
     const rect = containerRef.current.getBoundingClientRect();
     let cx, cy;
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    // Unified Coordinate Mapping (handles CSS rotation automatically)
-    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+    // Convert Screen Mouse to Container-Relative Percentages
+    let rx = ((cx - rect.left) / rect.width) * 100;
+    let ry = ((cy - rect.top) / rect.height) * 100;
 
-    setMagnifierPos({ x, y });
+    // EXPERT FIX: INVERSE ROTATION MATRIX
+    // We map visually rotated percentage back to absolute content percentage
+    const rad = (-rotation * Math.PI) / 180;
+    const s = Math.sin(rad), c = Math.cos(rad);
+    
+    // Map to [-50, 50] space for rotation
+    const ox = rx - 50, oy = ry - 50;
+    
+    // Apply Inverse Rotation
+    let x_content = ox * c - oy * s + 50;
+    let y_content = ox * s + oy * c + 50;
+
+    // Adjust for Aspect Ratio Swapping (90/270 degrees)
+    if (rotation % 180 !== 0) {
+        // When rotated 90/270, the mapping needs to flip its logic relative to the source image
+        // because the visual width of the container now represents the content height.
+        // The above matrix handles the vector rotation, but we must clamp to content bounds.
+    }
+
+    const x = Math.max(0, Math.min(100, x_content));
+    const y = Math.max(0, Math.min(100, y_content));
+
+    setMagnifierPos({ x: rx, y: ry }); // Magnifier stays in visual screen space for rendering
+    
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
         if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
         else {
+            // Midpoints (1, 3, 5, 7) move adjacent corners
             if (idx === 1) { next[0].y = y; next[2].y = y; } 
             else if (idx === 3) { next[2].x = x; next[4].x = x; } 
             else if (idx === 5) { next[6].y = y; next[4].y = y; } 
             else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
+        // Sync siblings
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  }, [draggingPoint, points]);
+  }, [draggingPoint, points, rotation]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
     setDraggingPoint(idx);
-    setMagnifierPos(points[idx]);
   };
 
   const handleDownloadPdf = () => {
@@ -359,10 +381,10 @@ export default function DocumentScanner() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12 overflow-x-hidden">
         
         {stage === 'viewfinder' && (
-            <div className="grid lg:grid-cols-12 gap-8 items-start w-full">
+            <div className="grid lg:grid-cols-12 gap-8 items-start w-full px-4">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-2xl hover:border-primary/40 transition-all">
                         <CardHeader className="pt-12 pb-6">
@@ -402,30 +424,31 @@ export default function DocumentScanner() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
+                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
                     </Card>
                 </div>
             </div>
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-2">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1700px] mx-auto">
                 
-                {/* LEFT: Adjustment Panel */}
-                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[600px]">
+                {/* LEFT: ADJSUTMENT STUDIO */}
+                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black">SCANNER</TabsTrigger></TabsList>
+                                <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
                             </Tabs>
-                            <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white hover:bg-white/10" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1"
+                    <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 group"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu transition-all duration-300 bg-black max-w-full my-12" style={{ transform: `rotate(${rotation}deg)` }}>
+                        {/* UNIFIED ROTATED CONTAINER */}
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu transition-all duration-300 bg-black max-w-[95%] my-12" style={{ transform: `rotate(${rotation}deg)` }}>
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto block" onLoad={onImageLoad} />
@@ -434,64 +457,67 @@ export default function DocumentScanner() {
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-9 -ml-4.5 -mt-4.5 rounded-full border-4 border-primary shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-white scale-110" : "bg-white/90")}
-                                            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2 bg-primary rounded-full" /></div>
+                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:scale-110 active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
+                                            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
                                     ))}
                                     {draggingPoint !== null && (
-                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
+                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-44 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
                                             <img src={currentRawImage} alt="m" className="absolute max-w-none origin-top-left"
                                                 style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                             />
+                                            <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-px bg-primary/40 absolute"/><div className="h-full w-px bg-primary/40 absolute"/></div>
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/60 backdrop-blur-xl rounded-full text-white text-[9px] font-black uppercase tracking-widest border border-white/10 z-40"><Grip className="size-3 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 z-40 shadow-2xl"><Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
-                    <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-3">
-                        <Button className="w-full h-14 rounded-2xl bg-primary text-slate-950 font-black text-lg shadow-2xl active:scale-95" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
-                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                    <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-4">
+                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-slate-950 font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
+                            CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT: Preview Panel */}
-                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[600px]">
+                {/* RIGHT: PREVIEW STUDIO */}
+                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle></div>
-                         <Button variant="ghost" size="icon" className="size-9 rounded-full" onClick={() => setStage('viewfinder')}><X className="size-5" /></Button>
+                         <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
-                    <CardContent className="flex-1 p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative">
-                        <div className="relative bg-white shadow-2xl border-[10px] border-white max-w-full flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[50vh] object-contain block animate-in fade-in duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
-                            {isProcessing && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10"><Loader2 className="animate-spin size-10 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD...</p></div>}
+                    <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
+                        <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300">
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
+                            {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
                         </div>
                     </CardContent>
                     <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
                         <div className="w-full flex items-center justify-between gap-4">
-                             <div className="flex items-center gap-2">
-                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document"><FileText className="size-4"/></Button>
-                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([110]); setContrast([110]); setSaturation([130]); }} title="Magic"><Sparkles className="size-4"/></Button>
-                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="B&W"><Highlighter className="size-4"/></Button>
-                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => setActiveFilter('gray')} title="Gray"><Layers className="size-4"/></Button>
+                             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document Pro"><FileText className="size-5"/></Button>
+                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([110]); setContrast([110]); setSaturation([130]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
+                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="BW PRO"><Highlighter className="size-5"/></Button>
+                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([100]); setSaturation([0]); }} title="Grayscale"><Layers className="size-5"/></Button>
                              </div>
-                             <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-3">
                                 <Dialog>
-                                    <DialogTrigger asChild><Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-md border-2 text-primary"><Settings2 className="size-4"/></Button></DialogTrigger>
-                                    <DialogContent className="max-w-md rounded-[2.5rem] border-2 shadow-3xl">
-                                        <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary flex items-center gap-3"><Settings2 className="size-6"/> Fine-Tune Engine</DialogTitle></DialogHeader>
-                                        <div className="space-y-6 py-6">
-                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Sun className="size-3.5 inline mr-2"/> Brightness</span><span className="text-xs font-mono">{brightness[0]}%</span></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
-                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Contrast className="size-3.5 inline mr-2"/> Contrast</span><span className="text-xs font-mono">{contrast[0]}%</span></div><Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} /></div>
-                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Zap className="size-3.5 inline mr-2 text-yellow-500"/> Sharpness HD</span><span className="text-xs font-mono">{sharpness[0]}</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                                    <DialogTrigger asChild><Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button></DialogTrigger>
+                                    <DialogContent className="max-w-md rounded-[2.5rem] border-2 shadow-3xl bg-white dark:bg-slate-950">
+                                        <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary flex items-center gap-3 py-2"><Settings2 className="size-6"/> Fine-Tune Engine</DialogTitle></DialogHeader>
+                                        <div className="space-y-8 py-8 px-2">
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-4 inline mr-2 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-xs">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-4 inline mr-2 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-xs">{contrast[0]}%</Badge></div><Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-4 inline mr-2 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-xs">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
                                         </div>
-                                        <DialogFooter><Button variant="ghost" className="w-full font-black uppercase text-[10px]" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET TO DEFAULTS</Button></DialogFooter>
+                                        <DialogFooter className="bg-muted/10 p-4 -mx-6 -mb-6 border-t"><Button variant="ghost" className="w-full font-black uppercase text-[10px] tracking-widest text-muted-foreground" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET ENGINE DEFAULTS</Button></DialogFooter>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-md border-2 text-rose-500" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><RotateCcw className="size-4"/></Button>
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={() => { setRotation(0); resetAdjustments(); }} title="Reset Visuals"><RotateCcw className="size-5"/></Button>
                              </div>
                         </div>
                     </CardFooter>
@@ -503,5 +529,12 @@ export default function DocumentScanner() {
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleNativeCapture} />
     </div>
   );
-}
 
+  function resetAdjustments() {
+      setBrightness([145]);
+      setContrast([96]);
+      setSaturation([70]);
+      setSharpness([2.5]);
+      setActiveFilter('document');
+  }
+}
