@@ -37,7 +37,12 @@ import {
     Sun,
     Contrast,
     FileArchive,
-    Highlighter
+    Highlighter,
+    Scan,
+    Grid3X3,
+    Monitor,
+    ImageIcon,
+    Grip
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -51,6 +56,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Point { x: number; y: number; }
 
@@ -95,7 +101,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Default Expert Specifications
+  // Default specifications for Document Filter
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -113,12 +119,11 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // 8-Point Scanner handles
   const [points, setPoints] = useState<Point[]>([
-    { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
-    { x: 90, y: 50 }, { x: 90, y: 90 },                   
-    { x: 50, y: 90 }, { x: 10, y: 90 },                   
-    { x: 10, y: 50 }                                      
+    { x: 5, y: 5 }, { x: 50, y: 5 }, { x: 95, y: 5 }, 
+    { x: 95, y: 50 }, { x: 95, y: 95 },                   
+    { x: 50, y: 95 }, { x: 5, y: 95 },                   
+    { x: 5, y: 50 }                                      
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -193,7 +198,7 @@ export default function DocumentScanner() {
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setRectCrop(centerCrop({ unit: '%', width: 80, height: 80 }, width, height));
+    setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
     setIsImageReady(true);
   };
 
@@ -222,7 +227,7 @@ export default function DocumentScanner() {
     tCtx.drawImage(image, -image.naturalWidth/2, -image.naturalHeight/2);
 
     if (cropMode === 'rect') {
-        const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
+        const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = tempCanvas.width / (imgRef.current?.width || 1);
         const scaleY = tempCanvas.height / (imgRef.current?.height || 1);
         canvas.width = Math.max(10, c.width * scaleX);
@@ -404,11 +409,17 @@ export default function DocumentScanner() {
       setMagnifierPos(points[idx]);
   };
 
+  const handleDownloadPdf = () => {
+    const pdf = new jsPDF();
+    scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
+    pdf.save(`scan-${Date.now()}.pdf`); toast({ title: "PDF Exported" });
+  };
+
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-4 animate-in fade-in duration-700 pb-20 px-4 mx-auto relative">
+    <div className="w-full flex flex-col gap-4 animate-in fade-in duration-700 relative">
         
         {stage === 'viewfinder' && (
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
+            <div className="grid lg:grid-cols-12 gap-8 items-start w-full">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
                         <CardHeader className="pt-8 pb-4">
@@ -417,11 +428,11 @@ export default function DocumentScanner() {
                         </CardHeader>
                         <CardContent className="pb-10 pt-2 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
-                                <div className="border-4 border-dashed border-primary/20 rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
-                                    <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-5" /></div>
+                                <div className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
+                                    <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg"><Camera className="size-5" /></div>
                                     <p className="text-[10px] font-black uppercase tracking-tighter">Capture Photo</p>
                                 </div>
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
                                     <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform"><UploadCloud className="size-5" /></div>
                                     <p className="text-[10px] font-black uppercase tracking-tighter">Pick from Album</p>
                                 </div>
@@ -454,11 +465,7 @@ export default function DocumentScanner() {
                             )}
                         </CardContent>
                         <CardFooter className="p-4 border-t bg-muted/10">
-                            <Button disabled={scannedPages.length === 0} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-black text-xs rounded-xl shadow-xl uppercase active:scale-95 transition-all" onClick={() => {
-                                const pdf = new jsPDF();
-                                scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
-                                pdf.save(`scan-${Date.now()}.pdf`); toast({ title: "PDF Exported" });
-                            }}>EXPORT AS PDF <Download className="ml-2 size-3" /></Button>
+                            <Button disabled={scannedPages.length === 0} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-black text-xs rounded-xl shadow-xl uppercase active:scale-95 transition-all" onClick={handleDownloadPdf}>EXPORT AS PDF <Download className="ml-2 size-3" /></Button>
                         </CardFooter>
                     </Card>
                 </div>
@@ -466,118 +473,135 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-6 items-stretch animate-in slide-in-from-right-4 duration-500">
-                <div className="lg:col-span-8 flex flex-col gap-4">
-                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col flex-1 min-h-[500px]">
-                        <CardHeader className="bg-slate-900 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white flex-wrap gap-4">
-                            <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
-                            <div className="flex items-center gap-2 md:gap-4 ml-auto">
-                                <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/20 text-white hover:bg-white/10" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-5" /></Button>
-                                <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent w-[140px] md:w-[180px]">
-                                        <TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger>
-                                        <TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                                <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-white hover:bg-white/10"><X className="size-6"/></Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 h-full"
-                                     onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                            
-                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                                {cropMode === 'rect' ? (
-                                    <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[65vh]">
-                                        <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
-                                    </ReactCrop>
-                                ) : (
-                                    <div className="relative">
-                                        <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[65vh] w-auto pointer-events-none block object-contain" onLoad={onImageLoad} />
-                                        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                            <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
-                                        </svg>
-                                        {points.map((p, i) => (
-                                            <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
-                                                style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                                onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-3 bg-white rounded-full" /></div>
-                                        ))}
-                                        {draggingPoint !== null && (
-                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
-                                                <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
-                                                    style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
-                                                /><div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-0.5 bg-green-500/50 absolute" /><div className="h-full w-0.5 bg-green-500/50 absolute" /></div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                        <CardFooter className="bg-black/60 p-4 flex justify-center"><div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest"><Move className="h-4 w-4 text-primary animate-pulse" /> Fine-tune edges for scanning</div></CardFooter>
-                    </Card>
-                </div>
+            <div className="grid lg:grid-cols-2 gap-6 items-stretch animate-in slide-in-from-bottom-4 duration-500 w-full">
                 
-                <div className="lg:col-span-4 flex flex-col gap-6">
-                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col h-full">
-                        <CardHeader className="bg-primary/5 border-b p-6 text-slate-800 dark:text-white shrink-0">
-                            <CardTitle className="text-lg font-black uppercase tracking-tighter">Render Filters</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1 p-6 flex flex-col bg-white dark:bg-slate-900 shadow-inner overflow-hidden">
-                            <ScrollArea className="h-full pr-2 custom-scrollbar">
-                                <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[300px] md:min-h-[400px]" style={{ transform: `rotate(${rotation}deg)` }}>
-                                    {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-full object-contain block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
-                                    {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
+                {/* LEFT: ADJUSTMENT PANEL */}
+                <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-900 flex flex-col min-h-[550px]">
+                    <CardHeader className="bg-slate-900/50 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between text-white flex-wrap gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20">
+                                <Maximize className="size-5" />
+                            </div>
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-4 ml-auto">
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
+                                <TabsList className="grid grid-cols-2 h-9 bg-transparent w-[140px] md:w-[160px]">
+                                    <TabsTrigger value="rect" className="text-[10px] font-black uppercase data-[state=active]:bg-white data-[state=active]:text-slate-900">RECT</TabsTrigger>
+                                    <TabsTrigger value="scanner" className="text-[10px] font-black uppercase data-[state=active]:bg-white data-[state=active]:text-slate-900">SCAN</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                            <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/20 text-white hover:bg-white/10 shadow-lg" onClick={() => setRotation(r => (r + 90) % 360)}>
+                                <RotateCw className="size-5" />
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/20 flex-1"
+                                 onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                        
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-black max-w-full my-8" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                            {cropMode === 'rect' ? (
+                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh]">
+                                    <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[60vh] w-auto object-contain block" onLoad={onImageLoad} />
+                                </ReactCrop>
+                            ) : (
+                                <div className="relative">
+                                    <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[60vh] w-auto pointer-events-none block object-contain" onLoad={onImageLoad} />
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                    </svg>
+                                    {points.map((p, i) => (
+                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
+                                            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
+                                            onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
+                                    ))}
+                                    {draggingPoint !== null && (
+                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-40 rounded-full border-4 border-primary shadow-2xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
+                                            <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
+                                                style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
+                                            /><div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-full h-0.5 bg-primary/30 absolute" /><div className="h-full w-0.5 bg-primary/30 absolute" /></div>
+                                        </div>
+                                    )}
                                 </div>
-                                
-                                <div className="space-y-8 pb-10">
-                                    <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Sparkles className="size-3"/> Intelligent Presets</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {['document', 'magic', 'bw', 'photo', 'gray', 'original'].map(f => (
-                                                <Button key={f} variant={activeFilter === f ? 'default' : 'outline'} className="text-[8px] font-black h-10 rounded-xl" onClick={() => setActiveFilter(f as ScanFilter)}>{f.toUpperCase()}</Button>
-                                            ))}
-                                        </div>
-                                    </div>
+                            )}
+                        </div>
 
-                                    <Separator className="opacity-10" />
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-6 py-2.5 bg-black/60 backdrop-blur-xl rounded-full text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
+                            <Grip className="size-3 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE
+                        </div>
+                    </CardContent>
+                    <CardFooter className="bg-slate-950 p-4 border-t border-white/5 flex gap-4">
+                        <Button variant="ghost" className="flex-1 h-12 font-black uppercase text-[10px] text-white/40 hover:text-white hover:bg-white/5 rounded-xl" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                        <Button className="flex-[2] h-12 rounded-xl bg-primary text-slate-950 font-black text-xs shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
+                    </CardFooter>
+                </Card>
 
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Settings2 className="size-3"/> Fine Tuning</Label>
-                                            <Button variant="ghost" size="sm" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} className="text-[8px] font-black uppercase text-muted-foreground h-6 px-2"><RotateCcw className="size-2.5 mr-1" /> Reset</Button>
-                                        </div>
-                                        <div className="space-y-6">
+                {/* RIGHT: PREVIEW PANEL */}
+                <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 flex flex-col h-full min-h-[550px]">
+                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800/50 border-b p-4 md:p-6 flex flex-row items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20">
+                                <Eye className="size-5" />
+                            </div>
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle>
+                        </div>
+                        <Button variant="ghost" size="icon" className="size-8 rounded-full text-muted-foreground hover:bg-muted" onClick={() => setStage('viewfinder')}>
+                            <X className="size-4" />
+                        </Button>
+                    </CardHeader>
+                    <CardContent className="flex-1 p-6 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
+                        <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm border-[6px] md:border-[12px] border-white max-w-full flex items-center justify-center overflow-hidden transform-gpu" style={{ transform: `rotate(${rotation}deg)` }}>
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[50vh] object-contain block animate-in fade-in duration-500" alt="result" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                            {isProcessing && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-10"><Loader2 className="animate-spin size-10 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD...</p></div>}
+                        </div>
+                    </CardContent>
+                    <CardFooter className="p-4 border-t bg-[#f0f9f9] dark:bg-slate-800/50">
+                        <div className="w-full flex items-center justify-between gap-4">
+                             <div className="flex items-center gap-2">
+                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-sm" onClick={() => setActiveFilter('document')} title="Document"><FileText className="size-4"/></Button>
+                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-sm" onClick={() => setActiveFilter('magic')} title="Magic Color"><Sparkles className="size-4"/></Button>
+                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-sm" onClick={() => setActiveFilter('bw')} title="B&W Pro"><Highlighter className="size-4"/></Button>
+                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-sm" onClick={() => setActiveFilter('gray')} title="Grayscale"><Layers className="size-4"/></Button>
+                             </div>
+                             <div className="flex items-center gap-2">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl shadow-sm text-primary"><Settings2 className="size-4"/></Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md rounded-[2.5rem] border-2 shadow-3xl">
+                                        <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary flex items-center gap-2"><Settings2 className="size-5"/> Fine-Tune Engine</DialogTitle></DialogHeader>
+                                        <div className="space-y-6 py-6">
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Sun className="size-3"/> Brightness</span><span className="text-[9px] font-mono font-black">{brightness[0]}%</span></div>
+                                                <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase flex items-center gap-1.5"><Sun className="size-3"/> Brightness</span><span className="text-[10px] font-mono font-black">{brightness[0]}%</span></div>
                                                 <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
                                             </div>
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Contrast className="size-3"/> Contrast</span><span className="text-[9px] font-mono font-black">{contrast[0]}%</span></div>
+                                                <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase flex items-center gap-1.5"><Contrast className="size-3"/> Contrast</span><span className="text-[10px] font-mono font-black">{contrast[0]}%</span></div>
                                                 <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
                                             </div>
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Droplets className="size-3"/> Saturation</span><span className="text-[9px] font-mono font-black">{saturation[0]}%</span></div>
-                                                <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
-                                            </div>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Zap className="size-3 text-yellow-500"/> Sharpness (HD)</span><span className="text-[9px] font-mono font-black">{sharpness[0]}</span></div>
+                                                <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase flex items-center gap-1.5"><Zap className="size-3 text-yellow-500"/> Sharpness (HD)</span><span className="text-[10px] font-mono font-black">{sharpness[0]}</span></div>
                                                 <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </ScrollArea>
-                        </CardContent>
-                        <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3 shrink-0">
-                            <Button className="w-full h-14 rounded-xl bg-primary text-primary-foreground font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
-                            <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-muted-foreground" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
-                        </CardFooter>
-                    </Card>
-                </div>
+                                        <DialogFooter><Button variant="ghost" className="w-full font-black uppercase text-[10px] h-10" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET TO DEFAULTS</Button></DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                                <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl shadow-sm text-rose-500" onClick={() => { setStage('viewfinder'); setCurrentRawImage(null); }}><RotateCcw className="size-4"/></Button>
+                             </div>
+                        </div>
+                    </CardFooter>
+                </Card>
             </div>
         )}
 
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleNativeCapture} />
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleNativeCapture} />
+        
+        <style jsx global>{`
+            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        `}</style>
     </div>
   );
 }

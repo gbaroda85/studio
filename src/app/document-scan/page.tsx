@@ -1,9 +1,11 @@
 
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck, Zap, Sparkles } from 'lucide-react';
+import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck, Zap, Sparkles, ArrowLeft } from 'lucide-react';
 import DocumentScanner from '@/components/document-scanner';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import {
   Accordion,
   AccordionContent,
@@ -12,20 +14,28 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Document Scan',
-  description: 'Premium mobile scanner with AI filters. BW PRO, Magic Color, and high-fidelity text enhancement.',
+  title: 'Professional Document Scanner - AI Filters & HD PDF Export Online',
+  description: 'Premium mobile scanner with AI filters. BW PRO, Magic Color, and high-fidelity text enhancement. 100% private local processing.',
 };
 
 export default function DocumentScanPage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
-        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" className="mb-0" />
+    <main className="flex-1 flex flex-col items-center bg-[#f2f8f8] dark:bg-slate-950/20 min-h-screen">
+        {/* Top Centered Navigation */}
+        <div className="w-full flex justify-center pt-8 no-print">
+            <Button asChild variant="outline" className="rounded-full bg-white dark:bg-slate-900 border-2 shadow-sm hover:shadow-md transition-all px-6 h-10 group">
+                <Link href="/tools?tab=pdf" className="flex items-center gap-2">
+                    <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+                    <span className="font-black text-[10px] uppercase tracking-[0.2em]">Back to PDF Tools</span>
+                </Link>
+            </Button>
+        </div>
 
-        <div className="w-full flex justify-center mb-12 px-4 mt-8">
+        <div className="w-full max-w-[1600px] flex justify-center mb-12 px-4 mt-8">
             <DocumentScanner />
         </div>
 
-        <div className="w-full max-w-4xl space-y-12 px-4 pb-20">
+        <div className="w-full max-w-4xl space-y-12 px-4 pb-20 no-print">
             <HowToGuide title="Document Scanner" steps={[
                 "Camera: Allow camera access and point at your document.",
                 "Capture: Click the large button to snap a clear photo.",
@@ -34,7 +44,7 @@ export default function DocumentScanPage() {
                 "Export: Bundle multiple pages and download as a professional PDF."
             ]} />
 
-            <section className="space-y-10 py-10 border-t">
+            <section className="space-y-10 py-10 border-t border-slate-200">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
                         <Sparkles className="text-primary size-8" />
