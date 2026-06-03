@@ -18,7 +18,8 @@ import {
   ShieldCheck,
   ImageIcon,
   Eye,
-  ArrowLeftRight
+  ArrowLeftRight,
+  RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -134,19 +135,6 @@ export default function SignatureRemover() {
         return () => clearTimeout(timer);
     }
   }, [sensitivity, boostInk, originalImageSrc]);
-
-  const handleStartExtraction = async () => {
-    if (!originalImageSrc) return;
-    setIsProcessing(true);
-    setProgress(20);
-    
-    setTimeout(() => {
-        setProgress(100);
-        processLocally();
-        setIsProcessing(false);
-        toast({ title: "Extraction Active", description: "Use sliders to fine-tune the result." });
-    }, 600);
-  };
 
   const handleDownload = () => {
     if (!resultImageSrc || !imageFile) return;
