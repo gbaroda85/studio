@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 export default function DocumentScanPage() {
   return (
     <main className="flex-1 flex flex-col items-center">
-        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" className="mb-2" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
+        <div className="w-full flex justify-center mb-6 px-4">
             <DocumentScanner />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-4xl space-y-12 px-4 pb-20">
             <HowToGuide title="Document Scanner" steps={[
                 "Camera: Allow camera access and point at your document.",
                 "Capture: Click the large button to snap a clear photo.",

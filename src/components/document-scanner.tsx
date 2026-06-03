@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -14,7 +15,6 @@ import {
     Zap, 
     ShieldCheck, 
     ScanLine,
-    ImageIcon,
     RotateCw,
     Sparkles,
     Maximize,
@@ -34,7 +34,6 @@ import {
     RotateCcw,
     Eye,
     Droplets,
-    Share2,
     Sun,
     Contrast,
     FileArchive,
@@ -311,7 +310,7 @@ export default function DocumentScanner() {
 
     // FIX SHARPNESS: Correct Kernel Implementation
     if (sharpness[0] > 0) {
-        const factor = sharpness[0] / 5; // Normalized factor
+        const factor = sharpness[0] / 5;
         const weights = [
             0, -factor, 0,
             -factor, 1 + (4 * factor), -factor,
@@ -382,6 +381,10 @@ export default function DocumentScanner() {
     toast({ title: "Page Added to Collection" });
   };
 
+  /**
+   * 2D ROTATION MATRIX COORDINATE SYNC
+   * This logic ensures handles move correctly even when the UI is rotated.
+   */
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
@@ -390,8 +393,25 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+    // Screen-space relative to container top-left
+    let rx = (cx - rect.left) / rect.width;
+    let ry = (cy - rect.top) / rect.height;
+
+    // Convert screen coordinates back to unrotated container coordinates (0-1)
+    // Pivot around center (0.5, 0.5)
+    const angleRad = (-rotation * Math.PI) / 180;
+    const cos = Math.cos(angleRad);
+    const sin = Math.sin(angleRad);
+
+    const dx = rx - 0.5;
+    const dy = ry - 0.5;
+
+    // Inverse Rotation Matrix application
+    const nx = dx * cos - dy * sin + 0.5;
+    const ny = dx * sin + dy * cos + 0.5;
+
+    const x = Math.max(0, Math.min(100, nx * 100));
+    const y = Math.max(0, Math.min(100, ny * 100));
 
     setMagnifierPos({ x, y });
     setPoints(prev => {
@@ -411,7 +431,7 @@ export default function DocumentScanner() {
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  }, [draggingPoint, points]);
+  }, [draggingPoint, points, rotation]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
       setDraggingPoint(idx);
@@ -424,24 +444,26 @@ export default function DocumentScanner() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
+    <div className="w-full max-w-[1600px] flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto mt-[-20px]">
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
-                        <CardHeader className="pt-12 md:pt-16 pb-4">
-                            <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-8 md:size-10" /></div>
-                            <CardTitle className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">Document <br className="md:hidden" /> <span className="text-primary">Scanner</span></CardTitle>
+                        <CardHeader className="pt-8 md:pt-10 pb-4">
+                            <div className="mx-auto mb-4 grid size-14 md:size-16 place-items-center rounded-2xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-6 md:size-8" /></div>
+                            <CardTitle className="text-2xl md:text-4xl font-black uppercase tracking-tighter leading-none">Document <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-12 md:pb-16 pt-4 px-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl mx-auto">
+                        <CardContent className="pb-8 md:pb-12 pt-2 px-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
                                 <div className="border-4 border-dashed border-primary/20 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
-                                    <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-6" /></div>
-                                    <p className="text-sm font-black uppercase tracking-tighter">Capture Photo</p>
+                                    <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-5" /></div>
+                                    <p className="text-[10px] font-black uppercase tracking-tighter">Capture Photo</p>
                                 </div>
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-14 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform shadow-xl"><UploadCloud className="size-6" /></div>
-                                    <p className="text-sm font-black uppercase tracking-tighter">Pick from Album</p>
+                                    <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
+                                        <UploadCloud className="size-5" />
+                                    </div>
+                                    <p className="text-[10px] font-black uppercase tracking-tighter">Pick from Album</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -509,10 +531,10 @@ export default function DocumentScanner() {
 
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-right-4 duration-500">
-                <div className="lg:col-span-8">
-                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col h-full min-h-[600px]">
-                        <CardHeader className="bg-white/5 border-b p-6 flex flex-row items-center justify-between text-white">
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
+                <div className="lg:col-span-8 flex flex-col gap-4">
+                    <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col flex-1 min-h-[500px]">
+                        <CardHeader className="bg-white/5 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white">
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
                             <div className="flex items-center gap-3">
                                 <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
@@ -522,14 +544,14 @@ export default function DocumentScanner() {
                         </CardHeader>
                         <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 h-full"
                                      onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
+                            <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                                 {cropMode === 'rect' ? (
-                                    <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[75vh]">
-                                        <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[75vh] w-auto object-contain block transition-transform duration-300" onLoad={onImageLoad} style={{ transform: `rotate(${rotation}deg)` }} />
+                                    <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[65vh]">
+                                        <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
                                     <div className="relative">
-                                        <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[75vh] w-auto pointer-events-none block object-contain transition-transform duration-300" onLoad={onImageLoad} style={{ transform: `rotate(${rotation}deg)` }} />
+                                        <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[65vh] w-auto pointer-events-none block object-contain" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                         </svg>
@@ -539,9 +561,9 @@ export default function DocumentScanner() {
                                                 onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-3 bg-white rounded-full" /></div>
                                         ))}
                                         {draggingPoint !== null && (
-                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50">
+                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
                                                 <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
-                                                    style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)`, transform: `rotate(${rotation}deg)` }} 
+                                                    style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                                 /><div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-0.5 bg-green-500/50 absolute" /><div className="h-full w-0.5 bg-green-500/50 absolute" /></div>
                                             </div>
                                         )}
@@ -560,7 +582,7 @@ export default function DocumentScanner() {
                         <CardContent className="flex-1 p-6 flex flex-col bg-white dark:bg-slate-900 shadow-inner overflow-hidden">
                             <ScrollArea className="h-full pr-2 custom-scrollbar">
                                 <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[300px] md:min-h-[400px]">
-                                    {liveResultSrc ? <img src={liveResultSrc} className="max-w-full h-auto max-h-full object-contain block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
+                                    {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-full object-contain block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
                                     {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
                                 </div>
                                 
