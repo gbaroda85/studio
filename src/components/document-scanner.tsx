@@ -95,7 +95,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Expert Specifications Defaults
+  // Default Expert Specifications
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -113,7 +113,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // 8-Point Scanner handles (In Unrotated Coordinate Space)
+  // 8-Point Scanner handles
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -205,7 +205,6 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // Content-Space Rotation Sanitization
     const tempCanvas = document.createElement('canvas');
     const tCtx = tempCanvas.getContext('2d');
     if (!tCtx) return "";
@@ -269,7 +268,6 @@ export default function DocumentScanner() {
         }
     }
 
-    // Filter Processing
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
@@ -301,7 +299,6 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // High Sharpness Kernel
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.5;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -352,7 +349,7 @@ export default function DocumentScanner() {
     const newPage = { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc };
     setScannedPages(prev => [...prev, newPage]);
     setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
-    toast({ title: "Page Added", description: "Doc bundle updated." });
+    toast({ title: "Page Added", description: "Bundle updated." });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -366,14 +363,12 @@ export default function DocumentScanner() {
     const xScreen = (cx - rect.left) / rect.width;
     const yScreen = (cy - rect.top) / rect.height;
 
-    // Inverse Rotation Matrix: Convert Visually Rotated Mouse to Content Space
     const rad = (-rotation * Math.PI) / 180;
     const dx = xScreen - 0.5;
     const dy = yScreen - 0.5;
     
     let nx, ny;
     if (rotation % 180 !== 0) {
-        // Swap bounds factor for aspect change
         const aspect = rect.width / rect.height;
         nx = (dx * Math.cos(rad) - dy * Math.sin(rad) * (1/aspect)) + 0.5;
         ny = (dx * Math.sin(rad) * aspect + dy * Math.cos(rad)) + 0.5;

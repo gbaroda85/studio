@@ -21,7 +21,7 @@ export default function DocumentScanPage() {
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" className="mb-0" />
 
-        <div className="w-full flex justify-center mb-2 px-4 mt-[-80px]">
+        <div className="w-full flex justify-center mb-12 px-4 mt-8">
             <DocumentScanner />
         </div>
 
