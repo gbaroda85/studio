@@ -115,6 +115,7 @@ export default function DocumentScanner() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -151,8 +152,8 @@ export default function DocumentScanner() {
             videoRef.current.srcObject = stream;
         }
     } catch (err) {
-        toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera device.' });
-        setStage('viewfinder');
+        toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access webcam. Using file fallback.' });
+        cameraInputRef.current?.click();
     } finally {
         setIsCameraStarting(false);
     }
