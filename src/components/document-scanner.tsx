@@ -225,6 +225,10 @@ export default function DocumentScanner() {
             const v = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
             r = g = b = v;
         } else if (activeFilter === 'gray') r = g = b = luma;
+        else if (activeFilter === 'photo') {
+            // Natural photo enhancement
+            r = r * 1.05; g = g * 1.05; b = b * 1.05;
+        }
 
         if (activeFilter !== 'bw' && activeFilter !== 'gray') {
             r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF;
@@ -322,7 +326,7 @@ export default function DocumentScanner() {
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
-        next[7] = { x: (next[6].y + next[0].y) / 2, y: (next[6].y + next[0].y) / 2 };
+        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
   }, [draggingPoint, points]);
@@ -341,6 +345,15 @@ export default function DocumentScanner() {
       setActiveFilter('document');
       toast({ title: "Engine Reset", description: "Industrial defaults applied." });
   };
+
+  const handleAiEnhance = () => {
+      setBrightness([165]);
+      setContrast([127]);
+      setSaturation([107]);
+      setSharpness([4.0]);
+      setActiveFilter('magic');
+      toast({ title: "AI Enhancement Active", description: "Brightness and contrast boosted for premium quality." });
+  }
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12 overflow-x-hidden">
@@ -459,54 +472,77 @@ export default function DocumentScanner() {
                         </div>
                     </CardContent>
                     <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
-                        <div className="w-full flex items-center justify-between gap-4">
-                             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document Pro"><FileText className="size-5"/></Button>
-                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
-                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="BW PRO"><Highlighter className="size-5"/></Button>
-                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([100]); setSaturation([0]); }} title="Grayscale"><Layers className="size-5"/></Button>
-                             </div>
-                             <div className="flex items-center gap-3">
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult} title="Rotate Scan 90°"><RotateCw className="size-5"/></Button>
+                        <div className="w-full flex flex-col gap-4">
+                             <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1 w-full">
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document Pro"><FileText className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Doc Pro</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Magic</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant={activeFilter === 'photo' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }} title="Photo High"><ImageIcon className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Photo</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="BW PRO"><Highlighter className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground">BW Pro</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance} title="AI Enhancement"><Zap className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-indigo-600">AI Enhance</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult} title="Rotate Scan 90°"><RotateCw className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
+                                </div>
                                 
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all">
-                                            <Settings2 className="size-5"/>
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-3xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
-                                        <div className="space-y-6">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm">
-                                                    <Settings2 className="size-4"/> FINE-TUNE
-                                                </h4>
-                                                <Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all">
+                                                <Settings2 className="size-5"/>
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-3xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm">
+                                                        <Settings2 className="size-4"/> FINE-TUNE
+                                                    </h4>
+                                                    <Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button>
+                                                </div>
+                                                
+                                                <div className="space-y-6 py-2">
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
+                                                        <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div>
+                                                        <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div>
+                                                        <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div>
+                                                        <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
+                                                    </div>
+                                                </div>
                                             </div>
-                                            
-                                            <div className="space-y-6 py-2">
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
-                                                    <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
-                                                </div>
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div>
-                                                    <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
-                                                </div>
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div>
-                                                    <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
-                                                </div>
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div>
-                                                    <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Adjust</span>
+                                </div>
 
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments} title="Reset Visuals"><RotateCcw className="size-5"/></Button>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments} title="Reset Visuals"><RotateCcw className="size-5"/></Button>
+                                    <span className="text-[8px] font-black uppercase text-rose-500">Reset</span>
+                                </div>
                              </div>
                         </div>
                     </CardFooter>
