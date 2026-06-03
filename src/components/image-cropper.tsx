@@ -29,7 +29,8 @@ import {
     ChevronRight,
     Undo2,
     Palette,
-    Settings2
+    Settings2,
+    Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -178,7 +179,6 @@ export default function ImageCropper() {
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
         let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
 
-        // Respect selected aspect ratio in scanner mode output
         if (aspect) {
             targetHeight = targetWidth / aspect;
         }
@@ -197,7 +197,6 @@ export default function ImageCropper() {
         srcCanvas.width = image.naturalWidth; srcCanvas.height = image.naturalHeight;
         const srcCtx = srcCanvas.getContext('2d');
         if (srcCtx) {
-            // Pre-apply rotation and flip to the sampling source
             srcCtx.save();
             srcCtx.translate(srcCanvas.width / 2, srcCanvas.height / 2);
             srcCtx.rotate((rotate * Math.PI) / 180);
@@ -300,25 +299,56 @@ export default function ImageCropper() {
 
   if (!imgSrc) {
     return (
-      <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1", isDragOver && "border-primary bg-primary/5")}
-            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
-        <CardHeader className="pt-20">
-          <div className="mx-auto mb-6 grid size-20 place-items-center rounded-2xl bg-primary/10 text-primary"><Maximize className="size-10" /></div>
-          <CardTitle className="text-4xl font-black uppercase tracking-tighter">Smart Image Cropper</CardTitle>
-          <CardDescription>Industrial grade cropping with Scanner mode.</CardDescription>
-        </CardHeader>
-        <CardContent className="pb-20 pt-10 flex flex-col items-center gap-6">
-            <div className="relative">
-                <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <Maximize className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
             </div>
-            <div className="text-center">
-                <p className="text-xl font-bold">Drop photo to Begin</p>
-                <p className="text-xs text-muted-foreground opacity-60 uppercase mt-1">100% Private local processing.</p>
-            </div>
-            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-      </Card>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Image <span className="text-gradient-hero">Cropper Studio</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Precision cropping with 8-dot smart scanner. <br/>100% Private local mapping.
+            </p>
+        </div>
+
+        <Card className={cn(
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+        )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 md:p-12">
+                <div 
+                    className={cn(
+                        "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                    )}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <div className="relative">
+                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center">
+                        <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
+                        <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> VISUAL EDIT</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT CROP</div>
+            </CardFooter>
+        </Card>
+      </div>
     );
   }
 
@@ -338,7 +368,7 @@ export default function ImageCropper() {
       </CardHeader>
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-12">
-            {/* Sidebar: Controls (Visible in BOTH modes) */}
+            {/* Sidebar: Controls */}
             <div className="lg:col-span-3 border-r bg-muted/20 p-6 space-y-8 no-print">
                 <div className="space-y-6 animate-in slide-in-from-left duration-300">
                     <div className="space-y-3">
@@ -437,7 +467,7 @@ export default function ImageCropper() {
                                     <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.6] dash-array-[5,5]" />
                                 </svg>
                                 {points.map((p, i) => (
-                                    <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                    <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
                                         style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
                                         <div className="size-2.5 bg-white rounded-full" />
                                     </div>
