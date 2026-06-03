@@ -106,7 +106,6 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Industrial Defaults
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -151,7 +150,7 @@ export default function DocumentScanner() {
             videoRef.current.srcObject = stream;
         }
     } catch (err) {
-        toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access webcam. Using file fallback.' });
+        toast({ variant: 'destructive', title: 'Camera Error', description: 'Webcam not found. Switching to picker.' });
         cameraInputRef.current?.click();
     } finally {
         setIsCameraStarting(false);
@@ -262,7 +261,6 @@ export default function DocumentScanner() {
         cCtx.putImageData(imgData, 0, 0);
     }
 
-    // Filter Processing
     const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
     const pixels = imageData.data;
     const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
@@ -289,7 +287,6 @@ export default function DocumentScanner() {
     }
     cCtx.putImageData(imageData, 0, 0);
 
-    // Sharpness Logic
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -339,7 +336,7 @@ export default function DocumentScanner() {
         ctx.rotate(Math.PI / 2);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setLiveResultSrc(canvas.toDataURL('image/jpeg', 0.95));
-        toast({ title: "Result Rotated 90°" });
+        toast({ title: "Rotated 90°" });
     };
   };
 
@@ -347,7 +344,7 @@ export default function DocumentScanner() {
     if (!liveResultSrc) return;
     setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
     setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
-    toast({ title: "Page Added to Bundle" });
+    toast({ title: "Added to Bundle" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -383,41 +380,41 @@ export default function DocumentScanner() {
   const handleDownloadPdf = () => {
     const pdf = new jsPDF();
     scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
-    pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
+    pdf.save(`Scan-${Date.now()}.pdf`);
   };
 
   const resetAdjustments = () => {
       setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]);
       setActiveFilter('document');
-      toast({ title: "Engine Reset", description: "Industrial defaults applied." });
+      toast({ title: "Reset Defaults" });
   };
 
   const handleAiEnhance = () => {
       setBrightness([150]); setContrast([150]); setSaturation([115]); setSharpness([6.5]);
       setActiveFilter('magic');
-      toast({ title: "AI Polish Active", description: "Ultra-sharpness restoration mode." });
+      toast({ title: "AI Enhance Active" });
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12 overflow-x-hidden">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4 overflow-x-hidden">
         
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start w-full px-4">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-2xl hover:border-primary/40 transition-all">
                         <CardHeader className="pt-12 pb-6">
-                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-inner"><ScanLine className="size-10" /></div>
+                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary"><ScanLine className="size-10" /></div>
                             <CardTitle className="text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
                         <CardContent className="pb-16 pt-4 px-10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                                 <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
                                     <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">Live Capture</p>
+                                    <p className="text-sm font-black uppercase tracking-widest">Live Capture</p>
                                 </div>
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
                                     <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">Gallery</p>
+                                    <p className="text-sm font-black uppercase tracking-widest">Gallery</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -426,7 +423,7 @@ export default function DocumentScanner() {
                 <div className="lg:col-span-4">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[3rem] min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">BUNDLE ({scannedPages.length})</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest">BUNDLE ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
@@ -455,7 +452,7 @@ export default function DocumentScanner() {
                     <video ref={videoRef} autoPlay playsInline className="w-full h-auto object-contain max-h-[75vh]" />
                     {isCameraStarting && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-4"><Loader2 className="size-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-white">Opening Camera Studio...</p></div>}
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
-                        <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 transition-all ring-8 ring-white/20 border-8 border-slate-900" onClick={captureFrame} title="Capture Image"><Camera className="size-10"/></Button>
+                        <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 transition-all ring-8 ring-white/20 border-8 border-slate-900" onClick={captureFrame}><Camera className="size-10"/></Button>
                         <Button variant="ghost" onClick={() => { stopCamera(); setStage('viewfinder'); }} className="bg-black/40 text-white hover:bg-black/60 rounded-full px-6 font-black uppercase text-[10px] border border-white/10">Cancel Camera</Button>
                     </div>
                 </Card>
@@ -465,18 +462,15 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1700px] mx-auto">
                 
-                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
+                <Card className="lg:col-span-8 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
-                        <div className="flex items-center gap-4">
-                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
-                            </Tabs>
-                        </div>
+                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
+                            <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
+                        </Tabs>
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 group"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-2xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
@@ -508,20 +502,18 @@ export default function DocumentScanner() {
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 z-40 shadow-2xl"><Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
                     <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-4">
-                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-slate-950 font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
-                            CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" />
-                        </Button>
+                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-slate-950 font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" /></Button>
                         <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                     </CardFooter>
                 </Card>
 
-                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
+                <Card className="lg:col-span-4 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">HD RESULT PREVIEW</CardTitle></div>
                          <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
-                    <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
-                        <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300">
+                    <CardContent className="flex-1 p-6 md:p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
+                        <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[380px]">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
                         </div>
@@ -547,53 +539,31 @@ export default function DocumentScanner() {
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
                                     <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance}><Zap className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-indigo-600">AI Enhance</span>
+                                    <span className="text-[8px] font-black uppercase text-indigo-600 text-center">AI Enhance</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1">
                                     <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
                                 </div>
-                                
                                 <div className="flex flex-col items-center gap-1">
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all">
-                                                <Settings2 className="size-5"/>
-                                            </Button>
+                                            <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-3xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
                                             <div className="space-y-6">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm">
-                                                        <Settings2 className="size-4"/> FINE-TUNE
-                                                    </h4>
-                                                    <Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button>
-                                                </div>
-                                                
+                                                <div className="flex items-center justify-between"><h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm"><Settings2 className="size-4"/> FINE-TUNE</h4><Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button></div>
                                                 <div className="space-y-6 py-2">
-                                                    <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
-                                                        <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div>
-                                                        <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div>
-                                                        <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div>
-                                                        <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
-                                                    </div>
+                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
+                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div><Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} /></div>
+                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
+                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
                                                 </div>
                                             </div>
                                         </PopoverContent>
                                     </Popover>
                                     <span className="text-[8px] font-black uppercase text-muted-foreground">Adjust</span>
                                 </div>
-
                                 <div className="flex flex-col items-center gap-1">
                                     <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments}><RotateCcw className="size-5"/></Button>
                                     <span className="text-[8px] font-black uppercase text-rose-500">Reset</span>
