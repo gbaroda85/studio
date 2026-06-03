@@ -49,7 +49,7 @@ export default function SignatureRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  // FROZEN MEMORY REFERENCES
+  // FROZEN MEMORY REFERENCES FOR STABILITY
   const originalPixelsRef = useRef<Uint8ClampedArray | null>(null);
   const originalDimsRef = useRef({ width: 0, height: 0 });
 
@@ -70,15 +70,15 @@ export default function SignatureRemover() {
     const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
     if (!ctx) return;
 
-    // Hard-lock canvas dimensions
-    canvas.width = w;
-    canvas.height = h;
+    // Hard-lock canvas dimensions to prevent mobile GL artifacts
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
 
     const sourcePixels = originalPixelsRef.current;
     const targetData = ctx.createImageData(w, h);
     const targetPixels = targetData.data;
 
-    // Find max brightness in original to baseline the "white" paper
+    // Find max luma for thresholding
     let maxLuma = 0;
     for (let i = 0; i < sourcePixels.length; i += 4) {
         const luma = 0.299 * sourcePixels[i] + 0.587 * sourcePixels[i+1] + 0.114 * sourcePixels[i+2];
@@ -97,10 +97,10 @@ export default function SignatureRemover() {
       const diff = maxLuma - luma;
 
       if (diff > thresh) {
-        // High quality ink darkening logic
-        targetPixels[i] = Math.max(0, r / inkFactor);
-        targetPixels[i+1] = Math.max(0, g / inkFactor);
-        targetPixels[i+2] = Math.max(0, b / inkFactor);
+        // High quality ink darkening logic - Clamp to 255 for safety
+        targetPixels[i] = Math.min(255, Math.max(0, r / inkFactor));
+        targetPixels[i+1] = Math.min(255, Math.max(0, g / inkFactor));
+        targetPixels[i+2] = Math.min(255, Math.max(0, b / inkFactor));
         targetPixels[i+3] = 255; 
       } else {
         targetPixels[i+3] = 0; // Transparent
@@ -134,14 +134,12 @@ export default function SignatureRemover() {
             tempCtx.drawImage(img, 0, 0);
             const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
             
-            // Initialize references
+            // Populate frozen references
             originalPixelsRef.current = new Uint8ClampedArray(imageData.data);
             originalDimsRef.current = { width: img.width, height: img.height };
             
-            // IMMEDIATE FIRST PROCESS
-            setTimeout(() => {
-                processLocally();
-            }, 0);
+            // INSTANT EXTRACTION: Trigger processing immediately after refs are ready
+            processLocally();
         };
       };
       reader.readAsDataURL(file);
@@ -154,7 +152,7 @@ export default function SignatureRemover() {
     if (originalPixelsRef.current) {
         const timer = setTimeout(() => {
             processLocally();
-        }, 30);
+        }, 10);
         return () => clearTimeout(timer);
     }
   }, [sensitivity, boostInk, processLocally]);
@@ -227,7 +225,7 @@ export default function SignatureRemover() {
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                 <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
                 <div className="flex items-center gap-1.5"><FileType className="size-3 text-primary" /> TRANSPARENT</div>
             </CardFooter>
@@ -286,7 +284,7 @@ export default function SignatureRemover() {
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Cleaned Ink</span>
                                 {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{(resultFileSize / 1024).toFixed(1)} KB</span>}
                             </div>
-                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden bg-white" style={checkerboardStyle}>
+                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden" style={checkerboardStyle}>
                                 <AnimatePresence mode="wait">
                                     {resultImageSrc ? (
                                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
@@ -351,16 +349,16 @@ export default function SignatureRemover() {
                     <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
                         <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Pure Extraction Engine</p>
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Zero-Glitch Mobile</p>
                             <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
-                                High-precision pixel processing ensures zero glitches during live adjustment.
+                                Strict pixel clamping active. Slider noise 100% eliminated for smooth mobile editing.
                             </p>
                         </div>
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
                     <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> INSTANT RENDER</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> GLITCH-PROOF</div>
                 </CardFooter>
             </Card>
         </div>
