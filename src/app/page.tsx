@@ -145,7 +145,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-10 pb-12 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
@@ -161,22 +161,22 @@ export default function Page() {
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-4 font-semibold leading-relaxed animate-fade-in-up">
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
-              <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+          <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-5 py-2.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
+              <ImageIcon className="size-4 text-primary group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
-              <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-5 py-2.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
+              <FileText className="size-4 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
-              <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-5 py-2.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
+              <Calculator className="size-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
@@ -231,9 +231,9 @@ export default function Page() {
                 </div>
 
                 <div className="py-12 w-full flex justify-center">
-                    <div className="w-full h-0.5 border-t-2 border-dashed border-rose-500/20 relative">
+                    <div className="w-full h-0.5 border-t-2 border-dashed border-primary/20 relative">
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-6">
-                            <div className="size-10 rounded-full border-2 border-dashed border-rose-500/30 flex items-center justify-center text-rose-500/50">
+                            <div className="size-10 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center text-primary/50">
                                 <Sparkles className="size-4" />
                             </div>
                         </div>
