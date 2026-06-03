@@ -9,12 +9,16 @@ import {
   X, 
   Sparkles, 
   Zap,
-  ScanSearch,
+  PenLine,
   CheckCircle2,
   FileType,
   Settings2,
   Eraser,
-  RefreshCcw
+  RefreshCcw,
+  ShieldCheck,
+  ImageIcon,
+  Eye,
+  ArrowLeftRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -23,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SignatureRemover() {
   const { toast } = useToast();
@@ -41,6 +46,13 @@ export default function SignatureRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const checkerboardStyle: React.CSSProperties = {
+    backgroundImage:
+      "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)",
+    backgroundSize: "20px 20px",
+    backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+  };
+
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       setImageFile(file);
@@ -49,7 +61,6 @@ export default function SignatureRemover() {
         setOriginalImageSrc(e.target?.result as string);
         setResultImageSrc(null);
         setProgress(0);
-        // Reset settings for new image
         setSensitivity([40]);
       };
       reader.readAsDataURL(file);
@@ -67,10 +78,6 @@ export default function SignatureRemover() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  /**
-   * Ultra-Clean Local Extraction Algorithm
-   * Processes image on canvas to distinguish ink from paper noise.
-   */
   const processLocally = async () => {
     if (!originalImageSrc) return;
     
@@ -90,7 +97,6 @@ export default function SignatureRemover() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        // Step 1: Detect brightest point (usually paper) to set a reference
         let maxLuma = 0;
         for (let i = 0; i < data.length; i += 4) {
             const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
@@ -100,24 +106,17 @@ export default function SignatureRemover() {
         const threshValue = sensitivity[0];
         const inkBoostFactor = 1 + (boostInk[0] / 100);
 
-        // Step 2: Remove background based on distance from reference white and local darkness
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i + 1], b = data[i + 2];
           const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-
-          // How different is this pixel from the estimated 'paper' brightness?
           const diffFromWhite = maxLuma - luma;
 
           if (diffFromWhite > threshValue) {
-            // This is INK
             data[i + 3] = 255; 
-            
-            // Optional: Make ink darker/vibrant if boosted
             data[i] = Math.max(0, r / inkBoostFactor);
             data[i+1] = Math.max(0, g / inkBoostFactor);
             data[i+2] = Math.max(0, b / inkBoostFactor);
           } else {
-            // This is PAPER / NOISE
             data[i + 3] = 0; 
           }
         }
@@ -127,7 +126,6 @@ export default function SignatureRemover() {
     };
   };
 
-  // Re-process when sensitivity changes
   useEffect(() => {
     if (originalImageSrc) {
         const timer = setTimeout(() => {
@@ -142,7 +140,6 @@ export default function SignatureRemover() {
     setIsProcessing(true);
     setProgress(20);
     
-    // UI feedback delay
     setTimeout(() => {
         setProgress(100);
         processLocally();
@@ -175,143 +172,163 @@ export default function SignatureRemover() {
 
   if (!originalImageSrc) {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <ScanSearch className="h-10 w-10" />
-          </div>
-          <CardTitle className="text-2xl font-black uppercase">Signature BG Remover</CardTitle>
-          <CardDescription>Extract clean signatures from paper photos by removing background and shadows.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div
-            className="border-2 border-dashed border-muted-foreground/50 rounded-xl p-8 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/50 transition-all group"
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <PenLine className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
+            </div>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Signature <span className="text-gradient-hero">BG Remover</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Step 1: Upload signature photo to extract ink. <br/>100% Private local RAM processing.
+            </p>
+        </motion.div>
+
+        <Card
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="relative">
-                <UploadCloud className="h-20 w-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500 animate-pulse" />
-            </div>
-            <div>
-                <p className="text-xl font-bold">Drop photo or Click to select</p>
-                <p className="text-sm text-muted-foreground mt-2">Extracts ink and makes paper background 100% transparent.</p>
-            </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-      </Card>
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 md:p-10">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Signature here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
+                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> TRANSPARENT</div>
+            </CardFooter>
+        </Card>
+
+        <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest mt-2">
+            <span>PRIVATE & SECURE</span>
+            <span>NO SERVER UPLOADS</span>
+            <span>HD PNG EXPORT</span>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Comparison Area */}
-        <div className="lg:col-span-8 space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-                <Card className="overflow-hidden border-2 shadow-lg">
-                    <CardHeader className="bg-muted/30 p-3 border-b flex flex-row items-center justify-between">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</CardTitle>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleReset}><RefreshCcw className="h-3 w-3" /></Button>
-                    </CardHeader>
-                    <CardContent className="p-0 aspect-square relative bg-white">
-                        <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4" />
-                    </CardContent>
-                </Card>
-
-                <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl relative">
-                    <CardHeader className="bg-primary/5 p-3 border-b flex flex-row items-center justify-between">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5">
-                            <Sparkles className="h-3 w-3" /> Clean Result (Transparent)
-                        </CardTitle>
-                        {resultImageSrc && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                    </CardHeader>
-                    <CardContent className="p-0 aspect-square relative flex items-center justify-center bg-white" 
-                                 style={{ 
-                                    backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)', 
-                                    backgroundSize: '20px 20px' 
-                                 }}>
-                        {isProcessing ? (
-                            <div className="flex flex-col items-center gap-4">
-                                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                                <Progress value={progress} className="w-32 h-1" />
-                            </div>
-                        ) : resultImageSrc ? (
-                            <Image src={resultImageSrc} alt="Processed" fill className="object-contain p-4 animate-in zoom-in-95 duration-300" />
-                        ) : (
-                            <div className="text-center p-8 opacity-20">
-                                <Eraser className="h-12 w-12 mx-auto mb-2" />
-                                <p className="text-xs font-bold uppercase">Ready to Clean</p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3">
+            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                <Settings2 className="size-5 md:size-6" />
             </div>
-
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                {!resultImageSrc ? (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl" onClick={handleStartExtraction}>
-                        <Zap className="mr-2 h-5 w-5" /> START CLEANING
-                    </Button>
-                ) : (
-                    <Button size="lg" className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleDownload}>
-                        <Download className="mr-2 h-6 w-6" /> DOWNLOAD PNG
-                    </Button>
-                )}
+            <div>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
+        <div className="flex gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+                <RotateCcw className="mr-1.5 size-3" /> Reset
+            </Button>
+            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !resultImageSrc}>
+                <Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG
+            </Button>
+        </div>
+      </div>
 
-        {/* Studio Controls */}
-        <div className={cn("lg:col-span-4 space-y-6 transition-all", !originalImageSrc && "opacity-20 pointer-events-none")}>
-            <Card className="border-2 shadow-xl border-primary/10">
-                <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg flex items-center gap-2 font-bold">
-                        <Settings2 className="h-5 w-5 text-primary" /> Adjustment Studio
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-8">
+            <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[2rem]">
+                <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[300px] md:min-h-[450px]" style={checkerboardStyle}>
+                    <AnimatePresence mode="wait">
+                        {isProcessing ? (
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-xl p-6 text-center gap-6"
+                            >
+                                <div className="relative">
+                                    <Loader2 className="h-14 w-14 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
+                                    <Eraser className="absolute inset-0 m-auto h-6 w-6 md:h-9 md:w-9 text-primary animate-pulse" />
+                                </div>
+                                <div className="space-y-3 w-full max-w-[250px] md:max-w-xs">
+                                    <p className="font-black text-lg md:text-xl text-primary animate-pulse uppercase tracking-tighter">Cleaning Ink...</p>
+                                    <Progress value={progress} className="h-1.5 shadow-inner" />
+                                </div>
+                            </motion.div>
+                        ) : resultImageSrc ? (
+                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative size-full p-4 md:p-8">
+                                <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 md:p-8 drop-shadow-2xl" />
+                            </motion.div>
+                        ) : (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative size-full p-4 md:p-8">
+                                <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 opacity-40 grayscale" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </CardContent>
+            </Card>
+        </div>
+
+        <div className="lg:col-span-4 space-y-4">
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
+                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 text-primary" /> Adjustment Studio
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-8">
-                    
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">
-                                <Eraser className="size-3" /> Background Sensitivity
-                            </Label>
-                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">{sensitivity[0]}</span>
+                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
+                                    <Eraser className="size-3" /> Sensitivity
+                                </Label>
+                                <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{sensitivity[0]}</span>
+                            </div>
+                            <Slider min={5} max={150} step={1} value={sensitivity} onValueChange={setSensitivity} className="py-2" />
+                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Remove paper shadows and background grit.</p>
                         </div>
-                        <Slider min={5} max={150} step={1} value={sensitivity} onValueChange={setSensitivity} />
-                        <p className="text-[9px] text-muted-foreground italic">Increase this to remove paper shadows and grit from the background.</p>
+
+                        <div className="space-y-4 pt-4 border-t border-white/5">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
+                                    <FileType className="size-3" /> Ink Darkness
+                                </Label>
+                                <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">+{boostInk[0]}%</span>
+                            </div>
+                            <Slider min={0} max={100} step={1} value={boostInk} onValueChange={setBoostInk} className="py-2" />
+                            <p className="text-[9px] text-muted-foreground italic leading-tight uppercase opacity-60">Makes the signature strokes darker and clearer.</p>
+                        </div>
                     </div>
 
-                    <div className="space-y-4 pt-4 border-t">
-                        <div className="flex justify-between items-center">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">
-                                <FileType className="size-3" /> Ink Darkness
-                            </Label>
-                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded text-primary">+{boostInk[0]}%</span>
-                        </div>
-                        <Slider min={0} max={100} step={1} value={boostInk} onValueChange={setBoostInk} />
-                        <p className="text-[9px] text-muted-foreground italic">Makes the signature strokes darker and clearer.</p>
-                    </div>
-
-                    <div className="p-4 bg-green-500/5 rounded-xl border border-green-500/10 flex gap-3">
-                        <FileType className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                        <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Extraction Tip</p>
-                            <p className="text-[9px] text-green-600/80 font-medium leading-relaxed">
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Pro Extraction Tip</p>
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
                                 This tool isolates the ink from the paper. Use it to get a clean signature that you can overlay on any digital form or PDF.
                             </p>
                         </div>
                     </div>
                 </CardContent>
+                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> INSTANT RENDER</div>
+                </CardFooter>
             </Card>
         </div>
       </div>
       
-      {/* Offscreen rendering canvas */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
