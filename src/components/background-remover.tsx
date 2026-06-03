@@ -278,7 +278,7 @@ export default function BackgroundRemover() {
 
         const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         const dw = img.width * scale;
-        const dh = img.height * scale;
+        const dh = (faceImg.height * (dw / faceImg.width));
         const dx = (canvas.width - dw) / 2;
         const dy = (canvas.height - dh) / 2;
         
@@ -321,41 +321,54 @@ export default function BackgroundRemover() {
 
   if (stage === 'upload') {
     return (
-      <div className="w-full max-w-4xl py-2 flex flex-col items-center justify-center gap-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-1">
-            <div className="mx-auto mb-1 grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary shadow-lg relative">
-                <Eraser className="size-6" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-4 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <Sparkles className="size-2" />
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <Eraser className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
                 </div>
             </div>
-            <h1 className="text-xl md:text-3xl font-black font-headline tracking-tighter uppercase leading-none">
-                Smart <span className="text-gradient-hero">BG</span> Remover
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Smart <span className="text-gradient-hero">BG Remover</span>
             </h1>
-            <p className="text-[8px] md:text-[10px] text-muted-foreground font-semibold max-w-xl mx-auto uppercase tracking-widest opacity-60">
-                100% Private local subjects extraction.
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Step 1: Upload photo to extract subjects. <br/>100% Private local RAM processing.
             </p>
         </motion.div>
 
         <Card
-            className={cn("w-full max-w-xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
             onClick={() => fileInputRef.current?.click()}
         >
-            <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center space-y-4">
-                <UploadCloud className="size-10 md:size-14 text-muted-foreground group-hover:text-primary transition-colors" />
-                <div className="text-center">
-                    <p className="text-base md:text-lg font-black uppercase tracking-tighter">Click to Upload Photo</p>
-                    <p className="text-[9px] md:text-[10px] text-muted-foreground mt-1 font-bold opacity-60 uppercase">Native speed RAM processing.</p>
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
+                    </div>
                 </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
             </CardContent>
-            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
+                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> TRANSPARENT</div>
+            </CardFooter>
         </Card>
 
-        <div className="flex flex-wrap justify-center gap-4 text-[7px] md:text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-2">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
-            <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> TRANSPARENT</div>
+        <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest mt-2">
+            <span>PRIVATE & SECURE</span>
+            <span>NO SERVER UPLOADS</span>
+            <span>HD EXPORT READY</span>
         </div>
       </div>
     );
