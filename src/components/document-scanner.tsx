@@ -48,7 +48,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -109,7 +109,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Requirement Defaults: 145, 96, 70, 2.5
+  // Default values locked: 145, 96, 70, 2.5
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -127,7 +127,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // 8-Dot Magnets
+  // 8-Dot Scanner Handles
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -142,13 +142,6 @@ export default function DocumentScanner() {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
-  const stopCamera = useCallback(() => {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-    }
-  }, [stream]);
 
   const startCamera = async () => {
     if (isMobile) {
@@ -193,39 +186,41 @@ export default function DocumentScanner() {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return "";
-
-    const tempCanvas = document.createElement('canvas');
-    const tCtx = tempCanvas.getContext('2d');
-    if (!tCtx) return "";
-    
-    // Step 1: Base Rotation and Alignment
+    // STEP 1: CREATE ROTATED SOURCE BUFFER (THE "VISUAL SOURCE")
+    const visualSourceCanvas = document.createElement('canvas');
     if (rotation % 180 !== 0) {
-        tempCanvas.width = image.naturalHeight;
-        tempCanvas.height = image.naturalWidth;
+        visualSourceCanvas.width = image.naturalHeight;
+        visualSourceCanvas.height = image.naturalWidth;
     } else {
-        tempCanvas.width = image.naturalWidth;
-        tempCanvas.height = image.naturalHeight;
+        visualSourceCanvas.width = image.naturalWidth;
+        visualSourceCanvas.height = image.naturalHeight;
     }
-    
-    tCtx.translate(tempCanvas.width/2, tempCanvas.height/2);
-    tCtx.rotate((rotation * Math.PI) / 180);
-    tCtx.drawImage(image, -image.naturalWidth/2, -image.naturalHeight/2);
+    const vsCtx = visualSourceCanvas.getContext('2d', { willReadFrequently: true });
+    if (!vsCtx) return "";
 
-    // Step 2: Perspective or Rectangular Mapping
+    vsCtx.save();
+    vsCtx.translate(visualSourceCanvas.width / 2, visualSourceCanvas.height / 2);
+    vsCtx.rotate((rotation * Math.PI) / 180);
+    vsCtx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
+    vsCtx.restore();
+
+    // STEP 2: APPLY CROP ON THE VISUAL BUFFER
+    const finalCanvas = document.createElement('canvas');
+    const fCtx = finalCanvas.getContext('2d', { willReadFrequently: true });
+    if (!fCtx) return "";
+
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
-        const scaleX = tempCanvas.width / (imgRef.current?.width || 1);
-        const scaleY = tempCanvas.height / (imgRef.current?.height || 1);
-        canvas.width = Math.max(10, c.width * scaleX);
-        canvas.height = Math.max(10, c.height * scaleY);
-        ctx.drawImage(tempCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
+        // Scale percentages to visualSource dimensions
+        const scaleX = visualSourceCanvas.width / (imgRef.current?.width || 1);
+        const scaleY = visualSourceCanvas.height / (imgRef.current?.height || 1);
+        finalCanvas.width = Math.max(10, c.width * scaleX);
+        finalCanvas.height = Math.max(10, c.height * scaleY);
+        fCtx.drawImage(visualSourceCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, finalCanvas.width, finalCanvas.height);
     } else {
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
-            x: (p.x / 100) * tempCanvas.width, 
-            y: (p.y / 100) * tempCanvas.height 
+            x: (p.x / 100) * visualSourceCanvas.width, 
+            y: (p.y / 100) * visualSourceCanvas.height 
         }));
         
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
@@ -235,12 +230,12 @@ export default function DocumentScanner() {
         
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
-        canvas.width = targetWidth; canvas.height = targetHeight;
+        finalCanvas.width = targetWidth; finalCanvas.height = targetHeight;
 
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         const h = solvePerspective(dstPoints, corners);
-        const imgData = ctx.createImageData(targetWidth, targetHeight);
-        const srcPixels = tCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
+        const imgData = fCtx.createImageData(targetWidth, targetHeight);
+        const srcPixels = vsCtx.getImageData(0, 0, visualSourceCanvas.width, visualSourceCanvas.height).data;
 
         if (srcPixels) {
             for (let y = 0; y < targetHeight; y++) {
@@ -248,9 +243,9 @@ export default function DocumentScanner() {
                     const z = h[6] * x + h[7] * y + 1;
                     const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                     const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                    if (sx >= 0 && sx < tempCanvas.width && sy >= 0 && sy < tempCanvas.height) {
+                    if (sx >= 0 && sx < visualSourceCanvas.width && sy >= 0 && sy < visualSourceCanvas.height) {
                         const dstIdx = (y * targetWidth + x) * 4;
-                        const srcIdx = (sy * tempCanvas.width + sx) * 4;
+                        const srcIdx = (sy * visualSourceCanvas.width + sx) * 4;
                         imgData.data[dstIdx] = srcPixels[srcIdx];
                         imgData.data[dstIdx+1] = srcPixels[srcIdx+1];
                         imgData.data[dstIdx+2] = srcPixels[srcIdx+2];
@@ -258,12 +253,12 @@ export default function DocumentScanner() {
                     }
                 }
             }
-            ctx.putImageData(imgData, 0, 0);
+            fCtx.putImageData(imgData, 0, 0);
         }
     }
 
-    // Step 3: Global Filters
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // STEP 3: APPLY FILTERS & SHARPNESS
+    const imageData = fCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
     const cFactor = contrast[0] / 100;
@@ -292,26 +287,25 @@ export default function DocumentScanner() {
         pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
         pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
     }
-    ctx.putImageData(imageData, 0, 0);
+    fCtx.putImageData(imageData, 0, 0);
 
-    // Step 4: Final Sharpness Pass
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
-        const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const currentData = fCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
         const src = currentData.data;
-        const output = ctx.createImageData(canvas.width, canvas.height);
-        const dst = output.data;
+        const out = fCtx.createImageData(finalCanvas.width, finalCanvas.height);
+        const dst = out.data;
 
-        for (let y = 0; y < canvas.height; y++) {
-            for (let x = 0; x < canvas.width; x++) {
-                const i = (y * canvas.width + x) * 4;
+        for (let y = 0; y < finalCanvas.height; y++) {
+            for (let x = 0; x < finalCanvas.width; x++) {
+                const i = (y * finalCanvas.width + x) * 4;
                 let r = 0, g = 0, b = 0;
                 for (let ky = -1; ky <= 1; ky++) {
                     for (let kx = -1; kx <= 1; kx++) {
-                        const scy = Math.min(canvas.height - 1, Math.max(0, y + ky));
-                        const scx = Math.min(canvas.width - 1, Math.max(0, x + kx));
-                        const srcOff = (scy * canvas.width + scx) * 4;
+                        const scy = Math.min(finalCanvas.height - 1, Math.max(0, y + ky));
+                        const scx = Math.min(finalCanvas.width - 1, Math.max(0, x + kx));
+                        const srcOff = (scy * finalCanvas.width + scx) * 4;
                         const wt = weights[(ky + 1) * 3 + (kx + 1)];
                         r += src[srcOff] * wt; g += src[srcOff + 1] * wt; b += src[srcOff + 2] * wt;
                     }
@@ -322,10 +316,10 @@ export default function DocumentScanner() {
                 dst[i+3] = src[i+3];
             }
         }
-        ctx.putImageData(output, 0, 0);
+        fCtx.putImageData(out, 0, 0);
     }
 
-    return canvas.toDataURL('image/jpeg', 0.95);
+    return finalCanvas.toDataURL('image/jpeg', 0.95);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness, rotation]);
 
   useEffect(() => {
@@ -359,7 +353,7 @@ export default function DocumentScanner() {
     const xScreen = (cx - rect.left) / rect.width;
     const yScreen = (cy - rect.top) / rect.height;
 
-    // INVERSE 2D ROTATION MATRIX
+    // Inverse 2D Transformation to map back to content space
     const rad = (-rotation * Math.PI) / 180;
     const dx = xScreen - 0.5;
     const dy = yScreen - 0.5;
@@ -388,7 +382,6 @@ export default function DocumentScanner() {
             else if (idx === 5) { next[6].y = finalY; next[4].y = finalY; } 
             else if (idx === 7) { next[0].x = finalX; next[6].x = finalX; } 
         }
-        // Sync midpoints
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
@@ -526,7 +519,7 @@ export default function DocumentScanner() {
                     </CardContent>
                     <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-4">
                         <Button className="w-full h-16 rounded-2xl bg-primary text-slate-950 font-black text-lg shadow-2xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
-                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}>CANCEL SCAN</Button>
                     </CardFooter>
                 </Card>
 
@@ -539,7 +532,7 @@ export default function DocumentScanner() {
                             </div>
                             <CardTitle className="text-xl font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle>
                         </div>
-                        <Button variant="ghost" size="icon" className="size-10 rounded-full text-muted-foreground hover:bg-muted" onClick={() => setStage('viewfinder')}>
+                        <Button variant="ghost" size="icon" className="size-10 rounded-full text-muted-foreground hover:bg-muted" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}>
                             <X className="size-5" />
                         </Button>
                     </CardHeader>
@@ -552,10 +545,10 @@ export default function DocumentScanner() {
                     <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
                         <div className="w-full flex items-center justify-between gap-6">
                              <div className="flex items-center gap-3">
-                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => setActiveFilter('document')} title="Document"><FileText className="size-5"/></Button>
-                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => setActiveFilter('magic')} title="Magic Color"><Sparkles className="size-5"/></Button>
-                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => setActiveFilter('bw')} title="B&W Pro"><Highlighter className="size-5"/></Button>
-                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => setActiveFilter('gray')} title="Grayscale"><Layers className="size-5"/></Button>
+                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document"><FileText className="size-5"/></Button>
+                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([110]); setContrast([110]); setSaturation([130]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
+                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="B&W Pro"><Highlighter className="size-5"/></Button>
+                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('gray'); }} title="Grayscale"><Layers className="size-5"/></Button>
                              </div>
                              <div className="flex items-center gap-3">
                                 <Dialog>
@@ -581,7 +574,7 @@ export default function DocumentScanner() {
                                         <DialogFooter><Button variant="ghost" className="w-full font-black uppercase text-xs h-12" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET TO DEFAULTS</Button></DialogFooter>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2 text-rose-500" onClick={() => { setStage('viewfinder'); setCurrentRawImage(null); }}><RotateCcw className="size-5"/></Button>
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2 text-rose-500" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><RotateCcw className="size-5"/></Button>
                              </div>
                         </div>
                     </CardFooter>
