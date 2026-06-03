@@ -216,7 +216,7 @@ export default function Page() {
             </div>
           ) : (
             <>
-                <div className="mb-20">
+                <div className="mb-12">
                     <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3">
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
@@ -231,7 +231,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className="py-20 w-full flex justify-center">
+                <div className="py-12 w-full flex justify-center">
                     <div className="w-full h-0.5 border-t-2 border-dashed border-rose-500/20 relative">
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-6">
                             <div className="size-10 rounded-full border-2 border-dashed border-rose-500/30 flex items-center justify-center text-rose-500/50">
