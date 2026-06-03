@@ -101,7 +101,6 @@ interface ScannedPage {
 
 export default function DocumentScanner() {
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   const [stage, setStage] = useState<Stage>('viewfinder');
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');

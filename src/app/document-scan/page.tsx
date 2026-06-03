@@ -1,11 +1,9 @@
 
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck, Zap, Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, Zap, ShieldCheck, MonitorCheck } from 'lucide-react';
 import DocumentScanner from '@/components/document-scanner';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import {
   Accordion,
   AccordionContent,
@@ -20,16 +18,8 @@ export const metadata: Metadata = {
 
 export default function DocumentScanPage() {
   return (
-    <main className="flex-1 flex flex-col items-center bg-[#f2f8f8] dark:bg-slate-950/20 min-h-screen">
-        {/* Top Centered Navigation */}
-        <div className="w-full flex justify-center pt-8 no-print">
-            <Button asChild variant="outline" className="rounded-full bg-white dark:bg-slate-900 border-2 shadow-sm hover:shadow-md transition-all px-6 h-10 group">
-                <Link href="/tools?tab=pdf" className="flex items-center gap-2">
-                    <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-                    <span className="font-black text-[10px] uppercase tracking-[0.2em]">Back to PDF Tools</span>
-                </Link>
-            </Button>
-        </div>
+    <main className="flex-1 flex flex-col items-center min-h-screen">
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full max-w-[1600px] flex justify-center mb-12 px-4 mt-8">
             <DocumentScanner />
