@@ -95,7 +95,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune states (Aapke bataye huye Defaults)
+  // Fine-tune defaults
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -306,7 +306,7 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // Sharpness Logic
+    // Sharpness Logic (Convolution)
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 4;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -462,7 +462,7 @@ export default function DocumentScanner() {
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] h-full min-h-[300px]">
                         <CardHeader className="bg-primary/5 border-b p-4 flex flex-row items-center justify-between">
                             <CardTitle className="text-sm font-black uppercase tracking-tighter flex items-center gap-3"><FileStack className="size-4 text-primary" /> COLLECTION</CardTitle>
-                            <Badge className="bg-primary text-black font-black px-2 py-0.5 rounded-full text-[10px]">{scannedPages.length}</Badge>
+                            <Badge className="bg-primary/20 text-primary font-black px-2 py-0.5 rounded-full text-[10px]">{scannedPages.length}</Badge>
                         </CardHeader>
                         <CardContent className="flex-1 p-4">
                             {scannedPages.length === 0 ? (
@@ -502,7 +502,7 @@ export default function DocumentScanner() {
             <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-in zoom-in-95 duration-500">
                 <Card className="border-none shadow-3xl bg-black rounded-[2.5rem] overflow-hidden relative">
                     <CardHeader className="absolute top-0 left-0 w-full z-10 p-6 flex flex-row items-center justify-between">
-                         <Badge className="bg-primary text-black font-black uppercase text-[10px]">LIVE FEED</Badge>
+                         <Badge className="bg-primary/20 text-primary font-black uppercase text-[10px]">LIVE FEED</Badge>
                          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => { stopCamera(); setStage('viewfinder'); }}><X /></Button>
                     </CardHeader>
                     <CardContent className="p-0 bg-black aspect-video flex items-center justify-center">
@@ -618,7 +618,7 @@ export default function DocumentScanner() {
                             </ScrollArea>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3 shrink-0">
-                            <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
+                            <Button className="w-full h-14 rounded-xl bg-primary text-primary-foreground font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
                             <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-muted-foreground" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                         </CardFooter>
                     </Card>

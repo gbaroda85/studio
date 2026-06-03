@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 export default function DocumentScanPage() {
   return (
     <main className="flex-1 flex flex-col items-center">
-        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" className="mb-2" />
+        <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" className="mb-0" />
 
-        <div className="w-full flex justify-center mb-6 px-4">
+        <div className="w-full flex justify-center mb-2 px-4 mt-[-60px]">
             <DocumentScanner />
         </div>
 
