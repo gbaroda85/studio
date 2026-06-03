@@ -452,7 +452,7 @@ function ToolsPageContent() {
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6 font-jakarta" style={{ animationDelay: '0.1s' }}>
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6 font-body" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your browser for 100% privacy.
           </p>
 
@@ -463,7 +463,7 @@ function ToolsPageContent() {
                 <input
                     type="search"
                     placeholder={t('search_tools_placeholder')}
-                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold outline-none font-jakarta"
+                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold outline-none font-body"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -474,7 +474,7 @@ function ToolsPageContent() {
 
       <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4 pb-32">
         {isSearching ? (
-            <div className="space-y-20 font-jakarta">
+            <div className="space-y-20 font-body">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -482,7 +482,7 @@ function ToolsPageContent() {
                       <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
                         <Icon className="size-6" />
                       </div>
-                      <h2 className="text-3xl font-black uppercase tracking-tighter">
+                      <h2 className="text-3xl font-semibold uppercase tracking-tighter">
                         {t(categoryKey)}
                       </h2>
                     </div>
@@ -504,13 +504,13 @@ function ToolsPageContent() {
             ) : (
                 <div className="text-center py-24 bg-muted/10 rounded-[3rem] border-4 border-dashed">
                 <Search className="mx-auto h-20 w-20 mb-6 text-muted-foreground/30" />
-                <p className="text-2xl font-black uppercase text-muted-foreground">{t('no_tools_found')}</p>
+                <p className="text-2xl font-semibold uppercase text-muted-foreground">{t('no_tools_found')}</p>
                 <p className="text-sm text-muted-foreground mt-2 font-medium">Try a different search term.</p>
                 </div>
             )}
             </div>
         ) : (
-            <Tabs defaultValue={defaultTab} className="w-full font-jakarta">
+            <Tabs defaultValue={defaultTab} className="w-full font-body">
             <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-10">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                 <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 transition-all tabs-trigger-lift">
