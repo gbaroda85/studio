@@ -57,6 +57,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Point { x: number; y: number; }
 
@@ -101,7 +109,6 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Default specifications for Document Filter
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -159,13 +166,6 @@ export default function DocumentScanner() {
         }
     }
   };
-
-  useEffect(() => {
-    if (stage === 'live-camera' && stream && videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().then(() => setIsVideoLoading(false)).catch(() => setIsVideoLoading(false));
-    }
-  }, [stage, stream]);
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -458,7 +458,7 @@ export default function DocumentScanner() {
                                         <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-lg group hover:border-primary transition-all">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="scan" />
                                             <div className="absolute top-1 left-1 size-5 rounded bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">{i+1}</div>
-                                            <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-6 rounded opacity-0 group-hover:opacity-100 transition-all shadow-lg" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3" /></Button>
+                                            <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-6 rounded opacity-0 group-hover:opacity-100 transition-all shadow-lg" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== pg.id))}><Trash2 className="size-3" /></Button>
                                         </div>
                                     ))}
                                 </div>
