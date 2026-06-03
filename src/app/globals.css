@@ -96,9 +96,8 @@
 }
 
 .text-gradient-hero {
-  /* Dynamic Gradients based on current theme variables */
-  /* Optimized light theme to use a darker navy teal (#0d5a71) for better contrast */
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#48a9a4] to-[#0d5a71] dark:from-[#7BBDE8] dark:to-[#BDD8E9];
+  /* Updated to match the Hub Studio gradient for a consistent premium look */
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent;
 }
 
 .bg-gradient-button {
