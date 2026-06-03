@@ -156,7 +156,7 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-normal mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium mb-4 tracking-tight leading-[1.1] animate-fade-in-up">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
