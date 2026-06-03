@@ -34,7 +34,6 @@ import {
     AlignVerticalJustifyEnd,
     Square,
     Sparkles,
-    ChevronRight as ChevronRightIcon,
     RotateCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -51,7 +50,7 @@ import jsPDF from 'jspdf';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker with stable CDN
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
@@ -275,6 +274,7 @@ export default function AadhaarPrinter() {
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
         const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
+        // Ensure dimensions are valid
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         
@@ -404,6 +404,8 @@ export default function AadhaarPrinter() {
         
         const next = [...prev];
         const idx = draggingPoint;
+        
+        // Calculate Deltas for smooth multi-point movement
         const dx = currentX - prev[idx].x;
         const dy = currentY - prev[idx].y;
 
@@ -412,22 +414,22 @@ export default function AadhaarPrinter() {
             next[idx] = { x: currentX, y: currentY };
         } else {
             // Dragging Midpoint (Smooth Edge Movement)
-            if (idx === 1) { // TC moves TL and TR
+            if (idx === 1) { // Top Center moves TL and TR vertically
                 next[0].y = Math.max(0, Math.min(100, next[0].y + dy));
                 next[2].y = Math.max(0, Math.min(100, next[2].y + dy));
-            } else if (idx === 3) { // RC moves TR and BR
+            } else if (idx === 3) { // Right Center moves TR and BR horizontally
                 next[2].x = Math.max(0, Math.min(100, next[2].x + dx));
                 next[4].x = Math.max(0, Math.min(100, next[4].x + dx));
-            } else if (idx === 5) { // BC moves BL and BR
+            } else if (idx === 5) { // Bottom Center moves BL and BR vertically
                 next[6].y = Math.max(0, Math.min(100, next[6].y + dy));
                 next[4].y = Math.max(0, Math.min(100, next[4].y + dy));
-            } else if (idx === 7) { // LC moves TL and BL
+            } else if (idx === 7) { // Left Center moves TL and BL horizontally
                 next[0].x = Math.max(0, Math.min(100, next[0].x + dx));
                 next[6].x = Math.max(0, Math.min(100, next[6].x + dx));
             }
         }
 
-        // Re-calculate all midpoints strictly based on corners for perfect alignment
+        // RE-SYNC ALL MIDPOINTS STRICTLY BASED ON CORNERS (Prevents Sticking/Overlapping)
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 }; // TC
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 }; // RC
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 }; // BC
