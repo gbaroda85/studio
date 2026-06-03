@@ -185,7 +185,6 @@ export default function ImageCropper() {
         }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
-        // Correct matrix ordering (Destination to Source mapping)
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
         const srcCanvas = document.createElement('canvas');
@@ -447,7 +446,6 @@ export default function ImageCropper() {
             </div>
         </div>
       </CardContent>
-      <canvas ref={canvasRef} className="hidden" />
     </Card>
   );
 }
