@@ -134,9 +134,9 @@ export default function DocumentScanner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const startCamera = async () => {
-    if (isMobile) cameraInputRef.current?.click();
-    else fileInputRef.current?.click();
+  const startCamera = () => {
+    // We explicitly click the capture input to force system camera on mobile
+    cameraInputRef.current?.click();
   };
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
