@@ -176,7 +176,13 @@ export default function ImageCropper() {
         const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
-        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
+        let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
+
+        // Respect selected aspect ratio in scanner mode output
+        if (aspect) {
+            targetHeight = targetWidth / aspect;
+        }
+
         canvas.width = targetWidth; canvas.height = targetHeight;
 
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
@@ -190,7 +196,17 @@ export default function ImageCropper() {
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = image.naturalWidth; srcCanvas.height = image.naturalHeight;
         const srcCtx = srcCanvas.getContext('2d');
-        srcCtx?.drawImage(image, 0, 0);
+        if (srcCtx) {
+            // Pre-apply rotation and flip to the sampling source
+            srcCtx.save();
+            srcCtx.translate(srcCanvas.width / 2, srcCanvas.height / 2);
+            srcCtx.rotate((rotate * Math.PI) / 180);
+            srcCtx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+            srcCtx.translate(-srcCanvas.width / 2, -srcCanvas.height / 2);
+            srcCtx.drawImage(image, 0, 0);
+            srcCtx.restore();
+        }
+        
         const srcPixels = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
 
         if (srcPixels) {
@@ -322,46 +338,44 @@ export default function ImageCropper() {
       </CardHeader>
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-12">
-            {/* Sidebar: Controls */}
+            {/* Sidebar: Controls (Visible in BOTH modes) */}
             <div className="lg:col-span-3 border-r bg-muted/20 p-6 space-y-8 no-print">
-                {cropMode === 'rectangular' && (
-                    <div className="space-y-6 animate-in slide-in-from-left duration-300">
-                        <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                <Grid3X3 className="size-3" /> Aspect Ratio
-                            </Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {ASPECT_RATIOS.map((r) => (
-                                    <Button 
-                                        key={r.label} 
-                                        variant="outline" 
-                                        className={cn("h-10 text-[9px] font-black border-2 rounded-xl", (aspect === r.value || (r.value === 0 && aspect === undefined)) ? "border-primary bg-primary/5" : "")}
-                                        onClick={() => handleAspectChange(r.value)}
-                                    >
-                                        {r.label}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 pt-4 border-t border-dashed">
-                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground">Rotation</Label>
-                                <Badge variant="secondary" className="font-mono text-[10px]">{rotate}°</Badge>
-                             </div>
-                             <Slider min={-180} max={180} step={1} value={[rotate]} onValueChange={(v) => setRotate(v[0])} className="py-2" />
-                        </div>
-
-                        <div className="flex gap-2 pt-2">
-                            <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipH && "bg-primary/10 border-primary")} onClick={() => setFlipH(!flipH)}>
-                                <FlipHorizontal className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip H</span>
-                            </Button>
-                            <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipV && "bg-primary/10 border-primary")} onClick={() => setFlipV(!flipV)}>
-                                <FlipVertical className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip V</span>
-                            </Button>
+                <div className="space-y-6 animate-in slide-in-from-left duration-300">
+                    <div className="space-y-3">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                            <Grid3X3 className="size-3" /> Aspect Ratio
+                        </Label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {ASPECT_RATIOS.map((r) => (
+                                <Button 
+                                    key={r.label} 
+                                    variant="outline" 
+                                    className={cn("h-10 text-[9px] font-black border-2 rounded-xl", (aspect === r.value || (r.value === 0 && aspect === undefined)) ? "border-primary bg-primary/5" : "")}
+                                    onClick={() => handleAspectChange(r.value)}
+                                >
+                                    {r.label}
+                                </Button>
+                            ))}
                         </div>
                     </div>
-                )}
+
+                    <div className="space-y-4 pt-4 border-t border-dashed">
+                         <div className="flex justify-between items-center">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Rotation</Label>
+                            <Badge variant="secondary" className="font-mono text-[10px]">{rotate}°</Badge>
+                         </div>
+                         <Slider min={-180} max={180} step={1} value={[rotate]} onValueChange={(v) => setRotate(v[0])} className="py-2" />
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                        <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipH && "bg-primary/10 border-primary")} onClick={() => setFlipH(!flipH)}>
+                            <FlipHorizontal className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip H</span>
+                        </Button>
+                        <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipV && "bg-primary/10 border-primary")} onClick={() => setFlipV(!flipV)}>
+                            <FlipVertical className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip V</span>
+                        </Button>
+                    </div>
+                </div>
 
                 <div className="space-y-4 pt-6 border-t border-dashed">
                     <Label className="text-[10px] font-black uppercase text-muted-foreground">Target Format</Label>
@@ -417,7 +431,8 @@ export default function ImageCropper() {
                             </ReactCrop>
                         ) : (
                             <div className="relative">
-                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[75vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[75vh] w-auto pointer-events-none block" onLoad={onImageLoad} 
+                                     style={{ transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`, transition: 'transform 0.2s ease-out' }} />
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.6] dash-array-[5,5]" />
                                 </svg>
@@ -429,7 +444,7 @@ export default function ImageCropper() {
                                 ))}
                                 {draggingPoint !== null && (
                                     <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
-                                        <img src={imgSrc} alt="mag" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
+                                        <img src={imgSrc} alt="mag" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)`, transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})` }} />
                                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                             <div className="w-full h-0.5 bg-green-500/40 absolute" />
                                             <div className="h-full w-0.5 bg-green-500/40 absolute" />
