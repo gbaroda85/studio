@@ -58,13 +58,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Point { x: number; y: number; }
 
@@ -109,7 +106,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Industrial Defaults
+  // Industrial Defaults (145, 96, 70, 2.5)
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -122,7 +119,6 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // Handles in CONTENT SPACE (0-100 relative to original image)
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -139,12 +135,8 @@ export default function DocumentScanner() {
   const imgRef = useRef<HTMLImageElement>(null);
 
   const startCamera = async () => {
-    if (isMobile) {
-        cameraInputRef.current?.click();
-    } else {
-        // Desktop can still use gallery or we can trigger native file input
-        fileInputRef.current?.click();
-    }
+    if (isMobile) cameraInputRef.current?.click();
+    else fileInputRef.current?.click();
   };
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
@@ -330,7 +322,7 @@ export default function DocumentScanner() {
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
-        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
+        next[7] = { x: (next[6].y + next[0].y) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
   }, [draggingPoint, points]);
@@ -347,6 +339,7 @@ export default function DocumentScanner() {
       setSaturation([70]);
       setSharpness([2.5]);
       setActiveFilter('document');
+      toast({ title: "Engine Reset", description: "Industrial defaults applied." });
   };
 
   return (
@@ -384,7 +377,7 @@ export default function DocumentScanner() {
                                 <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-16" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {scannedPages.map((p, i) => (
+                                    {scannedPages.map((p) => (
                                         <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-md group">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="s" />
                                             <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3.5" /></Button>
@@ -475,18 +468,44 @@ export default function DocumentScanner() {
                              </div>
                              <div className="flex items-center gap-3">
                                 <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult} title="Rotate Scan 90°"><RotateCw className="size-5"/></Button>
-                                <Dialog>
-                                    <DialogTrigger asChild><Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button></DialogTrigger>
-                                    <DialogContent className="max-w-md rounded-[2.5rem] border-2 shadow-3xl bg-white dark:bg-slate-950">
-                                        <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary flex items-center gap-3 py-2"><Settings2 className="size-6"/> Fine-Tune Engine</DialogTitle></DialogHeader>
-                                        <div className="space-y-8 py-8 px-2">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-4 inline mr-2 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-xs">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-4 inline mr-2 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-xs">{contrast[0]}%</Badge></div><Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-4 inline mr-2 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-xs">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                                
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all">
+                                            <Settings2 className="size-5"/>
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-3xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm">
+                                                    <Settings2 className="size-4"/> FINE-TUNE
+                                                </h4>
+                                                <Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button>
+                                            </div>
+                                            
+                                            <div className="space-y-6 py-2">
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div>
+                                                    <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div>
+                                                    <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div>
+                                                    <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div>
+                                                    <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <DialogFooter className="bg-muted/10 p-4 -mx-6 -mb-6 border-t"><Button variant="ghost" className="w-full font-black uppercase text-[10px] tracking-widest text-muted-foreground" onClick={resetAdjustments}>RESET ENGINE DEFAULTS</Button></DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
+                                    </PopoverContent>
+                                </Popover>
+
                                 <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments} title="Reset Visuals"><RotateCcw className="size-5"/></Button>
                              </div>
                         </div>
