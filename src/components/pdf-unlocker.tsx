@@ -31,7 +31,8 @@ import {
     Eye,
     ShieldCheck,
     SearchCode,
-    FileText
+    FileText,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -300,7 +301,9 @@ export default function PdfUnlocker() {
                                             <CardDescription className="text-[9px] font-mono">{formatBytes(pdfFile.size)}</CardDescription>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive"><X size={18}/></Button>
+                                    <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive">
+                                        <X size={18}/>
+                                    </Button>
                                 </div>
                             </CardHeader>
 
