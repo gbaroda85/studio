@@ -109,7 +109,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Default values locked: 145, 96, 70, 2.5
+  // Requirement Defaults
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -127,7 +127,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
-  // 8-Dot Scanner Handles
+  // Handles (Indices: 0=TL, 1=TC, 2=TR, 3=RC, 4=BR, 5=BC, 6=BL, 7=LC)
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -186,140 +186,115 @@ export default function DocumentScanner() {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
 
-    // STEP 1: CREATE ROTATED SOURCE BUFFER (THE "VISUAL SOURCE")
-    const visualSourceCanvas = document.createElement('canvas');
+    // 1. Create Rotated Visual Buffer (Matches exactly what user sees)
+    const visualCanvas = document.createElement('canvas');
     if (rotation % 180 !== 0) {
-        visualSourceCanvas.width = image.naturalHeight;
-        visualSourceCanvas.height = image.naturalWidth;
+        visualCanvas.width = image.naturalHeight;
+        visualCanvas.height = image.naturalWidth;
     } else {
-        visualSourceCanvas.width = image.naturalWidth;
-        visualSourceCanvas.height = image.naturalHeight;
+        visualCanvas.width = image.naturalWidth;
+        visualCanvas.height = image.naturalHeight;
     }
-    const vsCtx = visualSourceCanvas.getContext('2d', { willReadFrequently: true });
+    const vsCtx = visualCanvas.getContext('2d', { willReadFrequently: true });
     if (!vsCtx) return "";
 
     vsCtx.save();
-    vsCtx.translate(visualSourceCanvas.width / 2, visualSourceCanvas.height / 2);
+    vsCtx.translate(visualCanvas.width / 2, visualCanvas.height / 2);
     vsCtx.rotate((rotation * Math.PI) / 180);
     vsCtx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
     vsCtx.restore();
 
-    // STEP 2: APPLY CROP ON THE VISUAL BUFFER
-    const finalCanvas = document.createElement('canvas');
-    const fCtx = finalCanvas.getContext('2d', { willReadFrequently: true });
-    if (!fCtx) return "";
+    // 2. Perform Crop on Rotated Buffer
+    const cropCanvas = document.createElement('canvas');
+    const cCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
+    if (!cCtx) return "";
 
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
-        // Scale percentages to visualSource dimensions
-        const scaleX = visualSourceCanvas.width / (imgRef.current?.width || 1);
-        const scaleY = visualSourceCanvas.height / (imgRef.current?.height || 1);
-        finalCanvas.width = Math.max(10, c.width * scaleX);
-        finalCanvas.height = Math.max(10, c.height * scaleY);
-        fCtx.drawImage(visualSourceCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, finalCanvas.width, finalCanvas.height);
+        const scaleX = visualCanvas.width / (imgRef.current?.width || 1);
+        const scaleY = visualCanvas.height / (imgRef.current?.height || 1);
+        cropCanvas.width = Math.max(10, c.width * scaleX);
+        cropCanvas.height = Math.max(10, c.height * scaleY);
+        cCtx.drawImage(visualCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, cropCanvas.width, cropCanvas.height);
     } else {
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
-            x: (p.x / 100) * visualSourceCanvas.width, 
-            y: (p.y / 100) * visualSourceCanvas.height 
+            x: (p.x / 100) * visualCanvas.width, 
+            y: (p.y / 100) * visualCanvas.height 
         }));
-        
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
         const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
         const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
-        
-        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
-        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
-        finalCanvas.width = targetWidth; finalCanvas.height = targetHeight;
+        const tw = Math.max(10, Math.floor(Math.max(w1, w2)));
+        const th = Math.max(10, Math.floor(Math.max(h1, h2)));
+        cropCanvas.width = tw; cropCanvas.height = th;
 
-        const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
+        const dstPoints = [{ x: 0, y: 0 }, { x: tw, y: 0 }, { x: tw, y: th }, { x: 0, y: th }];
         const h = solvePerspective(dstPoints, corners);
-        const imgData = fCtx.createImageData(targetWidth, targetHeight);
-        const srcPixels = vsCtx.getImageData(0, 0, visualSourceCanvas.width, visualSourceCanvas.height).data;
+        const imgData = cCtx.createImageData(tw, th);
+        const srcPixels = vsCtx.getImageData(0, 0, visualCanvas.width, visualCanvas.height).data;
 
-        if (srcPixels) {
-            for (let y = 0; y < targetHeight; y++) {
-                for (let x = 0; x < targetWidth; x++) {
-                    const z = h[6] * x + h[7] * y + 1;
-                    const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
-                    const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                    if (sx >= 0 && sx < visualSourceCanvas.width && sy >= 0 && sy < visualSourceCanvas.height) {
-                        const dstIdx = (y * targetWidth + x) * 4;
-                        const srcIdx = (sy * visualSourceCanvas.width + sx) * 4;
-                        imgData.data[dstIdx] = srcPixels[srcIdx];
-                        imgData.data[dstIdx+1] = srcPixels[srcIdx+1];
-                        imgData.data[dstIdx+2] = srcPixels[srcIdx+2];
-                        imgData.data[dstIdx+3] = srcPixels[srcIdx+3];
-                    }
+        for (let y = 0; y < th; y++) {
+            for (let x = 0; x < tw; x++) {
+                const z = h[6] * x + h[7] * y + 1;
+                const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
+                const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
+                if (sx >= 0 && sx < visualCanvas.width && sy >= 0 && sy < visualCanvas.height) {
+                    const di = (y * tw + x) * 4, si = (sy * visualCanvas.width + sx) * 4;
+                    imgData.data[di] = srcPixels[si]; imgData.data[di+1] = srcPixels[si+1];
+                    imgData.data[di+2] = srcPixels[si+2]; imgData.data[di+3] = srcPixels[si+3];
                 }
             }
-            fCtx.putImageData(imgData, 0, 0);
         }
+        cCtx.putImageData(imgData, 0, 0);
     }
 
-    // STEP 3: APPLY FILTERS & SHARPNESS
-    const imageData = fCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
+    // 3. Apply Professional Filters
+    const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
     const pixels = imageData.data;
-    const bFactor = brightness[0] / 100;
-    const cFactor = contrast[0] / 100;
-    const sFactor = saturation[0] / 100;
+    const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
 
     for (let i = 0; i < pixels.length; i += 4) {
         let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
         const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-
-        if (activeFilter === 'bw') {
-            r = g = b = luma > 128 ? 255 : 0;
-        } else if (activeFilter === 'document') {
-            const val = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
-            r = g = b = val;
-        } else if (activeFilter === 'gray') {
-            r = g = b = luma;
-        }
+        if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
+        else if (activeFilter === 'document') {
+            const v = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
+            r = g = b = v;
+        } else if (activeFilter === 'gray') r = g = b = luma;
 
         if (activeFilter !== 'bw' && activeFilter !== 'gray') {
-            r = luma + (r - luma) * sFactor;
-            g = luma + (g - luma) * sFactor;
-            b = luma + (b - luma) * sFactor;
+            r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF;
         }
-
-        pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
-        pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
-        pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
+        pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
+        pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
+        pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
     }
-    fCtx.putImageData(imageData, 0, 0);
+    cCtx.putImageData(imageData, 0, 0);
 
+    // 4. Sharpness Boost
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
-        const currentData = fCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
-        const src = currentData.data;
-        const out = fCtx.createImageData(finalCanvas.width, finalCanvas.height);
-        const dst = out.data;
-
-        for (let y = 0; y < finalCanvas.height; y++) {
-            for (let x = 0; x < finalCanvas.width; x++) {
-                const i = (y * finalCanvas.width + x) * 4;
+        const curData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
+        const src = curData.data, out = cCtx.createImageData(cropCanvas.width, cropCanvas.height), dst = out.data;
+        for (let y = 0; y < cropCanvas.height; y++) {
+            for (let x = 0; x < cropCanvas.width; x++) {
+                const i = (y * cropCanvas.width + x) * 4;
                 let r = 0, g = 0, b = 0;
                 for (let ky = -1; ky <= 1; ky++) {
                     for (let kx = -1; kx <= 1; kx++) {
-                        const scy = Math.min(finalCanvas.height - 1, Math.max(0, y + ky));
-                        const scx = Math.min(finalCanvas.width - 1, Math.max(0, x + kx));
-                        const srcOff = (scy * finalCanvas.width + scx) * 4;
-                        const wt = weights[(ky + 1) * 3 + (kx + 1)];
-                        r += src[srcOff] * wt; g += src[srcOff + 1] * wt; b += src[srcOff + 2] * wt;
+                        const sy = Math.min(cropCanvas.height - 1, Math.max(0, y + ky)), sx = Math.min(cropCanvas.width - 1, Math.max(0, x + kx));
+                        const si = (sy * cropCanvas.width + sx) * 4, wt = weights[(ky + 1) * 3 + (kx + 1)];
+                        r += src[si] * wt; g += src[si + 1] * wt; b += src[si + 2] * wt;
                     }
                 }
-                dst[i] = Math.max(0, Math.min(255, r));
-                dst[i+1] = Math.max(0, Math.min(255, g));
-                dst[i+2] = Math.max(0, Math.min(255, b));
-                dst[i+3] = src[i+3];
+                dst[i] = Math.max(0, Math.min(255, r)); dst[i+1] = Math.max(0, Math.min(255, g)); dst[i+2] = Math.max(0, Math.min(255, b)); dst[i+3] = src[i+3];
             }
         }
-        fCtx.putImageData(out, 0, 0);
+        cCtx.putImageData(out, 0, 0);
     }
-
-    return finalCanvas.toDataURL('image/jpeg', 0.95);
+    return cropCanvas.toDataURL('image/jpeg', 0.95);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness, rotation]);
 
   useEffect(() => {
@@ -329,17 +304,16 @@ export default function DocumentScanner() {
             const res = await applyIntelligentScan();
             setLiveResultSrc(res);
             setIsProcessing(false);
-        }, 250);
+        }, 300);
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness, rotation]);
 
   const handleConfirmAdd = () => {
     if (!liveResultSrc) return;
-    const newPage = { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc };
-    setScannedPages(prev => [...prev, newPage]);
+    setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
     setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
-    toast({ title: "Page Added", description: "Document bundle updated." });
+    toast({ title: "Page Saved" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -350,37 +324,20 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    const xScreen = (cx - rect.left) / rect.width;
-    const yScreen = (cy - rect.top) / rect.height;
+    // Unified Coordinate Mapping (handles CSS rotation automatically)
+    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
 
-    // Inverse 2D Transformation to map back to content space
-    const rad = (-rotation * Math.PI) / 180;
-    const dx = xScreen - 0.5;
-    const dy = yScreen - 0.5;
-    
-    let nx, ny;
-    if (rotation % 180 !== 0) {
-        const aspect = rect.width / rect.height;
-        nx = (dx * Math.cos(rad) - dy * Math.sin(rad) * (1/aspect)) + 0.5;
-        ny = (dx * Math.sin(rad) * aspect + dy * Math.cos(rad)) + 0.5;
-    } else {
-        nx = (dx * Math.cos(rad) - dy * Math.sin(rad)) + 0.5;
-        ny = (dx * Math.sin(rad) + dy * Math.cos(rad)) + 0.5;
-    }
-
-    const finalX = Math.max(0, Math.min(100, nx * 100));
-    const finalY = Math.max(0, Math.min(100, ny * 100));
-
-    setMagnifierPos({ x: finalX, y: finalY });
+    setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
-        if ([0, 2, 4, 6].includes(idx)) { next[idx] = { x: finalX, y: finalY }; }
+        if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
         else {
-            if (idx === 1) { next[0].y = finalY; next[2].y = finalY; } 
-            else if (idx === 3) { next[2].x = finalX; next[4].x = finalX; } 
-            else if (idx === 5) { next[6].y = finalY; next[4].y = finalY; } 
-            else if (idx === 7) { next[0].x = finalX; next[6].x = finalX; } 
+            if (idx === 1) { next[0].y = y; next[2].y = y; } 
+            else if (idx === 3) { next[2].x = x; next[4].x = x; } 
+            else if (idx === 5) { next[6].y = y; next[4].y = y; } 
+            else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
@@ -388,22 +345,21 @@ export default function DocumentScanner() {
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  }, [draggingPoint, points, rotation]);
+  }, [draggingPoint, points]);
 
   const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      setDraggingPoint(idx);
-      setMagnifierPos(points[idx]);
+    setDraggingPoint(idx);
+    setMagnifierPos(points[idx]);
   };
 
   const handleDownloadPdf = () => {
     const pdf = new jsPDF();
     scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
-    pdf.save(`gr7-scan-${Date.now()}.pdf`); 
-    toast({ title: "PDF Downloaded" });
+    pdf.save(`Scan-${Date.now()}.pdf`);
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-8">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-12">
         
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start w-full">
@@ -411,49 +367,42 @@ export default function DocumentScanner() {
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-2xl hover:border-primary/40 transition-all">
                         <CardHeader className="pt-12 pb-6">
                             <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse shadow-inner"><ScanLine className="size-10" /></div>
-                            <CardTitle className="text-4xl font-black uppercase tracking-tighter leading-none">Industrial <span className="text-primary">Scanner</span></CardTitle>
+                            <CardTitle className="text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
                         <CardContent className="pb-16 pt-4 px-10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                                <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
-                                    <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-8" /></div>
+                                <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
+                                    <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-8" /></div>
                                     <p className="text-sm font-black uppercase tracking-widest">Live Capture</p>
                                 </div>
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform shadow-xl"><UploadCloud className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest">Device Gallery</p>
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-8" /></div>
+                                    <p className="text-sm font-black uppercase tracking-widest">Gallery</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
-                <div className="lg:col-span-4 h-full">
-                    <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[3rem] h-full min-h-[400px]">
-                        <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3"><FileStack className="size-5 text-primary" /> BUNDLE STACK</CardTitle>
-                            <Badge className="bg-primary text-white font-black px-3 py-1 rounded-full text-xs shadow-md">{scannedPages.length}</Badge>
+                <div className="lg:col-span-4">
+                    <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[3rem] min-h-[400px]">
+                        <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
+                            <CardTitle className="text-sm font-black uppercase tracking-widest">BUNDLE ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 opacity-20 gap-4">
-                                    <FileArchive className="size-20" />
-                                    <p className="text-xs font-black uppercase tracking-[0.2em]">Queue is Empty</p>
-                                </div>
+                                <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-16" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                                <div className="grid grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p, i) => (
-                                        <div key={p.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 bg-white shadow-xl group hover:border-primary transition-all">
-                                            <img src={p.processedSrc} className="size-full object-cover" alt="scan" />
-                                            <div className="absolute top-2 left-2 size-6 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">{i+1}</div>
-                                            <Button size="icon" variant="destructive" className="absolute top-2 right-2 size-8 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-xl" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-4" /></Button>
+                                        <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-md group">
+                                            <img src={p.processedSrc} className="size-full object-cover" alt="s" />
+                                            <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3.5" /></Button>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t bg-muted/10">
-                            <Button disabled={scannedPages.length === 0} className="w-full h-16 bg-green-600 hover:bg-green-700 text-white font-black text-base rounded-2xl shadow-2xl uppercase active:scale-95 transition-all" onClick={handleDownloadPdf}>BUILD PDF BUNDLE <Download className="ml-2 size-5" /></Button>
-                        </CardFooter>
+                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
                     </Card>
                 </div>
             </div>
@@ -462,119 +411,87 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-2">
                 
-                {/* LEFT Panel: Adjustment */}
-                <Card className="lg:col-span-6 border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
+                {/* LEFT: Adjustment Panel */}
+                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[600px]">
                     <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
-                        <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20">
-                                <ScanLine className="size-6" />
-                            </div>
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle>
-                        </div>
+                        <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                <TabsList className="grid grid-cols-2 h-10 bg-transparent w-[180px]">
-                                    <TabsTrigger value="rect" className="text-[10px] font-black uppercase data-[state=active]:bg-white data-[state=active]:text-slate-900">RECT</TabsTrigger>
-                                    <TabsTrigger value="scanner" className="text-[10px] font-black uppercase data-[state=active]:bg-white data-[state=active]:text-slate-900">SCANNER</TabsTrigger>
-                                </TabsList>
+                                <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black">SCANNER</TabsTrigger></TabsList>
                             </Tabs>
-                            <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/20 text-white hover:bg-white/10 shadow-xl" onClick={() => setRotation(r => (r + 90) % 360)}>
-                                <RotateCw className="size-5" />
-                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-black max-w-full my-12" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu transition-all duration-300 bg-black max-w-full my-12" style={{ transform: `rotate(${rotation}deg)` }}>
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[65vh]">
-                                    <img ref={imgRef} src={currentRawImage} alt="source" className="max-h-[65vh] w-auto object-contain block" onLoad={onImageLoad} />
+                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[65vh] w-auto pointer-events-none block object-contain" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] stroke-dasharray-[5,5]" />
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
-                                            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                            onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
+                                        <div key={i} className={cn("absolute size-9 -ml-4.5 -mt-4.5 rounded-full border-4 border-primary shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-white scale-110" : "bg-white/90")}
+                                            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2 bg-primary rounded-full" /></div>
                                     ))}
                                     {draggingPoint !== null && (
-                                        <div className="absolute top-8 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
-                                            <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
+                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50" style={{ transform: `rotate(${-rotation}deg)` }}>
+                                            <img src={currentRawImage} alt="m" className="absolute max-w-none origin-top-left"
                                                 style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
-                                            /><div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-full h-0.5 bg-primary/30 absolute" /><div className="h-full w-0.5 bg-primary/30 absolute" /></div>
+                                            />
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-
-                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
-                            <Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE
-                        </div>
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/60 backdrop-blur-xl rounded-full text-white text-[9px] font-black uppercase tracking-widest border border-white/10 z-40"><Grip className="size-3 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
-                    <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-4">
-                        <Button className="w-full h-16 rounded-2xl bg-primary text-slate-950 font-black text-lg shadow-2xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
-                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}>CANCEL SCAN</Button>
+                    <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-3">
+                        <Button className="w-full h-14 rounded-2xl bg-primary text-slate-950 font-black text-lg shadow-2xl active:scale-95" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
+                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT Panel: Preview */}
-                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col h-full min-h-[650px]">
+                {/* RIGHT: Preview Panel */}
+                <Card className="lg:col-span-6 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[600px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
-                         <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20">
-                                <Eye className="size-6" />
-                            </div>
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle>
-                        </div>
-                        <Button variant="ghost" size="icon" className="size-10 rounded-full text-muted-foreground hover:bg-muted" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}>
-                            <X className="size-5" />
-                        </Button>
+                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD RESULT PREVIEW</CardTitle></div>
+                         <Button variant="ghost" size="icon" className="size-9 rounded-full" onClick={() => setStage('viewfinder')}><X className="size-5" /></Button>
                     </CardHeader>
-                    <CardContent className="flex-1 p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
-                        <div className="relative bg-white shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] rounded-sm border-[10px] border-white max-w-full flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in duration-500" alt="result" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
-                            {isProcessing && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD...</p></div>}
+                    <CardContent className="flex-1 p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative">
+                        <div className="relative bg-white shadow-2xl border-[10px] border-white max-w-full flex items-center justify-center overflow-hidden">
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[50vh] object-contain block animate-in fade-in duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                            {isProcessing && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10"><Loader2 className="animate-spin size-10 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD...</p></div>}
                         </div>
                     </CardContent>
                     <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
-                        <div className="w-full flex items-center justify-between gap-6">
-                             <div className="flex items-center gap-3">
-                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document"><FileText className="size-5"/></Button>
-                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([110]); setContrast([110]); setSaturation([130]); }} title="Magic Color"><Sparkles className="size-5"/></Button>
-                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="B&W Pro"><Highlighter className="size-5"/></Button>
-                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2" onClick={() => { setActiveFilter('gray'); }} title="Grayscale"><Layers className="size-5"/></Button>
+                        <div className="w-full flex items-center justify-between gap-4">
+                             <div className="flex items-center gap-2">
+                                <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} title="Document"><FileText className="size-4"/></Button>
+                                <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([110]); setContrast([110]); setSaturation([130]); }} title="Magic"><Sparkles className="size-4"/></Button>
+                                <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} title="B&W"><Highlighter className="size-4"/></Button>
+                                <Button variant={activeFilter === 'gray' ? 'default' : 'outline'} size="icon" className="h-11 w-11 rounded-xl shadow-md border-2" onClick={() => setActiveFilter('gray')} title="Gray"><Layers className="size-4"/></Button>
                              </div>
-                             <div className="flex items-center gap-3">
+                             <div className="flex items-center gap-2">
                                 <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2 text-primary"><Settings2 className="size-5"/></Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-md rounded-[3rem] border-2 shadow-3xl">
+                                    <DialogTrigger asChild><Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-md border-2 text-primary"><Settings2 className="size-4"/></Button></DialogTrigger>
+                                    <DialogContent className="max-w-md rounded-[2.5rem] border-2 shadow-3xl">
                                         <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary flex items-center gap-3"><Settings2 className="size-6"/> Fine-Tune Engine</DialogTitle></DialogHeader>
-                                        <div className="space-y-8 py-8">
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><span className="text-[11px] font-black uppercase flex items-center gap-2"><Sun className="size-4"/> Brightness</span><span className="text-xs font-mono font-black">{brightness[0]}%</span></div>
-                                                <Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><span className="text-[11px] font-black uppercase flex items-center gap-2"><Contrast className="size-4"/> Contrast</span><span className="text-xs font-mono font-black">{contrast[0]}%</span></div>
-                                                <Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center"><span className="text-[11px] font-black uppercase flex items-center gap-2"><Zap className="size-4 text-yellow-500"/> Sharpness (HD)</span><span className="text-xs font-mono font-black">{sharpness[0]}</span></div>
-                                                <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
-                                            </div>
+                                        <div className="space-y-6 py-6">
+                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Sun className="size-3.5 inline mr-2"/> Brightness</span><span className="text-xs font-mono">{brightness[0]}%</span></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
+                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Contrast className="size-3.5 inline mr-2"/> Contrast</span><span className="text-xs font-mono">{contrast[0]}%</span></div><Slider min={50} max={200} step={1} value={contrast} onValueChange={setContrast} /></div>
+                                            <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase"><Zap className="size-3.5 inline mr-2 text-yellow-500"/> Sharpness HD</span><span className="text-xs font-mono">{sharpness[0]}</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
                                         </div>
-                                        <DialogFooter><Button variant="ghost" className="w-full font-black uppercase text-xs h-12" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET TO DEFAULTS</Button></DialogFooter>
+                                        <DialogFooter><Button variant="ghost" className="w-full font-black uppercase text-[10px]" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }}>RESET TO DEFAULTS</Button></DialogFooter>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shadow-md border-2 text-rose-500" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><RotateCcw className="size-5"/></Button>
+                                <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-md border-2 text-rose-500" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><RotateCcw className="size-4"/></Button>
                              </div>
                         </div>
                     </CardFooter>
@@ -584,11 +501,7 @@ export default function DocumentScanner() {
 
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleNativeCapture} />
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleNativeCapture} />
-        
-        <style jsx global>{`
-            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
-        `}</style>
     </div>
   );
 }
+
