@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, type DragEvent, type ChangeEvent, useCallback } from "react";
 import Image from "next/image";
 import { 
   UploadCloud, 
@@ -38,7 +39,6 @@ export default function SignatureRemover() {
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
   const [resultImageSrc, setResultImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [progress, setProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [originalFileSize, setOriginalFileSize] = useState<number>(0);
   const [resultFileSize, setResultFileSize] = useState<number>(0);
@@ -49,6 +49,7 @@ export default function SignatureRemover() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sourceCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // FIXED LIGHT CHECKERBOARD: Always stays light even in dark mode
   const checkerboardStyle: React.CSSProperties = {
@@ -68,8 +69,19 @@ export default function SignatureRemover() {
         const src = e.target?.result as string;
         setOriginalImageSrc(src);
         setResultImageSrc(null);
-        setProgress(0);
         setSensitivity([40]);
+        
+        // Pre-render to source canvas for faster slider response
+        const img = new window.Image();
+        img.src = src;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            canvas.getContext('2d')?.drawImage(img, 0, 0);
+            sourceCanvasRef.current = canvas;
+            processLocally();
+        };
       };
       reader.readAsDataURL(file);
     } else if (file) {
@@ -86,64 +98,66 @@ export default function SignatureRemover() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  const processLocally = async () => {
-    if (!originalImageSrc) return;
+  const processLocally = useCallback(async () => {
+    const sourceCanvas = sourceCanvasRef.current;
+    if (!sourceCanvas) return;
     
-    const img = new window.Image();
-    img.src = originalImageSrc;
-    
-    img.onload = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
 
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+    canvas.width = sourceCanvas.width;
+    canvas.height = sourceCanvas.height;
 
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
+    // Get fresh data from source
+    const sourceCtx = sourceCanvas.getContext('2d');
+    if (!sourceCtx) return;
+    const imageData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+    const data = imageData.data;
 
-        let maxLuma = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-            if (luma > maxLuma) maxLuma = luma;
-        }
+    // Find local max luma to handle off-white paper
+    let maxLuma = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        const luma = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+        if (luma > maxLuma) maxLuma = luma;
+    }
 
-        const threshValue = sensitivity[0];
-        const inkBoostFactor = 1 + (boostInk[0] / 100);
+    const thresh = sensitivity[0];
+    const inkFactor = 1 + (boostInk[0] / 100);
 
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i], g = data[i + 1], b = data[i + 2];
-          const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-          const diffFromWhite = maxLuma - luma;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+      
+      // Difference between paper brightness and pixel brightness
+      const diff = maxLuma - luma;
 
-          if (diffFromWhite > threshValue) {
-            data[i + 3] = 255; 
-            data[i] = Math.max(0, r / inkBoostFactor);
-            data[i+1] = Math.max(0, g / inkBoostFactor);
-            data[i+2] = Math.max(0, b / inkBoostFactor);
-          } else {
-            data[i + 3] = 0; 
-          }
-        }
+      if (diff > thresh) {
+        data[i + 3] = 255; // Keep ink
+        // Darken the ink based on boost
+        data[i] = Math.max(0, r / inkFactor);
+        data[i+1] = Math.max(0, g / inkFactor);
+        data[i+2] = Math.max(0, b / inkFactor);
+      } else {
+        data[i + 3] = 0; // Transparent paper
+      }
+    }
 
-        ctx.putImageData(imageData, 0, 0);
-        const dataUrl = canvas.toDataURL("image/png");
-        setResultImageSrc(dataUrl);
-        setResultFileSize(Math.round((dataUrl.length - 22) * 0.75));
-    };
-  };
+    ctx.putImageData(imageData, 0, 0);
+    const dataUrl = canvas.toDataURL("image/png");
+    setResultImageSrc(dataUrl);
+    setResultFileSize(Math.round((dataUrl.length - 22) * 0.75));
+  }, [sensitivity, boostInk]);
 
   useEffect(() => {
     if (originalImageSrc) {
         const timer = setTimeout(() => {
             processLocally();
-        }, 100);
+        }, 30); // Faster debounce
         return () => clearTimeout(timer);
     }
-  }, [sensitivity, boostInk, originalImageSrc]);
+  }, [sensitivity, boostInk, originalImageSrc, processLocally]);
 
   const handleDownload = () => {
     if (!resultImageSrc || !imageFile) return;
@@ -162,8 +176,8 @@ export default function SignatureRemover() {
     setOriginalImageSrc(null);
     setResultImageSrc(null);
     setIsProcessing(false);
-    setProgress(0);
     setSensitivity([40]);
+    sourceCanvasRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -251,7 +265,6 @@ export default function SignatureRemover() {
                 </CardHeader>
                 <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px]">
                     <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
-                        {/* BEFORE: FORCED WHITE BACKGROUND */}
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
@@ -263,7 +276,6 @@ export default function SignatureRemover() {
                             </div>
                         </div>
 
-                        {/* AFTER: FORCED LIGHT CHECKERBOARD (Even in dark mode) */}
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Cleaned Ink</span>
@@ -353,3 +365,4 @@ export default function SignatureRemover() {
     </div>
   );
 }
+
