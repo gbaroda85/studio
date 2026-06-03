@@ -12,7 +12,6 @@ import {
     UploadCloud,
     CheckCircle2,
     Zap, 
-    ShieldCheck, 
     ScanLine,
     RotateCw,
     Sparkles,
@@ -42,7 +41,8 @@ import {
     Monitor,
     ImageIcon,
     Grip,
-    Circle
+    Circle,
+    ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -54,7 +54,6 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useIsMobile } from '@/hooks/use-mobile';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -90,7 +89,7 @@ function solvePerspective(src: Point[], dst: Point[]) {
     return x;
 }
 
-type ScanFilter = 'original' | 'magic' | 'document' | 'bw' | 'photo' | 'gray';
+type ScanFilter = 'original' | 'magic' | 'document' | 'bw' | 'photo' | 'gray' | 'ai_enhance';
 type Stage = 'viewfinder' | 'camera' | 'adjust';
 
 interface ScannedPage {
@@ -105,6 +104,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
+  // SPECIFICATION VALUES
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -113,6 +113,7 @@ export default function DocumentScanner() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -390,7 +391,7 @@ export default function DocumentScanner() {
 
   const handleAiEnhance = () => {
       setBrightness([150]); setContrast([150]); setSaturation([115]); setSharpness([6.5]);
-      setActiveFilter('magic');
+      setActiveFilter('ai_enhance');
       toast({ title: "AI Enhance Active" });
   };
 
