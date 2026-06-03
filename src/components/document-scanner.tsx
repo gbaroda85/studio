@@ -37,13 +37,14 @@ import {
     Share2,
     Sun,
     Contrast,
-    FileArchive
+    FileArchive,
+    Highlighter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -98,6 +99,8 @@ export default function DocumentScanner() {
   // Fine-tune states
   const [brightness, setBrightness] = useState([100]);
   const [contrast, setContrast] = useState([100]);
+  const [saturation, setSaturation] = useState([100]);
+  const [sharpness, setSharpness] = useState([0]);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -247,6 +250,7 @@ export default function DocumentScanner() {
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
     const cFactor = contrast[0] / 100;
+    const sFactor = saturation[0] / 100;
 
     for (let i = 0; i < pixels.length; i += 4) {
         let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
@@ -259,19 +263,61 @@ export default function DocumentScanner() {
             const val = luma > 180 ? 255 : luma < 100 ? luma * 0.5 : luma;
             r = g = b = val;
         } else if (activeFilter === 'magic') {
-            r = Math.min(255, r * 1.1); g = Math.min(255, g * 1.1); b = Math.min(255, b * 1.1);
+            r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15);
         } else if (activeFilter === 'gray') {
             r = g = b = luma;
         }
 
+        // Saturation apply
+        if (activeFilter !== 'bw' && activeFilter !== 'gray') {
+            r = luma + (r - luma) * sFactor;
+            g = luma + (g - luma) * sFactor;
+            b = luma + (b - luma) * sFactor;
+        }
+
+        // Brightness & Contrast apply
         pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
         pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
         pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
     }
     ctx.putImageData(imageData, 0, 0);
 
+    // Apply Sharpness Kernel
+    if (sharpness[0] > 0) {
+        const factor = sharpness[0] / 10;
+        const weights = [
+            0, -factor, 0,
+            -factor, 1 + (4 * factor), -factor,
+            0, -factor, 0
+        ];
+        const sharpImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = sharpImageData.data;
+        const output = ctx.createImageData(canvas.width, canvas.height);
+        const dst = output.data;
+
+        for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+                const i = (y * canvas.width + x) * 4;
+                let r = 0, g = 0, b = 0;
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const scy = Math.min(canvas.height - 1, Math.max(0, y + ky));
+                        const scx = Math.min(canvas.width - 1, Math.max(0, x + kx));
+                        const srcOff = (scy * canvas.width + scx) * 4;
+                        const wt = weights[(ky + 1) * 3 + (kx + 1)];
+                        r += data[srcOff] * wt;
+                        g += data[srcOff + 1] * wt;
+                        b += data[srcOff + 2] * wt;
+                    }
+                }
+                dst[i] = r; dst[i+1] = g; dst[i+2] = b; dst[i+3] = data[i+3];
+            }
+        }
+        ctx.putImageData(output, 0, 0);
+    }
+
     return canvas.toDataURL('image/jpeg', 0.95);
-  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast]);
+  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness]);
 
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage && isImageReady) {
@@ -283,7 +329,7 @@ export default function DocumentScanner() {
         }, 300);
         return () => clearTimeout(timer);
     }
-  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast]);
+  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -303,7 +349,7 @@ export default function DocumentScanner() {
     setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
     setStage('viewfinder');
     setCurrentRawImage(null); setLiveResultSrc(null);
-    setBrightness([100]); setContrast([100]);
+    setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
     toast({ title: "Page Added to Collection" });
   };
 
@@ -489,9 +535,9 @@ export default function DocumentScanner() {
                                     {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
                                 </div>
                                 
-                                <div className="space-y-8">
+                                <div className="space-y-8 pb-10">
                                     <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Intelligent Presets</Label>
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Sparkles className="size-3"/> Intelligent Presets</Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             {['document', 'magic', 'bw', 'photo', 'gray', 'original'].map(f => (
                                                 <Button key={f} variant={activeFilter === f ? 'default' : 'outline'} className="text-[8px] font-black h-10 rounded-xl" onClick={() => setActiveFilter(f as ScanFilter)}>{f.toUpperCase()}</Button>
@@ -501,16 +547,24 @@ export default function DocumentScanner() {
 
                                     <Separator className="opacity-10" />
 
-                                    <div className="space-y-6 pb-4">
-                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Fine Tuning</Label>
-                                        <div className="space-y-4">
+                                    <div className="space-y-6">
+                                        <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Settings2 className="size-3"/> Fine Tuning Studio</Label>
+                                        <div className="space-y-6">
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Brightness</span><span className="text-[9px] font-mono font-black">{brightness[0]}%</span></div>
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Sun className="size-3"/> Brightness</span><span className="text-[9px] font-mono font-black">{brightness[0]}%</span></div>
                                                 <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
                                             </div>
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60">Contrast</span><span className="text-[9px] font-mono font-black">{contrast[0]}%</span></div>
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Contrast className="size-3"/> Contrast</span><span className="text-[9px] font-mono font-black">{contrast[0]}%</span></div>
                                                 <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Droplets className="size-3"/> Saturation</span><span className="text-[9px] font-mono font-black">{saturation[0]}%</span></div>
+                                                <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center"><span className="text-[9px] font-bold uppercase opacity-60 flex items-center gap-1.5"><Zap className="size-3 text-yellow-500"/> Sharpness (HD)</span><span className="text-[9px] font-mono font-black">{sharpness[0]}</span></div>
+                                                <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} />
                                             </div>
                                         </div>
                                     </div>
@@ -518,7 +572,7 @@ export default function DocumentScanner() {
                             </ScrollArea>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3 shrink-0">
-                            <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD</Button>
+                            <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg shadow-xl active:scale-95 transition-all" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE</Button>
                             <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-muted-foreground" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                         </CardFooter>
                     </Card>
