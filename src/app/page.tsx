@@ -119,8 +119,8 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-5" />
         </div>
-        <h3 className="text-lg font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase">{title}</h3>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-normal h-8">{description}</p>
+        <h3 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase">{title}</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-normal h-10">{description}</p>
         <div className="flex items-center text-primary font-bold text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
           Launch Tool <ArrowRight className="ml-1 size-3" />
         </div>
