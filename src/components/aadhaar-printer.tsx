@@ -196,7 +196,6 @@ export default function AadhaarPrinter() {
    */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
-    // We only use the 4 corners for the math
     for (let i = 0; i < 4; i++) {
         p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
         p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
@@ -234,7 +233,6 @@ export default function AadhaarPrinter() {
     const scaleY = image.naturalHeight / image.height;
 
     if (cropMode === 'scanner') {
-        // Calculate target dimensions based on perspective points
         const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
         const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
@@ -246,7 +244,6 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
-        // Map relative UI points to actual pixel coordinates for the 4 corners
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
@@ -258,7 +255,8 @@ export default function AadhaarPrinter() {
           { x: 0, y: canvas.height }
         ];
 
-        const h = solvePerspective(srcPoints, dstPoints);
+        // CRITICAL FIX: Matrix must map destination pixels back to source pixels for sampling
+        const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
         
         const srcCanvas = document.createElement('canvas');
@@ -337,18 +335,18 @@ export default function AadhaarPrinter() {
         const idx = draggingPoint;
         if (idx === null || !next[idx]) return prev;
 
-        // Move target points
+        // Move target points (Corners: 0, 2, 4, 6)
         if ([0, 2, 4, 6].includes(idx)) {
             next[idx] = { x, y };
         } else {
-            // Midpoint Handles Logic: Move adjacent corners
-            if (idx === 1) { next[0].y = y; next[2].y = y; } // Top Edge
-            else if (idx === 3) { next[2].x = x; next[4].x = x; } // Right Edge
-            else if (idx === 5) { next[6].y = y; next[4].y = y; } // Bottom Edge
-            else if (idx === 7) { next[0].x = x; next[6].x = x; } // Left Edge
+            // Midpoint Handles Logic (1, 3, 5, 7): Move adjacent corners synchronously
+            if (idx === 1) { next[0].y = y; next[2].y = y; } 
+            else if (idx === 3) { next[2].x = x; next[4].x = x; } 
+            else if (idx === 5) { next[6].y = y; next[4].y = y; } 
+            else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
 
-        // Recalculate ALL midpoints based on current corner states to prevent drift
+        // Recalculate midpoints to prevent drift and visual sticking
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
