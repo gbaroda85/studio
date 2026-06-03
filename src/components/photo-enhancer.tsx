@@ -20,7 +20,8 @@ import {
     Droplets,
     RefreshCcw,
     Eye,
-    ArrowLeftRight
+    ArrowLeftRight,
+    RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -165,7 +167,7 @@ export default function PhotoEnhancer() {
         applyAdjustments();
     }, 50);
     return () => clearTimeout(timer);
-  }, [brightness, contrast, saturation, sharpness]);
+  }, [brightness, contrast, saturation, sharpness, originalImageSrc]);
 
   const handleAutoEnhance = async () => {
     if (!originalImageSrc) return;
@@ -213,202 +215,208 @@ export default function PhotoEnhancer() {
 
   if (!originalImageSrc) {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Wand2 className="h-10 w-10" />
-          </div>
-          <CardTitle className="text-2xl font-black uppercase">Pro HD Photo Enhancer</CardTitle>
-          <CardDescription>Restore lost details, fix lighting, and sharpen edges instantly.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div
-            className="border-2 border-dashed border-muted-foreground/50 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <Wand2 className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
+            </div>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                AI PHOTO <span className="text-gradient-hero">ENHANCER</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Step 1: Upload photo to restore quality. <br/>100% Private local RAM processing.
+            </p>
+        </motion.div>
+
+        <Card
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="relative">
-                <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
-            </div>
-            <div>
-                <p className="text-lg md:text-xl font-bold">Drop photo to Enhance</p>
-                <p className="text-xs text-muted-foreground mt-2">All processing happens in your device RAM.</p>
-            </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-        <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE LOCAL</div>
-            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT PROCESSING</div>
-            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD OUTPUT</div>
-        </CardFooter>
-      </Card>
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 md:p-10">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Processing happens 100% locally.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE LOCAL</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT RENDER</div>
+                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD OUTPUT</div>
+            </CardFooter>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3">
+            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                <Settings2 className="size-5 md:size-6" />
+            </div>
+            <div>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+            </div>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+                <RotateCcw className="mr-1.5 size-3" /> Reset
+            </Button>
+            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !resultImageSrc}>
+                <Download className="mr-1.5 size-3.5" /> DOWNLOAD HD
+            </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <div className="lg:col-span-7 space-y-6">
-            <Card className="overflow-hidden border-2 shadow-2xl h-full flex flex-col relative border-foreground/5 bg-card/50">
-                <CardHeader className="bg-muted/30 border-b py-3 flex flex-row items-center justify-between p-4 md:px-6">
+        {/* Main Viewport: Before/After Comparison */}
+        <div className="lg:col-span-8">
+            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                         <ArrowLeftRight className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm font-black uppercase tracking-tighter">HD Quality Comparison</CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Before & After Comparison</CardTitle>
                     </div>
-                    <div className="flex items-center gap-2 md:gap-3">
-                        {resultImageSrc && (
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-8 font-black text-[8px] md:text-[10px] border-2 uppercase">
-                                        <Eye className="size-3 mr-1.5" /> <span className="hidden sm:inline">Full Zoom Check</span><span className="sm:hidden">Zoom</span>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-4 md:p-6">
-                                    <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter text-sm md:text-lg">Precision Enhancement Check</DialogTitle></DialogHeader>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 py-6">
-                                        <div className="space-y-3">
-                                            <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[10px]">ORIGINAL (DULL)</Badge>
-                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center">
-                                                <Image src={originalImageSrc!} alt="original" fill className="object-contain p-2" />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[10px]">ENHANCED (SHARP)</Badge>
-                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center">
-                                                <Image src={resultImageSrc!} alt="enhanced" fill className="object-contain p-2" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <CardFooter className="p-0 pt-4">
-                                        <Button className="w-full h-12 md:h-14 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg" onClick={handleDownload}>SAVE ENHANCED PHOTO <Download className="ml-2 size-4 md:size-5" /></Button>
-                                    </CardFooter>
-                                </DialogContent>
-                            </Dialog>
-                        )}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleReset}><X className="size-4" /></Button>
-                    </div>
+                    {resultImageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">ENHANCED</Badge>}
                 </CardHeader>
-                <CardContent className="p-4 md:p-6 flex-1 bg-slate-50 dark:bg-slate-900/50 min-h-[350px] md:min-h-[450px]">
-                    {isProcessing ? (
-                        <div className="h-full flex flex-col items-center justify-center p-8 md:p-12 text-center gap-8">
-                            <div className="relative">
-                                <Loader2 className="h-16 w-16 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
-                                <Sparkles className="absolute inset-0 m-auto h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse" />
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px]">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
+                        <div className="space-y-3 flex flex-col h-full justify-center">
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
+                                <span className="text-[9px] font-mono opacity-40">{formatBytes(originalFileSize)}</span>
                             </div>
-                            <div className="space-y-4 w-full max-w-sm">
-                                <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter animate-pulse">Enhancing Details...</p>
-                                <Progress value={progress} className="h-1.5 shadow-inner" />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 h-full">
-                            <div className="space-y-2 md:space-y-3 flex flex-col">
-                                <div className="flex justify-between items-center px-1">
-                                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original</span>
-                                    <span className="text-[8px] md:text-[9px] font-mono text-muted-foreground">{formatBytes(originalFileSize)}</span>
-                                </div>
-                                <div className="flex-1 relative aspect-square bg-white rounded-xl md:rounded-2xl border-2 shadow-inner flex items-center justify-center overflow-hidden min-h-[250px]">
-                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-2 md:p-4" />
-                                </div>
-                            </div>
-                            <div className="space-y-2 md:space-y-3 flex flex-col">
-                                <div className="flex justify-between items-center px-1">
-                                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-2 md:size-2.5"/> Enhanced Result</span>
-                                    <span className="text-[8px] md:text-[9px] font-mono text-primary font-bold">{formatBytes(enhancedFileSize)}</span>
-                                </div>
-                                <div className="flex-1 relative aspect-square bg-white rounded-xl md:rounded-2xl border-2 shadow-xl flex items-center justify-center overflow-hidden min-h-[250px] border-primary/20">
-                                    {resultImageSrc ? (
-                                        <div className="relative size-full animate-in zoom-in-95 duration-500">
-                                            <Image src={resultImageSrc} alt="After" fill className="object-contain p-2 md:p-4" />
-                                            <div className="absolute top-2 right-2"><div className="bg-green-500 text-white rounded-full p-1 shadow-lg"><CheckCircle2 className="size-3 md:size-4" /></div></div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center gap-2 opacity-10"><ImageIcon className="size-12 md:size-16" /><p className="text-[10px] font-black uppercase">Rendering...</p></div>
-                                    )}
-                                </div>
+                            <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                <Image src={originalImageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
+                                <div className="absolute top-4 left-4"><Badge variant="outline" className="text-[8px] bg-white/80 border-slate-200 text-slate-800">BEFORE</Badge></div>
                             </div>
                         </div>
-                    )}
+
+                        <div className="space-y-3 flex flex-col h-full justify-center">
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
+                                {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
+                            </div>
+                            <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
+                                <AnimatePresence mode="wait">
+                                    {isProcessing ? (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4 text-center p-12">
+                                            <Loader2 className="size-12 animate-spin text-primary stroke-[3]" />
+                                            <Progress value={progress} className="h-1 w-32" />
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p>
+                                        </motion.div>
+                                    ) : resultImageSrc ? (
+                                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
+                                            <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 md:p-6 drop-shadow-2xl" />
+                                            <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
+                                        </motion.div>
+                                    ) : null}
+                                </AnimatePresence>
+                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary text-primary-foreground uppercase border-none">AFTER</Badge></div>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 border-t p-4 md:p-6">
-                    <Button className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-xl md:rounded-2xl transition-all" 
-                            onClick={handleDownload} disabled={!resultImageSrc || isProcessing}>
-                        <Download className="mr-3 h-6 w-6 md:h-7 md:w-7" /> <span className="hidden sm:inline">DOWNLOAD ENHANCED PHOTO</span><span className="sm:hidden">DOWNLOAD HD</span>
-                    </Button>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE LOCAL RAM</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD RE-SAMPLING</div>
+                    </div>
                 </CardFooter>
             </Card>
         </div>
 
-        <div className="lg:col-span-5 space-y-6">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
-                <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between p-5 md:p-6">
-                    <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-5 md:size-6 text-primary" /> STUDIO PANEL
+        {/* Sidebar: Controls */}
+        <div className="lg:col-span-4 space-y-4">
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
+                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 text-primary" /> Adjustment Panel
                     </CardTitle>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary/5 hover:text-primary" onClick={resetAdjustments}>
-                        <RefreshCcw className="h-4 w-4" />
-                    </Button>
                 </CardHeader>
-                <CardContent className="p-5 md:p-8 space-y-8 md:space-y-10">
-                    
+                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
                     <Button className="w-full h-12 md:h-14 font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl md:rounded-2xl group relative overflow-hidden text-[10px] md:text-xs" onClick={handleAutoEnhance} disabled={isProcessing}>
                         <Zap className="mr-2 h-5 md:h-6 w-5 md:w-6 text-yellow-400 group-hover:scale-125 transition-transform" />
                         SMART AUTO-ENHANCE PRESET
                     </Button>
 
                     <div className="space-y-6 md:space-y-8">
-                        <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Sun className="size-3 text-yellow-500" /> Exposure</Label>
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
+                                    <Sun className="size-3 text-yellow-500" /> Exposure
+                                </Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{brightness[0]}%</span>
                             </div>
                             <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} className="py-2" />
                         </div>
 
-                        <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-4 pt-4 border-t border-white/5">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Contrast className="size-3 text-orange-500" /> Definition</Label>
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
+                                    <Contrast className="size-3 text-orange-500" /> Definition
+                                </Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{contrast[0]}%</span>
                             </div>
                             <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} className="py-2" />
                         </div>
 
-                        <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-4 pt-4 border-t border-white/5">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-muted-foreground"><Droplets className="size-3 text-blue-500" /> Vibrance</Label>
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
+                                    <Droplets className="size-3 text-blue-500" /> Vibrance
+                                </Label>
                                 <span className="text-[10px] font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{saturation[0]}%</span>
                             </div>
                             <Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} className="py-2" />
                         </div>
-
-                        <div className="space-y-3 md:space-y-4 pt-4 border-t-2 border-dashed border-primary/10">
+                        
+                        <div className="space-y-4 pt-4 border-t border-white/5">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase flex items-center gap-2 text-primary"><Zap className="size-3" /> Sharpness Level</Label>
+                                <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-primary">
+                                    <Zap className="size-3" /> Sharpness Level
+                                </Label>
                                 <Badge className="font-mono font-black text-xs px-2 bg-primary">{sharpness[0]}</Badge>
                             </div>
                             <Slider min={0} max={5} step={0.1} value={sharpness} onValueChange={setSharpness} className="py-2" />
                         </div>
                     </div>
-                </CardContent>
-                <CardFooter className="bg-muted/10 border-t py-6 px-6 md:px-8">
-                    <div className="flex gap-4 items-center">
-                        <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                            <ShieldCheck className="size-5 text-green-600" />
+
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                        <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Studio Quality</p>
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                                Restore blurry or dark photos using local kernel sharpening and exposure balance.
+                            </p>
                         </div>
-                        <p className="text-[8px] md:text-[9px] text-muted-foreground font-semibold leading-relaxed uppercase">
-                            <span className="font-black text-foreground">Zero Cloud Footprint</span><br/>
-                            Processing happens 100% on-device.
-                        </p>
                     </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> INSTANT RENDER</div>
                 </CardFooter>
             </Card>
         </div>
       </div>
+      
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
