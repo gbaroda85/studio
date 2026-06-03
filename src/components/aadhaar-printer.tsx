@@ -72,7 +72,6 @@ export default function AadhaarPrinter() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
   const [showBorder, setShowBorder] = useState(true);
-  const [autoEnhance, setAutoEnhance] = useState(true); 
   
   // A4 Workflow States
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -96,8 +95,7 @@ export default function AadhaarPrinter() {
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
-  // 8-Dot Scanner States
-  // Indices: 0:TL, 1:TC, 2:TR, 3:RC, 4:BR, 5:BC, 6:BL, 7:LC
+  // 8-Dot Scanner States (TL, TC, TR, RC, BR, BC, BL, LC)
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
     { x: 85, y: 50 }, { x: 85, y: 85 },                   
@@ -131,22 +129,15 @@ export default function AadhaarPrinter() {
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 2.2 }); 
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
-        if (!ctx) throw new Error("Could not initialize canvas context");
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error("Canvas init failed");
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        await page.render({ 
-            canvasContext: ctx, 
-            viewport,
-            intent: 'print'
-        }).promise;
-        
+        await page.render({ canvasContext: ctx, viewport }).promise;
         setOriginalA4Src(canvas.toDataURL('image/jpeg', 0.95));
         setStage('refine');
         resetPoints();
@@ -154,12 +145,7 @@ export default function AadhaarPrinter() {
         if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
             setStage('password');
         } else {
-            console.error("PDF Processing Error:", error);
-            toast({ 
-                variant: 'destructive', 
-                title: 'Processing Failed', 
-                description: 'Failed to render document.' 
-            });
+            toast({ variant: 'destructive', title: 'Processing Failed' });
         }
     } finally {
         setIsProcessing(false);
@@ -184,24 +170,13 @@ export default function AadhaarPrinter() {
                 resetPoints();
             };
             reader.readAsDataURL(file);
-        } else {
-            toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF or Image.' });
         }
     } else {
-        if (!file.type.startsWith('image/')) {
-            toast({ variant: 'destructive', title: 'Image Required', description: 'Please upload a JPG or PNG photo.' });
-            return;
-        }
         const reader = new FileReader();
         reader.onload = (e) => {
             const src = e.target?.result as string;
-            if (side === 'front') {
-                setFrontRaw(src);
-                setFrontFinal(null);
-            } else {
-                setBackRaw(src);
-                setBackFinal(null);
-            }
+            if (side === 'front') setFrontRaw(src);
+            else setBackRaw(src);
         };
         reader.readAsDataURL(file);
     }
@@ -214,21 +189,6 @@ export default function AadhaarPrinter() {
         { x: 50, y: 85 }, { x: 15, y: 85 },
         { x: 15, y: 50 }
     ]);
-  };
-
-  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    const initialCrop = centerCrop(
-        { unit: '%', width: 90, height: 90 },
-        width,
-        height
-    );
-    setRectCrop(initialCrop);
-  };
-
-  const handlePdfRenderWithPassword = async () => {
-    if (!pdfBuffer) return;
-    await processPdfWithPassword(pdfBuffer, password);
   };
 
   const solvePerspective = (src: Point[], dst: Point[]) => {
@@ -263,10 +223,14 @@ export default function AadhaarPrinter() {
     setIsProcessing(true);
 
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let finalData = "";
+
+    // INTRINSIC SCALE RATIO MATH
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
 
     if (cropMode === 'scanner') {
         const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
@@ -274,7 +238,6 @@ export default function AadhaarPrinter() {
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
         const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
-        // Ensure dimensions are valid
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         
@@ -285,26 +248,14 @@ export default function AadhaarPrinter() {
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
-        const dstPoints = [
-            { x: 0, y: 0 }, 
-            { x: canvas.width, y: 0 }, 
-            { x: canvas.width, y: canvas.height }, 
-            { x: 0, y: canvas.height }
-        ];
+        const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
 
         const h = solvePerspective(srcPoints, dstPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
-        
         const srcCanvas = document.createElement('canvas');
-        srcCanvas.width = image.naturalWidth;
-        srcCanvas.height = image.naturalHeight;
+        srcCanvas.width = image.naturalWidth; srcCanvas.height = image.naturalHeight;
         const srcCtx = srcCanvas.getContext('2d');
-        if (srcCtx) {
-            if (autoEnhance) {
-                srcCtx.filter = 'brightness(1.05) contrast(1.15) saturate(1.1)';
-            }
-            srcCtx.drawImage(image, 0, 0);
-        }
+        srcCtx?.drawImage(image, 0, 0);
         const srcPixels = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
 
         if (srcPixels) {
@@ -313,7 +264,6 @@ export default function AadhaarPrinter() {
                     const z = h[6] * x + h[7] * y + 1;
                     const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                     const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                    
                     if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
                         const dstIdx = (y * canvas.width + x) * 4;
                         const srcIdx = (sy * image.naturalWidth + sx) * 4;
@@ -329,27 +279,9 @@ export default function AadhaarPrinter() {
         finalData = canvas.toDataURL("image/png");
     } else {
         if (!completedRectCrop) return;
-        const scaleX = image.naturalWidth / image.width;
-        const scaleY = image.naturalHeight / image.height;
-        canvas.width = Math.max(completedRectCrop.width * scaleX, 10);
-        canvas.height = Math.max(completedRectCrop.height * scaleY, 10);
-        
-        if (autoEnhance) {
-            ctx.filter = 'brightness(1.05) contrast(1.15) saturate(1.1)';
-        }
-        
-        ctx.drawImage(
-            image,
-            completedRectCrop.x * scaleX,
-            completedRectCrop.y * scaleY,
-            completedRectCrop.width * scaleX,
-            completedRectCrop.height * scaleY,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-        ctx.filter = 'none';
+        canvas.width = completedRectCrop.width * scaleX;
+        canvas.height = completedRectCrop.height * scaleY;
+        ctx.drawImage(image, completedRectCrop.x * scaleX, completedRectCrop.y * scaleY, completedRectCrop.width * scaleX, completedRectCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
         finalData = canvas.toDataURL("image/png");
     }
 
@@ -362,132 +294,76 @@ export default function AadhaarPrinter() {
             fCanvas.width = halfWidth; fCanvas.height = cardImg.height;
             fCanvas.getContext("2d")?.drawImage(cardImg, 0, 0, halfWidth, cardImg.height, 0, 0, halfWidth, cardImg.height);
             setFrontFinal(fCanvas.toDataURL("image/png"));
-            
             const bCanvas = document.createElement("canvas");
             bCanvas.width = halfWidth; bCanvas.height = cardImg.height;
             bCanvas.getContext("2d")?.drawImage(cardImg, halfWidth, 0, halfWidth, cardImg.height, 0, 0, halfWidth, cardImg.height);
             setBackFinal(bCanvas.toDataURL("image/png"));
             setStage('preview');
-            setIsProcessing(false);
         };
     } else {
         if (refiningSide === 'front') setFrontFinal(finalData);
         else setBackFinal(finalData);
         setRefiningSide(null);
         setStage('upload');
-        setIsProcessing(false);
     }
-    
-    toast({ title: "Adjustment Applied" });
+    setIsProcessing(false);
+    toast({ title: "Adjustment Confirmed" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current) return;
     
     if (e.cancelable) e.preventDefault();
-
-    let clientX, clientY;
-    if ('touches' in e) {
-        clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-    } else {
-        clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
-    }
-    
     const rect = containerRef.current.getBoundingClientRect();
-    const currentX = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const currentY = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    setMagnifierPos({ x: currentX, y: currentY });
-    
-    setPoints(prev => {
-        if (draggingPoint === null || !prev[draggingPoint]) return prev;
-        
-        const next = [...prev];
-        const idx = draggingPoint;
-        
-        // Calculate Deltas for smooth multi-point movement
-        const dx = currentX - prev[idx].x;
-        const dy = currentY - prev[idx].y;
+    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
 
-        // If dragging a corner (0:TL, 2:TR, 4:BR, 6:BL)
-        if ([0, 2, 4, 6].includes(idx)) {
-            next[idx] = { x: currentX, y: currentY };
-        } else {
-            // Dragging Midpoint (Smooth Edge Movement)
-            if (idx === 1) { // Top Center moves TL and TR vertically
-                next[0].y = Math.max(0, Math.min(100, next[0].y + dy));
-                next[2].y = Math.max(0, Math.min(100, next[2].y + dy));
-            } else if (idx === 3) { // Right Center moves TR and BR horizontally
-                next[2].x = Math.max(0, Math.min(100, next[2].x + dx));
-                next[4].x = Math.max(0, Math.min(100, next[4].x + dx));
-            } else if (idx === 5) { // Bottom Center moves BL and BR vertically
-                next[6].y = Math.max(0, Math.min(100, next[6].y + dy));
-                next[4].y = Math.max(0, Math.min(100, next[4].y + dy));
-            } else if (idx === 7) { // Left Center moves TL and BL horizontally
-                next[0].x = Math.max(0, Math.min(100, next[0].x + dx));
-                next[6].x = Math.max(0, Math.min(100, next[6].x + dx));
+    requestAnimationFrame(() => {
+        setMagnifierPos({ x, y });
+        setPoints(prev => {
+            const next = [...prev];
+            const idx = draggingPoint;
+            const dx = x - prev[idx].x;
+            const dy = y - prev[idx].y;
+
+            if ([0, 2, 4, 6].includes(idx)) {
+                next[idx] = { x, y };
+            } else {
+                if (idx === 1) { next[0].y += dy; next[2].y += dy; }
+                else if (idx === 3) { next[2].x += dx; next[4].x += dx; }
+                else if (idx === 5) { next[6].y += dy; next[4].y += dy; }
+                else if (idx === 7) { next[0].x += dx; next[6].x += dx; }
             }
-        }
 
-        // RE-SYNC ALL MIDPOINTS STRICTLY BASED ON CORNERS (Prevents Sticking/Overlapping)
-        next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 }; // TC
-        next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 }; // RC
-        next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 }; // BC
-        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 }; // LC
-
-        return next;
+            // Sync Midpoints
+            next[1] = { x: (next[0].x + next[2].x)/2, y: (next[0].y + next[2].y)/2 };
+            next[3] = { x: (next[2].x + next[4].x)/2, y: (next[2].y + next[4].y)/2 };
+            next[5] = { x: (next[4].x + next[6].x)/2, y: (next[4].y + next[6].y)/2 };
+            next[7] = { x: (next[6].x + next[0].x)/2, y: (next[6].y + next[0].y)/2 };
+            return next;
+        });
     });
   }, [draggingPoint]);
 
-  const handlePointMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
-    setDraggingPoint(index);
-    let clientX, clientY;
-    if ('touches' in e) {
-        clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-    } else {
-        clientX = (e as React.MouseEvent).clientX; clientY = (e as React.MouseEvent).clientY;
-    }
-    if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setMagnifierPos({ 
-            x: Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)),
-            y: Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100))
-        });
-    }
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+    setDraggingPoint(idx);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+    setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
   };
-
-  const handleMouseUp = () => setDraggingPoint(null);
 
   const handlePrint = () => window.print();
-
-  const handleDownloadPdf = async () => {
-    if (!frontFinal || !backFinal) return;
-    setIsBuildingPdf(true);
-    try {
-        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const photoW = 85.6; const photoH = 54.0; const gap = 10;
-        const totalH = (photoH * 2) + gap;
-        let startY;
-        if (vAlign === 'top') startY = 10;
-        else if (vAlign === 'bottom') startY = pageHeight - totalH - 10;
-        else startY = (pageHeight - totalH) / 2;
-        const startX = (pageWidth - photoW) / 2;
-        pdf.addImage(frontFinal, 'PNG', startX, startY, photoW, photoH);
-        pdf.addImage(backFinal, 'PNG', startX, startY + photoH + gap, photoW, photoH);
-        pdf.save(`ID-Card-Ready-${Date.now()}.pdf`);
-    } catch (e) {
-        toast({ variant: 'destructive', title: "Error" });
-    } finally {
-        setIsBuildingPdf(false);
-    }
-  };
 
   const handleReset = () => {
     setWorkflow(null); setStage('selection'); setOriginalA4Src(null); setFrontRaw(null); setBackRaw(null);
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -595,7 +471,7 @@ export default function AadhaarPrinter() {
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 text-2xl font-black tracking-[0.3em] text-center border-2 rounded-2xl" placeholder="••••••••" autoFocus />
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 font-bold leading-tight">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
             </CardContent>
-            <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={handlePdfRenderWithPassword} disabled={isProcessing || !password} className="w-full h-14 bg-primary font-black rounded-xl text-lg shadow-xl">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
+            <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-14 bg-primary font-black rounded-xl text-lg shadow-xl">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
         </Card>
       )}
 
@@ -613,14 +489,14 @@ export default function AadhaarPrinter() {
                 </div>
               </CardHeader>
               <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden select-none"
-                           onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
+                           onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                   
                   {isProcessing && <div className="absolute inset-0 z-40 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase">Processing Pixels...</p></div>}
 
                   <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
-                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="crop" className="max-h-[70vh] w-auto object-contain" onLoad={onImageLoad} />
+                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="crop" className="max-h-[70vh] w-auto object-contain" />
                         </ReactCrop>
                     ) : (
                         <div className="relative">
@@ -631,7 +507,7 @@ export default function AadhaarPrinter() {
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                    onMouseDown={(e) => handlePointMouseDown(i, e)} onTouchStart={(e) => handlePointMouseDown(i, e)}>
+                                    onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
                                     <div className="size-2.5 bg-white rounded-full" />
                                 </div>
                             ))}
@@ -672,7 +548,6 @@ export default function AadhaarPrinter() {
                         <TabsList className="h-9"><TabsTrigger value="top"><AlignVerticalJustifyStart className="size-4"/></TabsTrigger><TabsTrigger value="center"><AlignVerticalJustifyCenter className="size-4"/></TabsTrigger><TabsTrigger value="bottom"><AlignVerticalJustifyEnd className="size-4"/></TabsTrigger></TabsList>
                     </Tabs>
                     <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl"><RefreshCcw className="mr-2 size-3" /> Re-align</Button>
-                    <Button onClick={handleDownloadPdf} disabled={isBuildingPdf} className="h-12 px-6 bg-blue-600 text-white font-black rounded-xl shadow-xl"><Download className="mr-2 size-4" /> PDF</Button>
                     <Button onClick={handlePrint} className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl"><Printer className="mr-2 size-4" /> PRINT NOW</Button>
                 </div>
             </div>
