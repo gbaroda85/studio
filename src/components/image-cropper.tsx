@@ -25,7 +25,10 @@ import {
     ShieldCheck,
     Zap,
     ArrowLeftRight,
-    Search
+    Search,
+    ChevronRight,
+    Undo2,
+    Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -41,6 +44,14 @@ interface Point {
     x: number;
     y: number;
 }
+
+const ASPECT_RATIOS = [
+    { label: 'Original', value: 0 },
+    { label: 'Square (1:1)', value: 1 },
+    { label: 'Portrait (2:3)', value: 2/3 },
+    { label: 'Standard (4:3)', value: 4/3 },
+    { label: 'Widescreen (16:9)', value: 16/9 },
+];
 
 export default function ImageCropper() {
   const { toast } = useToast();
@@ -58,7 +69,7 @@ export default function ImageCropper() {
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
 
-  // Perspective Mode States (8-Dot Magnet Logic: TL:0, TC:1, TR:2, RC:3, BR:4, BC:5, BL:6, LC:7)
+  // Perspective Mode States (8-Dot Magnet Logic)
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
     { x: 85, y: 50 }, { x: 85, y: 85 },                   
@@ -81,6 +92,7 @@ export default function ImageCropper() {
       setCrop(undefined);
       setCroppedImageSrc(null);
       setRotate(0); setFlipH(false); setFlipV(false);
+      setImgSrc(null);
       const reader = new FileReader();
       reader.addEventListener('load', () => setImgSrc(reader.result?.toString() || null));
       reader.readAsDataURL(file);
@@ -93,6 +105,17 @@ export default function ImageCropper() {
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
+  const handleAspectChange = (value: number) => {
+      setAspect(value === 0 ? undefined : value);
+      if (imgRef.current) {
+          const { width, height } = imgRef.current;
+          const newCrop = value === 0 
+            ? centerCrop({ unit: '%', width: 90, height: 90 }, width, height)
+            : centerCrop(makeAspectCrop({ unit: '%', width: 90 }, value, width, height), width, height);
+          setCrop(newCrop);
+      }
+  };
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
@@ -154,8 +177,11 @@ export default function ImageCropper() {
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         canvas.width = targetWidth; canvas.height = targetHeight;
 
-        // TL:0, TR:2, BR:4, BL:6 for Matrix mapping
-        const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
+        // Perspective logic uses 4 corners from the 8 points
+        const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
         const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
         
         const h = solvePerspective(dstPoints, srcPoints);
@@ -188,12 +214,29 @@ export default function ImageCropper() {
         if (!completedCrop) return;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
+        
         canvas.width = completedCrop.width * scaleX;
         canvas.height = completedCrop.height * scaleY;
-        ctx.drawImage(image, completedCrop.x * scaleX, completedCrop.y * scaleY, completedCrop.width * scaleX, completedCrop.height * scaleY, 0, 0, canvas.width, canvas.height);
+        
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((rotate * Math.PI) / 180);
+        ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        
+        ctx.drawImage(
+            image, 
+            completedCrop.x * scaleX, 
+            completedCrop.y * scaleY, 
+            completedCrop.width * scaleX, 
+            completedCrop.height * scaleY, 
+            0, 0, canvas.width, canvas.height
+        );
+        ctx.restore();
     }
     setCroppedImageSrc(canvas.toDataURL(`image/${outputFormat}`, 0.95));
     setIsProcessing(false);
+    toast({ title: "Crop Successful" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -243,55 +286,158 @@ export default function ImageCropper() {
         <CardHeader className="pt-20">
           <div className="mx-auto mb-6 grid size-20 place-items-center rounded-2xl bg-primary/10 text-primary"><Maximize className="size-10" /></div>
           <CardTitle className="text-4xl font-black uppercase tracking-tighter">Smart Image Cropper</CardTitle>
+          <CardDescription>Industrial grade cropping with Scanner mode.</CardDescription>
         </CardHeader>
-        <CardContent className="pb-20 pt-10"><UploadCloud className="size-16 mx-auto text-muted-foreground mb-4" /><p className="text-xl font-bold">Drop photo to Begin</p><input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} /></CardContent>
+        <CardContent className="pb-20 pt-10 flex flex-col items-center gap-6">
+            <div className="relative">
+                <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
+            </div>
+            <div className="text-center">
+                <p className="text-xl font-bold">Drop photo to Begin</p>
+                <p className="text-xs text-muted-foreground opacity-60 uppercase mt-1">100% Private local processing.</p>
+            </div>
+            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+        </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-6xl shadow-2xl border-foreground/10 overflow-hidden bg-card/50">
-      <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-6">
-        <div><CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment Studio</CardTitle></div>
+    <Card className="w-full max-w-7xl shadow-2xl border-foreground/10 overflow-hidden bg-card/50">
+      <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
         <div className="flex items-center gap-3">
-            <Tabs value={cropMode} onValueChange={(v) => { setCropMode(v as CropMode); setCroppedImageSrc(null); }} className="bg-background/50 p-1 rounded-lg border">
-                <TabsList className="h-9"><TabsTrigger value="rectangular" className="text-[10px] font-black px-4">RECT</TabsTrigger><TabsTrigger value="perspective" className="text-[10px] font-black px-4">SCAN</TabsTrigger></TabsList>
+            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg"><Settings2 className="size-5" /></div>
+            <CardTitle className="text-xl font-black uppercase tracking-tighter">Studio Panel</CardTitle>
+        </div>
+        <div className="flex items-center gap-3 bg-background/50 p-1 rounded-xl border-2">
+            <Tabs value={cropMode} onValueChange={(v) => { setCropMode(v as CropMode); setCroppedImageSrc(null); }} className="p-0">
+                <TabsList className="h-9 bg-transparent"><TabsTrigger value="rectangular" className="text-[10px] font-black px-4"><Maximize className="size-3.5 mr-1.5" /> RECT</TabsTrigger><TabsTrigger value="perspective" className="text-[10px] font-black px-4"><Scan className="size-3.5 mr-1.5" /> SCAN</TabsTrigger></TabsList>
             </Tabs>
-            <Button variant="ghost" size="icon" onClick={() => setImgSrc(null)}><X /></Button>
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={() => setImgSrc(null)}><X className="size-4"/></Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="grid lg:grid-cols-4">
-            <div className="lg:col-span-1 border-r bg-muted/20 p-6 space-y-8">
-                <div className="space-y-4 pt-6"><Label className="text-[10px] font-black uppercase text-muted-foreground">Output Format</Label><Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}><SelectTrigger className="h-12 font-bold border-2"><SelectValue /></SelectTrigger><SelectContent className="font-bold"><SelectItem value="jpeg">JPG</SelectItem><SelectItem value="png">PNG</SelectItem><SelectItem value="webp">WEBP</SelectItem></SelectContent></Select></div>
-                <Button className="w-full h-16 text-lg font-black bg-primary shadow-2xl rounded-2xl" onClick={handleApplyCrop} disabled={isProcessing}>{isProcessing ? <Loader2 className="animate-spin mr-2" /> : <CropIcon className="mr-2" />} CROP & SAVE</Button>
+        <div className="grid lg:grid-cols-12">
+            {/* Sidebar: Controls */}
+            <div className="lg:col-span-3 border-r bg-muted/20 p-6 space-y-8 no-print">
+                {cropMode === 'rectangular' && (
+                    <div className="space-y-6 animate-in slide-in-from-left duration-300">
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                <Grid3X3 className="size-3" /> Aspect Ratio
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {ASPECT_RATIOS.map((r) => (
+                                    <Button 
+                                        key={r.label} 
+                                        variant="outline" 
+                                        className={cn("h-10 text-[9px] font-black border-2 rounded-xl", (aspect === r.value || (r.value === 0 && aspect === undefined)) ? "border-primary bg-primary/5" : "")}
+                                        onClick={() => handleAspectChange(r.value)}
+                                    >
+                                        {r.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-dashed">
+                             <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground">Rotation</Label>
+                                <Badge variant="secondary" className="font-mono text-[10px]">{rotate}°</Badge>
+                             </div>
+                             <Slider min={-180} max={180} step={1} value={[rotate]} onValueChange={(v) => setRotate(v[0])} className="py-2" />
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                            <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipH && "bg-primary/10 border-primary")} onClick={() => setFlipH(!flipH)}>
+                                <FlipHorizontal className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip H</span>
+                            </Button>
+                            <Button variant="outline" className={cn("flex-1 h-10 border-2 rounded-xl", flipV && "bg-primary/10 border-primary")} onClick={() => setFlipV(!flipV)}>
+                                <FlipVertical className="size-4 mr-2" /> <span className="text-[9px] font-black uppercase">Flip V</span>
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="space-y-4 pt-6 border-t border-dashed">
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground">Target Format</Label>
+                    <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
+                        <SelectTrigger className="h-12 font-bold border-2 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent className="font-bold border-2">
+                            <SelectItem value="jpeg">JPG (Universal)</SelectItem>
+                            <SelectItem value="png">PNG (Lossless)</SelectItem>
+                            <SelectItem value="webp">WEBP (Modern)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="pt-4">
+                    <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleApplyCrop} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="animate-spin mr-2" /> : <CropIcon className="mr-2 group-hover:scale-125 transition-transform" />} 
+                        CROP & SAVE
+                    </Button>
+                </div>
+                
+                <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                    <ShieldCheck className="size-5 text-primary shrink-0" />
+                    <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
+                        All work happens in your device memory. Zero server uploads.
+                    </p>
+                </div>
             </div>
-            <div className="lg:col-span-3 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-8 relative min-h-[600px]"
+
+            {/* Main Viewport */}
+            <div className="lg:col-span-9 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[500px] md:min-h-[700px]"
                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                
                 {croppedImageSrc ? (
-                    <div className="flex flex-col items-center gap-8 animate-in zoom-in-95">
-                        <img src={croppedImageSrc} alt="result" className="max-h-[65vh] shadow-3xl border-8 border-white rounded-lg" />
-                        <div className="flex gap-4"><Button variant="outline" className="h-14 px-8 border-2 font-black" onClick={() => setCroppedImageSrc(null)}><RefreshCcw className="mr-2" /> Redo</Button><Button className="h-14 px-12 bg-green-600 font-black text-lg shadow-xl" onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop.${outputFormat}`; l.click(); }}><Download className="mr-2" /> DOWNLOAD</Button></div>
+                    <div className="flex flex-col items-center gap-8 animate-in zoom-in-95 duration-500">
+                        <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] border-white rounded-lg bg-white overflow-hidden max-w-[90vw]">
+                            <img src={croppedImageSrc} alt="result" className="max-h-[60vh] w-auto block" />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 w-full">
+                            <Button variant="outline" className="h-14 px-8 border-2 font-black uppercase text-xs rounded-xl hover:bg-destructive/5 hover:text-destructive" onClick={() => setCroppedImageSrc(null)}>
+                                <RefreshCcw className="mr-2 size-4" /> Start Over
+                            </Button>
+                            <Button className="h-14 px-12 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl rounded-xl flex-1" onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}>
+                                <Download className="mr-2 size-6" /> DOWNLOAD HD
+                            </Button>
+                        </div>
                     </div>
                 ) : (
-                    <div ref={containerRef} className="relative shadow-2xl border-4 border-white transform-gpu bg-white">
+                    <div ref={containerRef} className="relative shadow-2xl border-4 border-white transform-gpu bg-white max-w-[95vw]">
                         {cropMode === 'rectangular' ? (
-                            <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)}><img ref={imgRef} src={imgSrc} alt="rect" className="max-h-[75vh] w-auto" onLoad={onImageLoad} /></ReactCrop>
+                            <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)} aspect={aspect}>
+                                <img ref={imgRef} src={imgSrc} alt="rect" className="max-h-[75vh] w-auto block" onLoad={onImageLoad} 
+                                     style={{ transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`, transition: 'transform 0.2s ease-out' }} />
+                            </ReactCrop>
                         ) : (
                             <div className="relative">
-                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[75vh] w-auto pointer-events-none" onLoad={onImageLoad} />
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.5]" /></svg>
+                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[75vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.6] dash-array-[5,5]" />
+                                </svg>
                                 {points.map((p, i) => (
-                                    <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-xl cursor-grab", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
-                                        style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-white rounded-full" /></div>
+                                    <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/90")}
+                                        style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
+                                        <div className="size-2.5 bg-white rounded-full" />
+                                    </div>
                                 ))}
                                 {draggingPoint !== null && (
-                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
-                                        <img src={imgSrc} alt="mag" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} /><div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-0.5 bg-green-500/50 absolute" /><div className="h-full w-0.5 bg-green-500/50 absolute" /></div>
+                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
+                                        <img src={imgSrc} alt="mag" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="w-full h-0.5 bg-green-500/40 absolute" />
+                                            <div className="h-full w-0.5 bg-green-500/40 absolute" />
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         )}
+                        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl whitespace-nowrap">
+                            <Move className="size-3.5 text-primary animate-pulse" /> {cropMode === 'rectangular' ? "Position Crop Box" : "Drag 4 corners to fit edges"}
+                        </div>
                     </div>
                 )}
             </div>
