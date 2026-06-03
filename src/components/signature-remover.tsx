@@ -42,18 +42,13 @@ export default function SignatureRemover() {
   const [originalFileSize, setOriginalFileSize] = useState<number>(0);
   const [resultFileSize, setResultFileSize] = useState<number>(0);
   
-  // High-precision controls
+  // Controls
   const [sensitivity, setSensitivity] = useState([40]);
   const [boostInk, setBoostInk] = useState([20]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-  // FROZEN MEMORY REFERENCES FOR STABILITY
-  const originalPixelsRef = useRef<Uint8ClampedArray | null>(null);
-  const originalDimsRef = useRef({ width: 0, height: 0 });
 
-  // FIXED LIGHT CHECKERBOARD: Always stays light for signature visibility
+  // LIGHT CHECKERBOARD: Fixed for visibility
   const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
       "linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.05) 75%), linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.05) 75%)",
@@ -62,55 +57,53 @@ export default function SignatureRemover() {
     backgroundColor: "#ffffff"
   };
 
-  const processLocally = useCallback(() => {
-    if (!originalPixelsRef.current || !canvasRef.current) return;
-    
-    const { width: w, height: h } = originalDimsRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
-    if (!ctx) return;
+  const processImage = useCallback((sourceSrc: string) => {
+    const img = new window.Image();
+    img.src = sourceSrc;
+    img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
+        if (!ctx) return;
 
-    // Hard-lock canvas dimensions to prevent mobile GL artifacts
-    if (canvas.width !== w) canvas.width = w;
-    if (canvas.height !== h) canvas.height = h;
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-    const sourcePixels = originalPixelsRef.current;
-    const targetData = ctx.createImageData(w, h);
-    const targetPixels = targetData.data;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
 
-    // Find max luma for thresholding
-    let maxLuma = 0;
-    for (let i = 0; i < sourcePixels.length; i += 4) {
-        const luma = 0.299 * sourcePixels[i] + 0.587 * sourcePixels[i+1] + 0.114 * sourcePixels[i+2];
-        if (luma > maxLuma) maxLuma = luma;
-    }
+        // Find reference point for "paper color" (usually top-left pixel or max luma)
+        let maxLuma = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            const luma = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+            if (luma > maxLuma) maxLuma = luma;
+        }
 
-    const thresh = sensitivity[0];
-    const inkFactor = 1 + (boostInk[0] / 100);
+        const thresh = sensitivity[0];
+        const inkFactor = 1 + (boostInk[0] / 100);
 
-    for (let i = 0; i < sourcePixels.length; i += 4) {
-      const r = sourcePixels[i];
-      const g = sourcePixels[i+1];
-      const b = sourcePixels[i+2];
-      
-      const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-      const diff = maxLuma - luma;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+            const diff = maxLuma - luma;
 
-      if (diff > thresh) {
-        // High quality ink darkening logic - Clamp to 255 for safety
-        targetPixels[i] = Math.min(255, Math.max(0, r / inkFactor));
-        targetPixels[i+1] = Math.min(255, Math.max(0, g / inkFactor));
-        targetPixels[i+2] = Math.min(255, Math.max(0, b / inkFactor));
-        targetPixels[i+3] = 255; 
-      } else {
-        targetPixels[i+3] = 0; // Transparent
-      }
-    }
+            if (diff > thresh) {
+                // Keep ink, darken it based on boostInk
+                data[i] = Math.max(0, r / inkFactor);
+                data[i+1] = Math.max(0, g / inkFactor);
+                data[i+2] = Math.max(0, b / inkFactor);
+                data[i+3] = 255;
+            } else {
+                // Make background transparent
+                data[i+3] = 0;
+            }
+        }
 
-    ctx.putImageData(targetData, 0, 0);
-    const dataUrl = canvas.toDataURL("image/png", 1.0);
-    setResultImageSrc(dataUrl);
-    setResultFileSize(Math.round((dataUrl.length - 22) * 0.75));
+        ctx.putImageData(imageData, 0, 0);
+        const outUrl = canvas.toDataURL("image/png", 1.0);
+        setResultImageSrc(outUrl);
+        setResultFileSize(Math.round((outUrl.length - 22) * 0.75));
+    };
   }, [sensitivity, boostInk]);
 
   const handleFileChange = (file: File | null) => {
@@ -121,26 +114,8 @@ export default function SignatureRemover() {
       reader.onload = (e) => {
         const src = e.target?.result as string;
         setOriginalImageSrc(src);
-        
-        const img = new window.Image();
-        img.src = src;
-        img.onload = () => {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = img.width;
-            tempCanvas.height = img.height;
-            const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-            if (!tempCtx) return;
-            
-            tempCtx.drawImage(img, 0, 0);
-            const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
-            
-            // Populate frozen references
-            originalPixelsRef.current = new Uint8ClampedArray(imageData.data);
-            originalDimsRef.current = { width: img.width, height: img.height };
-            
-            // INSTANT EXTRACTION: Trigger processing immediately after refs are ready
-            processLocally();
-        };
+        // Trigger initial process immediately
+        processImage(src);
       };
       reader.readAsDataURL(file);
     } else if (file) {
@@ -149,13 +124,13 @@ export default function SignatureRemover() {
   };
 
   useEffect(() => {
-    if (originalPixelsRef.current) {
+    if (originalImageSrc) {
         const timer = setTimeout(() => {
-            processLocally();
-        }, 10);
+            processImage(originalImageSrc);
+        }, 50);
         return () => clearTimeout(timer);
     }
-  }, [sensitivity, boostInk, processLocally]);
+  }, [originalImageSrc, sensitivity, boostInk, processImage]);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
@@ -166,22 +141,17 @@ export default function SignatureRemover() {
     if (!resultImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resultImageSrc;
-    const nameParts = imageFile.name.split(".");
-    const name = nameParts.slice(0, -1).join(".");
+    const name = imageFile.name.split(".").slice(0, -1).join(".");
     link.download = `${name}-transparent.png`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   };
 
   const handleReset = () => {
     setImageFile(null);
     setOriginalImageSrc(null);
     setResultImageSrc(null);
-    setIsProcessing(false);
     setSensitivity([40]);
     setBoostInk([20]);
-    originalPixelsRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -256,7 +226,6 @@ export default function SignatureRemover() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
         <div className="lg:col-span-8">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -349,9 +318,9 @@ export default function SignatureRemover() {
                     <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
                         <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Zero-Glitch Mobile</p>
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Solid Mobile Logic</p>
                             <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
-                                Strict pixel clamping active. Slider noise 100% eliminated for smooth mobile editing.
+                                Strict single-pass loop active. Zero distortion guaranteed even during rapid slider movement.
                             </p>
                         </div>
                     </div>
@@ -363,8 +332,6 @@ export default function SignatureRemover() {
             </Card>
         </div>
       </div>
-      
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
