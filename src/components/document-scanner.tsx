@@ -2,7 +2,7 @@
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
-import { useState, useRef, useEffect, useCallback, type SyntheticEvent, type ChangeEvent } from 'react';
+import React, { useState, useRef, useEffect, useCallback, type SyntheticEvent, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import { 
@@ -95,11 +95,11 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune states (Defaults for Document mode)
+  // Fine-tune states (Aapke bataye huye Defaults)
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
-  const [sharpness, setSharpness] = useState([0]);
+  const [sharpness, setSharpness] = useState([2]);
   const [rotation, setRotation] = useState(0);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -115,10 +115,10 @@ export default function DocumentScanner() {
 
   // 8-Point Scanner handles
   const [points, setPoints] = useState<Point[]>([
-    { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
-    { x: 85, y: 50 }, { x: 85, y: 85 },                   
-    { x: 50, y: 85 }, { x: 15, y: 85 },                   
-    { x: 15, y: 50 }                                      
+    { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
+    { x: 90, y: 50 }, { x: 90, y: 90 },                   
+    { x: 50, y: 90 }, { x: 10, y: 90 },                   
+    { x: 10, y: 50 }                                      
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -180,11 +180,11 @@ export default function DocumentScanner() {
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
+    setRectCrop(centerCrop({ unit: '%', width: 80, height: 80 }, width, height));
     setIsImageReady(true);
   };
 
-  // Sync Slider Defaults with Filter Selection
+  // Sync Defaults with Filter Selection
   useEffect(() => {
     if (activeFilter === 'document') {
         setBrightness([145]);
@@ -209,7 +209,7 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    // 1. Initial Render with Rotation
+    // 1. CONTENT-SPACE ROTATION
     const tempCanvas = document.createElement('canvas');
     const tCtx = tempCanvas.getContext('2d');
     if (!tCtx) return "";
@@ -227,13 +227,14 @@ export default function DocumentScanner() {
     tCtx.drawImage(image, -image.naturalWidth/2, -image.naturalHeight/2);
 
     if (cropMode === 'rect') {
-        const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
+        const c = completedRectCrop || { x: 10, y: 10, width: 80, height: 80, unit: 'px' } as PixelCrop;
         const scaleX = tempCanvas.width / (imgRef.current?.width || 1);
         const scaleY = tempCanvas.height / (imgRef.current?.height || 1);
         canvas.width = Math.max(10, c.width * scaleX);
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(tempCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
+        // Perspective in content-space
         const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
         const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
@@ -273,7 +274,7 @@ export default function DocumentScanner() {
         }
     }
 
-    // Apply Filters & Fine-tuning
+    // Filters & Sharpness
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
@@ -285,13 +286,10 @@ export default function DocumentScanner() {
         const luma = 0.299 * r + 0.587 * g + 0.114 * b;
 
         if (activeFilter === 'bw') {
-            const val = luma > 128 ? 255 : 0;
-            r = g = b = val;
+            r = g = b = luma > 128 ? 255 : 0;
         } else if (activeFilter === 'document') {
             const val = luma > 180 ? 255 : luma < 100 ? luma * 0.5 : luma;
             r = g = b = val;
-        } else if (activeFilter === 'magic') {
-            r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15);
         } else if (activeFilter === 'gray') {
             r = g = b = luma;
         }
@@ -308,9 +306,9 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // Sharpness Kernel Fix
+    // Sharpness Logic
     if (sharpness[0] > 0) {
-        const factor = sharpness[0] / 5;
+        const factor = sharpness[0] / 4;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
         const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const src = currentData.data;
@@ -374,9 +372,10 @@ export default function DocumentScanner() {
     setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
     setStage('viewfinder');
     setCurrentRawImage(null); setLiveResultSrc(null); setRotation(0);
-    toast({ title: "Page Added to Collection" });
+    toast({ title: "Page Added" });
   };
 
+  // UNIFIED COORDINATE TRANSFORMATION SYSTEM
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
@@ -385,10 +384,11 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    // Unified Coordinate Mapping: Mouse to unrotated space
+    // 1. Localize to container
     let rx = (cx - rect.left) / rect.width;
     let ry = (cy - rect.top) / rect.height;
 
+    // 2. 2D Rotation Matrix Inverse (Transform mouse back to original image space)
     const angleRad = (-rotation * Math.PI) / 180;
     const cos = Math.cos(angleRad);
     const sin = Math.sin(angleRad);
@@ -440,7 +440,7 @@ export default function DocumentScanner() {
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
                         <CardHeader className="pt-6 md:pt-8 pb-4">
                             <div className="mx-auto mb-4 grid size-14 md:size-16 place-items-center rounded-2xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-6 md:size-8" /></div>
-                            <CardTitle className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">Document <span className="text-primary">Scanner</span></CardTitle>
+                            <CardTitle className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
                         <CardContent className="pb-8 md:pb-10 pt-2 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
@@ -490,7 +490,7 @@ export default function DocumentScanner() {
                                     pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297);
                                 });
                                 pdf.save(`scan-${Date.now()}.pdf`);
-                                toast({ title: "PDF Exported Successfully" });
+                                toast({ title: "PDF Exported" });
                             }}>EXPORT AS PDF <Download className="ml-2 size-3" /></Button>
                         </CardFooter>
                     </Card>
@@ -529,10 +529,12 @@ export default function DocumentScanner() {
                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
                                     <TabsList className="grid grid-cols-2 h-9 bg-transparent"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
                                 </Tabs>
+                                <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 h-full"
                                      onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                            
                             <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                                 {cropMode === 'rect' ? (
                                     <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[65vh]">
@@ -563,6 +565,7 @@ export default function DocumentScanner() {
                         <CardFooter className="bg-black/60 p-4 flex justify-center"><div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest"><Move className="h-4 w-4 text-primary animate-pulse" /> Fine-tune edges for scanning</div></CardFooter>
                     </Card>
                 </div>
+                
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col h-full">
                         <CardHeader className="bg-primary/5 border-b p-6 text-slate-800 dark:text-white shrink-0">
@@ -570,7 +573,7 @@ export default function DocumentScanner() {
                         </CardHeader>
                         <CardContent className="flex-1 p-6 flex flex-col bg-white dark:bg-slate-900 shadow-inner overflow-hidden">
                             <ScrollArea className="h-full pr-2 custom-scrollbar">
-                                <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[300px] md:min-h-[400px]">
+                                <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[300px] md:min-h-[400px]" style={{ transform: `rotate(${rotation}deg)` }}>
                                     {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-full object-contain block animate-in fade-in" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
                                     {isProcessing && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
                                 </div>
@@ -590,7 +593,7 @@ export default function DocumentScanner() {
                                     <div className="space-y-6">
                                         <div className="flex items-center justify-between">
                                             <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Settings2 className="size-3"/> Fine Tuning</Label>
-                                            <Button variant="ghost" size="sm" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([0]); }} className="text-[8px] font-black uppercase text-muted-foreground h-6 px-2"><RotateCcw className="size-2 mr-1" /> Reset</Button>
+                                            <Button variant="ghost" size="sm" onClick={() => { setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2]); }} className="text-[8px] font-black uppercase text-muted-foreground h-6 px-2"><RotateCcw className="size-2.5 mr-1" /> Reset</Button>
                                         </div>
                                         <div className="space-y-6">
                                             <div className="space-y-3">
