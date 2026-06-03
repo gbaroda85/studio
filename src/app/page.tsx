@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -155,7 +156,7 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-2 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-extrabold mb-2 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
