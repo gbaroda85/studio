@@ -119,7 +119,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-5" />
         </div>
-        <h3 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase">{title}</h3>
+        <h3 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase font-headline">{title}</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-normal h-10">{description}</p>
         <div className="flex items-center text-primary font-bold text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
           Launch Tool <ArrowRight className="ml-1 size-3" />
@@ -145,7 +145,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#001D39] border-b border-border/50 rounded-b-[4rem] shadow-2xl mx-auto transition-colors duration-500">
+      <section className="relative w-full max-w-[2000px] pt-10 pb-6 overflow-hidden bg-white/90 dark:bg-[#001D39] border-b border-border/50 rounded-b-[4rem] shadow-2xl shadow-primary/5 mx-auto transition-colors duration-500">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
