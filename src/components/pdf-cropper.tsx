@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -10,12 +9,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { 
-    UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, X, Move, CheckCircle2, Scan, Maximize, RefreshCcw, FileDigit, ShieldCheck, Zap
+    UploadCloud, Download, Loader2, ChevronLeft, ChevronRight, X, Move, CheckCircle2, Scan, Maximize, RefreshCcw, FileDigit, ShieldCheck, Zap, Trash2, LayoutGrid, Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -120,7 +119,7 @@ export default function PdfCropper() {
         setCropMode('rectangular'); setCrop(undefined); setCompletedCrop(undefined);
         setPoints([{ x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 50 }, { x: 85, y: 85 }, { x: 50, y: 85 }, { x: 15, y: 85 }, { x: 15, y: 50 }]);
     }
-  }, [currentPage, pageStates, loadPageImage]);
+  }, [currentPage, loadPageImage]);
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -168,6 +167,7 @@ export default function PdfCropper() {
         const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
         const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
         const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
+        
         const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
         const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
         canvas.width = targetWidth; canvas.height = targetHeight;
@@ -261,6 +261,8 @@ export default function PdfCropper() {
     setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
   };
 
+  const croppedEntries = Object.entries(pageStates).filter(([_,s])=>!!s.result).sort((a,b)=>Number(a[0])-Number(b[0]));
+
   return (
     <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 flex flex-col gap-8 pb-20">
         {!pdfFile ? (
@@ -319,7 +321,7 @@ export default function PdfCropper() {
                                             {draggingPoint !== null && (
                                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
                                                     <img src={pageImage} alt="mag" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-full h-0.5 bg-green-500/40 absolute" /><div className="h-full w-0.5 bg-green-500/40 absolute" /></div>
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-full h-0.5 bg-green-500/50 absolute" /><div className="h-full w-0.5 bg-green-500/50 absolute" /></div>
                                                 </div>
                                             )}
                                         </div>
@@ -331,6 +333,38 @@ export default function PdfCropper() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* CROP PREVIEW STRIP */}
+                    {croppedEntries.length > 0 && (
+                        <Card className="border-2 shadow-xl bg-card/40 rounded-[2rem] overflow-hidden">
+                            <CardHeader className="p-4 bg-muted/30 border-b">
+                                <div className="flex items-center gap-2">
+                                    <LayoutGrid className="size-3 text-primary" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Cropped Pages Bundle</span>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <ScrollArea className="w-full whitespace-nowrap">
+                                    <div className="flex gap-4 pb-4 px-1">
+                                        {croppedEntries.map(([idx, s]) => (
+                                            <div key={idx} className="relative inline-block w-24 md:w-32 aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-lg group">
+                                                <img src={s.result!} className="size-full object-contain" alt={`P${idx}`} />
+                                                <div className="absolute top-1 left-1 size-5 rounded-md bg-black/70 flex items-center justify-center text-[8px] font-black text-white">P{idx}</div>
+                                                <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setPageStates(prev => {
+                                                    const next = {...prev};
+                                                    delete next[Number(idx)];
+                                                    return next;
+                                                })}>
+                                                    <Trash2 className="size-3" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <ScrollBar orientation="horizontal" />
+                                </ScrollArea>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
                 <div className="lg:col-span-4 flex flex-col gap-6">
@@ -338,23 +372,39 @@ export default function PdfCropper() {
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2"><Maximize className="size-5 text-primary" /> Studio Actions</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 space-y-6">
-                            <div className="space-y-4">
+                        <CardContent className="p-6 space-y-8">
+                            
+                            {/* USER REQUESTED UI ELEMENTS */}
+                            <div className="flex flex-col gap-4">
+                                <div className="border-2 border-dashed border-primary/20 rounded-[1.5rem] p-4 text-center">
+                                    <p className="text-[11px] font-bold text-muted-foreground leading-tight">Trim margins for a clean digital doc.</p>
+                                </div>
+
                                 <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group transition-all active:scale-95" onClick={handleApplyCrop} disabled={isProcessing || !pageImage}>
                                     <CheckCircle2 className="size-6 mr-2 group-hover:scale-110 transition-transform" /> APPLY FOR PAGE {currentPage}
                                 </Button>
-                                <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest opacity-60">Saves current selection to memory</p>
+
+                                <div className="bg-green-500/5 border-2 border-green-500/10 rounded-[1.5rem] p-5 flex items-start gap-4">
+                                    <div className="size-10 rounded-full bg-green-500/10 border-2 border-green-500/20 flex items-center justify-center shrink-0">
+                                        <ShieldCheck className="size-5 text-green-600" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">INDEPENDENT PAGES</p>
+                                        <p className="text-[9px] font-medium text-green-600/80 leading-relaxed uppercase">
+                                            Every crop results in a separate new page in the output PDF.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                             
                             <Separator className="opacity-10" />
 
                             <div className="space-y-4">
-                                <Button disabled={Object.values(pageStates).filter(s=>!!s.result).length === 0 || isBuildingPdf} className="w-full h-14 bg-green-600 hover:bg-green-700 font-black text-sm rounded-xl shadow-xl uppercase transition-all active:scale-95" onClick={async () => {
+                                <Button disabled={croppedEntries.length === 0 || isBuildingPdf} className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase transition-all active:scale-95" onClick={async () => {
                                     setIsBuildingPdf(true);
                                     try {
-                                        const entries = Object.entries(pageStates).filter(([_,s])=>!!s.result).sort((a,b)=>Number(a[0])-Number(b[0]));
                                         const finalPdf = await PDFDocument.create();
-                                        for(const [_,s] of entries){
+                                        for(const [_,s] of croppedEntries){
                                             const b = await fetch(s.result!).then(r=>r.arrayBuffer());
                                             const ei = await finalPdf.embedJpg(b);
                                             const p = finalPdf.addPage([ei.width*0.75, ei.height*0.75]);
@@ -373,21 +423,13 @@ export default function PdfCropper() {
                                     }
                                 }}>
                                     {isBuildingPdf ? <Loader2 className="animate-spin mr-2" /> : <Download className="mr-2" />}
-                                    DOWNLOAD {Object.values(pageStates).filter(s=>!!s.result).length} PAGE BUNDLE
+                                    DOWNLOAD {croppedEntries.length} PAGE BUNDLE
                                 </Button>
                                 <Button variant="ghost" onClick={resetState} className="w-full h-10 font-black uppercase text-[10px] tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive">
                                     <RefreshCcw className="size-3 mr-2" /> Start Over
                                 </Button>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-5 border-t">
-                            <div className="flex gap-4 items-center">
-                                <ShieldCheck className="size-8 text-primary/40 shrink-0" />
-                                <p className="text-[9px] text-muted-foreground font-bold uppercase leading-relaxed">
-                                    Each page crop uses <span className="text-primary">Lossless pixel copying</span> to ensure text remains crisp for official use.
-                                </p>
-                            </div>
-                        </CardFooter>
                     </Card>
                 </div>
             </div>
