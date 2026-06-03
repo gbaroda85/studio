@@ -30,7 +30,8 @@ import {
     Undo2,
     Palette,
     Settings2,
-    Sparkles
+    Sparkles,
+    Eye
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
