@@ -50,10 +50,10 @@ export default function SignatureRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const darkCheckerboardStyle: React.CSSProperties = {
-    backgroundColor: "#020617", // Deep dark background
+  // Subtle checkerboard that works in both modes
+  const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
-      "linear-gradient(45deg, #0f172a 25%, transparent 25%), linear-gradient(-45deg, #0f172a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0f172a 75%), linear-gradient(-45deg, transparent 75%, #0f172a 75%)",
+      "linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.05) 75%), linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.05) 75%)",
     backgroundSize: "20px 20px",
     backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
   };
@@ -262,13 +262,13 @@ export default function SignatureRemover() {
                             </div>
                         </div>
 
-                        {/* AFTER - ALWAYS DARK FOR CONTRAST CHECK */}
+                        {/* AFTER - THEME ADAPTIVE */}
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Cleaned Ink</span>
                                 {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{(resultFileSize / 1024).toFixed(1)} KB</span>}
                             </div>
-                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden" style={darkCheckerboardStyle}>
+                            <div className="relative aspect-square rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden bg-background" style={checkerboardStyle}>
                                 <AnimatePresence mode="wait">
                                     {resultImageSrc ? (
                                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
@@ -277,12 +277,12 @@ export default function SignatureRemover() {
                                         </motion.div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center gap-3 opacity-10 p-12 text-center">
-                                            <Loader2 className="size-12 animate-spin text-white" />
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-white">Processing...</p>
+                                            <Loader2 className="size-12 animate-spin text-muted-foreground" />
+                                            <p className="text-[10px] font-black uppercase tracking-widest">Processing...</p>
                                         </div>
                                     )}
                                 </AnimatePresence>
-                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary/80">AFTER (DARK)</Badge></div>
+                                <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary/80 uppercase">AFTER</Badge></div>
                             </div>
                         </div>
                     </div>
