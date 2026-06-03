@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -55,11 +56,9 @@ interface Point { x: number; y: number; }
 
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
-    const corners = [src[0], src[1], src[3], src[4]]; 
-    
     for (let i = 0; i < 4; i++) {
-        p.push([dst[i].x, dst[i].y, 1, 0, 0, 0, -dst[i].x * corners[i].x, -dst[i].y * corners[i].x, corners[i].x]);
-        p.push([0, 0, 0, dst[i].x, dst[i].y, 1, -dst[i].x * corners[i].y, -dst[i].y * corners[i].y, corners[i].y]);
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
     }
     const n = 8;
     for (let i = 0; i < n; i++) {
@@ -115,10 +114,12 @@ export default function DocumentScanner() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
 
+  // 8-Point Scanner (TL, TC, TR, RC, BR, BC, BL, LC)
   const [points, setPoints] = useState<Point[]>([
-      { x: 10, y: 10 }, { x: 90, y: 10 },
-      { x: 90, y: 50 }, { x: 90, y: 90 },
-      { x: 10, y: 90 }, { x: 10, y: 50 }
+    { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
+    { x: 85, y: 50 }, { x: 85, y: 85 },                   
+    { x: 50, y: 85 }, { x: 15, y: 85 },                   
+    { x: 15, y: 50 }                                      
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -143,70 +144,35 @@ export default function DocumentScanner() {
         setIsVideoLoading(true);
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment', 
-                    width: { ideal: 1920 }, 
-                    height: { ideal: 1080 } 
-                },
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
                 audio: false
             });
             setStream(mediaStream);
             setStage('live-camera');
         } catch (err) {
             setIsVideoLoading(false);
-            toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera. Please check permissions.' });
+            toast({ variant: 'destructive', title: 'Camera Error', description: 'Could not access camera.' });
         }
     }
   };
 
   useEffect(() => {
     if (stage === 'live-camera' && stream && videoRef.current) {
-        const video = videoRef.current;
-        video.srcObject = stream;
-        
-        const handleLoaded = () => {
-            video.play().catch(err => {
-                console.warn("Autoplay blocked or failed:", err);
-                setIsVideoLoading(false);
-            });
-        };
-
-        const handleCanPlay = () => {
-            setIsVideoLoading(false);
-        };
-
-        video.addEventListener('loadedmetadata', handleLoaded);
-        video.addEventListener('canplay', handleCanPlay);
-        
-        const safetyTimer = setTimeout(() => {
-            setIsVideoLoading(false);
-        }, 3500);
-
-        return () => {
-            video.removeEventListener('loadedmetadata', handleLoaded);
-            video.removeEventListener('canplay', handleCanPlay);
-            clearTimeout(safetyTimer);
-        };
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().then(() => setIsVideoLoading(false)).catch(() => setIsVideoLoading(false));
     }
   }, [stage, stream]);
 
   const captureFrame = () => {
       if (!videoRef.current) return;
       const video = videoRef.current;
-      
-      if (video.readyState < 2) {
-          toast({ variant: 'destructive', title: 'Capture Error', description: 'Camera feed not ready yet.' });
-          return;
-      }
-
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       if (ctx) {
           ctx.drawImage(video, 0, 0);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-          setCurrentRawImage(dataUrl);
+          setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
           setIsImageReady(false);
           stopCamera();
           setStage('adjust');
@@ -227,10 +193,6 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return "";
 
-    if (blur[0] > 0) {
-        ctx.filter = `blur(${blur[0]}px)`;
-    }
-
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = image.naturalWidth / image.width;
@@ -239,20 +201,23 @@ export default function DocumentScanner() {
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        const w1 = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
-        const w2 = Math.hypot(points[3].x - points[4].x, points[3].y - points[4].y);
-        const h1 = Math.hypot(points[4].x - points[0].x, points[4].y - points[0].y);
-        const h2 = Math.hypot(points[3].x - points[1].x, points[3].y - points[1].y);
+        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
+        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
+        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
+        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
         
-        const targetWidth = Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100));
-        const targetHeight = Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100));
-        canvas.width = Math.max(10, targetWidth);
-        canvas.height = Math.max(10, targetHeight);
+        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
+        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
-        const srcPxPoints = points.map(p => ({ x: p.x * (image.naturalWidth / 100), y: p.y * (image.naturalHeight / 100) }));
+        const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
         const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
         
-        const h = solvePerspective(srcPxPoints, dstPoints);
+        const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
         
         const srcCanvas = document.createElement('canvas');
@@ -280,105 +245,33 @@ export default function DocumentScanner() {
             ctx.putImageData(imgData, 0, 0);
         }
     }
-    ctx.filter = 'none';
 
+    // Apply Filters & Adjustments
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
-    const len = pixels.length;
-
-    let bgSum = 0;
-    let bgCount = 0;
-    const skip = Math.max(8, Math.floor(len / 4000));
-    for (let i = 0; i < len; i += skip * 4) {
-        const luma = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
-        if (luma > 110) { bgSum += luma; bgCount++; }
-    }
-    
-    const whitePoint = bgCount > 0 ? bgSum / bgCount : 220;
-    const normFactor = 255 / Math.max(whitePoint, 150);
-
     const bFactor = brightness[0] / 100;
-    const cFactor = (contrast[0] / 100);
+    const cFactor = contrast[0] / 100;
 
-    for (let i = 0; i < len; i += 4) {
+    for (let i = 0; i < pixels.length; i += 4) {
         let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
         const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-        const normalizedLuma = Math.min(255, luma * normFactor);
 
         if (activeFilter === 'bw') {
-            let val;
-            if (normalizedLuma < 140) val = Math.pow(normalizedLuma / 140, 1.8) * 40; 
-            else if (normalizedLuma > 210) val = 255;
-            else {
-                const t = (normalizedLuma - 140) / 70;
-                val = 40 + t * (255 - 40);
-            }
+            const val = luma > 128 ? 255 : 0;
             r = g = b = val;
         } else if (activeFilter === 'document') {
-            let val;
-            if (normalizedLuma > 195) val = 255;
-            else if (normalizedLuma < 110) val = normalizedLuma * 0.4;
-            else {
-                const t = (normalizedLuma - 110) / 85;
-                val = 45 + t * (255 - 45);
-            }
+            const val = luma > 180 ? 255 : luma < 100 ? luma * 0.5 : luma;
             r = g = b = val;
         } else if (activeFilter === 'magic') {
-            r = Math.min(255, r * normFactor * 1.05);
-            g = Math.min(255, g * normFactor * 1.05);
-            b = Math.min(255, b * normFactor * 1.05);
-        } else if (activeFilter === 'photo') {
-            r = Math.min(255, r * 1.15 + 10);
-            g = Math.min(255, g * 1.15 + 10);
-            b = Math.min(255, b * 1.15 + 10);
+            r = Math.min(255, r * 1.1); g = Math.min(255, g * 1.1); b = Math.min(255, b * 1.1);
         } else if (activeFilter === 'gray') {
             r = g = b = luma;
         }
 
-        r = ((r / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
-        g = ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
-        b = ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor;
-
-        pixels[i] = Math.max(0, Math.min(255, r));
-        pixels[i+1] = Math.max(0, Math.min(255, g));
-        pixels[i+2] = Math.max(0, Math.min(255, b));
+        pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
+        pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
+        pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cFactor + 0.5) * 255 * bFactor));
     }
-    
-    if (sharpness[0] > 0) {
-        const factor = sharpness[0] / 5;
-        const kernel = [
-            0, -factor, 0,
-            -factor, 1 + (4 * factor), -factor,
-            0, -factor, 0
-        ];
-        const outputPixels = new Uint8ClampedArray(pixels.length);
-        const w = canvas.width;
-        const h = canvas.height;
-
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                const dstIdx = (y * w + x) * 4;
-                let r = 0, g = 0, b = 0;
-                for (let ky = -1; ky <= 1; ky++) {
-                    for (let kx = -1; kx <= 1; kx++) {
-                        const scy = Math.min(h - 1, Math.max(0, y + ky));
-                        const scx = Math.min(w - 1, Math.max(0, x + kx));
-                        const srcIdx = (scy * w + scx) * 4;
-                        const weight = kernel[(ky + 1) * 3 + (kx + 1)];
-                        r += pixels[srcIdx] * weight;
-                        g += pixels[srcIdx + 1] * weight;
-                        b += pixels[srcIdx + 2] * weight;
-                    }
-                }
-                outputPixels[dstIdx] = Math.max(0, Math.min(255, r));
-                outputPixels[dstIdx + 1] = Math.max(0, Math.min(255, g));
-                outputPixels[dstIdx + 2] = Math.max(0, Math.min(255, b));
-                outputPixels[dstIdx + 3] = pixels[dstIdx + 3];
-            }
-        }
-        pixels.set(outputPixels);
-    }
-
     ctx.putImageData(imageData, 0, 0);
 
     return canvas.toDataURL('image/jpeg', 0.95);
@@ -388,18 +281,13 @@ export default function DocumentScanner() {
     if (stage === 'adjust' && currentRawImage && isImageReady) {
         const timer = setTimeout(async () => {
             setIsProcessing(true);
-            try {
-                const res = await applyIntelligentScan();
-                setLiveResultSrc(res);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setIsProcessing(false);
-            }
+            const res = await applyIntelligentScan();
+            setLiveResultSrc(res);
+            setIsProcessing(false);
         }, 300);
         return () => clearTimeout(timer);
     }
-  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, sharpness, blur]);
+  }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast]);
 
   const handleNativeCapture = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -412,186 +300,81 @@ export default function DocumentScanner() {
           };
           reader.readAsDataURL(file);
       }
-      e.target.value = "";
-  };
-
-  const handleRotateSource = () => {
-    if (!currentRawImage) return;
-    const img = new window.Image();
-    img.src = currentRawImage;
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        canvas.width = img.height; canvas.height = img.width;
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((90 * Math.PI) / 180);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        setCurrentRawImage(canvas.toDataURL('image/jpeg', 0.95));
-        setIsImageReady(false);
-    };
   };
 
   const handleConfirmAdd = () => {
     if (!liveResultSrc) return;
-    setScannedPages(prev => [...prev, {
-        id: Math.random().toString(36).substr(2, 9),
-        processedSrc: liveResultSrc
-    }]);
+    setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
     setStage('stack');
-    setCurrentRawImage(null);
-    setLiveResultSrc(null);
-    setIsImageReady(false);
-    setBrightness([100]);
-    setContrast([100]);
-    setSharpness([0]);
-    setBlur([0]);
+    setCurrentRawImage(null); setLiveResultSrc(null);
   };
 
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      let cx, cy;
-      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
-      setDraggingPoint(idx);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
+  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
+    const rect = containerRef.current.getBoundingClientRect();
     let cx, cy;
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-    const rect = containerRef.current.getBoundingClientRect();
+
     const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
 
     setMagnifierPos({ x, y });
     setPoints(prev => {
         const next = [...prev];
-        if (draggingPoint === 2) { next[1].x = x; next[2].x = x; next[3].x = x; }
-        else if (draggingPoint === 5) { next[0].x = x; next[5].x = x; next[4].x = x; }
-        else {
-            next[draggingPoint] = { x, y };
-            if (draggingPoint === 0 || draggingPoint === 4) next[5] = { x: (next[0].x + next[4].x)/2, y: (next[0].y + next[4].y)/2 };
-            if (draggingPoint === 1 || draggingPoint === 3) next[2] = { x: (next[1].x + next[3].x)/2, y: (next[1].y + next[3].y)/2 };
+        const idx = draggingPoint;
+        if ([0, 2, 4, 6].includes(idx)) {
+            next[idx] = { x, y };
+        } else {
+            if (idx === 1) { next[0].y = y; next[2].y = y; } 
+            else if (idx === 3) { next[2].x = x; next[4].x = x; } 
+            else if (idx === 5) { next[6].y = y; next[4].y = y; } 
+            else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
+        next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
+        next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
+        next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
+        next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
         return next;
     });
-  };
+  }, [draggingPoint, points]);
 
-  const handleMouseUp = () => setDraggingPoint(null);
-
-  const handleExportPdf = () => {
-    setIsExporting(true);
-    const pdf = new jsPDF();
-    scannedPages.forEach((p, i) => {
-        if(i > 0) pdf.addPage();
-        const props = pdf.getImageProperties(p.processedSrc);
-        const pw = pdf.internal.pageSize.getWidth();
-        const ph = pdf.internal.pageSize.getHeight();
-        const ratio = Math.min(pw / props.width, ph / props.height);
-        pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
-    });
-    pdf.save(`GR7-Premium-Scan-${Date.now()}.pdf`);
-    setIsExporting(false);
-    toast({ title: "PDF Exported", description: "All pages bundled into a PDF." });
-  };
-
-  const handleExportImages = () => {
-    setIsExporting(true);
-    scannedPages.forEach((p, i) => {
-        const link = document.createElement('a');
-        link.href = p.processedSrc;
-        link.download = `scan-page-${i + 1}.jpg`;
-        link.click();
-    });
-    setIsExporting(false);
-    toast({ title: "Images Saved", description: "All pages downloaded individually." });
-  };
-
-  const handleShare = async () => {
-    if (!navigator.share) {
-        toast({ variant: 'destructive', title: 'Not Supported', description: 'Sharing is not supported on this browser.' });
-        return;
-    }
-
-    try {
-        const pdf = new jsPDF();
-        scannedPages.forEach((p, i) => {
-            if(i > 0) pdf.addPage();
-            const props = pdf.getImageProperties(p.processedSrc);
-            const pw = pdf.internal.pageSize.getWidth();
-            const ph = pdf.internal.pageSize.getHeight();
-            const ratio = Math.min(pw / props.width, ph / props.height);
-            pdf.addImage(p.processedSrc, 'JPEG', (pw - props.width * ratio) / 2, (ph - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
-        });
-        const blob = pdf.output('blob');
-        const file = new File([blob], "scanned-document.pdf", { type: "application/pdf" });
-
-        await navigator.share({
-            title: 'Scanned Document',
-            text: 'Here is my scanned document from GR7 Tools.',
-            files: [file]
-        });
-        toast({ title: "Shared Successfully" });
-    } catch (e: any) {
-        if (e.name !== 'AbortError') {
-            toast({ variant: 'destructive', title: 'Sharing Failed' });
-        }
-    }
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      setDraggingPoint(idx);
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      let cx, cy;
+      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
   };
 
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
-        
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-8 space-y-6">
-                    <Card className="w-full border-2 border-dashed bg-card/50 text-center transition-all duration-300 rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl dark:hover:shadow-primary/20">
-                        <CardHeader className="pt-12 md:pt-20">
-                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse">
-                                <ScanLine className="size-10" />
-                            </div>
-                            <CardTitle className="text-3xl md:text-5xl font-black uppercase tracking-tighter">Document Scanner</CardTitle>
-                            <CardDescription className="text-sm md:text-lg font-bold">Premium filters. Native full-screen capture.</CardDescription>
+                <div className="lg:col-span-8">
+                    <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
+                        <CardHeader className="pt-20">
+                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-10" /></div>
+                            <CardTitle className="text-5xl font-black uppercase tracking-tighter">Document Scanner</CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-12 md:pt-20 px-6">
+                        <CardContent className="pb-20 pt-10 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                                <div 
-                                    className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"
-                                    onClick={startCamera}
-                                >
-                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
-                                        <Camera className="size-8" />
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter">Capture Photo</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Open Camera</p>
-                                    </div>
+                                <div className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group" onClick={startCamera}>
+                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg"><Camera className="size-8" /></div>
+                                    <p className="text-base font-black uppercase tracking-tighter">Capture Photo</p>
                                 </div>
-
-                                <div 
-                                    className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
-                                        <UploadCloud className="size-8" />
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter">Pick from Album</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select local file</p>
-                                    </div>
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform"><UploadCloud className="size-8" /></div>
+                                    <p className="text-base font-black uppercase tracking-tighter">Pick from Album</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
-
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 h-full">
                     <Card className="border-2 shadow-2xl flex flex-col bg-card/50 rounded-[2.5rem] h-full min-h-[400px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><FileStack className="size-6 text-primary" /> COLLECTION</CardTitle>
@@ -606,77 +389,35 @@ export default function DocumentScanner() {
                                         <Button size="icon" variant="destructive" className="absolute top-1.5 right-1.5 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-4" /></Button>
                                     </div>
                                 ))}
-                                {scannedPages.length === 0 && (
-                                    <div className="col-span-2 py-20 text-center opacity-10">
-                                        <FileStack className="size-20 mx-auto" />
-                                        <p className="text-[10px] font-black uppercase mt-4 tracking-[0.3em]">No pages scanned</p>
-                                    </div>
-                                )}
                             </div>
                         </CardContent>
                         <CardFooter className="p-6 border-t bg-muted/10">
-                            <div className="w-full space-y-3">
-                                <Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase" onClick={handleExportPdf}>
-                                    <FileText className="mr-3 size-5" /> EXPORT AS PDF
-                                </Button>
-                                <Button disabled={scannedPages.length === 0} variant="outline" className="w-full h-14 px-6 border-2 font-black text-sm rounded-xl uppercase shadow-xl tracking-widest" onClick={handleExportImages}>
-                                    <ImageIcon className="mr-3 size-5" /> SAVE IMAGES
-                                </Button>
-                                <Button disabled={scannedPages.length === 0} variant="secondary" className="w-full h-14 font-black text-sm rounded-xl uppercase" onClick={handleShare}>
-                                    <Share2 className="mr-3 size-5" /> SHARE DOCUMENT
-                                </Button>
-                            </div>
+                            <Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase" onClick={() => {
+                                const pdf = new jsPDF();
+                                scannedPages.forEach((p, i) => {
+                                    if(i > 0) pdf.addPage();
+                                    pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297);
+                                });
+                                pdf.save(`scan-${Date.now()}.pdf`);
+                            }}>EXPORT AS PDF</Button>
                         </CardFooter>
                     </Card>
                 </div>
             </div>
         )}
 
-        {stage === 'live-camera' && (
-            <Card className="w-full max-w-4xl border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-black relative aspect-video flex flex-col items-center justify-center mx-auto min-h-[300px]">
-                {isVideoLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md gap-4">
-                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-white text-xs font-black uppercase tracking-widest animate-pulse">Initializing Camera...</p>
-                    </div>
-                )}
-                <video ref={videoRef} autoPlay playsInline muted className="size-full object-cover" />
-                <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20" />
-                <div className="absolute bottom-10 flex items-center gap-6 z-20">
-                    <Button variant="outline" size="icon" className="size-14 rounded-full border-2 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20" onClick={() => { stopCamera(); setStage('viewfinder'); }}>
-                        <X className="size-8" />
-                    </Button>
-                    <button className="size-20 rounded-full border-4 border-white bg-white/20 backdrop-blur-md flex items-center justify-center group active:scale-95 transition-all" onClick={captureFrame}>
-                        <div className="size-14 rounded-full bg-white group-hover:scale-90 transition-transform shadow-xl" />
-                    </button>
-                </div>
-                <div className="absolute top-6 right-6">
-                    <Badge className="bg-red-600 text-white font-black px-4 py-1.5 rounded-full animate-pulse">LIVE FEED</Badge>
-                </div>
-            </Card>
-        )}
-
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in zoom-in-95 duration-500">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch">
                 <div className="lg:col-span-8">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col h-full">
-                        <CardHeader className="bg-white/5 border-b border-white/5 p-4 md:p-6 flex flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 text-white">
-                                <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/20"><Maximize className="size-6" /></div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment</CardTitle>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent">
-                                        <TabsTrigger value="rect" className="text-[10px] font-black uppercase px-3">RECT</TabsTrigger>
-                                        <TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-3">SCAN</TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                                <Button variant="outline" size="icon" onClick={handleRotateSource} className="h-10 w-10 border-2 border-white/10 rounded-xl text-white bg-white/5"><RotateCw className="size-5" /></Button>
-                            </div>
+                        <CardHeader className="bg-white/5 border-b p-6 flex flex-row items-center justify-between text-white">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">Adjustment</CardTitle>
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-white/10 p-1 rounded-xl border border-white/10">
+                                <TabsList className="grid grid-cols-2 h-9 bg-transparent"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCAN</TabsTrigger></TabsList>
+                            </Tabs>
                         </CardHeader>
                         <CardContent className="p-0 flex items-center justify-center relative overflow-hidden select-none bg-black/40 min-h-[500px]"
-                                    onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchEnd={handleMouseUp}>
+                                     onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                             <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white/10 transform-gpu bg-black max-w-full">
                                 {cropMode === 'rect' ? (
                                     <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[60vh]">
@@ -686,161 +427,50 @@ export default function DocumentScanner() {
                                     <div className="relative">
                                         <img ref={imgRef} src={currentRawImage} alt="scanner" className="max-h-[60vh] w-auto object-contain pointer-events-none block" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                            <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                            <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                         </svg>
                                         {points.map((p, i) => (
-                                            <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125 ring-8 ring-primary/20" : "bg-primary/80")}
+                                            <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
                                                 style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
-                                                onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
-                                                <div className="size-3 bg-white rounded-full" />
-                                            </div>
+                                                onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-3 bg-white rounded-full" /></div>
                                         ))}
                                         {draggingPoint !== null && (
-                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-32 md:size-48 rounded-full border-4 border-green-500 shadow-2xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    {/* Precision Crosshair Overlay */}
-                                                    <div className="absolute size-full flex items-center justify-center pointer-events-none z-10">
-                                                        <div className="w-full h-0.5 bg-green-500/50 absolute" />
-                                                        <div className="h-full w-0.5 bg-green-500/50 absolute" />
-                                                        <div className="size-3 border-2 border-red-500 rounded-full bg-white/50 shadow-sm" />
-                                                    </div>
-                                                </div>
+                                            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-2xl bg-white animate-in zoom-in-50">
                                                 <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
                                                     style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
-                                                />
+                                                /><div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-0.5 bg-green-500/50 absolute" /><div className="h-full w-0.5 bg-green-500/50 absolute" /></div>
                                             </div>
                                         )}
                                     </div>
                                 )}
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-black/60 p-4 border-t border-white/5 flex justify-center">
-                            <div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
-                                <Move className="h-4 w-4 text-primary animate-pulse" /> Precision handles active
-                            </div>
-                        </CardFooter>
+                        <CardFooter className="bg-black/60 p-4 flex justify-center"><div className="flex items-center gap-3 px-6 py-2 bg-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-widest"><Move className="h-4 w-4 text-primary animate-pulse" /> Precision handles active</div></CardFooter>
                     </Card>
                 </div>
-
-                <div className="lg:col-span-4 flex flex-col h-full gap-6">
+                <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-950 flex flex-col flex-1">
-                        <CardHeader className="bg-green-600/5 border-b p-4 md:p-6 flex flex-row items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="size-10 rounded-xl bg-green-600/10 flex items-center justify-center text-green-600 shadow-md"><Eye className="size-5" /></div>
-                                <CardTitle className="text-lg font-black uppercase tracking-tighter text-slate-800 dark:text-slate-100">Studio Preview</CardTitle>
-                            </div>
+                        <CardHeader className="bg-green-600/5 border-b p-6 flex flex-row items-center justify-between text-slate-800 dark:text-white">
+                            <CardTitle className="text-lg font-black uppercase tracking-tighter">Studio Preview</CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 p-6 flex flex-col bg-slate-200 dark:bg-slate-900 shadow-inner overflow-y-auto custom-scrollbar">
-                            <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white transform-gpu max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[200px]">
+                        <CardContent className="flex-1 p-6 flex flex-col bg-slate-200 dark:bg-slate-900 shadow-inner">
+                            <div className="relative bg-white shadow-3xl rounded-sm border-[4px] border-white max-w-full flex items-center justify-center overflow-hidden mb-8 min-h-[200px]">
                                 {liveResultSrc ? <img src={liveResultSrc} className="max-w-full h-auto block" alt="result" /> : <Loader2 className="animate-spin size-10 text-primary opacity-20" />}
-                                {isProcessing && <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] flex items-center justify-center"><Loader2 className="animate-spin size-8 text-primary" /></div>}
                             </div>
-                            
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2"><Sparkles className="size-3"/> Intelligent Filters</Label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <FilterBtn active={activeFilter === 'document'} onClick={() => setActiveFilter('document')} icon={FileText} label="DOC PRO" color="text-blue-500" />
-                                        <FilterBtn active={activeFilter === 'magic'} onClick={() => setActiveFilter('magic')} icon={Sparkles} label="MAGIC" color="text-yellow-500" />
-                                        <FilterBtn active={activeFilter === 'bw'} onClick={() => setActiveFilter('bw')} icon={ScanLine} label="BW PRO" color="text-slate-600" />
-                                        <FilterBtn active={activeFilter === 'photo'} onClick={() => setActiveFilter('photo')} icon={ImageIcon} label="PHOTO" color="text-purple-500" />
-                                        <FilterBtn active={activeFilter === 'gray'} onClick={() => setActiveFilter('gray')} icon={Droplets} label="GRAY" color="text-sky-500" />
-                                        <FilterBtn active={activeFilter === 'original'} onClick={() => setActiveFilter('original')} icon={RefreshCcw} label="RAW" color="text-rose-500" />
-                                    </div>
-                                </div>
-
-                                <Separator className="opacity-10" />
-
-                                <div className="space-y-6 pt-2">
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Sun className="size-3 text-yellow-500" /> Brightness</Label>
-                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{brightness[0]}%</span>
-                                        </div>
-                                        <Slider min={50} max={150} value={brightness} onValueChange={setBrightness} className="py-2" />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Contrast className="size-3 text-orange-500" /> Contrast</Label>
-                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{contrast[0]}%</span>
-                                        </div>
-                                        <Slider min={50} max={150} value={contrast} onValueChange={setContrast} className="py-2" />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Zap className="size-3 text-primary" /> Sharpness</Label>
-                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{sharpness[0]}</span>
-                                        </div>
-                                        <Slider min={0} max={10} step={0.5} value={sharpness} onValueChange={setSharpness} className="py-2" />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label className="text-[10px] font-black uppercase flex items-center gap-2"><Droplets className="size-3 text-blue-500" /> Blur</Label>
-                                            <span className="text-[10px] font-mono font-bold bg-muted px-2 py-0.5 rounded">{blur[0]}px</span>
-                                        </div>
-                                        <Slider min={0} max={5} step={0.5} value={blur} onValueChange={setBlur} className="py-2" />
-                                    </div>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Intelligent Filters</Label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {['document', 'magic', 'bw', 'photo', 'gray', 'original'].map(f => (
+                                        <Button key={f} variant={activeFilter === f ? 'default' : 'outline'} className="text-[8px] font-black h-10 rounded-xl" onClick={() => setActiveFilter(f as ScanFilter)}>{f.toUpperCase()}</Button>
+                                    ))}
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="p-4 border-t bg-white dark:bg-slate-950 flex flex-col gap-3">
-                            <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg px-12 group shadow-xl transition-all" onClick={handleConfirmAdd}>
-                                CONFIRM & ADD <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                            <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px]" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                        <CardFooter className="p-6 border-t bg-white dark:bg-slate-950 flex flex-col gap-3">
+                            <Button className="w-full h-14 rounded-xl bg-primary text-black font-black text-lg shadow-xl" onClick={handleConfirmAdd}>CONFIRM & ADD</Button>
+                            <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px]" onClick={() => setStage('viewfinder')}>CANCEL</Button>
                         </CardFooter>
                     </Card>
-                </div>
-            </div>
-        )}
-
-        {stage === 'stack' && (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-5 w-full md:w-auto">
-                        <div className="size-16 rounded-3xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-2xl border border-green-500/20">
-                            <FileStack className="size-8" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Scan Collection</h2>
-                            <p className="text-[11px] font-bold text-muted-foreground uppercase opacity-60 tracking-[0.3em]">{scannedPages.length} Pages Captured</p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 md:flex md:items-center gap-3 w-full md:w-auto">
-                        <Button variant="outline" className="h-14 rounded-2xl font-black uppercase text-[10px] md:text-xs border-2 tracking-widest px-4 md:px-8 bg-white dark:bg-slate-900 shadow-md" onClick={() => setStage('viewfinder')}>
-                            <Plus className="mr-2 size-4 md:size-5" /> SCAN MORE
-                        </Button>
-                        <Button disabled={isExporting} className="h-14 px-4 md:px-6 bg-green-600 hover:bg-green-700 text-white font-black text-[10px] md:text-sm rounded-2xl shadow-3xl uppercase tracking-widest" onClick={handleExportPdf}>
-                            {isExporting ? <Loader2 className="animate-spin size-4 md:size-5" /> : <Download className="mr-2 size-4 md:size-5" />} EXPORT PDF
-                        </Button>
-                        <Button disabled={isExporting} variant="outline" className="h-14 px-4 md:px-6 border-2 font-black text-[10px] md:text-sm rounded-2xl shadow-xl uppercase tracking-widest" onClick={handleExportImages}>
-                            <ImageIcon className="mr-2 size-4 md:size-5" /> SAVE IMAGES
-                        </Button>
-                        <Button variant="secondary" className="h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase" onClick={handleShare}>
-                            <Share2 className="size-4 md:size-6" /> <span className="md:hidden">SHARE</span>
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
-                    {scannedPages.map((page, i) => (
-                        <Card key={page.id} className="group relative aspect-[3/4] rounded-3xl overflow-hidden border-2 bg-white shadow-2xl hover:border-primary/50 transition-all hover:-translate-y-2 transform-gpu">
-                            <img src={page.processedSrc} className="size-full object-cover" alt={`p${i+1}`} />
-                            <div className="absolute top-3 left-3 size-8 rounded-xl bg-black/70 backdrop-blur-md flex items-center justify-center text-xs font-black text-white border border-white/10 shadow-lg">P{i + 1}</div>
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                <Button size="icon" variant="destructive" className="size-12 rounded-2xl shadow-2xl" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== page.id))}><Trash2 className="size-6" /></Button>
-                            </div>
-                        </Card>
-                    ))}
-                    <button 
-                        className="aspect-[3/4] border-4 border-dashed border-muted-foreground/10 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 hover:bg-primary/5 hover:border-primary/40 transition-all group shadow-inner"
-                        onClick={() => setStage('viewfinder')}
-                    >
-                        <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg border border-primary/20">
-                            <Plus className="size-8" />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Add Page</span>
-                    </button>
                 </div>
             </div>
         )}
@@ -849,18 +479,4 @@ export default function DocumentScanner() {
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleNativeCapture} />
     </div>
   );
-}
-
-function FilterBtn({ active, onClick, icon: Icon, label, color }: { active: boolean, onClick: () => void, icon: any, label: string, color: string }) {
-    return (
-        <button onClick={onClick} className={cn(
-            "flex flex-col items-center gap-2 p-2 rounded-2xl border-2 transition-all flex-1",
-            active ? "bg-white border-primary shadow-lg scale-105" : "bg-white/5 border-transparent opacity-40 hover:opacity-100"
-        )}>
-            <div className={cn("size-8 rounded-xl flex items-center justify-center shadow-inner", active ? "bg-primary/10" : "bg-white/5")}>
-                <Icon className={cn("size-4", active ? color : "text-slate-400")} />
-            </div>
-            <span className={cn("text-[7px] font-black uppercase tracking-widest truncate w-full text-center", active ? "text-slate-900" : "text-slate-400")}>{label}</span>
-        </button>
-    );
 }

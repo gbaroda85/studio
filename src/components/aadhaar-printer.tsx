@@ -190,10 +190,6 @@ export default function AadhaarPrinter() {
     ]);
   };
 
-  /**
-   * Gaussian elimination for homography
-   * This solves the perspective transformation matrix.
-   */
   const solvePerspective = (src: Point[], dst: Point[]) => {
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -244,6 +240,7 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
+        // Use ONLY the 4 corner points for matrix (TL:0, TR:2, BR:4, BL:6)
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
@@ -255,7 +252,7 @@ export default function AadhaarPrinter() {
           { x: 0, y: canvas.height }
         ];
 
-        // CRITICAL FIX: Matrix must map destination pixels back to source pixels for sampling
+        // PERSPECTIVE CORRECTION: Destination back to Source mapping
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
         
@@ -346,7 +343,7 @@ export default function AadhaarPrinter() {
             else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
 
-        // Recalculate midpoints to prevent drift and visual sticking
+        // Recalculate midpoints to keep them centered and avoid sticking
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
@@ -441,7 +438,7 @@ export default function AadhaarPrinter() {
                   {[ { side: 'front' as const, raw: frontRaw, final: frontFinal, setRaw: setFrontRaw, setFinal: setFrontFinal, inputRef: frontInputRef },
                      { side: 'back' as const, raw: backRaw, final: backFinal, setRaw: setBackRaw, setFinal: setBackFinal, inputRef: backInputRef }
                   ].map(s => (
-                    <Card key={s.side} className={cn("border-2 border-dashed rounded-[2.5rem] overflow-hidden transition-all", s.final ? "border-green-500/50 bg-green-500/5" : "hover:border-primary")}>
+                    <Card key={s.side} className={cn("border-2 border-dashed rounded-[2.5rem] overflow-hidden transition-all", s.final ? "border-green-500/5 bg-green-500/5 border-green-500/50" : "hover:border-primary")}>
                       <CardHeader className="text-center"><CardTitle className="text-sm font-black uppercase text-muted-foreground">{s.side === 'front' ? 'FRONT SIDE' : 'BACK SIDE'}</CardTitle></CardHeader>
                       <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
                           {s.final ? (
