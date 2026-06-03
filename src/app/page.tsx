@@ -68,8 +68,8 @@ const ALL_TOOLS = [
   // PDF TOOLS
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
   { icon: FileText, title: "WORD TO PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
-  { icon: Lock, title: "VAULT PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
-  { icon: FileArchive, title: "PDF OPTIMIZER", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
+  { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
+  { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
   { icon: FilePenLine, title: "EDIT PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
 
   // HIDDEN FROM HOME BUT IN SEARCH INDEX
@@ -144,7 +144,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-12 pb-12 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-8 pb-10 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
@@ -165,16 +165,16 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-5 py-2 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
-              <ImageIcon className="size-3.5 text-primary group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
+              <ImageIcon className="size-3 text-primary group-hover:scale-110 transition-transform" />
               <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-5 py-2 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
-              <FileText className="size-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
+              <FileText className="size-3 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-5 py-2 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
-              <Calculator className="size-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
+              <Calculator className="size-3 text-emerald-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
@@ -230,9 +230,9 @@ export default function Page() {
                 </div>
 
                 <div className="py-12 w-full flex justify-center">
-                    <div className="w-full h-0.5 border-t-2 border-dashed border-primary/20 relative">
+                    <div className="w-full h-0.5 border-t-2 border-dashed border-primary relative">
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-6">
-                            <div className="size-10 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center text-primary/50">
+                            <div className="size-10 rounded-full border-2 border-dashed border-primary flex items-center justify-center text-primary">
                                 <Sparkles className="size-4" />
                             </div>
                         </div>

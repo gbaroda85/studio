@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Secure PDF Locker - Password Protect PDF Online with AES Encryption',
+  title: 'PDF Locker - Password Protect PDF Online with AES Encryption',
   description: 'Seal your PDF documents with professional AES-128 encryption. No server uploads - 100% private local protection for bank statements, IDs, and legal docs.',
 };
 
