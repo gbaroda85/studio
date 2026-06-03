@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -462,7 +461,7 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1700px] mx-auto">
                 
-                <Card className="lg:col-span-8 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
+                <Card className="lg:col-span-9 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
@@ -507,13 +506,13 @@ export default function DocumentScanner() {
                     </CardFooter>
                 </Card>
 
-                <Card className="lg:col-span-4 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
+                <Card className="lg:col-span-3 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[650px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">HD RESULT PREVIEW</CardTitle></div>
                          <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
-                    <CardContent className="flex-1 p-6 md:p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
-                        <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[12px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[380px]">
+                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
+                        <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
                         </div>
