@@ -13,7 +13,6 @@ import {
     Sparkles, 
     RefreshCcw,
     Eye,
-    ChevronRight,
     CheckCircle2,
     ImageIcon,
     Settings2
@@ -40,10 +39,11 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   const [outputFormat, setOutputFormat] = useState<OutputFormat>(targetFormat);
   const [isConverting, setIsConverting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const formatTitle = outputFormat === 'jpeg' ? 'JPG' : outputFormat.toUpperCase();
-  const title = `IMAGE TO ${formatTitle} STUDIO`;
   const mimeType = `image/${outputFormat}`;
 
   const handleFileChange = (file: File | null) => {
@@ -51,7 +51,8 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImageSrc(e.target?.result as string);
+        const src = e.target?.result as string;
+        setImageSrc(src);
         setConvertedSrc(null);
       };
       reader.readAsDataURL(file);
