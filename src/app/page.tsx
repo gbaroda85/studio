@@ -161,22 +161,22 @@ export default function Page() {
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up">
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-10 font-semibold leading-relaxed animate-fade-in-up">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-primary/50 transition-all group">
-              <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+          <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
+              <ImageIcon className="size-6 text-primary group-hover:scale-110 transition-transform" />
+              <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-rose-500/50 transition-all group">
-              <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
+              <FileText className="size-6 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border-2 shadow-sm rounded-2xl hover:shadow-xl hover:border-emerald-500/50 transition-all group">
-              <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-bold text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
+              <Calculator className="size-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
