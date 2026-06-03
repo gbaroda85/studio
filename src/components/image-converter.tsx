@@ -3,13 +3,28 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { UploadCloud, Download, Loader2, FileOutput, ShieldCheck, Zap, Sparkles, RefreshCcw } from "lucide-react";
+import { 
+    UploadCloud, 
+    Download, 
+    Loader2, 
+    FileOutput, 
+    ShieldCheck, 
+    Zap, 
+    Sparkles, 
+    RefreshCcw,
+    Eye,
+    ChevronRight,
+    CheckCircle2,
+    ImageIcon,
+    Settings2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 
@@ -27,7 +42,8 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const title = `IMAGE TO ${outputFormat === 'jpeg' ? 'JPG' : outputFormat.toUpperCase()} CONVERTER`;
+  const formatTitle = outputFormat === 'jpeg' ? 'JPG' : outputFormat.toUpperCase();
+  const title = `IMAGE TO ${formatTitle} STUDIO`;
   const mimeType = `image/${outputFormat}`;
 
   const handleFileChange = (file: File | null) => {
@@ -39,11 +55,11 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
         setConvertedSrc(null);
       };
       reader.readAsDataURL(file);
-    } else {
+    } else if (file) {
       toast({
         variant: "destructive",
         title: "Invalid File Type",
-        description: "Please select an image file.",
+        description: "Please select a valid image file.",
       });
     }
   };
@@ -74,7 +90,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
         setConvertedSrc(dataUrl);
       }
       setIsConverting(false);
-      toast({ title: "Success!", description: `Image transformed to ${outputFormat.toUpperCase()} perfectly.` });
+      toast({ title: "Success!", description: `Image transformed to ${formatTitle} perfectly.` });
     };
     img.onerror = () => {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not load image.' });
@@ -95,92 +111,171 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   
   if (!imageSrc) {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 border-2 border-dashed", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <FileOutput className="h-8 w-8" />
-          </div>
-          <CardTitle className="text-2xl font-black uppercase tracking-tight">{title}</CardTitle>
-          <CardDescription>Drag & drop or Click to convert image to {outputFormat.toUpperCase()}.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-10 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-            <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-            <div>
-                <p className="text-xl font-bold">Drop photo here to begin</p>
-                <p className="text-sm text-muted-foreground mt-2">100% Secure local processing. Instant output.</p>
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <FileOutput className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
             </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-        <CardFooter className="justify-center gap-6 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8">
-            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500" /> NO SERVER UPLOADS</div>
-            <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> INSTANT CONVERSION</div>
-        </CardFooter>
-      </Card>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Image to <span className="text-gradient-hero">{formatTitle} Pro</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Transform formats with 100% quality preservation. <br/>Private local RAM conversion logic.
+            </p>
+        </motion.div>
+
+        <Card
+            className={cn(
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+            )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-10 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Image here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Instant local conversion.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> NATIVE SPEED</div>
+                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> HD EXPORT</div>
+            </CardFooter>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-2xl transition-all duration-300 hover:border-primary/50 hover:shadow-xl border-2 overflow-hidden">
-      <CardHeader className="bg-muted/30 border-b">
-        <CardTitle className="text-xl font-black flex items-center justify-between">
-            <span className="uppercase tracking-tighter">{title}</span>
-            {convertedSrc && <Badge className="bg-green-500 text-white font-black">CONVERTED</Badge>}
-        </CardTitle>
-        <CardDescription>Fine-tune format and download your result.</CardDescription>
-      </CardHeader>
-      <CardContent className="p-8 space-y-8">
-        <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-white border-2 shadow-inner group flex items-center justify-center">
-            {convertedSrc ? (
-                 <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 animate-in zoom-in-95 duration-500" />
-            ) : (
-                <Image src={imageSrc} alt="Original" fill className="object-contain p-4 grayscale opacity-40" />
-            )}
-            {isConverting && (
-                <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-primary stroke-[3]" />
-                    <p className="text-xs font-black text-primary uppercase tracking-widest">Transforming Pixels...</p>
-                </div>
-            )}
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-6 items-end">
-            <div className="space-y-3">
-                <Label htmlFor="format" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Target Format</Label>
-                <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setConvertedSrc(null); }} disabled={isConverting}>
-                    <SelectTrigger id="format" className="h-12 font-bold border-2"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="jpeg" className="font-bold">JPEG (Universal)</SelectItem>
-                        <SelectItem value="png" className="font-bold">PNG (Lossless)</SelectItem>
-                        <SelectItem value="webp" className="font-bold">WEBP (Optimized)</SelectItem>
-                    </SelectContent>
-                </Select>
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3">
+            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                <Settings2 className="size-5 md:size-6" />
             </div>
-            {!convertedSrc ? (
-                <Button onClick={handleConvert} disabled={isConverting} className="h-12 w-full text-lg font-black bg-primary shadow-lg">
-                    {isConverting ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400"/>}
-                    START CONVERSION
-                </Button>
-            ) : (
-                <Button onClick={handleDownload} className="h-12 w-full text-lg font-black bg-green-600 hover:bg-green-700 shadow-lg">
-                    <Download className="mr-2 h-5 w-5"/>
-                    DOWNLOAD FILE
+            <div>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+            </div>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+                <RefreshCcw className="mr-1.5 size-3" /> Reset
+            </Button>
+            {convertedSrc && (
+                <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload}>
+                    <Download className="mr-1.5 size-3.5" /> DOWNLOAD {formatTitle}
                 </Button>
             )}
         </div>
-      </CardContent>
-      <CardFooter className="bg-muted/10 border-t p-4 flex justify-between">
-        <Button variant="ghost" onClick={() => { setImageSrc(null); setConvertedSrc(null); setImageFile(null); }} className="font-bold">
-            <RefreshCcw className="mr-2 h-4 w-4" /> Change Image
-        </Button>
-        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-            <ShieldCheck className="h-4 w-4 text-green-500" /> Secure RAM Processing
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Main Viewport: The Preview Box */}
+        <div className="lg:col-span-8">
+            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">HD RENDER PREVIEW</CardTitle>
+                    </div>
+                    {convertedSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">CONVERTED</Badge>}
+                </CardHeader>
+                {/* FIXED WHITE BACKGROUND FOR PREVIEW ACCURACY */}
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-white shadow-inner min-h-[400px] flex items-center justify-center relative">
+                    <div className="relative size-full min-h-[350px] flex items-center justify-center">
+                        {convertedSrc ? (
+                             <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
+                        ) : (
+                            <Image src={imageSrc} alt="Original" fill className="object-contain p-4 md:p-8 grayscale opacity-20" />
+                        )}
+                        {isConverting && (
+                            <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center gap-4 z-10">
+                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                <p className="text-xs font-black text-primary uppercase tracking-widest animate-pulse">Transforming Pixels...</p>
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD OUTPUT</div>
+                    </div>
+                </CardFooter>
+            </Card>
         </div>
-      </CardFooter>
-    </Card>
-  )
+
+        {/* Sidebar: Controls */}
+        <div className="lg:col-span-4 space-y-4">
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
+                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Settings
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 md:p-8 space-y-8">
+                    <div className="space-y-4">
+                        <Label htmlFor="format" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Target Format</Label>
+                        <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setConvertedSrc(null); }} disabled={isConverting}>
+                            <SelectTrigger id="format" className="h-12 font-black border-2 rounded-xl bg-background/50 shadow-inner"><SelectValue /></SelectTrigger>
+                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal - Smallest)</SelectItem>
+                                <SelectItem value="png" className="font-bold py-2">PNG (Lossless - Crystal Clear)</SelectItem>
+                                <SelectItem value="webp" className="font-bold py-2">WEBP (Modern - Optimized)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                        <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Conversion</p>
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                                Your image is rendered using original vectors and pixels for zero quality loss during format shift.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
+                    <Button 
+                        className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                        onClick={handleConvert}
+                        disabled={isConverting || !!convertedSrc}
+                    >
+                        {isConverting ? (
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="size-6 md:size-7 animate-spin" />
+                                <span className="uppercase text-sm md:text-base tracking-tighter">TRANSFORMING...</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">CONVERT NOW</span>
+                            </div>
+                        )}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+      </div>
+      
+      <canvas ref={canvasRef} className="hidden" />
+    </div>
+  );
 }
