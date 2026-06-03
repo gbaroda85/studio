@@ -13,6 +13,7 @@ const config: Config = {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Orbitron', 'sans-serif'],
+        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

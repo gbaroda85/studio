@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import type {LucideIcon} from 'lucide-react';
 import {
@@ -42,8 +43,8 @@ export function FeatureCard({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
-          <CardTitle className="text-xl font-bold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight line-clamp-1 uppercase font-headline">{title}</CardTitle>
-          <CardDescription className="text-[15px] text-slate-500 dark:text-slate-400 leading-tight font-normal line-clamp-2 h-11">{description}</CardDescription>
+          <CardTitle className="text-xl font-bold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight line-clamp-1 uppercase font-jakarta">{title}</CardTitle>
+          <CardDescription className="text-[15px] text-slate-500 dark:text-slate-400 leading-tight font-medium line-clamp-2 h-11 font-jakarta">{description}</CardDescription>
         </CardHeader>
         <div className="absolute -bottom-10 -right-10 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-2xl" />
       </Card>

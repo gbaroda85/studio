@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -443,15 +444,15 @@ function ToolsPageContent() {
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm font-jakarta">
             <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight font-headline uppercase">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-jakarta">
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6" style={{ animationDelay: '0.1s' }}>
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6 font-jakarta" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your browser for 100% privacy.
           </p>
 
@@ -462,7 +463,7 @@ function ToolsPageContent() {
                 <input
                     type="search"
                     placeholder={t('search_tools_placeholder')}
-                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold outline-none"
+                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white dark:bg-slate-900 font-bold outline-none font-jakarta"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -473,7 +474,7 @@ function ToolsPageContent() {
 
       <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4 pb-32">
         {isSearching ? (
-            <div className="space-y-20">
+            <div className="space-y-20 font-jakarta">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -509,7 +510,7 @@ function ToolsPageContent() {
             )}
             </div>
         ) : (
-            <Tabs defaultValue={defaultTab} className="w-full">
+            <Tabs defaultValue={defaultTab} className="w-full font-jakarta">
             <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-10">
                 {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                 <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 transition-all tabs-trigger-lift">

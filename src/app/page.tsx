@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -118,9 +119,9 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-5" />
         </div>
-        <h3 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase font-headline">{title}</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-normal h-10">{description}</p>
-        <div className="flex items-center text-primary font-bold text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all">
+        <h3 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1 uppercase font-jakarta">{title}</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-tight font-medium h-10 font-jakarta">{description}</p>
+        <div className="flex items-center text-primary font-black text-[9px] uppercase tracking-widest group-hover:gap-2 transition-all font-jakarta">
           Launch Tool <ArrowRight className="ml-1 size-3" />
         </div>
       </CardContent>
@@ -144,7 +145,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-8 pb-10 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
@@ -155,7 +156,7 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-2xl md:text-4xl lg:text-6xl font-extrabold mb-2 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-extrabold mb-2 tracking-tighter leading-[1.05] animate-fade-in-up font-jakarta">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
@@ -165,17 +166,17 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
+            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-3 py-1 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-3 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
+            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-3 py-1 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
               <FileText className="size-3 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-4 py-1.5 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
+            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-3 py-1 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
               <Calculator className="size-3 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
@@ -186,7 +187,7 @@ export default function Page() {
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'biodata', 'compress')"
-                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -199,14 +200,14 @@ export default function Page() {
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-12">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-12 font-jakarta">
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                     {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
                 </div>
                 {filteredTools.length === 0 && (
-                   <div className="text-center py-20 opacity-30">
+                   <div className="text-center py-20 opacity-30 font-jakarta">
                       <Search className="size-20 mx-auto mb-4" />
                       <p className="font-bold uppercase tracking-widest">No matching tools found.</p>
                    </div>
@@ -215,12 +216,12 @@ export default function Page() {
           ) : (
             <>
                 <div className="mb-12">
-                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3">
+                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3 font-jakarta">
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter">VISUAL PROCESSOR</h2>
-                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-bold text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-jakarta">VISUAL PROCESSOR</h2>
+                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-bold text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all font-jakarta">
                             <Link href="/tools">EXPLORE ALL <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>
                     </div>
@@ -240,10 +241,10 @@ export default function Page() {
                 </div>
 
                 <div className="mb-24">
-                    <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-[0.3em] mb-3">
+                    <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-[0.3em] mb-3 font-jakarta">
                         <div className="w-12 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10">PDF Toolkit</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-jakarta">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -255,9 +256,9 @@ export default function Page() {
                     
                     <div className="relative z-10 text-center space-y-16">
                         <div className="space-y-4">
-                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm">CORE PRINCIPLES</Badge>
-                            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
-                            <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80">The only professional studio built entirely on privacy-first architecture.</p>
+                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm font-jakarta">CORE PRINCIPLES</Badge>
+                            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter font-jakarta">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
+                            <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80 font-jakarta">The only professional studio built entirely on privacy-first architecture.</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8 md:gap-12">
@@ -265,7 +266,7 @@ export default function Page() {
                                 <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-green-500/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <ShieldCheck className="size-10 text-green-500" />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 font-jakarta">
                                     <h3 className="text-lg font-bold tracking-tight">100% Private</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).</p>
                                 </div>
@@ -275,7 +276,7 @@ export default function Page() {
                                 <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-blue-500/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <Zap className="size-10 text-blue-500" />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 font-jakarta">
                                     <h3 className="text-lg font-bold tracking-tight">Native Performance</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.</p>
                                 </div>
@@ -285,7 +286,7 @@ export default function Page() {
                                 <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-primary/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <Trophy className="size-10 text-primary" />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 font-jakarta">
                                     <h3 className="text-lg font-bold tracking-tight">Studio Quality</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.</p>
                                 </div>
@@ -293,7 +294,7 @@ export default function Page() {
                         </div>
 
                         <div className="pt-8">
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5">
+                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5 font-jakarta">
                                 <div className="flex items-center -space-x-3">
                                     {[1,2,3,4].map(i => (
                                         <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">U{i}</div>
