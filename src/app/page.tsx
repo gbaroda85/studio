@@ -55,64 +55,63 @@ import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
   // FEATURED & VISUAL PROCESSOR
-  { icon: Sparkles, title: "Document Scan", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", lightBg: "bg-[#f0fdf4]", category: "featured" },
-  { icon: FileDigit, title: "Image to PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", lightBg: "bg-[#fff1f2]", category: "featured" },
-  { icon: Shrink, title: "Smart Image Compress", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", lightBg: "bg-[#fefce8]", category: "featured" },
-  { icon: Heart, title: "Marriage Bio Data", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "featured" },
-  { icon: Printer, title: "Aadhaar Printer", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "featured" },
-  { icon: UserCircle, title: "Passport Photo Maker", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "featured" },
-  { icon: Eraser, title: "Background Remover", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-[#faf5ff]", category: "featured" },
-  { icon: Sparkles, title: "Enhance Photo", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", lightBg: "bg-[#f5f3ff]", category: "featured" },
+  { icon: Sparkles, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", lightBg: "bg-[#f0fdf4]", category: "featured" },
+  { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", lightBg: "bg-[#fff1f2]", category: "featured" },
+  { icon: Shrink, title: "SMART IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", lightBg: "bg-[#fefce8]", category: "featured" },
+  { icon: Heart, title: "MARRIAGE BIO DATA", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "featured" },
+  { icon: Printer, title: "AADHAAR PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "featured" },
+  { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "featured" },
+  { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-[#faf5ff]", category: "featured" },
+  { icon: Sparkles, title: "ENHANCE PHOTO", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", lightBg: "bg-[#f5f3ff]", category: "featured" },
   
-  // PDF TOOLS - REORDERED: Merge First, Edit Last
-  { icon: Merge, title: "Merge PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
-  { icon: FileText, title: "Word to PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
-  { icon: Lock, title: "Vault PDF Locker", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
-  { icon: FileArchive, title: "PDF Optimizer", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
-  { icon: FilePenLine, title: "Edit PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
+  // PDF TOOLS
+  { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
+  { icon: FileText, title: "WORD TO PDF", description: "Convert DOCX documents to professional PDF.", href: "/docx-to-pdf", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
+  { icon: Lock, title: "VAULT PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-[#f8fafc]", category: "pdf-kit" },
+  { icon: FileArchive, title: "PDF OPTIMIZER", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
+  { icon: FilePenLine, title: "EDIT PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
 
   // HIDDEN FROM HOME BUT IN SEARCH INDEX
-  { icon: FileOutput, title: "Image to JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", lightBg: "bg-[#fefce8]", category: "image" },
-  { icon: FileOutput, title: "Image to PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: FileScan, title: "Image to Text (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
-  { icon: Crop, title: "Crop Image", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: Maximize, title: "Image Resize", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
-  { icon: Scissors, title: "Split PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
-  { icon: Unlock, title: "Unlock PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-extra" },
-  { icon: Crop, title: "Crop PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]" },
-  { icon: Camera, title: "Scan to PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]" },
-  { icon: ImageIcon, title: "PDF to Image", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]" },
-  { icon: FileCode, title: "HTML to PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]" },
-  { icon: FileText, title: "Text to PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-slate-500", lightBg: "bg-[#f1f5f9]" },
-  { icon: Copyright, title: "Add Watermark", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]" },
-  { icon: NotebookPen, title: "Add Page Numbers", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]" },
+  { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-yellow-500", lightBg: "bg-[#fefce8]", category: "image" },
+  { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
+  { icon: Crop, title: "CROP IMAGE", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: Maximize, title: "IMAGE RESIZE", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
+  { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file visually.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-[#ecfeff]", category: "pdf-extra" },
+  { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-extra" },
+  { icon: Crop, title: "CROP PDF", description: "Crop the visible area of PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]" },
+  { icon: Camera, title: "SCAN TO PDF", description: "Scan documents directly to a PDF file.", href: "/scan-to-pdf", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]" },
+  { icon: ImageIcon, title: "PDF TO IMAGE", description: "Extract all pages from a PDF as images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]" },
+  { icon: FileCode, title: "HTML TO PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]" },
+  { icon: Copyright, title: "ADD WATERMARK", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]" },
+  { icon: NotebookPen, title: "ADD PAGE NUMBERS", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]" },
 
   // CALCULATORS
-  { icon: Calculator, title: "Standard Calculator", description: "For your everyday calculations.", href: "/standard-calculator", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "calculator" },
-  { icon: Landmark, title: "Loan & EMI Calculator", description: "Calculate your loan payments ease.", href: "/loan-calculator", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
-  { icon: Cake, title: "Age Calculator", description: "Find out your exact age profile.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
-  { icon: Percent, title: "Percentage Calculator", description: "Quickly calculate percentages.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
-  { icon: Route, title: "Fuel Cost Calculator", description: "Estimate trip fuel expenses.", href: "/fuel-cost-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
-  { icon: Coins, title: "Interest Calculator", description: "Simple and compound interest.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
-  { icon: Receipt, title: "Sales Tax Calculator", description: "Calculate tax and total price.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
+  { icon: Calculator, title: "STANDARD CALCULATOR", description: "For your everyday calculations.", href: "/standard-calculator", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "calculator" },
+  { icon: Landmark, title: "LOAN & EMI CALCULATOR", description: "Calculate your loan payments ease.", href: "/loan-calculator", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
+  { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
+  { icon: Percent, title: "PERCENTAGE CALCULATOR", description: "Quickly calculate percentages.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
+  { icon: Route, title: "FUEL COST CALCULATOR", description: "Estimate trip fuel expenses.", href: "/fuel-cost-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
+  { icon: Coins, title: "INTEREST CALCULATOR", description: "Simple and compound interest.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
+  { icon: Receipt, title: "SALES TAX CALCULATOR", description: "Calculate tax and total price.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
 
   // CONVERTERS
-  { icon: Gauge, title: "Acceleration Converter", description: "Convert between different units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-[#f0fdf4]", category: "converter" },
-  { icon: AreaChart, title: "Area Converter", description: "Convert between different area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converter" },
-  { icon: Fuel, title: "Fuel Consumption Converter", description: "Convert between efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converter" },
-  { icon: Waves, title: "Pressure Converter", description: "Convert between different units.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "converter" },
+  { icon: Gauge, title: "ACCELERATION CONVERTER", description: "Convert between different units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-[#f0fdf4]", category: "converter" },
+  { icon: AreaChart, title: "AREA CONVERTER", description: "Convert between different area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converter" },
+  { icon: Fuel, title: "FUEL CONSUMPTION CONVERTER", description: "Convert between efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converter" },
+  { icon: Waves, title: "PRESSURE CONVERTER", description: "Convert between different units.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "converter" },
 
   // FILE TOOLS
-  { icon: Archive, title: "Create Zip", description: "Combine multiple files into a single zip.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-[#f5f3ff]", category: "file" },
-  { icon: ArchiveRestore, title: "Unzip File", description: "Extract files from a zip archive.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
+  { icon: Archive, title: "CREATE ZIP", description: "Combine multiple files into a single zip.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-[#f5f3ff]", category: "file" },
+  { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from a zip archive.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group">
     <Card className={cn(
       "h-full border-2 border-border/50 dark:border-white/5 shadow-sm hover:shadow-2xl dark:hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 overflow-hidden relative rounded-[2.5rem] hover:-translate-y-2",
-      lightBg, // Colourful background for Light Mode
-      "dark:bg-card" // Professional dark background for Dark Mode
+      lightBg,
+      "dark:bg-card"
     )}>
       <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-5">
@@ -156,7 +155,7 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-medium mb-4 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-4 tracking-tighter leading-[1.05] animate-fade-in-up" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
@@ -166,15 +165,15 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
+            <Link href="/tools?tab=image" className="flex items-center gap-4 px-8 py-4 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group">
               <ImageIcon className="size-6 text-primary group-hover:scale-110 transition-transform" />
               <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
+            <Link href="/tools?tab=pdf" className="flex items-center gap-4 px-8 py-4 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group">
               <FileText className="size-6 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-4 px-8 py-4 bg-white dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
+            <Link href="/tools?tab=calculator" className="flex items-center gap-4 px-8 py-4 bg-background dark:bg-slate-900 border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group">
               <Calculator className="size-6 text-emerald-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
@@ -187,7 +186,7 @@ export default function Page() {
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'biodata', 'compress')"
-                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-white dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
+                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background dark:bg-[#001D39] border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -240,7 +239,8 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className="mb-32 py-16 px-8 bg-primary/5 dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/10 dark:border-white/10 shadow-inner overflow-hidden relative">
+                {/* UPDATED WHY CHOOSE SECTION - MORE VISIBLE IN LIGHT MODE */}
+                <div className="mb-32 py-16 px-8 bg-[#ecf4f4] dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/20 dark:border-white/10 shadow-inner overflow-hidden relative">
                     <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-3xl rounded-full" />
                     <div className="absolute bottom-0 left-0 size-64 bg-accent/10 blur-3xl rounded-full" />
                     
@@ -253,7 +253,7 @@ export default function Page() {
 
                         <div className="grid md:grid-cols-3 gap-8 md:gap-12">
                             <div className="space-y-6 group">
-                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-green-500/30 group-hover:-translate-y-2 transition-all duration-300">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-green-500/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <ShieldCheck className="size-10 text-green-500" />
                                 </div>
                                 <div className="space-y-2">
@@ -263,7 +263,7 @@ export default function Page() {
                             </div>
 
                             <div className="space-y-6 group">
-                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-blue-500/30 group-hover:-translate-y-2 transition-all duration-300">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-blue-500/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <Zap className="size-10 text-blue-500" />
                                 </div>
                                 <div className="space-y-2">
@@ -273,7 +273,7 @@ export default function Page() {
                             </div>
 
                             <div className="space-y-6 group">
-                                <div className="size-20 mx-auto rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-primary/30 group-hover:-translate-y-2 transition-all duration-300">
+                                <div className="size-20 mx-auto rounded-[2rem] bg-background dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-transparent group-hover:border-primary/30 group-hover:-translate-y-2 transition-all duration-300">
                                     <Trophy className="size-10 text-primary" />
                                 </div>
                                 <div className="space-y-2">
@@ -284,7 +284,7 @@ export default function Page() {
                         </div>
 
                         <div className="pt-8">
-                             <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5">
+                             <div className="inline-flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5">
                                 <div className="flex items-center -space-x-3">
                                     {[1,2,3,4].map(i => (
                                         <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">U{i}</div>
