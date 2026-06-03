@@ -95,7 +95,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune defaults
+  // Fine-tune defaults for Document mode
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -187,17 +187,11 @@ export default function DocumentScanner() {
   // Sync Defaults with Filter Selection
   useEffect(() => {
     if (activeFilter === 'document') {
-        setBrightness([145]);
-        setContrast([96]);
-        setSaturation([70]);
+        setBrightness([145]); setContrast([96]); setSaturation([70]);
     } else if (activeFilter === 'magic') {
-        setBrightness([110]);
-        setContrast([110]);
-        setSaturation([130]);
+        setBrightness([110]); setContrast([110]); setSaturation([130]);
     } else if (activeFilter === 'original') {
-        setBrightness([100]);
-        setContrast([100]);
-        setSaturation([100]);
+        setBrightness([100]); setContrast([100]); setSaturation([100]);
     }
   }, [activeFilter]);
 
@@ -234,34 +228,44 @@ export default function DocumentScanner() {
         canvas.height = Math.max(10, c.height * scaleY);
         ctx.drawImage(tempCanvas, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, canvas.width, canvas.height);
     } else {
-        // Perspective in content-space
-        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
-        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
-        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
-        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
+        // Perspective in rotated content-space
+        // We must map points to rotated space first
+        const angleRad = (rotation * Math.PI) / 180;
+        const cos = Math.cos(angleRad);
+        const sin = Math.sin(angleRad);
+
+        const mapPoint = (p: Point) => {
+            const dx = (p.x / 100) - 0.5;
+            const dy = (p.y / 100) - 0.5;
+            const nx = dx * cos - dy * sin + 0.5;
+            const ny = dx * sin + dy * cos + 0.5;
+            return { x: nx * tempCanvas.width, y: ny * tempCanvas.height };
+        };
+
+        const corners = [points[0], points[2], points[4], points[6]].map(mapPoint);
         
-        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (tempCanvas.width / 100)));
-        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (tempCanvas.height / 100)));
+        const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+        const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
+        const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
+        const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
+        
+        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
+        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
         canvas.width = targetWidth; canvas.height = targetHeight;
 
-        const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
-            x: p.x * (tempCanvas.width / 100), 
-            y: p.y * (tempCanvas.height / 100) 
-        }));
-        const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
-        
-        const h = solvePerspective(dstPoints, srcPoints);
-        const imgData = ctx.createImageData(canvas.width, canvas.height);
+        const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
+        const h = solvePerspective(dstPoints, corners);
+        const imgData = ctx.createImageData(targetWidth, targetHeight);
         const srcPixels = tCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
 
         if (srcPixels) {
-            for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width; x++) {
+            for (let y = 0; y < targetHeight; y++) {
+                for (let x = 0; x < targetWidth; x++) {
                     const z = h[6] * x + h[7] * y + 1;
                     const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                     const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
                     if (sx >= 0 && sx < tempCanvas.width && sy >= 0 && sy < tempCanvas.height) {
-                        const dstIdx = (y * canvas.width + x) * 4;
+                        const dstIdx = (y * targetWidth + x) * 4;
                         const srcIdx = (sy * tempCanvas.width + sx) * 4;
                         imgData.data[dstIdx] = srcPixels[srcIdx];
                         imgData.data[dstIdx+1] = srcPixels[srcIdx+1];
@@ -274,7 +278,7 @@ export default function DocumentScanner() {
         }
     }
 
-    // Filters & Sharpness
+    // Apply Filters (Brightness, Contrast, Saturation)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     const bFactor = brightness[0] / 100;
@@ -288,7 +292,7 @@ export default function DocumentScanner() {
         if (activeFilter === 'bw') {
             r = g = b = luma > 128 ? 255 : 0;
         } else if (activeFilter === 'document') {
-            const val = luma > 180 ? 255 : luma < 100 ? luma * 0.5 : luma;
+            const val = luma > 180 ? 255 : luma < 100 ? luma * 0.6 : luma;
             r = g = b = val;
         } else if (activeFilter === 'gray') {
             r = g = b = luma;
@@ -306,7 +310,7 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // Sharpness Logic (Convolution)
+    // Apply Sharpness (HD Convolution)
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 4;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -360,22 +364,12 @@ export default function DocumentScanner() {
           const reader = new FileReader();
           reader.onload = (event) => {
               setCurrentRawImage(event.target?.result as string); 
-              setIsImageReady(false);
-              setStage('adjust'); 
+              setIsImageReady(false); setStage('adjust'); 
           };
           reader.readAsDataURL(file);
       }
   };
 
-  const handleConfirmAdd = () => {
-    if (!liveResultSrc) return;
-    setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
-    setStage('viewfinder');
-    setCurrentRawImage(null); setLiveResultSrc(null); setRotation(0);
-    toast({ title: "Page Added" });
-  };
-
-  // UNIFIED COORDINATE TRANSFORMATION SYSTEM
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
@@ -384,18 +378,14 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    // 1. Localize to container
-    let rx = (cx - rect.left) / rect.width;
-    let ry = (cy - rect.top) / rect.height;
+    const rx = (cx - rect.left) / rect.width;
+    const ry = (cy - rect.top) / rect.height;
 
-    // 2. 2D Rotation Matrix Inverse (Transform mouse back to original image space)
+    // INVERSE ROTATION MATRIX for Coordinate Sync
     const angleRad = (-rotation * Math.PI) / 180;
     const cos = Math.cos(angleRad);
     const sin = Math.sin(angleRad);
-
-    const dx = rx - 0.5;
-    const dy = ry - 0.5;
-
+    const dx = rx - 0.5, dy = ry - 0.5;
     const nx = dx * cos - dy * sin + 0.5;
     const ny = dx * sin + dy * cos + 0.5;
 
@@ -406,9 +396,8 @@ export default function DocumentScanner() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
-        if ([0, 2, 4, 6].includes(idx)) {
-            next[idx] = { x, y };
-        } else {
+        if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
+        else {
             if (idx === 1) { next[0].y = y; next[2].y = y; } 
             else if (idx === 3) { next[2].x = x; next[4].x = x; } 
             else if (idx === 5) { next[6].y = y; next[4].y = y; } 
@@ -433,25 +422,24 @@ export default function DocumentScanner() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-4 animate-in fade-in duration-700 pb-20 px-4 mx-auto mt-[-30px]">
+    <div className="w-full max-w-[1600px] flex flex-col gap-4 animate-in fade-in duration-700 pb-20 px-4 mx-auto relative">
+        
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
-                        <CardHeader className="pt-6 md:pt-8 pb-4">
-                            <div className="mx-auto mb-4 grid size-14 md:size-16 place-items-center rounded-2xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-6 md:size-8" /></div>
-                            <CardTitle className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">Smart <span className="text-primary">Scanner</span></CardTitle>
+                        <CardHeader className="pt-8 pb-4">
+                            <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-8" /></div>
+                            <CardTitle className="text-3xl font-black uppercase tracking-tighter leading-none">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-8 md:pb-10 pt-2 px-6">
+                        <CardContent className="pb-10 pt-2 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
-                                <div className="border-4 border-dashed border-primary/20 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
+                                <div className="border-4 border-dashed border-primary/20 rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
                                     <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-5" /></div>
                                     <p className="text-[10px] font-black uppercase tracking-tighter">Capture Photo</p>
                                 </div>
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
-                                        <UploadCloud className="size-5" />
-                                    </div>
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group shadow-sm" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform"><UploadCloud className="size-5" /></div>
                                     <p className="text-[10px] font-black uppercase tracking-tighter">Pick from Album</p>
                                 </div>
                             </div>
@@ -485,12 +473,8 @@ export default function DocumentScanner() {
                         <CardFooter className="p-4 border-t bg-muted/10">
                             <Button disabled={scannedPages.length === 0} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-black text-xs rounded-xl shadow-xl uppercase active:scale-95 transition-all" onClick={() => {
                                 const pdf = new jsPDF();
-                                scannedPages.forEach((p, i) => {
-                                    if(i > 0) pdf.addPage();
-                                    pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297);
-                                });
-                                pdf.save(`scan-${Date.now()}.pdf`);
-                                toast({ title: "PDF Exported" });
+                                scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
+                                pdf.save(`scan-${Date.now()}.pdf`); toast({ title: "PDF Exported" });
                             }}>EXPORT AS PDF <Download className="ml-2 size-3" /></Button>
                         </CardFooter>
                     </Card>
@@ -522,12 +506,15 @@ export default function DocumentScanner() {
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-right-4 duration-500">
                 <div className="lg:col-span-8 flex flex-col gap-4">
                     <Card className="border-none shadow-3xl overflow-hidden rounded-[2.5rem] bg-slate-950 flex flex-col flex-1 min-h-[500px]">
-                        <CardHeader className="bg-white/5 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white">
+                        <CardHeader className="bg-slate-900 border-b p-4 md:p-6 flex flex-row items-center justify-between text-white">
                             <CardTitle className="text-lg font-black uppercase tracking-tighter">Adjustment Studio</CardTitle>
                             <div className="flex items-center gap-3">
                                 <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-white/20 text-white" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-4" /></Button>
                                 <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
-                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
+                                    <TabsList className="grid grid-cols-2 h-9 bg-transparent">
+                                        <TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger>
+                                        <TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger>
+                                    </TabsList>
                                 </Tabs>
                                 <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
                             </div>
