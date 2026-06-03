@@ -100,7 +100,7 @@ const ALL_TOOLS = [
   // CONVERTERS
   { icon: Gauge, title: "ACCELERATION CONVERTER", description: "Convert between different units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-[#f0fdf4]", category: "converter" },
   { icon: AreaChart, title: "AREA CONVERTER", description: "Convert between different area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converter" },
-  { icon: Fuel, title: "FUEL CONSUMPTION CONVERTER", description: "Convert between efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converter" },
+  { icon: Fuel, title: "FUEL CONVERTER", description: "Convert between efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converter" },
   { icon: Waves, title: "PRESSURE CONVERTER", description: "Convert between different units.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "converter" },
 
   // FILE TOOLS
@@ -115,7 +115,6 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
       lightBg,
       "dark:bg-card"
     )}>
-      <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-0 group-hover:opacity-100 transition-opacity", colorClass)} />
       <CardContent className="p-5">
         <div className={cn(`size-10 rounded-xl flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shadow-lg`, colorClass)}>
           <Icon className="size-5" />
