@@ -95,7 +95,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Fine-tune states
+  // Fine-tune states (Defaults for Document mode)
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -308,14 +308,10 @@ export default function DocumentScanner() {
     }
     ctx.putImageData(imageData, 0, 0);
 
-    // FIX SHARPNESS: Correct Kernel Implementation
+    // Sharpness Kernel Fix
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 5;
-        const weights = [
-            0, -factor, 0,
-            -factor, 1 + (4 * factor), -factor,
-            0, -factor, 0
-        ];
+        const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
         const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const src = currentData.data;
         const output = ctx.createImageData(canvas.width, canvas.height);
@@ -381,10 +377,6 @@ export default function DocumentScanner() {
     toast({ title: "Page Added to Collection" });
   };
 
-  /**
-   * 2D ROTATION MATRIX COORDINATE SYNC
-   * This logic ensures handles move correctly even when the UI is rotated.
-   */
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
     if (e.cancelable) e.preventDefault();
@@ -393,12 +385,10 @@ export default function DocumentScanner() {
     if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
     else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
 
-    // Screen-space relative to container top-left
+    // Unified Coordinate Mapping: Mouse to unrotated space
     let rx = (cx - rect.left) / rect.width;
     let ry = (cy - rect.top) / rect.height;
 
-    // Convert screen coordinates back to unrotated container coordinates (0-1)
-    // Pivot around center (0.5, 0.5)
     const angleRad = (-rotation * Math.PI) / 180;
     const cos = Math.cos(angleRad);
     const sin = Math.sin(angleRad);
@@ -406,7 +396,6 @@ export default function DocumentScanner() {
     const dx = rx - 0.5;
     const dy = ry - 0.5;
 
-    // Inverse Rotation Matrix application
     const nx = dx * cos - dy * sin + 0.5;
     const ny = dx * sin + dy * cos + 0.5;
 
@@ -444,16 +433,16 @@ export default function DocumentScanner() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto mt-[-20px]">
+    <div className="w-full max-w-[1600px] flex flex-col gap-4 animate-in fade-in duration-700 pb-20 px-4 mx-auto mt-[-30px]">
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl hover:-translate-y-1 transition-all">
-                        <CardHeader className="pt-8 md:pt-10 pb-4">
+                        <CardHeader className="pt-6 md:pt-8 pb-4">
                             <div className="mx-auto mb-4 grid size-14 md:size-16 place-items-center rounded-2xl bg-primary/10 text-primary animate-pulse"><ScanLine className="size-6 md:size-8" /></div>
-                            <CardTitle className="text-2xl md:text-4xl font-black uppercase tracking-tighter leading-none">Document <span className="text-primary">Scanner</span></CardTitle>
+                            <CardTitle className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">Document <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-8 md:pb-12 pt-2 px-6">
+                        <CardContent className="pb-8 md:pb-10 pt-2 px-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
                                 <div className="border-4 border-dashed border-primary/20 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={startCamera}>
                                     <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl"><Camera className="size-5" /></div>
@@ -482,7 +471,7 @@ export default function DocumentScanner() {
                                     <p className="text-[10px] font-black uppercase tracking-widest">No pages added</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                                <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar p-1">
                                     {scannedPages.map((p, i) => (
                                         <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-lg group hover:border-primary transition-all">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="scan" />
