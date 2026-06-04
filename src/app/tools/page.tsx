@@ -448,7 +448,7 @@ function ToolsPageContent() {
             <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-jakarta">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-headline">
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
