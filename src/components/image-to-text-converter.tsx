@@ -86,7 +86,6 @@ export default function ImageToTextConverter() {
     setExtractedText(null);
 
     try {
-      // Use the GenAI flow for 100% accuracy
       const result = await imageToText({ photoDataUri: originalImageSrc });
       
       if (result && result.text) {
@@ -206,8 +205,8 @@ export default function ImageToTextConverter() {
                     </div>
                     {extractedText && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">READY</Badge>}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] md:min-h-[650px] flex items-center justify-center relative">
-                    <div className="relative size-full min-h-[450px] flex items-center justify-center">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[600px] md:min-h-[750px] flex items-center justify-center relative">
+                    <div className="relative size-full min-h-[550px] flex items-center justify-center">
                         <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
                         <AnimatePresence>
                             {isProcessing && (
@@ -274,7 +273,7 @@ export default function ImageToTextConverter() {
                         </div>
                         <div className="relative group">
                             <Textarea
-                                className="min-h-[400px] md:min-h-[500px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
+                                className="min-h-[500px] md:min-h-[600px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
                                 placeholder={isProcessing ? "AI is reading..." : "Text result will appear here..."}
                                 value={extractedText || ""}
                                 onChange={(e) => setExtractedText(e.target.value)}
