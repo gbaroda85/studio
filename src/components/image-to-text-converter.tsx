@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -23,7 +22,8 @@ import {
     RotateCcw,
     Languages,
     BrainCircuit,
-    Wand2
+    Wand2,
+    ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
