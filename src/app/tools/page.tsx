@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -438,8 +437,8 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* 3D Elevated Header Section - Adjusted Height */}
-      <section className="relative w-full max-w-[2000px] pt-14 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
+      {/* 3D Elevated Header Section - Adjusted Height & Curvature */}
+      <section className="relative w-full max-w-[2000px] pt-14 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0">
           <Image 
