@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -34,7 +33,9 @@ import {
     AlignVerticalJustifyEnd,
     Square,
     Sparkles,
-    RotateCw
+    RotateCw,
+    ImageIcon,
+    Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -427,42 +428,70 @@ export default function AadhaarPrinter() {
       {stage === 'upload' && workflow === 'separate' && (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
               <div className="flex flex-col sm:flex-row items-center justify-between no-print gap-4">
-                   <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center"><ArrowLeft className="mr-1 size-3" /> Selection</Button>
+                   <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center bg-white/50 dark:bg-slate-900/50 rounded-full border shadow-sm px-6 h-10"><ArrowLeft className="mr-1 size-3" /> Back to Selection</Button>
                    <div className="flex items-center gap-3">
                         {frontFinal && backFinal && (
-                            <Button onClick={() => setStage('preview')} className="bg-primary font-black uppercase text-xs h-10 px-8 rounded-xl shadow-xl animate-bounce">GENERATE PRINT <ChevronRight className="ml-1 size-4" /></Button>
+                            <Button onClick={() => setStage('preview')} className="bg-primary text-primary-foreground font-black uppercase text-xs h-11 px-10 rounded-2xl shadow-xl animate-bounce border-none">GENERATE PRINT SHEET <ChevronRight className="ml-1 size-4" /></Button>
                         )}
                    </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 no-print">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 no-print">
                   {[ { side: 'front' as const, raw: frontRaw, final: frontFinal, setRaw: setFrontRaw, setFinal: setFrontFinal, inputRef: frontInputRef },
                      { side: 'back' as const, raw: backRaw, final: backFinal, setRaw: setBackRaw, setFinal: setBackFinal, inputRef: backInputRef }
                   ].map(s => (
-                    <Card key={s.side} className={cn("border-2 border-dashed rounded-[2.5rem] overflow-hidden transition-all", s.final ? "border-green-500/5 bg-green-500/5 border-green-500/50" : "hover:border-primary")}>
-                      <CardHeader className="text-center"><CardTitle className="text-sm font-black uppercase text-muted-foreground">{s.side === 'front' ? 'FRONT SIDE' : 'BACK SIDE'}</CardTitle></CardHeader>
-                      <CardContent className="p-8 flex flex-col items-center gap-6 min-h-[300px] justify-center">
+                    <Card key={s.side} className={cn("border-2 border-dashed rounded-[3rem] overflow-hidden transition-all duration-300 group relative", s.final ? "border-green-500/30 bg-green-500/5 shadow-2xl" : "hover:border-primary/50 hover:bg-primary/5 bg-card/50")}>
+                      <CardHeader className="text-center p-6 bg-muted/20 border-b border-dashed">
+                        <CardTitle className="text-xs font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center justify-center gap-2">
+                           {s.side === 'front' ? <Smartphone className="size-3.5 text-primary" /> : <RefreshCcw className="size-3.5 text-emerald-500" />}
+                           {s.side === 'front' ? 'FRONT SIDE VIEW' : 'BACK SIDE VIEW'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-8 md:p-12 flex flex-col items-center gap-6 min-h-[350px] justify-center">
                           {s.final ? (
-                              <div className={cn("relative group shadow-2xl rounded-lg overflow-hidden bg-white aspect-[85.6/54] h-40", showBorder && "border-2 border-black")}>
-                                  <img src={s.final} alt={s.side} className="w-full h-full object-cover" />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                      <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
-                                      <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => { s.setFinal(null); s.setRaw(null); }}><X className="size-4" /></Button>
+                              <div className="relative group/preview w-full flex flex-col items-center gap-6 animate-in zoom-in-95">
+                                  <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-full max-w-[320px] aspect-[85.6/54] transform transition-transform group-hover/preview:scale-[1.02]", showBorder && "border-2 border-black")}>
+                                      <img src={s.final} alt={s.side} className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
+                                          <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4 h-9 rounded-lg" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
+                                          <Button size="icon" variant="destructive" className="h-9 w-9 rounded-lg shadow-xl" onClick={() => { s.setFinal(null); s.setRaw(null); }}><Trash2 className="size-4" /></Button>
+                                      </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                     <CheckCircle2 className="size-4 text-green-600" />
+                                     <span className="text-[10px] font-black uppercase text-green-700 tracking-widest">Image Ready</span>
                                   </div>
                               </div>
                           ) : s.raw ? (
-                              <div className="flex flex-col items-center gap-3">
-                                  <div className="size-16 rounded-full bg-primary/20 flex items-center justify-center text-primary animate-pulse"><Move className="size-8" /></div>
-                                  <Button className="font-black uppercase text-[10px] bg-primary rounded-xl" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}>Start Smart Scanner</Button>
+                              <div className="flex flex-col items-center gap-6 text-center animate-in slide-in-from-bottom-2">
+                                  <div className="relative">
+                                     <div className="size-24 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner border-2 border-dashed border-primary/20"><Scan className="size-12 animate-pulse" /></div>
+                                     <div className="absolute -top-2 -right-2 bg-yellow-400 text-black font-black text-[8px] px-2 py-0.5 rounded-full shadow-md uppercase">Processing</div>
+                                  </div>
+                                  <div className="space-y-4">
+                                     <p className="text-sm font-bold uppercase tracking-tight text-slate-700 dark:text-slate-300">Photo detected. Ready to straighten?</p>
+                                     <Button className="font-black uppercase text-[10px] bg-primary text-primary-foreground h-11 px-8 rounded-xl shadow-xl hover:scale-105 active:scale-95 transition-all" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}>Start Adjustment Studio</Button>
+                                  </div>
                               </div>
                           ) : (
-                              <div className="flex flex-col items-center gap-4 text-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity" onClick={() => s.inputRef.current?.click()}>
-                                  <UploadCloud className="size-12" /><p className="text-[10px] font-black uppercase">Upload Side Photo</p>
+                              <div className="flex flex-col items-center gap-6 text-center cursor-pointer transition-all hover:scale-105" onClick={() => s.inputRef.current?.click()}>
+                                  <div className="size-20 rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                      <UploadCloud className="size-10" />
+                                  </div>
+                                  <div className="space-y-1">
+                                      <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-primary transition-colors">Click to Upload</p>
+                                      <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">JPG or PNG Photo</p>
+                                  </div>
                                   <input ref={s.inputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], s.side)} />
                               </div>
                           )}
                       </CardContent>
                     </Card>
                   ))}
+              </div>
+              
+              <div className="flex items-center justify-center gap-8 text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] py-4">
+                   <div className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-green-500" /> Secure Local Processing</div>
+                   <div className="flex items-center gap-2"><Zap className="size-3.5 text-yellow-500" /> Perspective Homography</div>
               </div>
           </div>
       )}
