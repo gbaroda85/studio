@@ -50,7 +50,8 @@ export default function DocxToPdf() {
     e.preventDefault(); e.stopPropagation(); setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.name.toLowerCase().endsWith('.docx') || droppedFile.name.toLowerCase().endsWith('.doc')) { 
+      const name = droppedFile.name.toLowerCase();
+      if (name.endsWith('.docx') || name.endsWith('.doc')) { 
         setFile(droppedFile); 
         setIsSuccess(false);
         setRequiresPassword(false);
@@ -246,10 +247,10 @@ export default function DocxToPdf() {
         </CardContent>
         <CardFooter className="bg-muted/10 border-t p-6 flex justify-center gap-8">
             <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                <ShieldCheck className="size-4 text-green-500" /> SECURE HANDSHAKE
+                <ShieldCheck className="size-4 text-green-500" /> CLOUD HANDSHAKE
             </div>
             <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                <Zap className="size-4 text-yellow-500" /> AES DECRYPTION
+                <Zap className="size-4 text-yellow-500" /> TOKEN AUTH
             </div>
         </CardFooter>
       </Card>
@@ -258,7 +259,7 @@ export default function DocxToPdf() {
       <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex items-center gap-4 max-w-xl">
           <AlertCircle className="size-5 text-blue-500 shrink-0" />
           <p className="text-[10px] text-blue-700 font-bold leading-tight uppercase">
-              Encrypted Word documents are supported. Our engine dynamically selects the best cloud endpoint for both .doc and .docx files.
+              Professional Grade Conversion: This tool uses industrial cloud engines to ensure that Word layouts, fonts, and tables are preserved 100% correctly in the PDF.
           </p>
       </div>
     </div>
