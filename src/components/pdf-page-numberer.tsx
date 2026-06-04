@@ -1,5 +1,4 @@
-
-"use client";
+"use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
@@ -26,7 +25,10 @@ import {
     Palette,
     AlignLeft,
     AlignCenter,
-    AlignRight
+    AlignRight,
+    X,
+    FileText,
+    SearchCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -198,7 +200,7 @@ export default function PdfPageNumberer() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setNumberedPdfUrl(url);
-        toast({title: "Success!", description: "Page numbers added to all pages."});
+        toast({title: "Success!", description: "Page numbers added successfully."});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to process document.'});
@@ -211,8 +213,8 @@ export default function PdfPageNumberer() {
     if (!numberedPdfUrl || !pdfFile) return;
     const link = document.createElement('a');
     link.href = numberedPdfUrl;
-    // Updated filename logic
-    link.download = `GR7-Tools-${pdfFile.name}`;
+    const originalName = pdfFile.name.replace('.pdf', '');
+    link.download = `GR7-Tools-Numbered-${originalName}.pdf`;
     link.click();
   }
 
@@ -220,6 +222,9 @@ export default function PdfPageNumberer() {
       setPdfFile(null);
       setOriginalPageImage(null);
       setNumberedPdfUrl(null);
+      setTotalPagesPreview(0);
+      setPageRange('all');
+      setCustomRange('');
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -251,70 +256,60 @@ export default function PdfPageNumberer() {
       return styles;
   }
   
-  if (!pdfFile) {
-    return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader>
-          <div className="mx-auto mb-4 grid size-16 md:size-20 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Hash className="h-8 md:h-10 w-8 md:w-10" />
-          </div>
-          <CardTitle className="text-xl md:text-3xl font-black uppercase tracking-tight">PDF Page Numbering</CardTitle>
-          <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60">Add professional numbering with live studio preview.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div
-            className="border-3 border-dashed border-muted-foreground/30 rounded-2xl md:rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="relative">
-                <UploadCloud className="h-12 md:h-16 w-12 md:w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-2 -right-2 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
-            </div>
-            <div>
-                <p className="text-lg md:text-xl font-bold uppercase tracking-tighter">Drop PDF here to Begin</p>
-                <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-medium">100% Private local RAM processing.</p>
-            </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-        </CardContent>
-        <CardFooter className="justify-center gap-4 md:gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-            <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
-            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO FORMATS</div>
-        </CardFooter>
-      </Card>
-    );
-  }
-
   return (
-    <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 flex flex-col gap-6 md:gap-8">
-        
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-            <div className="flex items-center gap-4">
-                <div className="size-12 md:size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
-                    <Settings2 className="size-6 md:size-8" />
-                </div>
-                <div>
-                    <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter">Numbering <span className="text-primary">Studio</span></h2>
-                    <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-green-500/5 text-green-600 border-green-500/20 truncate max-w-[150px]">{pdfFile.name}</Badge>
-                        <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase bg-primary/5 text-primary border-primary/20">LIVE HD PREVIEW</Badge>
+    <div className="w-full flex flex-col items-center justify-center gap-6 px-4">
+      {/* Premium Header */}
+      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+          <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+              <Hash className="size-8" />
+              <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                  <Sparkles className="size-2.5" />
+              </div>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+              Add Page <span className="text-gradient-hero">Numbers Pro</span>
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+              Choose professional positions and formats. <br/>100% Private local RAM mapping.
+          </p>
+      </div>
+
+      {!pdfFile ? (
+        <Card
+            className={cn(
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+            )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-10 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF to begin</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
                     </div>
                 </div>
-            </div>
-            <Button variant="outline" onClick={resetState} className="w-full md:w-auto h-10 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-4 md:px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-2 size-3 md:size-4" /> Change File
-            </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
-            
+                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO FORMATS</div>
+            </CardFooter>
+        </Card>
+      ) : (
+        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 pb-20">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                         <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
@@ -375,7 +370,7 @@ export default function PdfPageNumberer() {
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-5 md:p-8 border-t">
+                    <CardFooter className="bg-muted/10 p-5 md:p-8 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
                             <Button 
                                 className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
@@ -399,26 +394,29 @@ export default function PdfPageNumberer() {
                                 <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE PDF
                             </Button>
                         )}
+                        <Button variant="ghost" onClick={resetState} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
+                            <RefreshCcw className="mr-2 size-3" /> Change File
+                        </Button>
                     </CardFooter>
                 </Card>
             </div>
 
             {/* Workspace: Live Preview */}
-            <div className="lg:col-span-8">
-                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[3rem]">
+            <div className="lg:col-span-8 h-full">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-full flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Document Preview</CardTitle>
                         </div>
                         {numberedPdfUrl && (
-                             <div className="flex items-center gap-1.5 text-green-600">
-                                <CheckCircle2 className="size-3 md:size-4" />
-                                <span className="text-[8px] md:text-[10px] font-black uppercase">Ready</span>
+                             <div className="flex items-center gap-1.5 text-green-600 animate-in zoom-in-95">
+                                <CheckCircle2 className="size-4" />
+                                <span className="text-[10px] font-black uppercase">Ready</span>
                              </div>
                         )}
                     </CardHeader>
-                    <CardContent className="p-6 md:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden">
+                    <CardContent className="p-6 md:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1">
                         {isGeneratingPreview ? (
                             <div className="flex flex-col items-center gap-6 text-center">
                                 <div className="relative">
@@ -444,12 +442,7 @@ export default function PdfPageNumberer() {
                                     <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE 1 VIEW</Badge>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="flex flex-col items-center gap-4 opacity-30">
-                                <UploadCloud className="size-20" />
-                                <p className="text-xs font-black uppercase">Upload a document to see preview</p>
-                            </div>
-                        )}
+                        ) : null}
                         
                         {!numberedPdfUrl && originalPageImage && (
                             <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
@@ -458,17 +451,18 @@ export default function PdfPageNumberer() {
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-6 md:gap-12">
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
                         </div>
                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                            <Zap className="size-4 text-yellow-500" /> 300 DPI RENDER
+                            <Zap className="size-4 text-yellow-500" /> 300 DPI HD
                         </div>
                     </CardFooter>
                 </Card>
             </div>
         </div>
+      )}
     </div>
   );
 }
