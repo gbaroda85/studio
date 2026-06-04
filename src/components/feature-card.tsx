@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import type {LucideIcon} from 'lucide-react';
 import {
@@ -31,8 +30,8 @@ export function FeatureCard({
     <Link href={href} className="group block h-full">
       <Card className={cn(
         "h-full relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl dark:group-hover:shadow-primary/20 border-2 border-border/50 dark:border-white/10 group-hover:border-primary/50 dark:group-hover:border-primary/40 rounded-[2rem]",
-        lightBg || "bg-card", // Colourful for Light Mode
-        "dark:bg-card" // Professional Dark for Dark Mode
+        lightBg || "bg-card", 
+        "dark:bg-card" 
       )}>
         <CardHeader className="p-6 relative z-10 text-left">
           <div className="flex items-start justify-between mb-4">
@@ -43,8 +42,10 @@ export function FeatureCard({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
-          <CardTitle className="text-xl font-semibold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight line-clamp-1 uppercase font-body">{title}</CardTitle>
-          <CardDescription className="text-[15px] text-slate-500 dark:text-slate-400 leading-tight font-semibold line-clamp-2 h-11 font-body">{description}</CardDescription>
+          <CardTitle className="text-xl font-semibold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight uppercase font-body">{title}</CardTitle>
+          <CardDescription className="text-[15px] text-slate-500 dark:text-slate-400 leading-tight font-semibold font-body">
+            {description}
+          </CardDescription>
         </CardHeader>
         <div className="absolute -bottom-10 -right-10 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-2xl" />
       </Card>
