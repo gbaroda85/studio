@@ -4,32 +4,31 @@
 
 @layer base {
   :root {
-    /* Professional Palette - Light Mode (Interior Studio) */
-    /* Light Theme (Interior Studio Palette) */
-    --background: 180 20% 96%;      /* Airy Studio Grey-Teal (#f2f8f8) - Not Pure White */
-    --foreground: 180 40% 15%;      /* Deep Navy Teal text */
-    --card: 0 0% 100%;
-    --card-foreground: 180 40% 15%;
+    /* Professional Palette - Light Mode (Based on User Image) */
+    --background: 210 25% 95%;      /* #eff2f5 (Light Gray-Blue) */
+    --foreground: 210 100% 20%;     /* #003366 (Dark Navy) */
+    --card: 0 0% 100%;              /* #ffffff (White) */
+    --card-foreground: 210 100% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 180 40% 15%;
-    --primary: 178 44% 47%;        /* Signature Studio Teal (#48a9a4) */
+    --popover-foreground: 210 100% 20%;
+    --primary: 9 100% 47%;          /* #ef2300 (Primary Red) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 349 71% 94%;      /* Soft Dusty Rose (#fce7eb) */
-    --secondary-foreground: 349 71% 30%;
-    --muted: 180 15% 90%;
-    --muted-foreground: 180 10% 40%;
-    --accent: 349 71% 94%;         /* Soft Dusty Rose */
-    --accent-foreground: 180 40% 15%;
+    --secondary: 211 38% 39%;      /* #3d6188 (Steel Blue) */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 25% 90%;
+    --muted-foreground: 211 15% 45%;
+    --accent: 211 38% 90%;
+    --accent-foreground: 210 100% 20%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 180 15% 85%;
-    --input: 180 15% 85%;
-    --ring: 178 44% 47%;
+    --border: 210 25% 85%;
+    --input: 210 25% 85%;
+    --ring: 9 100% 47%;
     --radius: 1.5rem;
   }
   
   .dark {
-    /* NEW Oceanic Blue Palette - Dark Mode (Based on Image) */
+    /* Oceanic Blue Palette - Dark Mode */
     --background: 209 100% 11%;      /* Midnight Blue (#001D39) */
     --foreground: 204 46% 83%;       /* Pale Blue text (#BDD8E9) */
     --card: 210 84% 15%;             /* Dark Navy Card (#05284a) */
@@ -64,11 +63,11 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Immersive Studio Gradients for Light Mode - Teal/Rose themed */
+    /* Immersive Studio Gradients for Light Mode - Red/Blue themed */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(178, 44%, 47%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(349, 71%, 94%, 0.2) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(178, 44%, 47%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(211, 38%, 39%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(9, 100%, 47%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(211, 38%, 39%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -96,11 +95,11 @@
 }
 
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-secondary;
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-[#48a9a4] to-[#3aa39f] hover:from-[#3aa39f] hover:to-[#48a9a4] dark:from-[#7BBDE8] dark:to-[#49769F] text-white dark:text-slate-950 shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-[#ef2300] to-[#d11f00] hover:from-[#d11f00] hover:to-[#ef2300] dark:from-[#7BBDE8] dark:to-[#49769F] text-white dark:text-slate-950 shadow-lg transition-all duration-300;
 }
 
 /* Custom Thin Scrollbar */
@@ -120,5 +119,5 @@
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-accent to-secondary rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-blue-400 rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }
