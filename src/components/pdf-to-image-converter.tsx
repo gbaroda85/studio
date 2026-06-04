@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -29,7 +28,8 @@ import {
   Sparkles,
   Eye,
   FileDigit,
-  Monitor
+  Monitor,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +69,9 @@ export default function PdfToImageConverter() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // CRITICAL: Define selectedPage here so it's always in scope
+    const selectedPage = pages.find(p => p.id === selectedId);
 
     const renderProcessedImage = useCallback((originalSrc: string, vAlign: VAlign, fitMode: FitMode): Promise<string> => {
         return new Promise((resolve) => {
@@ -329,7 +332,7 @@ export default function PdfToImageConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Maximize className="size-3" /> Canvas Mode
                                 </Label>
-                                <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
+                                <Tabs value={selectedPage?.fitMode || 'fit'} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
                                     <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
                                         <TabsTrigger value="fit" className="font-bold text-[9px] uppercase rounded-lg">Raw Page</TabsTrigger>
                                         <TabsTrigger value="original" className="font-bold text-[9px] uppercase rounded-lg">A4 Frame</TabsTrigger>
