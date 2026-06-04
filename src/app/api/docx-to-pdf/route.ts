@@ -6,13 +6,17 @@ import convertapi from 'convertapi';
 import CloudConvert from 'cloudconvert';
 
 /**
- * @fileOverview Server-side DOCX to PDF conversion route with multi-provider fallback.
- * Using provided production tokens for guaranteed high-fidelity output.
+ * @fileOverview Server-side DOCX to PDF conversion route with multi-token fallback.
+ * Strategy:
+ * 1. ConvertAPI Production Token
+ * 2. ConvertAPI Sandbox Token (Fallback)
+ * 3. CloudConvert (Optional Fallback)
  */
 
 export async function POST(req: Request) {
-  // Priority: 1. Environment Variables, 2. Hardcoded fallback for immediate fix
-  const CONVERT_API_SECRET = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
+  // Use user-provided production and sandbox tokens
+  const PROD_TOKEN = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
+  const SANDBOX_TOKEN = "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy";
   const CLOUD_CONVERT_API_KEY = process.env.CLOUD_CONVERT_API_KEY;
 
   try {
@@ -26,38 +30,52 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // --- STRATEGY 1: CONVERTAPI (PRIMARY) ---
-    if (CONVERT_API_SECRET) {
+    // --- STRATEGY 1: CONVERTAPI (PRODUCTION TOKEN) ---
+    if (PROD_TOKEN) {
         try {
-          console.log('Initiating high-fidelity conversion with ConvertAPI...');
-          const capi = convertapi(CONVERT_API_SECRET);
+          console.log('Attempting conversion with PRODUCTION token...');
+          const capi = convertapi(PROD_TOKEN);
           
-          // Use Readable stream for large file handling
-          const stream = new Readable();
-          stream.push(buffer);
-          stream.push(null);
-
-          const uploadResult = await capi.upload(stream, file.name);
-          const result = await capi.convert('pdf', { File: uploadResult }, 'docx');
+          // Use Readable.from for efficient stream handling in Next.js
+          const stream = Readable.from(buffer);
+          const result = await capi.convert('pdf', { File: stream }, 'docx');
           
-          if (!result.files || result.files.length === 0) {
-              throw new Error('ConvertAPI returned no files.');
+          if (result.files && result.files.length > 0) {
+              return NextResponse.json({ 
+                success: true, 
+                pdfUrl: result.files[0].url, 
+                provider: 'convertapi-prod' 
+              });
           }
-
-          const pdfUrl = result.files[0].url;
-
-          return NextResponse.json({ 
-            success: true, 
-            pdfUrl, 
-            provider: 'convertapi' 
-          });
         } catch (capiError: any) {
-          console.warn('ConvertAPI attempt failed:', capiError.message);
-          // Proceed to fallback if primary fails
+          console.warn('Production token failed:', capiError.message);
+          // Proceed to sandbox fallback
         }
     }
 
-    // --- STRATEGY 2: CLOUDCONVERT (FALLBACK) ---
+    // --- STRATEGY 2: CONVERTAPI (SANDBOX TOKEN FALLBACK) ---
+    if (SANDBOX_TOKEN) {
+        try {
+            console.log('Attempting conversion with SANDBOX token...');
+            const capi = convertapi(SANDBOX_TOKEN);
+            
+            const stream = Readable.from(buffer);
+            const result = await capi.convert('pdf', { File: stream }, 'docx');
+            
+            if (result.files && result.files.length > 0) {
+                return NextResponse.json({ 
+                  success: true, 
+                  pdfUrl: result.files[0].url, 
+                  provider: 'convertapi-sandbox' 
+                });
+            }
+        } catch (sandboxError: any) {
+            console.warn('Sandbox token also failed:', sandboxError.message);
+            // Proceed to CloudConvert if available
+        }
+    }
+
+    // --- STRATEGY 3: CLOUDCONVERT (EXTRA FALLBACK) ---
     if (CLOUD_CONVERT_API_KEY) {
         try {
             console.log('Attempting fallback conversion with CloudConvert...');
@@ -65,60 +83,41 @@ export async function POST(req: Request) {
             
             let job = await cloudConvert.jobs.create({
               tasks: {
-                'upload-task': {
-                  operation: 'import/upload'
-                },
-                'convert-task': {
-                  operation: 'convert',
-                  input: 'upload-task',
-                  output_format: 'pdf',
-                  engine: 'office' 
-                },
-                'export-task': {
-                  operation: 'export/url',
-                  input: 'convert-task'
-                }
+                'upload-task': { operation: 'import/upload' },
+                'convert-task': { operation: 'convert', input: 'upload-task', output_format: 'pdf', engine: 'office' },
+                'export-task': { operation: 'export/url', input: 'convert-task' }
               }
             });
 
             const uploadTask = job.tasks.find((task: any) => task.name === 'upload-task');
-            const uploadStream = new Readable();
-            uploadStream.push(buffer);
-            uploadStream.push(null);
+            const uploadStream = Readable.from(buffer);
 
             await cloudConvert.tasks.upload(uploadTask, uploadStream, file.name);
             job = await cloudConvert.jobs.wait(job.id);
             
-            const exportTask = job.tasks.find(
-              (task: any) => task.name === 'export-task' && task.status === 'finished'
-            );
+            const exportTask = job.tasks.find((task: any) => task.name === 'export-task' && task.status === 'finished');
 
-            if (!exportTask || !exportTask.result || !exportTask.result.files) {
-              throw new Error('CloudConvert failed to generate output URL.');
+            if (exportTask?.result?.files) {
+              return NextResponse.json({ 
+                success: true, 
+                pdfUrl: exportTask.result.files[0].url, 
+                provider: 'cloudconvert' 
+              });
             }
-
-            const pdfUrl = exportTask.result.files[0].url;
-
-            return NextResponse.json({ 
-              success: true, 
-              pdfUrl, 
-              provider: 'cloudconvert' 
-            });
         } catch (ccError: any) {
-            console.error('CloudConvert fallback also failed:', ccError.message);
-            throw ccError;
+            console.error('CloudConvert fallback failed:', ccError.message);
         }
     }
 
     return NextResponse.json({ 
         error: 'All conversion providers failed.', 
-        details: 'Check API token validity and remaining credits.' 
+        details: 'Checked Production Token, Sandbox Token, and CloudConvert. All attempts returned errors.' 
     }, { status: 500 });
 
   } catch (error: any) {
-    console.error('Final Conversion Failure:', error);
+    console.error('Final Fatal Conversion Failure:', error);
     return NextResponse.json({ 
-      error: 'Cloud conversion failed. Check your API limits and document format.', 
+      error: 'Server-side conversion failed.', 
       details: error.message 
     }, { status: 500 });
   }
