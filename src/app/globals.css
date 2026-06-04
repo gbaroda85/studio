@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    /* Earthy and Minimalistic Palette - Light Mode */
-    --background: 210 20% 98%;      /* Very Light Blue Background */
-    --foreground: 210 10% 23%;     /* Dark Charcoal Text */
-    --card: 0 0% 100%;              /* White Card */
-    --card-foreground: 210 10% 23%;
+    /* Light and Peaceful Palette - Inspired by Ellen Von Wegand */
+    --background: 210 20% 98%;      /* Cloudy Shade of Light Gray */
+    --foreground: 218 44% 18%;     /* Deep Navy Blue for contrast */
+    --card: 0 0% 100%;              /* Pure White Card */
+    --card-foreground: 218 44% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 10% 23%;
-    --primary: 221 28% 50%;        /* Muted Periwinkle Blue */
+    --popover-foreground: 218 44% 18%;
+    --primary: 212 24% 58%;        /* Hushed Blue (#7b92ad) */
     --primary-foreground: 210 20% 98%;
-    --secondary: 20 18% 66%;       /* Muted Brown/Taupe */
+    --secondary: 218 45% 18%;       /* Contrast Navy */
     --secondary-foreground: 0 0% 100%;
     --muted: 210 10% 94%;
     --muted-foreground: 210 10% 45%;
-    --accent: 24 30% 85%;          /* Light Beige/Earthy Accent */
-    --accent-foreground: 210 10% 23%;
+    --accent: 160 12% 73%;          /* Natural Green/Sage (#b2c2bc) */
+    --accent-foreground: 218 44% 18%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 210 10% 90%;
     --input: 210 10% 90%;
-    --ring: 221 28% 50%;
+    --ring: 212 24% 58%;
     --radius: 1.5rem;
   }
   
   .dark {
-    /* Oceanic Blue Palette - Dark Mode */
+    /* Dark Mode remains the mystical palette established earlier */
     --background: 209 100% 11%;      /* Midnight Blue (#001D39) */
     --foreground: 204 46% 83%;       /* Pale Blue text (#BDD8E9) */
     --card: 210 84% 15%;             /* Dark Navy Card (#05284a) */
@@ -63,11 +63,11 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Earthy Minimalist Gradients for Light Mode */
+    /* Light and Peaceful Gradients for Light Mode */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(210, 20%, 90%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(24, 30%, 85%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(221, 28%, 50%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(212, 24%, 58%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(160, 12%, 73%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(218, 45%, 18%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 

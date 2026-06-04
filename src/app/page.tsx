@@ -149,8 +149,8 @@ export default function Page() {
       <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
-          {/* Light Mode: Earthy Minimalist Theme Colors */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f0f7ff] via-[#E6D5C9]/30 to-[#B8A398]/20 dark:hidden" />
+          {/* Light Mode: Peaceful Hues Aesthetic Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f8f9fa] via-[#e2e8f0]/30 to-[#b2c2bc]/20 dark:hidden" />
           
           {/* Dark Mode: The Productivity/Computer Image */}
           <div className="hidden dark:block absolute inset-0">
@@ -164,7 +164,9 @@ export default function Page() {
             />
           </div>
           
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/90" />
+          {/* Mixed Overlay for readability */}
+          <div className="absolute inset-0 bg-slate-900/60 mix-blend-multiply opacity-0 dark:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/90" />
         </div>
 
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
