@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { 
     UploadCloud, 
@@ -21,7 +21,8 @@ import {
     Eye,
     ChevronRight,
     ArrowLeftRight,
-    Trash2
+    Trash2,
+    RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -223,8 +224,6 @@ export default function ImageToTextConverter() {
 
   return (
     <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
-      
-      {/* Studio Header: Identical to Image Crop */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
         <div className="flex items-center gap-3">
             <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -245,8 +244,6 @@ export default function ImageToTextConverter() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        {/* Main Viewport: The Image Preview (Like Image Crop) */}
         <div className="lg:col-span-8">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -288,7 +285,6 @@ export default function ImageToTextConverter() {
             </Card>
         </div>
 
-        {/* Sidebar: Settings & Output (Like Image Crop) */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
