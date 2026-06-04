@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    /* Dreamy Sunset Hues - Light Mode */
-    --background: 260 20% 98%;      /* Very Light Lavender Background */
-    --foreground: 210 20% 15%;     /* Dark Slate Text */
+    /* Earthy and Minimalistic Palette - Light Mode */
+    --background: 210 20% 98%;      /* Very Light Blue Background */
+    --foreground: 210 10% 23%;     /* Dark Charcoal Text */
     --card: 0 0% 100%;              /* White Card */
-    --card-foreground: 210 20% 15%;
+    --card-foreground: 210 10% 23%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 15%;
-    --primary: 350 100% 82%;        /* Soft Sunset Coral/Pink */
-    --primary-foreground: 350 40% 25%;
-    --secondary: 190 35% 62%;       /* Muted Sunset Teal */
+    --popover-foreground: 210 10% 23%;
+    --primary: 221 28% 50%;        /* Muted Periwinkle Blue */
+    --primary-foreground: 210 20% 98%;
+    --secondary: 20 18% 66%;       /* Muted Brown/Taupe */
     --secondary-foreground: 0 0% 100%;
-    --muted: 260 10% 94%;
+    --muted: 210 10% 94%;
     --muted-foreground: 210 10% 45%;
-    --accent: 350 60% 94%;          /* Lightest Pink Accent */
-    --accent-foreground: 350 40% 25%;
+    --accent: 24 30% 85%;          /* Light Beige/Earthy Accent */
+    --accent-foreground: 210 10% 23%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 260 15% 90%;
-    --input: 260 15% 90%;
-    --ring: 350 100% 82%;
+    --border: 210 10% 90%;
+    --input: 210 10% 90%;
+    --ring: 221 28% 50%;
     --radius: 1.5rem;
   }
   
@@ -63,11 +63,11 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Dreamy Sunset Gradients for Light Mode */
+    /* Earthy Minimalist Gradients for Light Mode */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(260, 20%, 85%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(350, 100%, 80%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(190, 35%, 62%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(210, 20%, 90%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(24, 30%, 85%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(221, 28%, 50%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 

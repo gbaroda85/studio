@@ -149,8 +149,8 @@ export default function Page() {
       <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
-          {/* Light Mode: Dreamy Sunset Theme Colors (More vibrant as per instruction) */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f5f3f7] via-[#ffb3b3]/30 to-[#6cb4c4]/30 dark:hidden" />
+          {/* Light Mode: Earthy Minimalist Theme Colors */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f0f7ff] via-[#E6D5C9]/30 to-[#B8A398]/20 dark:hidden" />
           
           {/* Dark Mode: The Productivity/Computer Image */}
           <div className="hidden dark:block absolute inset-0">
