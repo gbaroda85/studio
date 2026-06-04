@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -23,17 +24,25 @@ import {
   Layout,
   Loader2,
   Layers,
-  RotateCw
+  RotateCw,
+  Settings2,
+  Sparkles,
+  Eye,
+  FileDigit,
+  Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { motion, AnimatePresence } from 'framer-motion';
 
+// Initialize PDF.js worker with stable CDN
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
 
 type OutputFormat = 'png' | 'jpeg';
@@ -112,7 +121,7 @@ export default function PdfToImageConverter() {
 
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 3.0 }); 
+                const viewport = page.getViewport({ scale: 2.5 }); 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
                 canvas.height = Math.floor(viewport.height);
@@ -190,23 +199,16 @@ export default function PdfToImageConverter() {
                 setIsProcessing(false);
                 return;
             }
-
-            // Swap width and height for 90 degree rotation
             canvas.width = img.height;
             canvas.height = img.width;
-
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate((90 * Math.PI) / 180);
             ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
             const rotatedOriginal = canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0);
-            
-            // Re-render final image with potential canvas adjustments
             const newFinal = await renderProcessedImage(rotatedOriginal, targetPage.vAlign, targetPage.fitMode);
-            
             setPages(prev => prev.map(p => p.id === selectedId ? { ...p, originalSrc: rotatedOriginal, finalSrc: newFinal } : p));
             setIsProcessing(false);
-            toast({ title: "Page Rotated", description: "Turned 90° clockwise." });
+            toast({ title: "Page Rotated" });
         };
     };
 
@@ -220,15 +222,8 @@ export default function PdfToImageConverter() {
         }));
         setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Strict Sync Complete", description: "Literal alignment applied to all pages." });
+        toast({ title: "Global Sync Complete" });
     };
-
-    const handleDownloadSingle = (url: string, index: number) => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `extracted-page-${index + 1}.${outputFormat === 'jpeg' ? 'jpg' : 'png'}`;
-        link.click();
-    }
 
     const handleDownloadAll = async () => {
         if (pages.length === 0 || !pdfFile) return;
@@ -243,7 +238,7 @@ export default function PdfToImageConverter() {
             const zipBlob = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(zipBlob);
-            link.download = `hd-extracted-pages.zip`;
+            link.download = `GR7-Tools-Extracted-Images.zip`;
             link.click();
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to bundle archive.' });
@@ -259,204 +254,235 @@ export default function PdfToImageConverter() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const selectedPage = pages.find(p => p.id === selectedId);
-
     if (!pdfFile) {
         return (
-            <Card className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
-                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-                <CardHeader>
-                    <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-                        <ImageIcon className="h-8 w-8" />
-                    </div>
-                    <CardTitle className="text-2xl font-black uppercase tracking-tight">PDF TO IMAGE HD STUDIO</CardTitle>
-                    <CardDescription>Extract pages as HD images with absolute alignment control.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="border-3 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                        <UploadCloud className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <div>
-                            <p className="text-xl font-bold">Drop PDF document here</p>
-                            <p className="text-sm text-muted-foreground mt-2">100% Private local processing. No server storage.</p>
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                        <ImageIcon className="size-8" />
+                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                            <Sparkles className="size-2.5" />
                         </div>
                     </div>
-                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                </CardContent>
-                <CardFooter className="justify-center gap-8 text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1.5"><Maximize className="size-3 text-primary" /> HD EXTRACTION</div>
-                    <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> NATIVE SPEED</div>
-                </CardFooter>
-            </Card>
+                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                        PDF to <span className="text-gradient-hero">Image HD</span>
+                    </h1>
+                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                        Extract pages as high-resolution images. <br/>100% Private local RAM processing.
+                    </p>
+                </motion.div>
+
+                <Card className={cn(
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                )}
+                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 md:p-12">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                            <div className="relative">
+                                <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center px-4">
+                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF here</p>
+                                <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens locally.</p>
+                            </div>
+                        </div>
+                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 300 DPI HD</div>
+                        <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> PNG/JPG</div>
+                    </CardFooter>
+                </Card>
+            </div>
         );
     }
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
-                
-                <div className="lg:col-span-8 space-y-6">
-                    <Card className="border-2 shadow-xl overflow-hidden bg-card/50">
-                        <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
-                            <div>
-                                <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter">EXTRACTION STUDIO</CardTitle>
-                                <CardDescription className="truncate max-w-[150px] md:max-w-md font-mono text-[9px] md:text-[10px] mt-1">{pdfFile?.name}</CardDescription>
-                            </div>
-                            {pages.length > 0 && <Badge className="bg-primary text-[10px]">{pages.length} PAGES</Badge>}
-                        </CardHeader>
-                        <CardContent className="p-3 md:p-6">
-                            {isProcessing && pages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 md:py-32 gap-8 text-center">
-                                    <Loader2 className="h-16 w-16 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
-                                    <div className="space-y-4 w-full max-w-[280px] md:max-w-sm">
-                                        <p className="font-black text-xl md:text-2xl text-primary uppercase tracking-tighter">Rendering PDF Pages...</p>
-                                        <Progress value={progress} className="h-2" />
-                                    </div>
-                                </div>
-                            ) : (
-                                <ScrollArea className="h-[400px] md:h-[550px] pr-2 md:pr-4">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 p-1">
-                                        {pages.map((p) => (
-                                            <div key={p.id} onClick={() => setSelectedId(p.id)}
-                                                className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-lg md:rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 flex flex-col p-0 bg-white shadow-md",
-                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
-                                                )}>
-                                                <div className={cn(
-                                                    "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
-                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                                )}>
-                                                    <img 
-                                                        src={p.finalSrc} 
-                                                        alt={`page-${p.index}`} 
-                                                        className={cn(
-                                                            "w-full object-contain pointer-events-none mx-auto block",
-                                                            p.fitMode === 'original' ? "max-h-[90%]" : "max-h-full"
-                                                        )}
-                                                    />
-                                                </div>
-                                                <div className="absolute top-1.5 left-1.5 size-6 md:size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] md:text-[10px] font-black text-white z-20">{p.index}</div>
-                                                <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                                    <Button size="icon" className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-green-600 shadow-lg" onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p.finalSrc, p.index-1); }}>
-                                                        <Download className="size-3.5 md:size-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
-                            )}
-                        </CardContent>
-                        <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
-                            <Button variant="ghost" onClick={handleReset} className="text-[10px] md:text-xs font-black uppercase text-destructive hover:bg-destructive/10"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over</Button>
-                            <div className="hidden sm:flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-muted-foreground">
-                                <ShieldCheck className="h-4 w-4 text-green-500" /> Secure Processing
-                            </div>
-                        </CardFooter>
-                    </Card>
+        <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
+            <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-5" /></div>
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Studio Control</CardTitle>
                 </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        {isProcessing && <Loader2 className="size-4 animate-spin text-primary" />}
+                        {pages.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pages.length} PAGES READY</Badge>}
+                    </div>
+                    <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={handleReset}><X className="size-4"/></Button>
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="grid lg:grid-cols-12">
+                    {/* LEFT SIDEBAR: CONTROLS */}
+                    <div className="lg:col-span-4 border-r bg-muted/20 p-6 space-y-8 no-print">
+                        <div className="space-y-8 animate-in slide-in-from-left duration-300">
+                             <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Maximize className="size-3" /> Canvas Mode
+                                </Label>
+                                <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
+                                    <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
+                                        <TabsTrigger value="fit" className="font-bold text-[9px] uppercase rounded-lg">Raw Page</TabsTrigger>
+                                        <TabsTrigger value="original" className="font-bold text-[9px] uppercase rounded-lg">A4 Frame</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                             </div>
 
-                <div className="lg:col-span-4 space-y-6">
-                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-2xl md:rounded-[2rem] bg-white dark:bg-slate-950">
-                        <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
-                            <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                                <Layout className="size-5 md:size-6 text-primary" /> STUDIO CONTROL
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-5 md:p-8 space-y-6 md:space-y-8">
-                            {!selectedId ? (
-                                <div className="py-12 text-center space-y-4 opacity-40">
-                                     <MousePointer2 className="size-10 md:size-12 mx-auto text-muted-foreground" />
-                                     <p className="text-[10px] md:text-xs font-black uppercase tracking-widest leading-relaxed">Select a page thumbnail<br/>to strictly align</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-6 md:space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                                <Maximize className="size-3" /> Canvas Mode
-                                            </Label>
-                                            <Badge variant="secondary" className="font-black text-[7px] md:text-[8px] uppercase">A4 RATIO</Badge>
-                                        </div>
-                                        <Tabs value={selectedPage?.fitMode} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
-                                            <TabsList className="grid grid-cols-2 h-10 md:h-12 bg-muted p-1 rounded-xl">
-                                                <TabsTrigger value="fit" className="font-bold text-[9px] md:text-[10px] uppercase">Page Only</TabsTrigger>
-                                                <TabsTrigger value="original" className="font-bold text-[9px] md:text-[10px] uppercase">A4 Canvas</TabsTrigger>
-                                            </TabsList>
-                                        </Tabs>
-                                    </div>
-
-                                    <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-opacity", selectedPage?.fitMode === 'fit' && "opacity-20 pointer-events-none")}>
-                                        <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <AlignVerticalJustifyCenter className="size-3" /> Strict Alignment
-                                        </Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
-                                                <AlignVerticalJustifyStart className="size-4 md:size-5" />
-                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Top</span>
-                                            </Button>
-                                            <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
-                                                <AlignVerticalJustifyCenter className="size-4 md:size-5" />
-                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Center</span>
-                                            </Button>
-                                            <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 md:h-16 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
-                                                <AlignVerticalJustifyEnd className="size-4 md:size-5" />
-                                                <span className="text-[7px] md:text-[8px] font-black uppercase">Bottom</span>
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3 md:space-y-4 pt-4 border-t-2 border-dashed">
-                                        <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <RotateCw className="size-3" /> Orientation
-                                        </Label>
-                                        <Button 
-                                            variant="outline" 
-                                            className="w-full h-10 md:h-12 rounded-xl border-2 font-black text-[10px] uppercase"
-                                            onClick={rotateSelectedPage}
-                                            disabled={isProcessing}
-                                        >
-                                            <RotateCw className="size-3.5 md:size-4 mr-2" /> Rotate 90° Clockwise
-                                        </Button>
-                                    </div>
-
-                                    <Button variant="outline" className="w-full h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyToAll}>
-                                        <Layers className="size-3 mr-2" /> Global Sync Alignment
+                             <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-all", selectedPage?.fitMode === 'fit' ? "opacity-20 pointer-events-none grayscale" : "opacity-100")}>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
+                                </Label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
+                                        <AlignVerticalJustifyStart className="size-4" />
+                                        <span className="text-[7px] font-black uppercase">Top</span>
+                                    </Button>
+                                    <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
+                                        <AlignVerticalJustifyCenter className="size-4" />
+                                        <span className="text-[7px] font-black uppercase">Center</span>
+                                    </Button>
+                                    <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
+                                        <AlignVerticalJustifyEnd className="size-4" />
+                                        <span className="text-[7px] font-black uppercase">Bottom</span>
                                     </Button>
                                 </div>
-                            )}
+                             </div>
 
-                            <div className="p-4 md:p-5 bg-primary/5 rounded-xl md:rounded-2xl border-2 border-primary/10 flex gap-3 md:gap-4">
-                                <Zap className="size-5 md:size-6 text-yellow-500 shrink-0" />
-                                <p className="text-[9px] md:text-[10px] text-primary/80 font-bold leading-relaxed">
-                                    <span className="font-black uppercase block mb-0.5 md:mb-1 text-primary text-[10px] md:text-xs">LITERAL CLAMPING:</span>
-                                    "Bottom" pushes the image to the exact edge of the canvas. No extra padding.
-                                </p>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="bg-muted/10 p-5 md:p-8 border-t-2">
-                            <Button className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50" 
-                                    onClick={handleDownloadAll} disabled={pages.length === 0 || isZipping}>
+                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <RotateCw className="size-3" /> Orientation
+                                </Label>
+                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-[10px] uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
+                                    <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
+                                </Button>
+                             </div>
+
+                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Controls</Label>
+                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
+                                    <Layers className="size-3.5 mr-2" /> Apply to All Pages
+                                </Button>
+                             </div>
+                        </div>
+
+                        <div className="pt-6 border-t-2 border-dashed">
+                             <Button 
+                                className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                                onClick={handleDownloadAll} 
+                                disabled={pages.length === 0 || isZipping || isProcessing}
+                             >
                                 {isZipping ? (
-                                    <div className="flex items-center gap-2 md:gap-3">
-                                        <Loader2 className="size-6 md:size-8 animate-spin" />
-                                        <span className="uppercase text-sm md:text-base tracking-tighter">ZIPPING...</span>
+                                    <div className="flex items-center gap-3">
+                                        <Loader2 className="size-6 animate-spin" />
+                                        <span className="uppercase text-sm tracking-tighter">ZIPPING...</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-3 md:gap-4">
-                                        <Layers className="size-7 md:size-9" />
-                                        <div className="text-left">
-                                            <span className="block uppercase tracking-tighter leading-none text-base md:text-xl">EXTRACT ALL</span>
-                                            <span className="text-[8px] md:text-[10px] font-bold opacity-60 uppercase tracking-widest">ZIP ARCHIVE ({pages.length})</span>
-                                        </div>
+                                    <div className="flex items-center gap-3">
+                                        <Download className="size-6 group-hover:translate-y-1 transition-transform" />
+                                        <span className="uppercase tracking-tighter">EXTRACT ALL</span>
                                     </div>
                                 )}
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                             </Button>
+                        </div>
+                        
+                        <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                            <Zap className="size-5 text-yellow-500 shrink-0" />
+                            <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
+                                <span className="font-black block mb-0.5 text-primary">HD RENDER:</span>
+                                Pages are sampled at 300 DPI equivalent for professional print quality.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* RIGHT VIEWPORT: GRID OF PAGES */}
+                    <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
+                        <ScrollArea className="flex-1 p-6 md:p-10">
+                            {isProcessing && pages.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-40 gap-8">
+                                    <div className="relative">
+                                        <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                        <Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                    </div>
+                                    <div className="space-y-3 w-full max-w-[280px] text-center">
+                                        <p className="font-black text-lg text-primary uppercase tracking-widest animate-pulse">Rendering PDF Pages...</p>
+                                        <Progress value={progress} className="h-1.5 shadow-inner" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                                    {pages.map((p) => (
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                            key={p.id} 
+                                            onClick={() => setSelectedId(p.id)}
+                                            className={cn(
+                                                "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
+                                                selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-500",
+                                                p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                            )}>
+                                                <img 
+                                                    src={p.finalSrc} 
+                                                    alt={`P${p.index}`} 
+                                                    className={cn(
+                                                        "w-full object-contain pointer-events-none mx-auto block shadow-sm",
+                                                        p.fitMode === 'original' ? "max-h-[90%]" : "max-h-full"
+                                                    )}
+                                                />
+                                            </div>
+                                            
+                                            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">
+                                                {p.index}
+                                            </div>
+                                            
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
+                                            
+                                            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
+                                                <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 hover:bg-green-700 shadow-2xl border-2 border-white/20" onClick={(e) => { e.stopPropagation(); const l=document.createElement('a'); l.href=p.finalSrc; l.download=`page-${p.index}.jpg`; l.click(); }}>
+                                                    <Download className="size-4" />
+                                                </Button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                    
+                                    <button 
+                                        className="border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Plus className="size-6 text-primary" />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase text-primary tracking-widest">Add Files</span>
+                                    </button>
+                                </div>
+                            )}
+                            <ScrollBar />
+                        </ScrollArea>
+                        
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
+                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Select page to adjust
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </CardContent>
+            <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
+                <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> NATIVE WASM SPEED</div>
+                <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> LOSSLESS VECTORS</div>
+            </CardFooter>
             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-        </div>
+        </Card>
     );
 }
