@@ -1,18 +1,17 @@
 /**
  * @fileOverview Professional Cloud-only utility to convert DOCX to PDF.
- * This utility relies exclusively on high-fidelity server-side conversion via:
- * 1. ConvertAPI (Primary)
- * 2. CloudConvert (Fallback)
- * 
- * No local/browser-based fallback is used to ensure 100% layout preservation.
+ * This utility relies exclusively on high-fidelity server-side conversion.
  */
 
-export const convertDocxToPdf = async (file: File): Promise<boolean> => {
+export const convertDocxToPdf = async (file: File, password?: string): Promise<boolean> => {
   try {
     console.log('Initiating Cloud Conversion request for:', file.name);
     
     const formData = new FormData();
     formData.append('file', file);
+    if (password) {
+        formData.append('password', password);
+    }
 
     const response = await fetch('/api/docx-to-pdf', {
       method: 'POST',
@@ -25,7 +24,6 @@ export const convertDocxToPdf = async (file: File): Promise<boolean> => {
       
       const link = document.createElement('a');
       link.href = pdfUrl;
-      // Get base name without extension
       const originalName = file.name.replace(/\.[^/.]+$/, "");
       link.download = `GR7-Tools-${originalName}.pdf`;
       document.body.appendChild(link);
@@ -37,11 +35,10 @@ export const convertDocxToPdf = async (file: File): Promise<boolean> => {
     } else {
         const errData = await response.json();
         const errorMessage = errData.error || 'Conversion failed at server side.';
-        console.error('Server Error:', errorMessage, errData.details || '');
         throw new Error(errorMessage);
     }
   } catch (error: any) {
-    console.error('Final Conversion Failure:', error.message);
-    throw error; // Re-throw to be caught by the UI toast
+    console.error('Conversion Utility Error:', error.message);
+    throw error; 
   }
 };

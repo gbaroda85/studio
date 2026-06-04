@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * @fileOverview Professional server-side DOCX to PDF conversion route.
- * This version uses direct REST API calls via fetch to bypass Node.js library 
- * filesystem checks, making it 100% compatible with serverless environments.
+ * Handles both public and password-protected Word documents using ConvertAPI REST.
  */
 
 export async function POST(req: Request) {
@@ -13,6 +12,7 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const password = formData.get('password') as string || '';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -21,15 +21,20 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    console.log('Starting conversion flow for:', file.name);
+    console.log('Starting conversion flow for:', file.name, password ? '(Protected)' : '(Public)');
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION) ---
-    let result = await callConvertApi(PROD_TOKEN, buffer, file.name);
+    let result = await callConvertApi(PROD_TOKEN, buffer, file.name, password);
     
     // --- STRATEGY 2: CONVERTAPI (SANDBOX FALLBACK) ---
     if (!result.success) {
+      // If error is specifically about password, don't try fallback yet, bubble up to user
+      if (result.error.toLowerCase().includes('password')) {
+          return NextResponse.json({ error: result.error }, { status: 401 });
+      }
+      
       console.warn('Production API failed, trying Sandbox. Error:', result.error);
-      result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name);
+      result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name, password);
     }
 
     if (result.success && result.pdfUrl) {
@@ -41,7 +46,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ 
-        error: 'All conversion providers failed.', 
+        error: result.error || 'All conversion providers failed.', 
         details: result.error 
     }, { status: 500 });
 
@@ -56,15 +61,16 @@ export async function POST(req: Request) {
 
 /**
  * Helper to call ConvertAPI REST endpoint directly.
- * Using fetch ensures we don't hit "path must be a string" errors.
  */
-async function callConvertApi(token: string, buffer: Buffer, filename: string) {
+async function callConvertApi(token: string, buffer: Buffer, filename: string, password?: string) {
     try {
-        const url = `https://v2.convertapi.com/convert/docx/to/pdf?Secret=${token}`;
+        // Construct URL with optional Password parameter
+        let url = `https://v2.convertapi.com/convert/docx/to/pdf?Secret=${token}`;
+        if (password) {
+            url += `&Password=${encodeURIComponent(password)}`;
+        }
         
-        // We use the binary payload directly for the REST API
         const formData = new FormData();
-        // Converting Buffer to Blob for standard fetch compatibility
         const fileBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
         formData.append('File', fileBlob, filename);
 
