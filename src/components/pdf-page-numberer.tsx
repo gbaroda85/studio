@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -28,7 +29,8 @@ import {
     AlignRight,
     X,
     FileText,
-    SearchCode
+    SearchCode,
+    ListFilter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -41,6 +43,13 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 }
 
 type PageNumberPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+
+const FORMAT_PRESETS = [
+    { label: 'Number Only (1)', value: '{page}' },
+    { label: 'Dashes (- 1 -)', value: '- {page} -' },
+    { label: 'Page 1', value: 'Page {page}' },
+    { label: 'Page 1 of 10', value: 'Page {page} of {total}' },
+];
 
 function parsePageRanges(ranges: string, maxPage: number): number[] {
     const result = new Set<number>();
@@ -145,11 +154,11 @@ export default function PdfPageNumberer() {
     try {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 30;
+        const margin = 20; // Reduced margin to place numbers at the very last part of the page
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -175,9 +184,9 @@ export default function PdfPageNumberer() {
             let x, y;
 
             switch (position) {
-                case 'top-left': x = margin; y = height - margin; break;
-                case 'top-center': x = (width - textWidth) / 2; y = height - margin; break;
-                case 'top-right': x = width - textWidth - margin; y = height - margin; break;
+                case 'top-left': x = margin; y = height - margin - fontSize; break;
+                case 'top-center': x = (width - textWidth) / 2; y = height - margin - fontSize; break;
+                case 'top-right': x = width - textWidth - margin; y = height - margin - fontSize; break;
                 case 'bottom-left': x = margin; y = margin; break;
                 case 'bottom-right': x = width - textWidth - margin; y = margin; break;
                 case 'bottom-center':
@@ -200,7 +209,7 @@ export default function PdfPageNumberer() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setNumberedPdfUrl(url);
-        toast({title: "Success!", description: "Page numbers added successfully."});
+        toast({title: "Success!", description: `Page numbers added to ${pagesToNumber.length} pages.`});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to process document.'});
@@ -234,14 +243,14 @@ export default function PdfPageNumberer() {
           pointerEvents: 'none',
           color: '#000000',
           fontSize: `${fontSize * 0.8}px`,
-          fontWeight: '700',
+          fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
           transition: 'all 0.2s ease-out',
           zIndex: 40
       };
 
-      const m = "6%";
+      const m = "4%"; // Adjusted for real preview look
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
@@ -270,7 +279,7 @@ export default function PdfPageNumberer() {
               Add Page <span className="text-gradient-hero">Numbers Pro</span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Choose professional positions and formats. <br/>100% Private local RAM mapping.
+              Professional positioning at the bottom edge. <br/>100% Private local RAM mapping.
           </p>
       </div>
 
@@ -316,39 +325,55 @@ export default function PdfPageNumberer() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
+                        
                         <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <Layout className="size-3" /> Position Preset
+                                <ListFilter className="size-3" /> Quick Formats
                             </Label>
-                            <Select value={position} onValueChange={(v) => setPosition(v as PageNumberPosition)}>
-                                <SelectTrigger className="h-12 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                            <Select value={format} onValueChange={setFormat}>
+                                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
                                 <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                    <SelectItem value="bottom-center" className="font-bold">Bottom Center</SelectItem>
-                                    <SelectItem value="bottom-left" className="font-bold">Bottom Left</SelectItem>
-                                    <SelectItem value="bottom-right" className="font-bold">Bottom Right</SelectItem>
-                                    <SelectItem value="top-center" className="font-bold">Top Center</SelectItem>
-                                    <SelectItem value="top-left" className="font-bold">Top Left</SelectItem>
-                                    <SelectItem value="top-right" className="font-bold">Top Right</SelectItem>
+                                    {FORMAT_PRESETS.map(f => (
+                                        <SelectItem key={f.value} value={f.value} className="font-bold py-2">{f.label}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 pt-4 border-t border-dashed">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <NotebookPen className="size-3" /> Number Format
+                                <Layout className="size-3" /> Position on Page
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {(['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'] as PageNumberPosition[]).map(pos => (
+                                    <Button 
+                                        key={pos} 
+                                        variant={position === pos ? 'default' : 'outline'}
+                                        onClick={() => setPosition(pos)}
+                                        className={cn("h-10 text-[9px] font-black uppercase border-2 rounded-xl", position === pos ? "border-primary" : "")}
+                                    >
+                                        {pos.replace('-', ' ')}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-dashed">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
+                                <NotebookPen className="size-3" /> Custom Format
                             </Label>
                             <Input 
                                 value={format} 
                                 onChange={(e) => setFormat(e.target.value)}
                                 placeholder="e.g. Page {page} of {total}"
-                                className="h-12 border-2 font-bold rounded-xl bg-background shadow-inner"
+                                className="h-10 border-2 font-bold rounded-xl bg-background shadow-inner"
                             />
-                            <p className="text-[9px] text-muted-foreground font-bold uppercase opacity-50">Use {'{page}'} and {'{total}'} as variables.</p>
+                            <p className="text-[8px] text-muted-foreground font-bold uppercase opacity-50">Variables: {'{page}'}, {'{total}'}</p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4 pt-2">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size (pt)</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label>
                                 <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
                             </div>
                             <div className="space-y-3">
@@ -380,18 +405,18 @@ export default function PdfPageNumberer() {
                                 {isProcessing ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="size-6 md:size-8 animate-spin" />
-                                        <span className="uppercase text-sm md:text-base">CALCULATING...</span>
+                                        <span className="uppercase text-sm md:text-base">NUMBERING...</span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 md:gap-3">
                                         <Hash className="size-6 md:size-8 text-white group-hover:scale-125 transition-transform" />
-                                        <span className="uppercase tracking-tighter text-lg md:text-2xl">ADD NUMBERS</span>
+                                        <span className="uppercase tracking-tighter text-lg md:text-2xl">APPLY NUMBERS</span>
                                     </div>
                                 )}
                             </Button>
                         ) : (
                             <Button size="lg" className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
-                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE PDF
+                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> DOWNLOAD PDF
                             </Button>
                         )}
                         <Button variant="ghost" onClick={resetState} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
@@ -407,7 +432,7 @@ export default function PdfPageNumberer() {
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Document Preview</CardTitle>
+                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Preview</CardTitle>
                         </div>
                         {numberedPdfUrl && (
                              <div className="flex items-center gap-1.5 text-green-600 animate-in zoom-in-95">
@@ -443,20 +468,13 @@ export default function PdfPageNumberer() {
                                 </div>
                             </div>
                         ) : null}
-                        
-                        {!numberedPdfUrl && originalPageImage && (
-                            <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
-                                <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" /> 
-                                Real-time Studio Sync Active
-                            </div>
-                        )}
                     </CardContent>
                     <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
                         </div>
                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                            <Zap className="size-4 text-yellow-500" /> 300 DPI HD
+                            <Zap className="size-4 text-yellow-500" /> TOP-TO-BOTTOM SYNC
                         </div>
                     </CardFooter>
                 </Card>
