@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -24,22 +24,23 @@ import {
     Sparkles,
     CheckCircle2,
     Palette,
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
     X,
     FileText,
     SearchCode,
-    ListFilter
+    ListFilter,
+    Monitor,
+    ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from './ui/badge';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { Progress } from './ui/progress';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
 
 type PageNumberPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
@@ -66,15 +67,11 @@ function parsePageRanges(ranges: string, maxPage: number): number[] {
                 for (let i = start; i <= end; i++) {
                     result.add(i);
                 }
-            } else {
-                return [];
             }
         } else {
             const page = parseInt(trimmedPart, 10);
             if (!isNaN(page) && page > 0 && page <= maxPage) {
                 result.add(page);
-            } else if (trimmedPart !== '') {
-                 return [];
             }
         }
     }
@@ -87,6 +84,7 @@ export default function PdfPageNumberer() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [renderingProgress, setRenderingProgress] = useState(0);
   
   const [position, setPosition] = useState<PageNumberPosition>('bottom-center');
   const [format, setFormat] = useState('Page {page} of {total}');
@@ -95,7 +93,7 @@ export default function PdfPageNumberer() {
   const [customRange, setCustomRange] = useState('');
   
   const [numberedPdfUrl, setNumberedPdfUrl] = useState<string | null>(null);
-  const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
+  const [previewPages, setPreviewPages] = useState<string[]>([]);
   const [totalPagesPreview, setTotalPagesPreview] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -110,29 +108,44 @@ export default function PdfPageNumberer() {
     if (file && file.type === 'application/pdf') {
       setPdfFile(file);
       setNumberedPdfUrl(null);
-      setOriginalPageImage(null);
+      setPreviewPages([]);
       setIsGeneratingPreview(true);
+      setRenderingProgress(0);
 
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+        const loadingTask = pdfjs.getDocument({ 
+            data: new Uint8Array(arrayBuffer),
+            cMapUrl: 'https://unpkg.com/pdfjs-dist@4.2.67/cmaps/',
+            cMapPacked: true
+        });
         const pdf = await loadingTask.promise;
-        setTotalPagesPreview(pdf.numPages);
+        const count = pdf.numPages;
+        setTotalPagesPreview(count);
         
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.0 });
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        const imgs: string[] = [];
+        // Render first 20 pages for preview to maintain performance
+        const pagesToRender = Math.min(count, 20);
 
-        if (context) {
-            context.fillStyle = '#FFFFFF';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: context, viewport }).promise;
-            setOriginalPageImage(canvas.toDataURL('image/jpeg', 0.9));
+        for (let i = 1; i <= pagesToRender; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            if (context) {
+                context.fillStyle = '#FFFFFF';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                await page.render({ canvasContext: context, viewport }).promise;
+                imgs.push(canvas.toDataURL('image/jpeg', 0.85));
+            }
+            setRenderingProgress(Math.round((i / pagesToRender) * 100));
         }
+        setPreviewPages(imgs);
       } catch (e) {
+        console.error(e);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF for preview.' });
       } finally {
         setIsGeneratingPreview(false);
@@ -158,7 +171,7 @@ export default function PdfPageNumberer() {
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 20; // Reduced margin to place numbers at the very last part of the page
+        const margin = 20; 
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -229,7 +242,7 @@ export default function PdfPageNumberer() {
 
   const resetState = () => {
       setPdfFile(null);
-      setOriginalPageImage(null);
+      setPreviewPages([]);
       setNumberedPdfUrl(null);
       setTotalPagesPreview(0);
       setPageRange('all');
@@ -242,7 +255,7 @@ export default function PdfPageNumberer() {
           position: 'absolute',
           pointerEvents: 'none',
           color: '#000000',
-          fontSize: `${fontSize * 0.8}px`,
+          fontSize: `${fontSize * 0.7}px`,
           fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
@@ -250,7 +263,7 @@ export default function PdfPageNumberer() {
           zIndex: 40
       };
 
-      const m = "4%"; // Adjusted for real preview look
+      const m = "5%"; 
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
@@ -267,7 +280,6 @@ export default function PdfPageNumberer() {
   
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4">
-      {/* Premium Header */}
       <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
           <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
               <Hash className="size-8" />
@@ -318,7 +330,7 @@ export default function PdfPageNumberer() {
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 pb-20">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                         <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
@@ -419,62 +431,84 @@ export default function PdfPageNumberer() {
                                 <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> DOWNLOAD PDF
                             </Button>
                         )}
-                        <Button variant="ghost" onClick={resetState} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
+                        <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
                             <RefreshCcw className="mr-2 size-3" /> Change File
                         </Button>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* Workspace: Live Preview */}
+            {/* Workspace: Live Preview - MULTI PAGE SCROLL */}
             <div className="lg:col-span-8 h-full">
                 <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-full flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Preview</CardTitle>
+                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live Visual Stack</CardTitle>
                         </div>
                         {numberedPdfUrl && (
                              <div className="flex items-center gap-1.5 text-green-600 animate-in zoom-in-95">
                                 <CheckCircle2 className="size-4" />
-                                <span className="text-[10px] font-black uppercase">Ready</span>
+                                <span className="text-[10px] font-black uppercase">Ready to Export</span>
                              </div>
                         )}
                     </CardHeader>
-                    <CardContent className="p-6 md:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1">
-                        {isGeneratingPreview ? (
-                            <div className="flex flex-col items-center gap-6 text-center">
-                                <div className="relative">
-                                    <Loader2 className="size-16 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
-                                    <Eye className="absolute inset-0 m-auto size-6 md:size-8 text-primary animate-pulse" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page 1...</p>
-                            </div>
-                        ) : originalPageImage ? (
-                            <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
-                                <img src={originalPageImage} alt="Preview" className="w-full h-auto block" />
-                                
-                                {/* FLOATING PAGE NUMBER PREVIEW OVERLAY */}
-                                <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-[8%]">
-                                    <div style={getPreviewStyle()}>
-                                        {format
-                                            .replace('{page}', '1')
-                                            .replace('{total}', String(totalPagesPreview))}
+                    <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1">
+                        <ScrollArea className="h-[600px] md:h-[800px] w-full p-4 md:p-12 lg:p-16">
+                            <div className="flex flex-col items-center gap-12 pb-20">
+                                {isGeneratingPreview ? (
+                                    <div className="flex flex-col items-center gap-6 text-center py-20">
+                                        <div className="relative">
+                                            <Loader2 className="size-16 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
+                                            <Monitor className="absolute inset-0 m-auto size-6 md:size-10 text-primary/40 animate-pulse" />
+                                        </div>
+                                        <div className="space-y-3 w-full max-w-[200px]">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Stack...</p>
+                                            <Progress value={renderingProgress} className="h-1" />
+                                        </div>
                                     </div>
-                                </div>
+                                ) : previewPages.length > 0 ? (
+                                    previewPages.map((src, i) => (
+                                        <div key={i} className="relative group w-full max-w-[480px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in slide-in-from-bottom-4 duration-500">
+                                            <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
+                                            
+                                            {/* FLOATING PAGE NUMBER PREVIEW OVERLAY */}
+                                            <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-[8%]">
+                                                <div style={getPreviewStyle()}>
+                                                    {format
+                                                        .replace('{page}', String(i + 1))
+                                                        .replace('{total}', String(totalPagesPreview))}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="absolute top-2 right-2 opacity-20 flex items-center gap-1.5">
+                                                <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE {i+1}</Badge>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-40 opacity-20">
+                                        <SearchCode className="size-20" />
+                                        <p className="text-xs font-black uppercase tracking-widest mt-4">Waiting for Input</p>
+                                    </div>
+                                )}
                                 
-                                <div className="absolute top-2 right-2 opacity-20">
-                                    <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE 1 VIEW</Badge>
-                                </div>
+                                {totalPagesPreview > 20 && previewPages.length > 0 && (
+                                    <div className="flex flex-col items-center gap-2 opacity-40">
+                                        <ChevronDown className="size-4 animate-bounce" />
+                                        <p className="text-[9px] font-black uppercase tracking-widest">Showing first 20 pages for performance</p>
+                                    </div>
+                                )}
                             </div>
-                        ) : null}
+                            <ScrollBar />
+                        </ScrollArea>
                     </CardContent>
                     <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
                         </div>
                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                            <Zap className="size-4 text-yellow-500" /> TOP-TO-BOTTOM SYNC
+                            <Zap className="size-4 text-yellow-500" /> FULL STACK SYNC
                         </div>
                     </CardFooter>
                 </Card>
@@ -484,3 +518,4 @@ export default function PdfPageNumberer() {
     </div>
   );
 }
+
