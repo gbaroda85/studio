@@ -436,8 +436,8 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* 3D Elevated Header Section - Increased Height */}
-      <section className="relative w-full max-w-[2000px] pt-20 pb-24 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
+      {/* 3D Elevated Header Section - Adjusted Height */}
+      <section className="relative w-full max-w-[2000px] pt-12 pb-14 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-48 -left-48 size-[600px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
