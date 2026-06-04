@@ -463,15 +463,15 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-6xl mx-auto">
                 
-                {/* ADJUSTMENT PANEL - MADE COMPACT (7 Span) */}
-                <Card className="lg:col-span-7 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-slate-950 flex flex-col min-h-[500px]">
-                    <CardHeader className="bg-slate-900 border-b border-white/5 p-6 flex flex-row items-center justify-between text-white">
+                {/* ADJUSTMENT PANEL */}
+                <Card className="lg:col-span-7 border-2 shadow-3xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
+                    <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
-                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-white/10 p-1 rounded-xl border border-white/10">
+                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
                             <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
                         </Tabs>
                     </CardHeader>
-                    <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-black/40 flex-1 group"
+                    <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1 group"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-2xl border-4 border-white">
                             {cropMode === 'rect' ? (
@@ -503,19 +503,19 @@ export default function DocumentScanner() {
                         </div>
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 z-40 shadow-2xl"><Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
-                    <CardFooter className="bg-slate-950 p-6 border-t border-white/5 flex flex-col gap-4">
-                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-slate-950 font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" /></Button>
-                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] text-white/40 hover:text-white" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-4">
+                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" /></Button>
+                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                     </CardFooter>
                 </Card>
 
-                {/* HD RESULT PREVIEW - MORE WIDTH FOR BALANCE (5 Span) */}
-                <Card className="lg:col-span-5 border-none shadow-3xl overflow-hidden rounded-[3rem] bg-white dark:bg-slate-900 flex flex-col min-h-[500px]">
+                {/* HD RESULT PREVIEW */}
+                <Card className="lg:col-span-5 border-2 shadow-3xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
-                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">HD RESULT PREVIEW</CardTitle></div>
+                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
                          <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
-                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 shadow-inner relative overflow-hidden">
+                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
                         <div className="relative bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
