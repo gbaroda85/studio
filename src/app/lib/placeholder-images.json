@@ -15,5 +15,9 @@
   "converter_tools": {
     "url": "https://picsum.photos/seed/convtools/800/400",
     "hint": "measurement units"
+  },
+  "hero_bg": {
+    "url": "https://picsum.photos/seed/pcdocs/1920/1080",
+    "hint": "computer documents"
   }
 }
