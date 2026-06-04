@@ -30,7 +30,8 @@ import {
     ListFilter,
     Monitor,
     ChevronDown,
-    Type
+    Type,
+    Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -47,11 +48,10 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 type PageNumberPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 type NumberStyle = 'arabic' | 'roman-upper' | 'roman-lower' | 'alpha-upper' | 'alpha-lower';
 
-const FORMAT_PRESETS = [
-    { label: 'Number Only (1)', value: '{page}' },
-    { label: 'Dashes (- 1 -)', value: '- {page} -' },
-    { label: 'Page 1', value: 'Page {page}' },
-    { label: 'Page 1 of 10', value: 'Page {page} of {total}' },
+const QUICK_FORMATS = [
+    { label: 'Page {page}', display: 'Page 1', value: 'Page {page}' },
+    { label: '{page} / {total}', display: '1 / 10', value: '{page} / {total}' },
+    { label: '- {page} -', display: '- 1 -', value: '- {page} -' },
 ];
 
 const NUMBER_STYLES = [
@@ -407,16 +407,37 @@ export default function PdfPageNumberer() {
 
                         <div className="space-y-4 pt-4 border-t border-dashed">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <ListFilter className="size-3" /> Quick Formats
+                                <Layers className="size-3" /> Quick Formats
                             </Label>
-                            <Select value={format} onValueChange={setFormat}>
-                                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
-                                <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                    {FORMAT_PRESETS.map(f => (
-                                        <SelectItem key={f.value} value={f.value} className="font-bold py-2">{f.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="grid grid-cols-1 gap-2">
+                                {QUICK_FORMATS.map((f) => (
+                                    <Button 
+                                        key={f.value}
+                                        variant={format === f.value ? "default" : "outline"}
+                                        onClick={() => setFormat(f.value)}
+                                        className={cn(
+                                            "h-11 justify-between font-black text-[10px] uppercase border-2 rounded-xl px-4",
+                                            format === f.value ? "border-primary" : "hover:border-primary/50"
+                                        )}
+                                    >
+                                        <span>{f.label.replace('{page}', '1').replace('{total}', '10')}</span>
+                                        {format === f.value && <CheckCircle2 className="size-3 text-white" />}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-dashed">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
+                                <NotebookPen className="size-3" /> Custom Format
+                            </Label>
+                            <Input 
+                                value={format} 
+                                onChange={(e) => setFormat(e.target.value)}
+                                placeholder="e.g. Page {page} of {total}"
+                                className="h-10 border-2 font-bold rounded-xl bg-background shadow-inner"
+                            />
+                            <p className="text-[8px] text-muted-foreground font-bold uppercase opacity-50">Variables: {'{page}'}, {'{total}'}</p>
                         </div>
 
                         <div className="space-y-4 pt-4 border-t border-dashed">
@@ -437,20 +458,7 @@ export default function PdfPageNumberer() {
                             </div>
                         </div>
 
-                        <div className="space-y-4 pt-4 border-t border-dashed">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <NotebookPen className="size-3" /> Custom Format
-                            </Label>
-                            <Input 
-                                value={format} 
-                                onChange={(e) => setFormat(e.target.value)}
-                                placeholder="e.g. Page {page} of {total}"
-                                className="h-10 border-2 font-bold rounded-xl bg-background shadow-inner"
-                            />
-                            <p className="text-[8px] text-muted-foreground font-bold uppercase opacity-50">Variables: {'{page}'}, {'{total}'}</p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed">
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label>
                                 <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
@@ -572,8 +580,7 @@ export default function PdfPageNumberer() {
                     </CardContent>
                     <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                            <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
-                        </div>
+                            <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <Zap className="size-4 text-yellow-500" /> FULL STACK SYNC
                         </div>
