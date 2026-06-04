@@ -34,24 +34,26 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
       console.log('Cloud Conversion Successful. Engine:', data.provider);
       return true;
     } else {
-        const errorMessage = data.error || 'Conversion failed at server side.';
+        const errorMessage = data.error || 'Conversion failed.';
+        const errorDetails = data.details || 'Check API token validity.';
         
-        // Log the actual detailed error for debugging
-        console.error('Server side error report:', errorMessage, data.details || '');
+        // Detailed console report for debugging
+        console.error('Server side error report:', errorMessage, '| Details:', errorDetails);
 
         // If server says password is required, bubble up specific error
         if (response.status === 401 || data.code === 'PASSWORD_REQUIRED') {
             throw new Error('PASSWORD_REQUIRED');
         }
         
-        throw new Error(errorMessage);
+        // Provide the real technical reason to the UI toast
+        throw new Error(errorDetails.length > 5 ? errorDetails : errorMessage);
     }
   } catch (error: any) {
     if (error.message === 'PASSWORD_REQUIRED') {
         throw error;
     }
     // Final error bubble
-    console.error('Word-to-PDF Utility Exception:', error.message);
+    console.error('Conversion Utility Exception:', error.message);
     throw error; 
   }
 };

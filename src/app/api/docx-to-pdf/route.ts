@@ -3,10 +3,11 @@ import { NextResponse } from 'next/server';
 /**
  * @fileOverview Professional server-side Word to PDF conversion route.
  * Optimized for both .doc and .docx using direct REST API calls.
+ * captures detailed cloud errors for debugging.
  */
 
 export async function POST(req: Request) {
-  // Use tokens provided by the user
+  // Hardcoded fallback tokens provided by the user for maximum reliability
   const PROD_TOKEN = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
   const SANDBOX_TOKEN = "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy";
 
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
     // Detect correct ConvertAPI endpoint based on file extension
     const format = fileName.endsWith('.docx') ? 'docx' : 'doc';
 
-    console.log(`[CloudConvert] Starting ${format.toUpperCase()} conversion for:`, file.name);
+    console.log(`[Word-to-PDF] Starting ${format.toUpperCase()} conversion for:`, file.name);
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION) ---
     let result = await callConvertApi(PROD_TOKEN, buffer, file.name, format, password);
@@ -34,15 +35,19 @@ export async function POST(req: Request) {
     // --- STRATEGY 2: CONVERTAPI (SANDBOX FALLBACK) ---
     if (!result.success) {
       // If error is specifically about password, stop and ask user for password
-      if (result.error && result.error.toLowerCase().includes('password')) {
-          return NextResponse.json({ error: result.error, code: 'PASSWORD_REQUIRED' }, { status: 401 });
+      if (result.error && (result.error.toLowerCase().includes('password') || result.code === 401)) {
+          return NextResponse.json({ 
+            error: 'File is password protected. Please supply the correct password.', 
+            code: 'PASSWORD_REQUIRED' 
+          }, { status: 401 });
       }
       
-      console.warn(`Production API failed (${result.error}), trying Sandbox fallback...`);
+      console.warn(`[Word-to-PDF] Production API failed: ${result.error}. Trying Sandbox fallback...`);
       result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name, format, password);
     }
 
     if (result.success && result.pdfUrl) {
+      console.log(`[Word-to-PDF] Success via ${result.provider}`);
       return NextResponse.json({ 
         success: true, 
         pdfUrl: result.pdfUrl, 
@@ -51,15 +56,16 @@ export async function POST(req: Request) {
     }
 
     // Final failure response with the actual error message from the cloud engine
+    console.error(`[Word-to-PDF] All attempts failed. Last error: ${result.error}`);
     return NextResponse.json({ 
-        error: result.error || 'All conversion providers failed.', 
-        details: result.error 
+        error: 'Conversion failed.', 
+        details: result.error || 'Unknown cloud error'
     }, { status: 500 });
 
   } catch (error: any) {
-    console.error('Final Fatal Conversion Failure:', error);
+    console.error('[Word-to-PDF] Fatal Exception:', error);
     return NextResponse.json({ 
-      error: 'Server-side conversion failed.', 
+      error: 'Server-side processing error.', 
       details: error.message 
     }, { status: 500 });
   }
@@ -67,7 +73,7 @@ export async function POST(req: Request) {
 
 /**
  * Helper to call ConvertAPI REST endpoint directly using native fetch.
- * This avoids filesystem path issues in serverless environments.
+ * Uses File object for better multipart compatibility.
  */
 async function callConvertApi(token: string, buffer: Buffer, filename: string, format: 'doc' | 'docx', password?: string) {
     try {
@@ -81,22 +87,30 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             : 'application/msword';
             
-        // We wrap the buffer in a Blob for native fetch FormData compatibility
-        const fileBlob = new Blob([buffer], { type: mimeType });
-        apiFormData.append('File', fileBlob, filename);
+        // Using File instead of Blob for better cloud filename detection
+        const fileObj = new File([buffer], filename, { type: mimeType });
+        apiFormData.append('File', fileObj);
 
         const response = await fetch(url, {
             method: 'POST',
             body: apiFormData,
         });
 
-        const data = await response.json();
+        const text = await response.text();
+        let data: any = {};
+        
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            // Handle non-JSON errors (like cloud outages)
+            return { success: false, error: `Cloud returned status ${response.status}: ${text.substring(0, 100)}` };
+        }
 
         if (response.ok && data.Files && data.Files.length > 0) {
             return { 
                 success: true, 
                 pdfUrl: data.Files[0].Url, 
-                provider: token === "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy" ? 'convertapi-sandbox' : 'convertapi-prod' 
+                provider: token.startsWith("x7Pt") ? 'convertapi-sandbox' : 'convertapi-prod' 
             };
         }
 
@@ -104,7 +118,8 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
         const cloudError = data.Message || data.message || `API returned status ${response.status}`;
         return { 
             success: false, 
-            error: cloudError
+            error: cloudError,
+            code: response.status
         };
     } catch (e: any) {
         return { success: false, error: e.message };
