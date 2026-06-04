@@ -148,16 +148,23 @@ export default function Page() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
-        {/* Background Image Layer */}
+        {/* Background Layer */}
         <div className="absolute inset-0 z-0">
-          <Image 
-            src={placeholderData.hero_bg.url} 
-            alt="Hero Background" 
-            fill 
-            className="object-cover opacity-10 dark:opacity-20 transition-opacity duration-700"
-            priority
-            data-ai-hint={placeholderData.hero_bg.hint}
-          />
+          {/* Light Mode: Dreamy Sunset Theme Colors */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f5f3f7] via-[#ffb3b3]/15 to-[#6cb4c4]/15 dark:hidden" />
+          
+          {/* Dark Mode: The Productivity/Computer Image */}
+          <div className="hidden dark:block absolute inset-0">
+            <Image 
+              src={placeholderData.hero_bg.url} 
+              alt="Hero Background" 
+              fill 
+              className="object-cover opacity-20 transition-opacity duration-700"
+              priority
+              data-ai-hint={placeholderData.hero_bg.hint}
+            />
+          </div>
+          
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/90" />
         </div>
 
@@ -180,18 +187,18 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-2 mb-6 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group scale-90">
-              <ImageIcon className="size-3 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+          <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="flex items-center gap-2.5 px-5 py-2.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group hover:scale-105 active:scale-95">
+              <ImageIcon className="size-4 text-primary group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group scale-90">
-              <FileText className="size-3 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-2.5 px-5 py-2.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group hover:scale-105 active:scale-95">
+              <FileText className="size-4 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group scale-90">
-              <Calculator className="size-3 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-2.5 px-5 py-2.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
+              <Calculator className="size-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
