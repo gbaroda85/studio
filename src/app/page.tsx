@@ -146,11 +146,11 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-12 pb-16 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
-          {/* Light Mode: Peaceful Hues Aesthetic Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f8f9fa] via-[#e2e8f0]/30 to-[#b2c2bc]/20 dark:hidden" />
+          {/* Light Mode: Unique Combinations Artistic Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           
           {/* Dark Mode: The Productivity/Computer Image */}
           <div className="hidden dark:block absolute inset-0">
@@ -189,17 +189,17 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-3 px-10 py-4 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group hover:scale-105 active:scale-95">
-              <ImageIcon className="size-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[11px] md:text-[12px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
+            <Link href="/tools?tab=image" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group hover:scale-105 active:scale-95">
+              <ImageIcon className="size-6 text-primary group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-10 py-4 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group hover:scale-105 active:scale-95">
-              <FileText className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[11px] md:text-[12px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group hover:scale-105 active:scale-95">
+              <FileText className="size-6 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-10 py-4 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
-              <Calculator className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[11px] md:text-[12px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
+              <Calculator className="size-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
@@ -210,7 +210,7 @@ export default function Page() {
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'biodata', 'compress')"
-                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background/90 dark:bg-[#001D39]/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm"
+                className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -273,7 +273,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className="mb-32 py-16 px-8 bg-[#ecf4f4] dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/20 dark:border-white/10 shadow-inner overflow-hidden relative">
+                <div className="mb-32 py-16 px-8 bg-[#fdf8f9] dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/20 dark:border-white/10 shadow-inner overflow-hidden relative">
                     <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-3xl rounded-full" />
                     <div className="absolute bottom-0 left-0 size-64 bg-accent/10 blur-3xl rounded-full" />
                     
