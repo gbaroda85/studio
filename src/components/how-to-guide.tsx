@@ -39,7 +39,13 @@ import {
     Fuel,
     Waves,
     Activity,
-    Target
+    Target,
+    Scissors,
+    Printer,
+    Merge,
+    Lock,
+    Heart,
+    FileStack
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,18 +56,19 @@ const ICON_MAP: Record<string, any> = {
   SearchCode, Scaling, Maximize, ScanLine, Smartphone, 
   UserCircle, Eraser, ImageIcon, PenLine, Layout, AlignCenter, 
   Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
-  Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck
+  Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck,
+  Scissors, Printer, Merge, Lock, Heart, FileStack
 };
 
 type StepDetail = {
   title: string;
   description: string;
-  icon?: string; // Pass icon name as string to avoid serialization error
+  icon?: string;
 };
 
 type HowToGuideProps = {
   title: string;
-  steps: StepDetail[];
+  steps: (string | StepDetail)[];
 };
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
@@ -81,7 +88,13 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {steps.map((step, index) => {
-          const Icon = (step.icon && ICON_MAP[step.icon]) || CheckCircle2;
+          // Robust parsing for both object and string formats
+          const isObject = typeof step !== 'string';
+          const titleText = isObject ? (step as StepDetail).title : (step as string).split(':')[0] || 'Step';
+          const descText = isObject ? (step as StepDetail).description : (step as string).split(':')[1] || (step as string);
+          const iconName = isObject ? (step as StepDetail).icon : undefined;
+          
+          const Icon = (iconName && ICON_MAP[iconName]) || CheckCircle2;
 
           return (
             <Card key={index} className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/50 transition-all duration-500 rounded-[2.5rem] bg-card hover:-translate-y-2 shadow-xl hover:shadow-primary/10">
@@ -94,9 +107,9 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 </div>
                 
                 <div className="space-y-3">
-                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{step.title}</h3>
+                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
-                        {step.description}
+                        {descText}
                     </p>
                 </div>
 

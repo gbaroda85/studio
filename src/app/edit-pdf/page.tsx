@@ -16,13 +16,27 @@ export const metadata: Metadata = {
 };
 
 export default function EditPdfPage() {
-  const steps = [
-    "Upload: Select a PDF document from your device workspace.",
-    "Remove Text: Use the 'Whiteout' tool to hide existing text or logos.",
-    "Add Text: Use the 'Add Text' tool to type new information over any area.",
-    "Direct Interaction: Double-click text boxes to edit content directly on canvas.",
-    "Sign & Brand: Insert PNG signatures or logos with custom opacity.",
-    "Export: Save your modified document as a high-fidelity vector PDF."
+  const deepSteps = [
+    {
+      title: "Workspace Import",
+      description: "Upload any PDF. Our industrial engine renders all pages as high-resolution background buffers in your browser, enabling interactive overlays.",
+      icon: "Monitor"
+    },
+    {
+      title: "Content Eraser",
+      description: "Use the 'Whiteout' tool to permanently hide sensitive info or logos. It works like a digital correction tape, perfect for sanitizing contracts.",
+      icon: "Eraser"
+    },
+    {
+      title: "Direct Overwrite",
+      description: "Place new text boxes over whiteout areas. Type directly to fill forms or fix typos. Our engine handles absolute positioning with pixel accuracy.",
+      icon: "Type"
+    },
+    {
+      title: "Signature & Save",
+      description: "Draw your signature or upload a PNG seal. Click 'Export PDF' to bundle everything into a fresh, sanitized document with zero quality loss.",
+      icon: "Download"
+    }
   ];
 
   return (
@@ -37,7 +51,7 @@ export default function EditPdfPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Smart <span className="text-gradient-hero">PDF Editor</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
                     Remove, Replace and Overwrite. The only truly private professional editor for your browser.
                 </p>
             </div>
@@ -46,7 +60,7 @@ export default function EditPdfPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-20 no-print">
-            <HowToGuide title="Professional PDF Editor" steps={steps} />
+            <HowToGuide title="Professional PDF Editor" steps={deepSteps} />
 
             {/* AdSense Ready Deep Content */}
             <section className="space-y-10 py-10 border-t">
@@ -77,35 +91,6 @@ export default function EditPdfPage() {
                         <p className="text-xs text-muted-foreground leading-relaxed">All edits happen in your browser's local RAM. Your sensitive documents never travel to a server.</p>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Editing FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">How do I remove text from a PDF?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Click the **"Whiteout"** button in the toolbar. A white block will appear on your page. Drag it over the text you want to hide and resize it using the sidebar controls to cover the area perfectly.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I change existing text directly?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Since PDFs are static files, you first use the **Whiteout tool** to hide the old text, then use the **Add Text tool** to type the new content exactly over it. This gives the effect of a direct edit.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for signing contracts?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. This is the most secure method because your contract is never uploaded to any cloud. The signature and text overlays are embedded locally on your device.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

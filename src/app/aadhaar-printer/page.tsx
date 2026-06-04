@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
@@ -17,6 +16,29 @@ export const metadata: Metadata = {
 };
 
 export default function AadhaarPrinterPage() {
+  const deepSteps = [
+    {
+      title: "Workflow Mode",
+      description: "Select between 'A4 e-Aadhaar' for official PDF strips or 'Individual Sides' for separate PAN/DL/Voter photos taken at angles.",
+      icon: "LayoutGrid"
+    },
+    {
+      title: "Studio Refinement",
+      description: "Use the 8-dot industrial scanner to straighten tilted photos. Our engine uses perspective matrices to flatten angled documents instantly.",
+      icon: "Scan"
+    },
+    {
+      title: "ISO Sizing",
+      description: "The tool automatically scales both sides to the standard ISO/IEC 7810 ID-1 size (85.6mm x 54mm) for a perfect wallet fit.",
+      icon: "Maximize"
+    },
+    {
+      title: "Print Render",
+      description: "Generate a high-fidelity A4 sheet preview. Click 'Print Now' to output a 300DPI document ready for physical printing.",
+      icon: "Printer"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center w-full">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
@@ -40,13 +62,7 @@ export default function AadhaarPrinterPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">
-            <HowToGuide title="ID Card Printer" steps={[
-                "Select Mode: Choose 'e-Aadhaar A4' or 'Separate Sides' (for PAN/DL/Voter).",
-                "Upload: Select your PDF document or JPG/PNG photos.",
-                "Adjust: Use the precision handles to align each side into the ID frame.",
-                "Review: See your card arranged automatically at standard ISO dimensions.",
-                "Print: Click 'Print Now' to get a perfect A4 sheet with standard ID sizes."
-            ]} />
+            <HowToGuide title="ID Card Printer" steps={deepSteps} />
 
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">

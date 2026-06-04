@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2 } from 'lucide-react';
 import PdfMerger from '@/components/pdf-merger';
@@ -17,6 +16,29 @@ export const metadata: Metadata = {
 };
 
 export default function MergePdfPage() {
+  const deepSteps = [
+    {
+      title: "Batch Import",
+      description: "Upload multiple PDF documents. Our engine initializes a safe buffer stack in your device RAM, mapping the pages without any server communication.",
+      icon: "UploadCloud"
+    },
+    {
+      title: "Stack Sequence",
+      description: "Drag and drop files to change order, or use the 'Sort A-Z' tool. Precise ordering is critical for legal and academic bundles.",
+      icon: "Layers"
+    },
+    {
+      title: "Visual Audit",
+      description: "Click 'Merge Pdfs'. Once combined, our built-in viewer renders the first 10 pages instantly so you can audit the sequence before saving.",
+      icon: "Monitor"
+    },
+    {
+      title: "WASM Export",
+      description: "The engine bundles the final document using WebAssembly logic. Save your combined PDF. Zero quality loss and 100% data privacy.",
+      icon: "Download"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
@@ -26,13 +48,7 @@ export default function MergePdfPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">
-            <HowToGuide title="Bulk PDF Merger" steps={[
-                "Upload: Select two or more PDF files from your device.",
-                "Organize: Use arrow buttons to move files up/down or use 'Sort A-Z'.",
-                "Review: Ensure the order matches your desired final document.",
-                "Merge: Click 'Merge PDFs' to bundle them together instantly.",
-                "Preview: Use the built-in viewer to verify the result before downloading."
-            ]} />
+            <HowToGuide title="Bulk PDF Merger" steps={deepSteps} />
 
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
@@ -65,27 +81,11 @@ export default function MergePdfPage() {
                 </div>
             </section>
 
-            {/* Feature Deep Dive */}
-            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                    <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="size-12 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Integrated Live Preview</h2>
-                        <p className="text-muted-foreground leading-relaxed text-sm">
-                            Unlike basic tools that force you to download and check, our <strong>PDF Merger</strong> features an integrated previewer. Once the merging process completes, a high-fidelity rendering of your new document appears instantly. This allows you to verify that pages are in the correct order and everything looks perfect before saving it to your device.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
             {/* FAQ Section */}
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">PDF Merger FAQs</h2>
-                    <p className="text-muted-foreground font-medium">Everything you need to know about combining documents.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full">
@@ -105,12 +105,6 @@ export default function MergePdfPage() {
                         <AccordionTrigger className="text-lg font-bold text-left">Can I merge protected PDFs?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             No. For security reasons, you must first remove the passwords using our **"Unlock PDF"** tool. Once the documents are open and accessible, you can upload them here for merging.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-4" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for legal contracts and bank statements?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. This is the safest method available online. Because we use **Client-Side JavaScript**, your files never leave your device. The merging happens in temporary memory (RAM) and is deleted once you close the tab.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

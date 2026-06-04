@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Sparkles, Zap, ShieldCheck, MonitorCheck, ScanLine, HelpCircle } from 'lucide-react';
 import DocumentScanner from '@/components/document-scanner';
@@ -17,6 +16,29 @@ export const metadata: Metadata = {
 };
 
 export default function DocumentScanPage() {
+  const deepSteps = [
+    {
+      title: "Sensor Calibration",
+      description: "Grant camera access. Our scanner initializes your device sensor to capture 1080p raw frames with environment-mode optimization for documents.",
+      icon: "Smartphone"
+    },
+    {
+      title: "Corner Mapping",
+      description: "Snap the photo and use the 8-dot handles to map the paper corners. Our engine calculates the homography matrix to flatten tilted photos instantly.",
+      icon: "Scan"
+    },
+    {
+      title: "Industrial Filtering",
+      description: "Select 'BW PRO' for crisp text or 'Magic' for vibrant signatures. Adjust brightness and contrast manually using the Studio Fine-Tune panel.",
+      icon: "FileStack"
+    },
+    {
+      title: "Bundle & Save",
+      description: "Scan multiple pages and bundle them into a single PDF. Everything is processed in local RAM using high-DPI rendering for industrial quality.",
+      icon: "Download"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center min-h-screen w-full">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
@@ -42,13 +64,7 @@ export default function DocumentScanPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-24 no-print">
-            <HowToGuide title="Document Scanner" steps={[
-                "Camera: Allow camera access and point at your document.",
-                "Capture: Click the large button to snap a clear photo.",
-                "Adjust: Drag the 4 precision dots to the corners of your document.",
-                "Filters: Choose 'BW PRO' for sharp text or 'Magic' for vibrant colors.",
-                "Export: Bundle multiple pages and download as a professional PDF."
-            ]} />
+            <HowToGuide title="Document Scanner" steps={deepSteps} />
 
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">
@@ -79,35 +95,6 @@ export default function DocumentScanPage() {
                         <p className="text-xs text-muted-foreground leading-relaxed font-medium">Everything happens in your browser RAM. Your sensitive documents, bank statements, and ID cards never leave your device.</p>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Scanning FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it better than a phone camera photo?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes. A photo is just an image. Our scanner **corrects perspective** (straightens tilted photos) and applies **industrial filters** that normalize lighting and sharpen text, making it look like a high-end flatbed scan.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">How many pages can I scan into one PDF?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            You can scan and bundle as many pages as your device's memory allows. Most modern smartphones and PCs can easily handle **30-50 pages** in a single professional PDF bundle.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I use this for bank statements or Aadhaar?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. This is the **most secure method** because we use client-side technology. Your sensitive documents are never uploaded to any cloud server, keeping your private data 100% on your device.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize } from 'lucide-react';
 import PassportPhotoMaker from '@/components/passport-photo-maker';
@@ -17,13 +16,27 @@ export const metadata: Metadata = {
 };
 
 export default function PassportPhotoPage() {
-  const steps = [
-    "Upload Photo: Select a clear, well-lit photo of your face.",
-    "Select Size: Choose from presets like India (3.5x4.5cm) or USA (2x2in).",
-    "Crop & Align: Use the crop tool to center your face perfectly.",
-    "Background Cleanup: Click 'AUTO REMOVE' to isolate the subject with one click.",
-    "Studio Adjust: Rotate, scale, and choose a background color (White/Blue).",
-    "Download: Save your 300 DPI HD photo ready for printing."
+  const deepSteps = [
+    {
+      title: "Standards Selection",
+      description: "Select your target document (India Passport, US Visa, SSC Photo). Our engine automatically sets the exact ISO millimeter dimensions required by governments.",
+      icon: "Maximize"
+    },
+    {
+      title: "AI Subject Isolation",
+      description: "Upload your photo and click 'AI REMOVE BACKGROUND'. Our local engine uses pixel-level edge detection to isolate your face without any server uploads.",
+      icon: "Zap"
+    },
+    {
+      title: "Studio Calibration",
+      description: "Fine-tune with the rotate and scale sliders. Adjust brightness and contrast to match professional studio profiles. Select 'Pure White' background for official use.",
+      icon: "Settings2"
+    },
+    {
+      title: "HD Print Layout",
+      description: "Download the final JPG at 300DPI. You can also generate a 'Master Print Sheet' (4x6 inch) which auto-grids 8 passport photos for easy printing.",
+      icon: "Printer"
+    }
   ];
 
   return (
@@ -35,7 +48,7 @@ export default function PassportPhotoPage() {
         </div>
 
         <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="Professional Passport Maker" steps={steps} />
+            <HowToGuide title="Professional Passport Maker" steps={deepSteps} />
 
             {/* Deep Value Section */}
             <section className="space-y-12 py-10 border-t">

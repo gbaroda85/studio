@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Heart, Sparkles, ShieldCheck, HelpCircle, FileText } from 'lucide-react';
 import MarriageBiodataGenerator from '@/components/marriage-biodata-generator';
@@ -17,6 +16,29 @@ export const metadata: Metadata = {
 };
 
 export default function MarriageBiodataPage() {
+  const deepSteps = [
+    {
+      title: "Studio Setup",
+      description: "Choose a premium template (Royal Gold, Canva Pro) and set your theme color. Upload a clear portrait photo and optional God Logo (PNG) for a professional look.",
+      icon: "Palette"
+    },
+    {
+      title: "Identity Entry",
+      description: "Fill in personal, career, and family details. Our smart forms handle everything from DOB/Time to Gotra and annual income with real-time sync.",
+      icon: "Type"
+    },
+    {
+      title: "Visual Alignment",
+      description: "Our engine automatically arranges the data onto a standard A4 canvas. You can see the live preview on the right to ensure perfect spacing and alignment.",
+      icon: "Eye"
+    },
+    {
+      title: "Industrial Export",
+      description: "Click 'Export to PDF'. The engine renders the document at 300DPI, ensuring ultra-sharp text and photos for physical printing and WhatsApp sharing.",
+      icon: "Download"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center w-full">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
@@ -40,14 +62,7 @@ export default function MarriageBiodataPage() {
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-20">
-            <HowToGuide title="Marriage Biodata Maker" steps={[
-                "Personal Info: Fill in your basic details like Name, DOB, and Height.",
-                "Family & Career: Add education, occupation, and family background.",
-                "Horoscope: Enter Rashi, Nakshatra, and Gotra (Optional).",
-                "Photo: Upload a clear portrait photo for a professional look.",
-                "Customization: Pick a theme color that matches your personality.",
-                "Download: Click 'Export to PDF' to get your high-res A4 document."
-            ]} />
+            <HowToGuide title="Marriage Biodata Maker" steps={deepSteps} />
 
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">
