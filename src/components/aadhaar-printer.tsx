@@ -439,7 +439,11 @@ export default function AadhaarPrinter() {
                   {[ { side: 'front' as const, raw: frontRaw, final: frontFinal, setRaw: setFrontRaw, setFinal: setFrontFinal, inputRef: frontInputRef },
                      { side: 'back' as const, raw: backRaw, final: backFinal, setRaw: setBackRaw, setFinal: setBackFinal, inputRef: backInputRef }
                   ].map(s => (
-                    <Card key={s.side} className={cn("border-2 border-dashed rounded-[3rem] overflow-hidden transition-all duration-300 group relative", s.final ? "border-green-500/30 bg-green-500/5 shadow-2xl" : "hover:border-primary/50 hover:bg-primary/5 bg-card/50")}>
+                    <Card key={s.side} className={cn(
+                        "border-2 border-dashed rounded-[3rem] overflow-hidden transition-all duration-300 group relative",
+                        "hover:-translate-y-2 hover:shadow-2xl hover:border-primary/40",
+                        s.final ? "border-green-500/30 bg-green-500/5 shadow-2xl" : "bg-card/50"
+                    )}>
                       <CardHeader className="text-center p-6 bg-muted/20 border-b border-dashed">
                         <CardTitle className="text-xs font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center justify-center gap-2">
                            {s.side === 'front' ? <Smartphone className="size-3.5 text-primary" /> : <RefreshCcw className="size-3.5 text-emerald-500" />}
