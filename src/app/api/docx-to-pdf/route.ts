@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server';
-import { Readable } from 'stream';
 // @ts-ignore
 import convertapi from 'convertapi';
 // @ts-ignore
 import CloudConvert from 'cloudconvert';
 
 /**
- * @fileOverview Server-side DOCX to PDF conversion route with multi-token fallback.
+ * @fileOverview Server-side DOCX to PDF conversion route with robust upload strategy.
  * Strategy:
- * 1. ConvertAPI Production Token
- * 2. ConvertAPI Sandbox Token (Fallback)
+ * 1. ConvertAPI Production Token (via Upload API)
+ * 2. ConvertAPI Sandbox Token (Fallback via Upload API)
  * 3. CloudConvert (Optional Fallback)
  */
 
 export async function POST(req: Request) {
-  // Use user-provided production and sandbox tokens
+  // Production and Sandbox tokens provided by the user
   const PROD_TOKEN = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
   const SANDBOX_TOKEN = "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy";
   const CLOUD_CONVERT_API_KEY = process.env.CLOUD_CONVERT_API_KEY;
@@ -27,23 +26,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Read file into Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let lastError = "All conversion providers failed.";
+    let lastError = "All conversion attempts failed.";
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION TOKEN) ---
     if (PROD_TOKEN) {
         try {
-          console.log('Attempting conversion with PRODUCTION token...');
+          console.log('Attempting Production conversion via Upload...');
           const capi = convertapi(PROD_TOKEN);
           
-          // Use Readable.from for efficient stream handling
-          // Adding FileName helps the cloud engine understand the source context
-          const stream = Readable.from(buffer);
+          // Step A: Upload the buffer to ConvertAPI cloud
+          // This avoids the "path must be a string" error with generic Readable streams
+          const uploadResult = await capi.upload(buffer, file.name);
+          
+          // Step B: Convert using the uploaded FileId
           const result = await capi.convert('pdf', { 
-              File: stream,
-              FileName: file.name 
+              File: uploadResult.fileId 
           }, 'docx');
           
           if (result.files && result.files.length > 0) {
@@ -57,20 +58,21 @@ export async function POST(req: Request) {
         } catch (capiError: any) {
           console.warn('Production token failed:', capiError.message);
           lastError = `Production Error: ${capiError.message}`;
-          // Proceed to sandbox fallback
+          // Proceed to sandbox
         }
     }
 
     // --- STRATEGY 2: CONVERTAPI (SANDBOX TOKEN FALLBACK) ---
     if (SANDBOX_TOKEN) {
         try {
-            console.log('Attempting conversion with SANDBOX token...');
+            console.log('Attempting Sandbox conversion via Upload...');
             const capi = convertapi(SANDBOX_TOKEN);
             
-            const stream = Readable.from(buffer);
+            // Re-upload using sandbox context
+            const uploadResult = await capi.upload(buffer, file.name);
+            
             const result = await capi.convert('pdf', { 
-                File: stream,
-                FileName: file.name
+                File: uploadResult.fileId
             }, 'docx');
             
             if (result.files && result.files.length > 0) {
@@ -82,16 +84,16 @@ export async function POST(req: Request) {
                 });
             }
         } catch (sandboxError: any) {
-            console.warn('Sandbox token also failed:', sandboxError.message);
+            console.warn('Sandbox token failed:', sandboxError.message);
             lastError = `Sandbox Error: ${sandboxError.message}`;
             // Proceed to CloudConvert if available
         }
     }
 
-    // --- STRATEGY 3: CLOUDCONVERT (EXTRA FALLBACK) ---
+    // --- STRATEGY 3: CLOUDCONVERT (FALLBACK) ---
     if (CLOUD_CONVERT_API_KEY) {
         try {
-            console.log('Attempting fallback conversion with CloudConvert...');
+            console.log('Attempting CloudConvert fallback...');
             const cloudConvert = new CloudConvert(CLOUD_CONVERT_API_KEY);
             
             let job = await cloudConvert.jobs.create({
@@ -103,6 +105,7 @@ export async function POST(req: Request) {
             });
 
             const uploadTask = job.tasks.find((task: any) => task.name === 'upload-task');
+            const { Readable } = await import('stream');
             const uploadStream = Readable.from(buffer);
 
             await cloudConvert.tasks.upload(uploadTask, uploadStream, file.name);
