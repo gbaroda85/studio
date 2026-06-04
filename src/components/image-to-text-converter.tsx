@@ -8,17 +8,15 @@ import {
     X, 
     FileScan, 
     Clipboard, 
-    ClipboardCheck, 
+    CheckCircle2, 
     Zap, 
     ShieldCheck, 
     Sparkles, 
     RefreshCcw,
-    CheckCircle2,
     SearchCode,
     FileText,
     Settings2,
     Eye,
-    ChevronRight,
     RotateCcw,
     Languages,
     BrainCircuit,
@@ -90,16 +88,16 @@ export default function ImageToTextConverter() {
       
       if (result && result.text) {
         setExtractedText(result.text);
-        toast({ title: "Extraction Success", description: "AI has processed the text accurately." });
+        toast({ title: "Extraction Success", description: "Text has been processed accurately." });
       } else {
-        throw new Error("No text returned from AI");
+        throw new Error("No text returned");
       }
     } catch (error: any) {
       console.error(error);
       toast({ 
         variant: "destructive", 
         title: "Extraction Failed", 
-        description: "AI could not process this image. Please try a clearer photo." 
+        description: "Could not process this image. Please try a clearer photo." 
       });
     } finally {
       setIsProcessing(false);
@@ -129,14 +127,14 @@ export default function ImageToTextConverter() {
             <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
                 <FileScan className="size-8" />
                 <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <BrainCircuit className="size-2.5" />
+                    <SearchCode className="size-2.5" />
                 </div>
             </div>
             <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                AI Image <span className="text-gradient-hero">to Text (OCR)</span>
+                Image <span className="text-gradient-hero">to Text (OCR)</span>
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                Step 1: Upload photo for high-accuracy extraction. <br/>Powered by Google Gemini AI Engine.
+                Step 1: Upload photo for high-accuracy extraction. <br/>100% Private local RAM processing.
             </p>
         </motion.div>
 
@@ -149,7 +147,7 @@ export default function ImageToTextConverter() {
             onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
@@ -159,14 +157,14 @@ export default function ImageToTextConverter() {
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">AI OCR will process accurately.</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens entirely in your browser.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><Languages className="size-3 text-green-600" /> BILINGUAL (EN/HI)</div>
-                <div className="flex items-center gap-1.5"><BrainCircuit className="size-3 text-yellow-500" /> GEMINI AI</div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-yellow-500" /> SECURE RAM</div>
                 <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> HD OCR</div>
             </CardFooter>
         </Card>
@@ -205,8 +203,8 @@ export default function ImageToTextConverter() {
                     </div>
                     {extractedText && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">READY</Badge>}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[600px] md:min-h-[750px] flex items-center justify-center relative">
-                    <div className="relative size-full min-h-[550px] flex items-center justify-center">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[650px] md:min-h-[850px] flex items-center justify-center relative">
+                    <div className="relative size-full min-h-[600px] flex items-center justify-center">
                         <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
                         <AnimatePresence>
                             {isProcessing && (
@@ -219,7 +217,7 @@ export default function ImageToTextConverter() {
                                         <BrainCircuit className="absolute inset-0 m-auto h-5 w-5 md:h-6 md:w-6 text-primary animate-pulse" />
                                     </div>
                                     <div className="space-y-3 w-full max-w-[200px] md:max-w-xs">
-                                        <p className="font-black text-sm md:text-lg text-primary animate-pulse uppercase tracking-tighter">AI Extraction in progress...</p>
+                                        <p className="font-black text-sm md:text-lg text-primary animate-pulse uppercase tracking-tighter">Extracting text Content...</p>
                                         <Progress value={undefined} className="h-1.5 shadow-inner" />
                                     </div>
                                 </motion.div>
@@ -231,7 +229,7 @@ export default function ImageToTextConverter() {
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE HANDSHAKE</div>
                         <div className="flex items-center gap-2"><Languages className="size-4" /> BILINGUAL (EN/HI)</div>
-                        <div className="flex items-center gap-2"><BrainCircuit className="size-4" /> GEMINI AI CORE</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD PRECISION</div>
                     </div>
                 </CardFooter>
             </Card>
@@ -241,12 +239,12 @@ export default function ImageToTextConverter() {
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
                     <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-4 md:size-5 text-primary" /> Extraction Control
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Properties
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
                     <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">AI Engine Actions</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Engine Actions</Label>
                         <Button 
                             className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
                             onClick={handleExtractText}
@@ -255,12 +253,12 @@ export default function ImageToTextConverter() {
                             {isProcessing ? (
                                 <div className="flex items-center gap-3">
                                     <Loader2 className="size-6 md:size-8 animate-spin" />
-                                    <span className="uppercase text-sm md:text-base tracking-tighter">PROCESSING...</span>
+                                    <span className="uppercase text-sm md:text-base tracking-tighter">EXTRACTING...</span>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2 md:gap-3">
                                     <Wand2 className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
-                                    <span className="uppercase tracking-tighter text-lg md:text-2xl">EXTRACT WITH AI</span>
+                                    <span className="uppercase tracking-tighter text-lg md:text-2xl">EXTRACT TEXT</span>
                                 </div>
                             )}
                         </Button>
@@ -273,8 +271,8 @@ export default function ImageToTextConverter() {
                         </div>
                         <div className="relative group">
                             <Textarea
-                                className="min-h-[500px] md:min-h-[600px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
-                                placeholder={isProcessing ? "AI is reading..." : "Text result will appear here..."}
+                                className="min-h-[550px] md:min-h-[700px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
+                                placeholder={isProcessing ? "Reading..." : "Text result will appear here..."}
                                 value={extractedText || ""}
                                 onChange={(e) => setExtractedText(e.target.value)}
                                 readOnly={isProcessing}
@@ -289,20 +287,20 @@ export default function ImageToTextConverter() {
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-xl md:rounded-2xl border-2 border-blue-500/10 flex gap-3 md:gap-4">
-                        <CheckCircle2 className="size-5 md:size-6 text-blue-600 shrink-0 mt-0.5" />
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm">
+                        <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[9px] md:text-[11px] font-black text-blue-700 uppercase tracking-tight">AI Accuracy Fix</p>
-                            <p className="text-[8px] md:text-[10px] text-blue-600/80 font-medium leading-tight mt-1">
-                                Now using Google Gemini Vision engine. Hand-written, low-light, and Hindi text are now handled with near-perfect precision.
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure RAM</p>
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
+                                Every pixel is processed in your device's memory for total privacy.
                             </p>
                         </div>
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
-                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE TOKEN</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> AI BOOSTED</div>
-                    <div className="flex items-center gap-1"><FileText className="size-2.5 text-primary" /> HD CONTENT</div>
+                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> INSTANT</div>
+                    <div className="flex items-center gap-1"><FileText className="size-2.5 text-primary" /> HD TEXT</div>
                 </CardFooter>
             </Card>
         </div>
