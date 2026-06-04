@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { FileText, UploadCloud, X, FileOutput, CheckCircle, AlertCircle, Loader2, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { FileText, UploadCloud, X, FileOutput, CheckCircle, AlertCircle, Loader2, Sparkles, ShieldCheck, Zap, RefreshCcw } from 'lucide-react';
 import { convertDocxToPdf } from '@/lib/docx-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,10 +30,10 @@ export default function DocxToPdf() {
     e.preventDefault(); e.stopPropagation(); setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.name.toLowerCase().endsWith('.docx')) { 
+      if (droppedFile.name.toLowerCase().endsWith('.docx') || droppedFile.name.toLowerCase().endsWith('.doc')) { 
         setFile(droppedFile); setIsSuccess(false); 
       } else {
-        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid .docx Word file.' });
+        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid .docx or .doc Word file.' });
       }
     }
   };
@@ -41,10 +41,10 @@ export default function DocxToPdf() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.name.toLowerCase().endsWith('.docx')) { 
+      if (selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.name.toLowerCase().endsWith('.doc')) { 
         setFile(selectedFile); setIsSuccess(false); 
       } else {
-        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid .docx Word file.' });
+        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid Word document.' });
       }
     }
   };
@@ -66,10 +66,14 @@ export default function DocxToPdf() {
           origin: { y: 0.6 },
           colors: ['#5cbdb9', '#fbe3e8', '#ffffff']
       });
-      toast({ title: 'Success!', description: 'DOCX successfully converted to PDF.' });
-    } catch (error) {
+      toast({ title: 'Conversion Success!', description: 'Your PDF is ready for download.' });
+    } catch (error: any) {
       console.error(error); 
-      toast({ variant: 'destructive', title: 'Conversion Error', description: 'Failed to convert document. Please try a simpler file.' });
+      toast({ 
+        variant: 'destructive', 
+        title: 'API Error', 
+        description: error.message || 'All conversion providers failed. Please check your API keys.' 
+      });
     } finally { 
       setIsProcessing(false); 
     }
@@ -86,10 +90,10 @@ export default function DocxToPdf() {
               </div>
           </div>
           <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-              Word to <span className="text-gradient-hero">PDF Pro</span>
+              Word to <span className="text-gradient-hero">PDF Cloud</span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Convert DOCX files to high-quality PDF instantly. <br/>100% Private local browser mapping.
+              Professional high-fidelity conversion using your API keys. <br/>Supports complex tables, images and styles.
           </p>
       </div>
 
@@ -112,14 +116,14 @@ export default function DocxToPdf() {
                   onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" />
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".docx,.doc" className="hidden" />
                   <div className="relative">
                     <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                     <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                   </div>
                   <div className="text-center">
                     <h3 className="text-xl font-black uppercase tracking-tighter">Drop Word File here</h3>
-                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">Supports .docx standard documents.</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">Supports .doc & .docx documents.</p>
                   </div>
                 </div>
               ) : (
@@ -128,9 +132,9 @@ export default function DocxToPdf() {
                     <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
                       <FileText className="size-6" />
                     </div>
-                    <div className="truncate">
+                    <div className="truncate text-left">
                       <div className="text-sm font-black truncate uppercase tracking-tight" title={file.name}>{file.name}</div>
-                      <Badge variant="secondary" className="text-[9px] font-mono mt-0.5">READY FOR CONVERSION</Badge>
+                      <Badge variant="secondary" className="text-[9px] font-mono mt-0.5">READY FOR CLOUD CONVERSION</Badge>
                     </div>
                   </div>
                   <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={removeFile}>
@@ -165,7 +169,7 @@ export default function DocxToPdf() {
                 </div>
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black uppercase tracking-tighter text-green-700">CONVERTED!</h2>
-                    <p className="text-sm text-muted-foreground font-bold">Your PDF has been generated and saved.</p>
+                    <p className="text-sm text-muted-foreground font-bold">Your document was processed via API and saved.</p>
                 </div>
                 <Button 
                     variant="outline" 
@@ -179,13 +183,21 @@ export default function DocxToPdf() {
         </CardContent>
         <CardFooter className="bg-muted/10 border-t p-6 flex justify-center gap-8">
             <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
+                <ShieldCheck className="size-4 text-green-500" /> SECURE HANDSHAKE
             </div>
             <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                <Zap className="size-4 text-yellow-500" /> 100% CLIENT-SIDE
+                <Zap className="size-4 text-yellow-500" /> DUAL API FALLBACK
             </div>
         </CardFooter>
       </Card>
+      
+      {/* Help Note */}
+      <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex items-center gap-4 max-w-xl">
+          <AlertCircle className="size-5 text-blue-500 shrink-0" />
+          <p className="text-[10px] text-blue-700 font-bold leading-tight uppercase">
+              High-fidelity conversion preserves all Word formatting, including page numbers, headers, and footer details using pro cloud engines.
+          </p>
+      </div>
     </div>
   );
 }
