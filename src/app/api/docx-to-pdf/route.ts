@@ -30,17 +30,24 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    let lastError = "All conversion providers failed.";
+
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION TOKEN) ---
     if (PROD_TOKEN) {
         try {
           console.log('Attempting conversion with PRODUCTION token...');
           const capi = convertapi(PROD_TOKEN);
           
-          // Use Readable.from for efficient stream handling in Next.js
+          // Use Readable.from for efficient stream handling
+          // Adding FileName helps the cloud engine understand the source context
           const stream = Readable.from(buffer);
-          const result = await capi.convert('pdf', { File: stream }, 'docx');
+          const result = await capi.convert('pdf', { 
+              File: stream,
+              FileName: file.name 
+          }, 'docx');
           
           if (result.files && result.files.length > 0) {
+              console.log('Production conversion successful.');
               return NextResponse.json({ 
                 success: true, 
                 pdfUrl: result.files[0].url, 
@@ -49,6 +56,7 @@ export async function POST(req: Request) {
           }
         } catch (capiError: any) {
           console.warn('Production token failed:', capiError.message);
+          lastError = `Production Error: ${capiError.message}`;
           // Proceed to sandbox fallback
         }
     }
@@ -60,9 +68,13 @@ export async function POST(req: Request) {
             const capi = convertapi(SANDBOX_TOKEN);
             
             const stream = Readable.from(buffer);
-            const result = await capi.convert('pdf', { File: stream }, 'docx');
+            const result = await capi.convert('pdf', { 
+                File: stream,
+                FileName: file.name
+            }, 'docx');
             
             if (result.files && result.files.length > 0) {
+                console.log('Sandbox conversion successful.');
                 return NextResponse.json({ 
                   success: true, 
                   pdfUrl: result.files[0].url, 
@@ -71,6 +83,7 @@ export async function POST(req: Request) {
             }
         } catch (sandboxError: any) {
             console.warn('Sandbox token also failed:', sandboxError.message);
+            lastError = `Sandbox Error: ${sandboxError.message}`;
             // Proceed to CloudConvert if available
         }
     }
@@ -106,12 +119,13 @@ export async function POST(req: Request) {
             }
         } catch (ccError: any) {
             console.error('CloudConvert fallback failed:', ccError.message);
+            lastError = `CloudConvert Error: ${ccError.message}`;
         }
     }
 
     return NextResponse.json({ 
         error: 'All conversion providers failed.', 
-        details: 'Checked Production Token, Sandbox Token, and CloudConvert. All attempts returned errors.' 
+        details: lastError 
     }, { status: 500 });
 
   } catch (error: any) {
