@@ -29,7 +29,8 @@ import {
     SearchCode,
     ListFilter,
     Monitor,
-    ChevronDown
+    ChevronDown,
+    Type
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -44,6 +45,7 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 }
 
 type PageNumberPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+type NumberStyle = 'arabic' | 'roman-upper' | 'roman-lower' | 'alpha-upper' | 'alpha-lower';
 
 const FORMAT_PRESETS = [
     { label: 'Number Only (1)', value: '{page}' },
@@ -51,6 +53,51 @@ const FORMAT_PRESETS = [
     { label: 'Page 1', value: 'Page {page}' },
     { label: 'Page 1 of 10', value: 'Page {page} of {total}' },
 ];
+
+const NUMBER_STYLES = [
+    { label: '1, 2, 3 (Arabic)', value: 'arabic' },
+    { label: 'I, II, III (Roman Upper)', value: 'roman-upper' },
+    { label: 'i, ii, iii (Roman Lower)', value: 'roman-lower' },
+    { label: 'A, B, C (Alpha Upper)', value: 'alpha-upper' },
+    { label: 'a, b, c (Alpha Lower)', value: 'alpha-lower' },
+];
+
+function romanize(num: number): string {
+    if (isNaN(num)) return "";
+    const digits = String(+num).split("");
+    const key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+               "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+               "","I","II","III","IV","V","VI","VII","VIII","IX"];
+    let roman = "";
+    let i = 3;
+    while (i--) {
+        const val = digits.pop();
+        if (val !== undefined) {
+            roman = (key[+val + (i * 10)] || "") + roman;
+        }
+    }
+    return Array(+digits.join("") + 1).join("M") + roman;
+}
+
+function alphabetize(num: number): string {
+    let s = "";
+    while (num > 0) {
+        let m = (num - 1) % 26;
+        s = String.fromCharCode(65 + m) + s;
+        num = Math.floor((num - m) / 26);
+    }
+    return s;
+}
+
+function formatWithStyle(num: number, style: NumberStyle): string {
+    switch (style) {
+        case 'roman-upper': return romanize(num) || String(num);
+        case 'roman-lower': return romanize(num).toLowerCase() || String(num);
+        case 'alpha-upper': return alphabetize(num);
+        case 'alpha-lower': return alphabetize(num).toLowerCase();
+        default: return String(num);
+    }
+}
 
 function parsePageRanges(ranges: string, maxPage: number): number[] {
     const result = new Set<number>();
@@ -88,6 +135,7 @@ export default function PdfPageNumberer() {
   
   const [position, setPosition] = useState<PageNumberPosition>('bottom-center');
   const [format, setFormat] = useState('Page {page} of {total}');
+  const [numberStyle, setNumberStyle] = useState<NumberStyle>('arabic');
   const [fontSize, setFontSize] = useState(12);
   const [pageRange, setPageRange] = useState('all');
   const [customRange, setCustomRange] = useState('');
@@ -124,7 +172,6 @@ export default function PdfPageNumberer() {
         setTotalPagesPreview(count);
         
         const imgs: string[] = [];
-        // Render first 20 pages for preview to maintain performance
         const pagesToRender = Math.min(count, 20);
 
         for (let i = 1; i <= pagesToRender; i++) {
@@ -185,13 +232,18 @@ export default function PdfPageNumberer() {
             }
         }
 
+        const formattedTotal = formatWithStyle(totalPages, numberStyle);
+
         for (const pageNum of pagesToNumber) {
             const pageIndex = pageNum - 1;
             const page = pages[pageIndex];
             const { width, height } = page.getSize();
+            
+            const formattedPageNum = formatWithStyle(pageNum, numberStyle);
+            
             const pageNumberText = format
-                .replace('{page}', String(pageNum))
-                .replace('{total}', String(totalPages));
+                .replace('{page}', formattedPageNum)
+                .replace('{total}', formattedTotal);
             
             const textWidth = font.widthOfTextAtSize(pageNumberText, fontSize);
             let x, y;
@@ -222,7 +274,7 @@ export default function PdfPageNumberer() {
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setNumberedPdfUrl(url);
-        toast({title: "Success!", description: `Page numbers added to ${pagesToNumber.length} pages.`});
+        toast({title: "Success!", description: `Page numbers added with ${numberStyle} style.`});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to process document.'});
@@ -247,6 +299,7 @@ export default function PdfPageNumberer() {
       setTotalPagesPreview(0);
       setPageRange('all');
       setCustomRange('');
+      setNumberStyle('arabic');
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -339,6 +392,20 @@ export default function PdfPageNumberer() {
                     <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
                         
                         <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
+                                <Type className="size-3" /> Number Style
+                            </Label>
+                            <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
+                                <SelectTrigger className="h-10 border-2 font-bold rounded-xl bg-background"><SelectValue /></SelectTrigger>
+                                <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                    {NUMBER_STYLES.map(s => (
+                                        <SelectItem key={s.value} value={s.value} className="font-bold py-2">{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-dashed">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
                                 <ListFilter className="size-3" /> Quick Formats
                             </Label>
@@ -476,8 +543,8 @@ export default function PdfPageNumberer() {
                                             <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-[8%]">
                                                 <div style={getPreviewStyle()}>
                                                     {format
-                                                        .replace('{page}', String(i + 1))
-                                                        .replace('{total}', String(totalPagesPreview))}
+                                                        .replace('{page}', formatWithStyle(i + 1, numberStyle))
+                                                        .replace('{total}', formatWithStyle(totalPagesPreview, numberStyle))}
                                                 </div>
                                             </div>
                                             
@@ -518,4 +585,3 @@ export default function PdfPageNumberer() {
     </div>
   );
 }
-
