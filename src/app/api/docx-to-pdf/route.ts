@@ -7,24 +7,15 @@ import CloudConvert from 'cloudconvert';
 
 /**
  * @fileOverview Server-side DOCX to PDF conversion route with multi-provider fallback.
- * Security Note: API keys are loaded from environment variables (process.env).
- * If keys are missing, the route returns a descriptive error.
+ * Using provided production tokens for guaranteed high-fidelity output.
  */
 
 export async function POST(req: Request) {
-  const CONVERT_API_SECRET = process.env.CONVERT_API_SECRET;
+  // Priority: 1. Environment Variables, 2. Hardcoded fallback for immediate fix
+  const CONVERT_API_SECRET = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
   const CLOUD_CONVERT_API_KEY = process.env.CLOUD_CONVERT_API_KEY;
 
   try {
-    // 1. Check for keys
-    if (!CONVERT_API_SECRET && !CLOUD_CONVERT_API_KEY) {
-      console.error('CRITICAL: All PDF API keys are missing from Environment Variables.');
-      return NextResponse.json({ 
-        error: 'Server configuration error: API keys are missing. Please add CONVERT_API_SECRET and CLOUD_CONVERT_API_KEY to your .env file or Dashboard.',
-        details: 'Keys are undefined.'
-      }, { status: 500 });
-    }
-
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -38,14 +29,21 @@ export async function POST(req: Request) {
     // --- STRATEGY 1: CONVERTAPI (PRIMARY) ---
     if (CONVERT_API_SECRET) {
         try {
-          console.log('Attempting conversion with ConvertAPI...');
+          console.log('Initiating high-fidelity conversion with ConvertAPI...');
           const capi = convertapi(CONVERT_API_SECRET);
+          
+          // Use Readable stream for large file handling
           const stream = new Readable();
           stream.push(buffer);
           stream.push(null);
 
           const uploadResult = await capi.upload(stream, file.name);
           const result = await capi.convert('pdf', { File: uploadResult }, 'docx');
+          
+          if (!result.files || result.files.length === 0) {
+              throw new Error('ConvertAPI returned no files.');
+          }
+
           const pdfUrl = result.files[0].url;
 
           return NextResponse.json({ 
@@ -54,8 +52,8 @@ export async function POST(req: Request) {
             provider: 'convertapi' 
           });
         } catch (capiError: any) {
-          console.warn('ConvertAPI failed or limit reached:', capiError.message);
-          // If strategy 1 fails, we proceed to strategy 2
+          console.warn('ConvertAPI attempt failed:', capiError.message);
+          // Proceed to fallback if primary fails
         }
     }
 
@@ -112,7 +110,10 @@ export async function POST(req: Request) {
         }
     }
 
-    return NextResponse.json({ error: 'All conversion providers failed or were not configured.' }, { status: 500 });
+    return NextResponse.json({ 
+        error: 'All conversion providers failed.', 
+        details: 'Check API token validity and remaining credits.' 
+    }, { status: 500 });
 
   } catch (error: any) {
     console.error('Final Conversion Failure:', error);
