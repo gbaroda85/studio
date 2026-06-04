@@ -3,12 +3,12 @@ import { NextResponse } from 'next/server';
 /**
  * @fileOverview Professional server-side Word to PDF conversion route.
  * Optimized for both .doc and .docx using direct REST API calls.
- * captures detailed cloud errors for debugging.
+ * Uses verified user tokens for maximum reliability.
  */
 
 export async function POST(req: Request) {
-  // Hardcoded fallback tokens provided by the user for maximum reliability
-  const PROD_TOKEN = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
+  // Hardcoded tokens provided by the user for maximum reliability
+  const PROD_TOKEN = "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
   const SANDBOX_TOKEN = "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy";
 
   try {
@@ -73,7 +73,6 @@ export async function POST(req: Request) {
 
 /**
  * Helper to call ConvertAPI REST endpoint directly using native fetch.
- * Uses File object for better multipart compatibility.
  */
 async function callConvertApi(token: string, buffer: Buffer, filename: string, format: 'doc' | 'docx', password?: string) {
     try {
@@ -87,9 +86,9 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             : 'application/msword';
             
-        // Using File instead of Blob for better cloud filename detection
-        const fileObj = new File([buffer], filename, { type: mimeType });
-        apiFormData.append('File', fileObj);
+        // Use a Blob for form-data binary transfer
+        const blob = new Blob([buffer], { type: mimeType });
+        apiFormData.append('File', blob, filename);
 
         const response = await fetch(url, {
             method: 'POST',
@@ -102,7 +101,6 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
         try {
             data = JSON.parse(text);
         } catch (e) {
-            // Handle non-JSON errors (like cloud outages)
             return { success: false, error: `Cloud returned status ${response.status}: ${text.substring(0, 100)}` };
         }
 
@@ -114,7 +112,6 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             };
         }
 
-        // Return the actual error message from ConvertAPI
         const cloudError = data.Message || data.message || `API returned status ${response.status}`;
         return { 
             success: false, 
