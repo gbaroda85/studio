@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 
 /**
  * @fileOverview Professional server-side Word to PDF conversion route.
- * Dynamically handles both .doc and .docx formats using ConvertAPI REST.
+ * Optimized for both .doc and .docx using direct REST API calls.
  */
 
 export async function POST(req: Request) {
+  // Use tokens provided by the user
   const PROD_TOKEN = process.env.CONVERT_API_SECRET || "LDWZ4A1C9k1uSo7JBeoyfgSYvdyPWif7";
   const SANDBOX_TOKEN = "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy";
 
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     // Detect correct ConvertAPI endpoint based on file extension
     const format = fileName.endsWith('.docx') ? 'docx' : 'doc';
 
-    console.log(`Starting ${format.toUpperCase()} conversion for:`, file.name);
+    console.log(`[CloudConvert] Starting ${format.toUpperCase()} conversion for:`, file.name);
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION) ---
     let result = await callConvertApi(PROD_TOKEN, buffer, file.name, format, password);
@@ -34,10 +35,10 @@ export async function POST(req: Request) {
     if (!result.success) {
       // If error is specifically about password, stop and ask user for password
       if (result.error && result.error.toLowerCase().includes('password')) {
-          return NextResponse.json({ error: result.error }, { status: 401 });
+          return NextResponse.json({ error: result.error, code: 'PASSWORD_REQUIRED' }, { status: 401 });
       }
       
-      console.warn('Production API failed, trying Sandbox. Error:', result.error);
+      console.warn(`Production API failed (${result.error}), trying Sandbox fallback...`);
       result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name, format, password);
     }
 
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Final failure response with detailed message
+    // Final failure response with the actual error message from the cloud engine
     return NextResponse.json({ 
         error: result.error || 'All conversion providers failed.', 
         details: result.error 
@@ -65,7 +66,8 @@ export async function POST(req: Request) {
 }
 
 /**
- * Helper to call ConvertAPI REST endpoint directly.
+ * Helper to call ConvertAPI REST endpoint directly using native fetch.
+ * This avoids filesystem path issues in serverless environments.
  */
 async function callConvertApi(token: string, buffer: Buffer, filename: string, format: 'doc' | 'docx', password?: string) {
     try {
@@ -79,6 +81,7 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             : 'application/msword';
             
+        // We wrap the buffer in a Blob for native fetch FormData compatibility
         const fileBlob = new Blob([buffer], { type: mimeType });
         apiFormData.append('File', fileBlob, filename);
 
@@ -97,9 +100,11 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             };
         }
 
+        // Return the actual error message from ConvertAPI
+        const cloudError = data.Message || data.message || `API returned status ${response.status}`;
         return { 
             success: false, 
-            error: data.Message || data.message || `API returned status ${response.status}` 
+            error: cloudError
         };
     } catch (e: any) {
         return { success: false, error: e.message };

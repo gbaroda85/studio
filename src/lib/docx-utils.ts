@@ -1,11 +1,11 @@
 /**
  * @fileOverview Professional Cloud-only utility to convert Word (DOC/DOCX) to PDF.
- * This utility relies exclusively on high-fidelity server-side conversion.
+ * This utility relies on our internal API route which handles token rotation and encryption.
  */
 
 export const convertDocxToPdf = async (file: File, password?: string): Promise<boolean> => {
   try {
-    console.log('Initiating Cloud Conversion request for:', file.name);
+    console.log('Initiating Secure Cloud Conversion for:', file.name);
     
     const formData = new FormData();
     formData.append('file', file);
@@ -31,15 +31,16 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
       link.click();
       document.body.removeChild(link);
       
-      console.log('Cloud Conversion Successful. Provider:', data.provider);
+      console.log('Cloud Conversion Successful. Engine:', data.provider);
       return true;
     } else {
         const errorMessage = data.error || 'Conversion failed at server side.';
-        const errorDetails = data.details || '';
         
-        console.error('Server side error details:', errorMessage, errorDetails);
+        // Log the actual detailed error for debugging
+        console.error('Server side error report:', errorMessage, data.details || '');
 
-        if (response.status === 401) {
+        // If server says password is required, bubble up specific error
+        if (response.status === 401 || data.code === 'PASSWORD_REQUIRED') {
             throw new Error('PASSWORD_REQUIRED');
         }
         
@@ -49,8 +50,8 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
     if (error.message === 'PASSWORD_REQUIRED') {
         throw error;
     }
-    // Log the actual error that reached the utility
-    console.error('Conversion Utility Error:', error.message);
+    // Final error bubble
+    console.error('Word-to-PDF Utility Exception:', error.message);
     throw error; 
   }
 };
