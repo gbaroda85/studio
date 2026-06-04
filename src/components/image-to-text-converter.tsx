@@ -16,7 +16,12 @@ import {
     CheckCircle2,
     SearchCode,
     FileText,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Settings2,
+    Eye,
+    ChevronRight,
+    ArrowLeftRight,
+    Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -25,6 +30,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { createWorker } from "tesseract.js";
+import { motion, AnimatePresence } from "framer-motion";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
 
 export default function ImageToTextConverter() {
   const { toast } = useToast();
@@ -38,6 +55,7 @@ export default function ImageToTextConverter() {
   const [hasCopied, setHasCopied] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -52,7 +70,7 @@ export default function ImageToTextConverter() {
       toast({
         variant: "destructive",
         title: "Invalid File Type",
-        description: "Please select a valid image file (PNG, JPG, etc.).",
+        description: "Please select a valid image file.",
       });
     }
   };
@@ -78,12 +96,6 @@ export default function ImageToTextConverter() {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
 
-            let maxLuma = 0;
-            for (let i = 0; i < data.length; i += 4) {
-                const luma = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-                if (luma > maxLuma) maxLuma = luma;
-            }
-
             for (let i = 0; i < data.length; i += 4) {
                 const r = data[i], g = data[i+1], b = data[i+2];
                 let gray = 0.299 * r + 0.587 * g + 0.114 * b;
@@ -104,20 +116,20 @@ export default function ImageToTextConverter() {
     setIsProcessing(true);
     setExtractedText(null);
     setProgress(5);
-    setStatusText("Cleaning...");
+    setStatusText("Cleaning Image...");
 
     try {
       const processedSrc = await preProcessImage(originalImageSrc);
       setProgress(15);
-      setStatusText("Engine Start...");
+      setStatusText("Initializing Engine...");
 
       const worker = await createWorker('eng+hin', 1, {
         logger: m => {
             if (m.status === 'recognizing text') {
                 setProgress(20 + Math.round(m.progress * 80));
-                setStatusText(`${Math.round(m.progress * 100)}%`);
+                setStatusText(`Reading... ${Math.round(m.progress * 100)}%`);
             } else if (m.status === 'loading tesseract core') {
-                setStatusText("Loading...");
+                setStatusText("Loading Core...");
             }
         }
       });
@@ -133,7 +145,7 @@ export default function ImageToTextConverter() {
       setStatusText("Complete");
       toast({ title: "Success", description: "Text extracted locally." });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Failed", description: "Could not read text." });
+      toast({ variant: "destructive", title: "Extraction Failed", description: "Could not read text from this image." });
     } finally {
       setIsProcessing(false);
     }
@@ -143,7 +155,7 @@ export default function ImageToTextConverter() {
     if (!extractedText) return;
     navigator.clipboard.writeText(extractedText);
     setHasCopied(true);
-    toast({ title: 'Copied!' });
+    toast({ title: 'Copied to clipboard!' });
     setTimeout(() => setHasCopied(false), 2000);
   }
 
@@ -159,121 +171,196 @@ export default function ImageToTextConverter() {
 
   if (!originalImageSrc) {
     return (
-      <Card
-        className={cn("w-full max-w-2xl text-center transition-all duration-300 bg-card/50 hover:border-primary/80 hover:shadow-2xl border-2 border-dashed mx-auto", isDragOver && "border-primary ring-4 ring-primary/20")}
-        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-      >
-        <CardHeader className="p-4 md:p-6">
-          <div className="mx-auto mb-2 grid size-12 md:size-14 place-items-center rounded-3xl bg-primary/10 text-primary">
-            <FileScan className="h-6 w-6 md:h-8 md:w-8" />
-          </div>
-          <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight leading-none">Local OCR Studio</CardTitle>
-          <CardDescription className="text-[10px] uppercase font-bold opacity-60">High-fidelity text extraction.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div
-            className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-6 md:p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group"
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                <FileScan className="size-8" />
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <Sparkles className="size-2.5" />
+                </div>
+            </div>
+            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                Smart Image <span className="text-gradient-hero">to Text (OCR)</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                Step 1: Upload photo to extract text content. <br/>100% Private local RAM processing.
+            </p>
+        </motion.div>
+
+        <Card
+            className={cn(
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+            )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="relative">
-                <UploadCloud className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Zap className="absolute -top-1 -right-1 h-4 w-4 md:h-6 md:w-6 text-yellow-500 animate-pulse" />
-            </div>
-            <div>
-                <p className="text-lg md:text-xl font-bold uppercase">Drop photo here</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Extraction is 100% local RAM based.</p>
-            </div>
-          </div>
-          <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-        </CardContent>
-        <CardFooter className="justify-center gap-4 md:gap-8 text-[8px] text-muted-foreground font-black uppercase tracking-widest pb-4">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE</div>
-            <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> CLEAN</div>
-            <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> LOCAL</div>
-        </CardFooter>
-      </Card>
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-10 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
+                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> OCR READY</div>
+            </CardFooter>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
-        
-        <div className="lg:col-span-5 flex flex-col gap-4">
-            <Card className="overflow-hidden border-2 shadow-lg flex flex-col bg-card/50">
-              <CardHeader className="bg-muted/30 border-b py-2 md:py-3 flex flex-row items-center justify-between p-4 md:px-6">
-                <CardTitle className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <ImageIcon className="h-3 md:h-3.5 w-3 md:w-3.5" /> Source
-                </CardTitle>
-                <Button variant="outline" size="sm" onClick={handleReset} className="h-7 text-[8px] font-black border-2 uppercase px-3">
-                    <RefreshCcw className="mr-1.5 size-2.5" /> Change
-                </Button>
-              </CardHeader>
-              <CardContent className="p-2 md:p-0 flex-1 aspect-[3/4] relative bg-white flex items-center justify-center min-h-[250px] md:min-h-[350px]">
-                <Image src={originalImageSrc} alt="Original" fill className="object-contain p-2 md:p-4" />
-              </CardContent>
-            </Card>
-            <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl flex gap-3 items-center">
-                <ShieldCheck className="size-4 text-primary shrink-0" />
-                <p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-tight">Local Extraction Active</p>
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      
+      {/* Studio Header: Identical to Image Crop */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3">
+            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                <Settings2 className="size-5 md:size-6" />
+            </div>
+            <div>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
+        <div className="flex gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+                <RotateCcw className="mr-1.5 size-3" /> Reset
+            </Button>
+            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleCopyToClipboard} disabled={!extractedText || hasCopied}>
+                {hasCopied ? <CheckCircle2 className="mr-1.5 size-3.5" /> : <Clipboard className="mr-1.5 size-3.5" />} {hasCopied ? "COPIED" : "COPY TEXT"}
+            </Button>
+        </div>
+      </div>
 
-        <div className="lg:col-span-7 flex flex-col">
-            <Card className="overflow-hidden border-2 shadow-2xl flex flex-col relative border-primary/20 bg-background h-full min-h-[400px]">
-              <CardHeader className="bg-primary/5 border-b py-2 md:py-3 flex flex-row items-center justify-between p-4 md:px-6">
-                <CardTitle className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                    <FileText className="h-3 md:h-3.5 w-3 md:w-3.5" /> Output
-                </CardTitle>
-                {extractedText && (
-                    <div className="flex items-center gap-1.5 text-green-600">
-                        <CheckCircle2 className="size-3" />
-                        <span className="text-[8px] font-black uppercase">Ready</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Main Viewport: The Image Preview (Like Image Crop) */}
+        <div className="lg:col-span-8">
+            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">SCANNING VIEWPORT</CardTitle>
                     </div>
-                )}
-              </CardHeader>
-              <CardContent className="flex-1 p-0 relative flex flex-col bg-background">
-                 {isProcessing && (
-                    <div className="absolute inset-0 z-20 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-6">
-                        <div className="relative">
-                            <Loader2 className="h-12 w-12 md:h-14 md:w-14 animate-spin text-primary stroke-[3]" />
-                            <FileScan className="absolute inset-0 m-auto h-5 w-5 md:h-6 md:w-6 text-primary animate-pulse" />
-                        </div>
-                        <div className="space-y-3 w-full max-w-[250px] md:max-w-xs">
-                            <p className="font-black text-lg text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
-                            <Progress value={progress} className="h-1.5 shadow-inner" />
-                        </div>
+                    {extractedText && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">READY</Badge>}
+                </CardHeader>
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px] flex items-center justify-center relative">
+                    <div className="relative size-full min-h-[350px] flex items-center justify-center">
+                        <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
+                        <AnimatePresence>
+                            {isProcessing && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4 z-20 backdrop-blur-sm p-8 text-center"
+                                >
+                                    <div className="relative">
+                                        <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin text-primary stroke-[3]" />
+                                        <FileScan className="absolute inset-0 m-auto h-5 w-5 md:h-6 md:w-6 text-primary animate-pulse" />
+                                    </div>
+                                    <div className="space-y-3 w-full max-w-[200px] md:max-w-xs">
+                                        <p className="font-black text-sm md:text-lg text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
+                                        <Progress value={progress} className="h-1.5 shadow-inner" />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                 )}
-                <Textarea
-                  className="flex-1 text-sm md:text-lg resize-none border-0 focus-visible:ring-0 rounded-none p-4 md:p-6 font-mono leading-relaxed bg-transparent min-h-[300px]"
-                  placeholder={isProcessing ? "" : "Text result..."}
-                  value={extractedText || ""}
-                  onChange={(e) => setExtractedText(e.target.value)}
-                  readOnly={isProcessing}
-                />
-              </CardContent>
-              <CardFooter className="p-4 md:p-6 bg-muted/10 border-t flex flex-col sm:flex-row gap-3">
-                {!extractedText ? (
-                    <Button className="w-full h-12 md:h-14 font-black bg-primary hover:bg-primary/90 shadow-xl text-base md:text-lg rounded-xl transition-all group" 
-                            onClick={handleExtractText} disabled={isProcessing}>
-                        {isProcessing ? "PROCESSING..." : "EXTRACT TEXT"}
-                    </Button>
-                ) : (
-                    <div className="flex flex-col sm:flex-row gap-2 w-full">
-                        <Button variant="outline" className="w-full sm:w-auto h-11 md:h-12 border-2 font-black px-6 rounded-xl text-[9px] md:text-[10px] uppercase" onClick={() => setExtractedText(null)}>
-                            RE-SCAN
+                </CardContent>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
+                        <div className="flex items-center gap-2"><SearchCode className="size-4" /> BILINGUAL (EN/HI)</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4" /> LOCAL ENGINE</div>
+                    </div>
+                </CardFooter>
+            </Card>
+        </div>
+
+        {/* Sidebar: Settings & Output (Like Image Crop) */}
+        <div className="lg:col-span-4 space-y-4">
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
+                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 md:size-5 text-primary" /> OCR Control
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
+                    <div className="space-y-4">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Engine Actions</Label>
+                        <Button 
+                            className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                            onClick={handleExtractText}
+                            disabled={isProcessing || !!extractedText}
+                        >
+                            {isProcessing ? (
+                                <div className="flex items-center gap-3">
+                                    <Loader2 className="size-6 md:size-8 animate-spin" />
+                                    <span className="uppercase text-sm md:text-base tracking-tighter">READING...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                    <span className="uppercase tracking-tighter text-lg md:text-2xl">EXTRACT TEXT</span>
+                                </div>
+                            )}
                         </Button>
-                        <Button className="flex-1 h-11 md:h-12 font-black bg-green-600 hover:bg-green-700 shadow-xl text-xs md:text-sm rounded-xl transition-all" 
-                                onClick={handleCopyToClipboard} disabled={hasCopied}>
-                            {hasCopied ? "COPIED!" : "COPY TO CLIPBOARD"}
-                        </Button>
                     </div>
-                )}
-              </CardFooter>
+
+                    <div className="space-y-4 pt-4 border-t border-white/10">
+                        <div className="flex justify-between items-center">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Extracted Content</Label>
+                            {extractedText && <Badge variant="secondary" className="font-mono text-[8px]">{extractedText.length} Chars</Badge>}
+                        </div>
+                        <div className="relative group">
+                            <Textarea
+                                className="min-h-[200px] md:min-h-[300px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
+                                placeholder={isProcessing ? "Extracting..." : "Text result will appear here..."}
+                                value={extractedText || ""}
+                                onChange={(e) => setExtractedText(e.target.value)}
+                                readOnly={isProcessing}
+                            />
+                            {extractedText && (
+                                <div className="absolute bottom-2 right-2 flex gap-1 animate-in fade-in">
+                                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-lg shadow-md" onClick={handleCopyToClipboard}>
+                                        {hasCopied ? <CheckCircle2 className="size-4 text-green-600" /> : <Clipboard className="size-4" />}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-xl md:rounded-2xl border-2 border-blue-500/10 flex gap-3 md:gap-4">
+                        <CheckCircle2 className="size-5 md:size-6 text-blue-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[9px] md:text-[11px] font-black text-blue-700 uppercase tracking-tight">Privacy Logic</p>
+                            <p className="text-[8px] md:text-[10px] text-blue-600/80 font-medium leading-tight mt-1">
+                                No cloud APIs used. The Tesseract engine runs inside your browser sandbox. Your images stay on your device.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> INSTANT OCR</div>
+                    <div className="flex items-center gap-1"><FileText className="size-2.5 text-primary" /> HD RENDER</div>
+                </CardFooter>
             </Card>
         </div>
       </div>
+      
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
