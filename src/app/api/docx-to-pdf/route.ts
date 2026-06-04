@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 /**
- * @fileOverview Professional server-side DOCX to PDF conversion route.
- * Handles both public and password-protected Word documents using ConvertAPI REST.
+ * @fileOverview Professional server-side Word to PDF conversion route.
+ * Dynamically handles both .doc and .docx formats using ConvertAPI REST.
  */
 
 export async function POST(req: Request) {
@@ -20,21 +20,25 @@ export async function POST(req: Request) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const fileName = file.name.toLowerCase();
+    
+    // Detect correct ConvertAPI endpoint based on file extension
+    const format = fileName.endsWith('.docx') ? 'docx' : 'doc';
 
-    console.log('Starting conversion flow for:', file.name, password ? '(Protected)' : '(Public)');
+    console.log(`Starting ${format.toUpperCase()} conversion for:`, file.name, password ? '(Protected)' : '(Public)');
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION) ---
-    let result = await callConvertApi(PROD_TOKEN, buffer, file.name, password);
+    let result = await callConvertApi(PROD_TOKEN, buffer, file.name, format, password);
     
     // --- STRATEGY 2: CONVERTAPI (SANDBOX FALLBACK) ---
     if (!result.success) {
-      // If error is specifically about password, don't try fallback yet, bubble up to user
+      // If error is specifically about password, stop and ask user for password
       if (result.error.toLowerCase().includes('password')) {
           return NextResponse.json({ error: result.error }, { status: 401 });
       }
       
       console.warn('Production API failed, trying Sandbox. Error:', result.error);
-      result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name, password);
+      result = await callConvertApi(SANDBOX_TOKEN, buffer, file.name, format, password);
     }
 
     if (result.success && result.pdfUrl) {
@@ -45,6 +49,7 @@ export async function POST(req: Request) {
       });
     }
 
+    // Final failure response
     return NextResponse.json({ 
         error: result.error || 'All conversion providers failed.', 
         details: result.error 
@@ -62,16 +67,21 @@ export async function POST(req: Request) {
 /**
  * Helper to call ConvertAPI REST endpoint directly.
  */
-async function callConvertApi(token: string, buffer: Buffer, filename: string, password?: string) {
+async function callConvertApi(token: string, buffer: Buffer, filename: string, format: 'doc' | 'docx', password?: string) {
     try {
-        // Construct URL with optional Password parameter
-        let url = `https://v2.convertapi.com/convert/docx/to/pdf?Secret=${token}`;
+        // Correct endpoint based on format
+        let url = `https://v2.convertapi.com/convert/${format}/to/pdf?Secret=${token}`;
         if (password) {
             url += `&Password=${encodeURIComponent(password)}`;
         }
         
         const formData = new FormData();
-        const fileBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        // Set appropriate mime-type for legacy or modern Word
+        const mimeType = format === 'docx' 
+            ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            : 'application/msword';
+            
+        const fileBlob = new Blob([buffer], { type: mimeType });
         formData.append('File', fileBlob, filename);
 
         const response = await fetch(url, {

@@ -64,7 +64,8 @@ export default function DocxToPdf() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.name.toLowerCase().endsWith('.doc')) { 
+      const name = selectedFile.name.toLowerCase();
+      if (name.endsWith('.docx') || name.endsWith('.doc')) { 
         setFile(selectedFile); 
         setIsSuccess(false);
         setRequiresPassword(false);
@@ -97,12 +98,11 @@ export default function DocxToPdf() {
       });
       toast({ title: 'Conversion Success!', description: 'Your PDF is ready for download.' });
     } catch (error: any) {
-      const msg = error.message || "";
-      if (msg.toLowerCase().includes('password')) {
+      if (error.message === 'PASSWORD_REQUIRED') {
           setRequiresPassword(true);
           toast({ variant: 'destructive', title: 'File Protected', description: 'This document requires a password to convert.' });
       } else {
-          toast({ variant: 'destructive', title: 'Conversion Error', description: msg });
+          toast({ variant: 'destructive', title: 'Conversion Error', description: error.message || 'Something went wrong.' });
       }
     } finally { 
       setIsProcessing(false); 
@@ -122,7 +122,7 @@ export default function DocxToPdf() {
               Word to <span className="text-gradient-hero">PDF Cloud</span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Professional high-fidelity conversion. <br/>Supports encrypted and complex Word documents.
+              Professional high-fidelity conversion. <br/>Supports .DOC, .DOCX and Encrypted documents.
           </p>
       </div>
 
@@ -152,7 +152,7 @@ export default function DocxToPdf() {
                   </div>
                   <div className="text-center">
                     <h3 className="text-xl font-black uppercase tracking-tighter">Drop Word File here</h3>
-                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Supports .doc & .docx documents.</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Supports Legacy .doc & Modern .docx</p>
                   </div>
                 </div>
               ) : (
@@ -258,7 +258,7 @@ export default function DocxToPdf() {
       <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex items-center gap-4 max-w-xl">
           <AlertCircle className="size-5 text-blue-500 shrink-0" />
           <p className="text-[10px] text-blue-700 font-bold leading-tight uppercase">
-              Encrypted Word documents are supported. Our engine securely handles passwords to ensure layout preservation during PDF rendering.
+              Encrypted Word documents are supported. Our engine dynamically selects the best cloud endpoint for both .doc and .docx files.
           </p>
       </div>
     </div>

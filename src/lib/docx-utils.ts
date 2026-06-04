@@ -1,5 +1,5 @@
 /**
- * @fileOverview Professional Cloud-only utility to convert DOCX to PDF.
+ * @fileOverview Professional Cloud-only utility to convert Word (DOC/DOCX) to PDF.
  * This utility relies exclusively on high-fidelity server-side conversion.
  */
 
@@ -18,8 +18,9 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
       body: formData,
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    const data = await response.json();
+
+    if (response.ok && data.success) {
       const pdfUrl = data.pdfUrl;
       
       const link = document.createElement('a');
@@ -33,11 +34,20 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
       console.log('Cloud Conversion Successful. Provider:', data.provider);
       return true;
     } else {
-        const errData = await response.json();
-        const errorMessage = errData.error || 'Conversion failed at server side.';
+        // Propagate the actual error message from the server (e.g. Password Protected)
+        const errorMessage = data.error || 'Conversion failed at server side.';
+        
+        // If it's a 401, we know it's a password issue
+        if (response.status === 401) {
+            throw new Error('PASSWORD_REQUIRED');
+        }
+        
         throw new Error(errorMessage);
     }
   } catch (error: any) {
+    if (error.message === 'PASSWORD_REQUIRED') {
+        throw error;
+    }
     console.error('Conversion Utility Error:', error.message);
     throw error; 
   }
