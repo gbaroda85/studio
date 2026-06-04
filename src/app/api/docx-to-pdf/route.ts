@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     // Detect correct ConvertAPI endpoint based on file extension
     const format = fileName.endsWith('.docx') ? 'docx' : 'doc';
 
-    console.log(`Starting ${format.toUpperCase()} conversion for:`, file.name, password ? '(Protected)' : '(Public)');
+    console.log(`Starting ${format.toUpperCase()} conversion for:`, file.name);
 
     // --- STRATEGY 1: CONVERTAPI (PRODUCTION) ---
     let result = await callConvertApi(PROD_TOKEN, buffer, file.name, format, password);
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     // --- STRATEGY 2: CONVERTAPI (SANDBOX FALLBACK) ---
     if (!result.success) {
       // If error is specifically about password, stop and ask user for password
-      if (result.error.toLowerCase().includes('password')) {
+      if (result.error && result.error.toLowerCase().includes('password')) {
           return NextResponse.json({ error: result.error }, { status: 401 });
       }
       
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Final failure response
+    // Final failure response with detailed message
     return NextResponse.json({ 
         error: result.error || 'All conversion providers failed.', 
         details: result.error 
@@ -69,24 +69,22 @@ export async function POST(req: Request) {
  */
 async function callConvertApi(token: string, buffer: Buffer, filename: string, format: 'doc' | 'docx', password?: string) {
     try {
-        // Correct endpoint based on format
         let url = `https://v2.convertapi.com/convert/${format}/to/pdf?Secret=${token}`;
         if (password) {
             url += `&Password=${encodeURIComponent(password)}`;
         }
         
-        const formData = new FormData();
-        // Set appropriate mime-type for legacy or modern Word
+        const apiFormData = new FormData();
         const mimeType = format === 'docx' 
             ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             : 'application/msword';
             
         const fileBlob = new Blob([buffer], { type: mimeType });
-        formData.append('File', fileBlob, filename);
+        apiFormData.append('File', fileBlob, filename);
 
         const response = await fetch(url, {
             method: 'POST',
-            body: formData,
+            body: apiFormData,
         });
 
         const data = await response.json();
@@ -95,13 +93,13 @@ async function callConvertApi(token: string, buffer: Buffer, filename: string, f
             return { 
                 success: true, 
                 pdfUrl: data.Files[0].Url, 
-                provider: token.startsWith('x7') ? 'convertapi-sandbox' : 'convertapi-prod' 
+                provider: token === "x7PtJTfCnxdSx5Ba5otIyDb9G4vkvMYy" ? 'convertapi-sandbox' : 'convertapi-prod' 
             };
         }
 
         return { 
             success: false, 
-            error: data.Message || `API returned status ${response.status}` 
+            error: data.Message || data.message || `API returned status ${response.status}` 
         };
     } catch (e: any) {
         return { success: false, error: e.message };

@@ -34,10 +34,11 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
       console.log('Cloud Conversion Successful. Provider:', data.provider);
       return true;
     } else {
-        // Propagate the actual error message from the server (e.g. Password Protected)
         const errorMessage = data.error || 'Conversion failed at server side.';
+        const errorDetails = data.details || '';
         
-        // If it's a 401, we know it's a password issue
+        console.error('Server side error details:', errorMessage, errorDetails);
+
         if (response.status === 401) {
             throw new Error('PASSWORD_REQUIRED');
         }
@@ -48,6 +49,7 @@ export const convertDocxToPdf = async (file: File, password?: string): Promise<b
     if (error.message === 'PASSWORD_REQUIRED') {
         throw error;
     }
+    // Log the actual error that reached the utility
     console.error('Conversion Utility Error:', error.message);
     throw error; 
   }
