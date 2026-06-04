@@ -432,7 +432,7 @@ export default function PdfEditor() {
                         const endY = elY + Math.sin(angle) * el.length;
                         copiedPage.drawLine({
                             start: { x: elX, y: elY },
-                            end: { x: endX, y: endY },
+                            end: { endX, endY },
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
@@ -447,7 +447,6 @@ export default function PdfEditor() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            // Updated filename logic
             link.download = `GR7-Tools-Edited-${pdfFile.name}`;
             link.click();
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
@@ -474,7 +473,7 @@ export default function PdfEditor() {
             
             {/* TOP TOOLBAR */}
             {pdfFile && (
-                <div className="w-full h-16 bg-slate-900 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
+                <div className="w-full h-16 bg-slate-900 dark:bg-slate-950 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
                         <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl shrink-0">
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
@@ -561,13 +560,13 @@ export default function PdfEditor() {
             ) : (
                 <div className="flex-1 flex overflow-hidden gap-0 bg-slate-200 dark:bg-black/20">
                     {/* LEFT PANEL: PAGES */}
-                    <div className="w-20 md:w-64 bg-slate-900 dark:bg-slate-950 border-r border-white/5 flex flex-col shrink-0 overflow-hidden shadow-2xl">
-                        <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between"><span className="text-[10px] font-black uppercase tracking-widest text-white/40 hidden md:block">Pages</span><Badge className="bg-primary/20 text-primary">{pages.filter(p => !p.isDeleted).length}</Badge></div>
+                    <div className="w-20 md:w-64 bg-muted/30 dark:bg-slate-950 border-r flex flex-col shrink-0 overflow-hidden shadow-2xl transition-colors">
+                        <div className="p-4 border-b bg-primary/5 flex items-center justify-between"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:block">Pages</span><Badge className="bg-primary/20 text-primary">{pages.filter(p => !p.isDeleted).length}</Badge></div>
                         <ScrollArea className="flex-1 p-2 md:p-4">
                             <div className="space-y-4">
                                 {pages.map((p, i) => !p.isDeleted && (
                                     <div key={p.id} onClick={() => { setSelectedPageIndex(i); setSelectedElementId(null); }}
-                                        className={cn("relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white", selectedPageIndex === i ? "border-primary ring-2 ring-primary/40 scale-105 z-10 shadow-3xl" : "border-white/5 opacity-40 hover:opacity-100")}>
+                                        className={cn("relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-white", selectedPageIndex === i ? "border-primary ring-2 ring-primary/40 scale-105 z-10 shadow-3xl" : "border-foreground/5 opacity-40 hover:opacity-100")}>
                                         <div className="size-full flex items-center justify-center p-1" style={{ transform: `rotate(${p.rotation}deg)` }}><img src={p.previewSrc!} className="max-w-full max-h-full object-contain" alt={`P${i+1}`} /></div>
                                         <div className="absolute top-1 left-1 size-5 rounded bg-black/80 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{i+1}</div>
                                     </div>
@@ -577,7 +576,7 @@ export default function PdfEditor() {
                     </div>
 
                     {/* CENTER PANEL: INTERACTIVE CANVAS */}
-                    <div className="flex-1 bg-slate-300 dark:bg-black/40 flex items-start justify-center overflow-auto p-8 md:p-16 rounded-none border-t border-white/5 relative shadow-inner custom-scrollbar">
+                    <div className="flex-1 bg-slate-100 dark:bg-black/40 flex items-start justify-center overflow-auto p-8 md:p-16 rounded-none border-t border-white/5 relative shadow-inner custom-scrollbar">
                         {selectedPage ? (
                             <div ref={containerRef} className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6)] bg-white transition-transform origin-top flex items-center justify-center" 
                                  style={{ transform: `scale(${zoom / 100})`, width: 'fit-content' }} onMouseDown={() => setSelectedElementId(null)}>
@@ -646,58 +645,58 @@ export default function PdfEditor() {
                     </div>
 
                     {/* RIGHT PANEL: PROPERTIES */}
-                    <div className="w-72 md:w-80 bg-slate-900 dark:bg-slate-950 border-l border-white/10 flex flex-col shrink-0 overflow-hidden shadow-2xl">
-                        <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3"><Settings2 className="size-5 text-primary" /><span className="text-[11px] font-black uppercase tracking-widest text-white/60">Studio Properties</span></div>
+                    <div className="w-72 md:w-80 bg-muted/30 dark:bg-slate-950 border-l flex flex-col shrink-0 overflow-hidden shadow-2xl transition-colors">
+                        <div className="p-4 border-b bg-primary/5 flex items-center gap-3"><Settings2 className="size-5 text-primary" /><span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Studio Properties</span></div>
                         <ScrollArea className="flex-1 p-6">
                             {selectedElement ? (
                                 <div className="space-y-8 animate-in slide-in-from-right-4">
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Opacity</Label><span className="text-primary text-[10px] font-bold">{selectedElement.opacity}%</span></div>
+                                        <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Opacity</Label><span className="text-primary text-[10px] font-bold">{selectedElement.opacity}%</span></div>
                                         <Slider min={10} max={100} value={[selectedElement.opacity]} onValueChange={v => updateElement({ opacity: v[0] })} onValueCommit={commitChange} />
                                     </div>
 
                                     {selectedElement.type === 'text' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">CONTENT</Label><Input value={selectedElement.text} onChange={e => updateElement({ text: e.target.value })} onBlur={commitChange} className="bg-white/10 border-white/10 text-white h-11 font-bold focus:ring-primary/20" /></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">CONTENT</Label><Input value={selectedElement.text} onChange={e => updateElement({ text: e.target.value })} onBlur={commitChange} className="bg-background border-border text-foreground h-11 font-bold focus:ring-primary/20" /></div>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">FONT</Label><Select value={selectedElement.font} onValueChange={v => { updateElement({ font: v }); commitChange(); }}><SelectTrigger className="h-9 bg-white/10 text-white font-bold text-[10px] border-none"><SelectValue /></SelectTrigger><SelectContent className="bg-slate-900 text-white border-white/10 shadow-2xl"><SelectItem value="Helvetica">Helvetica</SelectItem><SelectItem value="Times">Times Roman</SelectItem><SelectItem value="Courier">Courier</SelectItem></SelectContent></Select></div>
-                                                <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">SIZE</Label><Input type="number" value={selectedElement.size} onChange={e => { updateElement({ size: Number(e.target.value) }); commitChange(); }} className="bg-white/10 border-white/10 text-white h-9 font-bold" /></div>
+                                                <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FONT</Label><Select value={selectedElement.font} onValueChange={v => { updateElement({ font: v }); commitChange(); }}><SelectTrigger className="h-9 bg-background text-foreground font-bold text-[10px] border-border"><SelectValue /></SelectTrigger><SelectContent className="border-border shadow-2xl"><SelectItem value="Helvetica">Helvetica</SelectItem><SelectItem value="Times">Times Roman</SelectItem><SelectItem value="Courier">Courier</SelectItem></SelectContent></Select></div>
+                                                <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">SIZE</Label><Input type="number" value={selectedElement.size} onChange={e => { updateElement({ size: Number(e.target.value) }); commitChange(); }} className="bg-background border-border text-foreground h-9 font-bold" /></div>
                                             </div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">TEXT COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#ffff00'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-white/10")} style={{ backgroundColor: c }} />)} </div></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">TEXT COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#ffff00'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Width</Label></div><Slider min={5} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Height</Label></div><Slider min={5} max={800} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">FILL COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#ADD8E6'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-white/10")} style={{ backgroundColor: c }} />)} </div></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width</Label></div><Slider min={5} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height</Label></div><Slider min={5} max={800} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FILL COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#ADD8E6'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
                                     {selectedElement.type === 'arrow' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><Label className="text-[9px] font-black text-white/40">Arrow Length</Label><Slider min={10} max={500} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><Label className="text-[9px] font-black text-white/40">Angle Rotation</Label><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-white/40">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#00FF00', '#0000FF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-white/10")} style={{ backgroundColor: c }} />)} </div></div>
+                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Arrow Length</Label><Slider min={10} max={500} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Angle Rotation</Label><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#00FF00', '#0000FF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
                                     {selectedElement.type === 'image' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Scale</Label></div><Slider min={20} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-white/40">Rotate</Label></div><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Scale</Label></div><Slider min={20} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Rotate</Label></div><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
                                         </div>
                                     )}
                                 </div>
                             ) : (
                                 <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4">
-                                    <MousePointer2 className="size-16 text-white"/>
-                                    <p className="text-[11px] font-black uppercase tracking-widest text-white leading-relaxed">Select any item on<br/>the page to modify</p>
+                                    <MousePointer2 className="size-16 text-foreground"/>
+                                    <p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-relaxed">Select any item on<br/>the page to modify</p>
                                 </div>
                             )}
                         </ScrollArea>
-                        <CardFooter className="bg-primary/5 p-4 border-t border-white/10">
+                        <CardFooter className="bg-primary/5 p-4 border-t">
                             <div className="flex gap-3 items-center">
                                 <ShieldCheck className="size-4 text-primary" />
                                 <p className="text-[9px] font-black uppercase text-primary/60 tracking-tight">Active Secured Studio</p>
