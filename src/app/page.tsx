@@ -88,6 +88,7 @@ const ALL_TOOLS = [
   { icon: FileCode, title: "HTML TO PDF", description: "Convert raw HTML code into a PDF document.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Add a text watermark to your PDF.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]" },
   { icon: NotebookPen, title: "ADD PAGE NUMBERS", description: "Insert page numbers into your PDF document.", href: "/add-page-numbers", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]" },
+  { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text into a PDF document.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#f8fafc]" },
 
   // CALCULATORS
   { icon: Calculator, title: "STANDARD CALCULATOR", description: "For your everyday calculations.", href: "/standard-calculator", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "calculator" },

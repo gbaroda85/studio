@@ -264,8 +264,8 @@ function ToolsPageContent() {
       labelKey: 'text_to_pdf_label',
       descriptionKey: 'text_to_pdf_description',
       icon: FileText,
-      color: 'text-slate-500',
-      lightBg: 'bg-[#f1f5f9]'
+      color: 'text-indigo-600',
+      lightBg: 'bg-[#f8fafc]'
     },
     {
       href: '/add-watermark',
