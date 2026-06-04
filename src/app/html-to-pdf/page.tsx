@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Code2, Globe, Braces, FileCode, Monitor, Sparkles, Download } from 'lucide-react';
 import HtmlToPdfConverter from '@/components/html-to-pdf-converter';
@@ -21,22 +20,22 @@ export default function HtmlToPdfPage() {
     {
       title: "Input Code Source",
       description: "Paste your raw HTML5 and CSS3 code into the built-in Sandbox Editor. Our engine handles inline styles and internal <style> blocks with 100% fidelity.",
-      icon: FileCode
+      icon: "FileCode"
     },
     {
       title: "Internal Rendering",
       description: "Our local engine constructs a virtual DOM in a safe sandbox. It interprets layout rules, flexbox, and grid systems to prepare the document for high-res capture.",
-      icon: Monitor
+      icon: "Monitor"
     },
     {
       title: "High DPI Sampling",
       description: "The visual render is sampled at 2.5x scale, creating a crisp 300 DPI equivalent document. This ensures that web fonts and small text remain razor-sharp in the PDF.",
-      icon: Sparkles
+      icon: "Sparkles"
     },
     {
       title: "Standard A4 Export",
       description: "The rendered canvas is mapped to a standard A4 PDF container. Click 'Download' to get your professional document, ready for official use or printing.",
-      icon: Download
+      icon: "Download"
     }
   ];
 
@@ -49,7 +48,7 @@ export default function HtmlToPdfPage() {
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 md:px-8 pb-24">
-            <HowToGuide title="HTML to PDF HD Converter" steps={deepSteps} />
+            <HowToGuide title="HTML to PDF HD Studio" steps={deepSteps} />
 
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">

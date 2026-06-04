@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ImageIcon, ShieldCheck, HelpCircle, Sparkles, MonitorCheck, Layout, FileDigit, Settings2, Maximize, Zip } from 'lucide-react';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
@@ -21,22 +20,22 @@ export default function PdfToImagePage() {
     {
       title: "Import PDF Document",
       description: "Upload your multi-page PDF. Our local engine instantly maps the internal page structure and initializes a high-resolution render buffer in your device RAM.",
-      icon: FileDigit
+      icon: "FileDigit"
     },
     {
       title: "Configure Layout",
       description: "Select between 'Raw Page' (edge-to-edge) or 'A4 Frame' mode. Use the positioning studio to align content to the top, center, or bottom of each resulting image.",
-      icon: Settings2
+      icon: "Settings2"
     },
     {
       title: "HD Visual Render",
       description: "The engine renders every vector and font at 2.5x scale (equivalent to 300 DPI). This ensures text remains ultra-sharp for professional printing or presentations.",
-      icon: Sparkles
+      icon: "Sparkles"
     },
     {
       title: "Batch ZIP Export",
       description: "Download individual pages instantly or click 'Extract All' to bundle all pages into a single, organized ZIP archive for easy sharing and management.",
-      icon: MonitorCheck
+      icon: "MonitorCheck"
     }
   ];
 

@@ -1,25 +1,70 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { HelpCircle, Sparkles, Zap, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
-import { Badge } from './ui/badge';
+import { 
+    Sparkles, 
+    Zap, 
+    ShieldCheck, 
+    CheckCircle2, 
+    FileDigit, 
+    Settings2, 
+    MonitorCheck, 
+    UploadCloud, 
+    BrainCircuit, 
+    FileText, 
+    Clipboard,
+    FileCode,
+    Monitor,
+    Download,
+    Layers,
+    SearchCode,
+    Scaling,
+    Maximize,
+    ScanLine,
+    Smartphone,
+    UserCircle,
+    Eraser,
+    ImageIcon,
+    PenLine,
+    Layout,
+    AlignCenter,
+    Hash,
+    PenTool,
+    Type,
+    Eye,
+    Landmark,
+    Map,
+    Gauge,
+    AreaChart,
+    Fuel,
+    Waves,
+    Activity,
+    Target
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Icon Map to fix serialization error between Server and Client components
+const ICON_MAP: Record<string, any> = {
+  FileDigit, Settings2, MonitorCheck, UploadCloud, BrainCircuit, 
+  FileText, Clipboard, FileCode, Monitor, Download, Layers, 
+  SearchCode, Scaling, Maximize, ScanLine, Smartphone, 
+  UserCircle, Eraser, ImageIcon, PenLine, Layout, AlignCenter, 
+  Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
+  Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck
+};
 
 type StepDetail = {
   title: string;
   description: string;
-  icon?: any;
+  icon?: string; // Pass icon name as string to avoid serialization error
 };
 
 type HowToGuideProps = {
   title: string;
-  steps: (string | StepDetail)[];
+  steps: StepDetail[];
 };
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
-  const isRich = steps.length > 0 && typeof steps[0] !== 'string';
-
   return (
     <div className="w-full max-w-5xl mx-auto mt-20 mb-24 px-4 no-print">
       <div className="flex flex-col items-center text-center mb-12 space-y-4">
@@ -34,13 +79,9 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         </p>
       </div>
 
-      <div className={cn(
-        "grid gap-6 md:gap-8",
-        isRich ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-1"
-      )}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {steps.map((step, index) => {
-          const content = typeof step === 'string' ? { title: `Step ${index + 1}`, description: step } : step;
-          const Icon = content.icon || CheckCircle2;
+          const Icon = (step.icon && ICON_MAP[step.icon]) || CheckCircle2;
 
           return (
             <Card key={index} className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/50 transition-all duration-500 rounded-[2.5rem] bg-card hover:-translate-y-2 shadow-xl hover:shadow-primary/10">
@@ -53,9 +94,9 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 </div>
                 
                 <div className="space-y-3">
-                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{content.title}</h3>
+                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{step.title}</h3>
                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
-                        {content.description}
+                        {step.description}
                     </p>
                 </div>
 
@@ -63,7 +104,6 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                     <div className="h-0.5 w-full bg-gradient-to-r from-primary/50 to-transparent rounded-full" />
                 </div>
               </CardContent>
-              {/* Decorative elements */}
               <div className="absolute -bottom-6 -right-6 size-24 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-all" />
             </Card>
           );

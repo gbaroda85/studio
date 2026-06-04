@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Target, Layers, Wand2, Scaling, UploadCloud, Settings2, Zap, Download } from 'lucide-react';
 import ImageCompressor from '@/components/image-compressor';
@@ -21,22 +20,22 @@ export default function ImageCompressPage() {
     {
       title: "Batch Upload",
       description: "Upload up to 50 images at once. Our engine initializes a multi-threaded parallel processing queue in your browser for industrial-grade speed.",
-      icon: UploadCloud
+      icon: "UploadCloud"
     },
     {
       title: "Set Optimization Limit",
       description: "Choose 'Target Size' for government forms (like 20KB or 50KB) or 'Quality Mode' for manual control. Our algorithm targets 90% of your limit for safety.",
-      icon: Settings2
+      icon: "Settings2"
     },
     {
       title: "Adaptive Compression",
       description: "Click 'Optimize Now'. The engine intelligently balances JPEG sub-sampling with subtle pixel scaling to maintain face and text clarity at extremely small sizes.",
-      icon: Zap
+      icon: "Zap"
     },
     {
       title: "Smart ZIP Download",
       description: "Preview each optimized result side-by-side with the original. Download individual files or get the entire optimized batch in a secure ZIP archive instantly.",
-      icon: Download
+      icon: "Download"
     }
   ];
 

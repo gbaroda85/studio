@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, SearchCode, Languages, Clipboard, UploadCloud, BrainCircuit, FileText, CheckCircle2 } from 'lucide-react';
 import ImageToTextConverter from '@/components/image-to-text-converter';
@@ -21,22 +20,22 @@ export default function ImageToTextPage() {
     {
       title: "Upload Photo",
       description: "Select or drop any photo containing text. Our engine samples the image at high DPI to ensure that even small fonts or handwritten notes are clearly visible for analysis.",
-      icon: UploadCloud
+      icon: "UploadCloud"
     },
     {
       title: "AI Analysis",
       description: "Click 'Extract Text' to trigger the Gemini 2.5 Flash engine. It performs a multi-layer semantic scan to understand characters, symbols, and formatting structures.",
-      icon: BrainCircuit
+      icon: "BrainCircuit"
     },
     {
       title: "Semantic Extraction",
       description: "The AI recognizes and reconstructs the text while preserving line breaks and original document layout. It works perfectly for both English and Hindi languages simultaneously.",
-      icon: FileText
+      icon: "FileText"
     },
     {
       title: "Copy & Edit",
       description: "Once processed, the text appears in our Studio Editor. You can manually refine any details and click 'Copy' to move the data instantly to your clipboard or other apps.",
-      icon: Clipboard
+      icon: "Clipboard"
     }
   ];
 
