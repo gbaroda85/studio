@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    /* Professional Palette - Light Mode (Based on User Image) */
-    --background: 210 25% 95%;      /* #eff2f5 (Light Gray-Blue) */
-    --foreground: 210 100% 20%;     /* #003366 (Dark Navy) */
-    --card: 0 0% 100%;              /* #ffffff (White) */
-    --card-foreground: 210 100% 20%;
+    /* Dreamy Sunset Hues - Light Mode */
+    --background: 260 20% 98%;      /* Very Light Lavender Background */
+    --foreground: 210 20% 15%;     /* Dark Slate Text */
+    --card: 0 0% 100%;              /* White Card */
+    --card-foreground: 210 20% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 100% 20%;
-    --primary: 9 100% 47%;          /* #ef2300 (Primary Red) */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 211 38% 39%;      /* #3d6188 (Steel Blue) */
+    --popover-foreground: 210 20% 15%;
+    --primary: 350 100% 82%;        /* Soft Sunset Coral/Pink */
+    --primary-foreground: 350 40% 25%;
+    --secondary: 190 35% 62%;       /* Muted Sunset Teal */
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 25% 90%;
-    --muted-foreground: 211 15% 45%;
-    --accent: 211 38% 90%;
-    --accent-foreground: 210 100% 20%;
+    --muted: 260 10% 94%;
+    --muted-foreground: 210 10% 45%;
+    --accent: 350 60% 94%;          /* Lightest Pink Accent */
+    --accent-foreground: 350 40% 25%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 25% 85%;
-    --input: 210 25% 85%;
-    --ring: 9 100% 47%;
+    --border: 260 15% 90%;
+    --input: 260 15% 90%;
+    --ring: 350 100% 82%;
     --radius: 1.5rem;
   }
   
@@ -63,11 +63,11 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Immersive Studio Gradients for Light Mode - Red/Blue themed */
+    /* Dreamy Sunset Gradients for Light Mode */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(211, 38%, 39%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(9, 100%, 47%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(211, 38%, 39%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(260, 20%, 85%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(350, 100%, 80%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(190, 35%, 62%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -95,11 +95,11 @@
 }
 
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-secondary;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-blue-400;
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-[#ef2300] to-[#d11f00] hover:from-[#d11f00] hover:to-[#ef2300] dark:from-[#7BBDE8] dark:to-[#49769F] text-white dark:text-slate-950 shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white dark:text-slate-950 shadow-lg transition-all duration-300;
 }
 
 /* Custom Thin Scrollbar */
