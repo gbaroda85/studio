@@ -37,7 +37,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 // STABLE WORKER CONFIG
@@ -123,7 +123,8 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            // Use readAsArrayBuffer instead of readAsDataURL for PDF.js detection
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -172,7 +173,6 @@ export default function PdfUnlocker() {
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
                 const renderViewport = page.getViewport({ scale: 2.2 }); 
                 
                 const canvas = document.createElement('canvas');
@@ -186,11 +186,11 @@ export default function PdfUnlocker() {
                     
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
-                    const orientation = viewport.width > viewport.height ? 'l' : 'p';
+                    const orientation = renderViewport.width > renderViewport.height ? 'l' : 'p';
                     
                     if (i === 1) newPdf.deletePage(1);
-                    newPdf.addPage([viewport.width, viewport.height], orientation);
-                    newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
+                    newPdf.addPage([renderViewport.width, renderViewport.height], orientation);
+                    newPdf.addImage(imgData, 'JPEG', 0, 0, renderViewport.width, renderViewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
