@@ -199,9 +199,9 @@ export default function Page() {
               <FileText className="size-6 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=video" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-indigo-500/50 transition-all group hover:scale-105 active:scale-95">
-              <Video className="size-6 text-indigo-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Video Tools</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
+              <Calculator className="size-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
