@@ -1,7 +1,6 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Layout, AlignCenter, Hash } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { PdfPageNumbererClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
 import {
@@ -10,19 +9,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-// Dynamically import the heavy PDF component to solve Vercel bundle size issues
-const PdfPageNumberer = dynamic(() => import('@/components/pdf-page-numberer'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full max-w-2xl h-[400px] flex flex-col items-center justify-center bg-muted/20 rounded-[2.5rem] border-2 border-dashed">
-      <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-      <p className="text-[10px] font-black uppercase tracking-widest mt-4 opacity-40">Initializing Page Studio...</p>
-    </div>
-  )
-});
-
-import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Add Page Numbers to PDF Online - Customize Position & Format Privately',
@@ -35,7 +21,7 @@ export default function AddPageNumbersPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
-            <PdfPageNumberer />
+            <PdfPageNumbererClient />
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">

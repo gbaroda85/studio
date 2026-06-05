@@ -1,7 +1,6 @@
-
 import { Metadata } from 'next';
-import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize, Zap, Settings2, Loader2 } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize, Zap, Settings2 } from 'lucide-react';
+import { PassportPhotoMakerClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
 import {
@@ -10,17 +9,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-// Dynamically import the heavy AI component to keep it out of the server bundle
-const PassportPhotoMaker = dynamic(() => import('@/components/passport-photo-maker'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full max-w-2xl h-[400px] flex flex-col items-center justify-center bg-muted/20 rounded-[2.5rem] border-2 border-dashed">
-      <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-      <p className="text-[10px] font-black uppercase tracking-widest mt-4 opacity-40">Initializing Studio Engine...</p>
-    </div>
-  )
-});
 
 export const metadata: Metadata = {
   title: 'Professional Passport Photo Maker - Create ID Photos Online (HD)',
@@ -57,7 +45,7 @@ export default function PassportPhotoPage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" className="mb-2" />
 
         <div className="w-full flex justify-center mb-2 px-4">
-            <PassportPhotoMaker />
+            <PassportPhotoMakerClient />
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">

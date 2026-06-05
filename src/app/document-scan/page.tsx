@@ -1,7 +1,6 @@
-
 import { Metadata } from 'next';
-import { Sparkles, Zap, ShieldCheck, MonitorCheck, ScanLine, HelpCircle, Loader2 } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { Sparkles, Zap, ShieldCheck, MonitorCheck, ScanLine, HelpCircle } from 'lucide-react';
+import { DocumentScannerClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
 import {
@@ -10,17 +9,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-// Dynamically import the heavy scanner component to keep it out of the server bundle
-const DocumentScanner = dynamic(() => import('@/components/document-scanner'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full max-w-2xl h-[400px] flex flex-col items-center justify-center bg-muted/20 rounded-[2.5rem] border-2 border-dashed">
-      <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-      <p className="text-[10px] font-black uppercase tracking-widest mt-4 opacity-40">Initializing Capture Studio...</p>
-    </div>
-  )
-});
 
 export const metadata: Metadata = {
   title: 'Professional Document Scanner - AI Filters & HD PDF Export Online',
@@ -69,9 +57,9 @@ export default function DocumentScanPage() {
                 </p>
             </div>
             
-            {/* The Main Tool Component - MADE COMPACT */}
+            {/* The Main Tool Component - LOADED VIA CLIENT WRAPPER */}
             <div className="w-full max-w-6xl flex justify-center">
-                <DocumentScanner />
+                <DocumentScannerClient />
             </div>
         </div>
 
