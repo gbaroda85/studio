@@ -9,7 +9,14 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
   experimental: {
-    serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers', 'genkit'],
+    // Explicitly exclude heavy packages from the serverless function bundle
+    serverExternalPackages: [
+      '@imgly/background-removal', 
+      '@huggingface/transformers', 
+      'genkit',
+      '@genkit-ai/google-genai',
+      'pdfjs-dist'
+    ],
   },
   images: {
     remotePatterns: [
