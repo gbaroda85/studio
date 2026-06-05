@@ -186,17 +186,17 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-2 px-3.5 py-1.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group hover:scale-105 active:scale-95">
-              <ImageIcon className="size-3.5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] md:text-[9px] uppercase tracking-widest text-slate-800 dark:text-slate-200">Image Tools</span>
+            <Link href="/tools?tab=image" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-primary/50 transition-all group hover:scale-105 active:scale-95">
+              <ImageIcon className="size-3 text-primary group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-800 dark:text-slate-200">Image Tools</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-2 px-3.5 py-1.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group hover:scale-105 active:scale-95">
-              <FileText className="size-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] md:text-[9px] uppercase tracking-widest text-slate-800 dark:text-slate-200">PDF Tools</span>
+            <Link href="/tools?tab=pdf" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-rose-500/50 transition-all group hover:scale-105 active:scale-95">
+              <FileText className="size-3 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-800 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-2 px-3.5 py-1.5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
-              <Calculator className="size-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[8px] md:text-[9px] uppercase tracking-widest text-slate-800 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=calculator" className="flex items-center gap-2 px-3 py-1 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
+              <Calculator className="size-3 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest text-slate-800 dark:text-slate-200">Calculators</span>
             </Link>
           </div>
 
