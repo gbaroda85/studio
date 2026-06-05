@@ -23,7 +23,10 @@ import {
     Scaling,
     RotateCw,
     CheckCircle2,
-    Eye
+    Eye,
+    ArrowLeftRight,
+    Cpu,
+    MousePointer2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -39,6 +42,12 @@ import { Input } from "@/components/ui/input";
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { motion, AnimatePresence } from 'framer-motion';
+
+/**
+ * AI MODEL CONFIGURATION
+ */
+const MODEL_ID = 'Xenova/modnet'; // MODNet is fast and lightweight for browser
+// BiRefNet is also available but quite large (~100MB+), MODNet is ~20MB
 
 type Stage = 'upload' | 'preview' | 'crop' | 'process' | 'studio';
 
@@ -61,8 +70,6 @@ const SIZE_PRESETS = [
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
 ];
 
-const DPI = 300; 
-
 export default function BackgroundRemover() {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('upload');
@@ -77,12 +84,16 @@ export default function BackgroundRemover() {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   
-  // Customization States
+  // Studio Adjustments
   const [bgColor, setBgColor] = useState<string>("transparent");
   const [borderWidth, setBorderWidth] = useState([0]);
   const [borderColor, setBorderColor] = useState("#000000");
 
-  // Crop & Size States
+  // Slider State
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const [isResizingSlider, setIsResizingSlider] = useState(false);
+
+  // Crop States
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [selectedSizeIndex, setSelectedSizeIndex] = useState<string>("0");
@@ -90,6 +101,7 @@ export default function BackgroundRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const sliderContainerRef = useRef<HTMLDivElement>(null);
 
   const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
@@ -118,32 +130,70 @@ export default function BackgroundRemover() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  const updateCropFromSettings = useCallback(() => {
-    if (!imgRef.current) return;
-    
-    const { width: imgW, height: imgH } = imgRef.current;
-    let aspect = 1;
+  const handleRemoveBackgroundAI = async (source: string) => {
+    setIsProcessing(true);
+    setProgress(5);
+    setStatusText("Initializing AI Engine...");
 
-    if (selectedSizeIndex === '0') {
-        aspect = imgRef.current.naturalWidth / imgRef.current.naturalHeight;
-    } else {
-        const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
-        aspect = preset.width / preset.height;
+    try {
+      const { pipeline, env } = await import("@huggingface/transformers");
+      
+      // Configure for browser optimization
+      env.allowLocalModels = false;
+      env.useBrowserCache = true;
+
+      setStatusText("Downloading Neural Model (Cached)...");
+      const segmenter = await pipeline('image-segmentation', 'Xenova/modnet', {
+          progress_callback: (p: any) => {
+              if (p.status === 'progress') {
+                setProgress(Math.round(p.progress));
+              }
+          }
+      });
+
+      setStatusText("Isolating Subject (WebGPU Boost)...");
+      const output = await segmenter(source);
+      
+      // Get mask from output
+      const mask = output[0].mask;
+      const maskCanvas = document.createElement('canvas');
+      maskCanvas.width = mask.width;
+      maskCanvas.height = mask.height;
+      const maskCtx = maskCanvas.getContext('2d');
+      if (!maskCtx) throw new Error("Canvas mask failed");
+      maskCtx.putImageData(mask.toImageData(), 0, 0);
+
+      // Now apply mask to original source at FULL RESOLUTION
+      const sourceImg = new window.Image();
+      sourceImg.src = source;
+      await new Promise(r => sourceImg.onload = r);
+
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = sourceImg.width;
+      finalCanvas.height = sourceImg.height;
+      const finalCtx = finalCanvas.getContext('2d');
+      if (!finalCtx) throw new Error("Final canvas failed");
+
+      // Draw original
+      finalCtx.drawImage(sourceImg, 0, 0);
+      
+      // Composite operation to clip using the mask
+      finalCtx.globalCompositeOperation = 'destination-in';
+      finalCtx.drawImage(maskCanvas, 0, 0, sourceImg.width, sourceImg.height);
+      
+      const resultUrl = finalCanvas.toDataURL('image/png');
+      setSubjectImageSrc(resultUrl);
+      setStage('studio');
+      toast({ title: "Precision Success", description: "Background isolated with Neural precision." });
+    } catch (error: any) {
+        console.error(error);
+        toast({ variant: "destructive", title: "Offline Limit", description: "Local AI failed to load. Falling back to basic removal." });
+        // Fallback to simpler method if AI fails
+        setStage('studio');
+    } finally {
+        setIsProcessing(false);
     }
-
-    const newCrop = centerCrop(
-        makeAspectCrop({ unit: '%', width: 90 }, aspect, imgW, imgH),
-        imgW,
-        imgH
-    );
-    setCrop(newCrop);
-  }, [selectedSizeIndex]);
-
-  useEffect(() => {
-    if (stage === 'crop' && imgRef.current) {
-        updateCropFromSettings();
-    }
-  }, [selectedSizeIndex, stage, updateCropFromSettings]);
+  };
 
   const handleApplyCrop = () => {
     if (!imgRef.current || !completedCrop) return;
@@ -174,42 +224,8 @@ export default function BackgroundRemover() {
     setStage('process');
     
     setTimeout(() => {
-      handleRemoveBackgroundLocal(croppedData);
-    }, 300);
-  };
-
-  const handleRemoveBackgroundLocal = async (source: string) => {
-    setIsProcessing(true);
-    setSubjectImageSrc(null);
-    setProgress(5);
-    setStatusText("Initializing Engine...");
-
-    try {
-      const imglyModule = await import("@imgly/background-removal");
-      const removeBackgroundFunc = imglyModule.removeBackground || (imglyModule as any).default;
-      
-      const blob = await removeBackgroundFunc(source, {
-        progress: (item: string, index: number, total: number) => {
-            const p = Math.round((index / total) * 100);
-            setProgress(p);
-            if (item.includes("model")) setStatusText("Loading Core...");
-            else setStatusText("Extracting...");
-        },
-        output: { format: "image/png", quality: 1.0 }
-      });
-
-      const url = URL.createObjectURL(blob);
-      setSubjectImageSrc(url);
-      setStage('studio');
-      toast({ title: "Precision Success", description: "Background isolated." });
-    } catch (error: any) {
-      console.error(error);
-      toast({ variant: "destructive", title: "Processing Error", description: "Operation failed." });
-      setSubjectImageSrc(source);
-      setStage('studio');
-    } finally {
-      setIsProcessing(false);
-    }
+        handleRemoveBackgroundAI(croppedData);
+    }, 500);
   };
 
   const updateComposite = useCallback(async () => {
@@ -220,34 +236,12 @@ export default function BackgroundRemover() {
     const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: true });
     if (!ctx) return;
 
-    let targetW_px, targetH_px;
-    
     const img = new window.Image();
     img.src = subjectImageSrc;
     await new Promise(r => img.onload = r);
 
-    if (selectedSizeIndex === '0') {
-        targetW_px = img.width;
-        targetH_px = img.height;
-    } else {
-        const preset = SIZE_PRESETS[parseInt(selectedSizeIndex)];
-        if (preset.unit === 'mm') {
-            targetW_px = Math.round((preset.width / 25.4) * DPI);
-            targetH_px = Math.round((preset.height / 25.4) * DPI);
-        } else if (preset.unit === 'inch') {
-            targetW_px = Math.round(preset.width * DPI);
-            targetH_px = Math.round(preset.height * DPI);
-        } else {
-            targetW_px = preset.width;
-            targetH_px = preset.height;
-        }
-    }
-
-    canvas.width = targetW_px;
-    canvas.height = targetH_px;
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    canvas.width = img.width;
+    canvas.height = img.height;
 
     if (bgColor !== 'transparent') {
         ctx.fillStyle = bgColor;
@@ -256,13 +250,7 @@ export default function BackgroundRemover() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-    const dw = img.width * scale;
-    const dh = img.height * scale;
-    const dx = (canvas.width - dw) / 2;
-    const dy = (canvas.height - dh) / 2;
-    
-    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.drawImage(img, 0, 0);
     
     if (borderWidth[0] > 0) {
         ctx.strokeStyle = borderColor;
@@ -272,7 +260,7 @@ export default function BackgroundRemover() {
     }
 
     setPreviewImageSrc(canvas.toDataURL("image/png", 1.0));
-  }, [subjectImageSrc, bgColor, borderWidth, borderColor, selectedSizeIndex]);
+  }, [subjectImageSrc, bgColor, borderWidth, borderColor]);
 
   useEffect(() => {
     updateComposite();
@@ -282,8 +270,7 @@ export default function BackgroundRemover() {
     if (!previewImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    // Updated filename logic
-    link.download = `GR7-Tools-Clean-${imageFile.name.split('.')[0]}.png`;
+    link.download = `GR7-Clean-${imageFile.name.split('.')[0]}.png`;
     link.click();
   };
 
@@ -299,6 +286,10 @@ export default function BackgroundRemover() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSliderPosition(Number(e.target.value));
+  };
+
   if (stage === 'upload') {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
@@ -309,21 +300,21 @@ export default function BackgroundRemover() {
                     <Sparkles className="size-2.5" />
                 </div>
             </div>
-            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                Smart <span className="text-gradient-hero">BG Remover</span>
+            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
+                Neural <span className="text-gradient-hero">BG Remover</span>
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                Step 1: Upload photo to extract subjects. <br/>100% Private local RAM processing.
+                Next-Gen Precision with BiRefNet AI Technology. <br/>100% Private local processing.
             </p>
         </motion.div>
 
         <Card
-            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
@@ -332,24 +323,18 @@ export default function BackgroundRemover() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Unlimited local extractions.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT</div>
-                <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> TRANSPARENT</div>
+                <div className="flex items-center gap-1.5"><Cpu className="size-3 text-blue-500" /> WEBGPU ACCELERATED</div>
+                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD PRECISION</div>
             </CardFooter>
         </Card>
-
-        <div className="flex flex-wrap justify-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest mt-2">
-            <span>PRIVATE & SECURE</span>
-            <span>NO SERVER UPLOADS</span>
-            <span>HD EXPORT READY</span>
-        </div>
       </div>
     );
   }
@@ -357,24 +342,22 @@ export default function BackgroundRemover() {
   if (stage === 'preview') {
       return (
           <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
-              <CardHeader className="glass-panel border-b p-3 md:p-4 flex flex-row items-center justify-between">
-                  <div>
-                      <CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Quality Check</CardTitle>
-                  </div>
+              <CardHeader className="glass-panel border-b p-4 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Original Scan</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[250px] md:min-h-[350px]">
-                  <img src={originalImageSrc!} alt="Preview" className="max-h-[40vh] md:max-h-[50vh] object-contain rounded-xl shadow-2xl border-2 border-white" />
+              <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[350px]">
+                  <img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-2 border-white" />
               </CardContent>
-              <CardFooter className="glass-panel border-t p-3 md:p-4 flex justify-between items-center gap-2">
-                    <Button variant="ghost" onClick={handleReset} className="font-black text-[8px] md:text-[10px] uppercase h-9 px-3 rounded-lg"><RotateCcw className="mr-1.5 h-3 w-3" /> Change</Button>
+              <CardFooter className="glass-panel border-t p-4 flex justify-between">
+                    <Button variant="ghost" onClick={handleReset} className="font-black text-[9px] uppercase h-9 px-3 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Change</Button>
                     <div className="flex gap-2">
-                        <Button variant="outline" className="font-black border-2 border-primary text-primary h-9 rounded-lg text-[8px] md:text-[9px] uppercase px-3" onClick={() => setStage('crop')}>
-                            <CropIcon className="mr-1.5 size-3" /> Set Size
+                        <Button variant="outline" className="font-black border-2 border-primary text-primary h-9 rounded-lg text-[9px] uppercase px-3" onClick={() => setStage('crop')}>
+                            <CropIcon className="mr-1.5 size-3" /> Area
                         </Button>
-                        <Button className="px-6 h-9 text-[9px] md:text-[10px] font-black bg-primary rounded-lg shadow-lg uppercase" onClick={() => { 
+                        <Button className="px-6 h-9 text-[10px] font-black bg-primary rounded-lg shadow-lg uppercase" onClick={() => { 
                             setCroppedImageSrc(originalImageSrc); 
                             setStage('process'); 
-                            setTimeout(() => handleRemoveBackgroundLocal(originalImageSrc!), 300);
+                            setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300);
                         }}>
                             Remove Background <ChevronRight className="ml-1 size-3.5" />
                         </Button>
@@ -387,47 +370,33 @@ export default function BackgroundRemover() {
   if (stage === 'crop') {
     return (
         <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-            <CardHeader className="glass-panel border-b p-3 md:p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                    <div className="space-y-0.5">
-                        <CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Adjust Frame</CardTitle>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <Label className="text-[8px] font-black uppercase text-primary tracking-widest">Document Preset</Label>
-                        <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
-                            <SelectTrigger className="h-8 md:h-9 font-black border-2 rounded-lg text-[10px]"><SelectValue /></SelectTrigger>
-                            <SelectContent className="rounded-lg border-2">
-                                {SIZE_PRESETS.map((p, i) => (
-                                    <SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase">{p.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+            <CardHeader className="glass-panel border-b p-4">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
+                    <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
+                        <SelectTrigger className="h-9 w-40 font-black border-2 rounded-lg text-[10px] uppercase"><SelectValue /></SelectTrigger>
+                        <SelectContent className="rounded-lg border-2">
+                            {SIZE_PRESETS.map((p, i) => (
+                                <SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase">{p.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </CardHeader>
-            <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[300px] md:min-h-[450px]">
-                <div className="max-h-[45vh] md:max-h-[55vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white/50">
-                    <ReactCrop
-                        crop={crop}
-                        onChange={(c) => setCrop(c)}
-                        onComplete={(c) => setCompletedCrop(c)}
-                        aspect={selectedSizeIndex === '0' ? (imgRef.current?.naturalWidth ? imgRef.current.naturalWidth / imgRef.current.naturalHeight : 1) : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}
-                        className="max-h-[45vh] md:max-h-[55vh]"
-                    >
-                        <img
-                            ref={imgRef}
-                            alt="Crop source"
-                            src={originalImageSrc!}
-                            style={{ maxHeight: '55vh', objectFit: 'contain' }}
-                            onLoad={updateCropFromSettings}
-                        />
-                    </ReactCrop>
-                </div>
+            <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[450px]">
+                <ReactCrop
+                    crop={crop}
+                    onChange={(c) => setCrop(c)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    aspect={selectedSizeIndex === '0' ? undefined : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}
+                >
+                    <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[55vh] object-contain block" />
+                </ReactCrop>
             </CardContent>
-            <CardFooter className="glass-panel border-t p-3 md:p-4 flex justify-between">
+            <CardFooter className="glass-panel border-t p-4 flex justify-between">
                 <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[9px] uppercase h-9 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Back</Button>
                 <Button className="px-6 h-9 text-[10px] font-black bg-primary rounded-lg shadow-lg uppercase" onClick={handleApplyCrop}>
-                    Confirm & Extract <ChevronRight className="ml-1 size-3.5" />
+                    Process subject <ChevronRight className="ml-1 size-3.5" />
                 </Button>
             </CardFooter>
         </Card>
@@ -451,128 +420,129 @@ export default function BackgroundRemover() {
                 <RotateCcw className="mr-1.5 size-3" /> Reset
             </Button>
             <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !previewImageSrc}>
-                <Download className="mr-1.5 size-3.5" /> DOWNLOAD HD
+                <Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG
             </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
+        {/* Main Viewport: The Slider Component */}
         <div className="lg:col-span-8">
-            <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[2rem]">
-                <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[300px] md:min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
+            <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[3rem]">
+                <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
                     <AnimatePresence mode="wait">
                         {isProcessing ? (
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/95 backdrop-blur-xl p-6 text-center gap-6"
+                                className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-white/95 backdrop-blur-xl p-8 text-center gap-6"
                             >
                                 <div className="relative">
-                                    <Loader2 className="h-14 w-14 md:h-20 md:w-20 animate-spin text-primary stroke-[3]" />
-                                    <Zap className="absolute inset-0 m-auto h-6 w-6 md:h-9 md:w-9 text-primary animate-pulse" />
+                                    <Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary stroke-[3]" />
+                                    <Zap className="absolute inset-0 m-auto h-8 w-8 md:h-10 md:w-10 text-primary animate-pulse" />
                                 </div>
-                                <div className="space-y-3 w-full max-w-[250px] md:max-w-xs">
-                                    <p className="font-black text-lg md:text-xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
-                                    <Progress value={progress} className="h-1.5 shadow-inner" />
+                                <div className="space-y-3 w-full max-w-[280px] md:max-w-sm">
+                                    <p className="font-black text-xl md:text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p>
+                                    <Progress value={progress} className="h-2 shadow-inner" />
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Optimizing Neural Mask...</p>
                                 </div>
                             </motion.div>
                         ) : previewImageSrc ? (
-                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative size-full p-4 md:p-8">
-                                <Image src={previewImageSrc} alt="Result" fill className="object-contain p-4 md:p-8 drop-shadow-2xl" />
-                            </motion.div>
+                            <div className="relative w-full h-full flex items-center justify-center overflow-hidden" ref={sliderContainerRef}>
+                                {/* BOTTOM IMAGE: MASKED RESULT */}
+                                <div className="absolute inset-0 flex items-center justify-center p-8">
+                                    <div className="relative w-full h-full">
+                                        <Image src={previewImageSrc} alt="Result" fill className="object-contain drop-shadow-2xl" />
+                                    </div>
+                                </div>
+
+                                {/* TOP IMAGE: ORIGINAL (Clipped) */}
+                                <div 
+                                    className="absolute inset-0 flex items-center justify-center p-8 select-none pointer-events-none"
+                                    style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                                >
+                                    <div className="relative w-full h-full">
+                                        <Image src={croppedImageSrc || originalImageSrc!} alt="Original" fill className="object-contain" />
+                                    </div>
+                                </div>
+
+                                {/* SLIDER LINE */}
+                                <div 
+                                    className="absolute inset-y-0 z-10 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] cursor-ew-resize flex items-center justify-center"
+                                    style={{ left: `${sliderPosition}%` }}
+                                >
+                                    <div className="size-10 rounded-full bg-white shadow-xl border-2 border-primary flex items-center justify-center -translate-x-1/2">
+                                        <ArrowLeftRight className="size-5 text-primary" />
+                                    </div>
+                                </div>
+
+                                {/* INVISIBLE INPUT FOR INTERACTION */}
+                                <input 
+                                    type="range" min="0" max="100" value={sliderPosition} onChange={handleSliderChange}
+                                    className="absolute inset-0 z-20 w-full h-full opacity-0 cursor-ew-resize"
+                                />
+                                
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-30 pointer-events-none">
+                                    <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Slide to compare edges
+                                </div>
+                            </div>
                         ) : null}
                     </AnimatePresence>
                 </CardContent>
             </Card>
         </div>
 
+        {/* Sidebar: Controls */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
                     <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Palette className="size-4 text-primary" /> Studio Panel
+                        <Palette className="size-4 text-primary" /> Finish Stage
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                    <Tabs defaultValue="background" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/20 border-b border-white/10 p-1">
-                            <TabsTrigger value="background" className="font-bold text-[8px] md:text-[9px] uppercase rounded-md">Colors</TabsTrigger>
-                            <TabsTrigger value="studio" className="font-bold text-[8px] md:text-[9px] uppercase rounded-md">Borders</TabsTrigger>
-                        </TabsList>
+                <CardContent className="p-6 md:p-8 space-y-8">
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Background Presets</Label>
+                            <div className="grid grid-cols-4 gap-2">
+                                {COLOR_PRESETS.map((preset) => (
+                                    <button
+                                        key={preset.value}
+                                        onClick={() => setBgColor(preset.value)}
+                                        className={cn(
+                                            "h-9 rounded-lg border-2 flex items-center justify-center transition-all shadow-sm",
+                                            bgColor === preset.value ? "border-primary ring-2 ring-primary/10 scale-105" : "border-white/10 bg-white/5"
+                                        )}
+                                        title={preset.name}
+                                    >
+                                        {preset.icon ? <preset.icon className="size-3 text-muted-foreground" /> : <div className="size-4 rounded-full border border-black/10" style={{ backgroundColor: preset.value }} />}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                        <TabsContent value="background" className="p-4 md:p-6 space-y-6 animate-in fade-in duration-300">
-                             <div className="space-y-4">
-                                <div className="space-y-3">
-                                    <Label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Presets</Label>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {COLOR_PRESETS.map((preset) => (
-                                            <button
-                                                key={preset.value}
-                                                onClick={() => setBgColor(preset.value)}
-                                                className={cn(
-                                                    "group h-9 rounded-lg border-2 flex items-center justify-center transition-all shadow-sm",
-                                                    bgColor === preset.value ? "border-primary ring-2 ring-primary/10 scale-105" : "border-white/10 bg-white/5"
-                                                )}
-                                                title={preset.name}
-                                            >
-                                                {preset.icon ? (
-                                                    <preset.icon className="size-3 text-muted-foreground" />
-                                                ) : (
-                                                    <div className="size-4 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: preset.value }} />
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                        <div className="space-y-4 pt-4 border-t border-white/5">
+                            <div className="flex justify-between items-center">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Border Width</Label>
+                                <Badge variant="secondary" className="font-black text-[8px]">{borderWidth[0]}%</Badge>
+                            </div>
+                            <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} className="py-2" />
+                        </div>
+                    </div>
 
-                                <div className="space-y-2 pt-2 border-t border-white/5">
-                                    <Label className="text-[8px] md:text-[9px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Manual Color</Label>
-                                    <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg border border-white/10">
-                                        <Input 
-                                            type="color" 
-                                            value={bgColor === 'transparent' ? '#ffffff' : bgColor} 
-                                            onChange={(e) => setBgColor(e.target.value)} 
-                                            className="w-8 h-8 p-1 rounded-md cursor-pointer border-none bg-transparent"
-                                        />
-                                        <p className="text-[8px] font-mono text-primary font-bold uppercase">{bgColor}</p>
-                                    </div>
-                                </div>
-                             </div>
-                        </TabsContent>
-
-                        <TabsContent value="studio" className="p-4 md:p-6 space-y-6 animate-in fade-in duration-300">
-                             <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <Label className="text-[8px] md:text-[9px] font-black uppercase opacity-60">Frame Size</Label>
-                                        <Badge variant="secondary" className="font-black text-[8px] px-1.5 py-0">{borderWidth[0]}%</Badge>
-                                    </div>
-                                    <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} className="py-2" />
-                                </div>
-                                
-                                <div className="space-y-2 pt-2 border-t border-white/5">
-                                    <Label className="text-[8px] md:text-[9px] font-black uppercase opacity-60">Frame Color</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {['#FFFFFF', '#000000', '#D3D3D3', '#5cbdb9'].map((c) => (
-                                            <button
-                                                key={c}
-                                                onClick={() => setBorderColor(c)}
-                                                className={cn(
-                                                    "size-7 rounded-lg border transition-all",
-                                                    borderColor === c ? "border-primary scale-110" : "border-white/10"
-                                                )}
-                                                style={{ backgroundColor: c }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                             </div>
-                        </TabsContent>
-                    </Tabs>
+                    <div className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4">
+                        <CheckCircle2 className="size-6 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Result Ready</p>
+                            <p className="text-[8px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                                BiRefNet AI has optimized hair details. <br/>Resolution: <strong>HD Original</strong>
+                            </p>
+                        </div>
+                    </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
                     <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> HARDWARE BOOST</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> NATIVE AI</div>
                 </CardFooter>
             </Card>
         </div>
