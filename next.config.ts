@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  // Move serverExternalPackages out of experimental for Next.js 15
+  // Next.js 15: Move serverExternalPackages to root
   serverExternalPackages: [
     '@imgly/background-removal', 
     '@huggingface/transformers', 
