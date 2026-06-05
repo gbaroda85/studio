@@ -1,6 +1,6 @@
 
 import { Metadata } from 'next';
-import { HelpCircle, ArchiveRestore, ShieldCheck, Zap, FileArchive, Unlock, Lock } from 'lucide-react';
+import { HelpCircle, ShieldCheck, Zap, FileArchive, Unlock, Lock } from 'lucide-react';
 import Unzipper from '@/components/unzipper';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -29,19 +29,7 @@ export default function UnzipFilePage() {
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=file" label="Back to File Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-12 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <ArchiveRestore className="size-3" /> SECURE ARCHIVE STUDIO
-                </div>
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-                    Unzip <span className="text-gradient-hero">Pro Studio</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
-                    Extract compressed archives instantly without ever uploading them to the cloud.
-                </p>
-            </div>
-            
+        <div className="w-full flex flex-col items-center mb-12 px-4 pt-10 md:pt-16">
             <div className="w-full flex justify-center">
                 <Unzipper />
             </div>
