@@ -111,7 +111,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&family=Dancing+Script:wght@700&display=swap"
           rel="stylesheet"
         />
         <link rel="icon" href="/icon?v=25" />
