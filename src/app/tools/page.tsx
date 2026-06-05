@@ -55,7 +55,9 @@ import {
   Sparkles,
   Printer,
   Camera,
-  FilePenLine
+  FilePenLine,
+  Music,
+  Video
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -67,7 +69,7 @@ function ToolsPageContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  const validTabs = ['image', 'pdf', 'file', 'calculator', 'converters'];
+  const validTabs = ['image', 'pdf', 'video', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
@@ -277,6 +279,17 @@ function ToolsPageContent() {
     },
   ];
 
+  const videoFeatures = [
+    {
+      href: '/video-to-mp3',
+      labelKey: 'video_to_mp3_label',
+      descriptionKey: 'video_to_mp3_description',
+      icon: Music,
+      color: 'text-indigo-500',
+      lightBg: 'bg-[#eff6ff]'
+    },
+  ];
+
   const fileFeatures = [
     {
       href: '/aadhaar-printer',
@@ -415,6 +428,7 @@ function ToolsPageContent() {
   const allFeatureGroups = [
     { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
     { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-red-500' },
+    { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Video, color: 'text-indigo-500' },
     { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
     { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
     { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },

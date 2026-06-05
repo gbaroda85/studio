@@ -46,7 +46,9 @@ import {
   Archive,
   ArchiveRestore,
   MonitorCheck,
-  Trophy
+  Trophy,
+  Music,
+  Video
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,12 +62,12 @@ const ALL_TOOLS = [
   // FEATURED & VISUAL PROCESSOR
   { icon: Sparkles, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-primary", lightBg: "bg-[#f0fdf4]", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-red-500", lightBg: "bg-[#fff1f2]", category: "featured" },
+  { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video instantly.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-blue-600", lightBg: "bg-[#fefce8]", category: "featured" },
   { icon: Heart, title: "MARRIAGE BIO DATA", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "featured" },
   { icon: Printer, title: "AADHAAR PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "featured" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-[#faf5ff]", category: "featured" },
-  { icon: Sparkles, title: "ENHANCE PHOTO", description: "Improve photo quality, brightness and sharpness.", href: "/enhance-photo", colorClass: "bg-purple-600", lightBg: "bg-[#f5f3ff]", category: "featured" },
   
   // PDF TOOLS
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "pdf-kit" },
@@ -197,9 +199,9 @@ export default function Page() {
               <FileText className="size-6 text-rose-500 group-hover:scale-110 transition-transform" />
               <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">PDF Tools</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-emerald-500/50 transition-all group hover:scale-105 active:scale-95">
-              <Calculator className="size-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Calculators</span>
+            <Link href="/tools?tab=video" className="flex items-center gap-3 px-10 py-5 bg-background/80 dark:bg-slate-900/80 backdrop-blur-sm border-2 shadow-md rounded-full hover:shadow-2xl hover:border-indigo-500/50 transition-all group hover:scale-105 active:scale-95">
+              <Video className="size-6 text-indigo-500 group-hover:scale-110 transition-transform" />
+              <span className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-slate-700 dark:text-slate-200">Video Tools</span>
             </Link>
           </div>
 
@@ -240,10 +242,10 @@ export default function Page() {
             <>
                 <div className="mb-12">
                     <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">FEATURED SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body">VISUAL PROCESSOR</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body">POWER PROCESSORS</h2>
                         <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-bold text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all font-body">
                             <Link href="/tools">EXPLORE ALL <ArrowRight className="ml-2 size-4" /></Link>
                         </Button>

@@ -51,7 +51,9 @@ import {
   Lock,
   Heart,
   Sparkles,
-  FilePenLine
+  FilePenLine,
+  Music,
+  Video
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -111,6 +113,14 @@ const CATEGORIES = [
       { href: '/text-to-pdf', label: 'text_to_pdf_label', icon: FileText },
       { href: '/add-watermark', label: 'add_watermark_label', icon: Copyright },
       { href: '/add-page-numbers', label: 'add_page_numbers_label', icon: NotebookPen },
+    ]
+  },
+  {
+    name: "video_tools",
+    icon: Video,
+    color: "text-indigo-500",
+    tools: [
+      { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
     ]
   },
   {

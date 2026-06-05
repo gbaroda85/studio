@@ -14,7 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/remove-background',
     '/remove-signature',
     '/aadhaar-printer',
-    '/image-to-pdf'
+    '/image-to-pdf',
+    '/video-to-mp3'
   ];
 
   const otherTools = [
