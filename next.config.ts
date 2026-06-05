@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -8,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  // In Next.js 15, serverExternalPackages is at the root level
+  // Move serverExternalPackages out of experimental for Next.js 15
   serverExternalPackages: [
     '@imgly/background-removal', 
     '@huggingface/transformers', 
