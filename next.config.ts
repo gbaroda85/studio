@@ -10,12 +10,15 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   experimental: {
     // Explicitly exclude heavy packages from the serverless function bundle
+    // This is the key fix for Vercel's 250MB limit error
     serverExternalPackages: [
       '@imgly/background-removal', 
       '@huggingface/transformers', 
       'genkit',
       '@genkit-ai/google-genai',
-      'pdfjs-dist'
+      'pdfjs-dist',
+      'tesseract.js',
+      'pdf-lib'
     ],
   },
   images: {
