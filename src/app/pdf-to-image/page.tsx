@@ -71,7 +71,7 @@ export default function PdfToImagePage() {
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Full control over how your pages are rendered. Center your content or align to edges with precision padding for a 'clean scan' look.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <Sparkles className="text-blue-500 size-10" />
+                        <Sparkles className="size-3 text-blue-500" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">HD Rendering</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Engineered for 300 DPI equivalent quality. Perfect for professional presentations where text clarity is paramount.</p>
                     </div>

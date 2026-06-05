@@ -49,7 +49,7 @@ export default function ImageToTextPage() {
             <ImageToTextConverter />
         </div>
         
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-7xl space-y-16 px-4">
             <HowToGuide title="Smart Image to Text (OCR)" steps={deepSteps} />
 
             {/* Content Section */}

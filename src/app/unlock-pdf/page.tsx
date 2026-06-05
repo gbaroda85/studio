@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, FileText, Info, Key, Unlock } from 'lucide-react';
 import PdfUnlocker from '@/components/pdf-unlocker';
@@ -15,9 +16,33 @@ import {
 export const metadata: Metadata = {
   title: 'PDF Unlocker - Remove Password from Aadhaar & Bank PDFs',
   description: 'Remove password protection from encrypted PDFs locally. 100% private tool for Aadhaar cards, bank statements, and credit card bills. No data leaves your device.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/unlock-pdf' }
 };
 
 export default function UnlockPdfPage() {
+  const deepSteps = [
+    {
+      title: "Secure Import",
+      description: "Select your password-protected Aadhaar or Bank statement. Our engine initializes a local sandbox in your RAM, ensuring zero data persistence on servers.",
+      icon: "UploadCloud"
+    },
+    {
+      title: "Identity Key",
+      description: "Enter the current password once. For Aadhaar, it's usually the first 4 letters of your name (CAPS) + Year of Birth.",
+      icon: "Key"
+    },
+    {
+      title: "Decoding Layer",
+      description: "The local engine uses high-fidelity re-encoding to strip the security dictionary while preserving 100% of the internal vector data.",
+      icon: "Unlock"
+    },
+    {
+      title: "Permanent Save",
+      description: "Save the permanently unlocked PDF. It will now open without a password in any PDF reader, ready for sharing or storage.",
+      icon: "Download"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
@@ -26,13 +51,8 @@ export default function UnlockPdfPage() {
             <PdfUnlocker />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 mx-auto">
-            <HowToGuide title="PDF Unlocker" steps={[
-                "Upload PDF: Select your password-protected Aadhaar or Bank statement.",
-                "Enter Password: Type the correct current password once.",
-                "Unlock: Our local engine will decode the security layers.",
-                "Download: Save the permanently unlocked PDF for future use."
-            ]} />
+        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto">
+            <HowToGuide title="PDF Unlocker Studio" steps={deepSteps} />
 
             <section className="bg-muted/30 p-10 rounded-[3rem] border-2 border-dashed relative overflow-hidden">
                 <div className="flex flex-col md:flex-row gap-12 items-center relative z-10">
@@ -83,28 +103,28 @@ export default function UnlockPdfPage() {
             </section>
 
             {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
+            <section className="space-y-8 py-10 border-t pb-24">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">PDF Unlocker FAQs</h2>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold">What is the Aadhaar PDF password format?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             The standard e-Aadhaar password is the <strong>first 4 letters of your name in CAPS</strong> followed by your <strong>Year of Birth</strong>. For example, if your name is ANISH and your birth year is 1990, the password is ANIS1990.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold">Can this tool crack a password I don't know?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             No. This tool is designed to <strong>remove</strong> a password from a document where you already know the password. It is used for convenience so you don't have to type it every time.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold">Will the quality of my PDF decrease?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Our "Power Unlock" mode uses high-definition re-encoding. While it's very high quality, there might be a microscopic difference in text selection. However, for printing and viewing, it remains 100% clear.
                         </AccordionContent>
                     </AccordionItem>

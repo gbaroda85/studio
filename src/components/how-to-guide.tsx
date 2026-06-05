@@ -48,7 +48,10 @@ import {
     Heart,
     FileStack,
     ChevronRight,
-    Scan
+    Scan,
+    Key,
+    Unlock,
+    Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +63,8 @@ const ICON_MAP: Record<string, any> = {
   UserCircle, Eraser, ImageIcon, PenLine, Layout, AlignCenter, 
   Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
   Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck,
-  Scissors, Printer, Merge, Lock, Heart, FileStack, Scan
+  Scissors, Printer, Merge, Lock, Heart, FileStack, Scan,
+  Key, Unlock, Palette
 };
 
 type StepDetail = {
