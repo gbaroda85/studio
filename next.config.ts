@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: 'standalone',
+  experimental: {
+    serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers', 'genkit'],
+  },
   images: {
     remotePatterns: [
       {
@@ -29,7 +33,14 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  output: 'standalone',
+  webpack: (config) => {
+    // Handle top-level await for pdfjs-dist and other modern modules
+    config.experiments = {
+      ...config.experiments,
+      topLevelAwait: true,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
