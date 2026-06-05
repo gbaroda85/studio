@@ -13,10 +13,6 @@ export const metadata: Metadata = {
   },
   description: 'Fastest local browser tools. Compress images to 20kb/50kb for SSC & UPSC, resize photos, remove background, unlock Aadhaar PDF, and merge files without server uploads. 100% Secure & Private.',
   metadataBase: new URL('https://www.gr7imagepdf.com'),
-  alternates: {
-    // Removed hardcoded '/' to prevent canonical consolidation to home page
-    canonical: './',
-  },
   icons: {
     icon: [
       { url: '/icon?v=25', type: 'image/png' },
@@ -114,7 +110,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
           rel="stylesheet"
         />
         <link rel="icon" href="/icon?v=25" />

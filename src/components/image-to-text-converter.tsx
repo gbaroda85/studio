@@ -12,15 +12,15 @@ import {
     Zap, 
     ShieldCheck, 
     Sparkles, 
-    RefreshCcw,
-    SearchCode,
-    FileText,
-    Settings2,
-    Eye,
-    RotateCcw,
-    Languages,
-    BrainCircuit,
-    Wand2,
+    RefreshCcw, 
+    SearchCode, 
+    FileText, 
+    Settings2, 
+    Eye, 
+    RotateCcw, 
+    Languages, 
+    BrainCircuit, 
+    Wand2, 
     ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -86,11 +86,12 @@ export default function ImageToTextConverter() {
     try {
       const result = await imageToText({ photoDataUri: originalImageSrc });
       
-      if (result && result.text) {
+      if (result && result.success && result.text) {
         setExtractedText(result.text);
         toast({ title: "Extraction Success", description: "Text has been processed accurately." });
       } else {
-        throw new Error("No text returned from AI");
+        const errorMsg = result?.error || "AI could not process this image.";
+        throw new Error(errorMsg);
       }
     } catch (error: any) {
       console.error(error);
@@ -137,7 +138,7 @@ export default function ImageToTextConverter() {
             <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                 Image <span className="text-gradient-hero">to Text (OCR)</span>
             </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+            <p className="text-xs md:text-sm text-muted-foreground font-bold max-xl mx-auto">
                 Step 1: Upload photo for high-accuracy extraction. <br/>100% Private local RAM processing.
             </p>
         </motion.div>
@@ -160,7 +161,7 @@ export default function ImageToTextConverter() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens entirely in your browser.</p>
                     </div>
                 </div>
@@ -231,9 +232,9 @@ export default function ImageToTextConverter() {
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE HANDSHAKE</div>
-                        <div className="flex items-center gap-2"><Languages className="size-4" /> BILINGUAL (EN/HI)</div>
-                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD PRECISION</div>
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE HANDSHAKE</div>
+                        <div className="flex items-center gap-2"><Languages className="size-4 text-green-600" /> BILINGUAL (EN/HI)</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD PRECISION</div>
                     </div>
                 </CardFooter>
             </Card>
@@ -275,7 +276,7 @@ export default function ImageToTextConverter() {
                         </div>
                         <div className="relative group">
                             <Textarea
-                                className="min-h-[550px] md:min-h-[700px] text-sm font-medium border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar"
+                                className="min-h-[550px] md:min-h-[700px] text-sm font-bold border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar text-slate-800 dark:text-slate-200"
                                 placeholder={isProcessing ? "Reading..." : "Text result will appear here..."}
                                 value={extractedText || ""}
                                 onChange={(e) => setExtractedText(e.target.value)}
@@ -295,7 +296,7 @@ export default function ImageToTextConverter() {
                         <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure RAM</p>
-                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1">
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-bold leading-tight mt-1 uppercase">
                                 Every pixel is processed in your device's memory for total privacy.
                             </p>
                         </div>

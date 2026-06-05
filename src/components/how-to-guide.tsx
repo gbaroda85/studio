@@ -78,10 +78,10 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
             <Sparkles className="size-3" /> Step-by-Step Masterclass
         </div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight">
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight text-slate-800 dark:text-white">
             How to use the <span className="text-gradient-hero">{title}</span>
         </h2>
-        <p className="text-muted-foreground font-semibold max-w-2xl mx-auto text-sm uppercase opacity-60 tracking-widest">
+        <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-sm uppercase opacity-60 tracking-widest">
             Follow our industrial-grade workflow for the best results.
         </p>
       </div>
@@ -108,7 +108,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 
                 <div className="space-y-3">
                     <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
+                    <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase">
                         {descText}
                     </p>
                 </div>
