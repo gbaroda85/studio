@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Code2, Globe, Braces, FileCode, Monitor, Sparkles, Download } from 'lucide-react';
 import HtmlToPdfConverter from '@/components/html-to-pdf-converter';
@@ -40,7 +41,7 @@ export default function HtmlToPdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full min-h-screen">
+    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-0 md:px-8">
