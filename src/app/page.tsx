@@ -242,7 +242,7 @@ export default function Page() {
             <>
                 <div className="mb-12">
                     <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">FEATURED SOLUTION</span>
+                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body">VISUAL PROCESSORS</h2>
