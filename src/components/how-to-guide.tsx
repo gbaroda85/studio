@@ -93,6 +93,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         </p>
       </div>
 
+      {/* Modern 2-Column Landscape Grid for Desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
@@ -105,7 +106,8 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
           return (
             <Card key={index} className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/50 transition-all duration-500 rounded-[2.5rem] bg-card hover:-translate-y-1 shadow-xl hover:shadow-primary/10">
               <CardContent className="p-8 md:p-10">
-                <div className="flex flex-row gap-6 md:gap-8 items-center text-left">
+                {/* Horizontal Layout for Better Visual Space */}
+                <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-center text-center sm:text-left">
                     <div className="flex flex-col items-center gap-3 shrink-0">
                         <div className="size-16 md:size-24 rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-primary/20">
                             <Icon className="size-8 md:size-12" />
@@ -120,7 +122,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                         <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80 line-clamp-3">
                             {descText}
                         </p>
-                        <div className="pt-2 flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="pt-2 hidden sm:flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                             Studio Logic Active <ChevronRight className="size-3" />
                         </div>
                     </div>
