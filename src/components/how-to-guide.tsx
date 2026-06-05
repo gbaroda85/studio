@@ -90,7 +90,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         {steps.map((step, index) => {
           // Robust parsing for both object and string formats
           const isObject = typeof step !== 'string';
-          const titleText = isObject ? (step as StepDetail).title : (step as string).split(':')[0] || 'Step';
+          const titleText = isObject ? (step as StepDetail).title : (step as string).split(':')[0] || `Step ${index + 1}`;
           const descText = isObject ? (step as StepDetail).description : (step as string).split(':')[1] || (step as string);
           const iconName = isObject ? (step as StepDetail).icon : undefined;
           
@@ -108,7 +108,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 
                 <div className="space-y-3">
                     <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase">
+                    <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">
                         {descText}
                     </p>
                 </div>

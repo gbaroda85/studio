@@ -9,7 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {googleAI} from '@genkit-ai/google-genai';
 
 const ImageToTextInputSchema = z.object({
   photoDataUri: z
@@ -39,12 +39,12 @@ const imageToTextFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Using 1.5 Flash as it is extremely stable for OCR tasks
+      // Using 2.5 Flash as it is the most stable and updated for OCR tasks
       const llmResponse = await ai.generate({
-        model: googleAI.model('gemini-1.5-flash'),
+        model: 'googleai/gemini-2.5-flash',
         prompt: [
           {
-            text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible. If the image is a document, ID card, or certificate, extract all visible text content precisely.',
+            text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible. If the image is a document, ID card, or certificate, extract all visible text content precisely. Output ONLY the extracted text.',
           },
           {
             media: {
