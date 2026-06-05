@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -151,10 +150,10 @@ export default function BackgroundRemover() {
       setStatusText("Isolating Subject...");
       const output = await segmenter(source);
       
-      // FIXED: Convert 1-channel alpha mask to 4-channel RGBA for ImageData constructor
+      // FIXED: Convert 1-channel mask to 4-channel RGBA for ImageData constructor
       const mask = output[0].mask;
       const rgbaData = new Uint8ClampedArray(mask.width * mask.height * 4);
-      const maskData = mask.data; // This is 1-channel (grayscale alpha)
+      const maskData = mask.data; 
       
       for (let i = 0; i < maskData.length; ++i) {
           const alpha = maskData[i];
@@ -162,7 +161,7 @@ export default function BackgroundRemover() {
           rgbaData[j] = 0;       // R
           rgbaData[j + 1] = 0;   // G
           rgbaData[j + 2] = 0;   // B
-          rgbaData[j + 3] = alpha; // A (This creates the transparency mask)
+          rgbaData[j + 3] = alpha; // A 
       }
 
       const maskCanvas = document.createElement('canvas');
@@ -174,7 +173,6 @@ export default function BackgroundRemover() {
       const maskImageData = new ImageData(rgbaData, mask.width, mask.height);
       maskCtx.putImageData(maskImageData, 0, 0);
 
-      // Apply full-res original photo
       const sourceImg = new window.Image();
       sourceImg.src = source;
       await new Promise(r => sourceImg.onload = r);
@@ -264,7 +262,7 @@ export default function BackgroundRemover() {
                     <Sparkles className="size-2.5" />
                 </div>
             </div>
-            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">Neural <span className="text-gradient-hero">BG Remover</span></h1>
+            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">Smart <span className="text-gradient-hero">BG Remover</span></h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local processing.</p>
         </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
@@ -289,7 +287,7 @@ export default function BackgroundRemover() {
   if (stage === 'preview') {
       return (
           <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
-              <CardHeader className="glass-panel border-b p-4 flex flex-row items-center justify-between"><CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Original Scan</CardTitle></CardHeader>
+              <CardHeader className="glass-panel border-b p-4 flex flex-row items-center justify-between"><CardTitle className="text-sm md:base font-black uppercase tracking-tighter">Original Scan</CardTitle></CardHeader>
               <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[350px]"><img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-2 border-white" /></CardContent>
               <CardFooter className="glass-panel border-t p-4 flex justify-between">
                     <Button variant="ghost" onClick={handleReset} className="font-black text-[9px] uppercase h-9 px-3 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Change</Button>
@@ -307,7 +305,7 @@ export default function BackgroundRemover() {
         <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
             <CardHeader className="glass-panel border-b p-4">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm md:text-base font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
+                    <CardTitle className="text-sm md:base font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
                     <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
                         <SelectTrigger className="h-9 w-40 font-black border-2 rounded-lg text-[10px] uppercase"><SelectValue /></SelectTrigger>
                         <SelectContent className="rounded-lg border-2">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase">{p.name}</SelectItem>))}</SelectContent>
