@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,15 +81,15 @@ type HowToGuideProps = {
 export function HowToGuide({ title, steps }: HowToGuideProps) {
   return (
     <div className="w-full max-w-6xl mx-auto mt-12 mb-16 px-4 no-print">
-      <div className="flex flex-col items-center text-center mb-10 space-y-1">
+      <div className="flex flex-col items-start text-left mb-10 space-y-1">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-sm mb-2">
             <Sparkles className="size-2.5" /> MASTER GUIDE
         </div>
         <h2 className="text-3xl md:text-5xl tracking-tight leading-none text-slate-800 dark:text-white">
-            <span className="font-['Dancing_Script'] text-primary lowercase text-4xl md:text-6xl block mb-[-10px]">How to use the</span>
+            <span className="font-['Dancing_Script'] text-primary text-4xl md:text-6xl block mb-[-10px]">How to use the</span>
             <span className="font-jakarta font-black uppercase text-2xl md:text-4xl tracking-tighter text-gradient-hero">{title}</span>
         </h2>
-        <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-[9px] uppercase opacity-40 tracking-widest pt-2">
+        <p className="text-muted-foreground font-bold max-w-2xl text-[9px] uppercase opacity-40 tracking-widest pt-2">
             Follow our optimized workflow for industrial results.
         </p>
       </div>
