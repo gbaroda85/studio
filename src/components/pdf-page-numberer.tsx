@@ -217,7 +217,7 @@ export default function PdfPageNumberer() {
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 8; // Ultra-slim margin to push numbers to extreme edges
+        const margin = 25; // Professional safe margin for printing
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -311,11 +311,11 @@ export default function PdfPageNumberer() {
           fontWeight: '900',
           textAlign: 'center',
           whiteSpace: 'nowrap',
-          transition: 'all 0.2s ease-out',
-          zIndex: 40
+          transition: 'all 0.1s ease-out',
+          zIndex: 50
       };
 
-      const m = "1%"; // Minimal offset to push to absolute edges in preview
+      const m = "4%"; // Safe margin for preview box
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
@@ -550,7 +550,7 @@ export default function PdfPageNumberer() {
                                             <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
                                             
                                             {/* FLOATING PAGE NUMBER PREVIEW OVERLAY */}
-                                            <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-[8%]">
+                                            <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-1">
                                                 <div style={getPreviewStyle()}>
                                                     {format
                                                         .replace('{page}', formatWithStyle(i + 1, numberStyle))
