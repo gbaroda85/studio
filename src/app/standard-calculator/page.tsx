@@ -18,7 +18,7 @@ const steps = [
 
 export default function StandardCalculatorPage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
         <div className="w-full flex justify-center px-4">
             <StandardCalculator />

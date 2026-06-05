@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { Calendar, HelpCircle, Gift, Clock, Sparkles, Trophy } from 'lucide-react';
 import AgeCalculator from '@/components/age-calculator';
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function AgeCalculatorPage() {
   return (
-    <main className="flex-1 flex flex-col items-center w-full min-h-screen">
+    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
