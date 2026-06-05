@@ -27,6 +27,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function formatBytes(bytes: number, decimals = 2): string {
@@ -149,7 +150,7 @@ export default function ZipCreator() {
                             >
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Files to Bundle</p>

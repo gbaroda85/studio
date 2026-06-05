@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type ExtractedFile = {
@@ -163,6 +164,7 @@ export default function Unzipper() {
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ARCHIVE STUDIO</CardTitle>
