@@ -172,14 +172,6 @@ function ToolsPageContent() {
       lightBg: 'bg-[#f0fdf4]'
     },
     {
-      href: '/docx-to-pdf',
-      labelKey: 'word_to_pdf_label',
-      descriptionKey: 'word_to_pdf_description',
-      icon: FileText,
-      color: 'text-blue-500',
-      lightBg: 'bg-[#eff6ff]'
-    },
-    {
       href: '/lock-pdf',
       labelKey: 'lock_pdf_label',
       descriptionKey: 'lock_pdf_description',

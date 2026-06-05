@@ -100,7 +100,6 @@ const CATEGORIES = [
     color: "text-rose-500",
     tools: [
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
-      { href: '/docx-to-pdf', label: 'word_to_pdf_label', icon: FileText },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
       { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
       { href: '/edit-pdf', label: 'edit_pdf_label', icon: FilePenLine },

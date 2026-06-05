@@ -18,7 +18,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const otherTools = [
-    '/docx-to-pdf',
     '/lock-pdf',
     '/compress-pdf',
     '/split-pdf',
