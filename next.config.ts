@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  // Next.js 15: Move serverExternalPackages to root
+  // Next.js 15: serverExternalPackages must be at the root level
   serverExternalPackages: [
     '@imgly/background-removal', 
     '@huggingface/transformers', 
@@ -42,7 +42,6 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config) => {
-    // Handle top-level await for pdfjs-dist and other modern modules
     config.experiments = {
       ...config.experiments,
       topLevelAwait: true,

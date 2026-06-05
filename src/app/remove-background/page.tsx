@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { HelpCircle, Sun, Zap, ShieldCheck, Cpu, Sparkles, Maximize } from 'lucide-react';
 import { BackgroundRemoverClient } from '@/components/client-tool-wrappers';
