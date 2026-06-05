@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -218,7 +217,7 @@ export default function PdfPageNumberer() {
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 12; // Pushed closer to edge for absolute margin feeling
+        const margin = 8; // Ultra-slim margin to push numbers to extreme edges
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -316,7 +315,7 @@ export default function PdfPageNumberer() {
           zIndex: 40
       };
 
-      const m = "2.5%"; // Reduced to push numbers to edge in preview
+      const m = "1%"; // Minimal offset to push to absolute edges in preview
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
@@ -344,7 +343,7 @@ export default function PdfPageNumberer() {
               Add Page <span className="text-gradient-hero">Numbers Pro</span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Professional positioning at the bottom edge. <br/>100% Private local RAM mapping.
+              Professional positioning at the absolute edge. <br/>100% Private local RAM mapping.
           </p>
       </div>
 
