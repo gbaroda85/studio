@@ -42,7 +42,7 @@ export default function AadhaarPrinterPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full">
+    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
@@ -53,7 +53,7 @@ export default function AadhaarPrinterPage() {
                 <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
                     Smart ID <span className="text-gradient-hero">Printer</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Auto-crop Aadhaar or arrange PAN/DL sides for perfect 85.6mm x 54mm printing.
                 </p>
             </div>

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function CropImagePage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -107,7 +107,7 @@ export default function CropImagePage() {
                     <AccordionItem value="item-4" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Is it safe to upload my Aadhaar card or PAN card here?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. We use <strong>Client-Side Processing</strong>. This means your images are processed entirely inside your browser's temporary memory and are <strong>never uploaded</strong> to any server. Your data stays on your device.
+                            Absolutely. We use <strong>Client-Side Processing</strong>. This means your images are processed entirely inside your browser's temporary memory (RAM) and are <strong>never uploaded</strong> to any server. Your data stays on your device.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

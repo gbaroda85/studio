@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export default function EnhancePhotoPage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

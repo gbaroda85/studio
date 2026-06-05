@@ -42,7 +42,7 @@ export default function MarriageBiodataPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full">
+    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
@@ -53,7 +53,7 @@ export default function MarriageBiodataPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Marriage <span className="text-gradient-hero">Bio Data</span> Maker
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Design a professional biodata in minutes with our real-time A4 studio. No more manual typing or formatting issues.
                 </p>
             </div>
