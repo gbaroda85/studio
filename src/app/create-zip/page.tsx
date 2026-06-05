@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { HelpCircle, Package, Lock } from 'lucide-react';
 import ZipCreator from '@/components/zip-creator';
