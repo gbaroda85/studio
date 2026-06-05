@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -78,7 +77,6 @@ export default function ImageToTextConverter() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  // Optimized Client-Side Downscaling to prevent Server Action Payload Limit issues
   const getOptimizedPayload = async (src: string): Promise<string> => {
       return new Promise((resolve) => {
           const img = new window.Image();
@@ -87,21 +85,17 @@ export default function ImageToTextConverter() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-
-              // Max width for OCR is 1600px, anything more is overkill and heavy
               const MAX_WIDTH = 1600;
               let width = img.width;
               let height = img.height;
-
               if (width > MAX_WIDTH) {
                   height *= MAX_WIDTH / width;
                   width = MAX_WIDTH;
               }
-
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.85)); // 85% JPEG is perfect for OCR
+              resolve(canvas.toDataURL('image/jpeg', 0.85));
           };
       });
   };
@@ -113,10 +107,7 @@ export default function ImageToTextConverter() {
     setExtractedText(null);
 
     try {
-      // 1. Optimize image locally to bypass production server action limits
       const optimizedSrc = await getOptimizedPayload(originalImageSrc);
-      
-      // 2. Call AI Flow
       const result = await imageToText({ photoDataUri: optimizedSrc });
       
       if (result && result.success && result.text) {
@@ -188,14 +179,14 @@ export default function ImageToTextConverter() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens entirely in your browser.</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Extraction happens entirely in your browser.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />

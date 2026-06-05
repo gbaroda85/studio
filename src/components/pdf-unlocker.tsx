@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
@@ -116,14 +115,12 @@ export default function PdfUnlocker() {
             setPassword('');
             setIsProtected(null);
             clearUnlockedFile();
-            
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if (e.target?.result) {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            // Use readAsArrayBuffer instead of readAsDataURL for PDF.js detection
             reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
@@ -145,13 +142,11 @@ export default function PdfUnlocker() {
 
     const handleUnlockProcess = async () => {
         if (!pdfFile || !password) return;
-        
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
         setStatusText("Analyzing Security...");
         setProgress(5);
-
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
             const loadingTask = pdfjs.getDocument({ 
@@ -162,54 +157,35 @@ export default function PdfUnlocker() {
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
             const pdf = await loadingTask.promise;
-
             const totalPages = pdf.numPages;
-            const newPdf = new jsPDF({
-                orientation: 'p',
-                unit: 'pt',
-                compress: true
-            });
-
+            const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true });
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 const renderViewport = page.getViewport({ scale: 2.2 }); 
-                
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                
                 if (ctx) {
                     canvas.height = Math.floor(renderViewport.height);
                     canvas.width = Math.floor(renderViewport.width);
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     const orientation = renderViewport.width > renderViewport.height ? 'l' : 'p';
-                    
                     if (i === 1) newPdf.deletePage(1);
                     newPdf.addPage([renderViewport.width, renderViewport.height], orientation);
                     newPdf.addImage(imgData, 'JPEG', 0, 0, renderViewport.width, renderViewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
-
             const pdfBlob = newPdf.output('blob');
             const url = URL.createObjectURL(pdfBlob);
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Unlocked Successfully!");
-
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#48a9a4', '#fce7eb', '#ffffff']
-            });
-
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#48a9a4', '#fce7eb', '#ffffff'] });
             toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
-
         } catch (error: any) {
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please double check.");
@@ -225,7 +201,6 @@ export default function PdfUnlocker() {
         if (!unlockedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = unlockedPdfUrl;
-        // Updated filename logic
         link.download = `GR7-Tools-${pdfFile.name}`;
         link.click();
     }
@@ -266,10 +241,10 @@ export default function PdfUnlocker() {
                                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                             </CardHeader>
                             <CardContent className="p-10 md:p-12">
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                                     <div className="relative">
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Encrypted PDF</p>

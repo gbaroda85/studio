@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -53,7 +52,7 @@ export default function PdfWatermarker() {
   const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState(60);
-  const [rotation, setRotation] = useState(-45); // CSS Degrees
+  const [rotation, setRotation] = useState(-45); 
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
@@ -72,19 +71,16 @@ export default function PdfWatermarker() {
       setWatermarkedPdfUrl(null);
       setOriginalPageImage(null);
       setIsGeneratingPreview(true);
-
       try {
         const arrayBuffer = await file.arrayBuffer();
         const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        
         const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-
         if (context) {
             context.fillStyle = '#FFFFFF';
             context.fillRect(0, 0, canvas.width, canvas.height);
@@ -116,70 +112,39 @@ export default function PdfWatermarker() {
   const handleApplyWatermark = async () => {
     if (!pdfFile || !watermarkText) return;
     setIsProcessing(true);
-
     try {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
         const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        
         const pages = pdfDoc.getPages();
         const pdfRotation = -rotation; 
         const rad = (pdfRotation * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
-
         const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
         const textHeight = font.heightAtSize(fontSize);
-
         const centerXOffset = (textWidth / 2) * cos - (textHeight / 2) * sin;
         const centerYOffset = (textWidth / 2) * sin + (textHeight / 2) * cos;
-
         for (const page of pages) {
             const { width, height } = page.getSize();
             let targetCX, targetCY;
             const margin = 50; 
-
             if (position === 'center' || position.startsWith('diagonal')) {
                 targetCX = width / 2;
                 targetCY = height / 2;
             } else {
                 switch (position) {
-                    case 'top-left':
-                        targetCX = margin + textWidth / 2;
-                        targetCY = height - margin - textHeight / 2;
-                        break;
-                    case 'top-right':
-                        targetCX = width - margin - textWidth / 2;
-                        targetCY = height - margin - textHeight / 2;
-                        break;
-                    case 'bottom-left':
-                        targetCX = margin + textWidth / 2;
-                        targetCY = margin + textHeight / 2;
-                        break;
-                    case 'bottom-right':
-                        targetCX = width - margin - textWidth / 2;
-                        targetCY = margin + textHeight / 2;
-                        break;
-                    default:
-                        targetCX = width / 2;
-                        targetCY = height / 2;
+                    case 'top-left': targetCX = margin + textWidth / 2; targetCY = height - margin - textHeight / 2; break;
+                    case 'top-right': targetCX = width - margin - textWidth / 2; targetCY = height - margin - textHeight / 2; break;
+                    case 'bottom-left': targetCX = margin + textWidth / 2; targetCY = margin + textHeight / 2; break;
+                    case 'bottom-right': targetCX = width - margin - textWidth / 2; targetCY = margin + textHeight / 2; break;
+                    default: targetCX = width / 2; targetCY = height / 2;
                 }
             }
-
             const x = targetCX! - centerXOffset;
             const y = targetCY! - centerYOffset;
-
-            page.drawText(watermarkText, {
-                x,
-                y,
-                font,
-                size: fontSize,
-                color: rgb(0.5, 0.5, 0.5),
-                opacity: opacity[0] / 100,
-                rotate: degrees(pdfRotation),
-            });
+            page.drawText(watermarkText, { x, y, font, size: fontSize, color: rgb(0.5, 0.5, 0.5), opacity: opacity[0] / 100, rotate: degrees(pdfRotation) });
         }
-
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -214,23 +179,12 @@ export default function PdfWatermarker() {
 
   const getPreviewStyle = () => {
       const styles: React.CSSProperties = {
-          position: 'absolute',
-          pointerEvents: 'none',
-          color: 'rgba(0,0,0,0.5)', 
-          opacity: opacity[0] / 100,
-          fontSize: `${fontSize * 0.84}px`, 
-          fontWeight: '900',
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-          transition: 'all(0.1s) ease-out',
-          lineHeight: '1',
-          zIndex: 40
+          position: 'absolute', pointerEvents: 'none', color: 'rgba(0,0,0,0.5)', opacity: opacity[0] / 100,
+          fontSize: `${fontSize * 0.84}px`, fontWeight: '900', textAlign: 'center', whiteSpace: 'nowrap',
+          transition: 'all(0.1s) ease-out', lineHeight: '1', zIndex: 40
       };
-
       if (position === 'center' || position.startsWith('diagonal')) {
-          styles.top = '50%';
-          styles.left = '50%';
-          styles.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+          styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
       } else {
           const m = "8%";
           styles.transform = `rotate(${rotation}deg)`;
@@ -246,7 +200,6 @@ export default function PdfWatermarker() {
   
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4">
-      {/* Header Info - Same as Word to PDF */}
       <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
           <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
               <Copyright className="size-8" />
@@ -275,14 +228,14 @@ export default function PdfWatermarker() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF to begin</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -297,7 +250,7 @@ export default function PdfWatermarker() {
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 pb-20">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                         <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
@@ -384,7 +337,7 @@ export default function PdfWatermarker() {
                                 <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE PDF
                             </Button>
                         )}
-                        <Button variant="ghost" onClick={resetState} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
+                        <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
                             <RefreshCcw className="mr-2 size-3" /> Change File
                         </Button>
                     </CardFooter>
@@ -418,20 +371,16 @@ export default function PdfWatermarker() {
                         ) : originalPageImage ? (
                             <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
                                 <img src={originalPageImage} alt="Preview" className="w-full h-auto block" />
-                                
-                                {/* FLOATING WATERMARK PREVIEW OVERLAY */}
                                 <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none">
                                     <div style={getPreviewStyle()}>
                                         {watermarkText}
                                     </div>
                                 </div>
-                                
                                 <div className="absolute top-2 right-2 opacity-20">
                                     <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE 1 VIEW</Badge>
                                 </div>
                             </div>
                         ) : null}
-                        
                         {!watermarkedPdfUrl && originalPageImage && (
                             <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
                                 <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" /> 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -267,7 +266,6 @@ export default function ImageResizer() {
     if (!resizedImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resizedImageSrc;
-    // Updated filename logic
     link.download = `GR7-Tools-${imageFile.name}`;
     document.body.appendChild(link);
     link.click();
@@ -316,14 +314,11 @@ export default function ImageResizer() {
             </CardHeader>
             <CardContent className="p-8 md:p-12">
                 <div 
-                    className={cn(
-                        "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                    )}
-                    onClick={() => fileInputRef.current?.click()}
+                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group"
                 >
                     <div className="relative">
                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                        <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
@@ -515,7 +510,7 @@ export default function ImageResizer() {
                     )}
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
-                    <Button className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 group" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
+                    <Button className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
                         <Download className="mr-4 h-7 w-7 md:h-9 md:w-9 group-hover:translate-y-1 transition-transform" /> SAVE PROFESSIONAL IMAGE
                     </Button>
                 </CardFooter>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -88,8 +87,6 @@ export default function PdfCompressor() {
             setCompressionResult(null);
             setProgress(0);
             setStatusText("");
-            
-            // Suggest a target size that is 60% of original
             const sizeInKb = file.size / 1024;
             setTargetValue(Math.max(50, Math.round(sizeInKb * 0.6)).toString());
         } else if (file) {
@@ -118,7 +115,6 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                // STRICT BUFFER: We aim for 90% of the target to ensure the final file is DEFINITELY under the limit.
                 targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.90;
             }
 
@@ -128,7 +124,7 @@ export default function PdfCompressor() {
                 compress: false 
             });
 
-            const QUALITY_FLOOR = 0.6; // Don't go below 60% quality to maintain text legibility
+            const QUALITY_FLOOR = 0.6; 
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Optimizing Page ${i}/${totalPages}...`);
@@ -147,33 +143,23 @@ export default function PdfCompressor() {
                     canvas.height = Math.floor(viewport.height);
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // High-quality resampling
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    
                     await page.render({ canvasContext: ctx, viewport: viewport }).promise;
                     return canvas.toDataURL('image/jpeg', q);
                 };
 
                 if (mode === 'target') {
-                    // Try different scales to find the best quality that fits the byte limit
                     const scalesToTry = [3.0, 2.5, 2.0, 1.5, 1.2, 1.0, 0.8, 0.5];
                     let bestFound = false;
-
                     for (const scale of scalesToTry) {
                         if (bestFound) break;
-
                         let low = QUALITY_FLOOR, high = 0.95;
                         let stepBestUrl = "";
-
-                        // Binary search for best quality at this scale
                         for (let j = 0; j < 6; j++) {
                             const mid = (low + high) / 2;
                             const testUrl = await getPageDataUrl(scale, mid);
-                            // Accurate Base64 to Binary size estimation
                             const estSize = Math.round((testUrl.length - 22) * 0.75);
-
                             if (estSize <= targetBytesPerPage) {
                                 stepBestUrl = testUrl;
                                 low = mid; 
@@ -181,27 +167,21 @@ export default function PdfCompressor() {
                                 high = mid; 
                             }
                         }
-
                         if (stepBestUrl) {
                             finalDataUrl = stepBestUrl;
                             bestFound = true;
                         }
                     }
-                    
-                    // Fallback to absolute minimum if target is extremely tight
                     if (!finalDataUrl) finalDataUrl = await getPageDataUrl(0.4, 0.5);
                 } else {
-                    // Manual mode: Use high scale with user's quality preference
                     finalDataUrl = await getPageDataUrl(2.5, quality[0] / 100);
                 }
 
                 const viewport = page.getViewport({ scale: 1.0 });
                 const orientation = viewport.width > viewport.height ? 'l' : 'p';
-                
                 if (i === 1) newPdf.deletePage(1);
                 newPdf.addPage([viewport.width, viewport.height], orientation);
                 newPdf.addImage(finalDataUrl, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
-                
                 setProgress(10 + Math.round((i / totalPages) * 90));
             }
 
@@ -211,19 +191,10 @@ export default function PdfCompressor() {
                 newSize: pdfBlob.size,
                 savings: Math.max(0, ((pdfFile.size - pdfBlob.size) / pdfFile.size) * 100)
             });
-
             setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
             setStatusText("Processing Complete");
-            
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#48a9a4', '#fce7eb', '#ffffff']
-            });
-
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#48a9a4', '#fce7eb', '#ffffff'] });
             toast({ title: 'Success!', description: `Document optimized to ${formatBytes(pdfBlob.size)}.` });
-
         } catch (error: any) {
             console.error(error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
@@ -236,7 +207,6 @@ export default function PdfCompressor() {
         if (!compressedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = compressedPdfUrl;
-        // Updated filename logic
         link.download = `GR7-Tools-${pdfFile.name}`;
         link.click();
     }
@@ -273,25 +243,21 @@ export default function PdfCompressor() {
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
                 >
                     <CardHeader className="bg-muted/30 border-b p-6 text-center">
                         <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                     </CardHeader>
                     <CardContent className="p-10 md:p-12">
-                        <div 
-                        className={cn(
-                            "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                        )}
-                        onClick={() => fileInputRef.current?.click()}
-                        >
-                        <div className="relative">
-                            <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Optimize</p>
-                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">High-DPI text clarity engine active.</p>
-                        </div>
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Optimize</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">High-DPI text clarity engine active.</p>
+                            </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                     </CardContent>

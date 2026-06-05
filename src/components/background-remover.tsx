@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -151,7 +150,6 @@ export default function BackgroundRemover() {
       setStatusText("Isolating Subject...");
       const output = await segmenter(source);
       
-      // FIXED: Convert 1-channel mask to 4-channel RGBA for ImageData constructor
       const mask = output[0].mask;
       const rgbaData = new Uint8ClampedArray(mask.width * mask.height * 4);
       const maskData = mask.data; 
@@ -264,12 +262,12 @@ export default function BackgroundRemover() {
                 </div>
             </div>
             <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none"><span className="text-gradient-hero">Background Remover</span></h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local processing.</p>
+            <p className="text-xs md:sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local processing.</p>
         </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
             <CardHeader className="bg-muted/30 border-b p-6 text-center"><CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle></CardHeader>
             <CardContent className="p-8 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer bg-muted/30 group relative">
                     <div className="relative"><UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" /></div>
                     <div className="text-center px-4"><p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p><p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Unlimited local extractions.</p></div>
                 </div>

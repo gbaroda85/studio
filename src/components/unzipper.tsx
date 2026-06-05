@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -56,14 +55,12 @@ export default function Unzipper() {
 
     const handleFileChange = (file: File | null) => {
         if (!file) return;
-
         const isZip = file.type.includes('zip') || 
                       file.type.includes('octet-stream') || 
                       file.name.toLowerCase().endsWith('.zip');
-
         if (isZip) {
-            if (file.size > 800 * 1024 * 1024) { // 800MB Limit for RAM safety
-                toast({ variant: 'destructive', title: 'File Too Large', description: 'Maximum supported size is 800MB for local RAM processing.' });
+            if (file.size > 800 * 1024 * 1024) { 
+                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 800MB supported.' });
                 return;
             }
             setZipFile(file);
@@ -82,40 +79,23 @@ export default function Unzipper() {
         setIsUnzipping(true);
         setProgress(10);
         setExtractedFiles([]);
-        
         try {
-            // Load the zip file
             const zip = await JSZip.loadAsync(file);
             const files: ExtractedFile[] = [];
             const filenames = Object.keys(zip.files).filter(name => !zip.files[name].dir);
-            
             setProgress(30);
-
             for (let i = 0; i < filenames.length; i++) {
                 const filename = filenames[i];
                 const zipEntry = zip.files[filename];
                 const fileData = await zipEntry.async('blob');
                 const url = URL.createObjectURL(fileData);
-                
-                files.push({ 
-                    id: Math.random().toString(36).substr(2, 9),
-                    name: filename, 
-                    url,
-                    size: fileData.size
-                });
-                
+                files.push({ id: Math.random().toString(36).substr(2, 9), name: filename, url, size: fileData.size });
                 setProgress(30 + Math.round(((i + 1) / filenames.length) * 70));
             }
-
             setExtractedFiles(files);
-            toast({ title: 'Extraction Success!', description: `Found ${files.length} files in the archive.` });
+            toast({ title: 'Extraction Success!', description: `Found ${files.length} files.` });
         } catch (error: any) {
-            console.error("ZIP Error:", error);
-            let msg = "Could not process the zip file.";
-            if (error.message.includes("central directory")) {
-                msg = "Invalid ZIP structure. The file might be corrupted or incomplete.";
-            }
-            toast({ variant: 'destructive', title: 'Error', description: msg });
+            toast({ variant: 'destructive', title: 'Error', description: "Could not process zip." });
             setZipFile(null);
         } finally {
             setIsUnzipping(false);
@@ -141,7 +121,6 @@ export default function Unzipper() {
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 flex flex-col items-center gap-6">
-            
             {!zipFile && (
                 <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
                     <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
@@ -171,14 +150,14 @@ export default function Unzipper() {
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ARCHIVE STUDIO</CardTitle>
                         </CardHeader>
                         <CardContent className="p-10 md:p-12">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop ZIP File here</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Sanitization & Extract active.</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Sanitization & Extract active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept=".zip,application/zip,application/x-zip,application/x-zip-compressed" onChange={onFileChange} />
@@ -194,7 +173,6 @@ export default function Unzipper() {
 
             {zipFile && (
                 <div className="w-full grid lg:grid-cols-12 gap-8 items-start">
-                    {/* Left: Queue Info */}
                     <div className="lg:col-span-5 space-y-6">
                         <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                             <CardHeader className="bg-primary/5 border-b p-6">
@@ -213,7 +191,6 @@ export default function Unzipper() {
                                         <p className="text-[10px] font-mono opacity-50 uppercase mt-1">{formatBytes(zipFile.size)}</p>
                                     </div>
                                 </div>
-
                                 {isUnzipping ? (
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         <div className="relative flex flex-col items-center gap-4">
@@ -237,7 +214,7 @@ export default function Unzipper() {
                                         <div>
                                             <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Archive Ready</p>
                                             <p className="text-[8px] text-green-600/80 font-medium leading-relaxed mt-1 uppercase">
-                                                {extractedFiles.length} files extracted and available in the list.
+                                                {extractedFiles.length} files extracted.
                                             </p>
                                         </div>
                                     </div>
@@ -249,7 +226,6 @@ export default function Unzipper() {
                         </Card>
                     </div>
 
-                    {/* Right: Extracted Files List */}
                     <div className="lg:col-span-7 flex flex-col">
                         <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 flex flex-col h-full min-h-[500px]">
                             <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
@@ -300,9 +276,6 @@ export default function Unzipper() {
                                 <Button variant="ghost" onClick={resetState} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive h-10 px-6 rounded-xl border-2">
                                     <RefreshCcw className="size-3.5 mr-2" /> Start New Unzip
                                 </Button>
-                                <div className="hidden sm:flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
-                                    <ShieldCheck className="size-3" /> Hardware Boost Native
-                                </div>
                             </CardFooter>
                         </Card>
                     </div>

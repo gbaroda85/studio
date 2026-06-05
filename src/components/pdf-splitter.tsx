@@ -28,7 +28,7 @@ import {
     Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -263,20 +263,15 @@ export default function PdfSplitter() {
                         <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 md:p-12">
-                        <div 
-                        className={cn(
-                            "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                        )}
-                        onClick={() => fileInputRef.current?.click()}
-                        >
-                        <div className="relative">
-                            <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
-                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Visual Selection Enabled</p>
-                        </div>
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Visual Selection Enabled</p>
+                            </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                     </CardContent>

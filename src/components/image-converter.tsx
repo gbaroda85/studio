@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
@@ -104,7 +103,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     if (!convertedSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = convertedSrc;
-    // Updated filename logic
     const name = imageFile.name.includes('.') ? imageFile.name.split(".").slice(0, -1).join(".") : imageFile.name;
     const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
     link.download = `GR7-Tools-${name}.${ext}`;
@@ -143,14 +141,14 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Image here</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Instant local conversion.</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Instant local conversion.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -189,7 +187,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Main Viewport: The Preview Box */}
         <div className="lg:col-span-8">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -199,7 +196,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                     </div>
                     {convertedSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">CONVERTED</Badge>}
                 </CardHeader>
-                {/* FIXED WHITE BACKGROUND FOR PREVIEW ACCURACY */}
                 <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-white shadow-inner min-h-[400px] flex items-center justify-center relative">
                     <div className="relative size-full min-h-[350px] flex items-center justify-center">
                         {convertedSrc ? (
@@ -225,7 +221,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             </Card>
         </div>
 
-        {/* Sidebar: Controls */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
@@ -278,7 +273,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             </Card>
         </div>
       </div>
-      
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );

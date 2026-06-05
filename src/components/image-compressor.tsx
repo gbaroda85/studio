@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -215,7 +214,6 @@ export default function ImageCompressor() {
   const downloadFile = (res: CompressionResult) => {
     const link = document.createElement("a");
     link.href = res.dataUrl;
-    // Updated filename logic
     const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
     const baseName = res.name.includes('.') ? res.name.split('.').slice(0, -1).join('.') : res.name;
     link.download = `GR7-Tools-${baseName}.${ext}`;
@@ -233,7 +231,7 @@ export default function ImageCompressor() {
         }
     });
     const content = await zip.generateAsync({ type: "blob" });
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(content);
     link.download = "GR7-Tools-optimized-batch.zip";
     link.click();
@@ -257,6 +255,7 @@ export default function ImageCompressor() {
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                onClick={() => fileInputRef.current?.click()}
             >
                 <CardHeader className="bg-muted/30 border-b p-6 text-center">
                     <div className="flex items-center justify-between">
@@ -267,8 +266,7 @@ export default function ImageCompressor() {
                 <CardContent className={cn(results.length === 0 ? "p-10 md:p-12" : "p-4 md:p-6")}>
                     {results.length === 0 ? (
                         <div 
-                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                            onClick={() => fileInputRef.current?.click()}
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group"
                         >
                             <div className="relative">
                                 <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -367,7 +365,7 @@ export default function ImageCompressor() {
                                             </div>
                                         </div>
                                     ))}
-                                    <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                    <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                                         <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE IMAGES
                                     </Button>
                                 </div>

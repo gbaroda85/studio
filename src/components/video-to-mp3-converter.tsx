@@ -49,8 +49,8 @@ export default function VideoToMp3Converter() {
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('video/')) {
-            if (file.size > 200 * 1024 * 1024) { // 200MB limit for browser safety
-                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 200MB supported for local extraction.' });
+            if (file.size > 200 * 1024 * 1024) { 
+                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 200MB supported.' });
                 return;
             }
             setVideoFile(file);
@@ -71,31 +71,24 @@ export default function VideoToMp3Converter() {
         if (!videoFile) return;
         setIsProcessing(true);
         setProgress(10);
-
         try {
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             const arrayBuffer = await videoFile.arrayBuffer();
             setProgress(30);
-
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
             setProgress(70);
-
-            // Encode to WAV (widely compatible and simple to do client-side)
             const wavBlob = audioBufferToWav(audioBuffer);
             const url = URL.createObjectURL(wavBlob);
             setAudioUrl(url);
             setProgress(100);
-            
-            toast({ title: 'Extraction Success', description: 'High-quality audio isolated.' });
+            toast({ title: 'Extraction Success', description: 'Audio isolated.' });
         } catch (error) {
-            console.error(error);
-            toast({ variant: 'destructive', title: 'Extraction Failed', description: 'Format not supported by browser.' });
+            toast({ variant: 'destructive', title: 'Extraction Failed', description: 'Format not supported.' });
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // Helper: AudioBuffer to WAV Blob
     const audioBufferToWav = (buffer: AudioBuffer) => {
         const numOfChan = buffer.numberOfChannels;
         const length = buffer.length * numOfChan * 2 + 44;
@@ -104,27 +97,10 @@ export default function VideoToMp3Converter() {
         const channels = [];
         let offset = 0;
         let pos = 0;
-
-        // write WAV header
         const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; };
         const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; };
-
-        setUint32(0x46464952); // "RIFF"
-        setUint32(length - 8);
-        setUint32(0x45564157); // "WAVE"
-        setUint32(0x20746d66); // "fmt "
-        setUint32(16);         // length
-        setUint16(1);          // PCM
-        setUint16(numOfChan);
-        setUint32(buffer.sampleRate);
-        setUint32(buffer.sampleRate * 2 * numOfChan);
-        setUint16(numOfChan * 2);
-        setUint16(16);
-        setUint32(0x61746164); // "data"
-        setUint32(length - pos - 4);
-
+        setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
         for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
-
         while (pos < length) {
             for (let i = 0; i < numOfChan; i++) {
                 let sample = Math.max(-1, Math.min(1, channels[i][offset]));
@@ -158,7 +134,6 @@ export default function VideoToMp3Converter() {
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 flex flex-col gap-8 pb-20 mx-auto">
-            
             {!videoFile ? (
                 <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 mx-auto">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
@@ -187,7 +162,7 @@ export default function VideoToMp3Converter() {
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">MEDIA WORKSPACE</CardTitle>
                         </CardHeader>
                         <CardContent className="p-10 md:p-16">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
@@ -208,8 +183,6 @@ export default function VideoToMp3Converter() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    
-                    {/* Viewport: Video Preview */}
                     <div className="lg:col-span-7">
                         <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                             <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -258,7 +231,6 @@ export default function VideoToMp3Converter() {
                         </Card>
                     </div>
 
-                    {/* Sidebar: Controls */}
                     <div className="lg:col-span-5 space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 border-b border-white/10 p-6">
@@ -306,7 +278,7 @@ export default function VideoToMp3Converter() {
                                                 <Download className="mr-3 size-6 md:size-8 group-hover:translate-y-1 transition-transform" />
                                                 SAVE AUDIO FILE
                                             </Button>
-                                            <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100"><RefreshCcw className="mr-2 size-3" /> Load Another Video</Button>
+                                            <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100"><RefreshCcw className="size-3" /> Load Another Video</Button>
                                         </div>
                                      )}
                                 </div>
@@ -315,16 +287,6 @@ export default function VideoToMp3Converter() {
                                 <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30">GR7 INDUSTRIAL MEDIA ENGINE</p>
                             </CardFooter>
                         </Card>
-
-                        <div className="p-6 bg-green-500/5 rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
-                            <div className="size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                                <ShieldCheck className="size-6 text-green-600" />
-                            </div>
-                            <div>
-                                <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Zero-Stream Privacy</p>
-                                <p className="text-[9px] text-muted-foreground font-medium leading-tight">Your video buffer never leaves local RAM. Safe for confidential recordings.</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             )}
