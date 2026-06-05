@@ -1,5 +1,6 @@
+
 import { Metadata } from 'next';
-import { Heart, Sparkles, ShieldCheck, HelpCircle, FileText } from 'lucide-react';
+import { Heart, Sparkles, ShieldCheck, HelpCircle, FileText, Palette, Type, Eye, Download } from 'lucide-react';
 import MarriageBiodataGenerator from '@/components/marriage-biodata-generator';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Marriage Bio Data Generator - Create Premium Biodata Online Free (A4 PDF)',
   description: 'Create professional and traditional marriage biodata instantly. Features split-screen editor, photo upload, astrological info, and high-quality A4 PDF export. 100% private.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/marriage-biodata' }
 };
 
 export default function MarriageBiodataPage() {
@@ -61,13 +63,13 @@ export default function MarriageBiodataPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 pb-20">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Marriage Biodata Maker" steps={deepSteps} />
 
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <Sparkles className="text-primary size-8" />
                         Professional Marriage Studio
                     </h2>
@@ -79,18 +81,18 @@ export default function MarriageBiodataPage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-rose-500/50 transition-all">
                         <FileText className="text-rose-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">A4 Standard</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Generated PDFs follow strict A4 sizing rules, making them perfect for WhatsApp sharing or physical printing.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">A4 Standard</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Generated PDFs follow strict A4 sizing rules, making them perfect for WhatsApp sharing or physical printing.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <Sparkles className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Modern Templates</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Uses a balanced 'Modern-Traditional' design that appeals to both tech-savvy youth and traditional elders.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Modern Templates</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Uses a balanced 'Modern-Traditional' design that appeals to both tech-savvy youth and traditional elders.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">100% Secure</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">We respect your privacy. All data stays in your browser memory and is never uploaded to any server.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">100% Secure</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">We respect your privacy. All data stays in your browser memory and is never uploaded to any server.</p>
                     </div>
                 </div>
             </section>

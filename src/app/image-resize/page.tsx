@@ -14,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Smart Image Resizer - Resize for SSC, UPSC, IBPS Application Forms Online',
   description: 'Exact pixel and mm resizing for government job forms. Resize photos to 200x230px and signatures to 140x60px instantly and privately in your browser.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/image-resize' }
 };
 
 export default function ImageResizePage() {
@@ -33,13 +34,13 @@ export default function ImageResizePage() {
             <ImageResizer />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Professional Image Resizer" steps={steps} />
 
             {/* In-depth Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <Scaling className="text-primary size-8" />
                         Professional Grade Dimension Control
                     </h2>
@@ -51,18 +52,18 @@ export default function ImageResizePage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/40 transition-all">
                         <User className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Passport Ready</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">One-click presets for 200x230px and other standard passport dimensions used in Indian competitive exams.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Passport Ready</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">One-click presets for 200x230px and other standard passport dimensions used in Indian competitive exams.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/40 transition-all">
                         <PenTool className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Signature Mode</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Convert scanned signatures to 140x60px instantly while maintaining high contrast for better legibility on digital forms.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Signature Mode</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Convert scanned signatures to 140x60px instantly while maintaining high contrast for better legibility on digital forms.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/40 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Local Privacy</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Since processing happens in your browser RAM, your sensitive ID cards and personal documents never touch any server.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Local Privacy</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Since processing happens in your browser RAM, your sensitive ID cards and personal documents never touch any server.</p>
                     </div>
                 </div>
             </section>
@@ -71,20 +72,20 @@ export default function ImageResizePage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-black uppercase tracking-tight">The Precision Resampling Engine</h2>
+                        <h2 className="text-3xl font-black uppercase tracking-tight text-slate-800 dark:text-white">The Precision Resampling Engine</h2>
                         <div className="space-y-4">
                             <div className="flex gap-4 p-4 bg-muted/30 rounded-2xl">
                                 <Layers className="text-primary size-6 shrink-0" />
                                 <div>
                                     <h4 className="font-bold text-sm">Lanczos 3 Algorithm</h4>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">Unlike basic linear resizing, we use a high-order interpolation method that preserves sharp edges even when heavily shrinking a photo.</p>
+                                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Unlike basic linear resizing, we use a high-order interpolation method that preserves sharp edges even when heavily shrinking a photo.</p>
                                 </div>
                             </div>
                             <div className="flex gap-4 p-4 bg-muted/30 rounded-2xl">
                                 <Maximize className="text-orange-500 size-6 shrink-0" />
                                 <div>
                                     <h4 className="font-bold text-sm">MM/Inch to Pixel Math</h4>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">Need 3.5cm x 4.5cm? Our tool automatically calculates the exact pixel count based on standard DPI requirements for high-quality printing.</p>
+                                    <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Need 3.5cm x 4.5cm? Our tool automatically calculates the exact pixel count based on standard DPI requirements for high-quality printing.</p>
                                 </div>
                             </div>
                         </div>

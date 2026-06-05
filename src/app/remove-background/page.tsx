@@ -1,6 +1,6 @@
 
 import { Metadata } from 'next';
-import { Eraser, ShieldCheck, Zap, HelpCircle, Target, Sparkles, Layers, Cpu, Scissors } from 'lucide-react';
+import { Eraser, ShieldCheck, Zap, HelpCircle, Target, Sparkles, Layers, Cpu, Scissors, Maximize, Scan, Wand2, ArrowLeftRight, Download, UploadCloud } from 'lucide-react';
 import BackgroundRemover from '@/components/background-remover';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -14,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Neural Background Remover - High-Precision AI Image Extraction Online',
   description: 'Pro-grade background removal using BiRefNet AI technology. Perfect for hair detection, edge precision, and transparent PNG export. 100% private local RAM processing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/remove-background' }
 };
 
 export const dynamic = 'force-dynamic';
@@ -50,13 +51,13 @@ export default function RemoveBackgroundPage() {
             <BackgroundRemover />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Neural Background Remover" steps={deepSteps} />
 
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <Cpu className="text-primary size-8" />
                         Next-Gen On-Device AI
                     </h2>
@@ -68,17 +69,17 @@ export default function RemoveBackgroundPage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <Sparkles className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Hair Precision</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Hair Precision</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Proprietary mask softening algorithm that captures individual hair strands and translucent edges without 'halo' effects.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <Maximize className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Zero Res-Loss</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Zero Res-Loss</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">We don't downscale your photos. The AI model creates a high-res mapping that is applied back to your original source file.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Air-Gapped Tech</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Air-Gapped Tech</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">All neural inference happens on your local GPU/CPU. Your private photos never touch the internet or any third-party cloud.</p>
                     </div>
                 </div>

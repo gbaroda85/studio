@@ -1,5 +1,6 @@
+
 import { Metadata } from 'next';
-import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize } from 'lucide-react';
+import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize, Zap, Settings2 } from 'lucide-react';
 import PassportPhotoMaker from '@/components/passport-photo-maker';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Professional Passport Photo Maker - Create ID Photos Online (HD)',
   description: 'Create professional passport-sized photos for India, USA, and UK instantly. Features background removal, rotation, and high-DPI scaling. 100% private local processing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/passport-photo' }
 };
 
 export default function PassportPhotoPage() {
@@ -47,33 +49,33 @@ export default function PassportPhotoPage() {
             <PassportPhotoMaker />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Professional Passport Maker" steps={deepSteps} />
 
             {/* Deep Value Section */}
             <section className="space-y-12 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Standard ID Photo Requirements</h2>
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-800 dark:text-white">Standard ID Photo Requirements</h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
                         Meeting official document standards is critical. A slight tilt or wrong background can lead to form rejection. Our <strong>Pro Studio</strong> ensures your photos meet strict government criteria.
                     </p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <Maximize className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Dimension Control</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Exact support for India Passport (35x45mm), USA Visa (2x2 inch), and Indian PAN Card requirements.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Dimension Control</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Exact support for India Passport (35x45mm), USA Visa (2x2 inch), and Indian PAN Card requirements.</p>
                     </div>
-                    <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-emerald-500/50 transition-all">
                         <FileCheck className="text-emerald-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Smart Isolation</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Our local engine performs pixel-level edge detection to remove messy backgrounds instantly.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Smart Isolation</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Our local engine performs pixel-level edge detection to remove messy backgrounds instantly.</p>
                     </div>
-                    <div className="p-8 bg-muted/30 rounded-[2.5rem] border border-primary/5 space-y-4">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-rose-500/50 transition-all">
                         <Printer className="text-rose-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">300 DPI Export</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Rendered at high resolution to ensure your physical prints look professional and sharp on photo paper.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">300 DPI Export</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Rendered at high resolution to ensure your physical prints look professional and sharp on photo paper.</p>
                     </div>
                 </div>
             </section>

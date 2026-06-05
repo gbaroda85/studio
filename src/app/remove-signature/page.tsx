@@ -1,5 +1,6 @@
+
 import { Metadata } from 'next';
-import { PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser } from 'lucide-react';
+import { PenLine, ShieldCheck, Zap, HelpCircle, FileType, SearchCheck, Eraser, UploadCloud, Download, Eye, ArrowLeftRight } from 'lucide-react';
 import SignatureRemover from '@/components/signature-remover';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -11,13 +12,37 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Signature Background Remover',
+  title: 'Signature Background Remover - Extract Clean PNG Signatures Online',
   description: 'Extract clean, transparent signatures from photos instantly. Remove paper backgrounds and shadows locally for digital signing. 100% private.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/remove-signature' }
 };
 
 export const dynamic = 'force-dynamic';
 
 export default function RemoveSignaturePage() {
+  const deepSteps = [
+    {
+      title: "Raw Photo Capture",
+      description: "Take a clear photo of your signature on white paper. Our engine initializes a pixel-level histogram to prepare for background subtraction.",
+      icon: "UploadCloud"
+    },
+    {
+      title: "Chroma Extraction",
+      description: "Click 'Start Cleaning'. The tool uses advanced color-distance algorithms to isolate ink from paper textures and uneven lighting.",
+      icon: "Eraser"
+    },
+    {
+      title: "Visual Fine-Tuning",
+      description: "Use the 'Sensitivity' slider to remove stubborn shadows. Use 'Ink Darkness' to ensure the signature is bold and digital-ready.",
+      icon: "ArrowLeftRight"
+    },
+    {
+      title: "Transparent Save",
+      description: "Click 'Download PNG'. Your signature is saved with a true alpha channel (Transparent), ready to be placed on any PDF or form.",
+      icon: "Download"
+    }
+  ];
+
   return (
     <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
@@ -26,37 +51,31 @@ export default function RemoveSignaturePage() {
             <SignatureRemover />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
-            <HowToGuide title="Signature Background Remover" steps={[
-                "Upload Image: Take a clear photo of your signature on white paper.",
-                "Extract: Click 'Start Cleaning' to let our engine isolate the ink.",
-                "Adjust: Use 'Sensitivity' to remove paper shadows or gray spots.",
-                "Boost Ink: Enhance the darkness of the signature if it's too light.",
-                "Download: Save as a high-quality transparent PNG for digital docs."
-            ]} />
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+            <HowToGuide title="Signature Background Remover" steps={deepSteps} />
 
             {/* AdSense Value Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Digitize Your Hand-written Signature</h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">In the era of digital documents, having a clean signature file is essential. Our <strong>Smart Signature BG Remover</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-800 dark:text-white">Digitize Your Hand-written Signature</h2>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">In the era of digital documents, having a clean signature file is essential. Our <strong>Smart Signature BG Remover</strong> doesn't just crop your photo; it performs pixel-level background subtraction to give you a professional transparent PNG.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <SearchCheck className="text-primary size-8" />
-                        <h3 className="font-bold uppercase text-sm">Shadow Removal</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Automatically eliminates shadows caused by camera flash or poor lighting, leaving only the ink behind.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
+                        <SearchCheck className="text-primary size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Shadow Removal</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Automatically eliminates shadows caused by camera flash or poor lighting, leaving only the ink behind.</p>
                     </div>
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <FileType className="text-blue-500 size-8" />
-                        <h3 className="font-bold uppercase text-sm">Transparent PNG</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Exports with an alpha channel so you can overlay your signature on any PDF, Word doc, or Application form.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
+                        <FileType className="text-blue-500 size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Transparent PNG</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Exports with an alpha channel so you can overlay your signature on any PDF, Word doc, or Application form.</p>
                     </div>
-                    <div className="p-6 bg-muted/30 rounded-3xl space-y-3 border border-primary/5">
-                        <ShieldCheck className="text-teal-500 size-8" />
-                        <h3 className="font-bold uppercase text-sm">Secure Data</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Your signature is your most sensitive data. We process it locally in RAM so it's never stored on our cloud.</p>
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
+                        <ShieldCheck className="text-teal-500 size-10" />
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Secure Data</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Your signature is your most sensitive data. We process it locally in RAM so it's never stored on our cloud.</p>
                     </div>
                 </div>
             </section>

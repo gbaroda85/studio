@@ -51,7 +51,9 @@ import {
     Scan,
     Key,
     Unlock,
-    Palette
+    Palette,
+    ArrowLeftRight,
+    Wand2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -63,7 +65,7 @@ const ICON_MAP: Record<string, any> = {
   Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
   Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck,
   Scissors, Printer, Merge, Lock, Heart, FileStack, Scan,
-  Key, Unlock, Palette
+  Key, Unlock, Palette, ArrowLeftRight, Wand2
 };
 
 type StepDetail = {
@@ -104,7 +106,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
           return (
             <Card key={index} className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/50 transition-all duration-500 rounded-[2.5rem] bg-card hover:-translate-y-1 shadow-xl hover:shadow-primary/10">
               <CardContent className="p-8 md:p-10">
-                <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-center text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row gap-6 md:gap-10 items-center text-center sm:text-left">
                     <div className="flex flex-col items-center gap-3 shrink-0">
                         <div className="size-16 md:size-24 rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-primary/20">
                             <Icon className="size-8 md:size-12" />

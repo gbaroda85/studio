@@ -1,5 +1,6 @@
+
 import { Metadata } from 'next';
-import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout } from 'lucide-react';
+import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Universal ID Card Printer - Auto-Crop Aadhaar, PAN, DL & Voter ID Online',
   description: 'Easy print studio for Indian ID cards. Auto-crop A4 e-Aadhaar or upload separate front/back photos of PAN, DL, and Voter ID. 100% private and sized for printing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/aadhaar-printer' }
 };
 
 export default function AadhaarPrinterPage() {
@@ -61,13 +63,13 @@ export default function AadhaarPrinterPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="ID Card Printer" steps={deepSteps} />
 
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <LayoutGrid className="text-primary size-8" />
                         Professional Document Studio
                     </h2>
@@ -79,17 +81,17 @@ export default function AadhaarPrinterPage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <CreditCard className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Multi-ID Ready</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Multi-ID Ready</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Specially designed for Indian ID standards. Works perfectly for PAN, DL, Voter ID, and Health Cards.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <Layout className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">300DPI Precision</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">300DPI Precision</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Uses high-density resampling to ensure small text and barcodes remain crystal clear after resizing.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Zero Server Logic</h3>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Zero Server Logic</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">All processing happens in your browser RAM. We never store or see your sensitive personal data.</p>
                     </div>
                 </div>

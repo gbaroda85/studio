@@ -1,5 +1,6 @@
+
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2, UploadCloud, Layers, Monitor, Download } from 'lucide-react';
 import PdfMerger from '@/components/pdf-merger';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Bulk PDF Merger - Combine Multiple PDFs into One Online Privately',
   description: 'Combine hundreds of PDF documents into a single secure file. Features bulk upload, A-Z sorting, and re-ordering controls. 100% private local processing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/merge-pdf' }
 };
 
 export default function MergePdfPage() {
@@ -47,13 +49,13 @@ export default function MergePdfPage() {
             <PdfMerger />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Bulk PDF Merger" steps={deepSteps} />
 
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <CheckCircle2 className="text-primary size-8" />
                         Professional Document Bundling
                     </h2>
@@ -66,17 +68,17 @@ export default function MergePdfPage() {
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <SortAsc className="text-primary size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Bulk Sorting</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Auto-sort your files alphabetically or by numerical order with a single click. No more manual dragging.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Auto-sort your files alphabetically or by numerical order with a single click. No more manual dragging.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <ArrowUpDown className="text-blue-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Order Control</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Full control over the sequence. Move any file to the top or bottom of the list instantly.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Full control over the sequence. Move any file to the top or bottom of the list instantly.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Security First</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Combining files happens entirely in browser RAM. Your private data never touches our server.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Combining files happens entirely in browser RAM. Your private data never touches our server.</p>
                     </div>
                 </div>
             </section>
