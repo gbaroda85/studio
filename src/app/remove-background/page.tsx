@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Neural Background Remover - High-Precision AI Image Extraction Online',
-  description: 'Pro-grade background removal using BiRefNet AI technology. Perfect for hair detection, edge precision, and transparent PNG export. 100% private local RAM processing.',
+  description: 'Pro-grade background removal using local AI technology. Perfect for hair detection, edge precision, and transparent PNG export. 100% private local RAM processing.',
   alternates: { canonical: 'https://www.gr7imagepdf.com/remove-background' }
 };
 
@@ -23,7 +23,7 @@ export default function RemoveBackgroundPage() {
   const deepSteps = [
     {
       title: "Neural Import",
-      description: "Upload your photo. Our local engine initializes the BiRefNet neural weights in your browser RAM, ensuring zero data leaves your device.",
+      description: "Upload your photo. Our local engine initializes the neural weights in your browser RAM, ensuring zero data leaves your device.",
       icon: "UploadCloud"
     },
     {
@@ -54,7 +54,6 @@ export default function RemoveBackgroundPage() {
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Neural Background Remover" steps={deepSteps} />
 
-            {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
@@ -85,13 +84,11 @@ export default function RemoveBackgroundPage() {
                 </div>
             </section>
 
-            {/* FAQ Section */}
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">Background Removal FAQs</h2>
                 </div>
-
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Why is this tool better than remove.bg?</AccordionTrigger>
@@ -102,7 +99,7 @@ export default function RemoveBackgroundPage() {
                     <AccordionItem value="item-2" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Does it work with low-end mobile phones?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes! Our model uses **Optimized ONNX Runtime**. It will automatically detect if your device supports WebGPU for high speed, otherwise it will use WebAssembly (WASM) to process the image slightly slower but with the same high quality.
+                            Yes! Our model uses **Optimized ONNX Runtime**. It will automatically detect if your device supports WebGPU for high speed, otherwise it will use WebAssembly (WASM) to process the image slightly slower.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">

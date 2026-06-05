@@ -97,9 +97,28 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
-          const titleText = isObject ? (step as StepDetail).title : (step as string).split(':')[0] || `Step ${index + 1}`;
-          const descText = isObject ? (step as StepDetail).description : (step as string).split(':')[1] || (step as string);
-          const iconName = isObject ? (step as StepDetail).icon : undefined;
+          
+          // Logic to handle both simple strings and detailed objects
+          let titleText = "";
+          let descText = "";
+          let iconName = undefined;
+
+          if (isObject) {
+            const s = step as StepDetail;
+            titleText = s.title;
+            descText = s.description;
+            iconName = s.icon;
+          } else {
+            const s = step as string;
+            if (s.includes(':')) {
+                const parts = s.split(':');
+                titleText = parts[0];
+                descText = parts.slice(1).join(':');
+            } else {
+                titleText = `Step 0${index + 1}`;
+                descText = s;
+            }
+          }
           
           const Icon = (iconName && ICON_MAP[iconName]) || CheckCircle2;
 
@@ -112,13 +131,13 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                             <Icon className="size-8 md:size-12" />
                         </div>
                         <div className="bg-primary/5 px-3 py-0.5 rounded-full border border-primary/10">
-                           <span className="text-[10px] font-black text-primary uppercase">STEP 0{index + 1}</span>
+                           <span className="text-[10px] font-black text-primary uppercase tracking-widest">STEP 0{index + 1}</span>
                         </div>
                     </div>
                     
-                    <div className="space-y-2 flex-1">
+                    <div className="space-y-3 flex-1">
                         <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
-                        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80">
+                        <p className="text-[10px] md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80 tracking-wide">
                             {descText}
                         </p>
                     </div>
