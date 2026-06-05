@@ -382,6 +382,23 @@ export default function PdfEditor() {
         saveToHistory(pages);
     };
 
+    const getImageBytes = async (src: string): Promise<ArrayBuffer> => {
+        if (src.startsWith('data:')) {
+            const base64 = src.split(',')[1];
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        }
+        const response = await fetch(src);
+        return await response.arrayBuffer();
+    }
+
+    const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? rgb(parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255) : rgb(0, 0, 0);
+    };
+
     const handleExport = async () => {
         if (!pdfFile || pages.length === 0) return;
         setIsExporting(true);
@@ -401,7 +418,8 @@ export default function PdfEditor() {
                     const elY = height - ((el.y / 100) * height);
 
                     if (el.type === 'text') {
-                        const font = await finalPdfDoc.embedFont(el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold);
+                        const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
+                        const font = await finalPdfDoc.embedFont(fontName);
                         copiedPage.drawText(el.text, { 
                             x: elX, 
                             y: elY - el.size, 
@@ -420,19 +438,28 @@ export default function PdfEditor() {
                             opacity: el.opacity / 100
                         });
                     } else if (el.type === 'image') {
-                        const response = await fetch(el.src);
-                        const imgBuffer = await response.arrayBuffer();
-                        const embeddedImg = el.src.includes('png') ? await finalPdfDoc.embedPng(imgBuffer) : await finalPdfDoc.embedJpg(imgBuffer);
+                        const imgBuffer = await getImageBytes(el.src);
+                        const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
+                        const embeddedImg = isPng ? await finalPdfDoc.embedPng(imgBuffer) : await finalPdfDoc.embedJpg(imgBuffer);
+                        
                         const imgW = (el.width / 100) * width;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
-                        copiedPage.drawImage(embeddedImg, { x: elX, y: elY - imgH, width: imgW, height: imgH, rotate: degrees(-el.rotation), opacity: el.opacity / 100 });
+                        
+                        copiedPage.drawImage(embeddedImg, { 
+                            x: elX, 
+                            y: elY - imgH, 
+                            width: imgW, 
+                            height: imgH, 
+                            rotate: degrees(-el.rotation), 
+                            opacity: el.opacity / 100 
+                        });
                     } else if (el.type === 'arrow') {
                         const angle = (el.rotation * Math.PI) / 180;
                         const endX = elX + Math.cos(angle) * el.length;
                         const endY = elY + Math.sin(angle) * el.length;
                         copiedPage.drawLine({
                             start: { x: elX, y: elY },
-                            end: { endX, endY },
+                            end: { x: endX, y: endY },
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
@@ -452,16 +479,11 @@ export default function PdfEditor() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "PDF Exported Successfully" });
         } catch (e) {
-            console.error(e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Document rendering error." });
+            console.error('[Export Error]:', e);
+            toast({ variant: 'destructive', title: "Export Failed", description: "Document rendering error. Check logs for details." });
         } finally {
             setIsExporting(false);
         }
-    };
-
-    const hexToRgb = (hex: string) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? rgb(parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255) : rgb(0, 0, 0);
     };
 
     const selectedPage = selectedPageIndex !== null ? pages[selectedPageIndex] : null;
@@ -541,9 +563,9 @@ export default function PdfEditor() {
                             >
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
-                                <div className="text-center px-4">
+                                <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p>
                                     <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p>
                                 </div>
