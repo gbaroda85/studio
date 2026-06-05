@@ -90,14 +90,18 @@ export default function ImageToTextConverter() {
         setExtractedText(result.text);
         toast({ title: "Extraction Success", description: "Text has been processed accurately." });
       } else {
-        throw new Error("No text returned");
+        throw new Error("No text returned from AI");
       }
     } catch (error: any) {
       console.error(error);
+      const msg = error.message?.includes('blocked') 
+        ? "AI safety filters blocked this image. Please try a different photo."
+        : error.message || "Could not process this image.";
+        
       toast({ 
         variant: "destructive", 
         title: "Extraction Failed", 
-        description: "Could not process this image. Please try a clearer photo." 
+        description: msg
       });
     } finally {
       setIsProcessing(false);

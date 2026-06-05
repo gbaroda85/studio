@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   },
   description: 'Fastest local browser tools. Compress images to 20kb/50kb for SSC & UPSC, resize photos, remove background, unlock Aadhaar PDF, and merge files without server uploads. 100% Secure & Private.',
   metadataBase: new URL('https://www.gr7imagepdf.com'),
+  alternates: {
+    // Removed hardcoded '/' to prevent canonical consolidation to home page
+    canonical: './',
+  },
   icons: {
     icon: [
       { url: '/icon?v=25', type: 'image/png' },

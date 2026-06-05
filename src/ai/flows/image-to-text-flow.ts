@@ -35,10 +35,12 @@ const imageToTextFlow = ai.defineFlow(
     outputSchema: ImageToTextOutputSchema,
   },
   async (input) => {
+    // Explicitly setting safetySettings to BLOCK_NONE to ensure documents/IDs are not blocked
     const llmResponse = await ai.generate({
+      model: 'googleai/gemini-2.5-flash',
       prompt: [
         {
-          text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible.',
+          text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible. If the image is a document, ID card, or certificate, extract all visible text content precisely.',
         },
         {
           media: {
@@ -46,7 +48,19 @@ const imageToTextFlow = ai.defineFlow(
           },
         },
       ],
+      config: {
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        ],
+      }
     });
+
+    if (!llmResponse.text) {
+        throw new Error('AI could not find or extract any text from this image.');
+    }
 
     return {
       text: llmResponse.text,
