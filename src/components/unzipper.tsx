@@ -55,12 +55,16 @@ export default function Unzipper() {
 
     const handleFileChange = (file: File | null) => {
         if (!file) return;
+        
+        // Broader ZIP check for various browsers
         const isZip = file.type.includes('zip') || 
                       file.type.includes('octet-stream') || 
-                      file.name.toLowerCase().endsWith('.zip');
+                      file.name.toLowerCase().endsWith('.zip') ||
+                      file.name.toLowerCase().endsWith('.zipx');
+
         if (isZip) {
             if (file.size > 800 * 1024 * 1024) { 
-                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 800MB supported.' });
+                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 800MB supported for local extraction.' });
                 return;
             }
             setZipFile(file);
@@ -77,25 +81,40 @@ export default function Unzipper() {
 
     const handleUnzip = async (file: File) => {
         setIsUnzipping(true);
-        setProgress(10);
+        setProgress(5);
         setExtractedFiles([]);
         try {
-            const zip = await JSZip.loadAsync(file);
+            // Read as ArrayBuffer for maximum robustness
+            const arrayBuffer = await file.arrayBuffer();
+            setProgress(20);
+            
+            const zip = await JSZip.loadAsync(arrayBuffer);
             const files: ExtractedFile[] = [];
             const filenames = Object.keys(zip.files).filter(name => !zip.files[name].dir);
+            
             setProgress(30);
             for (let i = 0; i < filenames.length; i++) {
                 const filename = filenames[i];
                 const zipEntry = zip.files[filename];
+                
+                // Extract file content as blob
                 const fileData = await zipEntry.async('blob');
                 const url = URL.createObjectURL(fileData);
-                files.push({ id: Math.random().toString(36).substr(2, 9), name: filename, url, size: fileData.size });
+                
+                files.push({ 
+                    id: Math.random().toString(36).substr(2, 9), 
+                    name: filename, 
+                    url, 
+                    size: fileData.size 
+                });
+                
                 setProgress(30 + Math.round(((i + 1) / filenames.length) * 70));
             }
             setExtractedFiles(files);
-            toast({ title: 'Extraction Success!', description: `Found ${files.length} files.` });
+            toast({ title: 'Extraction Success!', description: `Successfully extracted ${files.length} files.` });
         } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error', description: "Could not process zip." });
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: "Could not process zip archive." });
             setZipFile(null);
         } finally {
             setIsUnzipping(false);
@@ -144,13 +163,13 @@ export default function Unzipper() {
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ARCHIVE STUDIO</CardTitle>
                         </CardHeader>
                         <CardContent className="p-10 md:p-12">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                                onClick={() => fileInputRef.current?.click()}>
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />

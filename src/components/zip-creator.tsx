@@ -90,22 +90,30 @@ export default function ZipCreator() {
             return;
         }
         setIsZipping(true);
-        setProgress(10);
+        setProgress(5);
 
         try {
             const zip = new JSZip();
+            // Process files one by one for better reliability
             for (let i = 0; i < filesToZip.length; i++) {
                 const file = filesToZip[i];
-                zip.file(file.name, file);
+                // Read as ArrayBuffer for standard compatibility
+                const buffer = await file.arrayBuffer();
+                zip.file(file.name, buffer);
                 setProgress(10 + Math.round(((i + 1) / filesToZip.length) * 80));
             }
 
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const zipBlob = await zip.generateAsync({ 
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 6 }
+            });
             const url = URL.createObjectURL(zipBlob);
             setZippedFileUrl(url);
             setProgress(100);
             toast({ title: 'Bundle Ready!', description: 'Your ZIP archive is ready for download.' });
         } catch (error) {
+            console.error(error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to bundle files.' });
         } finally {
             setIsZipping(false);
@@ -130,20 +138,22 @@ export default function ZipCreator() {
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ZIP STUDIO WORKSPACE</CardTitle>
                         </CardHeader>
                         <CardContent className="p-10 md:p-12">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <div 
+                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Files to Bundle</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">WASM-based local archiving active.</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">WASM-based local archiving active.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onFileChange} />
@@ -219,7 +229,7 @@ export default function ZipCreator() {
                             <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-3">
                                 {!zippedFileUrl ? (
                                     <Button 
-                                        className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                                        className="w-full h-16 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
                                         onClick={handleCreateZip}
                                         disabled={isZipping || filesToZip.length === 0}
                                     >
