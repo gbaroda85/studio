@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Neural Background Remover - High-Precision AI Image Extraction Online',
+  title: 'Background Remover - High-Precision AI Image Extraction Online',
   description: 'Pro-grade background removal using local AI technology. Perfect for hair detection, edge precision, and transparent PNG export. 100% private local RAM processing.',
   alternates: { canonical: 'https://www.gr7imagepdf.com/remove-background' }
 };
@@ -52,7 +52,7 @@ export default function RemoveBackgroundPage() {
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
-            <HowToGuide title="Neural Background Remover" steps={deepSteps} />
+            <HowToGuide title="Background Remover" steps={deepSteps} />
 
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
@@ -61,7 +61,7 @@ export default function RemoveBackgroundPage() {
                         Next-Gen On-Device AI
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Forget blurry edges. Our <strong>Neural Background Studio</strong> uses state-of-the-art transformer models to distinguish subjects from shadows with surgical precision.
+                        Forget blurry edges. Our <strong>Background Studio</strong> uses state-of-the-art transformer models to distinguish subjects from shadows with surgical precision.
                     </p>
                 </div>
                 

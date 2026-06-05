@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -262,7 +263,7 @@ export default function BackgroundRemover() {
                     <Sparkles className="size-2.5" />
                 </div>
             </div>
-            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">Smart <span className="text-gradient-hero">BG Remover</span></h1>
+            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none"><span className="text-gradient-hero">Background Remover</span></h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local processing.</p>
         </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
@@ -334,7 +335,9 @@ export default function BackgroundRemover() {
         </div>
         <div className="flex gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Reset</Button>
-            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !previewImageSrc}><Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG</Button>
+            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !previewImageSrc}>
+                <Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG
+            </Button>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -380,7 +383,8 @@ export default function BackgroundRemover() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
                     <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> NATIVE AI</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> WEBGPU BOOST</div>
+                    <div className="flex items-center gap-1"><Sparkles className="size-2.5 text-primary" /> HD PRECISION</div>
                 </CardFooter>
             </Card>
         </div>
