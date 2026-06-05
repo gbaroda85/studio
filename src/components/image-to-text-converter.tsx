@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -77,6 +78,34 @@ export default function ImageToTextConverter() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
+  // Optimized Client-Side Downscaling to prevent Server Action Payload Limit issues
+  const getOptimizedPayload = async (src: string): Promise<string> => {
+      return new Promise((resolve) => {
+          const img = new window.Image();
+          img.src = src;
+          img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(src);
+
+              // Max width for OCR is 1600px, anything more is overkill and heavy
+              const MAX_WIDTH = 1600;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.85)); // 85% JPEG is perfect for OCR
+          };
+      });
+  };
+
   const handleExtractText = async () => {
     if (!originalImageSrc) return;
     
@@ -84,7 +113,11 @@ export default function ImageToTextConverter() {
     setExtractedText(null);
 
     try {
-      const result = await imageToText({ photoDataUri: originalImageSrc });
+      // 1. Optimize image locally to bypass production server action limits
+      const optimizedSrc = await getOptimizedPayload(originalImageSrc);
+      
+      // 2. Call AI Flow
+      const result = await imageToText({ photoDataUri: optimizedSrc });
       
       if (result && result.success && result.text) {
         setExtractedText(result.text);
@@ -94,10 +127,10 @@ export default function ImageToTextConverter() {
         throw new Error(errorMsg);
       }
     } catch (error: any) {
-      console.error(error);
-      const msg = error.message?.includes('blocked') 
-        ? "AI safety filters blocked this image. Please try a different photo."
-        : error.message || "Could not process this image.";
+      console.error('[OCR Error UI]:', error);
+      const msg = error.message?.includes('Server Components render')
+        ? "Network payload error. Image was too large for the cloud to process."
+        : error.message || "AI engine failed. Please try a clearer photo.";
         
       toast({ 
         variant: "destructive", 

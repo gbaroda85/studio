@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to extract text from an image (OCR).
@@ -9,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 
 const ImageToTextInputSchema = z.object({
   photoDataUri: z
@@ -27,6 +29,7 @@ const ImageToTextOutputSchema = z.object({
 export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 
 export async function imageToText(input: ImageToTextInput): Promise<ImageToTextOutput> {
+  console.log('[OCR Flow] Starting extraction for payload of length:', input.photoDataUri.length);
   return imageToTextFlow(input);
 }
 
@@ -40,7 +43,7 @@ const imageToTextFlow = ai.defineFlow(
     try {
       // Using 2.5 Flash as it is the most stable and updated for OCR tasks
       const llmResponse = await ai.generate({
-        model: 'googleai/gemini-2.5-flash',
+        model: googleAI.model('gemini-2.5-flash'),
         prompt: [
           {
             text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible. If the image is a document, ID card, or certificate, extract all visible text content precisely. Output ONLY the extracted text.',
@@ -63,15 +66,17 @@ const imageToTextFlow = ai.defineFlow(
       });
 
       if (!llmResponse.text) {
+          console.warn('[OCR Flow] No text extracted by AI');
           return { success: false, error: 'AI could not find or extract any text from this image.' };
       }
 
+      console.log('[OCR Flow] Extraction successful. Text length:', llmResponse.text.length);
       return {
         success: true,
         text: llmResponse.text,
       };
     } catch (error: any) {
-      console.error('[OCR Flow Error]:', error);
+      console.error('[OCR Flow Fatal Error]:', error);
       return { 
         success: false, 
         error: error.message || 'AI engine failed to process the image.' 

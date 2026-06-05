@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Target, Layers, Wand2, Scaling, UploadCloud, Settings2, Zap, Download } from 'lucide-react';
 import ImageCompressor from '@/components/image-compressor';
@@ -13,28 +14,29 @@ import {
 export const metadata: Metadata = {
   title: 'Bulk Image Optimizer - Reduce Multiple JPG/PNG to 20kb, 50kb Online',
   description: 'Professional bulk image optimization for SSC, UPSC, IBPS and Bank forms. Reduce hundreds of photos to exact KB size instantly without quality loss using smart adaptive scaling.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/image-compress' }
 };
 
 export default function ImageCompressPage() {
   const deepSteps = [
     {
       title: "Batch Upload",
-      description: "Upload up to 50 images at once. Our engine initializes a multi-threaded parallel processing queue in your browser for industrial-grade speed.",
+      description: "Upload up to 50 images. Our engine initializes parallel processing queue in your browser for industrial speed without server communication.",
       icon: "UploadCloud"
     },
     {
-      title: "Set Optimization Limit",
-      description: "Choose 'Target Size' for government forms (like 20KB or 50KB) or 'Quality Mode' for manual control. Our algorithm targets 90% of your limit for safety.",
-      icon: "Settings2"
+      title: "Set KB Target",
+      description: "Choose 'Target Size' for govt forms (20KB/50KB). Our algorithm hits 90% of the limit for strict portal compliance.",
+      icon: "Target"
     },
     {
-      title: "Adaptive Compression",
-      description: "Click 'Optimize Now'. The engine intelligently balances JPEG sub-sampling with subtle pixel scaling to maintain face and text clarity at extremely small sizes.",
+      title: "Adaptive Scaling",
+      description: "The engine intelligently balances JPEG sub-sampling with subtle pixel scaling to maintain face clarity at tiny file sizes.",
       icon: "Zap"
     },
     {
-      title: "Smart ZIP Download",
-      description: "Preview each optimized result side-by-side with the original. Download individual files or get the entire optimized batch in a secure ZIP archive instantly.",
+      title: "Secure ZIP Save",
+      description: "Download individual files or get the entire batch in a secure ZIP archive instantly. All processing is 100% private in local RAM.",
       icon: "Download"
     }
   ];
@@ -59,7 +61,7 @@ export default function ImageCompressPage() {
                     <div className="space-y-4">
                         <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Smart Adaptive Optimization</h2>
                         <p className="text-muted-foreground leading-relaxed font-semibold">
-                            Compressing a 2MB photo to 50KB is mathematically difficult. Standard tools often create "banding" or "pixelation" on faces. Our <strong>GR7 Smart Engine</strong> automatically balances JPEG quality with subtle dimension resizing. If quality drops below the legibility floor, we slightly reduce the pixels to ensure your photo remains clear, crisp, and acceptable for government portals.
+                            Compressing a 2MB photo to 50KB is mathematically difficult. Standard tools often create "pixelation" on faces. Our <strong>GR7 Smart Engine</strong> automatically balances JPEG quality with subtle dimension resizing to ensure your photo remains acceptable for government portals.
                         </p>
                     </div>
                 </div>
@@ -73,7 +75,7 @@ export default function ImageCompressPage() {
                         Professional Grade Batch Optimization
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Standard online tools limit you to one photo at a time or store your data on cloud servers. Our <strong>Bulk Image Optimizer</strong> allows you to process entire batches for <strong>SSC, UPSC, and IBPS</strong> portals with 100% privacy.
+                        Standard online tools limit you to one photo at a time. Our <strong>Bulk Image Optimizer</strong> allows you to process entire batches for <strong>SSC, UPSC, and IBPS</strong> portals with 100% privacy.
                     </p>
                 </div>
                 
@@ -101,26 +103,25 @@ export default function ImageCompressPage() {
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">Image Optimization FAQs</h2>
-                    <p className="text-muted-foreground font-medium opacity-60">Everything you need to know about our local optimization tech.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Why does my photo look blurry when I compress it too much?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            JPEG compression works by removing data. When you ask for an extremely small size (like 10KB from a 5MB original), the "quantization noise" becomes visible. Our **Smart Resize** logic helps mitigate this by reducing dimensions, ensuring the remaining pixels are higher quality.
+                            JPEG compression works by removing data. When you ask for an extremely small size (like 10KB from a 5MB original), our **Smart Resize** logic helps mitigate quality loss by reducing dimensions slightly to keep the remaining pixels crisp.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">How do I compress images for SSC or UPSC forms?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Government portals usually ask for photos under 50KB and signatures under 20KB. Select the **"Target Size"** tab, click the "50K" or "20K" preset, and upload your file. The tool will automatically find the best quality setting to stay strictly under that limit.
+                            Government portals usually ask for photos under 50KB and signatures under 20KB. Select the **"Target Size"** tab, click the "50K" or "20K" preset, and upload your file. The tool will automatically hit that limit strictly.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Is it safe for sensitive data like ID cards?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes, it is 100% safe. Our tool uses **Client-Side WASM Processing**. This means your images are never uploaded to any server. All the work happens inside your browser's temporary memory (RAM), making it more secure than any cloud-based alternative.
+                            Yes, it is 100% safe. Our tool uses **Client-Side WASM Processing**. This means your images are never uploaded to any server. All work happens inside your browser's memory (RAM).
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

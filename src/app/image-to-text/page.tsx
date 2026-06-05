@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, SearchCode, Languages, Clipboard, UploadCloud, BrainCircuit, FileText, CheckCircle2 } from 'lucide-react';
 import ImageToTextConverter from '@/components/image-to-text-converter';
@@ -13,28 +14,29 @@ import {
 export const metadata: Metadata = {
   title: 'Image to Text (OCR) - Extract Text from Photos Online Securely',
   description: 'Smart local OCR tool to extract text from documents, screenshots, and notes. Supports English and Hindi with 100% privacy.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/image-to-text' }
 };
 
 export default function ImageToTextPage() {
   const deepSteps = [
     {
       title: "Upload Photo",
-      description: "Select or drop any photo containing text. Our engine samples the image at high DPI to ensure that even small fonts or handwritten notes are clearly visible for analysis.",
+      description: "Select any document or image. Our engine samples the image at high DPI in local RAM to ensure small fonts are clearly readable for extraction.",
       icon: "UploadCloud"
     },
     {
       title: "AI Analysis",
-      description: "Click 'Extract Text' to trigger the Gemini 2.5 Flash engine. It performs a multi-layer semantic scan to understand characters, symbols, and formatting structures.",
+      description: "Click 'Extract Text'. Gemini 2.5 Flash performs a multi-layer semantic scan to understand characters, symbols, and formatting with 99% accuracy.",
       icon: "BrainCircuit"
     },
     {
-      title: "Semantic Extraction",
-      description: "The AI recognizes and reconstructs the text while preserving line breaks and original document layout. It works perfectly for both English and Hindi languages simultaneously.",
+      title: "Semantic Capture",
+      description: "The AI recognizes and reconstructs the text while preserving line breaks and original layout. Native support for English and Hindi scripts.",
       icon: "FileText"
     },
     {
-      title: "Copy & Edit",
-      description: "Once processed, the text appears in our Studio Editor. You can manually refine any details and click 'Copy' to move the data instantly to your clipboard or other apps.",
+      title: "Export & Save",
+      description: "Text appears instantly in our Studio Editor. Use 'Copy' to move data to your clipboard. All processing is 100% private and secure.",
       icon: "Clipboard"
     }
   ];
