@@ -151,20 +151,27 @@ export default function BackgroundRemover() {
       setStatusText("Isolating Subject...");
       const output = await segmenter(source);
       
-      // FIXED: Use raw image data buffer to avoid 'toImageData is not a function' error
+      // FIXED: Convert 1-channel alpha mask to 4-channel RGBA for ImageData constructor
       const mask = output[0].mask;
+      const rgbaData = new Uint8ClampedArray(mask.width * mask.height * 4);
+      const maskData = mask.data; // This is 1-channel (grayscale alpha)
+      
+      for (let i = 0; i < maskData.length; ++i) {
+          const alpha = maskData[i];
+          const j = i * 4;
+          rgbaData[j] = 0;       // R
+          rgbaData[j + 1] = 0;   // G
+          rgbaData[j + 2] = 0;   // B
+          rgbaData[j + 3] = alpha; // A (This creates the transparency mask)
+      }
+
       const maskCanvas = document.createElement('canvas');
       maskCanvas.width = mask.width;
       maskCanvas.height = mask.height;
       const maskCtx = maskCanvas.getContext('2d');
       if (!maskCtx) throw new Error("Canvas mask failed");
       
-      // Create ImageData from mask raw bytes
-      const maskImageData = new ImageData(
-        new Uint8ClampedArray(mask.data),
-        mask.width,
-        mask.height
-      );
+      const maskImageData = new ImageData(rgbaData, mask.width, mask.height);
       maskCtx.putImageData(maskImageData, 0, 0);
 
       // Apply full-res original photo
