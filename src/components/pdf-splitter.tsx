@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -25,11 +24,13 @@ import {
     ShieldCheck,
     Settings2,
     Sparkles,
-    SearchCode
+    SearchCode,
+    Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
-import { Separator } from './ui/separator';
+import { Separator } from '@/components/ui/separator';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Bundle-safe worker URL
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -262,15 +263,20 @@ export default function PdfSplitter() {
                         <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 md:p-12">
-                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
-                            <div className="relative">
-                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
-                            </div>
-                            <div className="text-center px-4">
-                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Visual Selection Enabled</p>
-                            </div>
+                        <div 
+                        className={cn(
+                            "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                        )}
+                        onClick={() => fileInputRef.current?.click()}
+                        >
+                        <div className="relative">
+                            <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
+                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Visual Selection Enabled</p>
+                        </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                     </CardContent>
@@ -302,7 +308,7 @@ export default function PdfSplitter() {
 
             <CardContent className="p-0">
                 <div className="grid lg:grid-cols-12">
-                    {/* LEFT SIDEBAR: CONTROLS (Similar to Image Cropper) */}
+                    {/* LEFT SIDEBAR: CONTROLS */}
                     <div className="lg:col-span-4 border-r bg-muted/20 p-6 space-y-8 no-print">
                         <div className="space-y-8 animate-in slide-in-from-left duration-300">
                              <div className="space-y-4">
@@ -374,7 +380,7 @@ export default function PdfSplitter() {
                         </div>
                     </div>
 
-                    {/* RIGHT VIEWPORT: GRID OF PAGES (Same style as Image Cropper main area) */}
+                    {/* RIGHT VIEWPORT: GRID OF PAGES */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 p-6 md:p-10">
                             {isRendering && previews.length === 0 ? (
@@ -434,6 +440,7 @@ export default function PdfSplitter() {
                                     })}
                                 </div>
                             )}
+                            <ScrollBar />
                         </ScrollArea>
                         
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
@@ -451,4 +458,3 @@ export default function PdfSplitter() {
         </Card>
     );
 }
-
