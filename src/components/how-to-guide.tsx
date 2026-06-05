@@ -81,24 +81,23 @@ type HowToGuideProps = {
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
   return (
-    <div className="w-full max-w-7xl mx-auto mt-20 mb-24 px-4 no-print">
-      <div className="flex flex-col items-center text-center mb-16 space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
-            <Sparkles className="size-3" /> Step-by-Step Masterclass
+    <div className="w-full max-w-6xl mx-auto mt-12 mb-16 px-4 no-print">
+      <div className="flex flex-col items-center text-center mb-10 space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-sm">
+            <Sparkles className="size-2.5" /> MASTER GUIDE
         </div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-tight text-slate-800 dark:text-white">
+        <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase leading-none text-slate-800 dark:text-white font-jakarta">
             How to use the <span className="text-gradient-hero">{title}</span>
         </h2>
-        <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-sm uppercase opacity-60 tracking-widest">
-            Follow our industrial-grade workflow for the best results.
+        <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-[10px] uppercase opacity-60 tracking-widest">
+            Follow our optimized workflow for industrial results.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
           
-          // Logic to handle both simple strings and detailed objects
           let titleText = "";
           let descText = "";
           let iconName = undefined;
@@ -123,36 +122,33 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
           const Icon = (iconName && ICON_MAP[iconName]) || CheckCircle2;
 
           return (
-            <Card key={index} className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/50 transition-all duration-500 rounded-[2.5rem] bg-card hover:-translate-y-1 shadow-xl hover:shadow-primary/10">
-              <CardContent className="p-8 md:p-10">
-                <div className="flex flex-col sm:flex-row gap-6 md:gap-10 items-center text-center sm:text-left">
-                    <div className="flex flex-col items-center gap-3 shrink-0">
-                        <div className="size-16 md:size-24 rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-primary/20">
-                            <Icon className="size-8 md:size-12" />
+            <Card key={index} className="group relative overflow-hidden border-2 border-border/40 hover:border-primary/40 transition-all duration-300 rounded-[2rem] bg-card hover:-translate-y-0.5 shadow-lg hover:shadow-primary/5">
+              <CardContent className="p-6 md:p-8">
+                <div className="flex gap-5 md:gap-8 items-start">
+                    <div className="flex flex-col items-center gap-2 shrink-0">
+                        <div className="size-12 md:size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-primary/10">
+                            <Icon className="size-6 md:size-8" />
                         </div>
-                        <div className="bg-primary/5 px-3 py-0.5 rounded-full border border-primary/10">
-                           <span className="text-[10px] font-black text-primary uppercase tracking-widest">STEP 0{index + 1}</span>
-                        </div>
+                        <span className="text-[8px] font-black text-primary/40 uppercase tracking-widest">0{index + 1}</span>
                     </div>
                     
-                    <div className="space-y-3 flex-1">
-                        <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
-                        <p className="text-[10px] md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80 tracking-wide">
+                    <div className="space-y-1.5 flex-1 pt-1">
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors font-jakarta">{titleText}</h3>
+                        <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-70 tracking-wide">
                             {descText}
                         </p>
                     </div>
                 </div>
               </CardContent>
-              <div className="absolute -bottom-6 -right-6 size-24 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-all" />
             </Card>
           );
         })}
       </div>
 
-      <div className="mt-16 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-10 bg-muted/20 border-2 border-dashed rounded-[3rem] text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 shadow-inner">
-        <div className="flex items-center gap-2"><ShieldCheck className="size-5 text-green-500" /> SECURE LOCAL HANDSHAKE</div>
-        <div className="flex items-center gap-2"><Zap className="size-5 text-yellow-500" /> NATIVE WASM SPEED</div>
-        <div className="flex items-center gap-2"><Sparkles className="size-5 text-primary" /> STUDIO QUALITY RENDER</div>
+      <div className="mt-12 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-8 bg-muted/20 border-2 border-dashed rounded-[2.5rem] text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 shadow-inner">
+        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> WASM SPEED</div>
+        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD RENDER</div>
       </div>
     </div>
   );
