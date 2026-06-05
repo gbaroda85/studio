@@ -8,19 +8,16 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  experimental: {
-    // Explicitly exclude heavy packages from the serverless function bundle
-    // This is the key fix for Vercel's 250MB limit error
-    serverExternalPackages: [
-      '@imgly/background-removal', 
-      '@huggingface/transformers', 
-      'genkit',
-      '@genkit-ai/google-genai',
-      'pdfjs-dist',
-      'tesseract.js',
-      'pdf-lib'
-    ],
-  },
+  // In Next.js 15, serverExternalPackages is at the root level
+  serverExternalPackages: [
+    '@imgly/background-removal', 
+    '@huggingface/transformers', 
+    'genkit',
+    '@genkit-ai/google-genai',
+    'pdfjs-dist',
+    'tesseract.js',
+    'pdf-lib'
+  ],
   images: {
     remotePatterns: [
       {
