@@ -218,7 +218,7 @@ export default function PdfPageNumberer() {
         
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-        const margin = 20; 
+        const margin = 12; // Pushed closer to edge for absolute margin feeling
 
         let pagesToNumber: number[];
         if (pageRange === 'all') {
@@ -316,7 +316,7 @@ export default function PdfPageNumberer() {
           zIndex: 40
       };
 
-      const m = "5%"; 
+      const m = "2.5%"; // Reduced to push numbers to edge in preview
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
@@ -460,7 +460,10 @@ export default function PdfPageNumberer() {
 
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label>
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label>
+                                    <Badge variant="secondary" className="font-black text-[9px]">{fontSize}pt</Badge>
+                                </div>
                                 <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
                             </div>
                             <div className="space-y-3">
