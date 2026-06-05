@@ -29,7 +29,6 @@ const ImageToTextOutputSchema = z.object({
 export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 
 export async function imageToText(input: ImageToTextInput): Promise<ImageToTextOutput> {
-  console.log('[OCR Flow] Starting extraction for payload of length:', input.photoDataUri.length);
   return imageToTextFlow(input);
 }
 
@@ -66,11 +65,9 @@ const imageToTextFlow = ai.defineFlow(
       });
 
       if (!llmResponse.text) {
-          console.warn('[OCR Flow] No text extracted by AI');
           return { success: false, error: 'AI could not find or extract any text from this image.' };
       }
 
-      console.log('[OCR Flow] Extraction successful. Text length:', llmResponse.text.length);
       return {
         success: true,
         text: llmResponse.text,
