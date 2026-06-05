@@ -116,7 +116,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                     
                     <div className="space-y-2 flex-1">
                         <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">{titleText}</h3>
-                        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80 line-clamp-3">
+                        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-bold uppercase opacity-80">
                             {descText}
                         </p>
                     </div>
