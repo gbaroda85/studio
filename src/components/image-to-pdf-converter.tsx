@@ -423,7 +423,7 @@ export default function ImageToPdfConverter() {
                                 </div>
                                 <Button 
                                     size="lg" 
-                                    className="magic-button magic-button-success w-full md:w-auto h-20 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-base md:text-lg font-black rounded-full transition-all active:scale-95 group flex items-center gap-3 text-white hover:text-green-600" 
+                                    className="magic-button magic-button-success w-full md:w-auto h-14 md:h-16 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-sm md:text-lg font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 text-white hover:text-green-600" 
                                     onClick={handleDownload}
                                 >
                                     <StarIcons />
@@ -516,20 +516,20 @@ export default function ImageToPdfConverter() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-10 border-t-2 border-dashed">
                     <Button 
-                        className="magic-button w-full h-20 md:h-24 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10" 
+                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={images.length === 0 || isConverting}
                         onClick={handleConvertToPdf}
                     >
                         <StarIcons />
                         {isConverting ? (
                             <div className="flex items-center gap-4">
-                                <Loader2 className="size-8 md:size-10 animate-spin" />
-                                <span className="uppercase tracking-tighter font-black text-lg md:text-xl">BUNDLING...</span>
+                                <Loader2 className="size-7 md:size-9 animate-spin" />
+                                <span className="uppercase tracking-tighter font-black text-base md:text-lg">BUNDLING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center justify-center w-full gap-4">
-                                <FileDigit className="size-6 md:size-8" />
-                                <span className="uppercase tracking-tighter font-black text-lg md:text-xl">GENERATE PDF</span>
+                                <FileDigit className="size-7 md:size-8" />
+                                <span className="uppercase tracking-tighter font-black text-base md:text-lg">GENERATE PDF</span>
                             </div>
                         )}
                     </Button>
