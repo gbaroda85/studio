@@ -8,12 +8,47 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck, Zap } from 'lucide-react';
+import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck, Zap, Sparkles } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Badge } from './ui/badge';
 
 type Font = 'helvetica' | 'times' | 'courier';
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 export default function TextToPdfConverter() {
     const { toast } = useToast();
@@ -35,18 +70,16 @@ export default function TextToPdfConverter() {
 
         setIsGenerating(true);
         try {
-            // 1. Capture the styled HTML preview for mobile compatibility
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2,
                 logging: false,
                 backgroundColor: '#FFFFFF',
-                width: 595, // A4 width in pixels at standard scale
+                width: 595, 
             });
             
             const imgData = canvas.toDataURL('image/jpeg', 0.92);
             setPreviewImage(imgData);
 
-            // 2. Generate actual PDF for download
             const doc = new jsPDF({
                 orientation: "p",
                 unit: "mm",
@@ -81,7 +114,6 @@ export default function TextToPdfConverter() {
         }
     }, [text, fontSize, font, margin]);
 
-    // Debounced effect for live preview
     useEffect(() => {
         const timer = setTimeout(() => {
             generatePdf();
@@ -104,7 +136,6 @@ export default function TextToPdfConverter() {
     
     return (
         <div className="w-full max-w-7xl flex flex-col gap-6 px-4 animate-in fade-in duration-500">
-            {/* Hidden Sandbox for Rendering Preview Image */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
                     ref={previewRef} 
@@ -122,7 +153,6 @@ export default function TextToPdfConverter() {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-                {/* Editor Section */}
                 <Card className="flex flex-col border-2 shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
@@ -170,7 +200,6 @@ export default function TextToPdfConverter() {
                     </CardContent>
                 </Card>
 
-                {/* Live Preview Section */}
                 <Card className="flex flex-col border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
                     <CardHeader className="bg-muted/30 border-b p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -198,9 +227,10 @@ export default function TextToPdfConverter() {
                         )}
                     </CardContent>
                     <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4">
-                        <Button onClick={handleDownload} disabled={!pdfBlob} className="w-full h-14 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group active:scale-95 transition-all">
-                            <Download className="mr-2 h-6 w-6 group-hover:translate-y-0.5 transition-transform" />
-                            DOWNLOAD PDF FILE
+                        <Button onClick={handleDownload} disabled={!pdfBlob} className="magic-button magic-button-success w-full h-16 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4">
+                            <StarIcons />
+                            <Download className="mr-2 h-7 w-7 group-hover:translate-y-0.5 transition-transform" /> 
+                            <span className="uppercase tracking-tighter">DOWNLOAD PDF FILE</span>
                         </Button>
                     </CardFooter>
                 </Card>

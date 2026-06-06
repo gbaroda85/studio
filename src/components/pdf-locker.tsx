@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -30,6 +29,41 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { lockPdf } from "@/lib/pdf-utils";
 import confetti from 'canvas-confetti';
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -117,7 +151,6 @@ export default function PdfLocker() {
     const url = URL.createObjectURL(protectedBlob);
     const link = document.createElement("a");
     link.href = url;
-    // Updated filename logic
     link.download = `GR7-Tools-${pdfFile.name}`;
     link.click();
     URL.revokeObjectURL(url);
@@ -145,7 +178,7 @@ export default function PdfLocker() {
             <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
                 Vault <span className="text-gradient-hero">PDF Locker</span>
             </h1>
-            <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-w-xl mx-auto">
+            <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                 Secure your bank statements and IDs with standard AES encryption. <br/>100% Private local engine.
             </p>
         </div>
@@ -218,11 +251,13 @@ export default function PdfLocker() {
                                 <Sparkles className="absolute -top-2 -right-2 text-yellow-400" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
                                 <p className="text-[10px] md:text-sm text-muted-foreground font-bold uppercase">Your document is sanitized and sealed.</p>
                             </div>
-                            <Button size="lg" className="h-16 md:h-20 px-8 md:px-12 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all w-full group" onClick={handleDownload}>
-                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE SECURE PDF
+                            <Button size="lg" className="magic-button magic-button-success h-16 md:h-20 px-8 md:px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 w-full" onClick={handleDownload}>
+                                <StarIcons />
+                                <Download className="mr-3 md:mr-4 size-8 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">SAVE SECURE PDF</span>
                             </Button>
                         </div>
                     ) : isProcessing ? (
@@ -261,7 +296,7 @@ export default function PdfLocker() {
                 <CardContent className="p-5 md:p-8 space-y-6 md:space-y-8">
                     <div className="space-y-6">
                         <div className="space-y-3">
-                            <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Set Document Password</Label>
+                            <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Set Document Password</Label>
                             <div className="relative group">
                                 <Input 
                                     type={showPassword ? "text" : "password"} 
@@ -307,18 +342,19 @@ export default function PdfLocker() {
                 <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
                     {!protectedBlob ? (
                         <Button 
-                            className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                            className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10"
                             onClick={handleProtect}
                             disabled={!password || !confirmPassword || isProcessing}
                         >
+                            <StarIcons />
                             {isProcessing ? (
                                 <div className="flex items-center gap-3">
                                     <Loader2 className="size-6 md:size-8 animate-spin" />
                                     <span className="uppercase text-sm md:text-base tracking-tighter">ENCRYPTING...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    <Lock className="size-6 md:size-8 text-white group-hover:scale-125 transition-transform" />
+                                <div className="flex items-center gap-3">
+                                    <Lock className="size-7 md:size-8 text-white group-hover:scale-125 transition-transform" />
                                     <span className="uppercase tracking-tighter text-lg md:text-2xl">LOCK DOCUMENT</span>
                                 </div>
                             )}

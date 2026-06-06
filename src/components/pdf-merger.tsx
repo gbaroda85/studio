@@ -43,6 +43,41 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -305,7 +340,7 @@ export default function PdfMerger() {
                                         </div>
                                     ) : previewImages.map((img, i) => (
                                         <div key={i} className="shadow-2xl border-[6px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[400px] animate-in slide-in-from-bottom-4 duration-500">
-                                            <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto block" />
+                                            <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
                                             <div className="bg-muted text-[8px] font-black py-1.5 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
                                         </div>
                                     ))}
@@ -323,8 +358,10 @@ export default function PdfMerger() {
                                     <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
                                 </div>
                             </div>
-                            <Button size="lg" className="w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-green-700 text-lg font-black shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleDownload}>
-                                <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> SAVE COMBINED PDF
+                            <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
+                                <StarIcons />
+                                <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
                             </Button>
                         </CardFooter>
                     </Card>
@@ -347,7 +384,6 @@ export default function PdfMerger() {
                             </Label>
                             
                             <div className="flex flex-col gap-4">
-                                {/* A -> Z Sort Button */}
                                 <Button 
                                     className="h-16 rounded-full bg-gradient-to-r from-[#1a5f6e] to-[#0d9488] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('asc')}
@@ -359,7 +395,6 @@ export default function PdfMerger() {
                                     <span className="text-sm font-black tracking-widest uppercase">Sort Name A → Z</span>
                                 </Button>
 
-                                {/* Z -> A Sort Button */}
                                 <Button 
                                     className="h-16 rounded-full bg-gradient-to-r from-[#1e40af] to-[#312e81] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('desc')}
@@ -371,7 +406,6 @@ export default function PdfMerger() {
                                     <span className="text-sm font-black tracking-widest uppercase">Sort Name Z → A</span>
                                 </Button>
 
-                                {/* FLIP Order Button */}
                                 <Button 
                                     className="h-16 rounded-full bg-gradient-to-r from-[#065f46] to-[#064e3b] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('reverse')}
@@ -398,18 +432,19 @@ export default function PdfMerger() {
 
                     <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed">
                         <Button 
-                            className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
+                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                             onClick={handleMergePdfs} 
                             disabled={pdfFiles.length < 2 || isMerging}
                         >
+                            <StarIcons />
                             {isMerging ? (
                                 <div className="flex items-center gap-3">
-                                    <Loader2 className="size-6 md:size-8 animate-spin" />
+                                    <Loader2 className="size-7 md:size-8 animate-spin" />
                                     <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-3">
-                                    <Merge className="size-6 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
+                                    <Merge className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
                                     <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
                                 </div>
                             )}

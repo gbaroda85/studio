@@ -128,15 +128,17 @@
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   overflow: visible !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 0 rgba(var(--primary), 0.55);
 }
 
 .magic-button:hover {
   background: transparent !important;
-  box-shadow: 0 0 25px hsla(var(--primary), 0.5);
+  box-shadow: 0 0 25px rgba(var(--primary), 0.55);
 }
 
 .magic-button-success:hover {
-  box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.55);
 }
 
 .star-1, .star-2, .star-3, .star-4, .star-5, .star-6 {

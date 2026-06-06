@@ -27,6 +27,41 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -139,7 +174,7 @@ export default function VideoToMp3Converter() {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
                         <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-indigo-500/10 text-indigo-600 shadow-xl relative">
                             <Music className="size-8" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
                                 <Sparkles className="size-3" />
                             </div>
                         </div>
@@ -164,11 +199,11 @@ export default function VideoToMp3Converter() {
                         <CardContent className="p-10 md:p-16">
                             <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
                                 <div className="relative">
-                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center px-4">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Video File here</p>
+                                    <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Video File here</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Extraction happens locally in RAM.</p>
                                 </div>
                             </div>
@@ -253,18 +288,19 @@ export default function VideoToMp3Converter() {
                                 <div className="space-y-4 pt-4 border-t border-white/5">
                                      {!audioUrl ? (
                                         <Button 
-                                            className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50" 
+                                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
                                             onClick={extractAudio}
                                             disabled={isProcessing}
                                         >
+                                            <StarIcons />
                                             {isProcessing ? (
                                                 <div className="flex items-center gap-3">
                                                     <Loader2 className="size-6 md:size-8 animate-spin" />
-                                                    <span className="uppercase tracking-tighter">DECODING...</span>
+                                                    <span className="uppercase text-sm tracking-tighter">DECODING...</span>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-3">
-                                                    <Volume2 className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                    <Volume2 className="size-7 md:size-8 group-hover:scale-110 transition-transform" />
                                                     <span className="uppercase tracking-tighter">EXTRACT AUDIO</span>
                                                 </div>
                                             )}
@@ -272,11 +308,12 @@ export default function VideoToMp3Converter() {
                                      ) : (
                                         <div className="space-y-4 animate-in zoom-in-95">
                                              <Button 
-                                                className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl md:rounded-[1.5rem] group transition-all active:scale-95" 
+                                                className="magic-button magic-button-success w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10" 
                                                 onClick={handleDownload}
                                             >
-                                                <Download className="mr-3 size-6 md:size-8 group-hover:translate-y-1 transition-transform" />
-                                                SAVE AUDIO FILE
+                                                <StarIcons />
+                                                <Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                                                <span className="uppercase tracking-tighter">SAVE AUDIO FILE</span>
                                             </Button>
                                             <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100"><RefreshCcw className="size-3" /> Load Another Video</Button>
                                         </div>
