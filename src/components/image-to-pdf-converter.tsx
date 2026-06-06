@@ -22,15 +22,19 @@ import {
   MousePointer2,
   Layers,
   RotateCw,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  Monitor,
+  ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { motion, AnimatePresence } from "framer-motion";
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
@@ -72,10 +76,10 @@ export default function ImageToPdfConverter() {
     }
     const newFilesList = Array.from(files || []).filter(file => file.type.startsWith('image/'));
     
+    if (newFilesList.length === 0) return;
+
     const newItems: ImageItem[] = [];
     let processedCount = 0;
-
-    if (newFilesList.length === 0) return;
 
     newFilesList.forEach(file => {
         const reader = new FileReader();
@@ -150,20 +154,15 @@ export default function ImageToPdfConverter() {
             setIsConverting(false);
             return;
         }
-
-        // Swap width/height for 90 degree rotation
         canvas.width = img.height;
         canvas.height = img.width;
-
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
         const rotatedSrc = canvas.toDataURL('image/png');
         setImages(prev => prev.map(i => i.id === selectedId ? { ...i, src: rotatedSrc } : i));
         clearPreviews();
         setIsConverting(false);
-        toast({ title: "Image Rotated", description: "Turned 90° clockwise." });
     };
   };
 
@@ -223,7 +222,6 @@ export default function ImageToPdfConverter() {
 
     for (let i = 0; i < images.length; i++) {
         if (i > 0) pdf.addPage();
-
         const imgData = images[i];
         const img = new window.Image();
         img.src = imgData.src;
@@ -231,23 +229,15 @@ export default function ImageToPdfConverter() {
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
-                // 90% Scaling for room to align
                 const scaleFactor = 0.9;
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scaleFactor;
                 const finalWidth = imgProps.width * ratio;
                 const finalHeight = imgProps.height * ratio;
-
                 const x = (pageWidth - finalWidth) / 2;
                 let y;
-
-                // ABSOLUTE LITERAL COORDINATES
-                if (imgData.vAlign === 'top') {
-                    y = 0; 
-                } else if (imgData.vAlign === 'bottom') {
-                    y = pageHeight - finalHeight; 
-                } else {
-                    y = (pageHeight - finalHeight) / 2; 
-                }
+                if (imgData.vAlign === 'top') y = 0; 
+                else if (imgData.vAlign === 'bottom') y = pageHeight - finalHeight; 
+                else y = (pageHeight - finalHeight) / 2; 
 
                 pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
                 resolve(null);
@@ -259,246 +249,253 @@ export default function ImageToPdfConverter() {
     const url = URL.createObjectURL(pdfBlob);
     setConvertedPdfUrl(url);
     await generateVisualPreviews(pdfBlob);
-
     setIsConverting(false);
-    toast({ title: "PDF Created", description: "Strict alignment logic applied." });
+    toast({ title: "Bundle Created!", description: "Professional PDF has been generated." });
   };
   
   const handleDownload = () => {
       if (!convertedPdfUrl) return;
       const link = document.createElement('a');
       link.href = convertedPdfUrl;
-      link.download = `strictly-aligned-docs.pdf`;
+      link.download = `GR7-Image-Bundle-${Date.now()}.pdf`;
       link.click();
   }
 
   const selectedImage = images.find(img => img.id === selectedId);
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
         
+        {/* Workspace: Left Panel */}
         <div className="lg:col-span-8 space-y-6">
-            <Card className={cn("border-2 transition-all duration-300 overflow-hidden bg-card/50 shadow-xl rounded-[2.5rem]", isDragOver && "border-primary ring-4 ring-primary/20")}
-                  onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-                <CardHeader className="bg-muted/30 border-b p-6">
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter">IMAGE TO PDF STUDIO</CardTitle>
-                    <CardDescription className="font-bold text-[10px] uppercase opacity-50">Absolute zero-gap alignment enabled.</CardDescription>
+            <Card className={cn(
+                "border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl transition-all duration-300",
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+            )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+                <CardHeader className="bg-primary/5 border-b p-5 md:p-7 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="size-10 md:size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                            <FileDigit className="size-6 md:size-7" />
+                        </div>
+                        <div className="text-left">
+                            <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter leading-none">PDF Workspace</CardTitle>
+                            <CardDescription className="text-[9px] font-bold uppercase opacity-50 tracking-widest mt-1">Bundle up to 50 images into one PDF</CardDescription>
+                        </div>
+                    </div>
+                    {images.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{images.length} FILES</Badge>}
                 </CardHeader>
-                <CardContent className="p-4 md:p-6">
+                <CardContent className="p-4 md:p-8">
                     {images.length === 0 ? (
-                        <div className="border-4 border-dashed border-muted-foreground/30 rounded-3xl p-8 md:p-20 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group" onClick={() => fileInputRef.current?.click()}>
-                            <div className="size-16 md:size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                <UploadCloud className="size-8 md:size-10" />
+                        <div className="border-4 border-dashed border-primary/20 rounded-[2rem] p-12 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-muted/20" onClick={() => fileInputRef.current?.click()}>
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center px-4">
-                                <p className="text-lg font-black uppercase tracking-tighter">Drop images or Click to upload</p>
-                                <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Drop Images to Stacking Area</p>
+                                <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local RAM processing.</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar p-1">
                             {images.map((img, index) => (
                             <div 
                                 key={img.id} 
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
-                                    "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-md",
-                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-xl" : "hover:border-primary/30"
+                                    "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col shadow-lg",
+                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/20" : "border-slate-100 hover:border-primary/40"
                                 )}
                             >
                                 <div className={cn(
-                                    "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
+                                    "absolute inset-0 flex flex-col w-full h-full transition-all duration-300",
                                     img.vAlign === 'top' ? 'justify-start' : img.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                 )}>
-                                    <img 
-                                        src={img.src} 
-                                        alt="thumb"
-                                        className="max-w-full max-h-[90%] object-contain pointer-events-none mx-auto block" 
-                                    />
+                                    <img src={img.src} alt="thumb" className="max-w-[85%] max-h-[85%] object-contain pointer-events-none mx-auto block" />
                                 </div>
-                                
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                    <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRemoveImage(img.id); }}>
-                                        <X className="h-4 w-4" />
+                                    <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); handleRemoveImage(img.id); }}>
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
                                 <div className="absolute top-2 left-2 z-20">
-                                    <div className="bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full font-black uppercase backdrop-blur-md">P{index + 1}</div>
+                                    <div className="bg-primary text-white text-[8px] px-2 py-0.5 rounded-md font-black shadow-lg">P{index + 1}</div>
                                 </div>
                             </div>
                             ))}
-                            <button className="border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group" onClick={() => fileInputRef.current?.click()}>
-                                <UploadCloud className="h-8 w-8 text-primary/40 group-hover:text-primary" />
-                                <span className="text-[10px] font-black uppercase text-primary/60">Add More</span>
+                            <button className="border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                                <Plus className="h-8 w-8 text-primary/40 group-hover:scale-125 transition-transform" />
+                                <span className="text-[9px] font-black uppercase text-primary/60">ADD MORE</span>
                             </button>
                         </div>
                     )}
                 </CardContent>
-                {images.length > 0 && (
-                    <CardFooter className="bg-muted/10 border-t p-4 flex justify-between items-center">
-                        <Button variant="ghost" onClick={handleReset} className="text-[10px] font-black uppercase text-destructive hover:bg-destructive/10 tracking-widest"><RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over</Button>
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground opacity-40">
-                            <ShieldCheck className="h-4 w-4 text-green-500" /> Secure Processing
-                        </div>
-                    </CardFooter>
-                )}
+                <CardFooter className="bg-muted/10 p-5 border-t flex justify-between items-center">
+                    <Button variant="ghost" onClick={handleReset} className="text-[10px] font-black uppercase text-destructive h-10 px-6 hover:bg-destructive/5 rounded-xl border-2 border-transparent hover:border-destructive/20"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest">
+                        <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE RAM
+                    </div>
+                </CardFooter>
             </Card>
 
-            {convertedPdfUrl && (
-                <Card className="border-2 border-green-500/20 shadow-3xl animate-in zoom-in-95 duration-500 overflow-hidden bg-card/50 rounded-[2.5rem] hover:-translate-y-1 transition-all">
-                    <CardHeader className="bg-green-500/5 py-3 border-b border-green-500/20 text-center">
-                        <CardTitle className="text-[10px] font-black uppercase flex items-center justify-center gap-2 text-green-700 tracking-[0.2em]">
-                            <Eye className="size-3 text-green-600" /> VISUAL PREVIEW CONFIRMATION
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
-                        <ScrollArea className="h-[550px] w-full p-6 md:p-12 lg:p-16">
-                            <div className="flex flex-col items-center gap-8 pb-10">
-                                {isGeneratingPreview ? (
-                                    <div className="flex flex-col items-center gap-4 py-20 w-full max-w-xs text-center">
-                                        <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20 mx-auto stroke-[3]" />
-                                        <div className="space-y-3 w-full">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Generating HD Preview...</p>
-                                            <Progress value={renderingProgress} className="h-1" />
-                                        </div>
+            <AnimatePresence>
+                {convertedPdfUrl && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+                        <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem] relative">
+                            <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20 flex flex-row items-center justify-center gap-3">
+                                <Eye className="size-4 text-green-600" />
+                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Visual Render Confirmation</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
+                                <ScrollArea className="h-[450px] w-full p-8 md:p-12">
+                                    <div className="flex flex-col items-center gap-10 pb-10">
+                                        {isGeneratingPreview ? (
+                                            <div className="flex flex-col items-center gap-6 py-20 text-center">
+                                                <div className="relative">
+                                                    <Loader2 className="size-20 text-primary opacity-20 animate-spin stroke-[3]" />
+                                                    <Monitor className="absolute inset-0 m-auto size-8 text-primary/40 animate-pulse" />
+                                                </div>
+                                                <div className="space-y-3 w-64">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Combined View...</p>
+                                                    <Progress value={renderingProgress} className="h-1.5" />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            previewImages.map((img, i) => (
+                                                <div key={i} className="shadow-3xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-[400px] animate-in slide-in-from-bottom-4 duration-500">
+                                                    <img src={img} alt="p" className="w-full h-auto block" />
+                                                    <div className="bg-muted text-[8px] font-black py-2 text-center uppercase tracking-widest text-muted-foreground border-t">A4 Optimized Page {i+1}</div>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
-                                ) : (
-                                    previewImages.map((img, i) => (
-                                        <div key={i} className="shadow-3xl border-4 md:border-8 border-white rounded-sm overflow-hidden bg-white max-w-full animate-in slide-in-from-bottom-4 duration-500">
-                                            <img src={img} alt={`Page ${i+1}`} className="max-w-full h-auto block" />
-                                            <div className="bg-muted text-[8px] font-black py-1.5 text-center uppercase tracking-widest text-muted-foreground border-t">A4 Page {i+1}</div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                            <ScrollBar />
-                        </ScrollArea>
-                    </CardContent>
-                    <CardFooter className="bg-green-500/10 p-8 flex flex-col sm:flex-row justify-between items-center gap-8 border-t border-green-500/20">
-                        <div className="flex items-center gap-5 text-center sm:text-left">
-                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl shrink-0">
-                                <CheckCircle2 className="size-9" />
-                            </div>
-                            <div>
-                                <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">PDF READY!</p>
-                                <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
-                            </div>
-                        </div>
-                        {/* PREMIUM DOWNLOAD BUTTON */}
-                        <Button 
-                            size="lg" 
-                            className="w-full sm:w-auto h-20 px-12 bg-gradient-to-r from-green-600 to-emerald-800 border-t border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_15px_30px_-10px_rgba(34,197,94,0.4)] text-xl font-black rounded-3xl transition-all active:scale-95 group flex items-center gap-5 border-none" 
-                            onClick={handleDownload}
-                        >
-                            <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:translate-y-1 transition-transform">
-                                <Download className="size-6 text-white" />
-                            </div>
-                            <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            )}
+                                </ScrollArea>
+                            </CardContent>
+                            <CardFooter className="bg-green-500/10 p-8 md:p-10 flex flex-col md:flex-row justify-between items-center gap-8 border-t border-green-500/20">
+                                <div className="flex items-center gap-6">
+                                    <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl shrink-0 relative overflow-hidden">
+                                        <CheckCircle2 className="size-10 md:size-12 z-10" />
+                                        <Sparkles className="absolute -top-1 -right-1 text-yellow-300 size-8 opacity-40" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-2xl md:text-3xl font-black text-green-900 uppercase tracking-tighter leading-none">Ready!</p>
+                                        <p className="text-[10px] md:text-xs text-green-700 font-bold mt-2 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
+                                    </div>
+                                </div>
+                                <Button size="lg" className="w-full md:w-auto h-20 px-12 bg-gradient-to-r from-green-600 to-emerald-800 border-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_20px_40px_-10px_rgba(34,197,94,0.4)] text-xl font-black rounded-3xl transition-all active:scale-95 group flex items-center gap-4" onClick={handleDownload}>
+                                    <div className="size-11 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:translate-y-1 transition-transform">
+                                        <Download className="size-6 text-white" />
+                                    </div>
+                                    <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
 
+        {/* Sidebar: Settings Panel */}
         <div className="lg:col-span-4 space-y-6">
-            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
-                <CardHeader className="bg-primary/5 border-b p-6">
-                    <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
-                        <Layout className="size-6 text-primary" /> POSITIONING
+            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all hover:border-primary/30">
+                <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
+                    <CardTitle className="text-xl md:text-2xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-6 text-primary" /> STUDIO CONTROL
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8">
+                <CardContent className="p-6 md:p-10 space-y-10">
                     {!selectedId ? (
                         <div className="py-20 text-center space-y-4 opacity-30 flex flex-col items-center">
-                             <MousePointer2 className="size-14 text-muted-foreground" />
-                             <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">Select a page thumbnail<br/>to strictly align</p>
+                             <MousePointer2 className="size-16 text-muted-foreground animate-bounce" />
+                             <p className="text-xs font-black uppercase tracking-[0.2em] leading-relaxed max-w-[200px]">Select a page to<br/>unlock strict alignment</p>
                         </div>
                     ) : (
-                        <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
                             <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
+                                    <AlignVerticalJustifyCenter className="size-3" /> Position Logic
                                 </Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-3 gap-3">
                                     <Button 
                                         variant={selectedImage?.vAlign === 'top' ? 'default' : 'outline'} 
-                                        className={cn("h-16 flex-col gap-1 rounded-xl border-2 transition-all", selectedImage?.vAlign === 'top' && "border-primary bg-primary shadow-lg scale-105")} 
+                                        className={cn("h-20 flex-col gap-1 rounded-2xl border-2 transition-all shadow-sm", selectedImage?.vAlign === 'top' && "border-primary bg-primary shadow-xl scale-105")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
                                     >
                                         <AlignVerticalJustifyStart className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Literal Top</span>
+                                        <span className="text-[9px] font-black uppercase">Literal Top</span>
                                     </Button>
                                     <Button 
                                         variant={selectedImage?.vAlign === 'center' ? 'default' : 'outline'} 
-                                        className={cn("h-16 flex-col gap-1 rounded-xl border-2 transition-all", selectedImage?.vAlign === 'center' && "border-primary bg-primary shadow-lg scale-105")} 
+                                        className={cn("h-20 flex-col gap-1 rounded-2xl border-2 transition-all shadow-sm", selectedImage?.vAlign === 'center' && "border-primary bg-primary shadow-xl scale-105")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'center' })}
                                     >
                                         <AlignVerticalJustifyCenter className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Center</span>
+                                        <span className="text-[9px] font-black uppercase">Center</span>
                                     </Button>
                                     <Button 
                                         variant={selectedImage?.vAlign === 'bottom' ? 'default' : 'outline'} 
-                                        className={cn("h-16 flex-col gap-1 rounded-xl border-2 transition-all", selectedImage?.vAlign === 'bottom' && "border-primary bg-primary shadow-lg scale-105")} 
+                                        className={cn("h-20 flex-col gap-1 rounded-2xl border-2 transition-all shadow-sm", selectedImage?.vAlign === 'bottom' && "border-primary bg-primary shadow-xl scale-105")} 
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
                                     >
                                         <AlignVerticalJustifyEnd className="size-5" />
-                                        <span className="text-[8px] font-black uppercase">Literal Bottom</span>
+                                        <span className="text-[9px] font-black uppercase">Literal Bottom</span>
                                     </Button>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/5">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <RotateCw className="size-3" /> Orientation
+                            <div className="space-y-4 pt-6 border-t-2 border-dashed border-primary/10">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
+                                    <RotateCw className="size-3" /> Fix Orientation
                                 </Label>
                                 <Button 
                                     variant="outline" 
-                                    className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase shadow-sm hover:border-primary/40 transition-all"
+                                    className="w-full h-14 rounded-2xl border-2 font-black text-xs uppercase shadow-sm hover:border-primary/40 transition-all"
                                     onClick={rotateSelectedImage}
                                 >
-                                    <RotateCw className="size-4 mr-2" /> Rotate 90°
+                                    <RotateCw className="size-5 mr-3" /> Rotate 90° Clockwise
                                 </Button>
                             </div>
 
-                            <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl transition-all" onClick={applyToAll}>
-                                <Layers className="size-3.5 mr-2" /> Global Sync Alignment
+                            <Button variant="outline" className="w-full h-11 border-2 font-black text-[10px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-2xl transition-all shadow-sm" onClick={applyToAll}>
+                                <Layers className="size-4 mr-2" /> Global Sync Alignment
                             </Button>
-                        </div>
+                        </motion.div>
                     )}
 
-                    <div className="p-5 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4 shadow-inner">
-                        <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
-                        <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
+                    <div className="p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 flex gap-5 shadow-inner">
+                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                             <Zap className="size-6 text-yellow-500 animate-pulse" />
+                        </div>
+                        <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                             <span className="font-black block mb-1 text-primary">STRICT CLAMPING:</span>
                             "Bottom" logic pushes the image to the absolute last pixel of the page. Zero padding active.
                         </p>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed">
-                    {/* PREMIUM BUILD BUTTON */}
+                <CardFooter className="bg-muted/10 p-6 md:p-10 border-t-2 border-dashed">
                     <Button 
-                        className="w-full h-20 rounded-[1.8rem] bg-gradient-to-r from-primary to-blue-700 border-t border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_15px_30px_-10px_rgba(var(--primary),0.4)] text-white hover:brightness-110 transition-all active:scale-95 disabled:opacity-50 group px-8 border-none" 
+                        className="w-full h-20 md:h-24 rounded-[2rem] bg-gradient-to-r from-primary to-blue-700 border-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_25px_50px_-12px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 disabled:opacity-50 group px-10" 
                         disabled={images.length === 0 || isConverting}
                         onClick={handleConvertToPdf}
                     >
                         {isConverting ? (
-                            <div className="flex items-center gap-4">
-                                <Loader2 className="size-8 animate-spin" />
-                                <span className="uppercase tracking-tighter font-black text-xl">CONSTRUCTING...</span>
+                            <div className="flex items-center gap-5">
+                                <Loader2 className="size-10 animate-spin" />
+                                <span className="uppercase tracking-tighter font-black text-2xl">BUNDLING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-4">
-                                    <div className="size-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <FileDigit className="size-7 text-white" />
+                                <div className="flex items-center gap-5">
+                                    <div className="size-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                        <FileDigit className="size-8 text-white" />
                                     </div>
                                     <div className="text-left">
-                                        <span className="block uppercase tracking-tighter leading-none font-black text-xl">BUILD PDF</span>
-                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">{images.length} FILES STACKED</span>
+                                        <span className="block uppercase tracking-tighter leading-none font-black text-2xl">GENERATE PDF</span>
+                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">{images.length} FILES IN STACK</span>
                                     </div>
                                 </div>
-                                <ChevronRight className="size-6 opacity-30 group-hover:translate-x-1 transition-transform" />
+                                <ChevronRight className="size-8 opacity-20 group-hover:translate-x-1 transition-transform" />
                             </div>
                         )}
                     </Button>
@@ -510,3 +507,4 @@ export default function ImageToPdfConverter() {
     </div>
   );
 }
+
