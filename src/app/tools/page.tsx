@@ -73,13 +73,14 @@ function ToolsPageContent() {
   const tabParam = searchParams.get('tab');
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
+  // Fixed: Assigning explicit bg- classes to ensure JIT picks them up and icons are visible
   const imageFeatures = [
     {
       href: '/image-to-pdf',
       labelKey: 'image_to_pdf_label',
       descriptionKey: 'image_to_pdf_description',
       icon: FileDigit,
-      color: 'text-red-500',
+      color: 'bg-red-500',
       lightBg: 'bg-[#fff1f2]'
     },
     {
@@ -87,7 +88,7 @@ function ToolsPageContent() {
       labelKey: 'image_compress_label',
       descriptionKey: 'image_compress_description',
       icon: Shrink,
-      color: 'text-blue-600',
+      color: 'bg-blue-600',
       lightBg: 'bg-[#fefce8]'
     },
     {
@@ -95,7 +96,7 @@ function ToolsPageContent() {
       labelKey: 'crop_image_label',
       descriptionKey: 'crop_image_description',
       icon: Crop,
-      color: 'text-cyan-500',
+      color: 'bg-cyan-500',
       lightBg: 'bg-[#ecfeff]'
     },
     {
@@ -103,7 +104,7 @@ function ToolsPageContent() {
       labelKey: 'resize_image_label',
       descriptionKey: 'resize_image_description',
       icon: Maximize,
-      color: 'text-indigo-600',
+      color: 'bg-indigo-600',
       lightBg: 'bg-[#eff6ff]'
     },
     {
@@ -111,7 +112,7 @@ function ToolsPageContent() {
       labelKey: 'remove_background_label',
       descriptionKey: 'remove_background_description',
       icon: Eraser,
-      color: 'text-rose-500',
+      color: 'bg-rose-500',
       lightBg: 'bg-[#faf5ff]'
     },
     {
@@ -119,7 +120,7 @@ function ToolsPageContent() {
       labelKey: 'remove_signature_label',
       descriptionKey: 'remove_signature_description',
       icon: PenLine,
-      color: 'text-orange-500',
+      color: 'bg-orange-500',
       lightBg: 'bg-[#fff7ed]'
     },
     {
@@ -127,7 +128,7 @@ function ToolsPageContent() {
       labelKey: 'enhance_photo_label',
       descriptionKey: 'enhance_photo_description',
       icon: Sparkles,
-      color: 'text-purple-600',
+      color: 'bg-purple-600',
       lightBg: 'bg-[#f5f3ff]'
     },
     {
@@ -135,7 +136,7 @@ function ToolsPageContent() {
       labelKey: 'passport_photo_label',
       descriptionKey: 'passport_photo_description',
       icon: UserCircle,
-      color: 'text-emerald-600',
+      color: 'bg-emerald-600',
       lightBg: 'bg-[#f0fdfa]'
     },
     {
@@ -143,7 +144,7 @@ function ToolsPageContent() {
       labelKey: 'image_to_jpg_label',
       descriptionKey: 'image_to_jpg_description',
       icon: FileOutput,
-      color: 'text-yellow-500',
+      color: 'bg-yellow-500',
       lightBg: 'bg-[#fefce8]'
     },
     {
@@ -151,7 +152,7 @@ function ToolsPageContent() {
       labelKey: 'image_to_png_label',
       descriptionKey: 'image_to_png_description',
       icon: FileOutput,
-      color: 'text-sky-500',
+      color: 'bg-sky-500',
       lightBg: 'bg-[#ecfeff]'
     },
     {
@@ -159,7 +160,7 @@ function ToolsPageContent() {
       labelKey: 'image_to_text_label',
       descriptionKey: 'image_to_text_description',
       icon: FileScan,
-      color: 'text-teal-500',
+      color: 'bg-teal-500',
       lightBg: 'bg-[#f0fdfa]'
     },
   ];
@@ -170,7 +171,7 @@ function ToolsPageContent() {
       labelKey: 'merge_pdf_label',
       descriptionKey: 'merge_pdf_description',
       icon: Merge,
-      color: 'text-emerald-600',
+      color: 'bg-emerald-600',
       lightBg: 'bg-[#f0fdf4]'
     },
     {
@@ -178,7 +179,7 @@ function ToolsPageContent() {
       labelKey: 'lock_pdf_label',
       descriptionKey: 'lock_pdf_description',
       icon: Lock,
-      color: 'text-slate-900',
+      color: 'bg-slate-900',
       lightBg: 'bg-[#f8fafc]'
     },
     {
@@ -186,7 +187,7 @@ function ToolsPageContent() {
       labelKey: 'compress_pdf_label',
       descriptionKey: 'compress_pdf_description',
       icon: FileArchive,
-      color: 'text-rose-600',
+      color: 'bg-rose-600',
       lightBg: 'bg-[#fff1f2]'
     },
     {
@@ -194,7 +195,7 @@ function ToolsPageContent() {
       labelKey: 'edit_pdf_label',
       descriptionKey: 'edit_pdf_description',
       icon: FilePenLine,
-      color: 'text-indigo-600',
+      color: 'bg-indigo-600',
       lightBg: 'bg-[#eff6ff]'
     },
     {
@@ -202,7 +203,7 @@ function ToolsPageContent() {
       labelKey: 'document_scan_label',
       descriptionKey: 'document_scan_description',
       icon: Sparkles,
-      color: 'text-primary',
+      color: 'bg-primary',
       lightBg: 'bg-[#f0fdf4]'
     },
     {
@@ -210,7 +211,7 @@ function ToolsPageContent() {
       labelKey: 'scan_to_pdf_label',
       descriptionKey: 'scan_to_pdf_description',
       icon: Camera,
-      color: 'text-indigo-500',
+      color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
     },
     {
@@ -218,7 +219,7 @@ function ToolsPageContent() {
       labelKey: 'unlock_pdf_label',
       descriptionKey: 'unlock_pdf_description',
       icon: Unlock,
-      color: 'text-teal-500',
+      color: 'bg-teal-500',
       lightBg: 'bg-[#f0fdfa]'
     },
     {
@@ -226,7 +227,7 @@ function ToolsPageContent() {
       labelKey: 'split_pdf_label',
       descriptionKey: 'split_pdf_description',
       icon: Scissors,
-      color: 'text-cyan-600',
+      color: 'bg-cyan-600',
       lightBg: 'bg-[#ecfeff]'
     },
     {
@@ -234,7 +235,7 @@ function ToolsPageContent() {
       labelKey: 'crop_pdf_label',
       descriptionKey: 'crop_pdf_description',
       icon: Crop,
-      color: 'text-amber-600',
+      color: 'bg-amber-600',
       lightBg: 'bg-[#fffbeb]'
     },
     {
@@ -242,7 +243,7 @@ function ToolsPageContent() {
       labelKey: 'pdf_to_image_label',
       descriptionKey: 'pdf_to_image_description',
       icon: ImageIcon,
-      color: 'text-orange-500',
+      color: 'bg-orange-500',
       lightBg: 'bg-[#fff7ed]'
     },
     {
@@ -250,7 +251,7 @@ function ToolsPageContent() {
       labelKey: 'html_to_pdf_label',
       descriptionKey: 'html_to_pdf_description',
       icon: FileCode,
-      color: 'text-orange-600',
+      color: 'bg-orange-600',
       lightBg: 'bg-[#fff7ed]'
     },
     {
@@ -258,7 +259,7 @@ function ToolsPageContent() {
       labelKey: 'text_to_pdf_label',
       descriptionKey: 'text_to_pdf_description',
       icon: FileText,
-      color: 'text-indigo-600',
+      color: 'bg-indigo-600',
       lightBg: 'bg-[#f8fafc]'
     },
     {
@@ -266,7 +267,7 @@ function ToolsPageContent() {
       labelKey: 'add_watermark_label',
       descriptionKey: 'add_watermark_description',
       icon: Copyright,
-      color: 'text-rose-500',
+      color: 'bg-rose-500',
       lightBg: 'bg-[#fff1f2]'
     },
     {
@@ -274,7 +275,7 @@ function ToolsPageContent() {
       labelKey: 'add_page_numbers_label',
       descriptionKey: 'add_page_numbers_description',
       icon: NotebookPen,
-      color: 'text-metric-500',
+      color: 'bg-emerald-500',
       lightBg: 'bg-[#f7fee7]'
     },
   ];
@@ -285,7 +286,7 @@ function ToolsPageContent() {
       labelKey: 'video_to_mp3_label',
       descriptionKey: 'video_to_mp3_description',
       icon: Music,
-      color: 'text-indigo-500',
+      color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
     },
   ];
@@ -296,7 +297,7 @@ function ToolsPageContent() {
       labelKey: 'aadhaar_printer_label',
       descriptionKey: 'aadhaar_printer_description',
       icon: Printer,
-      color: 'text-orange-600',
+      color: 'bg-orange-600',
       lightBg: 'bg-[#fff7ed]'
     },
     {
@@ -304,7 +305,7 @@ function ToolsPageContent() {
       labelKey: 'create_zip_label',
       descriptionKey: 'create_zip_description',
       icon: Archive,
-      color: 'text-violet-500',
+      color: 'bg-violet-500',
       lightBg: 'bg-[#f5f3ff]'
     },
     {
@@ -312,7 +313,7 @@ function ToolsPageContent() {
       labelKey: 'unzip_file_label',
       descriptionKey: 'unzip_file_description',
       icon: ArchiveRestore,
-      color: 'text-stone-500',
+      color: 'bg-stone-500',
       lightBg: 'bg-[#f8fafc]'
     },
   ];
@@ -323,7 +324,7 @@ function ToolsPageContent() {
       labelKey: 'standard_calculator_label',
       descriptionKey: 'standard_calculator_description',
       icon: Calculator,
-      color: 'text-cyan-500',
+      color: 'bg-cyan-500',
       lightBg: 'bg-[#ecfeff]'
     },
     {
@@ -331,7 +332,7 @@ function ToolsPageContent() {
       labelKey: 'loan_emi_calculator_label',
       descriptionKey: 'loan_emi_calculator_description',
       icon: Landmark,
-      color: 'text-indigo-600',
+      color: 'bg-indigo-600',
       lightBg: 'bg-[#eff6ff]'
     },
     {
@@ -339,7 +340,7 @@ function ToolsPageContent() {
       labelKey: 'age_calculator_label',
       descriptionKey: 'age_calculator_description',
       icon: Cake,
-      color: 'text-rose-500',
+      color: 'bg-rose-500',
       lightBg: 'bg-[#fff1f2]'
     },
     {
@@ -347,7 +348,7 @@ function ToolsPageContent() {
       labelKey: 'percentage_calculator_label',
       descriptionKey: 'percentage_calculator_description',
       icon: Percent,
-      color: 'text-blue-500',
+      color: 'bg-blue-500',
       lightBg: 'bg-[#eff6ff]'
     },
     {
@@ -355,7 +356,7 @@ function ToolsPageContent() {
       labelKey: 'fuel_cost_calculator_label',
       descriptionKey: 'fuel_cost_calculator_description',
       icon: Route,
-      color: 'text-rose-500',
+      color: 'bg-rose-500',
       lightBg: 'bg-[#fff1f2]'
     },
     {
@@ -363,7 +364,7 @@ function ToolsPageContent() {
       labelKey: 'interest_calculator_label',
       descriptionKey: 'interest_calculator_description',
       icon: Coins,
-      color: 'text-yellow-600',
+      color: 'bg-yellow-600',
       lightBg: 'bg-[#fefce8]'
     },
     {
@@ -371,7 +372,7 @@ function ToolsPageContent() {
       labelKey: 'sales_tax_calculator_label',
       descriptionKey: 'sales_tax_calculator_description',
       icon: Receipt,
-      color: 'text-indigo-500',
+      color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
     },
   ];
@@ -382,7 +383,7 @@ function ToolsPageContent() {
       labelKey: 'acceleration_converter_label',
       descriptionKey: 'acceleration_converter_description',
       icon: Gauge,
-      color: 'text-emerald-500',
+      color: 'bg-emerald-500',
       lightBg: 'bg-[#f0fdf4]'
     },
     {
@@ -390,7 +391,7 @@ function ToolsPageContent() {
       labelKey: 'area_converter_label',
       descriptionKey: 'area_converter_description',
       icon: AreaChart,
-      color: 'text-lime-500',
+      color: 'bg-lime-500',
       lightBg: 'bg-[#f7fee7]'
     },
     {
@@ -398,7 +399,7 @@ function ToolsPageContent() {
       labelKey: 'fuel_converter_label',
       descriptionKey: 'fuel_converter_description',
       icon: Fuel,
-      color: 'text-orange-500',
+      color: 'bg-orange-500',
       lightBg: 'bg-[#fff7ed]'
     },
     {
@@ -406,7 +407,7 @@ function ToolsPageContent() {
       labelKey: 'pressure_converter_label',
       descriptionKey: 'pressure_converter_description',
       icon: Waves,
-      color: 'text-sky-500',
+      color: 'bg-sky-500',
       lightBg: 'bg-[#f0f9ff]'
     },
   ];

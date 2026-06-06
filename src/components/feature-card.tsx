@@ -31,7 +31,8 @@ export function FeatureCard({
     <Link href={href} className="group block h-full">
       <div className="h-full bg-white dark:bg-[#150a1a] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
         <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6", lightBg, "dark:bg-[#0a040d]/60")}>
-          <div className={cn("grid size-12 place-items-center rounded-2xl transition-all group-hover:scale-110 shadow-lg shrink-0", color.replace('text-', 'bg-'))}>
+          {/* Fixed: Use the color class directly as provided by the parent */}
+          <div className={cn("grid size-12 place-items-center rounded-2xl transition-all group-hover:scale-110 shadow-lg shrink-0", color)}>
             <Icon className="h-7 w-7 text-white" />
           </div>
           <div className="flex-1 flex flex-col mt-5">
