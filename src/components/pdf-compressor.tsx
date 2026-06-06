@@ -231,7 +231,7 @@ export default function PdfCompressor() {
                         </div>
                     </div>
                     <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        Pro PDF <span className="text-gradient-hero">Optimizer</span>
+                        PDF <span className="text-gradient-hero">Optimizer</span>
                     </h1>
                     <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                         Shrink documents to exact KB targets. <br/>100% Private high-fidelity local re-sampling.
