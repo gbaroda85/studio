@@ -12,7 +12,7 @@ import {
   Loader2, 
   ShieldCheck, 
   Zap, 
-  RefreshCcw,
+  RefreshCcw, 
   Layout,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyStart,
@@ -27,7 +27,8 @@ import {
   Monitor,
   ImageIcon,
   Settings2,
-  Trash2
+  Trash2,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -50,6 +51,41 @@ interface ImageItem {
     src: string;
     vAlign: VAlign;
 }
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 export default function ImageToPdfConverter() {
   const { toast } = useToast();
@@ -385,10 +421,13 @@ export default function ImageToPdfConverter() {
                                         <p className="text-[10px] md:text-xs text-green-700 font-bold mt-2 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
                                     </div>
                                 </div>
-                                <Button size="lg" className="w-full md:w-auto h-20 px-12 bg-gradient-to-r from-green-600 to-emerald-800 border-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_20px_40px_-10px_rgba(34,197,94,0.4)] text-xl font-black rounded-3xl transition-all active:scale-95 group flex items-center gap-4" onClick={handleDownload}>
-                                    <div className="size-11 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:translate-y-1 transition-transform">
-                                        <Download className="size-6 text-white" />
-                                    </div>
+                                <Button 
+                                    size="lg" 
+                                    className="magic-button magic-button-success w-full md:w-auto h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-xl font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 text-white hover:text-green-600" 
+                                    onClick={handleDownload}
+                                >
+                                    <StarIcons />
+                                    <Download className="size-7" />
                                     <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                 </Button>
                             </CardFooter>
@@ -477,10 +516,11 @@ export default function ImageToPdfConverter() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-10 border-t-2 border-dashed">
                     <Button 
-                        className="w-full h-20 md:h-24 rounded-[2rem] bg-gradient-to-r from-primary to-blue-700 border-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_25px_50px_-12px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 disabled:opacity-50 group px-10" 
+                        className="magic-button w-full h-20 md:h-24 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10" 
                         disabled={images.length === 0 || isConverting}
                         onClick={handleConvertToPdf}
                     >
+                        <StarIcons />
                         {isConverting ? (
                             <div className="flex items-center gap-5">
                                 <Loader2 className="size-10 animate-spin" />
@@ -489,8 +529,8 @@ export default function ImageToPdfConverter() {
                         ) : (
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-5">
-                                    <div className="size-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <FileDigit className="size-8 text-white" />
+                                    <div className="size-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                        <FileDigit className="size-7" />
                                     </div>
                                     <div className="text-left">
                                         <span className="block uppercase tracking-tighter leading-none font-black text-2xl">GENERATE PDF</span>
