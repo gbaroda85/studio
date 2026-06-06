@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -27,7 +28,15 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+
+type ExtractedFile = {
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+};
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -138,7 +147,6 @@ export default function ZipCreator() {
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <div className="flex items-center justify-between">
@@ -148,7 +156,10 @@ export default function ZipCreator() {
                         </CardHeader>
                         <CardContent className={cn(filesToZip.length === 0 ? "p-10 md:p-16" : "p-4 md:p-6")}>
                             {filesToZip.length === 0 ? (
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                                <div 
+                                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
                                     <div className="relative">
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
