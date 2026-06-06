@@ -36,6 +36,41 @@ type ExtractedFile = {
     size: number;
 };
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -57,7 +92,6 @@ export default function Unzipper() {
     const handleFileChange = (file: File | null) => {
         if (!file) return;
         
-        // Broader ZIP check for various browsers
         const isZip = file.type.includes('zip') || 
                       file.type.includes('octet-stream') || 
                       file.name.toLowerCase().endsWith('.zip') ||
@@ -85,7 +119,6 @@ export default function Unzipper() {
         setProgress(5);
         setExtractedFiles([]);
         try {
-            // Read as ArrayBuffer for maximum robustness
             const arrayBuffer = await file.arrayBuffer();
             setProgress(20);
             
@@ -98,7 +131,6 @@ export default function Unzipper() {
                 const filename = filenames[i];
                 const zipEntry = zip.files[filename];
                 
-                // Extract file content as blob
                 const fileData = await zipEntry.async('blob');
                 const url = URL.createObjectURL(fileData);
                 
@@ -174,7 +206,7 @@ export default function Unzipper() {
                                 onClick={() => fileInputRef.current?.click()}>
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop ZIP File here</p>
@@ -282,10 +314,12 @@ export default function Unzipper() {
                                                     </div>
                                                     <Button 
                                                         size="lg" 
-                                                        className="h-10 md:h-12 px-6 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xl font-black text-[10px] uppercase group-hover:scale-105 transition-all shrink-0" 
+                                                        className="magic-button h-10 md:h-12 px-6 bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3 shrink-0" 
                                                         onClick={() => handleDownload(file.url, file.name)}
                                                     >
-                                                        <Download className="mr-2 size-4" /> <span className="hidden sm:inline">DOWNLOAD</span>
+                                                        <StarIcons />
+                                                        <Download className="size-4 md:size-5 group-hover:translate-y-1 transition-transform" /> 
+                                                        <span className="font-black text-[9px] uppercase tracking-widest hidden sm:inline">DOWNLOAD</span>
                                                     </Button>
                                                 </motion.div>
                                             ))
