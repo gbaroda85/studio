@@ -36,6 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import confetti from 'canvas-confetti';
+import { useFileStore } from '@/lib/file-store';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
@@ -63,6 +64,7 @@ const QUICK_SIZES = ["100", "200", "500", "1024"];
 
 export default function PdfCompressor() {
     const { toast } = useToast();
+    const { setSharedFile } = useFileStore();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
@@ -100,6 +102,8 @@ export default function PdfCompressor() {
         } catch (error: any) {
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setIsProtected(true);
+                // Automatically pass this file to the global store for the Unlocker tool
+                setSharedFile(file);
             } else {
                 setIsProtected(null);
             }
@@ -303,7 +307,7 @@ export default function PdfCompressor() {
     }
     
     return (
-        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-in fade-in duration-500 px-4">
+        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 px-4">
             <div className="lg:col-span-7">
                 <Card className="shadow-2xl border-primary/10 overflow-hidden h-full bg-card/50 rounded-[2.5rem] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30">
                     <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
@@ -399,7 +403,7 @@ export default function PdfCompressor() {
                     </CardContent>
                     <CardFooter className="bg-muted/10 border-t p-6 md:p-8">
                         {compressionResult && (
-                             <Button onClick={handleDownload} className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 group">
+                             <Button onClick={handleDownload} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 group">
                                 <Download className="mr-3 md:mr-4 h-6 w-6 md:h-8 md:w-8 group-hover:translate-y-1 transition-transform" /> SAVE OPTIMIZED PDF
                             </Button>
                         )}

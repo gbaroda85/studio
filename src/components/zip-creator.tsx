@@ -17,12 +17,11 @@ import {
     RefreshCcw, 
     CheckCircle2, 
     Sparkles,
-    FileArchive,
-    SearchCode,
-    Plus,
     Trash2,
     Layers,
-    Settings2
+    Settings2,
+    Plus,
+    SearchCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -95,10 +94,8 @@ export default function ZipCreator() {
 
         try {
             const zip = new JSZip();
-            // Process files one by one for better reliability
             for (let i = 0; i < filesToZip.length; i++) {
                 const file = filesToZip[i];
-                // Read as ArrayBuffer for standard compatibility
                 const buffer = await file.arrayBuffer();
                 zip.file(file.name, buffer);
                 setProgress(10 + Math.round(((i + 1) / filesToZip.length) * 80));
@@ -130,64 +127,91 @@ export default function ZipCreator() {
     };
 
     return (
-        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-500">
-            {filesToZip.length === 0 ? (
-                <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
-                    <Card
+        <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Left: Workspace Area */}
+                <div className="lg:col-span-7 space-y-4">
+                    <Card 
                         className={cn(
-                            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
-                            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                            "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
+                            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ZIP STUDIO WORKSPACE</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-10 md:p-12">
-                            <div 
-                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <div className="relative">
-                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Files to Bundle</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">WASM-based local archiving active.</p>
-                                </div>
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                                {filesToZip.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] uppercase px-3 py-1 rounded-full">{filesToZip.length} FILES</Badge>}
                             </div>
-                            <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onFileChange} />
+                        </CardHeader>
+                        <CardContent className={cn(filesToZip.length === 0 ? "p-10 md:p-16" : "p-4 md:p-6")}>
+                            {filesToZip.length === 0 ? (
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                                    <div className="relative">
+                                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Files to Bundle</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">WASM-based local archiving active.</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center px-1">
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">File Stack</p>
+                                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase">
+                                            <Trash2 className="size-3 mr-1"/> Clear All
+                                        </Button>
+                                    </div>
+                                    <ScrollArea className="h-[300px] md:h-[450px] pr-2 custom-scrollbar">
+                                        <div className="grid gap-2">
+                                            {filesToZip.map((file, index) => (
+                                                <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
+                                                    <div className="flex items-center gap-4 truncate pr-4">
+                                                        <div className="size-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10 shadow-inner">
+                                                            <FileIcon className="size-5" />
+                                                        </div>
+                                                        <div className="truncate text-left">
+                                                            <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[350px] uppercase tracking-tight" title={file.name}>{file.name}</p>
+                                                            <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase mt-0.5">{formatBytes(file.size)}</p>
+                                                        </div>
+                                                    </div>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full" onClick={(e) => { e.stopPropagation(); handleRemoveFile(index); }}>
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                                                <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE FILES
+                                            </Button>
+                                        </div>
+                                    </ScrollArea>
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                             <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> INDEX SCAN</div>
                             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT ZIP</div>
                         </CardFooter>
+                        <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onFileChange} />
                     </Card>
                 </div>
-            ) : (
-                <div className="w-full max-w-7xl grid lg:grid-cols-12 gap-8 items-start px-4">
-                    {/* LEFT PANEL: CONFIG & ACTIONS */}
-                    <div className="lg:col-span-5 space-y-6">
-                        <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
-                            <CardHeader className="bg-primary/5 border-b p-6">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
-                                        <Settings2 className="size-6 text-primary" /> Bundle Panel
-                                    </CardTitle>
-                                    <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-8">
-                                <div className="p-6 bg-muted/20 border-2 border-dashed border-muted-foreground/20 rounded-2xl flex flex-col items-center gap-4 text-center">
-                                    <div className="size-14 rounded-2xl bg-white dark:bg-slate-900 border flex items-center justify-center shadow-lg"><Layers className="size-8 text-primary" /></div>
-                                    <div>
-                                        <p className="text-sm font-black uppercase tracking-tight">{filesToZip.length} Files Selected</p>
-                                        <p className="text-[10px] font-mono opacity-50 uppercase mt-1">Ready for Bundling</p>
-                                    </div>
-                                </div>
 
+                {/* Right: Settings Area */}
+                <div className="lg:col-span-5 space-y-4">
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                        <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
+                            <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                                <Settings2 className="size-6 text-primary" /> Bundle Settings
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-8 space-y-8">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Status Dashboard</Label>
                                 {isZipping ? (
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         <div className="relative flex flex-col items-center gap-4">
@@ -216,7 +240,7 @@ export default function ZipCreator() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                                    <div className="p-5 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4">
                                         <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
                                         <div>
                                             <p className="text-[10px] font-black text-primary uppercase tracking-tight">Local Speed</p>
@@ -226,93 +250,46 @@ export default function ZipCreator() {
                                         </div>
                                     </div>
                                 )}
-                            </CardContent>
-                            <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-3">
-                                {!zippedFileUrl ? (
-                                    <Button 
-                                        className="w-full h-16 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
-                                        onClick={handleCreateZip}
-                                        disabled={isZipping || filesToZip.length === 0}
-                                    >
-                                        {isZipping ? (
-                                            <div className="flex items-center gap-3">
-                                                <Loader2 className="size-6 animate-spin" />
-                                                <span className="uppercase text-sm tracking-tighter">BUNDLING...</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-3">
-                                                <Archive className="size-6 text-white/50 group-hover:scale-125 transition-transform" />
-                                                <span className="uppercase tracking-tighter">CREATE ZIP ARCHIVE</span>
-                                            </div>
-                                        )}
-                                    </Button>
-                                ) : (
-                                    <Button size="lg" className="w-full h-16 bg-green-600 hover:bg-green-700 text-lg font-black rounded-2xl shadow-2xl transition-all active:scale-95 group" onClick={handleDownload}>
-                                        <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> SAVE ZIP ARCHIVE
-                                    </Button>
-                                )}
-                                <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] tracking-widest text-muted-foreground/40 hover:text-destructive hover:bg-destructive/5 rounded-xl border-2 border-dashed">
-                                    <RefreshCcw className="size-3.5 mr-2" /> Start New Bundle
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
+                            {!zippedFileUrl ? (
+                                <Button 
+                                    className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
+                                    onClick={handleCreateZip}
+                                    disabled={isZipping || filesToZip.length === 0}
+                                >
+                                    {isZipping ? (
+                                        <div className="flex items-center gap-3">
+                                            <Loader2 className="size-6 md:size-8 animate-spin" />
+                                            <span className="uppercase text-sm tracking-tighter">BUNDLING...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <Archive className="size-6 text-white/50 group-hover:scale-125 transition-transform" />
+                                            <span className="uppercase tracking-tighter text-lg md:text-2xl">CREATE ZIP</span>
+                                        </div>
+                                    )}
                                 </Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
+                            ) : (
+                                <Button size="lg" className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl transition-all active:scale-95 group" onClick={handleDownload}>
+                                    <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> SAVE ZIP ARCHIVE
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
 
-                    {/* RIGHT PANEL: SELECTED FILES LIST */}
-                    <div className="lg:col-span-7 flex flex-col h-full min-h-[500px]">
-                        <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 flex flex-col h-full">
-                            <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20"><Plus className="size-5" /></div>
-                                    <CardTitle className="text-sm font-black uppercase tracking-[0.2em]">FILE QUEUE</CardTitle>
-                                </div>
-                                <Badge variant="secondary" className="font-mono text-[10px] font-black">{filesToZip.length}</Badge>
-                            </CardHeader>
-                            <CardContent className="flex-1 p-0 bg-slate-50 dark:bg-slate-900/50 shadow-inner">
-                                <ScrollArea className="h-[450px] md:h-[600px] w-full p-4 md:p-8">
-                                    <div className="grid gap-3">
-                                        {filesToZip.map((file, index) => (
-                                            <motion.div 
-                                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                                                key={`${file.name}-${index}`} 
-                                                className="flex items-center justify-between p-3 md:p-4 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md"
-                                            >
-                                                <div className="flex items-center gap-4 truncate pr-4">
-                                                    <div className="size-10 md:size-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10 shadow-inner">
-                                                        <FileIcon className="size-5 md:size-6" />
-                                                    </div>
-                                                    <div className="truncate text-left">
-                                                        <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[350px] uppercase tracking-tight" title={file.name}>{file.name}</p>
-                                                        <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase mt-0.5">{formatBytes(file.size)}</p>
-                                                    </div>
-                                                </div>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full" onClick={() => handleRemoveFile(index)}>
-                                                    <Trash2 className="size-4" />
-                                                </Button>
-                                            </motion.div>
-                                        ))}
-                                        <button 
-                                            className="border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all h-24 shadow-inner group"
-                                            onClick={() => fileInputRef.current?.click()}
-                                        >
-                                            <div className="size-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                <Plus className="size-5 text-primary" />
-                                            </div>
-                                            <span className="text-[10px] font-black uppercase text-primary tracking-widest">Add More Files</span>
-                                        </button>
-                                    </div>
-                                </ScrollArea>
-                            </CardContent>
-                            <CardFooter className="bg-muted/20 border-t p-6 md:p-8 flex justify-center gap-10 text-[8px] md:text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                                <div className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-                                <div className="flex items-center gap-2"><Zap className="size-3.5 text-yellow-500" /> WASM SPEED</div>
-                                <div className="flex items-center gap-2"><Sparkles className="size-3.5 text-primary" /> HD BUNDLE</div>
-                            </CardFooter>
-                            <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onFileChange} />
-                        </Card>
+                    <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+                        <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="size-5 md:size-6 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
+                            <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Your files never touch any server. All processing is local.</p>
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

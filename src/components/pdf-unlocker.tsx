@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { useFileStore } from '@/lib/file-store';
 
 // STABLE WORKER CONFIG
 const PDF_JS_VERSION = '4.2.67';
@@ -56,6 +57,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 
 export default function PdfUnlocker() {
     const { toast } = useToast();
+    const { sharedFile, setSharedFile } = useFileStore();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [password, setPassword] = useState('');
     const [isUnlocking, setIsUnlocking] = useState(false);
@@ -109,7 +111,7 @@ export default function PdfUnlocker() {
         }
     };
 
-    const handleFileChange = async (file: File | null) => {
+    const handleFileChange = useCallback(async (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPassword('');
@@ -125,7 +127,16 @@ export default function PdfUnlocker() {
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
-    };
+    }, [toast]);
+
+    // Handle incoming file from the shared store
+    useEffect(() => {
+        if (sharedFile) {
+            handleFileChange(sharedFile);
+            setSharedFile(null); // Consume the file
+            toast({ title: "File Received", description: "Document imported from Optimizer." });
+        }
+    }, [sharedFile, handleFileChange, setSharedFile, toast]);
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
@@ -201,7 +212,7 @@ export default function PdfUnlocker() {
         if (!unlockedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = unlockedPdfUrl;
-        link.download = `GR7-Tools-${pdfFile.name}`;
+        link.download = `GR7-Tools-unlocked-${pdfFile.name}`;
         link.click();
     }
 
@@ -246,9 +257,9 @@ export default function PdfUnlocker() {
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <div className="text-center px-4">
+                                    <div className="text-center">
                                         <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Encrypted PDF</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Sanitization & Decode active.</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Sanitization & Decode active.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
