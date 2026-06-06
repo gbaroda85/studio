@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -236,7 +235,7 @@ export default function PdfMerger() {
                             >
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDFs to Merge</p>
@@ -351,38 +350,32 @@ export default function PdfMerger() {
                             <div className="grid grid-cols-3 gap-2">
                                 <Button 
                                     variant="outline" 
-                                    className="h-16 flex-col gap-1.5 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-blue-500/5 hover:bg-blue-500/10 border-blue-500/10 hover:border-blue-500/30 transition-all group shadow-sm"
                                     onClick={() => sortFiles('asc')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <div className="size-7 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
-                                        <ArrowDownAz className="size-4 text-primary" />
-                                    </div>
-                                    <span className="text-[8px] font-black uppercase tracking-widest">A → Z</span>
+                                    <ArrowDownAz className="size-6 text-blue-600 transition-transform group-hover:scale-110" />
+                                    <span className="text-[11px] font-black uppercase tracking-tight text-blue-700">A → Z</span>
                                 </Button>
 
                                 <Button 
                                     variant="outline" 
-                                    className="h-16 flex-col gap-1.5 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-indigo-500/5 hover:bg-indigo-500/10 border-indigo-500/10 hover:border-indigo-500/30 transition-all group shadow-sm"
                                     onClick={() => sortFiles('desc')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <div className="size-7 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
-                                        <ArrowUpAz className="size-4 text-primary" />
-                                    </div>
-                                    <span className="text-[8px] font-black uppercase tracking-widest">Z → A</span>
+                                    <ArrowUpAz className="size-6 text-indigo-600 transition-transform group-hover:translate-y-0.5" />
+                                    <span className="text-[11px] font-black uppercase tracking-tight text-indigo-700">Z → A</span>
                                 </Button>
 
                                 <Button 
                                     variant="outline" 
-                                    className="h-16 flex-col gap-1.5 border-2 rounded-2xl bg-white dark:bg-slate-900 hover:border-primary/50 transition-all group"
+                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/10 hover:border-emerald-500/30 transition-all group shadow-sm"
                                     onClick={() => sortFiles('reverse')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <div className="size-7 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10">
-                                        <Repeat className="size-4 text-primary" />
-                                    </div>
-                                    <span className="text-[8px] font-black uppercase tracking-widest">FLIP</span>
+                                    <Repeat className="size-6 text-emerald-600 transition-transform group-hover:rotate-180 duration-500" />
+                                    <span className="text-[11px] font-black uppercase tracking-tight text-emerald-700">FLIP</span>
                                 </Button>
                             </div>
                         </div>
@@ -407,10 +400,10 @@ export default function PdfMerger() {
                             {isMerging ? (
                                 <div className="flex items-center gap-3">
                                     <Loader2 className="size-6 md:size-8 animate-spin" />
-                                    <span className="uppercase text-sm md:text-base tracking-tighter">COMBINING...</span>
+                                    <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
                                     <Merge className="size-6 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
                                     <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
                                 </div>
