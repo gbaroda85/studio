@@ -31,6 +31,41 @@ type ImageConverterProps = {
   targetFormat: OutputFormat;
 };
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   const { toast } = useToast();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -175,12 +210,14 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
                 <RefreshCcw className="mr-1.5 size-3" /> Reset
             </Button>
             {convertedSrc && (
-                <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload}>
-                    <Download className="mr-1.5 size-3.5" /> DOWNLOAD {formatTitle}
+                <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
+                    <StarIcons />
+                    <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD {formatTitle}</span>
                 </Button>
             )}
         </div>
@@ -234,14 +271,14 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setConvertedSrc(null); }} disabled={isConverting}>
                             <SelectTrigger id="format" className="h-12 font-black border-2 rounded-xl bg-background/50 shadow-inner"><SelectValue /></SelectTrigger>
                             <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal - Smallest)</SelectItem>
-                                <SelectItem value="png" className="font-bold py-2">PNG (Lossless - Crystal Clear)</SelectItem>
-                                <SelectItem value="webp" className="font-bold py-2">WEBP (Modern - Optimized)</SelectItem>
+                                <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal HD)</SelectItem>
+                                <SelectItem value="png" className="font-bold py-2">PNG (Lossless Extraction)</SelectItem>
+                                <SelectItem value="webp" className="font-bold py-2">WEBP (Modern Optimization)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm">
                         <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Conversion</p>
@@ -253,10 +290,11 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
                     <Button 
-                        className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                        className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                         onClick={handleConvert}
                         disabled={isConverting || !!convertedSrc}
                     >
+                        <StarIcons />
                         {isConverting ? (
                             <div className="flex items-center gap-3">
                                 <Loader2 className="size-6 md:size-7 animate-spin" />
