@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -56,6 +55,41 @@ const ASPECT_RATIOS = [
     { label: 'Standard (4:3)', value: 4/3 },
     { label: 'Widescreen (16:9)', value: 16/9 },
 ];
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 export default function ImageCropper() {
   const { toast } = useToast();
@@ -334,7 +368,7 @@ export default function ImageCropper() {
                 >
                     <div className="relative">
                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                        <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
@@ -354,7 +388,7 @@ export default function ImageCropper() {
   }
 
   return (
-    <Card className="w-full max-w-7xl shadow-2xl border-foreground/10 overflow-hidden bg-card/50">
+    <Card className="w-full max-w-7xl shadow-2xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
       <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
         <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg"><Settings2 className="size-5" /></div>
@@ -370,7 +404,7 @@ export default function ImageCropper() {
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-12">
             {/* Sidebar: Controls */}
-            <div className="lg:col-span-3 border-r bg-muted/20 p-6 space-y-8 no-print">
+            <div className="lg:col-span-4 border-r bg-muted/20 p-6 space-y-8 no-print">
                 <div className="space-y-6 animate-in slide-in-from-left duration-300">
                     <div className="space-y-3">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
@@ -421,9 +455,18 @@ export default function ImageCropper() {
                 </div>
 
                 <div className="pt-4">
-                    <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleApplyCrop} disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin mr-2" /> : <CropIcon className="mr-2 group-hover:scale-125 transition-transform" />} 
-                        CROP & SAVE
+                    <Button 
+                        className="magic-button w-full h-16 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group px-10 flex items-center gap-4" 
+                        onClick={handleApplyCrop} 
+                        disabled={isProcessing}
+                    >
+                        <StarIcons />
+                        {isProcessing ? (
+                            <Loader2 className="animate-spin size-7 md:size-8" />
+                        ) : (
+                            <CropIcon className="size-7 md:size-8 group-hover:scale-125 transition-transform" />
+                        )}
+                        <span className="uppercase tracking-tighter">CROP & SAVE</span>
                     </Button>
                 </div>
                 
@@ -436,7 +479,7 @@ export default function ImageCropper() {
             </div>
 
             {/* Main Viewport */}
-            <div className="lg:col-span-9 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[500px] md:min-h-[700px]"
+            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[500px] md:min-h-[700px]"
                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                 
                 {croppedImageSrc ? (
@@ -445,11 +488,16 @@ export default function ImageCropper() {
                             <img src={croppedImageSrc} alt="result" className="max-h-[60vh] w-auto block" />
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
-                            <Button variant="outline" className="h-14 px-8 border-2 font-black uppercase text-xs rounded-xl hover:bg-destructive/5 hover:text-destructive" onClick={() => setCroppedImageSrc(null)}>
+                            <Button variant="outline" className="h-14 md:h-16 px-8 border-2 font-black uppercase text-xs rounded-xl hover:bg-destructive/5 hover:text-destructive" onClick={() => setCroppedImageSrc(null)}>
                                 <RefreshCcw className="mr-2 size-4" /> Start Over
                             </Button>
-                            <Button className="h-14 px-12 bg-green-600 hover:bg-green-700 font-black text-lg shadow-xl rounded-xl flex-1" onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}>
-                                <Download className="mr-2 size-6" /> DOWNLOAD HD
+                            <Button 
+                                className="magic-button magic-button-success flex-1 h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group px-10 flex items-center justify-center gap-4" 
+                                onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}
+                            >
+                                <StarIcons />
+                                <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
+                                <span className="uppercase tracking-tighter text-base md:text-lg">DOWNLOAD HD</span>
                             </Button>
                         </div>
                     </div>
