@@ -66,8 +66,8 @@ type ElementType = 'text' | 'image' | 'shape' | 'mask' | 'arrow' | 'highlight';
 interface BaseElement {
     id: string;
     type: ElementType;
-    x: number;
-    y: number;
+    x: number; // %
+    y: number; // %
     opacity: number;
 }
 
@@ -82,20 +82,20 @@ interface OverlayText extends BaseElement {
 interface OverlayImage extends BaseElement {
     type: 'image';
     src: string;
-    width: number;
+    width: number; // %
     rotation: number;
 }
 
 interface OverlayShape extends BaseElement {
     type: 'mask' | 'shape' | 'highlight';
-    width: number;
-    height: number;
+    width: number; // %
+    height: number; // %
     color: string;
 }
 
 interface OverlayArrow extends BaseElement {
     type: 'arrow';
-    length: number;
+    length: number; // %
     rotation: number;
     color: string;
     thickness: number;
@@ -235,7 +235,7 @@ export default function PdfEditor() {
         addElement({
             id: Math.random().toString(36).substr(2, 9),
             type: 'mask',
-            x: 35, y: 35, width: 100, height: 25, color: "#FFFFFF", opacity: 100
+            x: 35, y: 35, width: 20, height: 5, color: "#FFFFFF", opacity: 100
         } as OverlayShape);
         toast({ title: "Eraser Tool Active", description: "Position over content to remove it." });
     };
@@ -244,7 +244,7 @@ export default function PdfEditor() {
         addElement({
             id: Math.random().toString(36).substr(2, 9),
             type: 'highlight',
-            x: 30, y: 30, width: 200, height: 20, color: "#ffff00", opacity: 40
+            x: 30, y: 30, width: 30, height: 4, color: "#ffff00", opacity: 40
         } as OverlayShape);
     };
 
@@ -252,7 +252,7 @@ export default function PdfEditor() {
         addElement({
             id: Math.random().toString(36).substr(2, 9),
             type: 'arrow',
-            x: 50, y: 50, length: 100, rotation: 45, color: "#FF0000", thickness: 4, opacity: 100
+            x: 50, y: 50, length: 15, rotation: 45, color: "#FF0000", thickness: 4, opacity: 100
         } as OverlayArrow);
     };
 
@@ -312,7 +312,7 @@ export default function PdfEditor() {
             id: Math.random().toString(36).substr(2, 9),
             type: 'image',
             src: dataUrl,
-            x: 40, y: 40, width: 150, rotation: 0, opacity: 100
+            x: 40, y: 40, width: 25, rotation: 0, opacity: 100
         } as OverlayImage);
         toast({ title: "Signature Created" });
     };
@@ -326,7 +326,7 @@ export default function PdfEditor() {
                     id: Math.random().toString(36).substr(2, 9),
                     type: 'image',
                     src: ev.target?.result as string,
-                    x: 30, y: 30, width: 120, rotation: 0, opacity: 100
+                    x: 30, y: 30, width: 20, rotation: 0, opacity: 100
                 } as OverlayImage);
             };
             reader.readAsDataURL(file);
@@ -404,14 +404,18 @@ export default function PdfEditor() {
         setIsExporting(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
+            // Load and modify the SAME document to preserve page sizes and boxes perfectly
             const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-            const finalPdfDoc = await PDFDocument.create();
-            const activePages = pages.filter(p => !p.isDeleted);
-
-            for (const pageState of activePages) {
-                const [copiedPage] = await finalPdfDoc.copyPages(pdfDoc, [pageState.index - 1]);
-                copiedPage.setRotation(degrees(pageState.rotation));
-                const { width, height } = copiedPage.getSize();
+            
+            const activePageStates = pages.filter(p => !p.isDeleted);
+            const pagesToKeep = activePageStates.map(p => p.index - 1);
+            
+            // Loop through active pages and apply edits
+            for (const pageState of activePageStates) {
+                const pdfPage = pdfDoc.getPage(pageState.index - 1);
+                pdfPage.setRotation(degrees(pageState.rotation));
+                
+                const { width, height } = pdfPage.getSize();
 
                 for (const el of pageState.elements) {
                     const elX = (el.x / 100) * width;
@@ -419,8 +423,8 @@ export default function PdfEditor() {
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
-                        const font = await finalPdfDoc.embedFont(fontName);
-                        copiedPage.drawText(el.text, { 
+                        const font = await pdfDoc.embedFont(fontName);
+                        pdfPage.drawText(el.text, { 
                             x: elX, 
                             y: elY - el.size, 
                             size: el.size, 
@@ -429,23 +433,25 @@ export default function PdfEditor() {
                             opacity: el.opacity / 100 
                         });
                     } else if (el.type === 'mask' || el.type === 'highlight') {
-                        copiedPage.drawRectangle({
+                        const shapeW = (el.width / 100) * width;
+                        const shapeH = (el.height / 100) * height;
+                        pdfPage.drawRectangle({
                             x: elX,
-                            y: elY - (el.height / 100) * height,
-                            width: (el.width / 100) * width,
-                            height: (el.height / 100) * height,
+                            y: elY - shapeH,
+                            width: shapeW,
+                            height: shapeH,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
                         });
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
                         const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
-                        const embeddedImg = isPng ? await finalPdfDoc.embedPng(imgBuffer) : await finalPdfDoc.embedJpg(imgBuffer);
+                        const embeddedImg = isPng ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
                         
                         const imgW = (el.width / 100) * width;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
                         
-                        copiedPage.drawImage(embeddedImg, { 
+                        pdfPage.drawImage(embeddedImg, { 
                             x: elX, 
                             y: elY - imgH, 
                             width: imgW, 
@@ -455,9 +461,10 @@ export default function PdfEditor() {
                         });
                     } else if (el.type === 'arrow') {
                         const angle = (el.rotation * Math.PI) / 180;
-                        const endX = elX + Math.cos(angle) * el.length;
-                        const endY = elY + Math.sin(angle) * el.length;
-                        copiedPage.drawLine({
+                        const len = (el.length / 100) * width;
+                        const endX = elX + Math.cos(angle) * len;
+                        const endY = elY + Math.sin(angle) * len;
+                        pdfPage.drawLine({
                             start: { x: elX, y: elY },
                             end: { x: endX, y: endY },
                             thickness: el.thickness,
@@ -466,10 +473,16 @@ export default function PdfEditor() {
                         });
                     }
                 }
-                finalPdfDoc.addPage(copiedPage);
             }
 
-            const pdfBytes = await finalPdfDoc.save();
+            // Handle deleted pages
+            const allIndices = Array.from({ length: pdfDoc.getPageCount() }, (_, i) => i);
+            const indicesToRemove = allIndices.filter(i => !pagesToKeep.includes(i)).reverse();
+            for (const idx of indicesToRemove) {
+                pdfDoc.removePage(idx);
+            }
+
+            const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -628,13 +641,33 @@ export default function PdfEditor() {
                                                     )}
                                                 </div>
                                             ) : (el.type === 'mask' || el.type === 'highlight') ? (
-                                                <div style={{ width: `${el.width}px`, height: `${el.height}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '1px dashed #primary' : 'none' }} />
+                                                <div style={{ 
+                                                    width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
+                                                    height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, 
+                                                    backgroundColor: el.color, 
+                                                    opacity: el.opacity / 100, 
+                                                    border: selectedElementId === el.id ? '1px dashed #primary' : 'none' 
+                                                }} />
                                             ) : el.type === 'arrow' ? (
-                                                <div style={{ transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center', width: `${el.length}px`, height: `${el.thickness}px`, backgroundColor: el.color, opacity: el.opacity/100, position: 'relative' }}>
+                                                <div style={{ 
+                                                    transform: `rotate(${el.rotation}deg)`, 
+                                                    transformOrigin: 'left center', 
+                                                    width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, 
+                                                    height: `${el.thickness}px`, 
+                                                    backgroundColor: el.color, 
+                                                    opacity: el.opacity/100, 
+                                                    position: 'relative' 
+                                                }}>
                                                     <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px]" style={{ borderLeftColor: el.color }} />
                                                 </div>
                                             ) : (
-                                                <div style={{ width: `${el.width}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>
+                                                <div style={{ 
+                                                    width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
+                                                    opacity: el.opacity / 100, 
+                                                    transform: `rotate(${el.rotation}deg)` 
+                                                }}>
+                                                    <img src={el.src} className="size-full" alt="img" />
+                                                </div>
                                             )}
 
                                             {selectedElementId === el.id && (
@@ -690,15 +723,15 @@ export default function PdfEditor() {
 
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width</Label></div><Slider min={5} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height</Label></div><Slider min={5} max={800} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FILL COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#ADD8E6'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
                                     {selectedElement.type === 'arrow' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Arrow Length</Label><Slider min={10} max={500} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Length (%)</Label><Slider min={1} max={100} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Angle Rotation</Label><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#00FF00', '#0000FF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
@@ -706,7 +739,7 @@ export default function PdfEditor() {
 
                                     {selectedElement.type === 'image' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Scale</Label></div><Slider min={20} max={800} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Scale (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Rotate</Label></div><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
                                         </div>
                                     )}
