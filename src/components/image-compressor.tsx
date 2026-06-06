@@ -20,7 +20,8 @@ import {
   Zap,
   Eye,
   ArrowLeftRight,
-  Plus
+  Plus,
+  ChevronRight
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,41 @@ type CompressionMode = 'manual' | 'target';
 type TargetUnit = 'kb' | 'mb';
 
 const QUICK_SIZES = ["20", "50", "100", "500"];
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -274,7 +310,7 @@ export default function ImageCompressor() {
                             </div>
                             <div className="text-center">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Adaptive scaling & batching active.</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Adaptive scaling & batching active.</p>
                             </div>
                         </div>
                     ) : (
@@ -320,7 +356,7 @@ export default function ImageCompressor() {
                                                                     <Eye className="size-4 text-primary" />
                                                                 </Button>
                                                             </DialogTrigger>
-                                                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+                                                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-6 rounded-[2.5rem]">
                                                                 <DialogHeader>
                                                                     <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm md:text-lg">
                                                                         <ArrowLeftRight className="text-primary size-5" /> Precision Analysis
@@ -333,7 +369,7 @@ export default function ImageCompressor() {
                                                                             <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(res.originalSize)}</Badge>
                                                                         </div>
                                                                         <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
-                                                                            <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-2" />
+                                                                            <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-4" />
                                                                         </div>
                                                                     </div>
                                                                     <div className="space-y-3">
@@ -341,14 +377,19 @@ export default function ImageCompressor() {
                                                                             <Badge className="bg-green-500 text-white font-mono text-[10px]">Optimized</Badge>
                                                                             <span className="text-[10px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
                                                                         </div>
-                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center shadow-inner">
-                                                                            <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-2" />
+                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center shadow-2xl">
+                                                                            <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-4" />
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <CardFooter className="p-0 pt-4">
-                                                                    <Button className="w-full h-12 md:h-14 bg-green-600 hover:bg-green-700 font-black text-sm md:text-lg" onClick={() => downloadFile(res)}>
-                                                                        DOWNLOAD OPTIMIZED <Download className="ml-2 size-4" />
+                                                                <CardFooter className="p-0 pt-6">
+                                                                    <Button 
+                                                                        className="magic-button magic-button-success w-full h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                                                                        onClick={() => downloadFile(res)}
+                                                                    >
+                                                                        <StarIcons />
+                                                                        <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
+                                                                        <span className="uppercase tracking-tighter text-base md:text-lg">DOWNLOAD OPTIMIZED</span>
                                                                     </Button>
                                                                 </CardFooter>
                                                             </DialogContent>
@@ -382,20 +423,26 @@ export default function ImageCompressor() {
             </Card>
 
             {allProcessed && results.length > 1 && (
-                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-xl hover:-translate-y-1 transition-all">
-                    <CardContent className="p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-5">
-                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
-                                <CheckCircle2 className="size-9" />
-                                <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
+                <Card className="bg-green-500/5 border-2 border-dashed border-green-500/30 rounded-[2.5rem] animate-in zoom-in-95 duration-500 shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+                    <CardContent className="p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="flex items-center gap-6">
+                            <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0 overflow-hidden">
+                                <CheckCircle2 className="size-10 md:size-12 z-10" />
+                                <Sparkles className="absolute -top-1 -right-1 text-yellow-300 size-8 opacity-40" />
                             </div>
                             <div className="text-left">
-                                <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">Complete!</p>
-                                <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Archive bundle ready for download</p>
+                                <p className="text-2xl md:text-3xl font-black text-green-900 uppercase tracking-tighter leading-none">Complete!</p>
+                                <p className="text-[10px] md:text-xs text-green-700 font-bold mt-2 uppercase tracking-widest opacity-60">Archive bundle ready for download</p>
                             </div>
                         </div>
-                        <Button size="lg" className="w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-green-700 text-lg font-black shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={downloadAllAsZip}>
-                            <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> DOWNLOAD ZIP BUNDLE
+                        <Button 
+                            size="lg" 
+                            className="magic-button magic-button-success w-full md:w-auto h-14 md:h-16 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-3" 
+                            onClick={downloadAllAsZip}
+                        >
+                            <StarIcons />
+                            <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
+                            <span className="uppercase tracking-tighter text-base md:text-lg">DOWNLOAD ZIP BUNDLE</span>
                         </Button>
                     </CardContent>
                 </Card>
@@ -404,13 +451,13 @@ export default function ImageCompressor() {
 
         {/* Right: Settings */}
         <div className="lg:col-span-5 space-y-4">
-            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
-                <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
+            <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                <CardHeader className="bg-primary/5 border-b p-5 md:p-8">
                     <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
                         <Settings2 className="size-6 text-primary" /> Optimizer Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-10">
+                <CardContent className="p-6 md:p-10 space-y-10">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1.5 bg-muted rounded-2xl border-2">
                             <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
@@ -424,7 +471,7 @@ export default function ImageCompressor() {
                         <TabsContent value="target" className="space-y-6 animate-in fade-in duration-500">
                              <div className="space-y-6">
                                 <div className="space-y-3">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
                                         <Zap className="size-3 text-yellow-500" /> Government Form Presets
                                     </Label>
                                     <div className="grid grid-cols-4 gap-2">
@@ -503,28 +550,29 @@ export default function ImageCompressor() {
                         </Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
+                <CardFooter className="bg-muted/10 p-6 md:p-10 border-t border-dashed">
                     <Button 
-                        className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" 
+                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={results.length === 0 || isBulkProcessing}
                         onClick={startBulkCompression}
                     >
+                        <StarIcons />
                         {isBulkProcessing ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="size-6 md:size-8 animate-spin" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">PROCESSING...</span>
+                            <div className="flex items-center justify-center w-full gap-3">
+                                <Loader2 className="size-7 md:size-8 animate-spin" />
+                                <span className="uppercase font-black text-base md:text-lg tracking-tighter">PROCESSING...</span>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <Zap className="size-6 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">OPTIMIZE NOW</span>
+                            <div className="flex items-center justify-center w-full gap-3">
+                                <Zap className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                <span className="uppercase font-black text-base md:text-lg tracking-tighter">OPTIMIZE NOW</span>
                             </div>
                         )}
                     </Button>
                 </CardFooter>
             </Card>
 
-            <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+            <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2.5rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
                 <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
                     <ShieldCheck className="size-5 md:size-6 text-green-600" />
                 </div>
