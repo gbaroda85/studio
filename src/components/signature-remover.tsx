@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type DragEvent, type ChangeEvent, useCallback } from "react";
@@ -30,6 +29,41 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 export default function SignatureRemover() {
   const { toast } = useToast();
@@ -156,7 +190,6 @@ export default function SignatureRemover() {
     if (!resultImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resultImageSrc;
-    // Updated filename logic
     const name = imageFile.name.includes('.') ? imageFile.name.split(".").slice(0, -1).join(".") : imageFile.name;
     link.download = `GR7-Tools-Signature-${name}.png`;
     link.click();
@@ -236,8 +269,15 @@ export default function SignatureRemover() {
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
                 <RotateCcw className="mr-1.5 size-3" /> Reset
             </Button>
-            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !resultImageSrc}>
-                <Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG
+            <Button 
+                size="lg" 
+                className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                onClick={handleDownload} 
+                disabled={isProcessing || !resultImageSrc}
+            >
+                <StarIcons />
+                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
+                <span className="text-[10px] md:text-xs uppercase tracking-widest">DOWNLOAD PNG</span>
             </Button>
         </div>
       </div>
@@ -290,11 +330,16 @@ export default function SignatureRemover() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
-                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE LOCAL RAM</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
-                        <div className="flex items-center gap-2"><FileType className="size-4" /> TRANSPARENT PNG</div>
-                    </div>
+                    <Button 
+                        size="lg" 
+                        className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        onClick={handleDownload} 
+                        disabled={isProcessing || !resultImageSrc}
+                    >
+                        <StarIcons />
+                        <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
+                        <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE PROFESSIONAL IMAGE</span>
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
