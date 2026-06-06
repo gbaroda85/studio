@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card';
 import {ArrowRight} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type FeatureCardProps = {
   title: string;
@@ -28,27 +29,34 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <Card className={cn(
-        "h-full relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl dark:group-hover:shadow-primary/20 border-2 border-border/50 dark:border-white/10 group-hover:border-primary/50 dark:group-hover:border-primary/40 rounded-[2rem]",
-        lightBg || "bg-card", 
-        "dark:bg-card" 
-      )}>
-        <CardHeader className="p-6 relative z-10 text-left">
-          <div className="flex items-start justify-between mb-4">
-            <div className={cn("grid size-12 place-items-center rounded-xl transition-all group-hover:scale-110 shadow-lg", color.replace('text-', 'bg-'))}>
-              <Icon className="h-7 w-7 text-white" />
-            </div>
-            <div className="size-9 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary text-primary group-hover:text-white transition-all shadow-sm">
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+      <div className="h-full bg-white dark:bg-slate-900 rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-white/5 flex flex-col">
+        <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6", lightBg || "bg-card")}>
+          <div className={cn("grid size-12 place-items-center rounded-2xl transition-all group-hover:scale-110 shadow-lg shrink-0", color.replace('text-', 'bg-'))}>
+            <Icon className="h-7 w-7 text-white" />
+          </div>
+          <div className="flex-1 flex flex-col mt-5">
+            <CardTitle className="text-lg md:text-xl font-black mb-2 leading-tight text-slate-900 dark:text-slate-800 group-hover:text-primary transition-colors tracking-tighter uppercase font-body">
+              {title}
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-600 leading-relaxed font-bold uppercase opacity-70 tracking-tight">
+              {description}
+            </CardDescription>
+
+            <div className="flex flex-wrap gap-2 mt-6">
+                <Badge variant="secondary" className="bg-white/60 dark:bg-black/10 text-[7px] font-black uppercase text-slate-700 dark:text-slate-300 border-none px-2 py-0.5 tracking-widest">Premium</Badge>
+                <Badge variant="secondary" className="bg-white/60 dark:bg-black/10 text-[7px] font-black uppercase text-slate-700 dark:text-slate-300 border-none px-2 py-0.5 tracking-widest">Secured</Badge>
             </div>
           </div>
-          <CardTitle className="text-xl font-semibold mb-2 leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors tracking-tight uppercase font-body">{title}</CardTitle>
-          <CardDescription className="text-[15px] text-slate-500 dark:text-slate-400 leading-tight font-semibold font-body">
-            {description}
-          </CardDescription>
-        </CardHeader>
-        <div className="absolute -bottom-10 -right-10 size-24 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors blur-2xl" />
-      </Card>
+        </div>
+
+        {/* White Footer Section */}
+        <div className="bg-white dark:bg-slate-950 p-4 px-6 flex items-center justify-between rounded-b-[2.5rem]">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-300">Launch Tool</span>
+          <div className="size-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-white group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }
