@@ -423,11 +423,11 @@ export default function ImageToPdfConverter() {
                                 </div>
                                 <Button 
                                     size="lg" 
-                                    className="magic-button magic-button-success w-full md:w-auto h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-xl font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 text-white hover:text-green-600" 
+                                    className="magic-button magic-button-success w-full md:w-auto h-20 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-base md:text-lg font-black rounded-full transition-all active:scale-95 group flex items-center gap-3 text-white hover:text-green-600" 
                                     onClick={handleDownload}
                                 >
                                     <StarIcons />
-                                    <Download className="size-7" />
+                                    <Download className="size-6 md:size-7" />
                                     <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                 </Button>
                             </CardFooter>
@@ -522,22 +522,14 @@ export default function ImageToPdfConverter() {
                     >
                         <StarIcons />
                         {isConverting ? (
-                            <div className="flex items-center gap-5">
-                                <Loader2 className="size-10 animate-spin" />
-                                <span className="uppercase tracking-tighter font-black text-2xl">BUNDLING...</span>
+                            <div className="flex items-center gap-4">
+                                <Loader2 className="size-8 md:size-10 animate-spin" />
+                                <span className="uppercase tracking-tighter font-black text-lg md:text-xl">BUNDLING...</span>
                             </div>
                         ) : (
-                            <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-5">
-                                    <div className="size-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <FileDigit className="size-7" />
-                                    </div>
-                                    <div className="text-left">
-                                        <span className="block uppercase tracking-tighter leading-none font-black text-2xl">GENERATE PDF</span>
-                                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">{images.length} FILES IN STACK</span>
-                                    </div>
-                                </div>
-                                <ChevronRight className="size-8 opacity-20 group-hover:translate-x-1 transition-transform" />
+                            <div className="flex items-center justify-center w-full gap-4">
+                                <FileDigit className="size-6 md:size-8" />
+                                <span className="uppercase tracking-tighter font-black text-lg md:text-xl">GENERATE PDF</span>
                             </div>
                         )}
                     </Button>
