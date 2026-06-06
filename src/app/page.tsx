@@ -88,13 +88,13 @@ const ALL_TOOLS = [
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
     <div className="h-full bg-white dark:bg-[#150a1a] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
-      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6", lightBg, "dark:bg-[#0a040d]/60")}>
-        <div className={cn(`size-12 rounded-2xl flex items-center justify-center mb-5 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
+      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
+        <div className={cn(`size-11 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
           <Icon className="size-6" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-xl md:text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100 tracking-tight uppercase leading-tight">{title}</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-6 uppercase opacity-60 tracking-tight">{description}</p>
+          <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tight uppercase leading-tight">{title}</h3>
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-4 uppercase opacity-60 tracking-tight">{description}</p>
           
           <div className="flex flex-wrap gap-2 mt-auto">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest">Professional</Badge>
@@ -104,9 +104,9 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
       </div>
       
       {/* Footer Section */}
-      <div className="bg-white dark:bg-[#0a040d] p-4 px-6 flex items-center justify-between rounded-b-[2.5rem]">
+      <div className="bg-white dark:bg-[#0a040d] p-3.5 px-6 flex items-center justify-between rounded-b-[2.5rem]">
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400">Launch Tool</span>
-        <div className="size-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-white group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+        <div className="size-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-white group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>
