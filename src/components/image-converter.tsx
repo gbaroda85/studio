@@ -122,7 +122,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 </div>
             </div>
             <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                Image to <span className="text-gradient-hero">{formatTitle} Pro</span>
+                Image to <span className="text-gradient-hero">{formatTitle}</span>
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                 Transform formats with 100% quality preservation. <br/>Private local RAM conversion logic.
