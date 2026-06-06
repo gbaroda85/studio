@@ -93,7 +93,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
           <Icon className="size-6" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-black mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
+          <h3 className="text-xl md:text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100 tracking-tight uppercase leading-tight">{title}</h3>
           <p className="text-xs text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-6 uppercase opacity-60 tracking-tight">{description}</p>
           
           <div className="flex flex-wrap gap-2 mt-auto">

@@ -36,7 +36,7 @@ export function FeatureCard({
             <Icon className="h-7 w-7 text-white" />
           </div>
           <div className="flex-1 flex flex-col mt-5">
-            <CardTitle className="text-lg md:text-xl font-black mb-2 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors tracking-tighter uppercase font-body">
+            <CardTitle className="text-xl md:text-2xl font-bold mb-2 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors uppercase font-body tracking-tight">
               {title}
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-bold uppercase opacity-70 tracking-tight">
