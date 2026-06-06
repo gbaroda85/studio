@@ -53,6 +53,41 @@ const GOVT_PRESETS = [
 
 const DPI = 96; 
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -322,7 +357,7 @@ export default function ImageResizer() {
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
-                        <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local RAM processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -408,9 +443,23 @@ export default function ImageResizer() {
                   </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3 bg-muted/20 p-6 border-t border-dashed">
-                  <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50" onClick={handleResize} disabled={isProcessing}>
-                      {isProcessing ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Maximize className="mr-3 h-6 w-6" />}
-                      {isProcessing ? "PROCESSING..." : "RESIZE IMAGE"}
+                  <Button 
+                    className="magic-button w-full h-16 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
+                    onClick={handleResize} 
+                    disabled={isProcessing}
+                  >
+                      <StarIcons />
+                      {isProcessing ? (
+                        <div className="flex items-center gap-3">
+                            <Loader2 className="size-7 md:size-8 animate-spin" />
+                            <span className="uppercase tracking-tighter">PROCESSING...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                            <Maximize className="size-7 md:size-8 group-hover:scale-125 transition-transform" />
+                            <span className="uppercase tracking-tighter">RESIZE IMAGE</span>
+                        </div>
+                      )}
                   </Button>
                   <Button variant="ghost" onClick={handleReset} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive" disabled={isProcessing}>
                       <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over
@@ -435,7 +484,7 @@ export default function ImageResizer() {
                                         <Eye className="size-3.5 mr-1.5 text-primary" /> Zoom Check
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-6 md:p-10">
+                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-[2.5rem]">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl">HD Pixel Proof Analysis</DialogTitle></DialogHeader>
                                     <div className="grid md:grid-cols-2 gap-8 py-8">
                                         <div className="space-y-4">
@@ -452,8 +501,13 @@ export default function ImageResizer() {
                                         </div>
                                     </div>
                                     <CardFooter className="p-0 pt-4">
-                                        <Button className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 font-black text-lg md:text-xl rounded-2xl shadow-2xl" onClick={handleDownload}>
-                                            SAVE SHARP IMAGE <Download className="ml-3 size-6 md:size-7" />
+                                        <Button 
+                                            className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
+                                            onClick={handleDownload}
+                                        >
+                                            <StarIcons />
+                                            <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
+                                            <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE SHARP IMAGE</span>
                                         </Button>
                                     </CardFooter>
                                 </DialogContent>
@@ -510,8 +564,14 @@ export default function ImageResizer() {
                     )}
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
-                    <Button className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl md:rounded-[1.5rem] transition-all active:scale-95 disabled:opacity-50 group" onClick={handleDownload} disabled={!resizedImageSrc || isProcessing}>
-                        <Download className="mr-4 h-7 w-7 md:h-9 md:w-9 group-hover:translate-y-1 transition-transform" /> SAVE PROFESSIONAL IMAGE
+                    <Button 
+                        className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        onClick={handleDownload} 
+                        disabled={!resizedImageSrc || isProcessing}
+                    >
+                        <StarIcons />
+                        <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
+                        <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE PROFESSIONAL IMAGE</span>
                     </Button>
                 </CardFooter>
             </Card>
