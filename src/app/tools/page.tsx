@@ -274,7 +274,7 @@ function ToolsPageContent() {
       labelKey: 'add_page_numbers_label',
       descriptionKey: 'add_page_numbers_description',
       icon: NotebookPen,
-      color: 'text-lime-500',
+      color: 'text-metric-500',
       lightBg: 'bg-[#f7fee7]'
     },
   ];
@@ -530,14 +530,24 @@ function ToolsPageContent() {
             </div>
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full font-body">
-            <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-transparent p-0 mb-10">
-                {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                <TabsTrigger key={value} value={value} className="px-8 py-3 h-auto text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 bg-white dark:bg-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary shadow-lg hover:shadow-2xl hover:border-primary/50 transition-all tabs-trigger-lift">
-                    <Icon className={cn("mr-2 h-4 w-4", color)} />
-                    {t(categoryKey)}
-                </TabsTrigger>
-                ))}
-            </TabsList>
+            <div className="flex justify-center mb-12">
+              <TabsList className="flex h-auto flex-wrap justify-center gap-2 bg-white/90 dark:bg-slate-900/50 backdrop-blur-md rounded-full p-2.5 border-2 border-slate-200 dark:border-white/10 shadow-2xl px-6 md:px-10">
+                  {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
+                  <TabsTrigger 
+                    key={value} 
+                    value={value} 
+                    className={cn(
+                      "px-5 md:px-7 py-3 h-auto text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] rounded-full transition-all duration-300",
+                      "data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-[0_8px_30px_rgb(0,0,0,0.12)] data-[state=active]:scale-[1.05]",
+                      "dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground dark:data-[state=active]:shadow-[0_0_40px_-5px_hsl(var(--primary)/0.6)]"
+                    )}
+                  >
+                      <Icon className={cn("mr-2.5 h-4 w-4 shrink-0 transition-transform group-hover:scale-110", color)} />
+                      {t(categoryKey)}
+                  </TabsTrigger>
+                  ))}
+              </TabsList>
+            </div>
 
             {allFeatureGroups.map(({ value, features }) => (
                 <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
