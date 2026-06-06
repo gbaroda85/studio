@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import * as pdfjs from 'pdfjs-dist';
@@ -25,7 +25,9 @@ import {
   ChevronRight,
   Plus,
   Monitor,
-  ImageIcon
+  ImageIcon,
+  Settings2,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -356,7 +358,7 @@ export default function ImageToPdfConverter() {
                                                     <Loader2 className="size-20 text-primary opacity-20 animate-spin stroke-[3]" />
                                                     <Monitor className="absolute inset-0 m-auto size-8 text-primary/40 animate-pulse" />
                                                 </div>
-                                                <div className="space-y-3 w-64">
+                                                <div className="space-y-3 w-full max-w-[200px]">
                                                     <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Combined View...</p>
                                                     <Progress value={renderingProgress} className="h-1.5" />
                                                 </div>
@@ -507,4 +509,3 @@ export default function ImageToPdfConverter() {
     </div>
   );
 }
-
