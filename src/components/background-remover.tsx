@@ -68,6 +68,41 @@ const SIZE_PRESETS = [
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
 ];
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function BackgroundRemover() {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('upload');
@@ -269,7 +304,7 @@ export default function BackgroundRemover() {
             <CardContent className="p-8 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer bg-muted/30 group relative">
                     <div className="relative"><UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" /></div>
-                    <div className="text-center px-4"><p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p><p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Unlimited local extractions.</p></div>
+                    <div className="text-center px-4"><p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p><p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Unlimited local extractions.</p></div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
@@ -288,11 +323,18 @@ export default function BackgroundRemover() {
           <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
               <CardHeader className="glass-panel border-b p-4 flex flex-row items-center justify-between"><CardTitle className="text-sm md:base font-black uppercase tracking-tighter">Original Scan</CardTitle></CardHeader>
               <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[350px]"><img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-2 border-white" /></CardContent>
-              <CardFooter className="glass-panel border-t p-4 flex justify-between">
-                    <Button variant="ghost" onClick={handleReset} className="font-black text-[9px] uppercase h-9 px-3 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Change</Button>
-                    <div className="flex gap-2">
-                        <Button variant="outline" className="font-black border-2 border-primary text-primary h-9 rounded-lg text-[9px] uppercase px-3" onClick={() => setStage('crop')}><CropIcon className="mr-1.5 size-3" /> Area</Button>
-                        <Button className="px-6 h-9 text-[10px] font-black bg-primary rounded-lg shadow-lg uppercase" onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}>Remove Background <ChevronRight className="ml-1 size-3.5" /></Button>
+              <CardFooter className="glass-panel border-t p-4 flex justify-between gap-4">
+                    <Button variant="ghost" onClick={handleReset} className="font-black text-[9px] uppercase h-11 px-4 rounded-xl border-2 border-transparent hover:border-muted"><RotateCcw className="mr-1.5 size-4" /> Change</Button>
+                    <div className="flex gap-3 flex-1 justify-end">
+                        <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-11 rounded-xl text-[10px] uppercase px-4 hover:bg-primary/5" onClick={() => setStage('crop')}><CropIcon className="mr-1.5 size-4" /> Area</Button>
+                        <Button 
+                            className="magic-button h-11 px-8 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
+                            onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}
+                        >
+                            <StarIcons />
+                            <Eraser className="size-5 group-hover:rotate-12 transition-transform" />
+                            <span className="text-[11px] uppercase tracking-widest">REMOVE BACKGROUND</span>
+                        </Button>
                     </div>
               </CardFooter>
           </Card>
@@ -316,9 +358,16 @@ export default function BackgroundRemover() {
                     <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[55vh] object-contain block" />
                 </ReactCrop>
             </CardContent>
-            <CardFooter className="glass-panel border-t p-4 flex justify-between">
-                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[9px] uppercase h-9 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Back</Button>
-                <Button className="px-6 h-9 text-[10px] font-black bg-primary rounded-lg shadow-lg uppercase" onClick={handleApplyCrop}>Process subject <ChevronRight className="ml-1 size-3.5" /></Button>
+            <CardFooter className="glass-panel border-t p-4 flex justify-between gap-4">
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[9px] uppercase h-11 px-4 rounded-xl border-2 border-transparent hover:border-muted"><RotateCcw className="mr-1.5 size-4" /> Back</Button>
+                <Button 
+                    className="magic-button h-11 px-10 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
+                    onClick={handleApplyCrop}
+                >
+                    <StarIcons />
+                    <Cpu className="size-5 group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] uppercase tracking-widest">PROCESS SUBJECT</span>
+                </Button>
             </CardFooter>
         </Card>
     );
@@ -331,10 +380,17 @@ export default function BackgroundRemover() {
             <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0"><Settings2 className="size-5 md:size-6" /></div>
             <div><h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2></div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg"><RotateCcw className="mr-1.5 size-3" /> Reset</Button>
-            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !previewImageSrc}>
-                <Download className="mr-1.5 size-3.5" /> DOWNLOAD PNG
+        <div className="flex gap-3 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Reset</Button>
+            <Button 
+                size="lg" 
+                className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-2" 
+                onClick={handleDownload} 
+                disabled={isProcessing || !previewImageSrc}
+            >
+                <StarIcons />
+                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
+                <span className="text-xs uppercase tracking-widest">DOWNLOAD PNG</span>
             </Button>
         </div>
       </div>
