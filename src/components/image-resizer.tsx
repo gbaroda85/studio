@@ -45,10 +45,10 @@ type OutputFormat = 'jpeg' | 'png' | 'webp';
 type Unit = 'px' | 'mm' | 'inch';
 
 const GOVT_PRESETS = [
-  { label: 'Photo (SSC/UPSC)', width: 200, height: 230, format: 'jpeg' as OutputFormat, icon: User },
-  { label: 'Signature (SSC)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool },
-  { label: 'Photo (IBPS)', width: 212, height: 272, format: 'jpeg' as OutputFormat, icon: User },
-  { label: 'Signature (IBPS)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool },
+  { label: 'Photo (SSC/UPSC)', width: 200, height: 230, format: 'jpeg' as OutputFormat, icon: User, color: 'border-blue-500', bg: 'bg-blue-500/5' },
+  { label: 'Signature (SSC)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool, color: 'border-emerald-500', bg: 'bg-emerald-500/5' },
+  { label: 'Photo (IBPS)', width: 212, height: 272, format: 'jpeg' as OutputFormat, icon: User, color: 'border-indigo-500', bg: 'bg-indigo-500/5' },
+  { label: 'Signature (IBPS)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool, color: 'border-rose-500', bg: 'bg-rose-500/5' },
 ];
 
 const DPI = 96; 
@@ -382,18 +382,33 @@ export default function ImageResizer() {
                     <Briefcase className="h-4 w-4" /> GOVT JOB PRESETS
                   </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CardContent className="p-4 md:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {GOVT_PRESETS.map((preset) => (
-                      <Button key={preset.label} variant="outline" className="h-auto flex-row items-center justify-start p-3 gap-3 hover:border-primary hover:bg-primary/5 border-2 rounded-xl transition-all" onClick={() => applyPreset(preset)}>
-                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <preset.icon className="h-4 w-4 text-primary" />
+                      <button 
+                        key={preset.label} 
+                        className={cn(
+                          "group relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left",
+                          "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800",
+                          "hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        )}
+                        onClick={() => applyPreset(preset)}
+                      >
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1/2 rounded-r-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="size-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 shadow-inner group-hover:bg-primary/10 transition-colors">
+                          <preset.icon className="h-5 w-5 text-primary" />
                         </div>
-                        <div className="text-left overflow-hidden">
-                            <div className="text-[9px] font-black uppercase tracking-tight truncate">{preset.label}</div>
-                            <span className="text-[8px] text-muted-foreground font-mono">{preset.width}x{preset.height} px</span>
+                        
+                        <div className="flex-1 overflow-hidden">
+                            <div className="text-[11px] font-black uppercase tracking-tight text-slate-800 dark:text-slate-200 truncate leading-none mb-1.5">{preset.label}</div>
+                            <div className="flex items-center gap-1.5">
+                                <Badge variant="secondary" className="text-[9px] font-mono py-0 px-1.5 h-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-none">
+                                    {preset.width}x{preset.height} PX
+                                </Badge>
+                            </div>
                         </div>
-                      </Button>
+                      </button>
                     ))}
                   </div>
               </CardContent>
