@@ -72,7 +72,7 @@ const ALL_TOOLS = [
   // PDF Toolkit
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "pdf-kit" },
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
-  { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "pdf-kit" },
+  { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-sky-500", lightBg: "bg-slate-50", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf-kit" },
   { icon: FilePenLine, title: "EDIT PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "pdf-kit" },
 
@@ -86,25 +86,25 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-white dark:bg-slate-900 rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-white/5 flex flex-col">
-      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6", lightBg)}>
+    <div className="h-full bg-white dark:bg-[#150a1a] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
+      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6", lightBg, "dark:bg-[#0a040d]/60")}>
         <div className={cn(`size-12 rounded-2xl flex items-center justify-center mb-5 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
           <Icon className="size-6" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-black mb-2 text-slate-900 dark:text-slate-800 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-700 font-bold leading-relaxed mb-6 uppercase opacity-60 tracking-tight">{description}</p>
+          <h3 className="text-lg md:text-xl font-black mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-6 uppercase opacity-60 tracking-tight">{description}</p>
           
           <div className="flex flex-wrap gap-2 mt-auto">
-             <Badge variant="secondary" className="bg-white/60 dark:bg-black/10 text-[7px] font-black uppercase text-slate-700 dark:text-slate-300 border-none px-2 py-0.5 tracking-widest">Professional</Badge>
-             <Badge variant="secondary" className="bg-white/60 dark:bg-black/10 text-[7px] font-black uppercase text-slate-700 dark:text-slate-300 border-none px-2 py-0.5 tracking-widest">Local RAM</Badge>
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest">Professional</Badge>
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest">Local RAM</Badge>
           </div>
         </div>
       </div>
       
-      {/* White Footer Section - Clean Explore Style */}
-      <div className="bg-white dark:bg-slate-950 p-4 px-6 flex items-center justify-between rounded-b-[2.5rem]">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-300">Launch Tool</span>
+      {/* Footer Section */}
+      <div className="bg-white dark:bg-[#0a040d] p-4 px-6 flex items-center justify-between rounded-b-[2.5rem]">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400">Launch Tool</span>
         <div className="size-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-white group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </div>
