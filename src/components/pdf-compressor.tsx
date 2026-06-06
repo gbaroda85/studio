@@ -3,6 +3,7 @@
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
+import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,9 @@ import {
     FileText,
     Layers,
     X,
-    Eye
+    Eye,
+    Lock,
+    AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -31,10 +34,11 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import confetti from 'canvas-confetti';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
 
 function formatBytes(bytes: number, decimals = 2): string {
@@ -61,6 +65,8 @@ export default function PdfCompressor() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isChecking, setIsChecking] = useState(false);
+    const [isProtected, setIsProtected] = useState<boolean | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [progress, setProgress] = useState(0);
     const [statusText, setStatusText] = useState("");
@@ -79,16 +85,40 @@ export default function PdfCompressor() {
             if (compressedPdfUrl) URL.revokeObjectURL(compressedPdfUrl);
         };
     }, [compressedPdfUrl]);
+
+    const checkEncryption = async (file: File) => {
+        setIsChecking(true);
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjs.getDocument({ 
+                data: new Uint8Array(arrayBuffer),
+                cMapUrl: 'https://unpkg.com/pdfjs-dist@4.2.67/cmaps/',
+                cMapPacked: true
+            });
+            await loadingTask.promise;
+            setIsProtected(false);
+        } catch (error: any) {
+            if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
+                setIsProtected(true);
+            } else {
+                setIsProtected(null);
+            }
+        } finally {
+            setIsChecking(false);
+        }
+    };
     
     const handleFileChange = (file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setCompressedPdfUrl(null);
             setCompressionResult(null);
+            setIsProtected(null);
             setProgress(0);
             setStatusText("");
             const sizeInKb = file.size / 1024;
             setTargetValue(Math.max(50, Math.round(sizeInKb * 0.6)).toString());
+            checkEncryption(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
         }
@@ -100,7 +130,7 @@ export default function PdfCompressor() {
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
     
     const handleCompressPdf = async () => {
-        if (!pdfFile) return;
+        if (!pdfFile || isProtected) return;
         setIsProcessing(true);
         setCompressionResult(null);
         setCompressedPdfUrl(null);
@@ -215,6 +245,7 @@ export default function PdfCompressor() {
         setPdfFile(null);
         setCompressedPdfUrl(null);
         setCompressionResult(null);
+        setIsProtected(null);
         setProgress(0);
         setStatusText("");
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -290,7 +321,31 @@ export default function PdfCompressor() {
                         </Button>
                     </CardHeader>
                     <CardContent className="py-12 md:py-16 flex flex-col items-center justify-center min-h-[400px]">
-                        {isProcessing ? (
+                        {isChecking ? (
+                            <div className="py-12 flex flex-col items-center justify-center gap-4">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Checking Encryption...</p>
+                            </div>
+                        ) : isProtected ? (
+                            <div className="w-full max-w-md space-y-6 animate-in zoom-in-95 duration-300 px-4">
+                                <Alert variant="destructive" className="border-2 rounded-[2rem] bg-rose-50 border-rose-100 p-8 shadow-xl">
+                                    <div className="flex flex-col items-center text-center gap-4">
+                                        <div className="size-16 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shadow-inner">
+                                            <Lock className="size-8" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <AlertTitle className="text-xl font-black uppercase tracking-tighter text-rose-800">Protected Document</AlertTitle>
+                                            <AlertDescription className="text-sm font-bold text-rose-600/80 leading-relaxed uppercase">
+                                                This PDF is password-protected. Please <Link href="/unlock-pdf" className="underline text-rose-800 font-black hover:text-rose-900 transition-colors">Unlock it first</Link> using our studio before optimization.
+                                            </AlertDescription>
+                                        </div>
+                                    </div>
+                                </Alert>
+                                <Button variant="outline" className="w-full h-12 border-2 border-dashed rounded-xl font-black uppercase text-xs" onClick={resetState}>
+                                    Try a different file
+                                </Button>
+                            </div>
+                        ) : isProcessing ? (
                             <div className="space-y-8 w-full max-w-sm text-center px-4">
                                 <div className="relative inline-block">
                                      <Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary opacity-20 stroke-[3]" />
@@ -348,7 +403,7 @@ export default function PdfCompressor() {
                                 <Download className="mr-3 md:mr-4 h-6 w-6 md:h-8 md:w-8 group-hover:translate-y-1 transition-transform" /> SAVE OPTIMIZED PDF
                             </Button>
                         )}
-                        {!compressionResult && !isProcessing && (
+                        {!compressionResult && !isProcessing && !isProtected && !isChecking && (
                             <Button className="w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl transition-all active:scale-95 group" onClick={handleCompressPdf}>
                                 <Zap className="mr-3 h-6 w-6 md:h-8 md:w-8 text-yellow-400 group-hover:scale-110 transition-transform" /> START COMPRESSION
                             </Button>
