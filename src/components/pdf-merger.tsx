@@ -206,7 +206,6 @@ export default function PdfMerger() {
         if (!mergedPdfUrl) return;
         const link = document.createElement('a');
         link.href = mergedPdfUrl;
-        // Updated filename logic
         link.download = `GR7-Tools-merged-document-${Date.now()}.pdf`;
         link.click();
     }
@@ -239,7 +238,7 @@ export default function PdfMerger() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDFs to Merge</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">High-fidelity bundling engine active.</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">High-fidelity bundling engine active.</p>
                                 </div>
                             </div>
                         ) : (
@@ -270,7 +269,7 @@ export default function PdfMerger() {
                                                 <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
                                              </div>
                                         ))}
-                                        <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                        <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                                             <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
                                         </Button>
                                     </div>
@@ -342,40 +341,46 @@ export default function PdfMerger() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-10">
                         
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-2">
-                                <ArrowUpDown className="size-3" /> Quick Sorting Tools
+                                <ArrowUpDown className="size-3" /> Quick Sorting Studio
                             </Label>
                             
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-4">
+                                {/* A -> Z Sort Button */}
                                 <Button 
-                                    variant="outline" 
-                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-blue-500/5 hover:bg-blue-500/10 border-blue-500/10 hover:border-blue-500/30 transition-all group shadow-sm"
+                                    className="h-16 rounded-full bg-gradient-to-r from-[#1a5f6e] to-[#0d9488] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('asc')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <ArrowDownAz className="size-6 text-blue-600 transition-transform group-hover:scale-110" />
-                                    <span className="text-[11px] font-black uppercase tracking-tight text-blue-700">A → Z</span>
+                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                        <ArrowDownAz className="size-6 text-white" />
+                                    </div>
+                                    <span className="text-sm font-black tracking-widest uppercase">Sort Name A → Z</span>
                                 </Button>
 
+                                {/* Z -> A Sort Button */}
                                 <Button 
-                                    variant="outline" 
-                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-indigo-500/5 hover:bg-indigo-500/10 border-indigo-500/10 hover:border-indigo-500/30 transition-all group shadow-sm"
+                                    className="h-16 rounded-full bg-gradient-to-r from-[#1e40af] to-[#312e81] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('desc')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <ArrowUpAz className="size-6 text-indigo-600 transition-transform group-hover:translate-y-0.5" />
-                                    <span className="text-[11px] font-black uppercase tracking-tight text-indigo-700">Z → A</span>
+                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                        <ArrowUpAz className="size-6 text-white" />
+                                    </div>
+                                    <span className="text-sm font-black tracking-widest uppercase">Sort Name Z → A</span>
                                 </Button>
 
+                                {/* FLIP Order Button */}
                                 <Button 
-                                    variant="outline" 
-                                    className="h-20 flex-col gap-2 border-2 rounded-3xl bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/10 hover:border-emerald-500/30 transition-all group shadow-sm"
+                                    className="h-16 rounded-full bg-gradient-to-r from-[#065f46] to-[#064e3b] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
                                     onClick={() => sortFiles('reverse')}
                                     disabled={pdfFiles.length < 2}
                                 >
-                                    <Repeat className="size-6 text-emerald-600 transition-transform group-hover:rotate-180 duration-500" />
-                                    <span className="text-[11px] font-black uppercase tracking-tight text-emerald-700">FLIP</span>
+                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:rotate-180 duration-500 transition-transform">
+                                        <Repeat className="size-6 text-white" />
+                                    </div>
+                                    <span className="text-sm font-black tracking-widest uppercase">Reverse Current Order</span>
                                 </Button>
                             </div>
                         </div>
