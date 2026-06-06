@@ -34,6 +34,41 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -197,7 +232,7 @@ export default function PhotoEnhancer() {
     link.href = resultImageSrc;
     const nameParts = imageFile.name.split(".");
     const name = nameParts.slice(0, -1).join(".");
-    link.download = `${name}-enhanced.jpg`;
+    link.download = `GR7-Tools-${name}-enhanced.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -274,11 +309,18 @@ export default function PhotoEnhancer() {
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
                 <RotateCcw className="mr-1.5 size-3" /> Reset
             </Button>
-            <Button size="lg" className="flex-1 md:flex-none h-9 md:h-10 px-6 bg-green-600 hover:bg-green-700 font-black text-[9px] md:text-xs rounded-lg shadow-xl" onClick={handleDownload} disabled={isProcessing || !resultImageSrc}>
-                <Download className="mr-1.5 size-3.5" /> DOWNLOAD HD
+            <Button 
+                size="lg" 
+                className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-3" 
+                onClick={handleDownload} 
+                disabled={isProcessing || !resultImageSrc}
+            >
+                <StarIcons />
+                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
+                <span className="text-xs uppercase tracking-widest">DOWNLOAD HD</span>
             </Button>
         </div>
       </div>
@@ -352,9 +394,14 @@ export default function PhotoEnhancer() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
-                    <Button className="w-full h-12 md:h-14 font-black bg-primary hover:bg-primary/90 shadow-xl rounded-xl md:rounded-2xl group relative overflow-hidden text-[10px] md:text-xs" onClick={handleAutoEnhance} disabled={isProcessing}>
-                        <Zap className="mr-2 h-5 md:h-6 w-5 md:w-6 text-yellow-400 group-hover:scale-125 transition-transform" />
-                        SMART AUTO-ENHANCE PRESET
+                    <Button 
+                        className="magic-button w-full h-14 font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-8 flex items-center gap-3" 
+                        onClick={handleAutoEnhance} 
+                        disabled={isProcessing}
+                    >
+                        <StarIcons />
+                        <Zap className="size-6 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                        <span className="text-[10px] md:text-xs uppercase tracking-widest">SMART AUTO-ENHANCE</span>
                     </Button>
 
                     <div className="space-y-6 md:space-y-8">
