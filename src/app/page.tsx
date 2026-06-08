@@ -174,18 +174,18 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="hero-btn-uiverse group">
-              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">Image Tools</span>
-              <ImageIcon className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
+          <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="btn-sliding group">
+              <span className="btn-text-one">Image Tools</span>
+              <span className="btn-text-two">Explore Now</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="hero-btn-uiverse group">
-              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">PDF Tools</span>
-              <FileText className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
+            <Link href="/tools?tab=pdf" className="btn-sliding group">
+              <span className="btn-text-one">PDF Tools</span>
+              <span className="btn-text-two">Try Studio</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="hero-btn-uiverse group">
-              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">Calculators</span>
-              <Calculator className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
+            <Link href="/tools?tab=calculator" className="btn-sliding group">
+              <span className="btn-text-one">Calculators</span>
+              <span className="btn-text-two">Instant Result</span>
             </Link>
           </div>
 
