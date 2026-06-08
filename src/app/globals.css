@@ -289,7 +289,6 @@
 .btn-sliding {
   width: 170px;
   height: 56px;
-  background: linear-gradient(to top, #00154c, #12376e, #23487f);
   color: #fff;
   border-radius: 50px;
   border: none;
@@ -302,6 +301,21 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+
+/* Default blue style used by hero buttons */
+.btn-sliding-blue {
+  background: linear-gradient(to top, #00154c, #12376e, #23487f);
+}
+
+/* Color variant for Explore All (Adaptive) */
+.btn-sliding-explore {
+  @apply bg-gradient-button;
+}
+
+.dark .btn-sliding-explore {
+  /* Vibrant magenta-pink gradient for dark mode change */
+  background: linear-gradient(to top, #5c0032, #83124d, #be185d);
 }
 
 .btn-sliding:active {

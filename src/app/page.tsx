@@ -175,15 +175,15 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="btn-sliding group">
+            <Link href="/tools?tab=image" className="btn-sliding btn-sliding-blue group">
               <span className="btn-text-one">Image Tools</span>
               <span className="btn-text-two">Explore Now</span>
             </Link>
-            <Link href="/tools?tab=pdf" className="btn-sliding group">
+            <Link href="/tools?tab=pdf" className="btn-sliding btn-sliding-blue group">
               <span className="btn-text-one">PDF Tools</span>
               <span className="btn-text-two">Try Studio</span>
             </Link>
-            <Link href="/tools?tab=calculator" className="btn-sliding group">
+            <Link href="/tools?tab=calculator" className="btn-sliding btn-sliding-blue group">
               <span className="btn-text-one">Calculators</span>
               <span className="btn-text-two">Instant Result</span>
             </Link>
@@ -230,9 +230,10 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Button asChild className="hidden sm:flex h-12 px-8 rounded-2xl font-bold text-sm bg-gradient-button text-white shadow-xl hover:scale-105 transition-all font-body">
-                            <Link href="/tools">EXPLORE ALL <ArrowRight className="ml-2 size-4" /></Link>
-                        </Button>
+                        <Link href="/tools" className="btn-sliding btn-sliding-explore group hidden sm:flex">
+                          <span className="btn-text-one">EXPLORE ALL</span>
+                          <span className="btn-text-two flex items-center justify-center gap-2">VIEW ALL <ArrowRight className="size-4" /></span>
+                        </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'featured').map((tool, i) => <ToolCard key={i} {...tool} />)}
