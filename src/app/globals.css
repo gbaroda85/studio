@@ -259,3 +259,27 @@
 .launch-arrow-btn:hover .button-elem svg {
   @apply text-primary;
 }
+
+/* HERO UIVERSE BUTTON */
+.hero-btn-uiverse {
+  @apply px-6 py-4 font-bold flex items-center gap-3 transition-all duration-1000 bg-white dark:bg-[#0a041a] rounded-[0.5rem] relative cursor-pointer;
+  color: blueviolet;
+  border-bottom: 2px solid blueviolet;
+  border-right: 2px solid blueviolet;
+  border-top: 2px solid white;
+  border-left: 2px solid white;
+}
+
+.dark .hero-btn-uiverse {
+  border-top-color: #1a1a2e;
+  border-left-color: #1a1a2e;
+}
+
+.hero-btn-uiverse:hover {
+  border-top: 2px solid blueviolet;
+  border-left: 2px solid blueviolet;
+  border-bottom: 2px solid rgb(238, 103, 238);
+  border-right: 2px solid rgb(238, 103, 238);
+  box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px,
+    rgba(240, 46, 170, 0.2) 15px 15px;
+}

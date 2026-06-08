@@ -175,17 +175,17 @@ export default function Page() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-[#0a041a] border-[3px] border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.15)] dark:shadow-[0_0_20px_rgba(99,102,241,0.3)] rounded-full hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] dark:hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all group hover:scale-105 active:scale-95 text-slate-900 dark:text-white">
-              <span className="font-black text-xs md:text-sm uppercase tracking-widest">Image Tools</span>
-              <ImageIcon className="size-5 md:size-6 text-indigo-600 dark:text-indigo-300 group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=image" className="hero-btn-uiverse group">
+              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">Image Tools</span>
+              <ImageIcon className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
             </Link>
-            <Link href="/tools?tab=pdf" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-[#0a041a] border-[3px] border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.15)] dark:shadow-[0_0_20px_rgba(99,102,241,0.3)] rounded-full hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] dark:hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all group hover:scale-105 active:scale-95 text-slate-900 dark:text-white">
-              <span className="font-black text-xs md:text-sm uppercase tracking-widest">PDF Tools</span>
-              <FileText className="size-5 md:size-6 text-indigo-600 dark:text-indigo-300 group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=pdf" className="hero-btn-uiverse group">
+              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">PDF Tools</span>
+              <FileText className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
             </Link>
-            <Link href="/tools?tab=calculator" className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-[#0a041a] border-[3px] border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.15)] dark:shadow-[0_0_20px_rgba(99,102,241,0.3)] rounded-full hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] dark:hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all group hover:scale-105 active:scale-95 text-slate-900 dark:text-white">
-              <span className="font-black text-xs md:text-sm uppercase tracking-widest">Calculators</span>
-              <Calculator className="size-5 md:size-6 text-indigo-600 dark:text-indigo-300 group-hover:scale-110 transition-transform" />
+            <Link href="/tools?tab=calculator" className="hero-btn-uiverse group">
+              <span className="font-bold text-xs md:text-sm uppercase tracking-widest">Calculators</span>
+              <Calculator className="size-5 md:size-6 text-indigo-600 transition-transform group-hover:scale-110" />
             </Link>
           </div>
 
