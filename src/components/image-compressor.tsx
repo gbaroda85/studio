@@ -291,7 +291,6 @@ export default function ImageCompressor() {
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                onClick={() => fileInputRef.current?.click()}
             >
                 <CardHeader className="bg-muted/30 border-b p-6 text-center">
                     <div className="flex items-center justify-between">
@@ -302,11 +301,12 @@ export default function ImageCompressor() {
                 <CardContent className={cn(results.length === 0 ? "p-10 md:p-12" : "p-4 md:p-6")}>
                     {results.length === 0 ? (
                         <div 
-                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group"
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                            onClick={() => fileInputRef.current?.click()}
                         >
                             <div className="relative">
                                 <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                                <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>

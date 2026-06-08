@@ -445,7 +445,7 @@ export default function PdfCompressor() {
                             </Button>
                         )}
                         {!compressionResult && !isProcessing && !isProtected && !isChecking && (
-                            <Button className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleCompressPdf}>
+                            <Button className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleCompressPdf}>
                                 <StarIcons />
                                 <Zap className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-110 transition-transform" /> 
                                 <span className="uppercase tracking-tighter">START COMPRESSION</span>
