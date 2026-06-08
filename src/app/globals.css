@@ -275,6 +275,7 @@
   border-left-color: #1a1a2e;
 }
 
+.hero-btn-uiverse.active-uiverse,
 .hero-btn-uiverse:hover {
   border-top: 2px solid blueviolet;
   border-left: 2px solid blueviolet;
