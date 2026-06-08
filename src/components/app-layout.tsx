@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -381,12 +382,18 @@ function AppHeader() {
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
             <div className="flex items-center gap-1">
-                <Button asChild variant="ghost" className="hidden sm:flex items-center gap-2 rounded-full hover:bg-primary/10 px-4 h-10 text-slate-700 dark:text-slate-200 border-none shadow-none">
-                    <a href="mailto:gaurav.thearmy@yahoo.com">
-                        <Mail className="h-4 w-4 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Support</span>
-                    </a>
-                </Button>
+                <a href="mailto:gaurav.thearmy@yahoo.com" className="explore-all-cta hidden sm:flex group h-9 px-5 py-0 items-center justify-center">
+                    <span className="span font-black tracking-widest uppercase text-[10px]">Support</span>
+                    <span className="second ml-3">
+                        <svg width="24px" height="12px" viewBox="0 0 66 43" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                            <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                <path className="one" d="M40.1543933,3.89485589 L40.3151592,2.18569696 C40.3601096,1.70693552 41.0261314,1.58550198 41.2291244,1.99616239 L45.2016838,9.75704901 C45.3090623,9.97014693 45.3090623,10.2201314 45.2016838,10.4332293 L41.2291244,18.194116 C41.0261314,18.6047764 40.3151592,18.0045814 L40.3151592,18.0045814 L40.1543933,16.2954224 L0,16.2954224 L0,3.89485589 L40.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                                <path className="two" d="M55.1543933,3.89485589 L55.3151592,2.18569696 C55.3601096,1.70693552 56.0261314,1.58550198 56.2291244,1.99616239 L60.2016838,9.75704901 C60.3090623,9.97014693 60.3090623,10.2201314 60.2016838,10.4332293 L56.2291244,18.194116 C56.0261314,18.6047764 55.3601096,18.4833428 55.3151592,18.0045814 L55.1543933,16.2954224 L15,16.2954224 L15,3.89485589 L55.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                                <path className="three" d="M70.1543933,3.89485589 L70.3151592,2.18569696 C70.3601096,1.70693552 71.0261314,1.58550198 71.2291244,1.99616239 L75.2016838,9.75704901 C75.3090623,9.97014693 75.3090623,10.2201314 75.2016838,10.4332293 L71.2291244,18.194116 C71.0261314,18.6047764 70.3601096,18.4833428 70.3151592,18.0045814 L70.1543933,16.2954224 L30,16.2954224 L30,3.89485589 L70.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                            </g>
+                        </svg>
+                    </span>
+                </a>
                 
                 <SettingsMenu />
                 <ThemeToggle />
