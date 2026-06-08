@@ -463,7 +463,7 @@ export default function ImageToPdfConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
                                     <AlignVerticalJustifyCenter className="size-3" /> Position Logic
                                 </Label>
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-3 gap-2">
                                     <button 
                                         className={cn(
                                             "btn-pos-uiverse",
