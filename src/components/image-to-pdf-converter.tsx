@@ -370,7 +370,13 @@ export default function ImageToPdfConverter() {
                     )}
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-5 border-t flex justify-between items-center">
-                    <Button variant="ghost" onClick={handleReset} className="text-[10px] font-black uppercase text-destructive h-10 px-6 hover:bg-destructive/5 rounded-xl border-2 border-transparent hover:border-destructive/20"><RefreshCcw className="mr-2 h-4 w-4" /> Start Over</Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleReset} 
+                      className="text-[10px] font-black uppercase text-destructive h-10 px-6 hover:bg-destructive hover:text-white rounded-full border-2 border-destructive/20 transition-all duration-300 shadow-sm"
+                    >
+                      <RefreshCcw className="mr-2 h-4 w-4" /> Start Over
+                    </Button>
                     <div className="flex items-center gap-3 text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest">
                         <ShieldCheck className="h-4 w-4 text-green-500" /> SECURE RAM
                     </div>
@@ -514,7 +520,7 @@ export default function ImageToPdfConverter() {
                         </p>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 md:p-10 border-t-2 border-dashed">
+                <CardFooter className="bg-muted/10 p-6 md:p-10 border-t-2 border-dashed flex flex-col gap-3">
                     <Button 
                         className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={images.length === 0 || isConverting}
@@ -532,6 +538,14 @@ export default function ImageToPdfConverter() {
                                 <span className="uppercase tracking-tighter font-black text-base md:text-lg">GENERATE PDF</span>
                             </div>
                         )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleReset} 
+                      className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive hover:text-white rounded-full border-2 border-destructive/20 transition-all duration-300" 
+                      disabled={isConverting}
+                    >
+                      <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over
                     </Button>
                 </CardFooter>
             </Card>
