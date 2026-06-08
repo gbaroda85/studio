@@ -83,7 +83,7 @@ function formatBytes(bytes: number, decimals = 2): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 type CompressionResult = {
@@ -481,21 +481,18 @@ export default function PdfCompressor() {
                                         </Label>
                                         <div className="grid grid-cols-2 gap-2">
                                             {QUICK_SIZES.map((size) => (
-                                                <Button
+                                                <button
                                                     key={size}
-                                                    variant="outline"
-                                                    size="sm"
                                                     onClick={() => {
                                                         setTargetValue(size);
                                                         setTargetUnit('kb');
                                                     }}
                                                     className={cn(
-                                                        "rounded-xl font-black text-[10px] uppercase h-10 border-2 transition-all",
-                                                        targetValue === size && targetUnit === 'kb' ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                        "btn-pos-uiverse h-10",
+                                                        targetValue === size && targetUnit === 'kb' && "active-uiverse"
                                                     )}
-                                                >
-                                                    UNDER {size}KB
-                                                </Button>
+                                                    data-label={`UNDER ${size}KB`}
+                                                />
                                             ))}
                                         </div>
                                     </div>

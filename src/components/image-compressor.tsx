@@ -476,21 +476,18 @@ export default function ImageCompressor() {
                                     </Label>
                                     <div className="grid grid-cols-4 gap-2">
                                         {QUICK_SIZES.map((size) => (
-                                            <Button
+                                            <button
                                                 key={size}
-                                                variant="outline"
-                                                size="sm"
                                                 onClick={() => {
                                                     setTargetSizeValue(size);
                                                     setTargetUnit('kb');
                                                 }}
                                                 className={cn(
-                                                    "rounded-xl font-black text-[10px] uppercase h-10 border-2 transition-all",
-                                                    targetSizeValue === size && targetUnit === 'kb' ? "bg-primary text-white border-primary shadow-lg" : "hover:border-primary/50"
+                                                    "btn-pos-uiverse h-10",
+                                                    targetSizeValue === size && targetUnit === 'kb' && "active-uiverse"
                                                 )}
-                                            >
-                                                {size}K
-                                            </Button>
+                                                data-label={`${size}K`}
+                                            />
                                         ))}
                                     </div>
                                 </div>
