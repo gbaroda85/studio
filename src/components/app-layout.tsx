@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -383,7 +382,7 @@ function AppHeader() {
 
             <div className="flex items-center gap-1">
                 <a href="mailto:gaurav.thearmy@yahoo.com" className="support-uiverse hidden sm:flex">
-                    <span className="uiverse-tooltip">Email Support</span>
+                    <span className="uiverse-tooltip">gaurav.thearmy@yahoo.com</span>
                     <span>Support</span>
                 </a>
                 
