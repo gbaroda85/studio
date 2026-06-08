@@ -100,7 +100,7 @@ export default function ImageCropper() {
   const [cropMode, setCropMode] = useState<CropMode>('rectangular');
   
   // Rectangular Mode States
-  const [crop, setCrop] = useState<Crop>();
+  const [crop, setCrop] = useState<CropType>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [aspect, setAspect] = useState<number | undefined>(undefined);
   const [rotate, setRotate] = useState(0); 
@@ -355,6 +355,7 @@ export default function ImageCropper() {
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
@@ -412,14 +413,15 @@ export default function ImageCropper() {
                         </Label>
                         <div className="grid grid-cols-2 gap-2">
                             {ASPECT_RATIOS.map((r) => (
-                                <Button 
+                                <button 
                                     key={r.label} 
-                                    variant="outline" 
-                                    className={cn("h-10 text-[9px] font-black border-2 rounded-xl", (aspect === r.value || (r.value === 0 && aspect === undefined)) ? "border-primary bg-primary/5" : "")}
+                                    className={cn(
+                                        "btn-pos-uiverse h-10", 
+                                        (aspect === r.value || (r.value === 0 && aspect === undefined)) && "active-uiverse"
+                                    )}
                                     onClick={() => handleAspectChange(r.value)}
-                                >
-                                    {r.label}
-                                </Button>
+                                    data-label={r.label}
+                                />
                             ))}
                         </div>
                     </div>
