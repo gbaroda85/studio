@@ -402,7 +402,7 @@ export default function ImageToPdfConverter() {
                                                 </div>
                                                 <div className="space-y-3 w-full max-w-[200px]">
                                                     <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Combined View...</p>
-                                                    <Progress value={renderingProgress} className="h-1.5" />
+                                                    <Progress value={renderingProgress} className="h-1" />
                                                 </div>
                                             </div>
                                         ) : (
@@ -463,37 +463,31 @@ export default function ImageToPdfConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
                                     <AlignVerticalJustifyCenter className="size-3" /> Position Logic
                                 </Label>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 gap-4">
                                     <button 
                                         className={cn(
-                                            "hero-btn-uiverse flex-col h-auto py-3 gap-1 flex-1 transition-all duration-1000 justify-center",
+                                            "btn-pos-uiverse",
                                             selectedImage?.vAlign === 'top' && "active-uiverse"
                                         )} 
+                                        data-label="Top"
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
-                                    >
-                                        <AlignVerticalJustifyStart className="size-5" />
-                                        <span className="text-[9px] font-black uppercase">Top</span>
-                                    </button>
+                                    />
                                     <button 
                                         className={cn(
-                                            "hero-btn-uiverse flex-col h-auto py-3 gap-1 flex-1 transition-all duration-1000 justify-center",
+                                            "btn-pos-uiverse",
                                             selectedImage?.vAlign === 'center' && "active-uiverse"
                                         )} 
+                                        data-label="Center"
                                         onClick={() => updateSelectedImage({ vAlign: 'center' })}
-                                    >
-                                        <AlignVerticalJustifyCenter className="size-5" />
-                                        <span className="text-[9px] font-black uppercase">Center</span>
-                                    </button>
+                                    />
                                     <button 
                                         className={cn(
-                                            "hero-btn-uiverse flex-col h-auto py-3 gap-1 flex-1 transition-all duration-1000 justify-center",
+                                            "btn-pos-uiverse",
                                             selectedImage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
+                                        data-label="Bottom"
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
-                                    >
-                                        <AlignVerticalJustifyEnd className="size-5" />
-                                        <span className="text-[9px] font-black uppercase">Bottom</span>
-                                    </button>
+                                    />
                                 </div>
                             </div>
 
