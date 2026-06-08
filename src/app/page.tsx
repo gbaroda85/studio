@@ -230,9 +230,17 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools" className="btn-sliding btn-sliding-explore group hidden sm:flex">
-                          <span className="btn-text-one">EXPLORE ALL</span>
-                          <span className="btn-text-two flex items-center justify-center gap-2">VIEW ALL <ArrowRight className="size-4" /></span>
+                        <Link href="/tools" className="explore-all-cta hidden sm:flex group">
+                          <span className="span font-black tracking-widest uppercase">Explore All</span>
+                          <span className="second">
+                            <svg width="30px" height="15px" viewBox="0 0 66 43" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                              <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                <path className="one" d="M40.1543933,3.89485589 L40.3151592,2.18569696 C40.3601096,1.70693552 41.0261314,1.58550198 41.2291244,1.99616239 L45.2016838,9.75704901 C45.3090623,9.97014693 45.3090623,10.2201314 45.2016838,10.4332293 L41.2291244,18.194116 C41.0261314,18.6047764 40.3601096,18.4833428 40.3151592,18.0045814 L40.1543933,16.2954224 L0,16.2954224 L0,3.89485589 L40.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                                <path className="two" d="M55.1543933,3.89485589 L55.3151592,2.18569696 C55.3601096,1.70693552 56.0261314,1.58550198 56.2291244,1.99616239 L60.2016838,9.75704901 C60.3090623,9.97014693 60.3090623,10.2201314 60.2016838,10.4332293 L56.2291244,18.194116 C56.0261314,18.6047764 55.3601096,18.4833428 55.3151592,18.0045814 L55.1543933,16.2954224 L15,16.2954224 L15,3.89485589 L55.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                                <path className="three" d="M70.1543933,3.89485589 L70.3151592,2.18569696 C70.3601096,1.70693552 71.0261314,1.58550198 71.2291244,1.99616239 L75.2016838,9.75704901 C75.3090623,9.97014693 75.3090623,10.2201314 75.2016838,10.4332293 L71.2291244,18.194116 C71.0261314,18.6047764 70.3601096,18.4833428 70.3151592,18.0045814 L70.1543933,16.2954224 L30,16.2954224 L30,3.89485589 L70.1543933,3.89485589 Z" fill="#FFFFFF"></path>
+                              </g>
+                            </svg>
+                          </span>
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

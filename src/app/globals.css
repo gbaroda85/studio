@@ -354,3 +354,90 @@
 .btn-sliding:hover .btn-text-two {
   top: 50%;
 }
+
+/* EXPLORE ALL CTA (UIVERSE ADAPTED) */
+.explore-all-cta {
+  display: flex;
+  padding: 10px 25px;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  color: white;
+  background: #6225e6;
+  transition: 1s;
+  box-shadow: 6px 6px 0 black;
+  transform: skewX(-15deg);
+  border: none;
+  cursor: pointer;
+  align-items: center;
+}
+
+.explore-all-cta:focus {
+  outline: none;
+}
+
+.explore-all-cta:hover {
+  transition: 0.5s;
+  box-shadow: 10px 10px 0 #fbc638;
+}
+
+.explore-all-cta .second {
+  transition: 0.5s;
+  margin-right: 0px;
+}
+
+.explore-all-cta:hover .second {
+  transition: 0.5s;
+  margin-right: 45px;
+}
+
+.explore-all-cta .span {
+  transform: skewX(15deg);
+}
+
+.explore-all-cta .second {
+  width: 20px;
+  margin-left: 15px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.explore-all-cta .one {
+  transition: 0.4s;
+  transform: translateX(-60%);
+}
+
+.explore-all-cta .two {
+  transition: 0.5s;
+  transform: translateX(-30%);
+}
+
+.explore-all-cta:hover .three {
+  animation: color_anim 1s infinite 0.2s;
+}
+
+.explore-all-cta:hover .one {
+  transform: translateX(0%);
+  animation: color_anim 1s infinite 0.6s;
+}
+
+.explore-all-cta:hover .two {
+  transform: translateX(0%);
+  animation: color_anim 1s infinite 0.4s;
+}
+
+@keyframes color_anim {
+  0% {
+    fill: white;
+  }
+
+  50% {
+    fill: #fbc638;
+  }
+
+  100% {
+    fill: white;
+  }
+}
