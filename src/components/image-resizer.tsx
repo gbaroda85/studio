@@ -376,44 +376,7 @@ export default function ImageResizer() {
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 pb-20">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-5 space-y-6">
-          <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
-              <CardHeader className="bg-primary/5 border-b p-4">
-                  <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
-                    <Briefcase className="h-4 w-4" /> GOVT JOB PRESETS
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {GOVT_PRESETS.map((preset) => (
-                      <button 
-                        key={preset.label} 
-                        className={cn(
-                          "group relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left",
-                          "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800",
-                          "hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
-                        )}
-                        onClick={() => applyPreset(preset)}
-                      >
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1/2 rounded-r-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="size-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 shadow-inner group-hover:bg-primary/10 transition-colors">
-                          <preset.icon className="h-5 w-5 text-primary" />
-                        </div>
-                        
-                        <div className="flex-1 overflow-hidden">
-                            <div className="text-[11px] font-black uppercase tracking-tight text-slate-800 dark:text-slate-200 truncate leading-none mb-1.5">{preset.label}</div>
-                            <div className="flex items-center gap-1.5">
-                                <Badge variant="secondary" className="text-[9px] font-mono py-0 px-1.5 h-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-none">
-                                    {preset.width}x{preset.height} PX
-                                </Badge>
-                            </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-              </CardContent>
-          </Card>
-
+          {/* Dimension Settings Card - Moved to First Position */}
           <Card className="border-2 shadow-xl overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
               <CardHeader className="bg-muted/30 border-b p-4">
                   <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
@@ -480,6 +443,45 @@ export default function ImageResizer() {
                       <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over
                   </Button>
               </CardFooter>
+          </Card>
+
+          {/* Govt Job Presets Card - Moved to Second Position */}
+          <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
+              <CardHeader className="bg-primary/5 border-b p-4">
+                  <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
+                    <Briefcase className="h-4 w-4" /> GOVT JOB PRESETS
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {GOVT_PRESETS.map((preset) => (
+                      <button 
+                        key={preset.label} 
+                        className={cn(
+                          "group relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left",
+                          "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800",
+                          "hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        )}
+                        onClick={() => applyPreset(preset)}
+                      >
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1/2 rounded-r-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="size-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 shadow-inner group-hover:bg-primary/10 transition-colors">
+                          <preset.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        
+                        <div className="flex-1 overflow-hidden">
+                            <div className="text-[11px] font-black uppercase tracking-tight text-slate-800 dark:text-slate-200 truncate leading-none mb-1.5">{preset.label}</div>
+                            <div className="flex items-center gap-1.5">
+                                <Badge variant="secondary" className="text-[9px] font-mono py-0 px-1.5 h-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-none">
+                                    {preset.width}x{preset.height} PX
+                                </Badge>
+                            </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+              </CardContent>
           </Card>
         </div>
 
