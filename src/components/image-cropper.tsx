@@ -34,7 +34,8 @@ import {
     Highlighter,
     ArrowUpRight,
     Pencil,
-    HandMetal
+    HandMetal,
+    Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -355,10 +356,11 @@ export default function ImageCropper() {
         </div>
 
         <Card className={cn(
-            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
         >
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
@@ -368,7 +370,6 @@ export default function ImageCropper() {
                     className={cn(
                         "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
                     )}
-                    onClick={() => fileInputRef.current?.click()}
                 >
                     <div className="relative">
                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
