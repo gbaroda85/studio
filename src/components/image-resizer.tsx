@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -20,7 +21,8 @@ import {
   CheckCircle2,
   Zap,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  RotateCw
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
@@ -258,14 +261,12 @@ export default function ImageResizer() {
 
         for (let y = 0; y < targetHeight; y++) {
             for (let x = 0; x < targetWidth; x++) {
-                const sy = y;
-                const sx = x;
                 const dstOff = (y * targetWidth + x) * 4;
                 let r = 0, g = 0, b = 0;
                 for (let cy = 0; cy < 3; cy++) {
                     for (let cx = 0; cx < 3; cx++) {
-                        const scy = Math.min(targetHeight - 1, Math.max(0, sy + cy - 1));
-                        const scx = Math.min(targetWidth - 1, Math.max(0, sx + cx - 1));
+                        const scy = Math.min(targetHeight - 1, Math.max(0, y + cy - 1));
+                        const scx = Math.min(targetWidth - 1, Math.max(0, x + cx - 1));
                         const srcOff = (scy * targetWidth + scx) * 4;
                         const wt = weights[cy * 3 + cx];
                         r += pixels[srcOff] * wt;
@@ -417,32 +418,41 @@ export default function ImageResizer() {
                                         <Eye className="size-3.5 mr-1.5 text-primary" /> Zoom Check
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-[2.5rem]">
-                                    <DialogHeader><DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl">HD Pixel Proof Analysis</DialogTitle></DialogHeader>
-                                    <div className="grid md:grid-cols-2 gap-8 py-8">
-                                        <div className="space-y-4">
-                                            <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[11px] border-2">ORIGINAL CANVAS</Badge>
-                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
-                                                {originalImageSrc && <img src={originalImageSrc} alt="original" className="w-full h-full object-contain p-4" />}
+                                <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                                    <DialogHeader className="p-6 md:p-8 border-b bg-muted/30">
+                                        <DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl flex items-center gap-3">
+                                             <Eye className="text-primary size-6" /> HD Pixel Proof Analysis
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <ScrollArea className="flex-1 w-full">
+                                        <div className="p-6 md:p-10 space-y-8">
+                                            <div className="grid md:grid-cols-2 gap-8">
+                                                <div className="space-y-4">
+                                                    <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[11px] border-2">ORIGINAL CANVAS</Badge>
+                                                    <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
+                                                        {originalImageSrc && <img src={originalImageSrc} alt="original" className="w-full h-full object-contain p-4" />}
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4 text-right">
+                                                    <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[11px] border-2 border-white shadow-lg">RESIZED HD RENDER</Badge>
+                                                    <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center shadow-2xl">
+                                                        {resizedImageSrc && <img src={resizedImageSrc} alt="resized" className="w-full h-full object-contain p-4" />}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-4 text-right">
-                                            <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[11px] border-2 border-white shadow-lg">RESIZED HD RENDER</Badge>
-                                            <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center shadow-2xl">
-                                                {resizedImageSrc && <img src={resizedImageSrc} alt="resized" className="w-full h-full object-contain p-4" />}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <CardFooter className="p-0 pt-4">
+                                        <ScrollBar />
+                                    </ScrollArea>
+                                    <div className="p-6 md:p-8 border-t bg-muted/10 mt-auto">
                                         <Button 
-                                            className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
+                                            className="magic-button magic-button-success w-full h-16 md:h-18 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
                                             onClick={handleDownload}
                                         >
                                             <StarIcons />
                                             <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
                                             <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE SHARP IMAGE</span>
                                         </Button>
-                                    </CardFooter>
+                                    </div>
                                 </DialogContent>
                             </Dialog>
                         </div>
@@ -465,7 +475,7 @@ export default function ImageResizer() {
                                     <span className="text-[10px] font-mono font-bold opacity-40">{formatBytes(originalFileSize)}</span>
                                 </div>
                                 <div className="relative w-full aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
-                                    {originalImageSrc && <img src={originalImageSrc} alt="Before" className="w-full h-full object-contain p-4 md:p-6" />}
+                                    {originalImageSrc && <img src={originalImageSrc} alt="Before" className="w-full h-full object-contain p-4 md:p-6 opacity-100" />}
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white px-4 py-1 rounded-full font-mono text-[10px]">{originalDimensions?.width}x{originalDimensions?.height}</div>
                                 </div>
                             </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -41,7 +42,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type CompressionResult = {
@@ -356,33 +357,38 @@ export default function ImageCompressor() {
                                                                     <Eye className="size-4 text-primary" />
                                                                 </Button>
                                                             </DialogTrigger>
-                                                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-6 rounded-[2.5rem]">
-                                                                <DialogHeader>
+                                                            <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                                                                <DialogHeader className="p-6 md:p-8 border-b bg-muted/30">
                                                                     <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm md:text-lg">
                                                                         <ArrowLeftRight className="text-primary size-5" /> Precision Analysis
                                                                     </DialogTitle>
                                                                 </DialogHeader>
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                                                                    <div className="space-y-3">
-                                                                        <div className="flex justify-between items-center bg-muted/30 p-2 rounded-xl">
-                                                                            <span className="text-[10px] font-black uppercase text-muted-foreground">Original</span>
-                                                                            <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(res.originalSize)}</Badge>
-                                                                        </div>
-                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
-                                                                            <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-4" />
+                                                                <ScrollArea className="flex-1 w-full">
+                                                                    <div className="p-6 md:p-10 space-y-8">
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                                                                            <div className="space-y-3">
+                                                                                <div className="flex justify-between items-center bg-muted/30 p-2 rounded-xl">
+                                                                                    <span className="text-[10px] font-black uppercase text-muted-foreground">Original</span>
+                                                                                    <Badge variant="outline" className="font-mono text-[10px]">{formatBytes(res.originalSize)}</Badge>
+                                                                                </div>
+                                                                                <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
+                                                                                    <Image src={res.originalDataUrl} alt="original" fill className="object-contain p-4" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="space-y-3">
+                                                                                <div className="flex justify-between items-center bg-green-500/10 p-2 rounded-xl">
+                                                                                    <Badge className="bg-green-500 text-white font-mono text-[10px]">Optimized</Badge>
+                                                                                    <span className="text-[10px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
+                                                                                </div>
+                                                                                <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center shadow-2xl">
+                                                                                    <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-4" />
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="space-y-3">
-                                                                        <div className="flex justify-between items-center bg-green-500/10 p-2 rounded-xl">
-                                                                            <Badge className="bg-green-500 text-white font-mono text-[10px]">Optimized</Badge>
-                                                                            <span className="text-[10px] font-black uppercase text-green-700">{formatBytes(res.newSize)}</span>
-                                                                        </div>
-                                                                        <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-green-500/20 bg-white flex items-center justify-center shadow-2xl">
-                                                                            <Image src={res.dataUrl} alt="optimized" fill className="object-contain p-4" />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <CardFooter className="p-0 pt-6">
+                                                                    <ScrollBar />
+                                                                </ScrollArea>
+                                                                <div className="p-6 md:p-8 border-t bg-muted/10 mt-auto">
                                                                     <Button 
                                                                         className="magic-button magic-button-success w-full h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
                                                                         onClick={() => downloadFile(res)}
@@ -391,7 +397,7 @@ export default function ImageCompressor() {
                                                                         <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
                                                                         <span className="uppercase tracking-tighter text-base md:text-lg">DOWNLOAD OPTIMIZED</span>
                                                                     </Button>
-                                                                </CardFooter>
+                                                                </div>
                                                             </DialogContent>
                                                         </Dialog>
 
@@ -449,8 +455,8 @@ export default function ImageCompressor() {
             )}
         </div>
 
-        {/* Right: Settings Area (Aligned to Workspace Top) */}
-        <div className="lg:col-span-5 space-y-4 h-full">
+        {/* Right: Settings Area */}
+        <div className="lg:col-span-5 space-y-4">
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                 <CardHeader className="bg-primary/5 border-b p-5 md:p-8">
                     <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
