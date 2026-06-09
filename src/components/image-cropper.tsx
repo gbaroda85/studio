@@ -27,10 +27,14 @@ import {
     Search,
     ChevronRight,
     Undo2,
-    Palette,
-    Settings2,
-    Sparkles,
-    Eye
+    Redo2,
+    ZoomIn,
+    ZoomOut,
+    Eraser,
+    Highlighter,
+    ArrowUpRight,
+    Pencil,
+    HandMetal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -480,13 +484,13 @@ export default function ImageCropper() {
             </div>
 
             {/* Main Viewport */}
-            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[500px] md:min-h-[700px]"
+            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[400px] md:min-h-[550px]"
                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                 
                 {croppedImageSrc ? (
                     <div className="flex flex-col items-center gap-8 animate-in zoom-in-95 duration-500">
                         <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] border-white rounded-lg bg-white overflow-hidden max-w-[90vw]">
-                            <img src={croppedImageSrc} alt="result" className="max-h-[60vh] w-auto block" />
+                            <img src={croppedImageSrc} alt="result" className="max-h-[50vh] w-auto block" />
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
                             <Button variant="outline" className="h-14 md:h-16 px-8 border-2 font-black uppercase text-xs rounded-xl hover:bg-destructive/5 hover:text-destructive" onClick={() => setCroppedImageSrc(null)}>
@@ -506,12 +510,12 @@ export default function ImageCropper() {
                     <div ref={containerRef} className="relative shadow-2xl border-4 border-white transform-gpu bg-white max-w-[95vw]">
                         {cropMode === 'rectangular' ? (
                             <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)} aspect={aspect}>
-                                <img ref={imgRef} src={imgSrc} alt="rect" className="max-h-[75vh] w-auto block" onLoad={onImageLoad} 
+                                <img ref={imgRef} src={imgSrc} alt="rect" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} 
                                      style={{ transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`, transition: 'transform 0.2s ease-out' }} />
                             </ReactCrop>
                         ) : (
                             <div className="relative">
-                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[75vh] w-auto pointer-events-none block" onLoad={onImageLoad} 
+                                <img ref={imgRef} src={imgSrc} alt="scan" className="max-h-[55vh] w-auto pointer-events-none block" onLoad={onImageLoad} 
                                      style={{ transform: `rotate(${rotate}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`, transition: 'transform 0.2s ease-out' }} />
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/20 stroke-primary stroke-[0.6] dash-array-[5,5]" />
