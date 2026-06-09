@@ -302,7 +302,9 @@ export default function ImageResizer() {
     if (!resizedImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = resizedImageSrc;
-    link.download = `GR7-Tools-${imageFile.name}`;
+    const name = imageFile.name.includes('.') ? imageFile.name.split(".").slice(0, -1).join(".") : imageFile.name;
+    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+    link.download = `GR7-Tools-${name}-resized.${ext}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -583,7 +585,7 @@ export default function ImageResizer() {
                         <Briefcase className="size-3" /> Quick Presets
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 grid grid-cols-1 gap-2">
+                <CardContent className="p-4 grid grid-cols-2 gap-2">
                     {GOVT_PRESETS.map((p) => (
                         <button key={p.label} onClick={() => applyPreset(p)} className="flex items-center gap-3 p-3 rounded-xl border-2 border-transparent bg-white/5 hover:bg-primary/5 hover:border-primary/20 transition-all text-left group">
                             <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><p.icon className="size-4" /></div>
