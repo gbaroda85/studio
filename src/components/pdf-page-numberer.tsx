@@ -350,7 +350,7 @@ export default function PdfPageNumberer() {
       {!pdfFile ? (
         <Card
             className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -366,7 +366,7 @@ export default function PdfPageNumberer() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF to begin</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
                     </div>
                 </div>

@@ -99,7 +99,7 @@ export default function ZipCreator() {
         setFilesToZip(prev => [...prev, ...newFiles]);
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files);
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
@@ -170,7 +170,7 @@ export default function ZipCreator() {
                 <div className="lg:col-span-7 space-y-4">
                     <Card 
                         className={cn(
-                            "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
+                            "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -192,8 +192,8 @@ export default function ZipCreator() {
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Files to Bundle</p>
+                                    <div className="text-center px-4">
+                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Files to Bundle</p>
                                         <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">WASM-based local archiving active.</p>
                                     </div>
                                 </div>

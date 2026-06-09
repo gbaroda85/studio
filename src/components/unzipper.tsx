@@ -16,17 +16,18 @@ import {
     Zap, 
     RefreshCcw, 
     CheckCircle2, 
-    Sparkles,
-    Eye,
-    FileArchive,
-    SearchCode,
-    Plus,
-    Trash2
+    Sparkles, 
+    Eye, 
+    FileArchive, 
+    SearchCode, 
+    Plus, 
+    Trash2 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type ExtractedFile = {
@@ -192,7 +193,7 @@ export default function Unzipper() {
 
                     <Card
                         className={cn(
-                            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -202,14 +203,13 @@ export default function Unzipper() {
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">ARCHIVE STUDIO</CardTitle>
                         </CardHeader>
                         <CardContent className="p-10 md:p-12">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
-                                onClick={() => fileInputRef.current?.click()}>
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                                 <div className="relative">
                                     <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop ZIP File here</p>
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop ZIP File here</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Sanitization & Extract active.</p>
                                 </div>
                             </div>
@@ -256,7 +256,7 @@ export default function Unzipper() {
                                         <div className="space-y-2">
                                             <Progress value={progress} className="h-1.5 shadow-inner" />
                                             <div className="flex justify-between text-[8px] font-black uppercase opacity-40">
-                                                <span>SCANNING BLOCKS</span>
+                                                <span>PACKING DATA</span>
                                                 <span>{progress}%</span>
                                             </div>
                                         </div>

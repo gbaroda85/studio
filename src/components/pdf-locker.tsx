@@ -169,9 +169,9 @@ export default function PdfLocker() {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
         <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="mx-auto mb-2 grid size-16 md:size-20 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                 <Lock className="size-8 md:size-10" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 md:size-6 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
                     <Sparkles className="size-2.5 md:size-3" />
                 </div>
             </div>
@@ -184,7 +184,7 @@ export default function PdfLocker() {
         </div>
 
         <Card
-            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
+            className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed cursor-pointer hover:border-primary/50 select-none", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]")}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
             onClick={() => fileInputRef.current?.click()}
         >
@@ -194,8 +194,8 @@ export default function PdfLocker() {
                     <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
                 </div>
                 <div className="text-center px-4">
-                    <p className="text-lg md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Lock</p>
-                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60">High-fidelity sanitization active.</p>
+                    <p className="text-lg md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Lock</p>
+                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">High-fidelity sanitization active.</p>
                 </div>
             </CardContent>
             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -261,7 +261,7 @@ export default function PdfLocker() {
                             </Button>
                         </div>
                     ) : isProcessing ? (
-                        <div className="w-full max-w-sm space-y-6 md:space-y-8 text-center">
+                        <div className="w-full max-sm space-y-6 md:space-y-8 text-center">
                             <div className="relative inline-block">
                                 <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                 <Lock className="absolute inset-0 m-auto h-8 w-8 md:h-12 md:w-12 text-primary animate-pulse" />

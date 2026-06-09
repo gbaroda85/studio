@@ -187,7 +187,7 @@ export default function VideoToMp3Converter() {
                     </motion.div>
 
                     <Card className={cn(
-                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50",
+                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                     )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -203,7 +203,7 @@ export default function VideoToMp3Converter() {
                                     <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center px-4">
-                                    <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Video File here</p>
+                                    <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Video File here</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Extraction happens locally in RAM.</p>
                                 </div>
                             </div>
@@ -315,7 +315,7 @@ export default function VideoToMp3Converter() {
                                                 <Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
                                                 <span className="uppercase tracking-tighter">SAVE AUDIO FILE</span>
                                             </Button>
-                                            <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100"><RefreshCcw className="size-3" /> Load Another Video</Button>
+                                            <Button variant="outline" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100"><RefreshCcw className="size-3" /> Load Another Video</Button>
                                         </div>
                                      )}
                                 </div>
