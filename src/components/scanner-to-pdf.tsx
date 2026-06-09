@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
@@ -187,7 +186,6 @@ export default function ScannerToPdf() {
             });
         }
 
-        // Updated filename logic
         pdf.save(`GR7-Tools-Scan-Bundle-${Date.now()}.pdf`);
         toast({ title: "PDF Exported", description: "Document saved successfully." });
     } catch (e) {
@@ -260,7 +258,7 @@ export default function ScannerToPdf() {
                                                 key={p.id} 
                                                 onClick={() => setSelectedId(p.id)}
                                                 className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer bg-white shadow-lg",
+                                                    "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-lg",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10" : "hover:border-primary/40"
                                                 )}
                                             >
@@ -343,7 +341,7 @@ export default function ScannerToPdf() {
                                     <Label className="text-[9px] font-black uppercase tracking-widest opacity-50">Current Selection</Label>
                                     <div className="aspect-[3/4] w-32 mx-auto rounded-xl border-2 border-primary/20 bg-muted/20 overflow-hidden relative shadow-inner">
                                         <div className={cn(
-                                            "absolute inset-0 flex flex-col p-1 transition-all duration-500",
+                                            "absolute inset-0 flex flex-col p-1 transition-all duration-300",
                                             selectedPage?.vAlign === 'top' ? 'justify-start' : selectedPage?.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                         )}>
                                             <img src={selectedPage?.src} className="max-w-full max-h-[90%] object-contain mx-auto shadow-2xl" alt="selection" />
@@ -352,39 +350,45 @@ export default function ScannerToPdf() {
                                 </div>
 
                                 <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                     </Label>
                                     <div className="grid grid-cols-3 gap-2">
-                                        <Button 
-                                            variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} 
-                                            className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedPage?.vAlign === 'top' && "border-primary")} 
+                                        <button 
+                                            className={cn(
+                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                selectedPage?.vAlign === 'top' && "active-uiverse"
+                                            )} 
+                                            data-label="Top"
                                             onClick={() => updateAlignment('top')}
                                         >
-                                            <AlignVerticalJustifyStart className="size-5" />
-                                            <span className="text-[8px] font-black uppercase">Top</span>
-                                        </Button>
-                                        <Button 
-                                            variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} 
-                                            className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedPage?.vAlign === 'center' && "border-primary")} 
+                                            <AlignVerticalJustifyStart className="size-5 relative z-20" />
+                                        </button>
+                                        <button 
+                                            className={cn(
+                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                selectedPage?.vAlign === 'center' && "active-uiverse"
+                                            )} 
+                                            data-label="Center"
                                             onClick={() => updateAlignment('center')}
                                         >
-                                            <AlignVerticalJustifyCenter className="size-5" />
-                                            <span className="text-[8px] font-black uppercase">Center</span>
-                                        </Button>
-                                        <Button 
-                                            variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} 
-                                            className={cn("h-16 flex-col gap-1 rounded-xl border-2", selectedPage?.vAlign === 'bottom' && "border-primary")} 
+                                            <AlignVerticalJustifyCenter className="size-5 relative z-20" />
+                                        </button>
+                                        <button 
+                                            className={cn(
+                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                selectedPage?.vAlign === 'bottom' && "active-uiverse"
+                                            )} 
+                                            data-label="Bottom"
                                             onClick={() => updateAlignment('bottom')}
                                         >
-                                            <AlignVerticalJustifyEnd className="size-5" />
-                                            <span className="text-[8px] font-black uppercase">Bottom</span>
-                                        </Button>
+                                            <AlignVerticalJustifyEnd className="size-5 relative z-20" />
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <RotateCw className="size-3" /> Orientation
                                     </Label>
                                     <Button 
