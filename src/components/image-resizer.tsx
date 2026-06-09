@@ -423,13 +423,13 @@ export default function ImageResizer() {
                                         <div className="space-y-4">
                                             <Badge variant="outline" className="w-full justify-center py-2 font-black uppercase text-[11px] border-2">ORIGINAL CANVAS</Badge>
                                             <div className="aspect-square relative rounded-2xl overflow-hidden border-2 bg-white flex items-center justify-center shadow-inner">
-                                                <Image src={originalImageSrc!} alt="original" fill className="object-contain p-4" />
+                                                {originalImageSrc && <img src={originalImageSrc} alt="original" className="w-full h-full object-contain p-4" />}
                                             </div>
                                         </div>
                                         <div className="space-y-4 text-right">
                                             <Badge className="w-full justify-center bg-primary py-2 font-black uppercase text-[11px] border-2 border-white shadow-lg">RESIZED HD RENDER</Badge>
                                             <div className="aspect-square relative rounded-2xl overflow-hidden border-2 border-primary/20 bg-white flex items-center justify-center shadow-2xl">
-                                                <Image src={resizedImageSrc!} alt="resized" fill className="object-contain p-4" />
+                                                {resizedImageSrc && <img src={resizedImageSrc} alt="resized" className="w-full h-full object-contain p-4" />}
                                             </div>
                                         </div>
                                     </div>
@@ -464,8 +464,8 @@ export default function ImageResizer() {
                                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Source</span>
                                     <span className="text-[10px] font-mono font-bold opacity-40">{formatBytes(originalFileSize)}</span>
                                 </div>
-                                <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
-                                    <Image src={originalImageSrc} alt="Before" fill className="object-contain p-6 grayscale opacity-40 transition-all group-hover:grayscale-0 group-hover:opacity-100" />
+                                <div className="relative w-full aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                    {originalImageSrc && <img src={originalImageSrc} alt="Before" className="w-full h-full object-contain p-4 md:p-6" />}
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white px-4 py-1 rounded-full font-mono text-[10px]">{originalDimensions?.width}x{originalDimensions?.height}</div>
                                 </div>
                             </div>
@@ -474,10 +474,10 @@ export default function ImageResizer() {
                                     <span className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
                                     {resizedImageSrc && <span className="text-[10px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
                                 </div>
-                                <div className="relative aspect-[3/4] bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
+                                <div className="relative w-full aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
                                     {resizedImageSrc ? (
                                         <div className="relative size-full animate-in zoom-in-95 duration-500 p-2">
-                                            <Image src={resizedImageSrc} alt="After" fill className="object-contain p-4" />
+                                            <img src={resizedImageSrc} alt="After" className="w-full h-full object-contain p-4 md:p-6 drop-shadow-xl" />
                                             <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
                                         </div>
                                     ) : (
