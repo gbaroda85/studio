@@ -29,7 +29,8 @@ import {
     ShieldCheck,
     SearchCode,
     FileText,
-    X
+    X,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -244,7 +245,8 @@ export default function PdfUnlocker() {
         if (!unlockedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = unlockedPdfUrl;
-        link.download = `GR7-Tools-unlocked-${pdfFile.name}`;
+        const originalName = pdfFile.name.replace('.pdf', '');
+        link.download = `GR7-Tools-unlocked-${originalName}.pdf`;
         link.click();
     }
 
@@ -312,7 +314,7 @@ export default function PdfUnlocker() {
                         <Card className="shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50">
                             <CardHeader className="bg-muted/30 border-b p-6">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3 truncate">
+                                    <div className="flex items-center gap-3 truncate pr-4">
                                         <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                             {isProtected ? <Lock className="size-5" /> : <CheckCircle2 className="size-5 text-green-500" />}
                                         </div>
