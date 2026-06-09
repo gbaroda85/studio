@@ -338,7 +338,7 @@ export default function ImageResizer() {
         </div>
 
         <Card className={cn(
-            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
