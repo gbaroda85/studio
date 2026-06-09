@@ -1,6 +1,5 @@
-
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2, UploadCloud, Layers, Monitor, Download } from 'lucide-react';
+import { ShieldCheck, HelpCircle, SortAsc, ArrowUpDown, CheckCircle2, UploadCloud, Layers, Monitor, Download, Zap } from 'lucide-react';
 import PdfMerger from '@/components/pdf-merger';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -42,7 +41,7 @@ export default function MergePdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

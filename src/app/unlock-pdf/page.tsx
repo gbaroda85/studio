@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, FileText, Info, Key, Unlock } from 'lucide-react';
 import PdfUnlocker from '@/components/pdf-unlocker';
@@ -44,7 +43,7 @@ export default function UnlockPdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -57,7 +56,7 @@ export default function UnlockPdfPage() {
             <section className="bg-muted/30 p-10 rounded-[3rem] border-2 border-dashed relative overflow-hidden">
                 <div className="flex flex-col md:flex-row gap-12 items-center relative z-10">
                     <div className="flex-1 space-y-6">
-                        <h2 className="text-3xl font-black uppercase flex items-center gap-3 tracking-tighter">
+                        <h2 className="text-3xl font-black uppercase flex items-center gap-3 tracking-tighter text-slate-800 dark:text-white">
                             <Key className="text-primary size-8" /> 
                             Permanent Decryption
                         </h2>

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Scissors, ShieldCheck, HelpCircle, LayoutGrid, MousePointer2 } from 'lucide-react';
 import PdfSplitter from '@/components/pdf-splitter';
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function SplitPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -36,7 +35,7 @@ export default function SplitPdfPage() {
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <Scissors className="text-primary size-8" />
                         Precision Document Extraction
                     </h2>

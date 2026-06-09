@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Lock, Key, FileDigit, Globe } from 'lucide-react';
 import PdfLocker from '@/components/pdf-locker';
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function LockPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -36,7 +35,7 @@ export default function LockPdfPage() {
             <section className="bg-muted/30 p-10 rounded-[3rem] border-2 border-dashed relative overflow-hidden">
                 <div className="flex flex-col md:flex-row gap-12 items-center relative z-10">
                     <div className="flex-1 space-y-6">
-                        <h2 className="text-3xl font-black uppercase flex items-center gap-3 tracking-tighter">
+                        <h2 className="text-3xl font-black uppercase flex items-center gap-3 tracking-tighter text-slate-800 dark:text-white">
                             <Key className="text-primary size-8" /> 
                             Bank-Grade Security
                         </h2>
@@ -72,18 +71,18 @@ export default function LockPdfPage() {
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
                         <FileDigit className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">AES-128 Support</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Uses the standard encryption dictionary defined in PDF spec. Compatible with professional readers.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">AES-128 Support</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Uses the standard encryption dictionary defined in PDF spec. Compatible with professional readers.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <Lock className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Zero Cache</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Passwords and files are processed in volatile memory. No history is stored on your device or our server.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Zero Cache</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Passwords and files are processed in volatile memory. No history is stored on your device or our server.</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
                         <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Aadhaar Ready</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Perfect for protecting e-Aadhaar cards, bank statements, and sensitive financial reports for safe sharing.</p>
+                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Aadhaar Ready</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Perfect for protecting e-Aadhaar cards, bank statements, and sensitive financial reports for safe sharing.</p>
                     </div>
                 </div>
             </section>

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Target, TrendingDown, Zap } from 'lucide-react';
 import PdfCompressor from '@/components/pdf-compressor';
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function CompressPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

@@ -449,8 +449,8 @@ export default function ImageCompressor() {
             )}
         </div>
 
-        {/* Right: Settings */}
-        <div className="lg:col-span-5 space-y-4">
+        {/* Right: Settings Area (Aligned to Workspace Top) */}
+        <div className="lg:col-span-5 space-y-4 h-full">
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                 <CardHeader className="bg-primary/5 border-b p-5 md:p-8">
                     <CardTitle className="text-lg md:text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
@@ -546,6 +546,16 @@ export default function ImageCompressor() {
                             </SelectContent>
                         </Select>
                     </div>
+
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-[2.5rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+                        <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="size-5 md:size-6 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
+                            <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Your photos never touch any server. All processing is local.</p>
+                        </div>
+                    </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-10 border-t border-dashed">
                     <Button 
@@ -568,16 +578,6 @@ export default function ImageCompressor() {
                     </Button>
                 </CardFooter>
             </Card>
-
-            <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2.5rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
-                <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="size-5 md:size-6 text-green-600" />
-                </div>
-                <div>
-                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
-                    <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Your photos never touch any server. All processing is local.</p>
-                </div>
-            </div>
         </div>
       </div>
     </div>
