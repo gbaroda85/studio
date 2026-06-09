@@ -35,7 +35,9 @@ import {
     ArrowUpRight,
     Pencil,
     HandMetal,
-    Sparkles
+    Sparkles,
+    Eye,
+    Settings2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -491,7 +493,7 @@ export default function ImageCropper() {
                 {croppedImageSrc ? (
                     <div className="flex flex-col items-center gap-8 animate-in zoom-in-95 duration-500">
                         <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] border-white rounded-lg bg-white overflow-hidden max-w-[90vw]">
-                            <img src={croppedImageSrc} alt="result" className="max-h-[50vh] w-auto block" />
+                            <img src={croppedImageSrc} alt="result" className="max-h-[55vh] w-auto block" />
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
                             <Button variant="outline" className="h-14 md:h-16 px-8 border-2 font-black uppercase text-xs rounded-xl hover:bg-destructive/5 hover:text-destructive" onClick={() => setCroppedImageSrc(null)}>
