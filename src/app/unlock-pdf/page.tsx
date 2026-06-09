@@ -43,7 +43,7 @@ export default function UnlockPdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -74,60 +74,7 @@ export default function UnlockPdfPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full md:w-80 h-56 relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
-                        <Image 
-                            src={placeholderData.pdf_tools.url} 
-                            alt="PDF Security Guide" 
-                            fill 
-                            className="object-cover"
-                            data-ai-hint={placeholderData.pdf_tools.hint}
-                        />
-                    </div>
                 </div>
-            </section>
-
-            {/* In-depth Content Section */}
-            <section className="space-y-8 py-10 border-t">
-                <h2 className="text-3xl font-black uppercase tracking-tight text-center">Why Decrypt Your Documents Locally?</h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="p-8 bg-card rounded-3xl border shadow-sm space-y-4">
-                        <h3 className="text-xl font-bold flex items-center gap-2"><Info className="text-primary" /> Privacy Risk on Clouds</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">Most online PDF unlockers upload your files to their servers. This is dangerous for bank statements and Aadhaar cards which contain your address, DOB, and account numbers. Our tool keeps everything on your device.</p>
-                    </div>
-                    <div className="p-8 bg-card rounded-3xl border shadow-sm space-y-4">
-                        <h3 className="text-xl font-bold flex items-center gap-2"><FileText className="text-primary" /> How it Works</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">We use a powerful HD re-encoding engine. It renders each page of your locked PDF into a high-resolution lossless container and bundles it back into a standard PDF without any password protection.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t pb-24">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">PDF Unlocker FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">What is the Aadhaar PDF password format?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            The standard e-Aadhaar password is the <strong>first 4 letters of your name in CAPS</strong> followed by your <strong>Year of Birth</strong>. For example, if your name is ANISH and your birth year is 1990, the password is ANIS1990.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Can this tool crack a password I don't know?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            No. This tool is designed to <strong>remove</strong> a password from a document where you already know the password. It is used for convenience so you don't have to type it every time.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold">Will the quality of my PDF decrease?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Our "Power Unlock" mode uses high-definition re-encoding. While it's very high quality, there might be a microscopic difference in text selection. However, for printing and viewing, it remains 100% clear.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

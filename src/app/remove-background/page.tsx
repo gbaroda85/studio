@@ -43,7 +43,7 @@ export default function RemoveBackgroundPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex justify-center mb-4 px-4">
