@@ -22,7 +22,8 @@ import {
     BrainCircuit, 
     Wand2, 
     ImageIcon,
-    Download
+    Download,
+    ArrowLeftRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -214,8 +215,8 @@ export default function ImageToTextConverter() {
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
-            <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
+            <CardContent className="p-8 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -249,8 +250,8 @@ export default function ImageToTextConverter() {
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
-                <RotateCcw className="mr-1.5 size-3" /> Reset
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RefreshCcw className="mr-1.5 size-3" /> Reset
             </Button>
             <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleCopyToClipboard} disabled={!extractedText || hasCopied}>
                 <StarIcons />
@@ -270,8 +271,8 @@ export default function ImageToTextConverter() {
                     </div>
                     {extractedText && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">READY</Badge>}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[650px] md:min-h-[850px] flex items-center justify-center relative">
-                    <div className="relative size-full min-h-[600px] flex items-center justify-center">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative">
+                    <div className="relative size-full min-h-[350px] flex items-center justify-center">
                         <Image src={originalImageSrc} alt="Original" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
                         <AnimatePresence>
                             {isProcessing && (
@@ -339,7 +340,7 @@ export default function ImageToTextConverter() {
                         </div>
                         <div className="relative group">
                             <Textarea
-                                className="min-h-[550px] md:min-h-[700px] text-sm font-bold border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar text-slate-800 dark:text-slate-200"
+                                className="min-h-[400px] md:min-h-[600px] text-sm font-bold border-2 rounded-xl bg-background/50 focus-visible:ring-primary/20 shadow-inner p-4 custom-scrollbar text-slate-800 dark:text-slate-200"
                                 placeholder={isProcessing ? "Reading..." : "Text result will appear here..."}
                                 value={extractedText || ""}
                                 onChange={(e) => setExtractedText(e.target.value)}

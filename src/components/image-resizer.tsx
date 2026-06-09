@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 type Unit = 'px' | 'mm' | 'inch';
@@ -104,7 +105,7 @@ export default function ImageResizer() {
   const [resizedImageSrc, setResizedImageSrc] = useState<string | null>(null);
   const [originalDimensions, setOriginalDimensions] = useState<{ width: number; height: number } | null>(null);
   const [originalFileSize, setOriginalFileSize] = useState<number>(0);
-  const [resizedFileSize, setResizedFileSize] = useState<number>(0);
+  const [enhancedFileSize, setEnhancedFileSize] = useState<number>(0);
   const [newDimensions, setNewDimensions] = useState({ width: '', height: '' });
   const [maintainAspectRatio, setMaintainAspectRatio] = useState(true);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
@@ -322,7 +323,7 @@ export default function ImageResizer() {
   if (!originalImageSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
             <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
                 <Scaling className="size-8" />
                 <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
@@ -335,7 +336,7 @@ export default function ImageResizer() {
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                 Precision dimensions for official documents. <br/>100% Private local HD resampling.
             </p>
-        </div>
+        </motion.div>
 
         <Card className={cn(
             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
@@ -349,15 +350,15 @@ export default function ImageResizer() {
             </CardHeader>
             <CardContent className="p-8 md:p-12">
                 <div 
-                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group"
+                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group"
                 >
                     <div className="relative">
-                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
-                    <div className="text-center">
-                        <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
-                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local RAM processing.</p>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Instant local processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -373,145 +374,32 @@ export default function ImageResizer() {
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 pb-20">
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-5 space-y-6">
-          {/* Dimension Settings Card */}
-          <Card className="border-2 shadow-xl overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
-              <CardHeader className="bg-muted/30 border-b p-4">
-                  <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
-                    <Settings2 className="h-4 w-4" /> Dimension Settings
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
-                            <button
-                                key={u}
-                                onClick={() => handleUnitChange(u)}
-                                className={cn(
-                                    "flex justify-center gap-1.5 items-center shadow-md text-[10px] font-black isolation-auto relative z-10 px-2 py-2 overflow-hidden border-2 rounded-full group transition-all h-10",
-                                    "bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200",
-                                    "before:absolute before:w-full before:transition-all before:duration-700 before:-left-full before:rounded-full before:bg-emerald-500 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700",
-                                    "hover:text-gray-50 hover:before:left-0",
-                                    unit === u ? "before:left-0 text-white border-emerald-500" : "border-slate-200 dark:border-slate-700"
-                                )}
-                            >
-                                {u.toUpperCase()}
-                                <svg
-                                    className={cn(
-                                        "w-4 h-4 justify-end transition-all ease-linear duration-300 rounded-full border p-1",
-                                        unit === u ? "rotate-90 bg-gray-50 border-none" : "rotate-45 border-slate-700 dark:border-slate-400 group-hover:rotate-90 group-hover:bg-gray-50 group-hover:border-none"
-                                    )}
-                                    viewBox="0 0 16 19"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M7 18C7 18.5523 7.44772 19 8 19C8.55228 19 9 18.5523 9 18H7ZM8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L0.928932 6.65685C0.538408 7.04738 0.538408 7.68054 0.928932 8.07107C1.31946 8.46159 1.95262 8.46159 2.34315 8.07107L8 2.41421L13.6569 8.07107C14.0474 8.46159 14.6805 8.46159 15.0711 8.07107C15.4616 7.68054 15.4616 7.04738 15.0711 6.65685L8.70711 0.292893ZM9 18L9 1H7L7 18H9Z"
-                                        className={cn(
-                                            "fill-current",
-                                            unit === u ? "fill-emerald-600" : "fill-slate-700 dark:fill-slate-400 group-hover:fill-emerald-600"
-                                        )}
-                                    ></path>
-                                </svg>
-                            </button>
-                        ))}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 items-center">
-                      <div className="space-y-2">
-                          <Label htmlFor="width" className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
-                          <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="height" className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
-                          <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
-                      </div>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border">
-                      <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-4" />
-                      <Label htmlFor="aspect-ratio" className="text-[10px] font-black cursor-pointer uppercase opacity-60">Lock Aspect Ratio</Label>
-                  </div>
-                  <div className="space-y-3 border-t pt-4 border-dashed">
-                      <Label htmlFor="format" className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Output Format</Label>
-                      <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)} disabled={isProcessing}>
-                          <SelectTrigger id="format" className="h-11 font-black text-xs border-2 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent className="rounded-xl border-2 shadow-2xl">
-                              <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal HD)</SelectItem>
-                              <SelectItem value="png" className="font-bold py-2">PNG (Lossless Extraction)</SelectItem>
-                              <SelectItem value="webp" className="font-bold py-2">WEBP (Modern Optimization)</SelectItem>
-                          </SelectContent>
-                      </Select>
-                  </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-3 bg-muted/20 p-6 border-t border-dashed">
-                  <Button 
-                    className="magic-button w-full h-16 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
-                    onClick={handleResize} 
-                    disabled={isProcessing}
-                  >
-                      <StarIcons />
-                      {isProcessing ? (
-                        <div className="flex items-center gap-3">
-                            <Loader2 className="size-7 md:size-8 animate-spin" />
-                            <span className="uppercase tracking-tighter">PROCESSING...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                            <Maximize className="size-7 md:size-8 group-hover:scale-125 transition-transform" />
-                            <span className="uppercase tracking-tighter">RESIZE IMAGE</span>
-                        </div>
-                      )}
-                  </Button>
-                  <Button variant="ghost" onClick={handleReset} className="w-full text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive" disabled={isProcessing}>
-                      <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Start Over
-                  </Button>
-              </CardFooter>
-          </Card>
-
-          {/* Govt Job Presets Card */}
-          <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
-              <CardHeader className="bg-primary/5 border-b p-4">
-                  <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
-                    <Briefcase className="h-4 w-4" /> GOVT JOB PRESETS
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {GOVT_PRESETS.map((preset) => (
-                      <button 
-                        key={preset.label} 
-                        className={cn(
-                          "group relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left",
-                          "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800",
-                          "hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
-                        )}
-                        onClick={() => applyPreset(preset)}
-                      >
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1/2 rounded-r-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="size-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 shadow-inner group-hover:bg-primary/10 transition-colors">
-                          <preset.icon className="h-5 w-5 text-primary" />
-                        </div>
-                        
-                        <div className="flex-1 overflow-hidden">
-                            <div className="text-[11px] font-black uppercase tracking-tight text-slate-800 dark:text-slate-200 truncate leading-none mb-1.5">{preset.label}</div>
-                            <div className="flex items-center gap-1.5">
-                                <Badge variant="secondary" className="text-[9px] font-mono py-0 px-1.5 h-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-none">
-                                    {preset.width}x{preset.height} PX
-                                </Badge>
-                            </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-              </CardContent>
-          </Card>
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3">
+            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                <Settings2 className="size-5 md:size-6" />
+            </div>
+            <div>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+            </div>
         </div>
+        <div className="flex gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RefreshCcw className="mr-1.5 size-3" /> Reset
+            </Button>
+            {resizedImageSrc && (
+                <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
+                    <StarIcons />
+                    <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD HD</span>
+                </Button>
+            )}
+        </div>
+      </div>
 
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-8">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -558,7 +446,7 @@ export default function ImageResizer() {
                         </div>
                     )}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px]">
                     {isProcessing ? (
                         <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
                             <div className="relative">
@@ -582,7 +470,7 @@ export default function ImageResizer() {
                             <div className="space-y-4 flex flex-col h-full justify-center">
                                 <div className="flex justify-between items-center px-1">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
-                                    {resizedImageSrc && <span className="text-[10px] font-mono font-black text-primary">{formatBytes(resizedFileSize)}</span>}
+                                    {resizedImageSrc && <span className="text-[10px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
                                 </div>
                                 <div className="relative aspect-[3/4] bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
                                     {resizedImageSrc ? (
@@ -606,22 +494,109 @@ export default function ImageResizer() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
-                    <Button 
-                        className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                        onClick={handleDownload} 
-                        disabled={!resizedImageSrc || isProcessing}
-                    >
-                        <StarIcons />
-                        <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
-                        <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE PROFESSIONAL IMAGE</span>
-                    </Button>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
                 </CardFooter>
             </Card>
         </div>
+
+        <div className="lg:col-span-4 space-y-4">
+            {/* Dimension Settings Card */}
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
+                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
+                        <Settings2 className="size-4 md:size-5" /> Settings
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
+                                    <button
+                                        key={u}
+                                        onClick={() => handleUnitChange(u)}
+                                        className={cn(
+                                            "btn-pos-uiverse h-10",
+                                            unit === u && "active-uiverse"
+                                        )}
+                                        data-label={u.toUpperCase()}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 items-center">
+                            <div className="space-y-2">
+                                <Label htmlFor="width" className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
+                                <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="height" className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
+                                <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border">
+                            <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-4" />
+                            <Label htmlFor="aspect-ratio" className="text-[10px] font-black cursor-pointer uppercase opacity-60">Lock Aspect Ratio</Label>
+                        </div>
+                    </div>
+
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm">
+                        <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
+                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                                Optimized for government application forms with strict pixel requirements.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
+                    <Button 
+                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        onClick={handleResize}
+                        disabled={isProcessing}
+                    >
+                        <StarIcons />
+                        {isProcessing ? (
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="size-6 md:size-7 animate-spin" />
+                                <span className="uppercase text-sm md:text-base tracking-tighter">RESIZING...</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <Maximize className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">RESIZE NOW</span>
+                            </div>
+                        )}
+                    </Button>
+                </CardFooter>
+            </Card>
+
+            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                        <Briefcase className="size-3" /> Quick Presets
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 grid grid-cols-1 gap-2">
+                    {GOVT_PRESETS.map((p) => (
+                        <button key={p.label} onClick={() => applyPreset(p)} className="flex items-center gap-3 p-3 rounded-xl border-2 border-transparent bg-white/5 hover:bg-primary/5 hover:border-primary/20 transition-all text-left group">
+                            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><p.icon className="size-4" /></div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-black uppercase truncate leading-none mb-1">{p.label}</p>
+                                <p className="text-[8px] font-bold opacity-50">{p.width}x{p.height} PX</p>
+                            </div>
+                        </button>
+                    ))}
+                </CardContent>
+            </Card>
+        </div>
       </div>
-      
-      {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
