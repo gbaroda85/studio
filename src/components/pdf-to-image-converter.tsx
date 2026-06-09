@@ -345,18 +345,30 @@ export default function PdfToImageConverter() {
                                     <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
                                 </Label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    <Button variant={selectedPage?.vAlign === 'top' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'top' })}>
-                                        <AlignVerticalJustifyStart className="size-4" />
-                                        <span className="text-[7px] font-black uppercase">Top</span>
-                                    </Button>
-                                    <Button variant={selectedPage?.vAlign === 'center' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'center' })}>
-                                        <AlignVerticalJustifyCenter className="size-4" />
-                                        <span className="text-[7px] font-black uppercase">Center</span>
-                                    </Button>
-                                    <Button variant={selectedPage?.vAlign === 'bottom' ? 'default' : 'outline'} className="h-14 flex-col gap-1 rounded-xl border-2" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}>
-                                        <AlignVerticalJustifyEnd className="size-4" />
-                                        <span className="text-[7px] font-black uppercase">Bottom</span>
-                                    </Button>
+                                    <button 
+                                        className={cn(
+                                            "btn-pos-uiverse",
+                                            selectedPage?.vAlign === 'top' && "active-uiverse"
+                                        )} 
+                                        data-label="Top"
+                                        onClick={() => updateSelectedPage({ vAlign: 'top' })}
+                                    />
+                                    <button 
+                                        className={cn(
+                                            "btn-pos-uiverse",
+                                            selectedPage?.vAlign === 'center' && "active-uiverse"
+                                        )} 
+                                        data-label="Center"
+                                        onClick={() => updateSelectedPage({ vAlign: 'center' })}
+                                    />
+                                    <button 
+                                        className={cn(
+                                            "btn-pos-uiverse",
+                                            selectedPage?.vAlign === 'bottom' && "active-uiverse"
+                                        )} 
+                                        data-label="Bottom"
+                                        onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
+                                    />
                                 </div>
                              </div>
 
