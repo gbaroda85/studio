@@ -11,11 +11,11 @@ import {
     ShieldCheck, 
     Zap, 
     Sparkles, 
-    RefreshCcw,
-    Eye,
-    CheckCircle2,
-    ImageIcon,
-    Settings2
+    RefreshCcw, 
+    Eye, 
+    CheckCircle2, 
+    ImageIcon, 
+    Settings2 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -175,14 +175,14 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
-            <CardContent className="p-10 md:p-12">
+            <CardContent className="p-8 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Image here</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Image here</p>
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Instant local conversion.</p>
                     </div>
                 </div>
@@ -233,7 +233,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                     </div>
                     {convertedSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">CONVERTED</Badge>}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-white shadow-inner min-h-[400px] flex items-center justify-center relative">
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-white shadow-inner min-h-[450px] flex items-center justify-center relative">
                     <div className="relative size-full min-h-[350px] flex items-center justify-center">
                         {convertedSrc ? (
                              <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
@@ -265,7 +265,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         <Settings2 className="size-4 md:size-5 text-primary" /> Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8">
+                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
                     <div className="space-y-4">
                         <Label htmlFor="format" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Target Format</Label>
                         <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setConvertedSrc(null); }} disabled={isConverting}>

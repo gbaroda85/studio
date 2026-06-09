@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -46,6 +45,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { motion } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CropMode = 'rectangular' | 'perspective';
@@ -342,7 +342,7 @@ export default function ImageCropper() {
   if (!imgSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
             <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
                 <Maximize className="size-8" />
                 <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
@@ -355,7 +355,7 @@ export default function ImageCropper() {
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                 Precision cropping with 8-dot smart scanner. <br/>100% Private local mapping.
             </p>
-        </div>
+        </motion.div>
 
         <Card className={cn(
             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
@@ -379,7 +379,7 @@ export default function ImageCropper() {
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-black uppercase tracking-tighter">Drop Photo here to Begin</h3>
-                        <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -487,7 +487,7 @@ export default function ImageCropper() {
             </div>
 
             {/* Main Viewport */}
-            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[400px] md:min-h-[550px]"
+            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 md:p-12 relative min-h-[450px] md:min-h-[550px]"
                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                 
                 {croppedImageSrc ? (
