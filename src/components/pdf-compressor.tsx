@@ -348,18 +348,6 @@ export default function PdfCompressor() {
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
                     </div>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={resetState} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                        <RefreshCcw className="mr-1.5 size-3" /> Reset
-                    </Button>
-                    {compressedPdfUrl && (
-                        <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                            <StarIcons />
-                            <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                            <span className="uppercase tracking-tighter text-[10px] md:text-xs">SAVE OPTIMIZED PDF</span>
-                        </Button>
-                    )}
-                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
@@ -419,11 +407,34 @@ export default function PdfCompressor() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
-                            <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                                <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                                <Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                                <Button variant="outline" onClick={resetState} className="flex-1 sm:flex-none h-12 md:h-14 px-6 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                                    <RefreshCcw className="mr-1.5 size-3" /> Reset
+                                </Button>
+                                <div className="hidden md:flex items-center gap-2 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                                    <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
+                                </div>
+                            </div>
+
+                            {!compressionResult ? (
+                                <Button 
+                                    className="magic-button w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10" 
+                                    onClick={handleCompressPdf} 
+                                    disabled={!pdfFile || isProcessing || isProtected}
+                                >
+                                    <StarIcons />
+                                    {isProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}
+                                </Button>
+                            ) : (
+                                <Button 
+                                    onClick={handleDownload} 
+                                    className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10"
+                                >
+                                    <StarIcons />
+                                    <Download className="mr-3 size-8" /> SAVE PDF
+                                </Button>
+                            )}
                         </CardFooter>
                     </Card>
                 </div>
@@ -489,19 +500,6 @@ export default function PdfCompressor() {
                                 </p>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
-                            {!compressionResult ? (
-                                <Button className="magic-button w-full h-16 md:h-20 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10" onClick={handleCompressPdf} disabled={!pdfFile || isProcessing || isProtected}>
-                                    <StarIcons />
-                                    {isProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}
-                                </Button>
-                            ) : (
-                                <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4">
-                                    <StarIcons />
-                                    <Download className="mr-3 size-8" /> SAVE PDF
-                                </Button>
-                            )}
-                        </CardFooter>
                     </Card>
                 </div>
             </div>
