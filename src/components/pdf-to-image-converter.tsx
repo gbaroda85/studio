@@ -58,6 +58,41 @@ interface PageItem {
     index: number;
 }
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function PdfToImageConverter() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -70,7 +105,7 @@ export default function PdfToImageConverter() {
     const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // CRITICAL: Define selectedPage here so it's always in scope
+    // Define selectedPage in scope
     const selectedPage = pages.find(p => p.id === selectedId);
 
     const renderProcessedImage = useCallback((originalSrc: string, vAlign: VAlign, fitMode: FitMode): Promise<string> => {
@@ -293,7 +328,7 @@ export default function PdfToImageConverter() {
                             </div>
                             <div className="text-center px-4">
                                 <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF here</p>
-                                <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens locally.</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Extraction happens locally.</p>
                             </div>
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -341,39 +376,45 @@ export default function PdfToImageConverter() {
                              </div>
 
                              <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-all", selectedPage?.fitMode === 'fit' ? "opacity-20 pointer-events-none grayscale" : "opacity-100")}>
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                     <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
                                 </Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedPage?.vAlign === 'top' && "active-uiverse"
                                         )} 
-                                        data-label="Top"
+                                        data-label="      Top"
                                         onClick={() => updateSelectedPage({ vAlign: 'top' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedPage?.vAlign === 'center' && "active-uiverse"
                                         )} 
-                                        data-label="Center"
+                                        data-label="      Center"
                                         onClick={() => updateSelectedPage({ vAlign: 'center' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
-                                        data-label="Bottom"
+                                        data-label="      Bottom"
                                         onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                 </div>
                              </div>
 
                              <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                     <RotateCw className="size-3" /> Orientation
                                 </Label>
                                 <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-[10px] uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
@@ -445,7 +486,7 @@ export default function PdfToImageConverter() {
                                             )}
                                         >
                                             <div className={cn(
-                                                "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-500",
+                                                "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
                                                 p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                             )}>
                                                 <img 

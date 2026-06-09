@@ -44,6 +44,41 @@ interface ScannedPage {
     vAlign: VAlign;
 }
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function ScannerToPdf() {
   const { toast } = useToast();
   const [pages, setPages] = useState<ScannedPage[]>([]);
@@ -353,36 +388,36 @@ export default function ScannerToPdf() {
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                     </Label>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-1 gap-2">
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                "btn-pos-uiverse h-14 relative", 
                                                 selectedPage?.vAlign === 'top' && "active-uiverse"
                                             )} 
-                                            data-label="Top"
+                                            data-label="      Top"
                                             onClick={() => updateAlignment('top')}
                                         >
-                                            <AlignVerticalJustifyStart className="size-5 relative z-20" />
+                                            <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                         </button>
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                "btn-pos-uiverse h-14 relative", 
                                                 selectedPage?.vAlign === 'center' && "active-uiverse"
                                             )} 
-                                            data-label="Center"
+                                            data-label="      Center"
                                             onClick={() => updateAlignment('center')}
                                         >
-                                            <AlignVerticalJustifyCenter className="size-5 relative z-20" />
+                                            <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                         </button>
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-16 flex flex-col gap-1 items-center justify-center", 
+                                                "btn-pos-uiverse h-14 relative", 
                                                 selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                             )} 
-                                            data-label="Bottom"
+                                            data-label="      Bottom"
                                             onClick={() => updateAlignment('bottom')}
                                         >
-                                            <AlignVerticalJustifyEnd className="size-5 relative z-20" />
+                                            <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                         </button>
                                     </div>
                                 </div>

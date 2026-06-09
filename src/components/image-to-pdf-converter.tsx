@@ -444,14 +444,14 @@ export default function ImageToPdfConverter() {
                                         <Sparkles className="absolute -top-1 -right-1 text-yellow-300 size-8 opacity-40" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-2xl md:text-3xl font-black text-green-900 uppercase tracking-tighter leading-none">Ready!</p>
+                                        <p className="text-xl font-black text-green-900 uppercase tracking-tighter leading-none">Ready!</p>
                                         <p className="text-[10px] md:text-xs text-green-700 font-bold mt-2 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
                                     </div>
                                 </div>
                                 <Button 
                                     size="lg" 
                                     className="magic-button magic-button-success w-full md:w-auto h-14 md:h-16 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-sm md:text-lg font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 text-white hover:text-green-600" 
-                                    onClick={handleDownload}
+                                    onClick={handleDownload} 
                                 >
                                     <StarIcons />
                                     <Download className="size-6 md:size-7" />
@@ -466,7 +466,7 @@ export default function ImageToPdfConverter() {
 
         {/* Sidebar: Settings Panel */}
         <div className="lg:col-span-4 space-y-6">
-            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all hover:border-primary/30">
+            <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all hover:border-primary/30">
                 <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                     <CardTitle className="text-xl md:text-2xl flex items-center gap-3 font-black uppercase tracking-tighter">
                         <Settings2 className="size-6 text-primary" /> STUDIO CONTROL
@@ -484,31 +484,37 @@ export default function ImageToPdfConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
                                     <AlignVerticalJustifyCenter className="size-3" /> Position Logic
                                 </Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedImage?.vAlign === 'top' && "active-uiverse"
                                         )} 
-                                        data-label="Top"
+                                        data-label="      Top"
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedImage?.vAlign === 'center' && "active-uiverse"
                                         )} 
-                                        data-label="Center"
+                                        data-label="      Center"
                                         onClick={() => updateSelectedImage({ vAlign: 'center' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse",
+                                            "btn-pos-uiverse h-14 relative",
                                             selectedImage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
-                                        data-label="Bottom"
+                                        data-label="      Bottom"
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
-                                    />
+                                    >
+                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                    </button>
                                 </div>
                             </div>
 
