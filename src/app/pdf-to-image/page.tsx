@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { ImageIcon, Trophy } from 'lucide-react';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -39,18 +38,6 @@ export default function PdfToImagePage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> EXTRACTION STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    PDF to <span className="text-gradient-hero">Image HD</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
-                    Extract all pages from a PDF as high-resolution JPG or PNG images.
-                </p>
-            </div>
-            
             <PdfToImageConverter />
         </div>
 

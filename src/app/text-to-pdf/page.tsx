@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { Type, Trophy } from 'lucide-react';
 import TextToPdfConverter from '@/components/text-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -15,18 +14,6 @@ export default function TextToPdfPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> WRITING STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Text to <span className="text-gradient-hero">PDF</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
-                    Convert plain text or code into professional A4 PDF documents.
-                </p>
-            </div>
-            
             <TextToPdfConverter />
         </div>
 

@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, Target, Layers, Wand2, Scaling, UploadCloud, Settings2, Zap, Download } from 'lucide-react';
 import ImageCompressor from '@/components/image-compressor';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -9,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { HelpCircle, Scaling, Wand2, Layers, Target, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Bulk Image Optimizer - Reduce Multiple JPG/PNG to 20kb, 50kb Online',
@@ -41,7 +41,7 @@ export default function ImageCompressPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
         
         <div className="w-full flex justify-center mb-12 px-4">
@@ -70,7 +70,6 @@ export default function ImageCompressPage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
-                        <Wand2 className="text-primary size-8" />
                         Professional Grade Batch Optimization
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">

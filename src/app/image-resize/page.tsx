@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { Scaling, Trophy } from 'lucide-react';
 import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -24,18 +23,6 @@ export default function ImageResizePage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> PROFESSIONAL STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Image <span className="text-gradient-hero">Resizer</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
-                    Exact pixel and mm resizing for government job forms and official documents.
-                </p>
-            </div>
-            
             <ImageResizer />
         </div>
 
@@ -45,7 +32,6 @@ export default function ImageResizePage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
-                        <Scaling className="text-primary size-8" />
                         Professional Grade Dimension Control
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">

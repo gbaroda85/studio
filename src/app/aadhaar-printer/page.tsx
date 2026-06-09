@@ -1,6 +1,4 @@
-
 import { Metadata } from 'next';
-import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -10,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Universal ID Card Printer - Auto-Crop Aadhaar, PAN, DL & Voter ID Online',
@@ -46,18 +45,6 @@ export default function AadhaarPrinterPage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-12 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <CreditCard className="size-3" /> UNIVERSAL IDENTITY STUDIO
-                </div>
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-                    Smart ID <span className="text-gradient-hero">Printer</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
-                    Auto-crop Aadhaar or arrange PAN/DL sides for perfect 85.6mm x 54mm printing.
-                </p>
-            </div>
-            
             <div className="w-full flex justify-center">
                 <AadhaarPrinter />
             </div>
@@ -70,7 +57,6 @@ export default function AadhaarPrinterPage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
-                        <LayoutGrid className="text-primary size-8" />
                         Professional Document Studio
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">

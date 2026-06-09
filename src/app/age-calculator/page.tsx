@@ -1,6 +1,4 @@
-
 import { Metadata } from 'next';
-import { Calendar, HelpCircle, Gift, Clock, Sparkles, Trophy } from 'lucide-react';
 import AgeCalculator from '@/components/age-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -10,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Gift, Clock, Sparkles, HelpCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Advanced Age Calculator - Exact Years, Months, Days & Life Analytics Online',
@@ -18,22 +17,10 @@ export const metadata: Metadata = {
 
 export default function AgeCalculatorPage() {
   return (
-    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> LIFE ANALYTICS STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Age <span className="text-gradient-hero">Calculator</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
-                    Go beyond years. Explore your lifetime in weeks, days, and seconds with mathematical precision.
-                </p>
-            </div>
-            
             <AgeCalculator />
         </div>
 
@@ -50,7 +37,6 @@ export default function AgeCalculatorPage() {
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
-                        <Clock className="text-primary size-8" />
                         Beyond Just a Number
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
@@ -90,7 +76,7 @@ export default function AgeCalculatorPage() {
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             We use the standard Unix timestamp logic to calculate the absolute difference between your birth date and the current moment. This ensures a precision of **1 second**.
                         </AccordionContent>
-                    </AccordionItem>
+                    </AccordionItem(
                     <AccordionItem value="item-2" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Does this tool support leap years?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
