@@ -442,11 +442,24 @@ export default function PdfCompressor() {
                                     <TabsTrigger value="manual" className="font-bold text-[9px] uppercase">Manual Quality</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="target" className="space-y-6">
-                                    <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Govt Presets</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {QUICK_SIZES.map(s => (
-                                                <Button key={s} variant={targetValue === s ? 'default' : 'outline'} className="h-10 text-[9px] font-black border-2" onClick={() => { setTargetValue(s); setTargetUnit('kb'); }}>UNDER {s}KB</Button>
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+                                            <Zap className="size-3 text-yellow-500" /> Government Form Presets
+                                        </Label>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {QUICK_SIZES.map((size) => (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => {
+                                                        setTargetValue(size);
+                                                        setTargetUnit('kb');
+                                                    }}
+                                                    className={cn(
+                                                        "btn-pos-uiverse h-10",
+                                                        targetValue === size && targetUnit === 'kb' && "active-uiverse"
+                                                    )}
+                                                    data-label={size === "1024" ? "1MB" : `${size}K`}
+                                                />
                                             ))}
                                         </div>
                                     </div>
