@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Target, Layers, Wand2, Scaling, UploadCloud, Settings2, Zap, Download } from 'lucide-react';
 import ImageCompressor from '@/components/image-compressor';
@@ -42,7 +41,7 @@ export default function ImageCompressPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
         
         <div className="w-full flex justify-center mb-12 px-4">

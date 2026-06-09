@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
@@ -42,7 +41,7 @@ export default function AadhaarPrinterPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">

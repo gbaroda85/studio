@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, User, PenTool, Scaling, Layers, Maximize } from 'lucide-react';
 import ImageResizer from '@/components/image-resizer';
@@ -27,7 +26,7 @@ export default function ImageResizePage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -55,7 +54,7 @@ export default function ImageResizePage() {
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Passport Ready</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">One-click presets for 200x230px and other standard passport dimensions used in Indian competitive exams.</p>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/40 transition-all">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
                         <PenTool className="text-blue-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Signature Mode</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Convert scanned signatures to 140x60px instantly while maintaining high contrast for better legibility on digital forms.</p>

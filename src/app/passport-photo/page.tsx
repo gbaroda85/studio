@@ -41,7 +41,7 @@ export default function PassportPhotoPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" className="mb-2" />
 
         <div className="w-full flex justify-center mb-2 px-4">

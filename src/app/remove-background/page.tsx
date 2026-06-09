@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { HelpCircle, Sun, Zap, ShieldCheck, Cpu, Sparkles, Maximize } from 'lucide-react';
 import { BackgroundRemoverClient } from '@/components/client-tool-wrappers';
@@ -44,7 +43,7 @@ export default function RemoveBackgroundPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex justify-center mb-4 px-4">

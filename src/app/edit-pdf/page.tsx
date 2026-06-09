@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { FilePenLine, ShieldCheck, HelpCircle, Sparkles, Zap, Layout } from 'lucide-react';
 import PdfEditor from '@/components/pdf-editor';
@@ -41,7 +40,7 @@ export default function EditPdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center w-full min-h-screen pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-2 px-4">

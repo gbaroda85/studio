@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, SearchCode, Languages, Clipboard, UploadCloud, BrainCircuit, FileText, CheckCircle2 } from 'lucide-react';
 import ImageToTextConverter from '@/components/image-to-text-converter';
@@ -42,7 +41,7 @@ export default function ImageToTextPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

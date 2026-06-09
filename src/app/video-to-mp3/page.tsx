@@ -40,7 +40,7 @@ export default function VideoToMp3Page() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=video" label="Back to Video Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

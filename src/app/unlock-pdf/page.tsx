@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, FileText, Info, Key, Unlock } from 'lucide-react';
 import PdfUnlocker from '@/components/pdf-unlocker';
@@ -44,7 +43,7 @@ export default function UnlockPdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
@@ -61,7 +60,7 @@ export default function UnlockPdfPage() {
                             <Key className="text-primary size-8" /> 
                             Permanent Decryption
                         </h2>
-                        <p className="text-lg text-muted-foreground leading-relaxed">
+                        <p className="text-lg text-muted-foreground font-medium leading-relaxed">
                             Tired of entering your name and birth year every time you open your <strong>e-Aadhaar</strong>? Our tool removes the encryption permanently. Since it works locally in your browser, your sensitive financial and personal data is <strong>never uploaded to any server</strong>.
                         </p>
                         <div className="flex flex-wrap gap-4">
