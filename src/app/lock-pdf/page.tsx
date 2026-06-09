@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Lock, Key, FileDigit, Globe } from 'lucide-react';
 import PdfLocker from '@/components/pdf-locker';
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function LockPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-8">
+    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

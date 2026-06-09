@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -280,7 +281,7 @@ export default function PdfSplitter() {
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                         {isRendering && <Loader2 className="size-4 animate-spin text-primary" />}
-                        <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{totalPages} PAGES DETECTED</Badge>
+                        {totalPages > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{totalPages} PAGES DETECTED</Badge>}
                     </div>
                     <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={resetState}><X className="size-4"/></Button>
                 </div>
@@ -366,7 +367,12 @@ export default function PdfSplitter() {
                     {/* RIGHT VIEWPORT: GRID OF PAGES */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 p-6 md:p-10">
-                            {isRendering && previews.length === 0 ? (
+                            {!pdfFile ? (
+                                <div className="flex flex-col items-center justify-center py-40 gap-8">
+                                     <UploadCloud className="size-16 text-muted-foreground/20" />
+                                     <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/30">Drop file to view pages</p>
+                                </div>
+                            ) : isRendering && previews.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-40 gap-6">
                                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                     <p className="text-sm font-black text-primary uppercase tracking-[0.3em] animate-pulse">Scanning Document Index...</p>
@@ -426,9 +432,11 @@ export default function PdfSplitter() {
                             <ScrollBar />
                         </ScrollArea>
                         
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
-                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to bundle
-                        </div>
+                        {pdfFile && (
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
+                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to bundle
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -375,7 +376,7 @@ export default function AadhaarPrinter() {
     <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
       
       {stage === 'selection' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 px-4 w-full max-w-5xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 px-4 w-full max-w-2xl">
             <Card className="group border-2 border-dashed hover:border-primary hover:shadow-2xl transition-all cursor-pointer rounded-[2.5rem] overflow-hidden" onClick={() => handleSelection('a4')}>
                 <CardHeader className="p-10 text-center">
                     <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl transition-transform group-hover:scale-110">
@@ -405,7 +406,7 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'upload' && workflow === 'a4' && (
-        <Card className={cn("w-full max-w-4xl border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl mx-4", isDragOver && "border-primary bg-primary/5")}
+        <Card className={cn("w-full max-w-2xl border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl mx-4", isDragOver && "border-primary bg-primary/5")}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
         >
@@ -426,7 +427,7 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'upload' && workflow === 'separate' && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-2xl">
               <div className="flex flex-col sm:flex-row items-center justify-between no-print gap-4">
                    <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center bg-white/50 dark:bg-slate-900/50 rounded-full border shadow-sm px-6 h-10"><ArrowLeft className="mr-1 size-3" /> Back to Selection</Button>
                    <div className="flex items-center gap-3">
@@ -435,7 +436,7 @@ export default function AadhaarPrinter() {
                         )}
                    </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 no-print">
+              <div className="grid grid-cols-1 gap-6 no-print">
                   {[ { side: 'front' as const, raw: frontRaw, final: frontFinal, setRaw: setFrontRaw, setFinal: setFrontFinal, inputRef: frontInputRef },
                      { side: 'back' as const, raw: backRaw, final: backFinal, setRaw: setBackRaw, setFinal: setBackFinal, inputRef: backInputRef }
                   ].map(s => (

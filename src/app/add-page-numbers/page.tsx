@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Layout, AlignCenter, Hash } from 'lucide-react';
 import { PdfPageNumbererClient } from '@/components/client-tool-wrappers';
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function AddPageNumbersPage() {
   return (
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1 flex flex-col items-center pt-4 md:pt-6">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

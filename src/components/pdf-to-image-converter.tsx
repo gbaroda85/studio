@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -294,7 +295,7 @@ export default function PdfToImageConverter() {
 
     if (!pdfFile) {
         return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+            <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
                     <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                         <ImageIcon className="size-8" />
@@ -353,7 +354,7 @@ export default function PdfToImageConverter() {
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                         {isProcessing && <Loader2 className="size-4 animate-spin text-primary" />}
-                        {pages.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pages.length} PAGES READY</Badge>}
+                        {pages.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{pages.length} PAGES READY</Badge>}
                     </div>
                     <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={handleReset}><X className="size-4"/></Button>
                 </div>

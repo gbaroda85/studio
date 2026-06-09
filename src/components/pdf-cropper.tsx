@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -305,6 +306,7 @@ export default function PdfCropper() {
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                onClick={() => fileInputRef.current?.click()}
             >
                 <CardHeader className="bg-muted/30 border-b p-6 text-center">
                     <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>

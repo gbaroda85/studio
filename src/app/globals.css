@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -72,7 +73,7 @@
   }
 
   /* Global Cursor Hand Fix */
-  a, button, [role="button"], label[for], .cursor-pointer, .glass-card, .group {
+  a, button, [role="button"], label[for], .cursor-pointer, .glass-card, .group, .magic-button, img {
     cursor: pointer !important;
   }
 
@@ -594,3 +595,4 @@
 .btn-pos-uiverse:active {
   scale: 0.95;
 }
+

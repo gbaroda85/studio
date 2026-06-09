@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -463,7 +464,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
-            <div className="w-full flex-1 flex flex-col pt-6 md:pt-10">
+            <div className="w-full flex-1 flex flex-col">
               {children}
             </div>
             <AppFooter />

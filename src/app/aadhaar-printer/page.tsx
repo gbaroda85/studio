@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
 import AadhaarPrinter from '@/components/aadhaar-printer';
@@ -41,7 +42,7 @@ export default function AadhaarPrinterPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center w-full pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
@@ -111,7 +112,7 @@ export default function AadhaarPrinterPage() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Will the printed card be the same size as my original?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Will the printed card be the same size bundle as my original?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Yes. We use the **ISO/IEC 7810 ID-1** standard (85.60 × 53.98 mm). As long as you select "Actual Size" or "100%" in your printer settings, the output will fit perfectly in any standard wallet slot.
                         </AccordionContent>

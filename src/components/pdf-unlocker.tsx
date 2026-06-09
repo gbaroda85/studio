@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -257,7 +258,7 @@ export default function PdfUnlocker() {
                     <motion.div 
                         key="setup"
                         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-                        className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4"
+                        className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4"
                     >
                         <div className="text-center space-y-2 mb-4">
                             <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
@@ -309,7 +310,7 @@ export default function PdfUnlocker() {
                     <motion.div 
                         key="editor"
                         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                        className="w-full max-w-lg px-4"
+                        className="w-full max-w-2xl px-4"
                     >
                         <Card className="shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50">
                             <CardHeader className="bg-muted/30 border-b p-6">

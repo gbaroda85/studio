@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -168,9 +169,9 @@ export default function VideoToMp3Converter() {
     };
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 flex flex-col gap-8 pb-20 mx-auto">
+        <div className="w-full max-w-2xl animate-in fade-in duration-500 px-4 flex flex-col gap-8 pb-20 mx-auto">
             {!videoFile ? (
-                <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 mx-auto">
+                <div className="w-full py-4 flex flex-col items-center justify-center gap-6">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
                         <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-indigo-500/10 text-indigo-600 shadow-xl relative">
                             <Music className="size-8" />
@@ -187,7 +188,7 @@ export default function VideoToMp3Converter() {
                     </motion.div>
 
                     <Card className={cn(
-                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
+                        "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                     )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -295,8 +296,8 @@ export default function VideoToMp3Converter() {
                                             <StarIcons />
                                             {isProcessing ? (
                                                 <div className="flex items-center gap-3">
-                                                    <Loader2 className="size-6 md:size-8 animate-spin" />
-                                                    <span className="uppercase text-sm tracking-tighter">DECODING...</span>
+                                                    <Loader2 className="size-6 md:size-7 animate-spin" />
+                                                    <span className="uppercase text-sm md:text-base tracking-tighter">DECODING...</span>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-3">
