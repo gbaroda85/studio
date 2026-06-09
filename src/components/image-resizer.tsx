@@ -285,7 +285,7 @@ export default function ImageResizer() {
         const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0); 
         
         const blob = await (await fetch(resizedDataUrl)).blob();
-        setResizedFileSize(blob.size);
+        setEnhancedFileSize(blob.size);
         setResizedImageSrc(resizedDataUrl);
       }
       
@@ -314,7 +314,7 @@ export default function ImageResizer() {
     setResizedImageSrc(null);
     setOriginalDimensions(null);
     setOriginalFileSize(0);
-    setResizedFileSize(0);
+    setEnhancedFileSize(0);
     setNewDimensions({ width: '', height: '' });
     setIsProcessing(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -462,7 +462,7 @@ export default function ImageResizer() {
                                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Source</span>
                                     <span className="text-[10px] font-mono font-bold opacity-40">{formatBytes(originalFileSize)}</span>
                                 </div>
-                                <div className="relative aspect-[3/4] bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
                                     <Image src={originalImageSrc} alt="Before" fill className="object-contain p-6 grayscale opacity-40 transition-all group-hover:grayscale-0 group-hover:opacity-100" />
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white px-4 py-1 rounded-full font-mono text-[10px]">{originalDimensions?.width}x{originalDimensions?.height}</div>
                                 </div>
@@ -508,7 +508,7 @@ export default function ImageResizer() {
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
                     <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
-                        <Settings2 className="size-4 md:size-5" /> Settings
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Settings
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">

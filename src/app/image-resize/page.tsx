@@ -1,14 +1,8 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, User, PenTool, Scaling, Layers, Maximize } from 'lucide-react';
+import { Scaling, Trophy } from 'lucide-react';
 import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
   title: 'Smart Image Resizer - Resize for SSC, UPSC, IBPS Application Forms Online',
@@ -26,17 +20,28 @@ export default function ImageResizePage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
+        <div className="w-full flex flex-col items-center mb-12 px-4">
+            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                    <Trophy className="size-3" /> PROFESSIONAL STUDIO
+                </div>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
+                    Image <span className="text-gradient-hero">Resizer</span>
+                </h1>
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                    Exact pixel and mm resizing for government job forms and official documents.
+                </p>
+            </div>
+            
             <ImageResizer />
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Professional Image Resizer" steps={steps} />
 
-            {/* In-depth Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
@@ -46,24 +51,6 @@ export default function ImageResizePage() {
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
                         Resizing images for official portals like <strong>SSC, UPSC, or Bank forms</strong> can be tricky. Standard tools often blur the text or stretch the face. Our <strong>Smart Resizer</strong> is calibrated for exact official requirements with zero data risk.
                     </p>
-                </div>
-                
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/40 transition-all">
-                        <User className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Passport Ready</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">One-click presets for 200x230px and other standard passport dimensions used in Indian competitive exams.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <PenTool className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Signature Mode</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Convert scanned signatures to 140x60px instantly while maintaining high contrast for better legibility on digital forms.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/40 transition-all">
-                        <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Local Privacy</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Since processing happens in your browser RAM, your sensitive ID cards and personal documents never touch any server.</p>
-                    </div>
                 </div>
             </section>
         </div>
