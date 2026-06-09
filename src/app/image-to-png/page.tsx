@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ImageToPngPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-4 md:pt-8">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
