@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -403,32 +402,32 @@ export default function DocumentScanner() {
             <div className="grid lg:grid-cols-12 gap-8 items-start w-full px-4">
                 <div className="lg:col-span-8">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-lg hover:border-primary/40 transition-all">
-                        <CardHeader className="pt-12 pb-6">
-                            <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary"><ScanLine className="size-10" /></div>
-                            <CardTitle className="text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
+                        <CardHeader className="pt-8 pb-4">
+                            <div className="mx-auto mb-4 grid size-16 place-items-center rounded-3xl bg-primary/10 text-primary"><ScanLine className="size-8" /></div>
+                            <CardTitle className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-16 pt-4 px-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                                <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
-                                    <div className="size-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest">Live Capture</p>
+                        <CardContent className="pb-10 pt-2 px-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                                <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
+                                    <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-7" /></div>
+                                    <p className="text-xs font-black uppercase tracking-widest">Live Capture</p>
                                 </div>
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-12 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-8" /></div>
-                                    <p className="text-sm font-black uppercase tracking-widest">Gallery</p>
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-7" /></div>
+                                    <p className="text-xs font-black uppercase tracking-widest">Gallery</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
                 <div className="lg:col-span-4">
-                    <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] min-h-[400px]">
+                    <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] min-h-[320px]">
                         <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
                             <CardTitle className="text-sm font-black uppercase tracking-widest">BUNDLE ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-16" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
+                                <div className="flex flex-col items-center justify-center py-10 opacity-20"><FileArchive className="size-12" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p) => (

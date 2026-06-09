@@ -40,12 +40,12 @@ export default function DocumentScanPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center min-h-screen w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center min-h-screen w-full pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             {/* Standard Hero Section */}
-            <div className="w-full max-w-5xl text-center mb-12 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Sparkles className="size-3" /> PREMIUM SCANNING STUDIO
                 </div>
