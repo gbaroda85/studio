@@ -250,7 +250,7 @@ export default function PdfMerger() {
             {/* Left Column: Stack & Selection */}
             <div className="lg:col-span-7 space-y-4">
                 <Card className={cn(
-                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -264,7 +264,7 @@ export default function PdfMerger() {
                     <CardContent className={cn("p-6 md:p-8", pdfFiles.length === 0 ? "py-20 md:py-32" : "py-6")}>
                         {pdfFiles.length === 0 ? (
                             <div 
-                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
+                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <div className="relative">
@@ -272,7 +272,7 @@ export default function PdfMerger() {
                                     <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDFs to Merge</p>
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDFs to Merge</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">High-fidelity bundling engine active.</p>
                                 </div>
                             </div>

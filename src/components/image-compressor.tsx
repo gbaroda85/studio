@@ -287,7 +287,7 @@ export default function ImageCompressor() {
         <div className="lg:col-span-7 space-y-4">
             <Card 
                 className={cn(
-                    "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                    "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                 )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -301,7 +301,7 @@ export default function ImageCompressor() {
                 <CardContent className={cn(results.length === 0 ? "p-10 md:p-12" : "p-4 md:p-6")}>
                     {results.length === 0 ? (
                         <div 
-                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <div className="relative">
@@ -309,7 +309,7 @@ export default function ImageCompressor() {
                                 <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center">
-                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop Images to Optimize</p>
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Images to Optimize</p>
                                 <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Adaptive scaling & batching active.</p>
                             </div>
                         </div>

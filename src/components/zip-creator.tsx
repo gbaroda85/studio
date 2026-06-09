@@ -99,7 +99,7 @@ export default function ZipCreator() {
         setFilesToZip(prev => [...prev, ...newFiles]);
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files?.[0] || null);
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFilesChange(e.target.files);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFilesChange(e.dataTransfer.files); };
@@ -170,11 +170,10 @@ export default function ZipCreator() {
                 <div className="lg:col-span-7 space-y-4">
                     <Card 
                         className={cn(
-                            "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
+                            "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <div className="flex items-center justify-between">
@@ -185,14 +184,14 @@ export default function ZipCreator() {
                         <CardContent className={cn(filesToZip.length === 0 ? "p-10 md:p-16" : "p-4 md:p-6")}>
                             {filesToZip.length === 0 ? (
                                 <div 
-                                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer"
+                                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     <div className="relative">
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <div className="text-center px-4">
+                                    <div className="text-center">
                                         <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Files to Bundle</p>
                                         <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">WASM-based local archiving active.</p>
                                     </div>
@@ -294,7 +293,7 @@ export default function ZipCreator() {
                         <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
                             {!zippedFileUrl ? (
                                 <Button 
-                                    className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                                    className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                                     onClick={handleCreateZip}
                                     disabled={isZipping || filesToZip.length === 0}
                                 >
@@ -312,7 +311,7 @@ export default function ZipCreator() {
                                     )}
                                 </Button>
                             ) : (
-                                <Button size="lg" className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10" onClick={handleDownload}>
+                                <Button size="lg" className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10" onClick={handleDownload}>
                                     <StarIcons />
                                     <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
                                     <span className="uppercase tracking-tighter">SAVE ZIP ARCHIVE</span>
@@ -321,7 +320,7 @@ export default function ZipCreator() {
                         </CardFooter>
                     </Card>
 
-                    <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
+                    <div className="p-5 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2.5rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
                         <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
                             <ShieldCheck className="size-5 md:size-6 text-green-600" />
                         </div>
