@@ -376,7 +376,7 @@ export default function ImageResizer() {
     <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 pb-20">
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-5 space-y-6">
-          {/* Dimension Settings Card - Moved to First Position */}
+          {/* Dimension Settings Card */}
           <Card className="border-2 shadow-xl overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
               <CardHeader className="bg-muted/30 border-b p-4">
                   <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
@@ -388,9 +388,35 @@ export default function ImageResizer() {
                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
                     <div className="grid grid-cols-3 gap-2">
                         {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
-                            <Button key={u} variant={unit === u ? "default" : "outline"} className="h-10 text-[10px] font-black rounded-xl border-2" onClick={() => handleUnitChange(u)}>
+                            <button
+                                key={u}
+                                onClick={() => handleUnitChange(u)}
+                                className={cn(
+                                    "flex justify-center gap-1.5 items-center shadow-md text-[10px] font-black isolation-auto relative z-10 px-2 py-2 overflow-hidden border-2 rounded-full group transition-all h-10",
+                                    "bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200",
+                                    "before:absolute before:w-full before:transition-all before:duration-700 before:-left-full before:rounded-full before:bg-emerald-500 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700",
+                                    "hover:text-gray-50 hover:before:left-0",
+                                    unit === u ? "before:left-0 text-white border-emerald-500" : "border-slate-200 dark:border-slate-700"
+                                )}
+                            >
                                 {u.toUpperCase()}
-                            </Button>
+                                <svg
+                                    className={cn(
+                                        "w-4 h-4 justify-end transition-all ease-linear duration-300 rounded-full border p-1",
+                                        unit === u ? "rotate-90 bg-gray-50 border-none" : "rotate-45 border-slate-700 dark:border-slate-400 group-hover:rotate-90 group-hover:bg-gray-50 group-hover:border-none"
+                                    )}
+                                    viewBox="0 0 16 19"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M7 18C7 18.5523 7.44772 19 8 19C8.55228 19 9 18.5523 9 18H7ZM8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L0.928932 6.65685C0.538408 7.04738 0.538408 7.68054 0.928932 8.07107C1.31946 8.46159 1.95262 8.46159 2.34315 8.07107L8 2.41421L13.6569 8.07107C14.0474 8.46159 14.6805 8.46159 15.0711 8.07107C15.4616 7.68054 15.4616 7.04738 15.0711 6.65685L8.70711 0.292893ZM9 18L9 1H7L7 18H9Z"
+                                        className={cn(
+                                            "fill-current",
+                                            unit === u ? "fill-emerald-600" : "fill-slate-700 dark:fill-slate-400 group-hover:fill-emerald-600"
+                                        )}
+                                    ></path>
+                                </svg>
+                            </button>
                         ))}
                     </div>
                   </div>
@@ -445,7 +471,7 @@ export default function ImageResizer() {
               </CardFooter>
           </Card>
 
-          {/* Govt Job Presets Card - Moved to Second Position */}
+          {/* Govt Job Presets Card */}
           <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-slate-950">
               <CardHeader className="bg-primary/5 border-b p-4">
                   <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
