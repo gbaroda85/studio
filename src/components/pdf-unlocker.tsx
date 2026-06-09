@@ -16,8 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { 
     UploadCloud, 
-    Loader2, 
-    Download, 
     Unlock, 
     AlertCircle, 
     ShieldAlert, 
@@ -158,7 +156,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataBuffer(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
