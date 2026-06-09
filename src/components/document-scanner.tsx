@@ -463,7 +463,7 @@ export default function DocumentScanner() {
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-6xl mx-auto">
                 
                 {/* ADJUSTMENT PANEL */}
-                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
+                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
                     <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
@@ -475,11 +475,11 @@ export default function DocumentScanner() {
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-2xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -509,14 +509,14 @@ export default function DocumentScanner() {
                 </Card>
 
                 {/* HD RESULT PREVIEW */}
-                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
+                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
                          <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
                     </CardHeader>
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
                         <div className="relative bg-white shadow-lg border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[55vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
                         </div>
                     </CardContent>
