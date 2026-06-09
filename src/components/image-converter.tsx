@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
 
@@ -176,7 +176,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-14 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -251,7 +251,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><Eye className="size-4" /> INSTANT PREVIEW</div>
                         <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD OUTPUT</div>
                     </div>
                 </CardFooter>
