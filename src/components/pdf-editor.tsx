@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -404,17 +403,14 @@ export default function PdfEditor() {
         setIsExporting(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            // Load and modify the SAME document to preserve page sizes and boxes perfectly
             const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             
             const activePageStates = pages.filter(p => !p.isDeleted);
             const pagesToKeep = activePageStates.map(p => p.index - 1);
             
-            // Loop through active pages and apply edits
             for (const pageState of activePageStates) {
                 const pdfPage = pdfDoc.getPage(pageState.index - 1);
                 pdfPage.setRotation(degrees(pageState.rotation));
-                
                 const { width, height } = pdfPage.getSize();
 
                 for (const el of pageState.elements) {
@@ -475,7 +471,6 @@ export default function PdfEditor() {
                 }
             }
 
-            // Handle deleted pages
             const allIndices = Array.from({ length: pdfDoc.getPageCount() }, (_, i) => i);
             const indicesToRemove = allIndices.filter(i => !pagesToKeep.includes(i)).reverse();
             for (const idx of indicesToRemove) {
@@ -493,7 +488,7 @@ export default function PdfEditor() {
             toast({ title: "PDF Exported Successfully" });
         } catch (e) {
             console.error('[Export Error]:', e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Document rendering error. Check logs for details." });
+            toast({ variant: 'destructive', title: "Export Failed", description: "Document rendering error." });
         } finally {
             setIsExporting(false);
         }
@@ -506,8 +501,7 @@ export default function PdfEditor() {
         <div className="w-full max-w-[1800px] mx-auto flex flex-col gap-0 animate-in fade-in duration-500 h-[calc(100vh-140px)] overflow-hidden" 
              onMouseMove={handleMouseMoveGlobal} onMouseUp={handleMouseUpGlobal}>
             
-            {/* TOP TOOLBAR */}
-            {pdfFile && (
+            {pdfFile ? (
                 <div className="w-full h-16 bg-slate-900 dark:bg-slate-950 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
                         <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl shrink-0">
@@ -520,19 +514,12 @@ export default function PdfEditor() {
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
-                            
                             <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button>
-                                </DialogTrigger>
+                                <DialogTrigger asChild><Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button></DialogTrigger>
                                 <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary">Handwriting Signature</DialogTitle></DialogHeader>
                                     <div className="bg-white rounded-xl overflow-hidden touch-none border-4 border-primary/20 shadow-inner">
-                                        <canvas 
-                                            ref={drawingCanvasRef} width={400} height={200} className="w-full h-[200px] cursor-crosshair"
-                                            onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={finishDrawing} onMouseLeave={finishDrawing}
-                                            onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={finishDrawing}
-                                        />
+                                        <canvas ref={drawingCanvasRef} width={400} height={200} className="w-full h-[200px] cursor-crosshair" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={finishDrawing} onMouseLeave={finishDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={finishDrawing} />
                                     </div>
                                     <DialogFooter className="gap-2 pt-4">
                                         <Button variant="ghost" onClick={() => drawingCanvasRef.current?.getContext('2d')?.clearRect(0,0,400,200)} className="font-black text-[10px] uppercase text-white/60">Clear Pad</Button>
@@ -540,11 +527,9 @@ export default function PdfEditor() {
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
-
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
                         </div>
                     </div>
-
                     <div className="flex items-center gap-4">
                         <div className="hidden lg:flex items-center gap-2 bg-white/10 px-2 py-1.5 rounded-xl border border-white/10">
                             <Button variant="ghost" size="icon" className="h-6 w-6 text-white/60 hover:text-white" onClick={() => setZoom(z => Math.max(50, z - 10))}><ZoomOut className="size-3.5"/></Button>
@@ -556,31 +541,27 @@ export default function PdfEditor() {
                         </Button>
                     </div>
                 </div>
-            )}
-
-            {!pdfFile ? (
+            ) : (
                 <div className="flex-1 flex flex-col items-center justify-start pt-6 px-6 bg-slate-200/50 dark:bg-slate-900/10">
                     <Card className={cn(
-                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                     )}
                         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+                        onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12">
-                            <div 
-                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group">
                                 <div className="relative">
-                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                    <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </div>
-                                <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Studio</p>
-                                    <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering. No server upload.</p>
+                                <div className="text-center px-4">
+                                    <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Studio</p>
+                                    <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering.</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
@@ -592,9 +573,10 @@ export default function PdfEditor() {
                         </CardFooter>
                     </Card>
                 </div>
-            ) : (
+            )}
+
+            {pdfFile && (
                 <div className="flex-1 flex overflow-hidden gap-0 bg-slate-200 dark:bg-black/20">
-                    {/* LEFT PANEL: PAGES */}
                     <div className="w-20 md:w-64 bg-muted/30 dark:bg-slate-950 border-r flex flex-col shrink-0 overflow-hidden shadow-2xl transition-colors">
                         <div className="p-4 border-b bg-primary/5 flex items-center justify-between"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:block">Pages</span><Badge className="bg-primary/20 text-primary">{pages.filter(p => !p.isDeleted).length}</Badge></div>
                         <ScrollArea className="flex-1 p-2 md:p-4">
@@ -610,7 +592,6 @@ export default function PdfEditor() {
                         </ScrollArea>
                     </div>
 
-                    {/* CENTER PANEL: INTERACTIVE CANVAS */}
                     <div className="flex-1 bg-slate-100 dark:bg-black/40 flex items-start justify-center overflow-auto p-8 md:p-16 rounded-none border-t border-white/5 relative shadow-inner custom-scrollbar">
                         {selectedPage ? (
                             <div ref={containerRef} className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6)] bg-white transition-transform origin-top flex items-center justify-center" 
@@ -621,55 +602,25 @@ export default function PdfEditor() {
                                         <motion.div key={el.id} onMouseDown={(e) => handleElementMouseDown(e, selectedPageIndex!, el)}
                                             className={cn("absolute z-10 cursor-move transition-shadow", selectedElementId === el.id ? "ring-2 ring-primary ring-offset-1 rounded-sm shadow-2xl" : "hover:ring-1 hover:ring-primary/20")}
                                             style={{ left: `${el.x}%`, top: `${el.y}%`, transform: `rotate(${-selectedPage.rotation}deg)` }}>
-                                            
                                             {el.type === 'text' ? (
                                                 <div className="group relative">
                                                     {selectedElementId === el.id ? (
                                                         <div className="p-1 bg-white/50 backdrop-blur-sm rounded border border-primary shadow-xl">
-                                                            <input 
-                                                                value={el.text} 
-                                                                onChange={e => updateElement({ text: e.target.value })} 
-                                                                onBlur={commitChange}
-                                                                className="bg-transparent border-none text-slate-900 font-bold outline-none focus:ring-0 px-1"
-                                                                style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }}
-                                                                autoFocus
-                                                                onMouseDown={(e) => e.stopPropagation()}
-                                                            />
+                                                            <input value={el.text} onChange={e => updateElement({ text: e.target.value })} onBlur={commitChange} className="bg-transparent border-none text-slate-900 font-bold outline-none focus:ring-0 px-1" style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }} autoFocus onMouseDown={(e) => e.stopPropagation()} />
                                                         </div>
                                                     ) : (
                                                         <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px', opacity: el.opacity/100 }}>{el.text}</div>
                                                     )}
                                                 </div>
                                             ) : (el.type === 'mask' || el.type === 'highlight') ? (
-                                                <div style={{ 
-                                                    width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
-                                                    height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, 
-                                                    backgroundColor: el.color, 
-                                                    opacity: el.opacity / 100, 
-                                                    border: selectedElementId === el.id ? '1px dashed #primary' : 'none' 
-                                                }} />
+                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '1px dashed #primary' : 'none' }} />
                                             ) : el.type === 'arrow' ? (
-                                                <div style={{ 
-                                                    transform: `rotate(${el.rotation}deg)`, 
-                                                    transformOrigin: 'left center', 
-                                                    width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, 
-                                                    height: `${el.thickness}px`, 
-                                                    backgroundColor: el.color, 
-                                                    opacity: el.opacity/100, 
-                                                    position: 'relative' 
-                                                }}>
+                                                <div style={{ transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center', width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.thickness}px`, backgroundColor: el.color, opacity: el.opacity/100, position: 'relative' }}>
                                                     <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px]" style={{ borderLeftColor: el.color }} />
                                                 </div>
                                             ) : (
-                                                <div style={{ 
-                                                    width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
-                                                    opacity: el.opacity / 100, 
-                                                    transform: `rotate(${el.rotation}deg)` 
-                                                }}>
-                                                    <img src={el.src} className="size-full" alt="img" />
-                                                </div>
+                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>
                                             )}
-
                                             {selectedElementId === el.id && (
                                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 border border-white/20 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-3xl z-50 scale-90 md:scale-100">
                                                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white/80 hover:text-white" onClick={(e) => { e.stopPropagation(); updateElement({ y: el.y - 1 }); commitChange(); }}><ChevronUp className="size-3.5"/></Button>
@@ -677,14 +628,7 @@ export default function PdfEditor() {
                                                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white/80 hover:text-white" onClick={(e) => { e.stopPropagation(); updateElement({ x: el.x - 1 }); commitChange(); }}><ChevronLeft className="size-3.5"/></Button>
                                                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white/80 hover:text-white" onClick={(e) => { e.stopPropagation(); updateElement({ x: el.x + 1 }); commitChange(); }}><ChevronRight className="size-3.5"/></Button>
                                                      <Separator orientation="vertical" className="h-4 opacity-20 mx-1" />
-                                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-full shadow-lg" onClick={(e) => {
-                                                         e.stopPropagation();
-                                                         const next = [...pages];
-                                                         next[selectedPageIndex!].elements = next[selectedPageIndex!].elements.filter(item => item.id !== el.id);
-                                                         setPages(next);
-                                                         saveToHistory(next);
-                                                         setSelectedElementId(null);
-                                                     }}><Trash2 className="size-3.5"/></Button>
+                                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-full shadow-lg" onClick={(e) => { e.stopPropagation(); const next = [...pages]; next[selectedPageIndex!].elements = next[selectedPageIndex!].elements.filter(item => item.id !== el.id); setPages(next); saveToHistory(next); setSelectedElementId(null); }}><Trash2 className="size-3.5"/></Button>
                                                 </div>
                                             )}
                                         </motion.div>
@@ -692,14 +636,10 @@ export default function PdfEditor() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center gap-8 text-slate-400 dark:text-white/5 p-20 select-none animate-pulse">
-                                <FilePenLine className="size-60" />
-                                <p className="font-black uppercase tracking-[0.5em] text-3xl">Loading Workspace...</p>
-                            </div>
+                            <div className="flex flex-col items-center gap-8 text-slate-400 dark:text-white/5 p-20 select-none animate-pulse"><FilePenLine className="size-60" /><p className="font-black uppercase tracking-[0.5em] text-3xl">Loading Workspace...</p></div>
                         )}
                     </div>
 
-                    {/* RIGHT PANEL: PROPERTIES */}
                     <div className="w-72 md:w-80 bg-muted/30 dark:bg-slate-950 border-l flex flex-col shrink-0 overflow-hidden shadow-2xl transition-colors">
                         <div className="p-4 border-b bg-primary/5 flex items-center gap-3"><Settings2 className="size-5 text-primary" /><span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Studio Properties</span></div>
                         <ScrollArea className="flex-1 p-6">
@@ -709,7 +649,6 @@ export default function PdfEditor() {
                                         <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Opacity</Label><span className="text-primary text-[10px] font-bold">{selectedElement.opacity}%</span></div>
                                         <Slider min={10} max={100} value={[selectedElement.opacity]} onValueChange={v => updateElement({ opacity: v[0] })} onValueCommit={commitChange} />
                                     </div>
-
                                     {selectedElement.type === 'text' && (
                                         <div className="space-y-6">
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">CONTENT</Label><Input value={selectedElement.text} onChange={e => updateElement({ text: e.target.value })} onBlur={commitChange} className="bg-background border-border text-foreground h-11 font-bold focus:ring-primary/20" /></div>
@@ -717,10 +656,9 @@ export default function PdfEditor() {
                                                 <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FONT</Label><Select value={selectedElement.font} onValueChange={v => { updateElement({ font: v }); commitChange(); }}><SelectTrigger className="h-9 bg-background text-foreground font-bold text-[10px] border-border"><SelectValue /></SelectTrigger><SelectContent className="border-border shadow-2xl"><SelectItem value="Helvetica">Helvetica</SelectItem><SelectItem value="Times">Times Roman</SelectItem><SelectItem value="Courier">Courier</SelectItem></SelectContent></Select></div>
                                                 <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">SIZE</Label><Input type="number" value={selectedElement.size} onChange={e => { updateElement({ size: Number(e.target.value) }); commitChange(); }} className="bg-background border-border text-foreground h-9 font-bold" /></div>
                                             </div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">TEXT COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#ffff00'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#ffff00'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
-
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
@@ -728,7 +666,6 @@ export default function PdfEditor() {
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FILL COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#ADD8E6'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
-
                                     {selectedElement.type === 'arrow' && (
                                         <div className="space-y-6">
                                             <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Length (%)</Label><Slider min={1} max={100} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
@@ -736,7 +673,6 @@ export default function PdfEditor() {
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#00FF00', '#0000FF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
-
                                     {selectedElement.type === 'image' && (
                                         <div className="space-y-6">
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Scale (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
@@ -745,22 +681,13 @@ export default function PdfEditor() {
                                     )}
                                 </div>
                             ) : (
-                                <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4">
-                                    <MousePointer2 className="size-16 text-foreground"/>
-                                    <p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-relaxed">Select any item on<br/>the page to modify</p>
-                                </div>
+                                <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4"><MousePointer2 className="size-16 text-foreground"/><p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-relaxed">Select any item on<br/>the page to modify</p></div>
                             )}
                         </ScrollArea>
-                        <CardFooter className="bg-primary/5 p-4 border-t">
-                            <div className="flex gap-3 items-center">
-                                <ShieldCheck className="size-4 text-primary" />
-                                <p className="text-[9px] font-black uppercase text-primary/60 tracking-tight">Active Secured Studio</p>
-                            </div>
-                        </CardFooter>
+                        <CardFooter className="bg-primary/5 p-4 border-t"><div className="flex gap-3 items-center"><ShieldCheck className="size-4 text-primary" /><p className="text-[9px] font-black uppercase text-primary/60 tracking-tight">Active Secured Studio</p></div></CardFooter>
                     </div>
                 </div>
             )}
-
             <input ref={overlayImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
         </div>
     );

@@ -158,17 +158,16 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
     }, [toast]);
 
-    // Handle incoming file from the shared store
     useEffect(() => {
         if (sharedFile) {
             handleFileChange(sharedFile);
-            setSharedFile(null); // Consume the file
+            setSharedFile(null);
             toast({ title: "File Received", description: "Document imported from Optimizer." });
         }
     }, [sharedFile, handleFileChange, setSharedFile, toast]);
@@ -286,15 +285,15 @@ export default function PdfUnlocker() {
                             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-10 md:p-12">
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <CardContent className="p-8 md:p-12">
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                                     <div className="relative">
-                                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center px-4">
-                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Sanitization & Decode active.</p>
+                                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -359,8 +358,7 @@ export default function PdfUnlocker() {
                                                 <Info className="size-5 text-blue-500" />
                                                 <AlertTitle className="text-[10px] font-black uppercase text-blue-700">Aadhaar Format Tip</AlertTitle>
                                                 <AlertDescription className="text-[11px] font-bold text-blue-600 leading-tight">
-                                                    First 4 letters of NAME (CAPS) + Year of Birth. <br/>
-                                                    <span className="text-[9px] opacity-60">Example: ANIS1990</span>
+                                                    First 4 letters of NAME (CAPS) + Year of Birth.
                                                 </AlertDescription>
                                             </Alert>
                                         )}
@@ -394,7 +392,7 @@ export default function PdfUnlocker() {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xl font-black text-green-800 uppercase tracking-tighter">PERMANENTLY UNLOCKED!</p>
-                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Sanitized buffer ready for saving</p>
+                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving</p>
                                         </div>
                                     </div>
                                 ) : null}
