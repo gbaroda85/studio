@@ -348,7 +348,7 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-20 sticky top-0 bg-gradient-to-r from-background/90 via-white/80 to-secondary/60 dark:from-slate-950/80 dark:via-slate-950/80 dark:to-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-50 shrink-0 w-full flex justify-center">
+    <header className="h-20 fixed top-0 left-0 right-0 bg-gradient-to-r from-background/90 via-white/80 to-secondary/60 dark:from-slate-950/80 dark:via-slate-950/80 dark:to-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
       <div className="w-full h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
@@ -456,14 +456,14 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-20">
       <AppHeader />
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
-            <div className="w-full flex-1 flex flex-col">
+            <div className="w-full flex-1 flex flex-col pt-6 md:pt-10">
               {children}
             </div>
             <AppFooter />

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function SplitPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">

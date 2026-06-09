@@ -25,7 +25,8 @@ import {
     Settings2,
     Sparkles,
     SearchCode,
-    Plus
+    Plus, 
+    Trash2 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -269,57 +270,6 @@ export default function PdfSplitter() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
     
-    if (!pdfFile) {
-        return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-                <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                        <Scissors className="size-8" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        PDF <span className="text-gradient-hero">Split Studio</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Extract specific pages visually. <br/>100% Private local RAM processing.
-                    </p>
-                </div>
-
-                <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
-                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-                )}
-                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8 md:p-12">
-                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
-                            <div className="relative">
-                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
-                            </div>
-                            <div className="text-center">
-                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Split</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Visual Selection Enabled</p>
-                            </div>
-                        </div>
-                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                    </CardContent>
-                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> INDEX SCAN</div>
-                        <div className="flex items-center gap-1.5"><Eye className="size-3 text-rose-500" /> VISUAL CROP</div>
-                    </CardFooter>
-                </Card>
-            </div>
-        );
-    }
-    
     return (
         <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
             <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
@@ -374,7 +324,7 @@ export default function PdfSplitter() {
                         <div className="pt-6 border-t-2 border-dashed">
                              {!splitPdfUrl ? (
                                 <Button 
-                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
+                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
                                     onClick={handleSplitPdf} 
                                     disabled={selectedPages.length === 0 || isProcessing}
                                 >

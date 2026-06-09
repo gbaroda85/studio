@@ -71,6 +71,11 @@
     background-attachment: fixed;
   }
 
+  /* Global Cursor Hand Fix */
+  a, button, [role="button"], label[for], .cursor-pointer, .glass-card, .group {
+    cursor: pointer !important;
+  }
+
   .dark body {
     /* Mystic Magenta radial overlays for Dark Mode */
     background-image: 
