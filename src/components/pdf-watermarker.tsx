@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -32,7 +31,7 @@ import { Input } from './ui/input';
 import { Slider } from './ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from './ui/badge';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Initialize PDF.js worker with stable CDN
@@ -165,8 +164,6 @@ export default function PdfWatermarker() {
         const textWidth = font.widthOfTextAtSize(watermarkText, finalFontSize);
         const textHeight = font.heightAtSize(finalFontSize);
         
-        // pdf-lib rotate uses counter-clockwise degrees.
-        // We calculate position so the center of the text bounding box is at our target point.
         const rad = (finalRotation * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
@@ -189,12 +186,6 @@ export default function PdfWatermarker() {
                 }
             }
 
-            /**
-             * PDF-Lib drawText(x, y) coordinates are for the bottom-left of the text baseline.
-             * To center a rotated block of text at (cx, cy):
-             * x = cx - (W/2 * cos) + (H/2 * sin)
-             * y = cy - (W/2 * sin) - (H/2 * cos)
-             */
             const x = targetCX - (textWidth / 2) * cos + (textHeight / 2) * sin;
             const y = targetCY - (textWidth / 2) * sin - (textHeight / 2) * cos;
             
@@ -244,9 +235,6 @@ export default function PdfWatermarker() {
 
   const getPreviewStyle = () => {
       const finalFontSize = Number(fontSize) || 0;
-      // In CSS, rotate(deg) is clockwise. 
-      // PDF-Lib rotate is counter-clockwise.
-      // So we negate the rotation in CSS to visually match PDF-lib's rendering logic.
       const finalRotation = -(Number(rotation) || 0);
 
       const styles: React.CSSProperties = {
@@ -254,7 +242,7 @@ export default function PdfWatermarker() {
           pointerEvents: 'none', 
           color: 'rgba(128,128,128,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${finalFontSize * 0.75}px`, // Adjusted visual scale
+          fontSize: `${finalFontSize * 0.75}px`, 
           fontWeight: '900', 
           textAlign: 'center', 
           whiteSpace: 'nowrap',
@@ -330,7 +318,6 @@ export default function PdfWatermarker() {
         </Card>
       ) : (
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 pb-20">
-            {/* Sidebar: Controls */}
             <div className="lg:col-span-4 space-y-6">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
@@ -426,8 +413,14 @@ export default function PdfWatermarker() {
                                 )}
                             </Button>
                         ) : (
-                            <Button size="lg" className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
-                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> SAVE PDF
+                            <Button 
+                                size="lg" 
+                                className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
+                                onClick={handleDownload}
+                            >
+                                <StarIcons />
+                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">SAVE PDF</span>
                             </Button>
                         )}
                         <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
@@ -437,7 +430,6 @@ export default function PdfWatermarker() {
                 </Card>
             </div>
 
-            {/* Workspace: Live Preview */}
             <div className="lg:col-span-8 h-full">
                 <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-full flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
