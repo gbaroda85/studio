@@ -35,6 +35,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 // HARDCODED STABLE VERSION FOR WORKER
@@ -246,7 +247,7 @@ export default function PdfMerger() {
     }
     
     return (
-        <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500">
+        <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20">
             {/* Top Grid: Stack & Selection */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Left Column: List */}
