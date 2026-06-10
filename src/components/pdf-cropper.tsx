@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -29,24 +28,64 @@ import {
     Info,
     Sparkles,
     FileArchive,
-    Settings2
+    Settings2,
+    Crop
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { motion, AnimatePresence } from 'framer-motion';
 
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type CropMode = 'rectangular' | 'perspective';
+type Stage = 'upload' | 'edit';
 interface Point { x: number; y: number; }
 interface PageState { mode: CropMode; crop?: CropType; completedCrop?: PixelCrop; points: Point[]; result: string | null; }
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function PdfCropper() {
   const { toast } = useToast();
+  const [stage, setStage] = useState<Stage>('upload');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBuildingPdf, setIsBuildingPdf] = useState(false);
@@ -73,6 +112,7 @@ export default function PdfCropper() {
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
+  const renderIdRef = useRef(0);
 
   const loadPageImage = useCallback(async (pageNum: number) => {
     if (!pdfDocRef.current) return;
@@ -98,15 +138,29 @@ export default function PdfCropper() {
 
   const handleFileChange = async (file: File | null) => {
     if (file && file.type === 'application/pdf') {
+        renderIdRef.current++;
+        setIsProcessing(true);
         setPdfFile(file);
         setPageStates({});
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const buffer = e.target?.result as ArrayBuffer;
-            const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
-            pdfDocRef.current = await loadingTask.promise;
-            setNumPages(pdfDocRef.current.numPages);
-            loadPageImage(1);
+            try {
+                const buffer = e.target?.result as ArrayBuffer;
+                const loadingTask = pdfjs.getDocument({ 
+                    data: new Uint8Array(buffer),
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                    cMapPacked: true
+                });
+                pdfDocRef.current = await loadingTask.promise;
+                setNumPages(pdfDocRef.current.numPages);
+                await loadPageImage(1);
+                setStage('edit');
+            } catch (err) {
+                toast({ variant: 'destructive', title: 'File Error', description: 'Could not open PDF.' });
+                setPdfFile(null);
+            } finally {
+                setIsProcessing(false);
+            }
         };
         reader.readAsArrayBuffer(file);
     } else if (file) {
@@ -120,16 +174,18 @@ export default function PdfCropper() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   const resetState = () => {
+    renderIdRef.current++;
     setPdfFile(null);
     setPageImage(null);
     setPageStates({});
     setNumPages(0);
     setCurrentPage(1);
+    setStage('upload');
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   useEffect(() => {
-    if (pdfDocRef.current) {
+    if (pdfDocRef.current && stage === 'edit') {
         loadPageImage(currentPage);
     }
     if (pageStates[currentPage]) {
@@ -139,7 +195,7 @@ export default function PdfCropper() {
         setCropMode('rectangular'); setCrop(undefined); setCompletedCrop(undefined);
         setPoints([{ x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 50 }, { x: 85, y: 85 }, { x: 50, y: 85 }, { x: 15, y: 85 }, { x: 15, y: 50 }]);
     }
-  }, [currentPage, loadPageImage]);
+  }, [currentPage, loadPageImage, stage]);
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -183,22 +239,21 @@ export default function PdfCropper() {
 
     let processedImage = "";
     if (cropMode === 'perspective') {
-        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
-        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
-        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
-        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
-        
-        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
-        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
-        canvas.width = targetWidth; canvas.height = targetHeight;
-        
-        const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
+        const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
-        const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
+        const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+        const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
+        const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
+        const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
         
-        const h = solvePerspective(dstPoints, srcPoints);
+        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
+        const targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
+        canvas.width = targetWidth; canvas.height = targetHeight;
+        
+        const dstPoints = [{ x: 0, y: 0 }, { x: targetWidth, y: 0 }, { x: targetWidth, y: targetHeight }, { x: 0, y: targetHeight }];
+        const h = solvePerspective(dstPoints, corners);
         const imgData = ctx.createImageData(targetWidth, targetHeight);
         
         const srcCanvas = document.createElement('canvas');
@@ -283,7 +338,7 @@ export default function PdfCropper() {
 
   const croppedEntries = Object.entries(pageStates).filter(([_,s])=>!!s.result).sort((a,b)=>Number(a[0])-Number(b[0]));
 
-  if (!pdfFile) {
+  if (stage === 'upload') {
     return (
         <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
             <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
@@ -302,7 +357,7 @@ export default function PdfCropper() {
             </div>
 
             <Card className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -316,15 +371,14 @@ export default function PdfCropper() {
                         className={cn(
                             "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group"
                         )}
-                        onClick={() => fileInputRef.current?.click()}
                     >
                         <div className="relative">
                             <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                             <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
                         </div>
                         <div className="text-center">
-                            <h3 className="text-xl font-black uppercase tracking-tighter">Drop PDF File here</h3>
-                            <p className="text-xs text-muted-foreground mt-1 font-bold opacity-60">100% Private local RAM processing.</p>
+                            <h3 className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF File here</h3>
+                            <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
                         </div>
                     </div>
                     <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -408,7 +462,7 @@ export default function PdfCropper() {
                                     {croppedEntries.map(([idx, s]) => (
                                         <div key={idx} className="relative inline-block w-24 md:w-32 aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-lg group">
                                             <img src={s.result!} className="size-full object-contain" alt={`P${idx}`} />
-                                            <div className="absolute top-1 left-1 size-5 rounded-md bg-black/70 flex items-center justify-center text-[8px] font-black text-white">P{idx}</div>
+                                            <div className="absolute top-1 left-1 size-5 rounded-md bg-black/80 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{idx}</div>
                                             <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setPageStates(prev => {
                                                 const next = {...prev};
                                                 delete next[Number(idx)];

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize, Zap } from 'lucide-react';
-import PdfCropper from '@/components/pdf-cropper';
+import { PdfCropperClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
 import {
@@ -29,7 +29,7 @@ export default function CropPdfPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex justify-center mb-12 px-4">
-            <PdfCropper />
+            <PdfCropperClient />
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4">
