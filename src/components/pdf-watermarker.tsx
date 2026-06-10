@@ -42,6 +42,41 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 
 type WatermarkPosition = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'diagonal-bottom-up' | 'diagonal-top-down';
 
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
+
 export default function PdfWatermarker() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -126,19 +161,24 @@ export default function PdfWatermarker() {
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
         const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const pages = pdfDoc.getPages();
-        const pdfRotation = -finalRotation; 
-        const rad = (pdfRotation * Math.PI) / 180;
-        const cos = Math.cos(rad);
-        const sin = Math.sin(rad);
+        
+        // PDF-lib rotation is counter-clockwise.
+        // If UI rotation is negative (e.g. -45), it means clockwise in CSS,
+        // so we pass finalRotation as is to 'rotate: degrees(...)'.
+        // But the centering math needs care.
+        
         const textWidth = font.widthOfTextAtSize(watermarkText, finalFontSize);
         const textHeight = font.heightAtSize(finalFontSize);
-        const centerXOffset = (textWidth / 2) * cos - (textHeight / 2) * sin;
-        const centerYOffset = (textWidth / 2) * sin + (textHeight / 2) * cos;
+        
+        const rad = (finalRotation * Math.PI) / 180;
+        const cos = Math.abs(Math.cos(rad));
+        const sin = Math.abs(Math.sin(rad));
 
         for (const page of pages) {
             const { width, height } = page.getSize();
             let targetCX, targetCY;
             const margin = 50; 
+
             if (position === 'center' || position.startsWith('diagonal')) {
                 targetCX = width / 2;
                 targetCY = height / 2;
@@ -151,17 +191,22 @@ export default function PdfWatermarker() {
                     default: targetCX = width / 2; targetCY = height / 2;
                 }
             }
-            const x = targetCX! - centerXOffset;
-            const y = targetCY! - centerYOffset;
+
+            // Correct baseline centering for rotated text in PDF-lib
+            // We want the center of the text bounding box to be at targetCX, targetCY
+            // drawText (x,y) is the bottom-left of the baseline.
+            
             page.drawText(watermarkText, { 
-                x, y, 
+                x: targetCX - (textWidth / 2) * Math.cos(rad) + (textHeight / 2) * Math.sin(rad),
+                y: targetCY - (textWidth / 2) * Math.sin(rad) - (textHeight / 2) * Math.cos(rad),
                 font, 
                 size: finalFontSize, 
                 color: rgb(0.5, 0.5, 0.5), 
                 opacity: opacity[0] / 100, 
-                rotate: degrees(pdfRotation) 
+                rotate: degrees(finalRotation) 
             });
         }
+        
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -200,10 +245,20 @@ export default function PdfWatermarker() {
       const finalRotation = Number(rotation) || 0;
 
       const styles: React.CSSProperties = {
-          position: 'absolute', pointerEvents: 'none', color: 'rgba(0,0,0,0.5)', opacity: opacity[0] / 100,
-          fontSize: `${finalFontSize * 0.84}px`, fontWeight: '900', textAlign: 'center', whiteSpace: 'nowrap',
-          transition: 'all 0.1s ease-out', lineHeight: '1', zIndex: 40
+          position: 'absolute', 
+          pointerEvents: 'none', 
+          color: 'rgba(0,0,0,0.5)', 
+          opacity: opacity[0] / 100,
+          fontSize: `${finalFontSize * 0.82}px`, // Matches PDF-lib visual scale better
+          fontWeight: '900', 
+          textAlign: 'center', 
+          whiteSpace: 'nowrap',
+          transition: 'all 0.1s ease-out', 
+          lineHeight: '1', 
+          zIndex: 40,
+          fontFamily: 'sans-serif'
       };
+      
       if (position === 'center' || position.startsWith('diagonal')) {
           styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${finalRotation}deg)`;
       } else {
@@ -239,7 +294,7 @@ export default function PdfWatermarker() {
       {!pdfFile ? (
         <Card
             className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -249,7 +304,7 @@ export default function PdfWatermarker() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -347,10 +402,11 @@ export default function PdfWatermarker() {
                     <CardFooter className="bg-muted/10 p-5 md:p-8 border-t flex flex-col gap-3">
                         {!watermarkedPdfUrl ? (
                             <Button 
-                                className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleApplyWatermark}
                                 disabled={isProcessing || !watermarkText}
                             >
+                                <StarIcons />
                                 {isProcessing ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="size-6 md:size-8 animate-spin" />
