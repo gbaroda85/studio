@@ -27,7 +27,9 @@ import {
     Sparkles,
     SearchCode,
     Plus, 
-    Trash2 
+    Trash2,
+    ImageIcon,
+    FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -35,8 +37,17 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Bundle-safe worker URL
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+}
+
+interface PagePreview {
+    id: string;
+    src: string;
+    originalFile: File;
+    pageIndex: number; // 0-based for PDFs, always 0 for Images
+    type: 'pdf' | 'image';
 }
 
 const StarIcons = () => (
@@ -100,9 +111,9 @@ function parsePageRanges(ranges: string, maxPage: number): number[] {
     return Array.from(result).sort((a, b) => a - b);
 }
 
-function generateRangeString(selectedPages: number[]): string {
-    if (selectedPages.length === 0) return '';
-    const sorted = [...selectedPages].sort((a, b) => a - b);
+function generateRangeString(selectedIndices: number[]): string {
+    if (selectedIndices.length === 0) return '';
+    const sorted = [...selectedIndices].map(i => i + 1).sort((a, b) => a - b);
     const ranges: string[] = [];
     let start = sorted[0];
     let end = sorted[0];
@@ -127,11 +138,9 @@ function generateRangeString(selectedPages: number[]): string {
 
 export default function PdfSplitter() {
     const { toast } = useToast();
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [totalPages, setTotalPages] = useState(0);
     const [pageRanges, setPageRanges] = useState('');
-    const [selectedPages, setSelectedPages] = useState<number[]>([]);
-    const [previews, setPreviews] = useState<string[]>([]);
+    const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+    const [previews, setPreviews] = useState<PagePreview[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isRendering, setIsRendering] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -150,138 +159,173 @@ export default function PdfSplitter() {
             URL.revokeObjectURL(splitPdfUrl);
             setSplitPdfUrl(null);
         }
-        const parsed = parsePageRanges(value, totalPages);
-        setSelectedPages(parsed);
+        const parsed = parsePageRanges(value, previews.length);
+        // Map 1-based ranges to 0-based indices
+        setSelectedIndices(parsed.map(p => p - 1));
     };
 
-    const togglePageSelection = (pageNum: number) => {
+    const togglePageSelection = (index: number) => {
         if (splitPdfUrl) {
             URL.revokeObjectURL(splitPdfUrl);
             setSplitPdfUrl(null);
         }
-        setSelectedPages(prev => {
-            const next = prev.includes(pageNum) 
-                ? prev.filter(p => p !== pageNum) 
-                : [...prev, pageNum];
+        setSelectedIndices(prev => {
+            const next = prev.includes(index) 
+                ? prev.filter(i => i !== index) 
+                : [...prev, index];
             setPageRanges(generateRangeString(next));
             return next;
         });
     };
 
-    const handleFileChange = async (file: File | null) => {
-        if (file && file.type === 'application/pdf') {
-            setPdfFile(file);
-            setPageRanges('');
-            setSelectedPages([]);
-            setPreviews([]);
-            setSplitPdfUrl(null);
-            setIsRendering(true);
+    const processFiles = async (files: FileList | null) => {
+        if (!files || files.length === 0) return;
+        setIsRendering(true);
+        setSplitPdfUrl(null);
 
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-                setTotalPages(pdf.numPages);
+        const newPreviews: PagePreview[] = [];
+        const filesArray = Array.from(files);
 
-                const newPreviews: string[] = [];
-                const pagesToRender = Math.min(pdf.numPages, 100); 
-                
-                for (let i = 1; i <= pagesToRender; i++) {
-                    const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 0.6 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+        for (const file of filesArray) {
+            if (file.type === 'application/pdf') {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjs.getDocument({ 
+                        data: new Uint8Array(arrayBuffer),
+                        cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                        cMapPacked: true
+                    }).promise;
                     
-                    if (context) {
-                        context.fillStyle = '#FFFFFF';
-                        context.fillRect(0, 0, canvas.width, canvas.height);
-                        await page.render({ canvasContext: context, viewport: viewport }).promise;
-                        newPreviews.push(canvas.toDataURL('image/jpeg', 0.8));
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 1.0 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        if (context) {
+                            context.fillStyle = '#FFFFFF';
+                            context.fillRect(0, 0, canvas.width, canvas.height);
+                            await page.render({ canvasContext: context, viewport: viewport }).promise;
+                            newPreviews.push({
+                                id: Math.random().toString(36).substr(2, 9),
+                                src: canvas.toDataURL('image/jpeg', 0.8),
+                                originalFile: file,
+                                pageIndex: i - 1,
+                                type: 'pdf'
+                            });
+                        }
                     }
+                } catch (e) {
+                    toast({ variant: 'destructive', title: 'Error Reading PDF', description: file.name });
                 }
-                setPreviews(newPreviews);
-            } catch (e) {
-                console.error(e);
-                toast({ variant: 'destructive', title: 'Error Reading PDF', description: 'Could not render previews.' });
-            } finally {
-                setIsRendering(false);
+            } else if (file.type.startsWith('image/')) {
+                try {
+                    const reader = new FileReader();
+                    const dataUrl = await new Promise<string>((resolve) => {
+                        reader.onload = (e) => resolve(e.target?.result as string);
+                        reader.readAsDataURL(file);
+                    });
+                    newPreviews.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        src: dataUrl,
+                        originalFile: file,
+                        pageIndex: 0,
+                        type: 'image'
+                    });
+                } catch (e) {
+                    toast({ variant: 'destructive', title: 'Error Reading Image', description: file.name });
+                }
             }
-        } else if (file) {
-            toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a PDF file.' });
         }
+
+        setPreviews(prev => [...prev, ...newPreviews]);
+        setIsRendering(false);
+        toast({ title: 'Stack Updated', description: `Added ${filesArray.length} items to grid.` });
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => processFiles(e.target.files);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); processFiles(e.dataTransfer.files); };
 
     const handleSplitPdf = async () => {
-        if (!pdfFile) return;
-        
-        const pagesToExtract = parsePageRanges(pageRanges, totalPages);
-        if (pagesToExtract.length === 0) {
-            toast({ variant: 'destructive', title: 'Invalid Pages', description: 'Please select or enter valid page numbers.' });
+        if (selectedIndices.length === 0) {
+            toast({ variant: 'destructive', title: 'No Selection', description: 'Please select pages to extract.' });
             return;
         }
         
         setIsProcessing(true);
 
         try {
-            const pdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             const newPdfDoc = await PDFDocument.create();
+            const fileBuffers = new Map<string, ArrayBuffer>();
 
-            const pageIndices = pagesToExtract.map(p => p - 1);
-            const copiedPages = await newPdfDoc.copyPages(pdfDoc, pageIndices);
-            copiedPages.forEach(page => newPdfDoc.addPage(page));
+            for (const index of selectedIndices) {
+                const item = previews[index];
+                
+                if (item.type === 'pdf') {
+                    if (!fileBuffers.has(item.originalFile.name)) {
+                        fileBuffers.set(item.originalFile.name, await item.originalFile.arrayBuffer());
+                    }
+                    const sourcePdf = await PDFDocument.load(fileBuffers.get(item.originalFile.name)!);
+                    const [copiedPage] = await newPdfDoc.copyPages(sourcePdf, [item.pageIndex]);
+                    newPdfDoc.addPage(copiedPage);
+                } else {
+                    const imgBuffer = await item.originalFile.arrayBuffer();
+                    const isPng = item.originalFile.type === 'image/png';
+                    const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
+                    
+                    const page = newPdfDoc.addPage([embeddedImg.width, embeddedImg.height]);
+                    page.drawImage(embeddedImg, { x: 0, y: 0, width: embeddedImg.width, height: embeddedImg.height });
+                }
+            }
 
             const newPdfBytes = await newPdfDoc.save();
             const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             setSplitPdfUrl(url);
             
-            toast({title: 'Success!', description: `Created a new PDF with ${pagesToExtract.length} pages.`});
-
+            toast({ title: 'Extraction Success!', description: `Created a new PDF with ${selectedIndices.length} pages.` });
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error Splitting PDF', description: 'Check file permissions.' });
+            toast({ variant: 'destructive', title: 'Error Generating PDF', description: 'Check file contents.' });
         } finally {
             setIsProcessing(false);
         }
     };
     
     const handleDownload = () => {
-        if (!splitPdfUrl || !pdfFile) return;
+        if (!splitPdfUrl) return;
         const link = document.createElement('a');
         link.href = splitPdfUrl;
-        link.download = `GR7-Tools-split-${pdfFile.name}`;
+        link.download = `GR7-Tools-Bundle-${Date.now()}.pdf`;
         link.click();
-    }
+    };
     
     const resetState = () => {
-        setPdfFile(null);
-        setTotalPages(0);
         setPreviews([]);
         setPageRanges('');
-        setSelectedPages([]);
+        setSelectedIndices([]);
         if (splitPdfUrl) URL.revokeObjectURL(splitPdfUrl);
         setSplitPdfUrl(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    };
     
     return (
         <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
             <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-5" /></div>
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Split Panel</CardTitle>
+                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20">
+                        <Settings2 className="size-5" />
+                    </div>
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Split & Bundle Studio</CardTitle>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                         {isRendering && <Loader2 className="size-4 animate-spin text-primary" />}
-                        {totalPages > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{totalPages} PAGES DETECTED</Badge>}
+                        {previews.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{previews.length} TOTAL PAGES</Badge>}
                     </div>
                     <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={resetState}><X className="size-4"/></Button>
                 </div>
@@ -303,18 +347,18 @@ export default function PdfSplitter() {
                                     className="h-14 text-xl font-black border-2 rounded-2xl bg-background shadow-inner text-center focus-visible:ring-primary/20"
                                 />
                                 <p className="text-[9px] text-muted-foreground font-bold uppercase opacity-60 leading-relaxed">
-                                    Type ranges or click thumbnails on the right to select.
+                                    Type ranges or click thumbnails on the right to select pages.
                                 </p>
                              </div>
 
                              <AnimatePresence>
-                                {selectedPages.length > 0 && (
+                                {selectedIndices.length > 0 && (
                                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4">
                                         <CheckCircle2 className="size-6 text-green-600 shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Selection Active</p>
+                                            <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Bundle Ready</p>
                                             <p className="text-[9px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
-                                                {selectedPages.length} {selectedPages.length === 1 ? 'page' : 'pages'} ready for extraction.
+                                                {selectedIndices.length} {selectedIndices.length === 1 ? 'page' : 'pages'} selected for extraction.
                                             </p>
                                         </div>
                                     </motion.div>
@@ -322,18 +366,18 @@ export default function PdfSplitter() {
                              </AnimatePresence>
                         </div>
 
-                        <div className="pt-6 border-t-2 border-dashed">
+                        <div className="pt-6 border-t-2 border-dashed flex flex-col gap-3">
                              {!splitPdfUrl ? (
                                 <Button 
                                     className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
                                     onClick={handleSplitPdf} 
-                                    disabled={selectedPages.length === 0 || isProcessing}
+                                    disabled={selectedIndices.length === 0 || isProcessing}
                                 >
                                     <StarIcons />
                                     {isProcessing ? (
                                         <div className="flex items-center gap-3">
                                             <Loader2 className="size-6 md:size-8 animate-spin" />
-                                            <span className="uppercase text-sm tracking-tighter">EXTRACTING...</span>
+                                            <span className="uppercase text-sm tracking-tighter">PROCESSING...</span>
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3">
@@ -349,17 +393,21 @@ export default function PdfSplitter() {
                                     <span className="uppercase tracking-tighter">SAVE NEW PDF</span>
                                 </Button>
                              )}
+                             
+                             <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={() => fileInputRef.current?.click()}>
+                                <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD PDF / IMAGES
+                             </Button>
                         </div>
                         
                         <Button variant="ghost" onClick={resetState} className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-muted-foreground/60 hover:text-destructive hover:bg-destructive/5 rounded-xl">
-                            <RefreshCcw className="size-3.5 mr-2" /> Start New Split
+                            <RefreshCcw className="size-3.5 mr-2" /> Start New Bundle
                         </Button>
 
                         <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
                             <ShieldCheck className="size-5 text-primary shrink-0" />
                             <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
                                 <span className="font-black block mb-0.5 text-primary">SECURE RAM:</span>
-                                Your document is rendered and split entirely on your device.
+                                All processing happens locally. PDFs and Images never leave your device.
                             </p>
                         </div>
                     </div>
@@ -367,10 +415,23 @@ export default function PdfSplitter() {
                     {/* RIGHT VIEWPORT: GRID OF PAGES */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 p-6 md:p-10">
-                            {!pdfFile ? (
-                                <div className="flex flex-col items-center justify-center py-40 gap-8">
-                                     <UploadCloud className="size-16 text-muted-foreground/20" />
-                                     <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/30">Drop file to view pages</p>
+                            {previews.length === 0 && !isRendering ? (
+                                <div 
+                                    className={cn(
+                                        "flex flex-col items-center justify-center py-40 gap-8 cursor-pointer group transition-all",
+                                        isDragOver && "scale-110 opacity-100"
+                                    )}
+                                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                     <div className="relative">
+                                         <UploadCloud className="size-24 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                                         <Zap className="absolute -top-2 -right-2 size-8 text-yellow-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                     </div>
+                                     <div className="text-center">
+                                         <p className="text-lg font-black uppercase tracking-widest text-muted-foreground/30">Drop PDFs or Images to begin</p>
+                                         <p className="text-[10px] font-bold text-muted-foreground/20 uppercase mt-2">Visually select pages for extraction</p>
+                                     </div>
                                 </div>
                             ) : isRendering && previews.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-40 gap-6">
@@ -379,16 +440,14 @@ export default function PdfSplitter() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-                                    {Array.from({ length: totalPages }).map((_, i) => {
-                                        const pageNum = i + 1;
-                                        const isSelected = selectedPages.includes(pageNum);
-                                        const hasPreview = previews[i];
+                                    {previews.map((p, i) => {
+                                        const isSelected = selectedIndices.includes(i);
 
                                         return (
                                             <motion.div 
                                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                                key={pageNum}
-                                                onClick={() => togglePageSelection(pageNum)}
+                                                key={p.id}
+                                                onClick={() => togglePageSelection(i)}
                                                 className={cn(
                                                     "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
                                                     isSelected ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
@@ -398,21 +457,19 @@ export default function PdfSplitter() {
                                                     "absolute top-2 left-2 size-7 rounded-lg flex items-center justify-center text-[10px] font-black z-20 border transition-colors",
                                                     isSelected ? "bg-primary text-white border-white/20" : "bg-black/60 text-white backdrop-blur-md border-white/10"
                                                 )}>
-                                                    {pageNum}
+                                                    {i + 1}
+                                                </div>
+
+                                                <div className="absolute top-2 right-2 z-20 opacity-40">
+                                                    {p.type === 'pdf' ? <FileText className="size-3" /> : <ImageIcon className="size-3" />}
                                                 </div>
 
                                                 <div className="size-full flex items-center justify-center p-1 bg-white">
-                                                    {hasPreview ? (
-                                                        <img 
-                                                            src={hasPreview} 
-                                                            alt={`P${pageNum}`} 
-                                                            className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} 
-                                                        />
-                                                    ) : (
-                                                        <div className="flex flex-col items-center gap-2 text-muted-foreground/20">
-                                                            <Loader2 className="size-6 animate-spin" />
-                                                        </div>
-                                                    )}
+                                                    <img 
+                                                        src={p.src} 
+                                                        alt={`P${i+1}`} 
+                                                        className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} 
+                                                    />
                                                 </div>
 
                                                 {isSelected && (
@@ -427,14 +484,24 @@ export default function PdfSplitter() {
                                             </motion.div>
                                         );
                                     })}
+                                    
+                                    <button 
+                                        className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Plus className="size-6" />
+                                        </div>
+                                        <span>Add More</span>
+                                    </button>
                                 </div>
                             )}
                             <ScrollBar />
                         </ScrollArea>
                         
-                        {pdfFile && (
+                        {previews.length > 0 && (
                             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
-                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to bundle
+                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to select
                             </div>
                         )}
                     </div>
@@ -444,8 +511,16 @@ export default function PdfSplitter() {
             <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
                 <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
                 <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> NATIVE WASM SPEED</div>
-                <div className="flex items-center gap-2"><Eye className="size-4 text-primary" /> VISUAL SELECTION</div>
+                <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> PDF & IMAGE SUPPORT</div>
             </CardFooter>
+            <input 
+                ref={fileInputRef} 
+                type="file" 
+                className="hidden" 
+                accept=".pdf,image/*" 
+                multiple 
+                onChange={handleFileChange} 
+            />
         </Card>
     );
 }
