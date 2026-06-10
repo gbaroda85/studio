@@ -180,31 +180,6 @@ export default function ImageCropper() {
     }
   }
 
-  const solvePerspective = (src: Point[], dst: Point[]) => {
-    const p = [];
-    for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
-    }
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-        let max = i;
-        for (let j = i + 1; j < n; j++) if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
-        const temp = p[i]; p[i] = p[max]; p[max] = temp;
-        for (let j = i + 1; j < n; j++) {
-            const f = p[j][i] / p[i][i];
-            for (let k = i; k <= n; k++) p[j][k] -= f * p[i][k];
-        }
-    }
-    const x = new Array(n);
-    for (let i = n - 1; i >= 0; i--) {
-        let s = 0;
-        for (let j = i + 1; j < n; j++) s += p[i][j] * x[j];
-        x[i] = (p[i][n] - s) / p[i][i];
-    }
-    return x;
-  };
-
   const handleApplyCrop = async () => {
     const image = imgRef.current;
     if (!image || !image.naturalWidth) return;
@@ -407,8 +382,8 @@ export default function ImageCropper() {
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={() => setImgSrc(null)} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3" /> Reset
+             <Button variant="outline" onClick={() => setImgSrc(null)} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
             {croppedImageSrc && (
                 <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}>
@@ -503,7 +478,7 @@ export default function ImageCropper() {
                         <Settings2 className="size-4 text-primary" /> Adjustments
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8">
+                <CardContent className="p-4 md:p-6 space-y-4 md:space-y-6">
                     <div className="space-y-6">
                         <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
@@ -590,3 +565,28 @@ export default function ImageCropper() {
     </div>
   );
 }
+
+const solvePerspective = (src: Point[], dst: Point[]) => {
+    const p = [];
+    for (let i = 0; i < 4; i++) {
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
+    }
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+        let max = i;
+        for (let j = i + 1; j < n; j++) if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
+        const temp = p[i]; p[i] = p[max]; p[max] = temp;
+        for (let j = i + 1; j < n; j++) {
+            const f = p[j][i] / p[i][i];
+            for (let k = i; k <= n; k++) p[j][k] -= f * p[i][k];
+        }
+    }
+    const x = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+        let s = 0;
+        for (let j = i + 1; j < n; j++) s += p[i][j] * x[j];
+        x[i] = (p[i][n] - s) / p[i][i];
+    }
+    return x;
+};
