@@ -343,7 +343,8 @@ export default function PdfRotator() {
 
                                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
 
-                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
+                                                {/* Permanent Rotate Icon for discoverability */}
+                                                <div className="absolute bottom-2 right-2 z-20 transition-all transform hover:scale-110">
                                                     <Button size="icon" className="h-9 w-9 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-2xl border-2 border-white/20" onClick={() => rotatePage(p.id)}>
                                                         <RotateCw className="size-5" />
                                                     </Button>
@@ -357,7 +358,7 @@ export default function PdfRotator() {
                         </CardContent>
                         <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 flex justify-center items-center relative">
                              <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
-                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click individual pages to rotate
+                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click icons to rotate pages individually
                             </div>
                         </CardFooter>
                     </Card>
