@@ -66,7 +66,6 @@ import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
   // IMAGE SOLUTION
-  { icon: Sparkles, title: "AI IMAGE UPSCALER", description: "Increase resolution and fix blurry photos instantly.", href: "/ai-upscaler", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
