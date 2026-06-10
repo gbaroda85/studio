@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -34,9 +35,9 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker with stable CDN
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
 
 type WatermarkPosition = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'diagonal-bottom-up' | 'diagonal-top-down';
@@ -51,8 +52,8 @@ export default function PdfWatermarker() {
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
-  const [fontSize, setFontSize] = useState(60);
-  const [rotation, setRotation] = useState(-45); 
+  const [fontSize, setFontSize] = useState<number | string>(60);
+  const [rotation, setRotation] = useState<number | string>(-45); 
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
@@ -73,7 +74,11 @@ export default function PdfWatermarker() {
       setIsGeneratingPreview(true);
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+        const loadingTask = pdfjs.getDocument({ 
+            data: new Uint8Array(arrayBuffer),
+            cMapUrl: 'https://unpkg.com/pdfjs-dist@4.2.67/cmaps/',
+            cMapPacked: true
+        });
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 2.0 });
@@ -112,19 +117,24 @@ export default function PdfWatermarker() {
   const handleApplyWatermark = async () => {
     if (!pdfFile || !watermarkText) return;
     setIsProcessing(true);
+
+    const finalFontSize = Number(fontSize) || 12;
+    const finalRotation = Number(rotation) || 0;
+
     try {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
         const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const pages = pdfDoc.getPages();
-        const pdfRotation = -rotation; 
+        const pdfRotation = -finalRotation; 
         const rad = (pdfRotation * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
-        const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-        const textHeight = font.heightAtSize(fontSize);
+        const textWidth = font.widthOfTextAtSize(watermarkText, finalFontSize);
+        const textHeight = font.heightAtSize(finalFontSize);
         const centerXOffset = (textWidth / 2) * cos - (textHeight / 2) * sin;
         const centerYOffset = (textWidth / 2) * sin + (textHeight / 2) * cos;
+
         for (const page of pages) {
             const { width, height } = page.getSize();
             let targetCX, targetCY;
@@ -143,7 +153,14 @@ export default function PdfWatermarker() {
             }
             const x = targetCX! - centerXOffset;
             const y = targetCY! - centerYOffset;
-            page.drawText(watermarkText, { x, y, font, size: fontSize, color: rgb(0.5, 0.5, 0.5), opacity: opacity[0] / 100, rotate: degrees(pdfRotation) });
+            page.drawText(watermarkText, { 
+                x, y, 
+                font, 
+                size: finalFontSize, 
+                color: rgb(0.5, 0.5, 0.5), 
+                opacity: opacity[0] / 100, 
+                rotate: degrees(pdfRotation) 
+            });
         }
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
@@ -174,20 +191,24 @@ export default function PdfWatermarker() {
       setWatermarkText('CONFIDENTIAL');
       setPosition('diagonal-bottom-up');
       setRotation(-45);
+      setFontSize(60);
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   const getPreviewStyle = () => {
+      const finalFontSize = Number(fontSize) || 0;
+      const finalRotation = Number(rotation) || 0;
+
       const styles: React.CSSProperties = {
           position: 'absolute', pointerEvents: 'none', color: 'rgba(0,0,0,0.5)', opacity: opacity[0] / 100,
-          fontSize: `${fontSize * 0.84}px`, fontWeight: '900', textAlign: 'center', whiteSpace: 'nowrap',
-          transition: 'all(0.1s) ease-out', lineHeight: '1', zIndex: 40
+          fontSize: `${finalFontSize * 0.84}px`, fontWeight: '900', textAlign: 'center', whiteSpace: 'nowrap',
+          transition: 'all 0.1s ease-out', lineHeight: '1', zIndex: 40
       };
       if (position === 'center' || position.startsWith('diagonal')) {
-          styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+          styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${finalRotation}deg)`;
       } else {
           const m = "8%";
-          styles.transform = `rotate(${rotation}deg)`;
+          styles.transform = `rotate(${finalRotation}deg)`;
           switch (position) {
               case 'top-left': styles.top = m; styles.left = m; break;
               case 'top-right': styles.top = m; styles.right = m; break;
@@ -235,7 +256,7 @@ export default function PdfWatermarker() {
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF to begin</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local processing.</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -258,7 +279,7 @@ export default function PdfWatermarker() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
                         <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 flex items-center gap-2 mb-2">
                                 <Type className="size-3" /> Watermark Text
                             </Label>
                             <Input 
@@ -271,7 +292,7 @@ export default function PdfWatermarker() {
                         </div>
 
                         <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60 flex items-center gap-2 mb-2">
                                 <Maximize className="size-3" /> Position Preset
                             </Label>
                             <Select value={position} onValueChange={(v) => handlePositionChange(v as WatermarkPosition)}>
@@ -292,16 +313,26 @@ export default function PdfWatermarker() {
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Size</Label>
-                                    <span className="text-[10px] font-bold text-primary">{fontSize}pt</span>
+                                    <span className="text-[10px] font-bold text-primary">{fontSize || 0}pt</span>
                                 </div>
-                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(10, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
+                                <Input 
+                                    type="number" 
+                                    value={fontSize} 
+                                    onChange={(e) => setFontSize(e.target.value)} 
+                                    className="h-10 border-2 font-bold rounded-xl" 
+                                />
                             </div>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Rotation</Label>
-                                    <span className="text-[10px] font-bold text-primary">{rotation}°</span>
+                                    <span className="text-[10px] font-bold text-primary">{rotation || 0}°</span>
                                 </div>
-                                <Input type="number" value={rotation} onChange={(e) => setRotation(Number(e.target.value))} className="h-10 border-2 font-bold rounded-xl" />
+                                <Input 
+                                    type="number" 
+                                    value={rotation} 
+                                    onChange={(e) => setRotation(e.target.value)} 
+                                    className="h-10 border-2 font-bold rounded-xl" 
+                                />
                             </div>
                         </div>
 
