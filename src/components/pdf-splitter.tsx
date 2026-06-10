@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -149,10 +149,25 @@ export default function PdfSplitter() {
     const [splitPdfUrl, setSplitPdfUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
+    // Cancellation token for background rendering
+    const renderIdRef = useRef(0);
+
     useEffect(() => {
         return () => {
             if (splitPdfUrl) URL.revokeObjectURL(splitPdfUrl);
         }
+    }, [splitPdfUrl]);
+
+    const resetState = useCallback(() => {
+        renderIdRef.current++; // Signal abort for any active processFiles loop
+        setPreviews([]);
+        setPageRanges('');
+        setSelectedIndices([]);
+        if (splitPdfUrl) URL.revokeObjectURL(splitPdfUrl);
+        setSplitPdfUrl(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        setIsRendering(false);
+        setIsProcessing(false);
     }, [splitPdfUrl]);
 
     const handleRangeInputChange = (value: string) => {
@@ -184,22 +199,28 @@ export default function PdfSplitter() {
         setIsRendering(true);
         setSplitPdfUrl(null);
 
+        const currentRenderId = ++renderIdRef.current;
         const filesArray = Array.from(files);
 
         for (const file of filesArray) {
+            if (currentRenderId !== renderIdRef.current) break;
+
             if (file.type === 'application/pdf') {
                 try {
                     const arrayBuffer = await file.arrayBuffer();
+                    if (currentRenderId !== renderIdRef.current) break;
+
                     const pdf = await pdfjs.getDocument({ 
                         data: new Uint8Array(arrayBuffer),
                         cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                         cMapPacked: true
                     }).promise;
                     
-                    // Detect page count immediately
                     const totalFilePages = pdf.numPages;
 
                     for (let i = 1; i <= totalFilePages; i++) {
+                        if (currentRenderId !== renderIdRef.current) break;
+
                         const page = await pdf.getPage(i);
                         const viewport = page.getViewport({ scale: 1.0 });
                         const canvas = document.createElement('canvas');
@@ -212,15 +233,16 @@ export default function PdfSplitter() {
                             context.fillRect(0, 0, canvas.width, canvas.height);
                             await page.render({ canvasContext: context, viewport: viewport }).promise;
                             
+                            if (currentRenderId !== renderIdRef.current) break;
+
                             const newPage: PagePreview = {
                                 id: Math.random().toString(36).substr(2, 9),
-                                src: canvas.toDataURL('image/jpeg', 0.75), // Optimized quality for speed
+                                src: canvas.toDataURL('image/jpeg', 0.75),
                                 originalFile: file,
                                 pageIndex: i - 1,
                                 type: 'pdf'
                             };
 
-                            // Update state incrementally for "turant" images
                             setPreviews(prev => [...prev, newPage]);
                         }
                     }
@@ -234,6 +256,7 @@ export default function PdfSplitter() {
                         reader.onload = (e) => resolve(e.target?.result as string);
                         reader.readAsDataURL(file);
                     });
+                    if (currentRenderId !== renderIdRef.current) break;
                     const newImage: PagePreview = {
                         id: Math.random().toString(36).substr(2, 9),
                         src: dataUrl,
@@ -248,7 +271,9 @@ export default function PdfSplitter() {
             }
         }
 
-        setIsRendering(false);
+        if (currentRenderId === renderIdRef.current) {
+            setIsRendering(false);
+        }
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => processFiles(e.target.files);
@@ -308,15 +333,6 @@ export default function PdfSplitter() {
         link.download = `GR7-Tools-Bundle-${Date.now()}.pdf`;
         link.click();
     };
-    
-    const resetState = () => {
-        setPreviews([]);
-        setPageRanges('');
-        setSelectedIndices([]);
-        if (splitPdfUrl) URL.revokeObjectURL(splitPdfUrl);
-        setSplitPdfUrl(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
 
     if (previews.length === 0 && !isRendering) {
         return (
@@ -337,7 +353,7 @@ export default function PdfSplitter() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
