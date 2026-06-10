@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import confetti from 'canvas-confetti';
 
 // HARDCODED STABLE VERSION FOR WORKER
@@ -178,7 +178,7 @@ export default function PdfMerger() {
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
+                const viewport = page.getViewport({ scale: 1.2 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
@@ -246,212 +246,223 @@ export default function PdfMerger() {
     }
     
     return (
-        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-4 animate-in fade-in duration-500">
-            {/* Left Column: Stack & Selection */}
-            <div className="lg:col-span-7 space-y-6">
-                <Card className={cn(
-                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col",
-                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-                )}
-                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                >
-                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                            {pdfFiles.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pdfFiles.length} DOCUMENTS</Badge>}
-                        </div>
-                    </CardHeader>
-                    <CardContent className={cn("p-6 md:p-8 flex-1 flex flex-col", pdfFiles.length === 0 ? "justify-center py-20 md:py-32" : "py-6")}>
-                        {pdfFiles.length === 0 ? (
-                            <div 
-                                className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <div className="relative">
-                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDFs to Merge</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">High-fidelity bundling engine active.</p>
-                                </div>
+        <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500">
+            {/* Top Grid: Stack & Selection */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
+                {/* Left Column: List */}
+                <div className="lg:col-span-7 flex flex-col">
+                    <Card className={cn(
+                        "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col",
+                        isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+                    )}
+                        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    >
+                        <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                                {pdfFiles.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pdfFiles.length} DOCUMENTS</Badge>}
                             </div>
-                        ) : (
-                            <div className="space-y-4 flex-1 flex flex-col">
-                                <div className="flex justify-between items-center px-1 shrink-0">
-                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
-                                    <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase">
-                                        <Trash2 className="size-3 mr-1"/> Clear All
-                                    </Button>
-                                </div>
-                                <ScrollArea className="flex-1 min-h-[400px] pr-2 custom-scrollbar">
-                                    <div className="space-y-2 py-1">
-                                        {pdfFiles.map((file, index) => (
-                                             <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
-                                                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
-                                                    <div className="flex flex-col gap-1 opacity-40 group-hover:opacity-100 transition-opacity shrink-0">
-                                                        <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50 hover:bg-primary/10" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-4 w-4" /></Button>
-                                                        <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50 hover:bg-primary/10" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-4 w-4" /></Button>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 truncate">
-                                                        <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shrink-0 border border-primary/20 shadow-inner">{index + 1}</div>
-                                                        <div className="truncate">
-                                                            <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[300px] uppercase tracking-tight" title={file.name}>{file.name}</p>
-                                                            <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase">{formatBytes(file.size)}</p>
-                                                        </div>
-                                                    </div>
-                                                 </div>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
-                                             </div>
-                                        ))}
-                                        <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
-                                            <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
-                                        </Button>
-                                    </div>
-                                </ScrollArea>
-                            </div>
-                        )}
-                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={(e) => handleFilesChange(e.target.files)} />
-                    </CardContent>
-                    <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
-                        <div className="flex items-center gap-1.5"><FileStack className="size-3 text-purple-500" /> PRO BUNDLING</div>
-                    </CardFooter>
-                </Card>
-
-                {mergedPdfUrl && (
-                    <Card className="border-2 border-green-500/20 shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden bg-card/50 rounded-[2.5rem] hover:-translate-y-1 transition-all">
-                        <CardHeader className="bg-green-500/5 py-3 border-b border-green-500/20">
-                            <CardTitle className="text-[10px] font-black uppercase flex items-center justify-center gap-2 text-green-700 tracking-[0.2em]">
-                                <Eye className="size-3 text-green-600" /> VISUAL PREVIEW CONFIRMATION
-                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
-                            <ScrollArea className="h-[400px] w-full p-6 md:p-10">
-                                <div className="flex flex-col items-center gap-6">
-                                    {isGeneratingPreview ? (
-                                        <div className="flex flex-col items-center gap-4 py-20 text-center">
-                                            <div className="relative">
-                                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
-                                                <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
-                                            </div>
-                                            <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">Rendering Combined View...</p>
-                                        </div>
-                                    ) : previewImages.map((img, i) => (
-                                        <div key={i} className="shadow-2xl border-[6px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[400px] animate-in slide-in-from-bottom-4 duration-500">
-                                            <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
-                                            <div className="bg-muted text-[8px] font-black py-1.5 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </ScrollArea>
-                        </CardContent>
-                        <CardFooter className="bg-green-500/10 p-6 md:p-8 flex flex-col sm:flex-row justify-between items-center gap-6 border-t border-green-500/20">
-                            <div className="flex items-center gap-5">
-                                <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
-                                    <CheckCircle2 className="size-9" />
-                                    <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">MERGE READY!</p>
-                                    <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
-                                </div>
-                            </div>
-                            <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
-                                <StarIcons />
-                                <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                )}
-            </div>
-
-            {/* Right Column: Settings & Actions */}
-            <div className="lg:col-span-5 h-full">
-                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                            <LayoutList className="size-6 text-primary" /> Stack Control
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 md:p-8 space-y-10 flex-1 overflow-y-auto">
-                        
-                        <div className="space-y-6">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-2">
-                                <ArrowUpDown className="size-3" /> Quick Sorting Studio
-                            </Label>
-                            
-                            <div className="flex flex-col gap-4">
-                                <Button 
-                                    className="h-16 rounded-full bg-gradient-to-r from-[#1a5f6e] to-[#0d9488] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
-                                    onClick={() => sortFiles('asc')}
-                                    disabled={pdfFiles.length < 2}
+                        <CardContent className={cn("p-6 md:p-8 flex-1 flex flex-col", pdfFiles.length === 0 ? "justify-center py-20 md:py-32" : "py-6")}>
+                            {pdfFiles.length === 0 ? (
+                                <div 
+                                    className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
+                                    onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <ArrowDownAz className="size-6 text-white" />
+                                    <div className="relative">
+                                        <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <span className="text-sm font-black tracking-widest uppercase">Sort Name A → Z</span>
-                                </Button>
-
-                                <Button 
-                                    className="h-16 rounded-full bg-gradient-to-r from-[#1e40af] to-[#312e81] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
-                                    onClick={() => sortFiles('desc')}
-                                    disabled={pdfFiles.length < 2}
-                                >
-                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                        <ArrowUpAz className="size-6 text-white" />
+                                    <div className="text-center">
+                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDFs to Merge</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">High-fidelity bundling engine active.</p>
                                     </div>
-                                    <span className="text-sm font-black tracking-widest uppercase">Sort Name Z → A</span>
-                                </Button>
-
-                                <Button 
-                                    className="h-16 rounded-full bg-gradient-to-r from-[#065f46] to-[#064e3b] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
-                                    onClick={() => sortFiles('reverse')}
-                                    disabled={pdfFiles.length < 2}
-                                >
-                                    <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:rotate-180 duration-500 transition-transform">
-                                        <Repeat className="size-6 text-white" />
-                                    </div>
-                                    <span className="text-sm font-black tracking-widest uppercase">Reverse Current Order</span>
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="p-5 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4 shadow-sm">
-                            <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-[10px] font-black text-primary uppercase tracking-tight">Pro Bundling Note</p>
-                                <p className="text-[9px] text-primary/80 font-medium leading-relaxed mt-1 uppercase">
-                                    Our local engine merges documents without rasterizing pages. This ensures that original text stays <strong>selectable and crisp</strong> in the final output.
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-
-                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed mt-auto">
-                        <Button 
-                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                            onClick={handleMergePdfs} 
-                            disabled={pdfFiles.length < 2 || isMerging}
-                        >
-                            <StarIcons />
-                            {isMerging ? (
-                                <div className="flex items-center gap-3">
-                                    <Loader2 className="size-7 md:size-8 animate-spin" />
-                                    <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-3">
-                                    <Merge className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
-                                    <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
+                                <div className="space-y-4 flex-1 flex flex-col">
+                                    <div className="flex justify-between items-center px-1 shrink-0">
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
+                                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase hover:bg-destructive/5">
+                                            <Trash2 className="size-3 mr-1"/> Clear All
+                                        </Button>
+                                    </div>
+                                    <ScrollArea className="flex-1 min-h-[300px] md:min-h-[400px] pr-2 custom-scrollbar">
+                                        <div className="space-y-2 py-1">
+                                            {pdfFiles.map((file, index) => (
+                                                <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
+                                                    <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                                        <div className="flex flex-col gap-1 opacity-40 group-hover:opacity-100 transition-opacity shrink-0">
+                                                            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50 hover:bg-primary/10" onClick={() => moveFile(index, 'up')} disabled={index === 0}><ChevronUp className="h-4 w-4" /></Button>
+                                                            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-md bg-muted/50 hover:bg-primary/10" onClick={() => moveFile(index, 'down')} disabled={index === pdfFiles.length - 1}><ChevronDown className="h-4 w-4" /></Button>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 truncate">
+                                                            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shrink-0 border border-primary/20 shadow-inner">{index + 1}</div>
+                                                            <div className="truncate text-left">
+                                                                <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[300px] uppercase tracking-tight" title={file.name}>{file.name}</p>
+                                                                <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase">{formatBytes(file.size)}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
+                                                </div>
+                                            ))}
+                                            <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                                                <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
+                                            </Button>
+                                        </div>
+                                    </ScrollArea>
                                 </div>
                             )}
-                        </Button>
-                    </CardFooter>
-                </Card>
+                            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={(e) => handleFilesChange(e.target.files)} />
+                        </CardContent>
+                        <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                            <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+                            <div className="flex items-center gap-1.5"><FileStack className="size-3 text-purple-500" /> PRO BUNDLING</div>
+                        </CardFooter>
+                    </Card>
+                </div>
+
+                {/* Right Column: Actions */}
+                <div className="lg:col-span-5 flex flex-col">
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
+                        <CardHeader className="bg-primary/5 border-b p-6">
+                            <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                <LayoutList className="size-6 text-primary" /> Stack Control
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-8 space-y-10 flex-1 flex flex-col">
+                            <div className="space-y-6">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-2">
+                                    <ArrowUpDown className="size-3" /> Quick Sorting Studio
+                                </Label>
+                                
+                                <div className="flex flex-col gap-4">
+                                    <Button 
+                                        className="h-16 rounded-full bg-gradient-to-r from-[#1a5f6e] to-[#0d9488] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                        onClick={() => sortFiles('asc')}
+                                        disabled={pdfFiles.length < 2}
+                                    >
+                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                            <ArrowDownAz className="size-6 text-white" />
+                                        </div>
+                                        <span className="text-sm font-black tracking-widest uppercase">Sort Name A → Z</span>
+                                    </Button>
+
+                                    <Button 
+                                        className="h-16 rounded-full bg-gradient-to-r from-[#1e40af] to-[#312e81] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                        onClick={() => sortFiles('desc')}
+                                        disabled={pdfFiles.length < 2}
+                                    >
+                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
+                                            <ArrowUpAz className="size-6 text-white" />
+                                        </div>
+                                        <span className="text-sm font-black tracking-widest uppercase">Sort Name Z → A</span>
+                                    </Button>
+
+                                    <Button 
+                                        className="h-16 rounded-full bg-gradient-to-r from-[#065f46] to-[#064e3b] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                        onClick={() => sortFiles('reverse')}
+                                        disabled={pdfFiles.length < 2}
+                                    >
+                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:rotate-180 duration-500 transition-transform">
+                                            <Repeat className="size-6 text-white" />
+                                        </div>
+                                        <span className="text-sm font-black tracking-widest uppercase">Reverse Order</span>
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="mt-auto pt-6 space-y-6">
+                                <div className="p-5 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4 shadow-sm">
+                                    <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
+                                        <span className="font-black block mb-1 text-primary">PRO BUNDLING:</span>
+                                        Documents are merged without rasterizing. Text remains selectable.
+                                    </p>
+                                </div>
+
+                                <Button 
+                                    className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                                    onClick={handleMergePdfs} 
+                                    disabled={pdfFiles.length < 2 || isMerging}
+                                >
+                                    <StarIcons />
+                                    {isMerging ? (
+                                        <div className="flex items-center gap-3">
+                                            <Loader2 className="size-7 md:size-8 animate-spin" />
+                                            <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <Merge className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
+                                            <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
+                                        </div>
+                                    )}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
+
+            {/* Bottom Row: Visual Preview (Appears after merge) */}
+            <AnimatePresence>
+                {mergedPdfUrl && (
+                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} className="w-full no-print">
+                        <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem] hover:-translate-y-1 transition-all">
+                            <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
+                                <CardTitle className="text-[10px] font-black uppercase flex items-center justify-center gap-2 text-green-700 tracking-[0.2em]">
+                                    <Eye className="size-3 text-green-600" /> VISUAL PREVIEW CONFIRMATION
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
+                                <ScrollArea className="h-[400px] md:h-[500px] w-full p-6 md:p-12">
+                                    <div className="flex flex-col items-center gap-8 pb-10">
+                                        {isGeneratingPreview ? (
+                                            <div className="flex flex-col items-center gap-4 py-20 text-center">
+                                                <div className="relative">
+                                                    <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                                    <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
+                                                </div>
+                                                <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">Rendering HD Previews...</p>
+                                            </div>
+                                        ) : previewImages.map((img, i) => (
+                                            <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[450px] animate-in slide-in-from-bottom-4 duration-500">
+                                                <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
+                                                <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <ScrollBar />
+                                </ScrollArea>
+                            </CardContent>
+                            <CardFooter className="bg-green-500/10 p-6 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-green-500/20">
+                                <div className="flex items-center gap-5">
+                                    <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
+                                        <CheckCircle2 className="size-10 md:size-12 z-10" />
+                                        <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">MERGE READY!</p>
+                                        <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                    <Button variant="outline" onClick={handleReset} className="h-14 md:h-16 px-6 font-black text-[10px] uppercase border-2 rounded-xl bg-white/50">
+                                        <RefreshCcw className="mr-2 size-4" /> CHANGE FILES
+                                    </Button>
+                                    <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
+                                        <StarIcons />
+                                        <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
+                                        <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
+                                    </Button>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
