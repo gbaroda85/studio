@@ -72,6 +72,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert } from '@/components/ui/alert';
 import confetti from 'canvas-confetti';
 
 type QRType = 'url' | 'text' | 'wifi' | 'email' | 'phone' | 'sms' | 'whatsapp' | 'vcard' | 'location' | 'upi';
