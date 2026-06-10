@@ -225,7 +225,7 @@ export default function PdfRotator() {
 
     if (!pdfFile) {
         return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
                     <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                         <RotateCw className="size-8" />
@@ -242,7 +242,7 @@ export default function PdfRotator() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -286,9 +286,6 @@ export default function PdfRotator() {
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                     <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                        <RefreshCcw className="mr-1.5 size-3" /> Reset
-                    </Button>
                     {rotatedPdfUrl && (
                         <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
                             <StarIcons />
@@ -308,9 +305,19 @@ export default function PdfRotator() {
                                 <LayoutGrid className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Map</CardTitle>
                             </div>
-                            <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[9px] px-3 py-1 rounded-full border-none">
-                                {pages.length} PAGES DETECTED
-                            </Badge>
+                            <div className="flex items-center gap-3">
+                                <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[9px] px-3 py-1 rounded-full border-none">
+                                    {pages.length} PAGES DETECTED
+                                </Badge>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={handleReset} 
+                                    className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg"
+                                >
+                                    <RefreshCcw className="mr-1.5 size-3" /> Change PDF
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent className="p-4 md:p-8 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px]">
                             {isRendering ? (
