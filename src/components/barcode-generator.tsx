@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -33,7 +32,8 @@ import {
     Smartphone,
     FileDigit,
     ArrowDownToLine,
-    Archive
+    Archive,
+    Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import confetti from 'canvas-confetti';
 
 const FORMATS = [
@@ -322,7 +323,7 @@ export default function BarcodeGenerator() {
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-5 md:p-8">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                                <Settings2 className="size-4 md:size-5" /> Config Studio
+                                <Settings2 className="size-4 md:size-5 text-primary" /> Config Studio
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-10">
@@ -408,27 +409,3 @@ export default function BarcodeGenerator() {
         </div>
     );
 }
-
-const audioBufferToWav = (buffer: AudioBuffer) => {
-    const numOfChan = buffer.numberOfChannels;
-    const length = buffer.length * numOfChan * 2 + 44;
-    const outBuffer = new ArrayBuffer(length);
-    const view = new DataView(outBuffer);
-    const channels = [];
-    let offset = 0;
-    let pos = 0;
-    const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; };
-    const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; };
-    setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
-    for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
-    while (pos < length) {
-        for (let i = 0; i < numOfChan; i++) {
-            let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-            sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
-            view.setInt16(pos, sample, true);
-            pos += 2;
-        }
-        offset++;
-    }
-    return new Blob([outBuffer], { type: "audio/wav" });
-};
