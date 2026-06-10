@@ -345,7 +345,7 @@ export default function PdfSplitter() {
                         </div>
                     </div>
                     <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        Split & <span className="text-gradient-hero">Bundle Studio</span>
+                        SPLIT PDF <span className="text-gradient-hero">STUDIO</span>
                     </h1>
                     <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
                         Extract specific pages or combine multiple documents. <br/>100% Private high-fidelity local mapping.
@@ -353,7 +353,7 @@ export default function PdfSplitter() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -392,7 +392,7 @@ export default function PdfSplitter() {
                     <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20">
                         <Settings2 className="size-5" />
                     </div>
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Split & Bundle Studio</CardTitle>
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">SPLIT PDF STUDIO</CardTitle>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
