@@ -201,9 +201,15 @@ export default function ImageToPdfConverter() {
   };
 
   const applyToAll = () => {
-      const selected = images.find(img => img.id === selectedId);
-      if (!selected) return;
-      setImages(prev => prev.map(img => ({ ...img, vAlign: selected.vAlign })));
+      if (!selectedId) return;
+      
+      setImages(prev => {
+          const selected = prev.find(img => img.id === selectedId);
+          if (!selected) return prev;
+          const targetAlign = selected.vAlign;
+          return prev.map(img => ({ ...img, vAlign: targetAlign }));
+      });
+      
       clearPreviews();
       toast({ title: "Global Sync Complete", description: "Alignment applied to all pages." });
   };
