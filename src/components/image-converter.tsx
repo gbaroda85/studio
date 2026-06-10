@@ -15,7 +15,8 @@ import {
     Eye, 
     CheckCircle2, 
     ImageIcon, 
-    Settings2 
+    Settings2,
+    ArrowLeftRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -210,8 +211,8 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3" /> Reset
+             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
             {convertedSrc && (
                 <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
@@ -228,27 +229,53 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">HD RENDER PREVIEW</CardTitle>
+                        <ArrowLeftRight className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                            {convertedSrc ? "Before & After Comparison" : "Preview Viewport"}
+                        </CardTitle>
                     </div>
                     {convertedSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">CONVERTED</Badge>}
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-white shadow-inner min-h-[450px] flex items-center justify-center relative">
-                    <div className="relative size-full min-h-[350px] flex items-center justify-center">
-                        {convertedSrc ? (
-                             <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 md:p-8 animate-in zoom-in-95 duration-500" />
-                        ) : (
-                            <Image src={imageSrc} alt="Original" fill className="object-contain p-4 md:p-8 grayscale opacity-20" />
-                        )}
-                        {isConverting && (
-                            <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center gap-4 z-10">
-                                <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
-                                <p className="text-xs font-black text-primary uppercase tracking-widest animate-pulse">Transforming Pixels...</p>
-                            </div>
-                        )}
+                <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative">
+                    <div className="w-full h-full min-h-[350px] flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            {isConverting ? (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4 z-10">
+                                    <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                    <p className="text-xs font-black text-primary uppercase tracking-widest animate-pulse">Transforming Pixels...</p>
+                                </motion.div>
+                            ) : convertedSrc ? (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-8 w-full h-full items-center">
+                                    <div className="space-y-3 flex flex-col h-full justify-center">
+                                        <div className="flex justify-between items-center px-1">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Source</span>
+                                            <Badge variant="outline" className="text-[8px] bg-white/80 border-slate-200 text-slate-800">BEFORE</Badge>
+                                        </div>
+                                        <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
+                                            <Image src={imageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3 flex flex-col h-full justify-center">
+                                        <div className="flex justify-between items-center px-1">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
+                                            <Badge className="text-[8px] bg-primary text-primary-foreground uppercase border-none">AFTER</Badge>
+                                        </div>
+                                        <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
+                                            <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 md:p-6 drop-shadow-2xl animate-in zoom-in-95 duration-500" />
+                                            <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full">
+                                    <Image src={imageSrc!} alt="Original" fill className="object-contain p-4 md:p-8" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
                         <div className="flex items-center gap-2"><Eye className="size-4" /> INSTANT PREVIEW</div>
