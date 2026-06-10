@@ -21,7 +21,7 @@ import {
     Eye,
     CheckCircle2,
     ShieldCheck,
-    Zap,
+    Zap, 
     FileStack,
     RefreshCcw,
     LayoutList,
@@ -248,9 +248,9 @@ export default function PdfMerger() {
     return (
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-4 animate-in fade-in duration-500">
             {/* Left Column: Stack & Selection */}
-            <div className="lg:col-span-7 space-y-4">
+            <div className="lg:col-span-7 space-y-6">
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none",
+                    "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -258,10 +258,10 @@ export default function PdfMerger() {
                     <CardHeader className="bg-muted/30 border-b p-6 text-center">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                            {pdfFiles.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] uppercase px-3 py-1 rounded-full">{pdfFiles.length} DOCUMENTS</Badge>}
+                            {pdfFiles.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pdfFiles.length} DOCUMENTS</Badge>}
                         </div>
                     </CardHeader>
-                    <CardContent className={cn("p-6 md:p-8", pdfFiles.length === 0 ? "py-20 md:py-32" : "py-6")}>
+                    <CardContent className={cn("p-6 md:p-8 flex-1 flex flex-col", pdfFiles.length === 0 ? "justify-center py-20 md:py-32" : "py-6")}>
                         {pdfFiles.length === 0 ? (
                             <div 
                                 className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
@@ -277,15 +277,15 @@ export default function PdfMerger() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-1">
+                            <div className="space-y-4 flex-1 flex flex-col">
+                                <div className="flex justify-between items-center px-1 shrink-0">
                                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
                                     <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase">
                                         <Trash2 className="size-3 mr-1"/> Clear All
                                     </Button>
                                 </div>
-                                <ScrollArea className="h-[300px] md:h-[450px] pr-2 custom-scrollbar">
-                                    <div className="space-y-2">
+                                <ScrollArea className="flex-1 min-h-[400px] pr-2 custom-scrollbar">
+                                    <div className="space-y-2 py-1">
                                         {pdfFiles.map((file, index) => (
                                              <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
                                                  <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
@@ -351,7 +351,7 @@ export default function PdfMerger() {
                             <div className="flex items-center gap-5">
                                 <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
                                     <CheckCircle2 className="size-9" />
-                                    <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
+                                    <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
                                 </div>
                                 <div className="text-left">
                                     <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">MERGE READY!</p>
@@ -369,14 +369,14 @@ export default function PdfMerger() {
             </div>
 
             {/* Right Column: Settings & Actions */}
-            <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 hover:-translate-y-1">
+            <div className="lg:col-span-5 h-full">
+                <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                             <LayoutList className="size-6 text-primary" /> Stack Control
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6 md:p-8 space-y-10">
+                    <CardContent className="p-6 md:p-8 space-y-10 flex-1 overflow-y-auto">
                         
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-2">
@@ -430,7 +430,7 @@ export default function PdfMerger() {
                         </div>
                     </CardContent>
 
-                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed">
+                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t-2 border-dashed mt-auto">
                         <Button 
                             className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                             onClick={handleMergePdfs} 
@@ -451,16 +451,6 @@ export default function PdfMerger() {
                         </Button>
                     </CardFooter>
                 </Card>
-                
-                <div className="p-4 md:p-6 bg-green-500/5 rounded-xl md:rounded-[2rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
-                    <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                        <ShieldCheck className="size-5 md:size-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local Merge</p>
-                        <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Combine bank statements or sensitive docs without any cloud risk.</p>
-                    </div>
-                </div>
             </div>
         </div>
     );
