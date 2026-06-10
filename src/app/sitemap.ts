@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const otherTools = [
     '/lock-pdf',
+    '/rotate-pdf',
     '/compress-pdf',
     '/split-pdf',
     '/crop-pdf',

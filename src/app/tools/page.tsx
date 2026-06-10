@@ -57,7 +57,8 @@ import {
   Camera,
   FilePenLine,
   Music,
-  Video
+  Video,
+  RotateCw
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -173,6 +174,14 @@ function ToolsPageContent() {
       icon: Merge,
       color: 'bg-emerald-600',
       lightBg: 'bg-[#f0fdf4]'
+    },
+    {
+      href: '/rotate-pdf',
+      labelKey: 'rotate_pdf_label',
+      descriptionKey: 'rotate_pdf_description',
+      icon: RotateCw,
+      color: 'bg-blue-500',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/lock-pdf',

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -54,7 +53,8 @@ import {
   Sparkles,
   FilePenLine,
   Music,
-  Video
+  Video,
+  RotateCw
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -103,6 +103,7 @@ const CATEGORIES = [
     color: "text-rose-500",
     tools: [
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
+      { href: '/rotate-pdf', label: 'rotate_pdf_label', icon: RotateCw },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
       { href: '/compress-pdf', label: 'compress_pdf_label', icon: FileArchive },
       { href: '/edit-pdf', label: 'edit_pdf_label', icon: FilePenLine },
