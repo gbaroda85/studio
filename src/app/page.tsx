@@ -198,7 +198,6 @@ export default function Page() {
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary" />
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'barcode', 'compress')"
@@ -206,6 +205,7 @@ export default function Page() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none" />
             </div>
           </div>
         </div>
