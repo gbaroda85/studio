@@ -184,7 +184,6 @@ export default function PdfSplitter() {
         setIsRendering(true);
         setSplitPdfUrl(null);
 
-        const newPreviews: PagePreview[] = [];
         const filesArray = Array.from(files);
 
         for (const file of filesArray) {
@@ -197,7 +196,10 @@ export default function PdfSplitter() {
                         cMapPacked: true
                     }).promise;
                     
-                    for (let i = 1; i <= pdf.numPages; i++) {
+                    // Detect page count immediately
+                    const totalFilePages = pdf.numPages;
+
+                    for (let i = 1; i <= totalFilePages; i++) {
                         const page = await pdf.getPage(i);
                         const viewport = page.getViewport({ scale: 1.0 });
                         const canvas = document.createElement('canvas');
@@ -209,13 +211,17 @@ export default function PdfSplitter() {
                             context.fillStyle = '#FFFFFF';
                             context.fillRect(0, 0, canvas.width, canvas.height);
                             await page.render({ canvasContext: context, viewport: viewport }).promise;
-                            newPreviews.push({
+                            
+                            const newPage: PagePreview = {
                                 id: Math.random().toString(36).substr(2, 9),
-                                src: canvas.toDataURL('image/jpeg', 0.8),
+                                src: canvas.toDataURL('image/jpeg', 0.75), // Optimized quality for speed
                                 originalFile: file,
                                 pageIndex: i - 1,
                                 type: 'pdf'
-                            });
+                            };
+
+                            // Update state incrementally for "turant" images
+                            setPreviews(prev => [...prev, newPage]);
                         }
                     }
                 } catch (e) {
@@ -228,20 +234,20 @@ export default function PdfSplitter() {
                         reader.onload = (e) => resolve(e.target?.result as string);
                         reader.readAsDataURL(file);
                     });
-                    newPreviews.push({
+                    const newImage: PagePreview = {
                         id: Math.random().toString(36).substr(2, 9),
                         src: dataUrl,
                         originalFile: file,
                         pageIndex: 0,
                         type: 'image'
-                    });
+                    };
+                    setPreviews(prev => [...prev, newImage]);
                 } catch (e) {
                     toast({ variant: 'destructive', title: 'Error Reading Image', description: file.name });
                 }
             }
         }
 
-        setPreviews(prev => [...prev, ...newPreviews]);
         setIsRendering(false);
     };
 
@@ -463,57 +469,58 @@ export default function PdfSplitter() {
 
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 p-6 md:p-10">
-                            {isRendering ? (
-                                <div className="flex flex-col items-center justify-center py-40 gap-6">
-                                    <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
-                                    <p className="text-sm font-black text-primary uppercase tracking-[0.3em] animate-pulse">Scanning Document Index...</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-                                    {previews.map((p, i) => {
-                                        const isSelected = selectedIndices.includes(i);
-                                        return (
-                                            <motion.div 
-                                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                                key={p.id}
-                                                onClick={() => togglePageSelection(i)}
-                                                className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
-                                                    isSelected ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
-                                                )}
-                                            >
-                                                <div className={cn(
-                                                    "absolute top-2 left-2 size-7 rounded-lg flex items-center justify-center text-[10px] font-black z-20 border transition-colors",
-                                                    isSelected ? "bg-primary text-white border-white/20" : "bg-black/60 text-white backdrop-blur-md border-white/10"
-                                                )}>
-                                                    {i + 1}
-                                                </div>
-                                                <div className="absolute top-2 right-2 z-20 opacity-40">
-                                                    {p.type === 'pdf' ? <FileText className="size-3" /> : <ImageIcon className="size-3" />}
-                                                </div>
-                                                <div className="size-full flex items-center justify-center p-1 bg-white">
-                                                    <img src={p.src} alt={`P${i+1}`} className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} />
-                                                </div>
-                                                {isSelected && <div className="absolute inset-0 bg-primary/5 pointer-events-none z-10 animate-in fade-in" />}
-                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
-                                                     <div className={cn("size-7 rounded-lg flex items-center justify-center shadow-2xl border-2 border-white", isSelected ? "bg-red-500 text-white" : "bg-primary text-white")}>
-                                                        {isSelected ? <X className="size-4" /> : <Plus className="size-4" />}
-                                                     </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                    <button 
-                                        className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Plus className="size-6" />
-                                        </div>
-                                        <span>Add More</span>
-                                    </button>
-                                </div>
-                            )}
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                                {previews.map((p, i) => {
+                                    const isSelected = selectedIndices.includes(i);
+                                    return (
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                            key={p.id}
+                                            onClick={() => togglePageSelection(i)}
+                                            className={cn(
+                                                "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
+                                                isSelected ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "absolute top-2 left-2 size-7 rounded-lg flex items-center justify-center text-[10px] font-black z-20 border transition-colors",
+                                                isSelected ? "bg-primary text-white border-white/20" : "bg-black/60 text-white backdrop-blur-md border-white/10"
+                                            )}>
+                                                {i + 1}
+                                            </div>
+                                            <div className="absolute top-2 right-2 z-20 opacity-40">
+                                                {p.type === 'pdf' ? <FileText className="size-3" /> : <ImageIcon className="size-3" />}
+                                            </div>
+                                            <div className="size-full flex items-center justify-center p-1 bg-white">
+                                                <img src={p.src} alt={`P${i+1}`} className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} />
+                                            </div>
+                                            {isSelected && <div className="absolute inset-0 bg-primary/5 pointer-events-none z-10 animate-in fade-in" />}
+                                            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
+                                                    <div className={cn("size-7 rounded-lg flex items-center justify-center shadow-2xl border-2 border-white", isSelected ? "bg-red-500 text-white" : "bg-primary text-white")}>
+                                                    {isSelected ? <X className="size-4" /> : <Plus className="size-4" />}
+                                                    </div>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                                
+                                {isRendering && (
+                                    <div className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 bg-white/50">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-40" />
+                                        <span className="text-[8px] font-black uppercase text-primary/60">Scanning...</span>
+                                    </div>
+                                )}
+
+                                <button 
+                                    className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Plus className="size-6" />
+                                    </div>
+                                    <span>Add More</span>
+                                </button>
+                            </div>
                             <ScrollBar />
                         </ScrollArea>
                         {previews.length > 0 && (
