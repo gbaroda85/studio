@@ -42,7 +42,7 @@ export default function AadhaarPrinterPage() {
 
   return (
     <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
-        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
+        <ToolNavigation href="/tools?tab=file" label="Back to File Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             {/* Reduced Font Sizes and Shifted Down */}
