@@ -389,7 +389,7 @@ export default function ImageResizer() {
         </div>
         <div className="flex gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3" /> Reset
+                <RefreshCcw className="mr-1.5 size-3" /> Change Image
             </Button>
             {resizedImageSrc && (
                 <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
@@ -418,7 +418,7 @@ export default function ImageResizer() {
                                         <Eye className="size-3.5 mr-1.5 text-primary" /> Zoom Check
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                                <DialogContent className="max-w-5xl max-h-[85vh] top-[55%] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
                                     <DialogHeader className="p-6 md:p-8 border-b bg-muted/30">
                                         <DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl flex items-center gap-3">
                                              <Eye className="text-primary size-6" /> HD Pixel Proof Analysis
