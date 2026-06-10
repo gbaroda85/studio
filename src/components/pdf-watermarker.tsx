@@ -88,7 +88,7 @@ export default function PdfWatermarker() {
   const [position, setPosition] = useState<WatermarkPosition>('diagonal-bottom-up');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState<number | string>(60);
-  const [rotation, setRotation] = useState<number | string>(-45); 
+  const [rotation, setRotation] = useState<number | string>(45); 
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
@@ -144,8 +144,8 @@ export default function PdfWatermarker() {
   
   const handlePositionChange = (value: WatermarkPosition) => {
       setPosition(value);
-      if(value === 'diagonal-bottom-up') setRotation(-45);
-      else if(value === 'diagonal-top-down') setRotation(45);
+      if(value === 'diagonal-bottom-up') setRotation(45);
+      else if(value === 'diagonal-top-down') setRotation(-45);
       else setRotation(0);
   }
 
@@ -162,17 +162,14 @@ export default function PdfWatermarker() {
         const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const pages = pdfDoc.getPages();
         
-        // PDF-lib rotation is counter-clockwise.
-        // If UI rotation is negative (e.g. -45), it means clockwise in CSS,
-        // so we pass finalRotation as is to 'rotate: degrees(...)'.
-        // But the centering math needs care.
-        
         const textWidth = font.widthOfTextAtSize(watermarkText, finalFontSize);
         const textHeight = font.heightAtSize(finalFontSize);
         
+        // pdf-lib rotate uses counter-clockwise degrees.
+        // We calculate position so the center of the text bounding box is at our target point.
         const rad = (finalRotation * Math.PI) / 180;
-        const cos = Math.abs(Math.cos(rad));
-        const sin = Math.abs(Math.sin(rad));
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
 
         for (const page of pages) {
             const { width, height } = page.getSize();
@@ -192,13 +189,18 @@ export default function PdfWatermarker() {
                 }
             }
 
-            // Correct baseline centering for rotated text in PDF-lib
-            // We want the center of the text bounding box to be at targetCX, targetCY
-            // drawText (x,y) is the bottom-left of the baseline.
+            /**
+             * PDF-Lib drawText(x, y) coordinates are for the bottom-left of the text baseline.
+             * To center a rotated block of text at (cx, cy):
+             * x = cx - (W/2 * cos) + (H/2 * sin)
+             * y = cy - (W/2 * sin) - (H/2 * cos)
+             */
+            const x = targetCX - (textWidth / 2) * cos + (textHeight / 2) * sin;
+            const y = targetCY - (textWidth / 2) * sin - (textHeight / 2) * cos;
             
             page.drawText(watermarkText, { 
-                x: targetCX - (textWidth / 2) * Math.cos(rad) + (textHeight / 2) * Math.sin(rad),
-                y: targetCY - (textWidth / 2) * Math.sin(rad) - (textHeight / 2) * Math.cos(rad),
+                x,
+                y,
                 font, 
                 size: finalFontSize, 
                 color: rgb(0.5, 0.5, 0.5), 
@@ -235,21 +237,24 @@ export default function PdfWatermarker() {
       setWatermarkedPdfUrl(null);
       setWatermarkText('CONFIDENTIAL');
       setPosition('diagonal-bottom-up');
-      setRotation(-45);
+      setRotation(45);
       setFontSize(60);
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   const getPreviewStyle = () => {
       const finalFontSize = Number(fontSize) || 0;
-      const finalRotation = Number(rotation) || 0;
+      // In CSS, rotate(deg) is clockwise. 
+      // PDF-Lib rotate is counter-clockwise.
+      // So we negate the rotation in CSS to visually match PDF-lib's rendering logic.
+      const finalRotation = -(Number(rotation) || 0);
 
       const styles: React.CSSProperties = {
           position: 'absolute', 
           pointerEvents: 'none', 
-          color: 'rgba(0,0,0,0.5)', 
+          color: 'rgba(128,128,128,0.5)', 
           opacity: opacity[0] / 100,
-          fontSize: `${finalFontSize * 0.82}px`, // Matches PDF-lib visual scale better
+          fontSize: `${finalFontSize * 0.75}px`, // Adjusted visual scale
           fontWeight: '900', 
           textAlign: 'center', 
           whiteSpace: 'nowrap',
@@ -262,7 +267,8 @@ export default function PdfWatermarker() {
       if (position === 'center' || position.startsWith('diagonal')) {
           styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${finalRotation}deg)`;
       } else {
-          const m = "8%";
+          const m = "10%";
+          styles.transformOrigin = 'center center';
           styles.transform = `rotate(${finalRotation}deg)`;
           switch (position) {
               case 'top-left': styles.top = m; styles.left = m; break;
@@ -294,7 +300,7 @@ export default function PdfWatermarker() {
       {!pdfFile ? (
         <Card
             className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -310,7 +316,7 @@ export default function PdfWatermarker() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF to begin</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
                         <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local processing.</p>
                     </div>
                 </div>
@@ -402,7 +408,7 @@ export default function PdfWatermarker() {
                     <CardFooter className="bg-muted/10 p-5 md:p-8 border-t flex flex-col gap-3">
                         {!watermarkedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleApplyWatermark}
                                 disabled={isProcessing || !watermarkText}
                             >
