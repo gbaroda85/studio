@@ -356,7 +356,7 @@ export default function ImageCompressor() {
                                                                     <Eye className="size-4 text-primary" />
                                                                 </Button>
                                                             </DialogTrigger>
-                                                            <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                                                            <DialogContent className="max-w-4xl max-h-[90vh] top-[55%] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
                                                                 <DialogHeader className="p-6 md:p-8 border-b bg-muted/30">
                                                                     <DialogTitle className="flex items-center gap-2 uppercase font-black tracking-tighter text-sm md:text-lg">
                                                                         <ArrowLeftRight className="text-primary size-5" /> Precision Analysis
@@ -462,9 +462,9 @@ export default function ImageCompressor() {
                         <Settings2 className="size-6 text-primary" /> Optimizer Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-6">
+                <CardContent className="p-4 md:p-6 space-y-4">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-4 h-12 p-1.5 bg-muted rounded-xl border-2">
+                        <TabsList className="grid w-full grid-cols-2 mb-2 h-10 p-1 bg-muted rounded-xl border-2">
                             <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
                                 <Target className="h-4 w-4 mr-2" /> Target Size
                             </TabsTrigger>
@@ -473,10 +473,10 @@ export default function ImageCompressor() {
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="target" className="space-y-6 animate-in fade-in duration-500">
-                             <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
+                        <TabsContent value="target" className="space-y-4 animate-in fade-in duration-500">
+                             <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-1">
                                         <Zap className="size-3 text-yellow-500" /> Government Form Presets
                                     </Label>
                                     <div className="grid grid-cols-4 gap-2">
@@ -496,7 +496,7 @@ export default function ImageCompressor() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="space-y-3 pt-4 border-t border-dashed">
+                                <div className="space-y-2 pt-2 border-t border-dashed">
                                     <Label htmlFor="target-val" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Custom Limit</Label>
                                     <div className="flex gap-2">
                                         <div className="flex-1 group">
@@ -505,11 +505,11 @@ export default function ImageCompressor() {
                                                 type="number" 
                                                 value={targetSizeValue} 
                                                 onChange={(e) => setTargetSizeValue(e.target.value)} 
-                                                className="h-12 text-2xl font-black focus-visible:ring-primary border-2 rounded-xl bg-background px-4"
+                                                className="h-10 text-xl font-black focus-visible:ring-primary border-2 rounded-xl bg-background px-4"
                                             />
                                         </div>
                                         <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                            <SelectTrigger className="w-24 h-12 font-black text-base border-2 rounded-xl shadow-sm">
+                                            <SelectTrigger className="w-24 h-10 font-black text-base border-2 rounded-xl shadow-sm">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
@@ -522,14 +522,14 @@ export default function ImageCompressor() {
                              </div>
                         </TabsContent>
 
-                        <TabsContent value="manual" className="space-y-6 animate-in fade-in duration-500">
-                            <div className="space-y-8 py-4">
+                        <TabsContent value="manual" className="space-y-4 animate-in fade-in duration-500">
+                            <div className="space-y-6 py-2">
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center px-1">
                                         <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Compression Strength</Label>
                                         <Badge className="font-mono font-black text-base px-4 py-1 bg-primary text-white rounded-xl shadow-lg">{quality[0]}%</Badge>
                                     </div>
-                                    <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-4" />
+                                    <Slider min={5} max={100} step={1} value={quality} onValueChange={setQuality} className="py-2" />
                                     <div className="flex justify-between text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
                                         <span>Max Shrink</span>
                                         <span>Best Quality</span>
@@ -539,10 +539,10 @@ export default function ImageCompressor() {
                         </TabsContent>
                     </Tabs>
 
-                    <div className="space-y-3 pt-6 border-t border-dashed border-primary/10">
+                    <div className="space-y-2 pt-4 border-t border-dashed border-primary/10">
                         <Label htmlFor="format" className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Target Format</Label>
                         <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
-                            <SelectTrigger id="format" className="h-12 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger>
+                            <SelectTrigger id="format" className="h-10 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger>
                             <SelectContent className="rounded-xl border-2 shadow-2xl">
                                 <SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal - Smallest)</SelectItem>
                                 <SelectItem value="webp" className="font-bold py-2">WEBP (Modern - HD)</SelectItem>
@@ -551,17 +551,17 @@ export default function ImageCompressor() {
                         </Select>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-[2.5rem] border-2 border-green-500/10 flex gap-4 items-center shadow-sm">
-                        <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                            <ShieldCheck className="size-5 md:size-6 text-green-600" />
+                    <div className="p-3 md:p-4 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 items-center shadow-sm">
+                        <div className="size-8 md:size-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="size-4 md:size-5 text-green-600" />
                         </div>
                         <div>
-                            <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
-                            <p className="text-[8px] md:text-[10px] text-muted-foreground font-medium leading-tight">Your photos never touch any server. All processing is local.</p>
+                            <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">100% Secure Local RAM</p>
+                            <p className="text-[7px] md:text-[8px] text-muted-foreground font-medium leading-tight">Your photos never touch any server. All processing is local.</p>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 md:p-10 border-t border-dashed">
+                <CardFooter className="bg-muted/10 p-6 border-t border-dashed">
                     <Button 
                         className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={results.length === 0 || isBulkProcessing}
