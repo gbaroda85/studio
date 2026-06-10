@@ -263,7 +263,7 @@ export default function BarcodeGenerator() {
             return;
         }
 
-        printWindow.document.write('<html><head><title>Preparing Barcode...</title></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;background:#f8fafc;"><div style="text-align:center;"><div style="border:4px solid #3b82f6;border-top-color:transparent;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px;"></div><p style="font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#1e293b;">Generating Print Buffer...</p></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></body></html>');
+        printWindow.document.write('<html><head><title>Print Barcode</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:white;"><div id="loader" style="text-align:center;font-family:sans-serif;"><div style="border:4px solid #3b82f6;border-top-color:transparent;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px;"></div><p style="font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#1e293b;">Preparing Print...</p></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></body></html>');
 
         const img = new window.Image();
         img.src = target.data;
@@ -278,24 +278,17 @@ export default function BarcodeGenerator() {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 const pngData = canvas.toDataURL('image/png');
                 
-                printWindow.document.open();
-                printWindow.document.write(`
-                    <html>
-                        <head><title>Print Barcode - ${target.label}</title></head>
-                        <body style="margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background: white;">
-                            <img src="${pngData}" style="max-width:90%; max-height:90%; object-fit: contain;">
-                            <script>
-                                window.onload = function() {
-                                    setTimeout(() => {
-                                        window.print();
-                                        window.onafterprint = function() { window.close(); };
-                                    }, 500);
-                                };
-                            </script>
-                        </body>
-                    </html>
-                `);
+                printWindow.document.body.innerHTML = `<img src="${pngData}" style="max-width:90%; max-height:90%; object-fit: contain;">`;
+                printWindow.document.title = `Print Barcode - ${target.label}`;
+                
+                // Finalize parsing and execute print
                 printWindow.document.close();
+                
+                // Allow a small delay for mobile rendering engines before triggering dialog
+                setTimeout(() => {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 500);
             }
         };
     };
@@ -368,19 +361,11 @@ export default function BarcodeGenerator() {
                                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                         <div className="flex flex-wrap items-center justify-center gap-3 no-print">
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}>
-                                                <ImageIcon className="size-3.5 mr-1.5 text-primary" /> PNG
-                                            </Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}>
-                                                <LayoutGrid className="size-3.5 mr-1.5 text-blue-500" /> SVG
-                                            </Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}>
-                                                <FileDigit className="size-3.5 mr-1.5 text-rose-500" /> PDF
-                                            </Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
                                             <Separator orientation="vertical" className="h-6 opacity-20 mx-2" />
-                                            <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}>
-                                                <Printer className="size-3.5 mr-1.5" /> PRINT NOW
-                                            </Button>
+                                            <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT NOW</Button>
                                         </div>
                                     </motion.div>
                                 ) : (
