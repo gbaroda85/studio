@@ -212,7 +212,11 @@ export default function PdfEditor() {
             setIsProcessing(true);
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                const pdf = await pdfjs.getDocument({ 
+                    data: new Uint8Array(arrayBuffer),
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                    cMapPacked: true
+                }).promise;
                 const totalPages = pdf.numPages;
                 const initialPages: PageState[] = [];
 
@@ -452,29 +456,57 @@ export default function PdfEditor() {
                 const pdfPage = newPdfDoc.addPage(copiedPage);
                 
                 const { width, height } = pdfPage.getSize();
+                const cropBox = pdfPage.getCropBox();
+                const pageRotation = pdfPage.getRotation().angle;
+
+                // ORIGIN COMPENSATION: Handle PDFs with non-zero CropBox origins
+                const ox = cropBox.x;
+                const oy = cropBox.y;
 
                 for (const el of pageState.elements) {
-                    const elX = (el.x / 100) * width;
-                    const elY = height - ((el.y / 100) * height);
+                    // MAPPING: Convert UI percentages to PDF local coordinates
+                    // pdf-lib's origin is bottom-left of the unrotated page
+                    // The UI elements are relative to the "visual" viewport (after rotation)
+
+                    const isLeaning = pageRotation === 90 || pageRotation === 270;
+                    const visualW = isLeaning ? height : width;
+                    const visualH = isLeaning ? width : height;
+
+                    let localX = 0;
+                    let localY = 0;
+
+                    if (pageRotation === 0) {
+                        localX = ox + (el.x / 100) * width;
+                        localY = oy + height - (el.y / 100) * height;
+                    } else if (pageRotation === 90) {
+                        localX = ox + (el.y / 100) * width;
+                        localY = oy + (el.x / 100) * height;
+                    } else if (pageRotation === 180) {
+                        localX = ox + width - (el.x / 100) * width;
+                        localY = oy + (el.y / 100) * height;
+                    } else if (pageRotation === 270) {
+                        localX = ox + width - (el.y / 100) * width;
+                        localY = oy + height - (el.x / 100) * height;
+                    }
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await newPdfDoc.embedFont(fontName);
                         
                         pdfPage.drawText(el.text, { 
-                            x: elX, 
-                            y: elY - (el.size * 0.8), // Vertical baseline adjustment
+                            x: localX, 
+                            y: localY - (el.size * 0.8), // Approx baseline offset
                             size: el.size, 
                             font, 
                             color: hexToRgb(el.color), 
                             opacity: el.opacity / 100 
                         });
                     } else if (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') {
-                        const shapeW = (el.width / 100) * width;
-                        const shapeH = (el.height / 100) * height;
+                        const shapeW = (el.width / 100) * visualW;
+                        const shapeH = (el.height / 100) * visualH;
                         pdfPage.drawRectangle({
-                            x: elX,
-                            y: elY - shapeH,
+                            x: localX,
+                            y: localY - shapeH,
                             width: shapeW,
                             height: shapeH,
                             color: hexToRgb(el.color),
@@ -485,43 +517,42 @@ export default function PdfEditor() {
                         const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
                         const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
                         
-                        const imgW = (el.width / 100) * width;
+                        const imgW = (el.width / 100) * visualW;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
                         
                         pdfPage.drawImage(embeddedImg, { 
-                            x: elX, 
-                            y: elY - imgH, 
+                            x: localX, 
+                            y: localY - imgH, 
                             width: imgW, 
                             height: imgH, 
                             rotate: degrees(-el.rotation), 
                             opacity: el.opacity / 100 
                         });
                     } else if (el.type === 'arrow') {
-                        const angle = (el.rotation * Math.PI) / 180;
-                        const len = (el.length / 100) * width;
-                        const endX = elX + Math.cos(angle) * len;
-                        const endY = elY - Math.sin(angle) * len;
+                        const angleRad = (el.rotation * Math.PI) / 180;
+                        const len = (el.length / 100) * visualW;
+                        const endX = localX + Math.cos(angleRad) * len;
+                        const endY = localY - Math.sin(angleRad) * len;
 
                         pdfPage.drawLine({
-                            start: { x: elX, y: elY },
+                            start: { x: localX, y: localY },
                             end: { x: endX, y: endY },
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
                         });
                         
-                        // Arrow Head Logic
                         const headSize = el.thickness * 4;
                         const headAngle = Math.PI / 6;
                         pdfPage.drawLine({
                             start: { x: endX, y: endY },
-                            end: { x: endX - headSize * Math.cos(angle - headAngle), y: endY + headSize * Math.sin(angle - headAngle) },
+                            end: { x: endX - headSize * Math.cos(angleRad - headAngle), y: endY + headSize * Math.sin(angleRad - headAngle) },
                             thickness: el.thickness,
                             color: hexToRgb(el.color)
                         });
                         pdfPage.drawLine({
                             start: { x: endX, y: endY },
-                            end: { x: endX - headSize * Math.cos(angle + headAngle), y: endY + headSize * Math.sin(angle + headAngle) },
+                            end: { x: endX - headSize * Math.cos(angleRad + headAngle), y: endY + headSize * Math.sin(angleRad + headAngle) },
                             thickness: el.thickness,
                             color: hexToRgb(el.color)
                         });
