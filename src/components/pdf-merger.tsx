@@ -272,7 +272,7 @@ export default function PdfMerger() {
                                 >
                                     <div className="relative">
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDFs to Merge</p>
@@ -287,8 +287,9 @@ export default function PdfMerger() {
                                             <Trash2 className="size-3 mr-1"/> Clear All
                                         </Button>
                                     </div>
-                                    <ScrollArea className="flex-1 min-h-[300px] md:min-h-[400px] pr-2 custom-scrollbar">
-                                        <div className="space-y-2 py-1">
+                                    {/* FIXED SCROLL AREA HEIGHT FOR LARGE LISTS */}
+                                    <ScrollArea className="h-[400px] md:h-[600px] pr-2 custom-scrollbar border rounded-2xl bg-muted/5">
+                                        <div className="space-y-2 p-3">
                                             {pdfFiles.map((file, index) => (
                                                 <div key={`${file.name}-${index}`} className="flex items-center justify-between p-3 rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 hover:border-primary/40 transition-all group shadow-md animate-in slide-in-from-bottom-2">
                                                     <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
@@ -311,12 +312,13 @@ export default function PdfMerger() {
                                                 <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
                                             </Button>
                                         </div>
+                                        <ScrollBar />
                                     </ScrollArea>
                                 </div>
                             )}
                             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={(e) => handleFilesChange(e.target.files)} />
                         </CardContent>
-                        <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <CardFooter className="justify-center gap-8 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                             <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
                             <div className="flex items-center gap-1.5"><FileStack className="size-3 text-purple-500" /> PRO BUNDLING</div>
