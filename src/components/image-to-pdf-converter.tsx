@@ -106,12 +106,16 @@ export default function ImageToPdfConverter() {
     };
   }, [convertedPdfUrl]);
 
-  const handleFilesChange = (files: FileList | null) => {
+  const clearPreviews = () => {
     if (convertedPdfUrl) {
         URL.revokeObjectURL(convertedPdfUrl);
         setConvertedPdfUrl(null);
-        setPreviewImages([]);
     }
+    setPreviewImages([]);
+  }
+
+  const handleFilesChange = (files: FileList | null) => {
+    clearPreviews();
     const newFilesList = Array.from(files || []).filter(file => file.type.startsWith('image/'));
     
     if (newFilesList.length === 0) return;
@@ -154,14 +158,6 @@ export default function ImageToPdfConverter() {
         if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[0].id : null);
         return filtered;
     });
-  }
-  
-  const clearPreviews = () => {
-    if (convertedPdfUrl) {
-        URL.revokeObjectURL(convertedPdfUrl);
-        setConvertedPdfUrl(null);
-    }
-    setPreviewImages([]);
   }
 
   const handleReset = () => {
@@ -208,6 +204,7 @@ export default function ImageToPdfConverter() {
       const selected = images.find(img => img.id === selectedId);
       if (!selected) return;
       setImages(prev => prev.map(img => ({ ...img, vAlign: selected.vAlign })));
+      clearPreviews();
       toast({ title: "Global Sync Complete", description: "Alignment applied to all pages." });
   };
 
@@ -309,7 +306,7 @@ export default function ImageToPdfConverter() {
         <div className="lg:col-span-8 space-y-6">
             <Card className={cn(
                 "border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl transition-all duration-300",
-                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-105 shadow-primary/20"
             )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader className="bg-primary/5 border-b p-5 md:p-7 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -328,7 +325,7 @@ export default function ImageToPdfConverter() {
                         <div className="border-4 border-dashed border-primary/20 rounded-[2rem] p-12 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-muted/20" onClick={() => fileInputRef.current?.click()}>
                             <div className="relative">
                                 <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center px-4">
                                 <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Drop Images to Stacking Area</p>
@@ -531,7 +528,11 @@ export default function ImageToPdfConverter() {
                                 </Button>
                             </div>
 
-                            <Button variant="outline" className="w-full h-11 border-2 font-black text-[10px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-2xl transition-all shadow-sm" onClick={applyToAll}>
+                            <Button 
+                              variant="outline" 
+                              className="w-full h-11 border-2 font-black text-[10px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-2xl transition-all shadow-sm" 
+                              onClick={applyToAll}
+                            >
                                 <Layers className="size-4 mr-2" /> Global Sync Alignment
                             </Button>
                         </motion.div>
