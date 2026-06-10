@@ -210,15 +210,34 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
                 <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
+            <Button 
+                size="lg" 
+                className="magic-button magic-button-success flex-[2] md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                onClick={handleConvert} 
+                disabled={isConverting || !!convertedSrc}
+            >
+                <StarIcons />
+                {isConverting ? (
+                    <div className="flex items-center gap-3">
+                        <Loader2 className="size-6 md:size-7 animate-spin" />
+                        <span className="uppercase text-sm md:text-base tracking-tighter">TRANSFORMING...</span>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                        <span className="uppercase tracking-tighter text-sm md:text-base">{convertedSrc ? "CONVERTED" : "CONVERT NOW"}</span>
+                    </div>
+                )}
+            </Button>
             {convertedSrc && (
-                <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
+                <Button size="lg" className="magic-button flex-1 md:flex-none h-11 md:h-12 px-10 bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
                     <StarIcons />
                     <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD {formatTitle}</span>
+                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">SAVE {formatTitle}</span>
                 </Button>
             )}
         </div>
@@ -240,19 +259,19 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                     <div className="w-full h-full min-h-[350px] flex items-center justify-center">
                         <AnimatePresence mode="wait">
                             {isConverting ? (
-                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4 z-10">
+                                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4 z-10">
                                     <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
                                     <p className="text-xs font-black text-primary uppercase tracking-widest animate-pulse">Transforming Pixels...</p>
                                 </motion.div>
                             ) : convertedSrc ? (
-                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-8 w-full h-full items-center">
+                                <motion.div key="comparison" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-8 w-full h-full items-center">
                                     <div className="space-y-3 flex flex-col h-full justify-center">
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Source</span>
                                             <Badge variant="outline" className="text-[8px] bg-white/80 border-slate-200 text-slate-800">BEFORE</Badge>
                                         </div>
                                         <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
-                                            <Image src={imageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
+                                            <img src={imageSrc!} alt="Original" className="max-w-[90%] max-h-[90%] object-contain transition-all group-hover:scale-105" />
                                         </div>
                                     </div>
 
@@ -262,20 +281,20 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                                             <Badge className="text-[8px] bg-primary text-primary-foreground uppercase border-none">AFTER</Badge>
                                         </div>
                                         <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
-                                            <Image src={convertedSrc} alt="Converted" fill className="object-contain p-4 md:p-6 drop-shadow-2xl animate-in zoom-in-95 duration-500" />
+                                            <img src={convertedSrc} alt="Converted" className="max-w-[90%] max-h-[90%] object-contain drop-shadow-2xl animate-in zoom-in-95 duration-500" />
                                             <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
                                         </div>
                                     </div>
                                 </motion.div>
                             ) : (
-                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full">
-                                    <Image src={imageSrc!} alt="Original" fill className="object-contain p-4 md:p-8" />
+                                <motion.div key="preview" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full h-full min-h-[350px] flex items-center justify-center">
+                                    <img src={imageSrc!} alt="Original" className="max-w-full max-h-full object-contain p-4 md:p-8 rounded-xl shadow-2xl bg-white" />
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
                         <div className="flex items-center gap-2"><Eye className="size-4" /> INSTANT PREVIEW</div>
@@ -289,7 +308,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
                     <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-4 md:size-5 text-primary" /> Settings
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Properties
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
@@ -310,30 +329,15 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Conversion</p>
                             <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
-                                Your image is rendered using original vectors and pixels for zero quality loss during format shift.
+                                Your image is rendered using original pixels for zero quality loss during format shift.
                             </p>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
-                    <Button 
-                        className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                        onClick={handleConvert}
-                        disabled={isConverting || !!convertedSrc}
-                    >
-                        <StarIcons />
-                        {isConverting ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="size-6 md:size-7 animate-spin" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">TRANSFORMING...</span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">CONVERT NOW</span>
-                            </div>
-                        )}
-                    </Button>
+                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> NATIVE SPEED</div>
+                    <div className="flex items-center gap-1"><ImageIcon className="size-2.5 text-primary" /> HD EXPORT</div>
                 </CardFooter>
             </Card>
         </div>
