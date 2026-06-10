@@ -62,6 +62,15 @@ const NUMBER_STYLES = [
     { label: 'a, b, c (Alpha Lower)', value: 'alpha-lower' },
 ];
 
+const POSITIONS = [
+    { val: 'bottom-left', label: 'Bottom Left' },
+    { val: 'bottom-center', label: 'Bottom Center' },
+    { val: 'bottom-right', label: 'Bottom Right' },
+    { val: 'top-left', label: 'Top Left' },
+    { val: 'top-center', label: 'Top Center' },
+    { val: 'top-right', label: 'Top Right' }
+] as { val: PageNumberPosition, label: string }[];
+
 const StarIcons = () => (
     <>
         <div className="star-1">
@@ -502,15 +511,16 @@ export default function PdfPageNumberer() {
                                 <Layout className="size-3" /> Position on Page
                             </Label>
                             <div className="grid grid-cols-2 gap-2">
-                                {(['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'] as PageNumberPosition[]).map(pos => (
-                                    <Button 
-                                        key={pos} 
-                                        variant={position === pos ? 'default' : 'outline'}
-                                        onClick={() => setPosition(pos)}
-                                        className={cn("h-10 text-[9px] font-black uppercase border-2 rounded-xl", position === pos ? "border-primary" : "")}
-                                    >
-                                        {pos.replace('-', ' ')}
-                                    </Button>
+                                {POSITIONS.map(pos => (
+                                    <button
+                                        key={pos.val}
+                                        onClick={() => setPosition(pos.val)}
+                                        className={cn(
+                                            "btn-pos-uiverse h-10",
+                                            position === pos.val && "active-uiverse"
+                                        )}
+                                        data-label={pos.label}
+                                    />
                                 ))}
                             </div>
                         </div>
