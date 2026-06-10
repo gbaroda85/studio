@@ -55,7 +55,8 @@ import {
     Palette,
     History,
     FileSpreadsheet,
-    Hash
+    Hash,
+    Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -83,17 +84,6 @@ const DOT_TYPES: { id: DotType, label: string }[] = [
     { id: 'extra-rounded', label: 'Extra Rounded' },
 ];
 
-const CORNER_SQUARE_TYPES: { id: CornerSquareType, label: string }[] = [
-    { id: 'square', label: 'Square' },
-    { id: 'dot', label: 'Dot' },
-    { id: 'extra-rounded', label: 'Extra Rounded' },
-];
-
-const CORNER_DOT_TYPES: { id: CornerDotType, label: string }[] = [
-    { id: 'square', label: 'Square' },
-    { id: 'dot', label: 'Dot' },
-];
-
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -112,6 +102,11 @@ export default function QrCodeGenerator() {
     const [inputData, setInputData] = useState("https://www.gr7imagepdf.com");
     const [isProcessing, setIsProcessing] = useState(false);
     
+    // Sub-states for specific types
+    const [wifiData, setWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
+    const [whatsappData, setWhatsappData] = useState({ phone: '', message: '' });
+    const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
+
     // QR Styling Options
     const [options, setOptions] = useState<Options>({
         width: 300,
@@ -155,6 +150,20 @@ export default function QrCodeGenerator() {
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
+    // Effect to update inputData based on type-specific sub-states
+    useEffect(() => {
+        if (qrType === 'wifi') {
+            const data = `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
+            setInputData(data);
+        } else if (qrType === 'whatsapp') {
+            const data = `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
+            setInputData(data);
+        } else if (qrType === 'email') {
+            const data = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
+            setInputData(data);
+        }
+    }, [qrType, wifiData, whatsappData, emailData]);
+
     // Initialize QR Code engine
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -170,7 +179,7 @@ export default function QrCodeGenerator() {
         if (qrCodeRef.current) {
             qrCodeRef.current.update({
                 ...options,
-                data: inputData
+                data: inputData || " " // Ensure non-empty string
             });
         }
     }, [options, inputData]);
@@ -378,6 +387,63 @@ export default function QrCodeGenerator() {
                                                 className="min-h-[100px] border-2 rounded-xl bg-background/50 font-bold"
                                                 placeholder="Enter text data..."
                                             />
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="wifi" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
+                                        <div className="grid gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Network Name (SSID)</Label>
+                                                <Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="My Home Wifi" className="h-10 border-2" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Password</Label>
+                                                <div className="relative">
+                                                    <Input type="text" value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Network Password" className="h-10 border-2 pr-10" />
+                                                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 size-4 opacity-20" />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Encryption</Label>
+                                                <Select value={wifiData.encryption} onValueChange={(v) => setWifiData(p => ({...p, encryption: v}))}>
+                                                    <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
+                                                    <SelectContent className="rounded-xl border-2">
+                                                        <SelectItem value="WPA" className="font-bold">WPA/WPA2</SelectItem>
+                                                        <SelectItem value="WEP" className="font-bold">WEP</SelectItem>
+                                                        <SelectItem value="nopass" className="font-bold">None (Open)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="whatsapp" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
+                                        <div className="grid gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Phone Number (with Country Code)</Label>
+                                                <Input value={whatsappData.phone} onChange={(e) => setWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="e.g. 919876543210" className="h-10 border-2" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Default Message</Label>
+                                                <Textarea value={whatsappData.message} onChange={(e) => setWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Hello! I found your QR code..." className="min-h-[80px] border-2" />
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="email" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
+                                        <div className="grid gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Recipient Email</Label>
+                                                <Input value={emailData.to} onChange={(e) => setEmailData(p => ({...p, to: e.target.value}))} placeholder="example@gmail.com" className="h-10 border-2" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Subject</Label>
+                                                <Input value={emailData.subject} onChange={(e) => setEmailData(p => ({...p, subject: e.target.value}))} placeholder="Contact from QR" className="h-10 border-2" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Message Body</Label>
+                                                <Textarea value={emailData.body} onChange={(e) => setEmailData(p => ({...p, body: e.target.value}))} placeholder="Write your email content..." className="min-h-[80px] border-2" />
+                                            </div>
                                         </div>
                                     </TabsContent>
 
