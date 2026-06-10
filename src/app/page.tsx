@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -54,7 +53,8 @@ import {
   RotateCw,
   Barcode,
   QrCode,
-  ChevronUp
+  ChevronUp,
+  ScanLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
