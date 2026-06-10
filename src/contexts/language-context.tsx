@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -110,6 +111,8 @@ const translations = {
     image_to_text_description: 'Extract text from any image locally.',
     text_to_pdf_label: 'Text to PDF',
     text_to_pdf_description: 'Convert plain text into a PDF document.',
+    barcode_generator_label: 'Barcode Generator',
+    barcode_generator_description: 'Create scannable barcodes in various formats instantly.',
     privacy_policy: 'Privacy Policy',
     terms_of_service: 'Terms of Service',
   },
@@ -212,6 +215,8 @@ const translations = {
     image_to_text_description: 'इमेज से टेक्स्ट निकालें।',
     text_to_pdf_label: 'टेक्स्ट से PDF',
     text_to_pdf_description: 'टेक्स्ट को PDF में बदलें।',
+    barcode_generator_label: 'बारकोड जनरेटर',
+    barcode_generator_description: 'तुरंत विभिन्न फॉर्मेट में स्कैनेबल बारकोड बनाएं।',
     privacy_policy: 'गोपनीयता नीति',
     terms_of_service: 'सेवा की शर्तें',
   },
@@ -314,6 +319,8 @@ const translations = {
     image_to_text_description: 'Extrae texto localmente.',
     text_to_pdf_label: 'Texto a PDF',
     text_to_pdf_description: 'Convierte texto a PDF.',
+    barcode_generator_label: 'Generador de códigos de barras',
+    barcode_generator_description: 'Cree códigos de barras escaneables en varios formatos al instante.',
     privacy_policy: 'Política de Privacidad',
     terms_of_service: 'Términos de Servicio',
   },

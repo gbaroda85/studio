@@ -59,7 +59,8 @@ import {
   FilePenLine,
   Music,
   Video,
-  RotateCw
+  RotateCw,
+  Barcode
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -387,6 +388,14 @@ function ToolsPageContent() {
   ];
   
   const converterFeatures = [
+    {
+      href: '/barcode-generator',
+      labelKey: 'barcode_generator_label',
+      descriptionKey: 'barcode_generator_description',
+      icon: Barcode,
+      color: 'bg-amber-600',
+      lightBg: 'bg-[#fefce8]'
+    },
     {
       href: '/acceleration-converter',
       labelKey: 'acceleration_converter_label',

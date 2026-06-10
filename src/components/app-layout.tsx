@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -54,7 +55,8 @@ import {
   FilePenLine,
   Music,
   Video,
-  RotateCw
+  RotateCw,
+  Barcode
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -144,6 +146,7 @@ const CATEGORIES = [
     icon: Infinity,
     color: "text-amber-500",
     tools: [
+      { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
       { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
       { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
       { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },

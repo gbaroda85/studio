@@ -17,7 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/aadhaar-printer',
     '/image-to-pdf',
     '/video-to-mp3',
-    '/image-to-text'
+    '/image-to-text',
+    '/barcode-generator'
   ];
 
   const otherTools = [
