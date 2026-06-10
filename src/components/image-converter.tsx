@@ -214,32 +214,6 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
              <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
                 <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
-            <Button 
-                size="lg" 
-                className="magic-button magic-button-success flex-[2] md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
-                onClick={handleConvert} 
-                disabled={isConverting || !!convertedSrc}
-            >
-                <StarIcons />
-                {isConverting ? (
-                    <div className="flex items-center gap-3">
-                        <Loader2 className="size-6 md:size-7 animate-spin" />
-                        <span className="uppercase text-sm md:text-base tracking-tighter">TRANSFORMING...</span>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2 md:gap-3">
-                        <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
-                        <span className="uppercase tracking-tighter text-sm md:text-base">{convertedSrc ? "CONVERTED" : "CONVERT NOW"}</span>
-                    </div>
-                )}
-            </Button>
-            {convertedSrc && (
-                <Button size="lg" className="magic-button flex-1 md:flex-none h-11 md:h-12 px-10 bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                    <StarIcons />
-                    <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">SAVE {formatTitle}</span>
-                </Button>
-            )}
         </div>
       </div>
 
@@ -294,11 +268,11 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         </AnimatePresence>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE RAM</div>
                         <div className="flex items-center gap-2"><Eye className="size-4" /> INSTANT PREVIEW</div>
-                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD OUTPUT</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD EXPORT</div>
                     </div>
                 </CardFooter>
             </Card>
@@ -334,10 +308,38 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
-                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> NATIVE SPEED</div>
-                    <div className="flex items-center gap-1"><ImageIcon className="size-2.5 text-primary" /> HD EXPORT</div>
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-3">
+                    <Button 
+                        size="lg" 
+                        className="magic-button w-full h-14 md:h-16 bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-3" 
+                        onClick={handleConvert} 
+                        disabled={isConverting || !!convertedSrc}
+                    >
+                        <StarIcons />
+                        {isConverting ? (
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="size-6 md:size-7 animate-spin" />
+                                <span className="uppercase text-sm md:text-base tracking-tighter">TRANSFORMING...</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <Zap className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                <span className="uppercase tracking-tighter text-sm md:text-base">{convertedSrc ? "CONVERTED" : "CONVERT NOW"}</span>
+                            </div>
+                        )}
+                    </Button>
+
+                    {convertedSrc && (
+                        <Button 
+                            size="lg" 
+                            className="magic-button magic-button-success w-full h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3 animate-in zoom-in-95" 
+                            onClick={handleDownload}
+                        >
+                            <StarIcons />
+                            <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                            <span className="uppercase tracking-tighter text-[10px] md:text-xs">SAVE {formatTitle}</span>
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>
