@@ -256,13 +256,21 @@ export default function BarcodeGenerator() {
         const target = previews.find(p => p.id === selectedPreviewId);
         if (!target) return;
 
-        // Convert to PNG for reliable printing across all browsers
+        // satisify browser popup heuristics by opening window immediately
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            toast({ variant: 'destructive', title: "Printer Blocked", description: "Please allow popups to print." });
+            return;
+        }
+
+        printWindow.document.write('<html><head><title>Preparing Barcode...</title></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;background:#f8fafc;"><div style="text-align:center;"><div style="border:4px solid #3b82f6;border-top-color:transparent;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 20px;"></div><p style="font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#1e293b;">Generating Print Buffer...</p></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></body></html>');
+
         const img = new window.Image();
         img.src = target.data;
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            canvas.width = img.width * 2;
-            canvas.height = img.height * 2;
+            canvas.width = img.width * 4; // High DPI for crisp printing
+            canvas.height = img.height * 4;
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.fillStyle = '#FFFFFF';
@@ -270,28 +278,24 @@ export default function BarcodeGenerator() {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 const pngData = canvas.toDataURL('image/png');
                 
-                const win = window.open('', '_blank');
-                if (win) {
-                    win.document.write(`
-                        <html>
-                            <head><title>Print Barcode - ${target.label}</title></head>
-                            <body style="margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background: white;">
-                                <img src="${pngData}" style="max-width:90%; max-height:90%; object-fit: contain;">
-                                <script>
-                                    window.onload = function() {
-                                        setTimeout(() => {
-                                            window.print();
-                                            window.onafterprint = function() { window.close(); };
-                                        }, 300);
-                                    };
-                                </script>
-                            </body>
-                        </html>
-                    `);
-                    win.document.close();
-                } else {
-                    toast({ variant: 'destructive', title: "Printer Blocked", description: "Please allow popups to print." });
-                }
+                printWindow.document.open();
+                printWindow.document.write(`
+                    <html>
+                        <head><title>Print Barcode - ${target.label}</title></head>
+                        <body style="margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background: white;">
+                            <img src="${pngData}" style="max-width:90%; max-height:90%; object-fit: contain;">
+                            <script>
+                                window.onload = function() {
+                                    setTimeout(() => {
+                                        window.print();
+                                        window.onafterprint = function() { window.close(); };
+                                    }, 500);
+                                };
+                            </script>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
             }
         };
     };
