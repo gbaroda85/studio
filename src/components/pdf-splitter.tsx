@@ -29,7 +29,9 @@ import {
     Plus, 
     Trash2,
     ImageIcon,
-    FileText
+    FileText,
+    Maximize,
+    Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -160,7 +162,6 @@ export default function PdfSplitter() {
             setSplitPdfUrl(null);
         }
         const parsed = parsePageRanges(value, previews.length);
-        // Map 1-based ranges to 0-based indices
         setSelectedIndices(parsed.map(p => p - 1));
     };
 
@@ -242,7 +243,6 @@ export default function PdfSplitter() {
 
         setPreviews(prev => [...prev, ...newPreviews]);
         setIsRendering(false);
-        toast({ title: 'Stack Updated', description: `Added ${filesArray.length} items to grid.` });
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => processFiles(e.target.files);
@@ -286,7 +286,6 @@ export default function PdfSplitter() {
             const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             setSplitPdfUrl(url);
-            
             toast({ title: 'Extraction Success!', description: `Created a new PDF with ${selectedIndices.length} pages.` });
         } catch (error) {
             console.error(error);
@@ -312,6 +311,57 @@ export default function PdfSplitter() {
         setSplitPdfUrl(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
+
+    if (previews.length === 0 && !isRendering) {
+        return (
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
+                        <Scissors className="size-8" />
+                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                            <Sparkles className="size-2.5" />
+                        </div>
+                    </div>
+                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                        Split & <span className="text-gradient-hero">Bundle Studio</span>
+                    </h1>
+                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                        Extract specific pages or combine multiple documents. <br/>100% Private high-fidelity local mapping.
+                    </p>
+                </motion.div>
+
+                <Card className={cn(
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                )}
+                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 md:p-12">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
+                            <div className="relative">
+                                <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center px-4">
+                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF or Images here</p>
+                                <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Local extraction active.</p>
+                            </div>
+                        </div>
+                        <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" multiple onChange={handleFileChange} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT CROP</div>
+                        <div className="flex items-center gap-1.5"><FileDigit className="size-3 text-primary" /> PRO BUNDLING</div>
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
     
     return (
         <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
@@ -333,7 +383,6 @@ export default function PdfSplitter() {
 
             <CardContent className="p-0">
                 <div className="grid lg:grid-cols-12">
-                    {/* LEFT SIDEBAR: CONTROLS */}
                     <div className="lg:col-span-4 border-r bg-muted/20 p-6 space-y-8 no-print">
                         <div className="space-y-8 animate-in slide-in-from-left duration-300">
                              <div className="space-y-4">
@@ -412,28 +461,9 @@ export default function PdfSplitter() {
                         </div>
                     </div>
 
-                    {/* RIGHT VIEWPORT: GRID OF PAGES */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 p-6 md:p-10">
-                            {previews.length === 0 && !isRendering ? (
-                                <div 
-                                    className={cn(
-                                        "flex flex-col items-center justify-center py-40 gap-8 cursor-pointer group transition-all",
-                                        isDragOver && "scale-110 opacity-100"
-                                    )}
-                                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                     <div className="relative">
-                                         <UploadCloud className="size-24 text-muted-foreground/20 group-hover:text-primary transition-colors" />
-                                         <Zap className="absolute -top-2 -right-2 size-8 text-yellow-500 opacity-20 group-hover:opacity-100 transition-opacity" />
-                                     </div>
-                                     <div className="text-center">
-                                         <p className="text-lg font-black uppercase tracking-widest text-muted-foreground/30">Drop PDFs or Images to begin</p>
-                                         <p className="text-[10px] font-bold text-muted-foreground/20 uppercase mt-2">Visually select pages for extraction</p>
-                                     </div>
-                                </div>
-                            ) : isRendering && previews.length === 0 ? (
+                            {isRendering ? (
                                 <div className="flex flex-col items-center justify-center py-40 gap-6">
                                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                     <p className="text-sm font-black text-primary uppercase tracking-[0.3em] animate-pulse">Scanning Document Index...</p>
@@ -442,7 +472,6 @@ export default function PdfSplitter() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
                                     {previews.map((p, i) => {
                                         const isSelected = selectedIndices.includes(i);
-
                                         return (
                                             <motion.div 
                                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -459,23 +488,13 @@ export default function PdfSplitter() {
                                                 )}>
                                                     {i + 1}
                                                 </div>
-
                                                 <div className="absolute top-2 right-2 z-20 opacity-40">
                                                     {p.type === 'pdf' ? <FileText className="size-3" /> : <ImageIcon className="size-3" />}
                                                 </div>
-
                                                 <div className="size-full flex items-center justify-center p-1 bg-white">
-                                                    <img 
-                                                        src={p.src} 
-                                                        alt={`P${i+1}`} 
-                                                        className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} 
-                                                    />
+                                                    <img src={p.src} alt={`P${i+1}`} className={cn("w-full h-full object-contain transition-all duration-500", !isSelected && "opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0")} />
                                                 </div>
-
-                                                {isSelected && (
-                                                    <div className="absolute inset-0 bg-primary/5 pointer-events-none z-10 animate-in fade-in" />
-                                                )}
-                                                
+                                                {isSelected && <div className="absolute inset-0 bg-primary/5 pointer-events-none z-10 animate-in fade-in" />}
                                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
                                                      <div className={cn("size-7 rounded-lg flex items-center justify-center shadow-2xl border-2 border-white", isSelected ? "bg-red-500 text-white" : "bg-primary text-white")}>
                                                         {isSelected ? <X className="size-4" /> : <Plus className="size-4" />}
@@ -484,7 +503,6 @@ export default function PdfSplitter() {
                                             </motion.div>
                                         );
                                     })}
-                                    
                                     <button 
                                         className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
                                         onClick={() => fileInputRef.current?.click()}
@@ -498,7 +516,6 @@ export default function PdfSplitter() {
                             )}
                             <ScrollBar />
                         </ScrollArea>
-                        
                         {previews.length > 0 && (
                             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
                                 <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to select
@@ -513,14 +530,7 @@ export default function PdfSplitter() {
                 <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> NATIVE WASM SPEED</div>
                 <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> PDF & IMAGE SUPPORT</div>
             </CardFooter>
-            <input 
-                ref={fileInputRef} 
-                type="file" 
-                className="hidden" 
-                accept=".pdf,image/*" 
-                multiple 
-                onChange={handleFileChange} 
-            />
+            <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" multiple onChange={handleFileChange} />
         </Card>
     );
 }
