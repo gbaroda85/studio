@@ -226,7 +226,7 @@ export default function PdfEditor() {
         addElement({
             id: Math.random().toString(36).substr(2, 9),
             type: 'text',
-            text: "Double click to edit",
+            text: "Type here...",
             x: 40, y: 40, size: 18, color: "#000000", font: "Helvetica", opacity: 100
         } as OverlayText);
     };
@@ -421,8 +421,6 @@ export default function PdfEditor() {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await pdfDoc.embedFont(fontName);
                         
-                        // Text vertical correction: drawText Y is bottom-left baseline
-                        // Browser coordinates are top-left
                         pdfPage.drawText(el.text, { 
                             x: elX, 
                             y: elY - (el.size * 0.82), 
@@ -431,7 +429,7 @@ export default function PdfEditor() {
                             color: hexToRgb(el.color), 
                             opacity: el.opacity / 100 
                         });
-                    } else if (el.type === 'mask' || el.type === 'highlight') {
+                    } else if (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') {
                         const shapeW = (el.width / 100) * width;
                         const shapeH = (el.height / 100) * height;
                         pdfPage.drawRectangle({
@@ -462,13 +460,30 @@ export default function PdfEditor() {
                         const angle = (el.rotation * Math.PI) / 180;
                         const len = (el.length / 100) * width;
                         const endX = elX + Math.cos(angle) * len;
-                        const endY = elY + Math.sin(angle) * len;
+                        const endY = elY - Math.sin(angle) * len; // Adjusted for PDF coords
+
                         pdfPage.drawLine({
                             start: { x: elX, y: elY },
                             end: { x: endX, y: endY },
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
+                        });
+                        
+                        // Basic Arrow Head
+                        const headSize = el.thickness * 3;
+                        const headAngle = Math.PI / 6;
+                        pdfPage.drawLine({
+                            start: { x: endX, y: endY },
+                            end: { x: endX - headSize * Math.cos(angle - headAngle), y: endY + headSize * Math.sin(angle - headAngle) },
+                            thickness: el.thickness,
+                            color: hexToRgb(el.color)
+                        });
+                        pdfPage.drawLine({
+                            start: { x: endX, y: endY },
+                            end: { x: endX - headSize * Math.cos(angle + headAngle), y: endY + headSize * Math.sin(angle + headAngle) },
+                            thickness: el.thickness,
+                            color: hexToRgb(el.color)
                         });
                     }
                 }
@@ -608,7 +623,7 @@ export default function PdfEditor() {
                                             {el.type === 'text' ? (
                                                 <div className="group relative">
                                                     {selectedElementId === el.id ? (
-                                                        <div className="p-1 bg-white/50 backdrop-blur-sm rounded border border-primary shadow-xl">
+                                                        <div className="p-1 bg-slate-800 rounded border border-primary shadow-xl">
                                                             <input 
                                                                 value={el.text} 
                                                                 onChange={e => updateElement({ text: e.target.value })} 
@@ -623,7 +638,7 @@ export default function PdfEditor() {
                                                         <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px', opacity: el.opacity/100 }}>{el.text}</div>
                                                     )}
                                                 </div>
-                                            ) : (el.type === 'mask' || el.type === 'highlight') ? (
+                                            ) : (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') ? (
                                                 <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '1px dashed #primary' : 'none' }} />
                                             ) : el.type === 'arrow' ? (
                                                 <div style={{ transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center', width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.thickness}px`, backgroundColor: el.color, opacity: el.opacity/100, position: 'relative' }}>
@@ -670,7 +685,7 @@ export default function PdfEditor() {
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#ffff00'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
-                                    {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
+                                    {(selectedElement.type === 'mask' || selectedElement.type === 'highlight' || selectedElement.type === 'shape') && (
                                         <div className="space-y-6">
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
