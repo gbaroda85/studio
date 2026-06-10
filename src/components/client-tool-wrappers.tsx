@@ -1,3 +1,4 @@
+
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -37,4 +38,9 @@ export const PassportPhotoMakerClient = dynamic(() => import('@/components/passp
 export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper'), {
   ssr: false,
   loading: () => <LoadingState message="Initializing Crop Studio..." />
+});
+
+export const AiUpscalerClient = dynamic(() => import('@/components/ai-upscaler'), {
+  ssr: false,
+  loading: () => <LoadingState message="Initializing AI Engine..." />
 });

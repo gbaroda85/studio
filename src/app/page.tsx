@@ -53,7 +53,8 @@ import {
   PenLine,
   RotateCw,
   Barcode,
-  QrCode
+  QrCode,
+  ChevronUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -65,13 +66,13 @@ import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
   // IMAGE SOLUTION
+  { icon: Sparkles, title: "AI IMAGE UPSCALER", description: "Increase resolution and fix blurry photos instantly.", href: "/ai-upscaler", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
-  { icon: Sparkles, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
+  { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Heart, title: "MARRIAGE BIODATA", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
-  { icon: Printer, title: "AADHAAR PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "featured" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   
   // PDF Toolkit
@@ -199,7 +200,7 @@ export default function Page() {
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'scan', 'barcode', 'compress')"
+                placeholder="Search tools... (e.g. 'upscale', 'scan', 'barcode')"
                 className="w-full pl-14 pr-6 h-12 text-base rounded-3xl bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

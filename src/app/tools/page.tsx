@@ -79,6 +79,14 @@ function ToolsPageContent() {
 
   const imageFeatures = [
     {
+      href: '/ai-upscaler',
+      labelKey: 'enhance_photo_label',
+      descriptionKey: 'enhance_photo_description',
+      icon: Sparkles,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#f5f3ff]'
+    },
+    {
       href: '/image-to-pdf',
       labelKey: 'image_to_pdf_label',
       descriptionKey: 'image_to_pdf_description',
@@ -125,14 +133,6 @@ function ToolsPageContent() {
       icon: PenLine,
       color: 'bg-orange-500',
       lightBg: 'bg-[#fff7ed]'
-    },
-    {
-      href: '/enhance-photo',
-      labelKey: 'enhance_photo_label',
-      descriptionKey: 'enhance_photo_description',
-      icon: Sparkles,
-      color: 'bg-purple-600',
-      lightBg: 'bg-[#f5f3ff]'
     },
     {
       href: '/passport-photo',
