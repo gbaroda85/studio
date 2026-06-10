@@ -71,8 +71,8 @@
     background-attachment: fixed;
   }
 
-  /* GLOBAL CURSOR HAND FIX - APPLYING TO ALL CLICKABLE ELEMENTS */
-  a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, img, .btn-pos-uiverse {
+  /* GLOBAL CURSOR HAND FIX - REMOVED 'img' to allow cropping tools to work properly */
+  a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
     cursor: pointer !important;
   }
 
