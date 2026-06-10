@@ -232,7 +232,8 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900"
+          sideOffset={12}
+          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110]"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -268,7 +269,7 @@ function SettingsMenu() {
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-2">
+      <DropdownMenuContent align="end" sideOffset={12} className="w-48 p-2 rounded-2xl shadow-2xl border-2 z-[110]">
         <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3">🇺🇸 {t('english')}</DropdownMenuItem>
@@ -291,7 +292,7 @@ function MobileNav() {
           <Menu className="size-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] p-0 border-r-2">
+      <SheetContent side="left" className="w-[300px] p-0 border-r-2 z-[150]">
         <SheetHeader className="p-6 border-b text-left">
           <SheetTitle>
             <Link href="/" onClick={() => setOpen(false)}>
