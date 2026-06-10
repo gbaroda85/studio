@@ -281,7 +281,7 @@ export default function PhotoEnhancer() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Photo here</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Processing happens 100% locally.</p>
                     </div>
                 </div>
@@ -308,9 +308,9 @@ export default function PhotoEnhancer() {
                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RotateCcw className="mr-1.5 size-3" /> Reset
+        <div className="flex items-center gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RotateCcw className="mr-1.5 size-4" /> Change Image
             </Button>
             <Button 
                 size="lg" 
@@ -393,7 +393,7 @@ export default function PhotoEnhancer() {
                         <Settings2 className="size-4 text-primary" /> Adjustment Panel
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
+                <CardContent className="p-4 md:p-6 space-y-6 md:space-y-8">
                     <Button 
                         className="magic-button w-full h-14 font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-8 flex items-center gap-3" 
                         onClick={handleAutoEnhance} 
