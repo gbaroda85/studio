@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -74,7 +75,6 @@ function ToolsPageContent() {
   const tabParam = searchParams.get('tab');
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
-  // Fixed: Assigning explicit bg- classes to ensure JIT picks them up and icons are visible
   const imageFeatures = [
     {
       href: '/image-to-pdf',

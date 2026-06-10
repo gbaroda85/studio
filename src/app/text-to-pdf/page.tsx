@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import TextToPdfConverter from '@/components/text-to-pdf-converter';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -6,6 +7,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'Text to PDF Converter - Create Clean PDF Documents from Plain Text Online',
   description: 'Convert plain text, notes, or code into professional PDF files. Customize fonts, sizes, and margins locally in your browser for 100% privacy.',
+  alternates: { canonical: '/text-to-pdf' }
 };
 
 export default function TextToPdfPage() {

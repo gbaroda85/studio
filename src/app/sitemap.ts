@@ -1,9 +1,10 @@
+
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
   
-  // High-traffic tools paths based on trending searches
+  // All active tools paths for comprehensive indexing
   const highPriorityTools = [
     '/image-compress',
     '/image-resize',
@@ -15,7 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/remove-signature',
     '/aadhaar-printer',
     '/image-to-pdf',
-    '/video-to-mp3'
+    '/video-to-mp3',
+    '/image-to-text'
   ];
 
   const otherTools = [
@@ -46,7 +48,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/create-zip',
     '/unzip-file',
     '/crop-image',
-    '/image-to-text',
     '/image-to-jpg',
     '/image-to-png'
   ];
@@ -56,7 +57,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const allRoutes = [...corePages, ...highPriorityTools, ...otherTools];
 
   return allRoutes.map((route) => {
-    // Assigning high priority to home and popular tools for faster indexing
     let priority = 0.8;
     if (route === '') priority = 1.0;
     if (route === '/tools') priority = 0.9;

@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, PenTool, Type, Eye } from 'lucide-react';
 import PdfWatermarker from '@/components/pdf-watermarker';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Add Watermark to PDF Online - Protect Your Documents with Custom Text Watermarks',
   description: 'Add custom text watermarks to your PDF files. Control opacity, rotation, and position instantly. Secure local browser-based processing.',
+  alternates: { canonical: '/add-watermark' }
 };
 
 export default function AddWatermarkPage() {

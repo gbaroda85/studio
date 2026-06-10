@@ -14,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Add Page Numbers to PDF Online - Customize Position & Format Privately',
   description: 'Easily insert page numbers into your PDF documents. Choose positions, font sizes, and ranges. 100% private local browser-based tool.',
+  alternates: { canonical: '/add-page-numbers' }
 };
 
 export default function AddPageNumbersPage() {

@@ -14,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Unzip Files Online - Extract ZIP, RAR & 7Z Archives Privately (HD)',
   description: 'Professional online unzipper. Extract multiple files from ZIP archives instantly. 100% secure local browser processing. No server uploads, zero data risk.',
+  alternates: { canonical: '/unzip-file' }
 };
 
 export default function UnzipFilePage() {
@@ -65,21 +66,6 @@ export default function UnzipFilePage() {
                         <Lock className="text-teal-500 size-10" />
                         <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Secure Sandbox</h3>
                         <p className="text-xs text-muted-foreground leading-relaxed">Your files are extracted into a local virtual sandbox. Once you close the tab, all traces of the files are wiped from your device memory.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Technical Detail Section */}
-            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                    <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Unlock className="size-12 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Why use our Local Unzipper?</h2>
-                        <p className="text-muted-foreground leading-relaxed text-sm">
-                            Compressed archives often contain sensitive data like bank statements, private photos, or project code. Standard online unzippers require you to "upload" these files, which is a massive security vulnerability. <strong>GR7 Unzip Studio</strong> executes the entire decompression algorithm (Deflate/LZMA) directly on your device, ensuring that your data stays strictly under your control.
-                        </p>
                     </div>
                 </div>
             </section>

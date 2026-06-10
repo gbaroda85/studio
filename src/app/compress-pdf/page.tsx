@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Target, TrendingDown, Zap } from 'lucide-react';
 import PdfCompressor from '@/components/pdf-compressor';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'PDF Compress - Shrink PDF to 100kb, 200kb & 500kb Online (Lossless)',
   description: 'Reduce PDF file size without losing text clarity. Features targeted optimization for SSC, UPSC, and Bank portals. 100% secure local browser-based compression.',
+  alternates: { canonical: '/compress-pdf' }
 };
 
 export default function CompressPdfPage() {

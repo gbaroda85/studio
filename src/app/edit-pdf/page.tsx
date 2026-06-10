@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { FilePenLine, ShieldCheck, HelpCircle, Sparkles, Zap, Layout } from 'lucide-react';
 import PdfEditor from '@/components/pdf-editor';
@@ -13,6 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Professional PDF Editor - Edit Text, Remove Content & Overwrite Online',
   description: 'The most powerful private PDF editor. Directly type new text, remove existing content with whiteout, and insert images locally in your browser memory.',
+  alternates: { canonical: '/edit-pdf' }
 };
 
 export default function EditPdfPage() {
