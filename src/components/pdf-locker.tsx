@@ -199,8 +199,8 @@ export default function PdfLocker() {
             <CardContent className="p-8 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
-                        <UploadCloud className="size-12 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Zap className="absolute -top-2 -right-2 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                        <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-2 -right-2 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF here</p>
@@ -281,8 +281,8 @@ export default function PdfLocker() {
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto h-12 md:h-14 px-6 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                            <RefreshCcw className="mr-1.5 size-3" /> Change File
+                        <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto h-12 md:h-14 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
+                            <RefreshCcw className="mr-2 size-4" /> Change File
                         </Button>
                         
                         {protectedBlob && (
@@ -293,7 +293,7 @@ export default function PdfLocker() {
                             >
                                 <StarIcons />
                                 <Download className="mr-1.5 size-5 group-hover:translate-y-1 transition-transform" /> 
-                                <span className="uppercase tracking-tighter text-[10px] font-black">SAVE SECURE PDF</span>
+                                <span className="uppercase tracking-tighter text-[11px] md:text-xs font-black">SAVE SECURE PDF</span>
                             </Button>
                         )}
                     </div>
