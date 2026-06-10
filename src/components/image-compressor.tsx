@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -463,9 +462,9 @@ export default function ImageCompressor() {
                         <Settings2 className="size-6 text-primary" /> Optimizer Settings
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-10 space-y-10">
+                <CardContent className="p-6 md:p-8 space-y-6">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1.5 bg-muted rounded-2xl border-2">
+                        <TabsList className="grid w-full grid-cols-2 mb-4 h-12 p-1.5 bg-muted rounded-xl border-2">
                             <TabsTrigger value="target" className="font-black text-[10px] uppercase rounded-xl transition-all">
                                 <Target className="h-4 w-4 mr-2" /> Target Size
                             </TabsTrigger>
@@ -500,18 +499,17 @@ export default function ImageCompressor() {
                                 <div className="space-y-3 pt-4 border-t border-dashed">
                                     <Label htmlFor="target-val" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Custom Limit</Label>
                                     <div className="flex gap-2">
-                                        <div className="relative flex-1 group">
+                                        <div className="flex-1 group">
                                             <Input 
                                                 id="target-val" 
                                                 type="number" 
                                                 value={targetSizeValue} 
                                                 onChange={(e) => setTargetSizeValue(e.target.value)} 
-                                                className="h-16 text-3xl font-black focus-visible:ring-primary border-2 rounded-2xl bg-background pl-8"
+                                                className="h-12 text-2xl font-black focus-visible:ring-primary border-2 rounded-xl bg-background px-4"
                                             />
-                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/20 font-black text-xl uppercase pointer-events-none">{targetUnit}</div>
                                         </div>
                                         <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                            <SelectTrigger className="w-24 h-16 font-black text-lg border-2 rounded-2xl shadow-sm">
+                                            <SelectTrigger className="w-24 h-12 font-black text-base border-2 rounded-xl shadow-sm">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-xl border-2 shadow-2xl">
