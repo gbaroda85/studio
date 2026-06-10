@@ -231,18 +231,6 @@ export default function PdfLocker() {
                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3" /> Reset
-            </Button>
-            {protectedBlob && (
-                <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                    <StarIcons />
-                    <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">SAVE SECURE PDF</span>
-                </Button>
-            )}
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
@@ -291,11 +279,24 @@ export default function PdfLocker() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
-                    <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-widest">
-                        <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-widest">
-                        <Eye className="size-4 text-primary" /> INSTANT SEAL</div>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto h-12 md:h-14 px-6 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                            <RefreshCcw className="mr-1.5 size-3" /> Change File
+                        </Button>
+                        
+                        {protectedBlob && (
+                            <Button 
+                                size="lg" 
+                                className="magic-button magic-button-success w-full sm:w-auto h-12 md:h-14 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-xl transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                                onClick={handleDownload}
+                            >
+                                <StarIcons />
+                                <Download className="mr-1.5 size-5 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter text-[10px] font-black">SAVE SECURE PDF</span>
+                            </Button>
+                        )}
+                    </div>
                 </CardFooter>
             </Card>
         </div>
@@ -369,7 +370,7 @@ export default function PdfLocker() {
                         ) : (
                             <div className="flex items-center gap-3">
                                 <Lock className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">LOCK DOCUMENT</span>
+                                <span className="uppercase tracking-tighter text-lg md:text-2xl">{protectedBlob ? "DOCUMENT SEALED" : "LOCK DOCUMENT"}</span>
                             </div>
                         )}
                     </Button>

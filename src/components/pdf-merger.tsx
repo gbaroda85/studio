@@ -283,11 +283,15 @@ export default function PdfMerger() {
                                 <div className="space-y-4 flex-1 flex flex-col">
                                     <div className="flex justify-between items-center px-1 shrink-0">
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
-                                        <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase hover:bg-destructive/5">
-                                            <Trash2 className="size-3 mr-1"/> Clear All
-                                        </Button>
+                                        <div className="flex items-center gap-2">
+                                            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary/5">
+                                                <Plus className="size-3 mr-1"/> Add Files
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase hover:bg-destructive/5">
+                                                <Trash2 className="size-3 mr-1"/> Clear All
+                                            </Button>
+                                        </div>
                                     </div>
-                                    {/* FIXED SCROLL AREA HEIGHT FOR LARGE LISTS */}
                                     <ScrollArea className="h-[400px] md:h-[600px] pr-2 custom-scrollbar border rounded-2xl bg-muted/5">
                                         <div className="space-y-2 p-3">
                                             {pdfFiles.map((file, index) => (
