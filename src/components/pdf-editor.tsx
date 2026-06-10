@@ -57,8 +57,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// HARDCODED STABLE VERSION FOR WORKER
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type ElementType = 'text' | 'image' | 'shape' | 'mask' | 'arrow' | 'highlight';
@@ -111,6 +113,41 @@ interface PageState {
     elements: Element[];
     previewSrc: string | null;
 }
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 export default function PdfEditor() {
     const { toast } = useToast();
@@ -404,13 +441,16 @@ export default function PdfEditor() {
         setIsExporting(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+            const originalPdf = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+            const newPdfDoc = await PDFDocument.create();
             
             const activePageStates = pages.filter(p => !p.isDeleted);
-            const pagesToKeep = activePageStates.map(p => p.index - 1);
             
             for (const pageState of activePageStates) {
-                const pdfPage = pdfDoc.getPage(pageState.index - 1);
+                // Copy the original page into the new document to ensure modifications are clean
+                const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [pageState.index - 1]);
+                const pdfPage = newPdfDoc.addPage(copiedPage);
+                
                 const { width, height } = pdfPage.getSize();
 
                 for (const el of pageState.elements) {
@@ -419,11 +459,11 @@ export default function PdfEditor() {
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
-                        const font = await pdfDoc.embedFont(fontName);
+                        const font = await newPdfDoc.embedFont(fontName);
                         
                         pdfPage.drawText(el.text, { 
                             x: elX, 
-                            y: elY - (el.size * 0.82), 
+                            y: elY - (el.size * 0.8), // Vertical baseline adjustment
                             size: el.size, 
                             font, 
                             color: hexToRgb(el.color), 
@@ -443,7 +483,7 @@ export default function PdfEditor() {
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
                         const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
-                        const embeddedImg = isPng ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
+                        const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
                         
                         const imgW = (el.width / 100) * width;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
@@ -460,7 +500,7 @@ export default function PdfEditor() {
                         const angle = (el.rotation * Math.PI) / 180;
                         const len = (el.length / 100) * width;
                         const endX = elX + Math.cos(angle) * len;
-                        const endY = elY - Math.sin(angle) * len; // Adjusted for PDF coords
+                        const endY = elY - Math.sin(angle) * len;
 
                         pdfPage.drawLine({
                             start: { x: elX, y: elY },
@@ -470,8 +510,8 @@ export default function PdfEditor() {
                             opacity: el.opacity / 100
                         });
                         
-                        // Basic Arrow Head
-                        const headSize = el.thickness * 3;
+                        // Arrow Head Logic
+                        const headSize = el.thickness * 4;
                         const headAngle = Math.PI / 6;
                         pdfPage.drawLine({
                             start: { x: endX, y: endY },
@@ -489,24 +529,21 @@ export default function PdfEditor() {
                 }
             }
 
-            const allIndices = Array.from({ length: pdfDoc.getPageCount() }, (_, i) => i);
-            const indicesToRemove = allIndices.filter(i => !pagesToKeep.includes(i)).reverse();
-            for (const idx of indicesToRemove) {
-                pdfDoc.removePage(idx);
-            }
-
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const finalPdfBytes = await newPdfDoc.save();
+            const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `GR7-Tools-Edited-${pdfFile.name}`;
+            link.download = `Edited_${pdfFile.name}`;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "PDF Exported Successfully" });
         } catch (e) {
             console.error('[Export Error]:', e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Document rendering error." });
+            toast({ variant: 'destructive', title: "Export Failed", description: "Internal rendering error." });
         } finally {
             setIsExporting(false);
         }
@@ -534,7 +571,7 @@ export default function PdfEditor() {
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
                             <Dialog>
                                 <DialogTrigger asChild><Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button></DialogTrigger>
-                                <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl">
+                                <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl rounded-[2.5rem]">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary">Handwriting Signature</DialogTitle></DialogHeader>
                                     <div className="bg-white rounded-xl overflow-hidden touch-none border-4 border-primary/20 shadow-inner">
                                         <canvas ref={drawingCanvasRef} width={400} height={200} className="w-full h-[200px] cursor-crosshair" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={finishDrawing} onMouseLeave={finishDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={finishDrawing} />
@@ -623,12 +660,12 @@ export default function PdfEditor() {
                                             {el.type === 'text' ? (
                                                 <div className="group relative">
                                                     {selectedElementId === el.id ? (
-                                                        <div className="p-1 bg-slate-800 rounded border border-primary shadow-xl">
+                                                        <div className="p-1 bg-[#1e293b] rounded border-2 border-primary shadow-2xl">
                                                             <input 
                                                                 value={el.text} 
                                                                 onChange={e => updateElement({ text: e.target.value })} 
                                                                 onBlur={commitChange} 
-                                                                className="bg-transparent border-none font-bold outline-none focus:ring-0 px-1" 
+                                                                className="bg-transparent border-none font-bold outline-none focus:ring-0 px-2 placeholder:text-white/20" 
                                                                 style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }} 
                                                                 autoFocus 
                                                                 onMouseDown={(e) => e.stopPropagation()} 
@@ -639,7 +676,7 @@ export default function PdfEditor() {
                                                     )}
                                                 </div>
                                             ) : (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') ? (
-                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '1px dashed #primary' : 'none' }} />
+                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '2px dashed #ff0000' : 'none' }} />
                                             ) : el.type === 'arrow' ? (
                                                 <div style={{ transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center', width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.thickness}px`, backgroundColor: el.color, opacity: el.opacity/100, position: 'relative' }}>
                                                     <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px]" style={{ borderLeftColor: el.color }} />
