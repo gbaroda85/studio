@@ -101,13 +101,13 @@ export default function BarcodeGenerator() {
         if (isManual) setIsGenerating(true);
 
         // Small simulation for better UX on manual click
-        if (isManual) await new Promise(r => setTimeout(r, 500));
+        if (isManual) await new Promise(r => setTimeout(r, 600));
 
         const lines = inputData.split('\n').filter(l => l.trim() !== '');
         const results: { id: string, data: string, label: string }[] = [];
 
         try {
-            lines.forEach((line, idx) => {
+            lines.forEach((line) => {
                 const container = document.createElement('div');
                 const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 container.appendChild(svg);
@@ -132,11 +132,22 @@ export default function BarcodeGenerator() {
             });
 
             setPreviews(results);
-            if (results.length > 0 && (!selectedPreviewId || !results.find(r => r.id === selectedPreviewId))) {
-                setSelectedPreviewId(results[0].id);
+            if (results.length > 0) {
+                // If manual, always select the first one of the new batch
+                if (isManual) setSelectedPreviewId(results[0].id);
+                // Otherwise only select if nothing is selected or current selection is invalid
+                else if (!selectedPreviewId || !results.find(r => r.id === selectedPreviewId)) {
+                    setSelectedPreviewId(results[0].id);
+                }
             }
             
             if (isManual) {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#3b82f6', '#10b981', '#ffffff']
+                });
                 toast({ title: "Barcode Ready", description: `${results.length} code(s) generated successfully.` });
             }
         } catch (e: any) {
@@ -272,11 +283,15 @@ export default function BarcodeGenerator() {
                             </div>
                             {previews.length > 0 && (
                                 <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5 bg-green-500/10 text-green-700 px-3 py-1 rounded-full border border-green-500/20 animate-in zoom-in-95">
+                                        <CheckCircle2 className="size-3" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest">ACTIVE</span>
+                                    </div>
                                     <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{previews.length} GENERATED</Badge>
                                 </div>
                             )}
                         </CardHeader>
-                        <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px] flex items-center justify-center relative select-none">
+                        <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative select-none">
                             <AnimatePresence mode="wait">
                                 {isGenerating ? (
                                     <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4">
@@ -284,17 +299,25 @@ export default function BarcodeGenerator() {
                                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary animate-pulse">Encoding Pixels...</p>
                                     </motion.div>
                                 ) : selectedItem ? (
-                                    <motion.div key={selectedItem.id} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-8">
-                                        <div className="bg-white p-10 md:p-16 rounded-[2rem] shadow-2xl border-4 border-white flex items-center justify-center relative overflow-hidden group">
+                                    <motion.div 
+                                        key={selectedItem.id} 
+                                        initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+                                        animate={{ scale: 1, opacity: 1, y: 0 }} 
+                                        exit={{ scale: 0.9, opacity: 0, y: -20 }}
+                                        transition={{ type: "spring", damping: 20, stiffness: 100 }}
+                                        className="flex flex-col items-center gap-8"
+                                    >
+                                        <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-4 border-white flex items-center justify-center relative overflow-hidden group">
                                             <img src={selectedItem.data} alt="Barcode Preview" className="max-h-[35vh] w-auto block transition-transform group-hover:scale-105" />
                                             <div className="absolute top-4 right-4"><Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-500/20 text-[8px] font-black">SCANNABLE HD</Badge></div>
+                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                         <div className="flex flex-wrap items-center justify-center gap-3 no-print">
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
                                             <Separator orientation="vertical" className="h-6 opacity-20 mx-2" />
-                                            <Button className="h-10 bg-slate-800 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT NOW</Button>
+                                            <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT NOW</Button>
                                         </div>
                                     </motion.div>
                                 ) : (
@@ -441,4 +464,3 @@ export default function BarcodeGenerator() {
         </div>
     );
 }
-
