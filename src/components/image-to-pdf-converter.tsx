@@ -23,7 +23,7 @@ import {
   Layers,
   RotateCw,
   ChevronRight,
-  Plus,
+  Plus, 
   Monitor,
   ImageIcon,
   Settings2,
@@ -112,7 +112,7 @@ export default function ImageToPdfConverter() {
         setConvertedPdfUrl(null);
     }
     setPreviewImages([]);
-  }
+  };
 
   const handleFilesChange = (files: FileList | null) => {
     clearPreviews();
@@ -155,17 +155,17 @@ export default function ImageToPdfConverter() {
     clearPreviews();
     setImages(prev => {
         const filtered = prev.filter(img => img.id !== id);
-        if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[0].id : null);
+        if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
         return filtered;
     });
-  }
+  };
 
   const handleReset = () => {
     setImages([]);
     setSelectedId(null);
     clearPreviews();
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }
+  };
 
   const updateSelectedImage = (updates: Partial<Pick<ImageItem, 'vAlign'>>) => {
       if (!selectedId) return;
@@ -219,7 +219,11 @@ export default function ImageToPdfConverter() {
     setRenderingProgress(0);
     try {
         const arrayBuffer = await pdfBlob.arrayBuffer();
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
+        const loadingTask = pdfjs.getDocument({ 
+            data: new Uint8Array(arrayBuffer),
+            cMapUrl: 'https://unpkg.com/pdfjs-dist@4.2.67/cmaps/',
+            cMapPacked: true
+        });
         const pdf = await loadingTask.promise;
         const imgs: string[] = [];
         const pagesToRender = Math.min(pdf.numPages, 10); 
@@ -263,26 +267,38 @@ export default function ImageToPdfConverter() {
 
     for (let i = 0; i < images.length; i++) {
         if (i > 0) pdf.addPage();
-        const imgData = images[i];
+        
+        const pageData = images[i];
         const img = new window.Image();
-        img.src = imgData.src;
+        img.src = pageData.src;
 
         await new Promise((resolve) => {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
+                
+                // Professional scaling logic with aspect ratio protection
                 const scaleFactor = 0.9;
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scaleFactor;
                 const finalWidth = imgProps.width * ratio;
                 const finalHeight = imgProps.height * ratio;
+                
                 const x = (pageWidth - finalWidth) / 2;
                 let y;
-                if (imgData.vAlign === 'top') y = 0; 
-                else if (imgData.vAlign === 'bottom') y = pageHeight - finalHeight; 
-                else y = (pageHeight - finalHeight) / 2; 
 
-                pdf.addImage(imgData.src, 'PNG', x, y, finalWidth, finalHeight, undefined, 'FAST');
+                // STRICT CLAMPING: 0 is absolute top, pageHeight-finalHeight is absolute bottom
+                if (pageData.vAlign === 'top') {
+                    y = 0; 
+                } else if (pageData.vAlign === 'bottom') {
+                    y = pageHeight - finalHeight; 
+                } else {
+                    y = (pageHeight - finalHeight) / 2; 
+                }
+
+                // Force JPEG to optimize memory and standard rendering
+                pdf.addImage(pageData.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
                 resolve(null);
             };
+            img.onerror = () => resolve(null);
         });
     }
 
@@ -300,7 +316,7 @@ export default function ImageToPdfConverter() {
       link.href = convertedPdfUrl;
       link.download = `GR7-Image-Bundle-${Date.now()}.pdf`;
       link.click();
-  }
+  };
 
   const selectedImage = images.find(img => img.id === selectedId);
 
@@ -550,7 +566,7 @@ export default function ImageToPdfConverter() {
                         </div>
                         <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                             <span className="font-black block mb-1 text-primary">STRICT CLAMPING:</span>
-                            "Bottom" logic pushes the image to the absolute last pixel of the page. Zero padding active.
+                            "Top" logic pushes the image to the absolute first pixel of the page. Zero padding active.
                         </p>
                     </div>
                 </CardContent>
