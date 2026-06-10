@@ -427,7 +427,7 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'upload' && workflow === 'separate' && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-2xl">
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
               <div className="flex flex-col sm:flex-row items-center justify-between no-print gap-4">
                    <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center bg-white/50 dark:bg-slate-900/50 rounded-full border shadow-sm px-6 h-10"><ArrowLeft className="mr-1 size-3" /> Back to Selection</Button>
                    <div className="flex items-center gap-3">
@@ -436,7 +436,7 @@ export default function AadhaarPrinter() {
                         )}
                    </div>
               </div>
-              <div className="grid grid-cols-1 gap-6 no-print">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 no-print">
                   {[ { side: 'front' as const, raw: frontRaw, final: frontFinal, setRaw: setFrontRaw, setFinal: setFrontFinal, inputRef: frontInputRef },
                      { side: 'back' as const, raw: backRaw, final: backFinal, setRaw: setBackRaw, setFinal: setBackFinal, inputRef: backInputRef }
                   ].map(s => (
