@@ -173,7 +173,7 @@ export default function ImageToPdfConverter() {
       clearPreviews();
   };
 
-  const rotateSelectedImage = () => {
+  const rotateSelectedImage = (deg: number) => {
     if (!selectedId) return;
     const item = images.find(img => img.id === selectedId);
     if (!item) return;
@@ -188,19 +188,28 @@ export default function ImageToPdfConverter() {
             setIsConverting(false);
             return;
         }
-        canvas.width = img.height;
-        canvas.height = img.width;
+        
+        // Handle target rotation
+        if (deg === 90 || deg === 270) {
+            canvas.width = img.height;
+            canvas.height = img.width;
+        } else {
+            canvas.width = img.width;
+            canvas.height = img.height;
+        }
+
         ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((90 * Math.PI) / 180);
+        ctx.rotate((deg * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         const rotatedSrc = canvas.toDataURL('image/png');
         setImages(prev => prev.map(i => i.id === selectedId ? { ...i, src: rotatedSrc } : i));
         clearPreviews();
         setIsConverting(false);
+        toast({ title: `Rotated ${deg}°` });
     };
   };
 
-  const rotateAllImages = async () => {
+  const rotateAllImages = async (deg: number) => {
     if (images.length === 0) return;
     setIsConverting(true);
     clearPreviews();
@@ -216,10 +225,15 @@ export default function ImageToPdfConverter() {
             resolve(item);
             return;
           }
-          canvas.width = img.height;
-          canvas.height = img.width;
+          if (deg === 90 || deg === 270) {
+              canvas.width = img.height;
+              canvas.height = img.width;
+          } else {
+              canvas.width = img.width;
+              canvas.height = img.height;
+          }
           ctx.translate(canvas.width / 2, canvas.height / 2);
-          ctx.rotate((90 * Math.PI) / 180);
+          ctx.rotate((deg * Math.PI) / 180);
           ctx.drawImage(img, -img.width / 2, -img.height / 2);
           const rotatedSrc = canvas.toDataURL('image/png');
           resolve({ ...item, src: rotatedSrc });
@@ -230,7 +244,7 @@ export default function ImageToPdfConverter() {
 
     setImages(rotatedImages);
     setIsConverting(false);
-    toast({ title: "Rotation Complete", description: "All pages rotated 90° clockwise." });
+    toast({ title: "Global Rotation Complete", description: `Applied ${deg}° to all pages.` });
   };
 
   const applyToAll = () => {
@@ -309,7 +323,6 @@ export default function ImageToPdfConverter() {
             img.onload = () => {
                 const imgProps = pdf.getImageProperties(img);
                 
-                // Professional scaling logic with aspect ratio protection
                 const scaleFactor = 0.9;
                 const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height) * scaleFactor;
                 const finalWidth = imgProps.width * ratio;
@@ -318,7 +331,6 @@ export default function ImageToPdfConverter() {
                 const x = (pageWidth - finalWidth) / 2;
                 let y;
 
-                // STRICT CLAMPING: 0 is absolute top, pageHeight-finalHeight is absolute bottom
                 if (pageData.vAlign === 'top') {
                     y = 0; 
                 } else if (pageData.vAlign === 'bottom') {
@@ -327,7 +339,6 @@ export default function ImageToPdfConverter() {
                     y = (pageHeight - finalHeight) / 2; 
                 }
 
-                // Force JPEG to optimize memory and standard rendering
                 pdf.addImage(pageData.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
                 resolve(null);
             };
@@ -357,7 +368,6 @@ export default function ImageToPdfConverter() {
     <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
       <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
         
-        {/* Workspace: Left Panel */}
         <div className="lg:col-span-8 space-y-6">
             <Card className={cn(
                 "border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl transition-all duration-300",
@@ -572,25 +582,26 @@ export default function ImageToPdfConverter() {
 
                             <div className="space-y-4 pt-6 border-t-2 border-dashed border-primary/10">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
-                                    <RotateCw className="size-3" /> Orientation
+                                    <RotateCw className="size-3" /> Orientation Control
                                 </Label>
-                                <div className="flex flex-col gap-2">
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-14 rounded-2xl border-2 font-black text-xs uppercase shadow-sm hover:border-primary/40 transition-all"
-                                        onClick={rotateSelectedImage}
-                                        disabled={!selectedId || isConverting}
-                                    >
-                                        <RotateCw className="size-5 mr-3" /> Rotate Selected 90°
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-11 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-2xl transition-all shadow-sm"
-                                        onClick={rotateAllImages}
-                                        disabled={images.length === 0 || isConverting}
-                                    >
-                                        <Layers className="size-3.5 mr-2" /> Rotate All Pages 90°
-                                    </Button>
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <p className="text-[8px] font-black text-muted-foreground uppercase opacity-60">Selected Page</p>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <Button variant="outline" className="h-10 text-[9px] font-black" onClick={() => rotateSelectedImage(90)}>90°</Button>
+                                            <Button variant="outline" className="h-10 text-[9px] font-black" onClick={() => rotateSelectedImage(180)}>180°</Button>
+                                            <Button variant="outline" className="h-10 text-[9px] font-black" onClick={() => rotateSelectedImage(270)}>270°</Button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-2 pt-2 border-t border-dashed border-primary/5">
+                                        <p className="text-[8px] font-black text-muted-foreground uppercase opacity-60">Batch (All Pages)</p>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <Button variant="outline" className="h-10 text-[9px] font-black text-primary border-primary/20" onClick={() => rotateAllImages(90)}>90° ALL</Button>
+                                            <Button variant="outline" className="h-10 text-[9px] font-black text-primary border-primary/20" onClick={() => rotateAllImages(180)}>180° ALL</Button>
+                                            <Button variant="outline" className="h-10 text-[9px] font-black text-primary border-primary/20" onClick={() => rotateAllImages(270)}>270° ALL</Button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
