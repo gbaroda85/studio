@@ -238,7 +238,7 @@ export default function SignatureRemover() {
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
-                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop Signature here</p>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Signature here</p>
                         <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
                     </div>
                 </div>
@@ -265,9 +265,9 @@ export default function SignatureRemover() {
                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
-                <RotateCcw className="mr-1.5 size-3" /> Reset
+        <div className="flex items-center gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                <RotateCcw className="mr-1.5 size-3" /> Change Signature
             </Button>
             <Button 
                 size="lg" 
