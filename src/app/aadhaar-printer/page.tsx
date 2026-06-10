@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer } from 'lucide-react';
+import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer, Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Universal ID Card Printer - Auto-Crop Aadhaar, PAN, DL & Voter ID Online',
@@ -41,10 +41,23 @@ export default function AadhaarPrinterPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-4 md:pt-8">
+    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
+            {/* Restored Hero Header */}
+            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                    <Sparkles className="size-3" /> IDENTITY STUDIO
+                </div>
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-none">
+                    Universal ID <span className="text-gradient-hero">Printer</span>
+                </h1>
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                    Auto-crop Aadhaar, PAN, DL and Voter ID for perfect wallet-sized printing. 100% private.
+                </p>
+            </div>
+
             <div className="w-full flex justify-center">
                 <AadhaarPrinter />
             </div>
