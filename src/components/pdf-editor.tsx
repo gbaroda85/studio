@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -410,7 +411,6 @@ export default function PdfEditor() {
             
             for (const pageState of activePageStates) {
                 const pdfPage = pdfDoc.getPage(pageState.index - 1);
-                pdfPage.setRotation(degrees(pageState.rotation));
                 const { width, height } = pdfPage.getSize();
 
                 for (const el of pageState.elements) {
@@ -420,9 +420,12 @@ export default function PdfEditor() {
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await pdfDoc.embedFont(fontName);
+                        
+                        // Text vertical correction: drawText Y is bottom-left baseline
+                        // Browser coordinates are top-left
                         pdfPage.drawText(el.text, { 
                             x: elX, 
-                            y: elY - el.size, 
+                            y: elY - (el.size * 0.82), 
                             size: el.size, 
                             font, 
                             color: hexToRgb(el.color), 
@@ -606,7 +609,15 @@ export default function PdfEditor() {
                                                 <div className="group relative">
                                                     {selectedElementId === el.id ? (
                                                         <div className="p-1 bg-white/50 backdrop-blur-sm rounded border border-primary shadow-xl">
-                                                            <input value={el.text} onChange={e => updateElement({ text: e.target.value })} onBlur={commitChange} className="bg-transparent border-none text-slate-900 font-bold outline-none focus:ring-0 px-1" style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }} autoFocus onMouseDown={(e) => e.stopPropagation()} />
+                                                            <input 
+                                                                value={el.text} 
+                                                                onChange={e => updateElement({ text: e.target.value })} 
+                                                                onBlur={commitChange} 
+                                                                className="bg-transparent border-none font-bold outline-none focus:ring-0 px-1" 
+                                                                style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }} 
+                                                                autoFocus 
+                                                                onMouseDown={(e) => e.stopPropagation()} 
+                                                            />
                                                         </div>
                                                     ) : (
                                                         <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px', opacity: el.opacity/100 }}>{el.text}</div>
