@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -43,7 +42,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -197,9 +195,26 @@ export default function BarcodeGenerator() {
             const img = new window.Image();
             img.src = target.data;
             img.onload = () => {
-                const pdf = new jsPDF({ orientation: 'l', unit: 'px', format: [img.width, img.height] });
-                pdf.addImage(target.data, 'SVG', 0, 0, img.width, img.height);
-                pdf.save(`barcode-${target.label}.pdf`);
+                // To fix the "SVG not supported" error in jsPDF:
+                // We render the SVG to a Canvas first, then add as JPEG to PDF
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width * 4; // High DPI
+                canvas.height = img.height * 4;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const pngData = canvas.toDataURL('image/jpeg', 1.0);
+                    
+                    const pdf = new jsPDF({ 
+                        orientation: img.width > img.height ? 'l' : 'p', 
+                        unit: 'px', 
+                        format: [img.width, img.height] 
+                    });
+                    pdf.addImage(pngData, 'JPEG', 0, 0, img.width, img.height);
+                    pdf.save(`barcode-${target.label}.pdf`);
+                }
             };
         }
     };
@@ -240,13 +255,45 @@ export default function BarcodeGenerator() {
     const handlePrint = () => {
         const target = previews.find(p => p.id === selectedPreviewId);
         if (!target) return;
-        const win = window.open('', '_blank');
-        if (win) {
-            win.document.write(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${target.data}" style="max-width:80%;"></body></html>`);
-            win.document.close();
-            win.focus();
-            setTimeout(() => { win.print(); win.close(); }, 500);
-        }
+
+        // Convert to PNG for reliable printing across all browsers
+        const img = new window.Image();
+        img.src = target.data;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width * 2;
+            canvas.height = img.height * 2;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const pngData = canvas.toDataURL('image/png');
+                
+                const win = window.open('', '_blank');
+                if (win) {
+                    win.document.write(`
+                        <html>
+                            <head><title>Print Barcode - ${target.label}</title></head>
+                            <body style="margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background: white;">
+                                <img src="${pngData}" style="max-width:90%; max-height:90%; object-fit: contain;">
+                                <script>
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                            window.onafterprint = function() { window.close(); };
+                                        }, 300);
+                                    };
+                                </script>
+                            </body>
+                        </html>
+                    `);
+                    win.document.close();
+                } else {
+                    toast({ variant: 'destructive', title: "Printer Blocked", description: "Please allow popups to print." });
+                }
+            }
+        };
     };
 
     const selectedItem = previews.find(p => p.id === selectedPreviewId);
@@ -263,7 +310,7 @@ export default function BarcodeGenerator() {
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={() => { setInputData("GR7-854120"); setPreviews([]); }} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                    <Button variant="outline" onClick={() => { setInputData("GR7-854120"); setPreviews([]); }} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Data
                     </Button>
                     {previews.length > 1 && (
