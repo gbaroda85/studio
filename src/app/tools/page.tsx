@@ -60,7 +60,8 @@ import {
   Music,
   Video,
   RotateCw,
-  Barcode
+  Barcode,
+  QrCode
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -388,6 +389,14 @@ function ToolsPageContent() {
   ];
   
   const converterFeatures = [
+    {
+      href: '/qr-code-generator',
+      labelKey: 'qr_code_generator_label',
+      descriptionKey: 'qr_code_generator_description',
+      icon: QrCode,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#f5f3ff]'
+    },
     {
       href: '/barcode-generator',
       labelKey: 'barcode_generator_label',

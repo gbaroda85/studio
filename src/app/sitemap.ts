@@ -18,7 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/image-to-pdf',
     '/video-to-mp3',
     '/image-to-text',
-    '/barcode-generator'
+    '/barcode-generator',
+    '/qr-code-generator'
   ];
 
   const otherTools = [

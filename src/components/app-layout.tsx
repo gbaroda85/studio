@@ -56,7 +56,8 @@ import {
   Music,
   Video,
   RotateCw,
-  Barcode
+  Barcode,
+  QrCode
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -146,6 +147,7 @@ const CATEGORIES = [
     icon: Infinity,
     color: "text-amber-500",
     tools: [
+      { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
       { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
       { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
       { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
