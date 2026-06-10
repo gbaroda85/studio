@@ -51,6 +51,7 @@ const QUICK_FORMATS = [
     { label: 'Page {page}', display: 'Page 1', value: 'Page {page}' },
     { label: '{page} / {total}', display: '1 / 10', value: '{page} / {total}' },
     { label: '- {page} -', display: '- 1 -', value: '- {page} -' },
+    { label: '{page}', display: '1', value: '{page}' },
 ];
 
 const NUMBER_STYLES = [
@@ -60,6 +61,41 @@ const NUMBER_STYLES = [
     { label: 'A, B, C (Alpha Upper)', value: 'alpha-upper' },
     { label: 'a, b, c (Alpha Lower)', value: 'alpha-lower' },
 ];
+
+const StarIcons = () => (
+    <>
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+    </>
+);
 
 function romanize(num: number): string {
     if (isNaN(num)) return "";
@@ -124,6 +160,31 @@ function parsePageRanges(ranges: string, maxPage: number): number[] {
     return Array.from(result).sort((a, b) => a - b);
 }
 
+function generateRangeString(selectedIndices: number[]): string {
+    if (selectedIndices.length === 0) return '';
+    const sorted = [...selectedIndices].map(i => i + 1).sort((a, b) => a - b);
+    const ranges: string[] = [];
+    let start = sorted[0];
+    let end = sorted[0];
+
+    for (let i = 1; i <= sorted.length; i++) {
+        if (i < sorted.length && sorted[i] === end + 1) {
+            end = sorted[i];
+        } else {
+            if (start === end) {
+                ranges.push(`${start}`);
+            } else {
+                ranges.push(`${start}-${end}`);
+            }
+            if (i < sorted.length) {
+                start = sorted[i];
+                end = sorted[i];
+            }
+        }
+    }
+    return ranges.join(', ');
+}
+
 export default function PdfPageNumberer() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -184,7 +245,7 @@ export default function PdfPageNumberer() {
             if (context) {
                 context.fillStyle = '#FFFFFF';
                 context.fillRect(0, 0, canvas.width, canvas.height);
-                await page.render({ canvasContext: context, viewport }).promise;
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
                 imgs.push(canvas.toDataURL('image/jpeg', 0.85));
             }
             setRenderingProgress(Math.round((i / pagesToRender) * 100));
@@ -367,7 +428,7 @@ export default function PdfPageNumberer() {
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -408,20 +469,17 @@ export default function PdfPageNumberer() {
                             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
                                 <Layers className="size-3" /> Quick Formats
                             </Label>
-                            <div className="grid grid-cols-1 gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                                 {QUICK_FORMATS.map((f) => (
-                                    <Button 
+                                    <button
                                         key={f.value}
-                                        variant={format === f.value ? "default" : "outline"}
                                         onClick={() => setFormat(f.value)}
                                         className={cn(
-                                            "h-11 justify-between font-black text-[10px] uppercase border-2 rounded-xl px-4",
-                                            format === f.value ? "border-primary" : "hover:border-primary/50"
+                                            "btn-pos-uiverse h-10",
+                                            format === f.value && "active-uiverse"
                                         )}
-                                    >
-                                        <span>{f.label.replace('{page}', '1').replace('{total}', '10')}</span>
-                                        {format === f.value && <CheckCircle2 className="size-3 text-white" />}
-                                    </Button>
+                                        data-label={f.display}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -434,7 +492,7 @@ export default function PdfPageNumberer() {
                                 value={format} 
                                 onChange={(e) => setFormat(e.target.value)}
                                 placeholder="e.g. Page {page} of {total}"
-                                className="h-10 border-2 font-bold rounded-xl bg-background shadow-inner"
+                                className="h-10 border-2 font-bold rounded-xl bg-background shadow-inner text-center focus-visible:ring-primary/20"
                             />
                             <p className="text-[8px] text-muted-foreground font-bold uppercase opacity-50">Variables: {'{page}'}, {'{total}'}</p>
                         </div>
@@ -487,10 +545,11 @@ export default function PdfPageNumberer() {
                     <CardFooter className="bg-muted/10 p-5 md:p-8 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
                             <Button 
-                                className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary shadow-2xl rounded-xl md:rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleAddPageNumbers}
                                 disabled={isProcessing || !format}
                             >
+                                <StarIcons />
                                 {isProcessing ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="size-6 md:size-8 animate-spin" />
@@ -504,8 +563,10 @@ export default function PdfPageNumberer() {
                                 )}
                             </Button>
                         ) : (
-                            <Button size="lg" className="w-full h-16 md:h-20 bg-green-600 hover:bg-green-700 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
-                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> DOWNLOAD PDF
+                            <Button size="lg" className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg md:text-2xl font-black rounded-xl md:rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
+                                <StarIcons />
+                                <Download className="mr-3 md:mr-4 size-6 md:size-8 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                             </Button>
                         )}
                         <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
