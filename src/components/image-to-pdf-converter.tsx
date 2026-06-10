@@ -200,6 +200,39 @@ export default function ImageToPdfConverter() {
     };
   };
 
+  const rotateAllImages = async () => {
+    if (images.length === 0) return;
+    setIsConverting(true);
+    clearPreviews();
+
+    const rotatedImages = await Promise.all(images.map(async (item) => {
+      return new Promise<ImageItem>((resolve) => {
+        const img = new window.Image();
+        img.src = item.src;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(item);
+            return;
+          }
+          canvas.width = img.height;
+          canvas.height = img.width;
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((90 * Math.PI) / 180);
+          ctx.drawImage(img, -img.width / 2, -img.height / 2);
+          const rotatedSrc = canvas.toDataURL('image/png');
+          resolve({ ...item, src: rotatedSrc });
+        };
+        img.onerror = () => resolve(item);
+      });
+    }));
+
+    setImages(rotatedImages);
+    setIsConverting(false);
+    toast({ title: "Rotation Complete", description: "All pages rotated 90° clockwise." });
+  };
+
   const applyToAll = () => {
       if (!selectedId) return;
       
@@ -539,15 +572,26 @@ export default function ImageToPdfConverter() {
 
                             <div className="space-y-4 pt-6 border-t-2 border-dashed border-primary/10">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
-                                    <RotateCw className="size-3" /> Fix Orientation
+                                    <RotateCw className="size-3" /> Orientation
                                 </Label>
-                                <Button 
-                                    variant="outline" 
-                                    className="w-full h-14 rounded-2xl border-2 font-black text-xs uppercase shadow-sm hover:border-primary/40 transition-all"
-                                    onClick={rotateSelectedImage}
-                                >
-                                    <RotateCw className="size-5 mr-3" /> Rotate 90° Clockwise
-                                </Button>
+                                <div className="flex flex-col gap-2">
+                                    <Button 
+                                        variant="outline" 
+                                        className="w-full h-14 rounded-2xl border-2 font-black text-xs uppercase shadow-sm hover:border-primary/40 transition-all"
+                                        onClick={rotateSelectedImage}
+                                        disabled={!selectedId || isConverting}
+                                    >
+                                        <RotateCw className="size-5 mr-3" /> Rotate Selected 90°
+                                    </Button>
+                                    <Button 
+                                        variant="outline" 
+                                        className="w-full h-11 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-2xl transition-all shadow-sm"
+                                        onClick={rotateAllImages}
+                                        disabled={images.length === 0 || isConverting}
+                                    >
+                                        <Layers className="size-3.5 mr-2" /> Rotate All Pages 90°
+                                    </Button>
+                                </div>
                             </div>
 
                             <Button 
