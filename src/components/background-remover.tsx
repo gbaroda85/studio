@@ -297,7 +297,7 @@ export default function BackgroundRemover() {
                 </div>
             </div>
             <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none"><span className="text-gradient-hero">Background Remover</span></h1>
-            <p className="text-xs md:sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local processing.</p>
+            <p className="text-xs md:sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local RAM processing.</p>
         </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
             <CardHeader className="bg-muted/30 border-b p-6 text-center"><CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle></CardHeader>
@@ -380,8 +380,8 @@ export default function BackgroundRemover() {
             <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0"><Settings2 className="size-5 md:size-6" /></div>
             <div><h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2></div>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Reset</Button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Change Image</Button>
             <Button 
                 size="lg" 
                 className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-2" 
