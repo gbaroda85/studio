@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -33,7 +34,8 @@ import {
     FileDigit,
     ArrowDownToLine,
     Archive,
-    Image as ImageIcon
+    ImageIcon,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -77,6 +79,7 @@ export default function BarcodeGenerator() {
     const [inputData, setInputData] = useState("GR7-854120");
     const [format, setFormat] = useState('CODE128');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     
     // Customization States
     const [width, setWidth] = useState([2]);
@@ -84,18 +87,21 @@ export default function BarcodeGenerator() {
     const [displayValue, setDisplayValue] = useState(true);
     const [fontSize, setFontSize] = useState([20]);
     const [margin, setMargin] = useState([10]);
-    const [lineColor, setBorderColor] = useState("#000000");
+    const [lineColor, setLineColor] = useState("#000000");
     
     const [previews, setPreviews] = useState<{ id: string, data: string, label: string }[]>([]);
     const [selectedPreviewId, setSelectedPreviewId] = useState<string | null>(null);
 
-    const svgRef = useRef<SVGSVGElement>(null);
-
-    const generateBarcode = useCallback(() => {
+    const generateBarcode = useCallback(async (isManual = false) => {
         if (!inputData.trim()) {
             setPreviews([]);
             return;
         }
+
+        if (isManual) setIsGenerating(true);
+
+        // Small simulation for better UX on manual click
+        if (isManual) await new Promise(r => setTimeout(r, 500));
 
         const lines = inputData.split('\n').filter(l => l.trim() !== '');
         const results: { id: string, data: string, label: string }[] = [];
@@ -126,16 +132,22 @@ export default function BarcodeGenerator() {
             });
 
             setPreviews(results);
-            if (results.length > 0 && !selectedPreviewId) {
+            if (results.length > 0 && (!selectedPreviewId || !results.find(r => r.id === selectedPreviewId))) {
                 setSelectedPreviewId(results[0].id);
+            }
+            
+            if (isManual) {
+                toast({ title: "Barcode Ready", description: `${results.length} code(s) generated successfully.` });
             }
         } catch (e: any) {
             toast({ variant: 'destructive', title: 'Format Error', description: 'Data is not valid for this barcode type.' });
+        } finally {
+            if (isManual) setIsGenerating(false);
         }
-    }, [inputData, format, width, height, displayValue, fontSize, margin, lineColor, toast]);
+    }, [inputData, format, width, height, displayValue, fontSize, margin, lineColor, toast, selectedPreviewId]);
 
     useEffect(() => {
-        const timer = setTimeout(generateBarcode, 300);
+        const timer = setTimeout(() => generateBarcode(false), 300);
         return () => clearTimeout(timer);
     }, [generateBarcode]);
 
@@ -266,7 +278,12 @@ export default function BarcodeGenerator() {
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px] flex items-center justify-center relative select-none">
                             <AnimatePresence mode="wait">
-                                {selectedItem ? (
+                                {isGenerating ? (
+                                    <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4">
+                                        <Loader2 className="size-16 animate-spin text-primary opacity-20 stroke-[3]" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary animate-pulse">Encoding Pixels...</p>
+                                    </motion.div>
+                                ) : selectedItem ? (
                                     <motion.div key={selectedItem.id} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-8">
                                         <div className="bg-white p-10 md:p-16 rounded-[2rem] shadow-2xl border-4 border-white flex items-center justify-center relative overflow-hidden group">
                                             <img src={selectedItem.data} alt="Barcode Preview" className="max-h-[35vh] w-auto block transition-transform group-hover:scale-105" />
@@ -394,13 +411,28 @@ export default function BarcodeGenerator() {
                         <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-3">
                              <Button 
                                 className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                                onClick={() => handleDownload('png')}
-                                disabled={previews.length === 0}
+                                onClick={() => generateBarcode(true)}
+                                disabled={!inputData.trim() || isGenerating}
                             >
                                 <StarIcons />
-                                <Download className="size-6 md:size-8 text-white group-hover:translate-y-1 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">SAVE IMAGE</span>
+                                {isGenerating ? (
+                                    <div className="flex items-center gap-3">
+                                        <Loader2 className="size-7 md:size-8 animate-spin" />
+                                        <span className="uppercase font-black text-base md:text-lg tracking-tighter">GENERATING...</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        <Barcode className="size-7 group-hover:scale-110 transition-transform text-white/50" />
+                                        <span className="uppercase tracking-tighter text-lg md:text-2xl font-black">GENERATE BARCODE</span>
+                                    </div>
+                                )}
                             </Button>
+                            
+                            {previews.length > 0 && (
+                                <Button variant="outline" className="w-full h-12 border-2 rounded-xl font-black text-xs uppercase hover:bg-primary/5 text-primary border-primary/20 transition-all" onClick={() => handleDownload('png')}>
+                                    <ImageIcon className="size-4 mr-2" /> QUICK SAVE PNG
+                                </Button>
+                            )}
                             <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local RAM Processing Active</p>
                         </CardFooter>
                     </Card>
@@ -409,3 +441,4 @@ export default function BarcodeGenerator() {
         </div>
     );
 }
+
