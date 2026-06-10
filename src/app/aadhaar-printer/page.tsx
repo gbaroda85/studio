@@ -11,7 +11,7 @@ import {
 import { CreditCard, LayoutGrid, HelpCircle, ShieldCheck, Layout, Scan, Maximize, Printer, Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Universal ID Card Printer - Auto-Crop Aadhaar, PAN, DL & Voter ID Online',
+  title: 'Smart ID Card Printer - Auto-Crop Aadhaar, PAN, DL & Voter ID Online',
   description: 'Easy print studio for Indian ID cards. Auto-crop A4 e-Aadhaar or upload separate front/back photos of PAN, DL, and Voter ID. 100% private and sized for printing.',
   alternates: { canonical: 'https://www.gr7imagepdf.com/aadhaar-printer' }
 };
@@ -41,19 +41,19 @@ export default function AadhaarPrinterPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            {/* Restored Hero Header */}
+            {/* Reduced Font Sizes and Shifted Down */}
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-3" /> IDENTITY STUDIO
+                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                    <Sparkles className="size-2.5" /> IDENTITY STUDIO
                 </div>
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-none">
-                    Universal ID <span className="text-gradient-hero">Printer</span>
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
+                    Smart ID <span className="text-gradient-hero">Printer</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
                     Auto-crop Aadhaar, PAN, DL and Voter ID for perfect wallet-sized printing. 100% private.
                 </p>
             </div>
@@ -69,10 +69,10 @@ export default function AadhaarPrinterPage() {
             {/* Deep SEO Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                    <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         Professional Document Studio
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base font-medium">
                         Whether it is your <strong>PAN Card, Driving Licence, or e-Aadhaar</strong>, our studio uses smart canvas technology to lock your documents to exact government-standard dimensions (8.56cm x 5.4cm).
                     </p>
                 </div>
