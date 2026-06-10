@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -16,7 +17,8 @@ const nextConfig: NextConfig = {
     '@genkit-ai/google-genai',
     'pdfjs-dist',
     'tesseract.js',
-    'pdf-lib'
+    'pdf-lib',
+    '@tensorflow/tfjs'
   ],
   images: {
     remotePatterns: [
