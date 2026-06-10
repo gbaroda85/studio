@@ -55,7 +55,9 @@ import {
     History,
     FileSpreadsheet,
     Hash,
-    Lock
+    Lock,
+    CreditCard,
+    IndianRupee
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -72,7 +74,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import confetti from 'canvas-confetti';
 
-type QRType = 'url' | 'text' | 'wifi' | 'email' | 'phone' | 'sms' | 'whatsapp' | 'vcard' | 'location';
+type QRType = 'url' | 'text' | 'wifi' | 'email' | 'phone' | 'sms' | 'whatsapp' | 'vcard' | 'location' | 'upi';
 
 const DOT_TYPES: { id: DotType, label: string }[] = [
     { id: 'square', label: 'Square' },
@@ -105,6 +107,7 @@ export default function QrCodeGenerator() {
     const [wifiData, setWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
     const [whatsappData, setWhatsappData] = useState({ phone: '', message: '' });
     const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
+    const [upiData, setUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
 
     // QR Styling Options
     const [options, setOptions] = useState<Options>({
@@ -160,8 +163,16 @@ export default function QrCodeGenerator() {
         } else if (qrType === 'email') {
             const data = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
             setInputData(data);
+        } else if (qrType === 'upi') {
+            // Standard UPI URI format: upi://pay?pa=upiid@bank&pn=PayeeName&am=Amount&cu=INR&tn=Note
+            let data = `upi://pay?pa=${upiData.pa}`;
+            if (upiData.pn) data += `&pn=${encodeURIComponent(upiData.pn)}`;
+            if (upiData.am) data += `&am=${upiData.am}`;
+            if (upiData.cu) data += `&cu=${upiData.cu}`;
+            if (upiData.tn) data += `&tn=${encodeURIComponent(upiData.tn)}`;
+            setInputData(data);
         }
-    }, [qrType, wifiData, whatsappData, emailData]);
+    }, [qrType, wifiData, whatsappData, emailData, upiData]);
 
     // Initialize QR Code engine
     useEffect(() => {
@@ -381,6 +392,7 @@ export default function QrCodeGenerator() {
                                 <ScrollArea className="w-full whitespace-nowrap mb-6">
                                     <TabsList className="flex h-auto w-max p-1.5 bg-muted/40 rounded-2xl border-2">
                                         <TabsTrigger value="url" className="text-[9px] font-black px-4"><Globe className="size-3 mr-1.5" /> URL</TabsTrigger>
+                                        <TabsTrigger value="upi" className="text-[9px] font-black px-4 text-emerald-600"><CreditCard className="size-3 mr-1.5" /> PAYMENT</TabsTrigger>
                                         <TabsTrigger value="text" className="text-[9px] font-black px-4"><Type className="size-3 mr-1.5" /> TEXT</TabsTrigger>
                                         <TabsTrigger value="wifi" className="text-[9px] font-black px-4"><Wifi className="size-3 mr-1.5" /> WIFI</TabsTrigger>
                                         <TabsTrigger value="whatsapp" className="text-[9px] font-black px-4"><MessageSquare className="size-3 mr-1.5" /> WHATSAPP</TabsTrigger>
@@ -399,6 +411,48 @@ export default function QrCodeGenerator() {
                                                 className="h-12 border-2 rounded-xl bg-background/50 font-bold"
                                                 placeholder="https://example.com"
                                             />
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="upi" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
+                                        <div className="grid gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Payee Name</Label>
+                                                <Input value={upiData.pn} onChange={(e) => setUpiData(p => ({...p, pn: e.target.value}))} placeholder="e.g. John Doe" className="h-10 border-2 font-bold" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">UPI ID (VPA)</Label>
+                                                <Input value={upiData.pa} onChange={(e) => setUpiData(p => ({...p, pa: e.target.value}))} placeholder="username@okaxis" className="h-10 border-2 font-bold" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] font-black uppercase">Amount (Optional)</Label>
+                                                    <div className="relative">
+                                                        <Input type="number" value={upiData.am} onChange={(e) => setUpiData(p => ({...p, am: e.target.value}))} placeholder="0.00" className="h-10 border-2 pl-8" />
+                                                        <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 opacity-40" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] font-black uppercase">Currency</Label>
+                                                    <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}>
+                                                        <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
+                                                        <SelectContent className="rounded-xl border-2">
+                                                            <SelectItem value="INR" className="font-bold">INR (₹)</SelectItem>
+                                                            <SelectItem value="USD" className="font-bold">USD ($)</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase">Transaction Note</Label>
+                                                <Input value={upiData.tn} onChange={(e) => setUpiData(p => ({...p, tn: e.target.value}))} placeholder="Rent, Coffee, etc." className="h-10 border-2" />
+                                            </div>
+                                            <Alert className="bg-emerald-50 border-emerald-100 rounded-xl py-2 px-3">
+                                                <div className="flex gap-2">
+                                                    <CreditCard className="size-4 text-emerald-600 shrink-0" />
+                                                    <p className="text-[9px] font-bold text-emerald-700 leading-tight">Universal Payment QR: Works with GPay, PhonePe, and Paytm.</p>
+                                                </div>
+                                            </Alert>
                                         </div>
                                     </TabsContent>
 
