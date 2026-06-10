@@ -249,9 +249,9 @@ export default function ImageToTextConverter() {
                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-10 border-2 font-black text-[9px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3" /> Reset
+        <div className="flex items-center gap-2 w-full md:w-auto">
+             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
+                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
             <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleCopyToClipboard} disabled={!extractedText || hasCopied}>
                 <StarIcons />
