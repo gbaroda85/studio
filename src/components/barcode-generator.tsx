@@ -124,8 +124,12 @@ export default function BarcodeGenerator() {
                 });
 
                 const svgData = new XMLSerializer().serializeToString(svg);
+                
+                // Use a stable ID based on content to prevent unnecessary re-animations (blinking)
+                const stableId = btoa(line + format).substring(0, 12);
+
                 results.push({
-                    id: Math.random().toString(36).substr(2, 9),
+                    id: stableId,
                     data: `data:image/svg+xml;base64,${btoa(svgData)}`,
                     label: line
                 });
@@ -133,10 +137,8 @@ export default function BarcodeGenerator() {
 
             setPreviews(results);
             if (results.length > 0) {
-                // If manual, always select the first one of the new batch
-                if (isManual) setSelectedPreviewId(results[0].id);
-                // Otherwise only select if nothing is selected or current selection is invalid
-                else if (!selectedPreviewId || !results.find(r => r.id === selectedPreviewId)) {
+                // Determine which ID to select
+                if (isManual || !selectedPreviewId || !results.find(r => r.id === selectedPreviewId)) {
                     setSelectedPreviewId(results[0].id);
                 }
             }
@@ -157,6 +159,7 @@ export default function BarcodeGenerator() {
         }
     }, [inputData, format, width, height, displayValue, fontSize, margin, lineColor, toast, selectedPreviewId]);
 
+    // Initial and debounced auto-generation
     useEffect(() => {
         const timer = setTimeout(() => generateBarcode(false), 300);
         return () => clearTimeout(timer);
@@ -176,8 +179,9 @@ export default function BarcodeGenerator() {
             img.src = target.data;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = img.width * 2; // High DPI
-                canvas.height = img.height * 2;
+                // Use higher resolution for PNG
+                canvas.width = img.width * 4; 
+                canvas.height = img.height * 4;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.fillStyle = '#FFFFFF';
@@ -211,11 +215,11 @@ export default function BarcodeGenerator() {
                 await new Promise(r => img.onload = r);
                 
                 const canvas = document.createElement('canvas');
-                canvas.width = img.width; canvas.height = img.height;
+                canvas.width = img.width * 2; canvas.height = img.height * 2;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const base64 = canvas.toDataURL('image/png').split(',')[1];
                     zip.file(`${item.label}.png`, base64, { base64: true });
                 }
@@ -301,10 +305,10 @@ export default function BarcodeGenerator() {
                                 ) : selectedItem ? (
                                     <motion.div 
                                         key={selectedItem.id} 
-                                        initial={{ scale: 0.9, opacity: 0, y: 20 }} 
-                                        animate={{ scale: 1, opacity: 1, y: 0 }} 
-                                        exit={{ scale: 0.9, opacity: 0, y: -20 }}
-                                        transition={{ type: "spring", damping: 20, stiffness: 100 }}
+                                        initial={{ scale: 0.9, opacity: 0 }} 
+                                        animate={{ scale: 1, opacity: 1 }} 
+                                        exit={{ scale: 0.9, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
                                         className="flex flex-col items-center gap-8"
                                     >
                                         <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-4 border-white flex items-center justify-center relative overflow-hidden group">
@@ -313,11 +317,19 @@ export default function BarcodeGenerator() {
                                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                         <div className="flex flex-wrap items-center justify-center gap-3 no-print">
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
-                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}>
+                                                <ImageIcon className="size-3.5 mr-1.5 text-primary" /> PNG
+                                            </Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}>
+                                                <LayoutGrid className="size-3.5 mr-1.5 text-blue-500" /> SVG
+                                            </Button>
+                                            <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}>
+                                                <FileDigit className="size-3.5 mr-1.5 text-rose-500" /> PDF
+                                            </Button>
                                             <Separator orientation="vertical" className="h-6 opacity-20 mx-2" />
-                                            <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT NOW</Button>
+                                            <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}>
+                                                <Printer className="size-3.5 mr-1.5" /> PRINT NOW
+                                            </Button>
                                         </div>
                                     </motion.div>
                                 ) : (
@@ -344,7 +356,7 @@ export default function BarcodeGenerator() {
                                         {previews.map((p) => (
                                             <div key={p.id} onClick={() => setSelectedPreviewId(p.id)} className={cn(
                                                 "relative inline-block w-32 aspect-video rounded-xl overflow-hidden border-2 bg-white shadow-md cursor-pointer transition-all active:scale-95",
-                                                selectedPreviewId === p.id ? "border-primary ring-4 ring-primary/20 scale-105" : "border-slate-100 hover:border-primary/40 grayscale opacity-60 hover:grayscale-0 hover:opacity-100"
+                                                selectedPreviewId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/20" : "border-slate-100 hover:border-primary/40 grayscale opacity-60 hover:grayscale-0 hover:opacity-100"
                                             )}>
                                                 <img src={p.data} className="size-full object-contain p-2" alt={p.label} />
                                                 <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full text-[7px] font-black text-white">{p.label}</div>
@@ -451,11 +463,6 @@ export default function BarcodeGenerator() {
                                 )}
                             </Button>
                             
-                            {previews.length > 0 && (
-                                <Button variant="outline" className="w-full h-12 border-2 rounded-xl font-black text-xs uppercase hover:bg-primary/5 text-primary border-primary/20 transition-all" onClick={() => handleDownload('png')}>
-                                    <ImageIcon className="size-4 mr-2" /> QUICK SAVE PNG
-                                </Button>
-                            )}
                             <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local RAM Processing Active</p>
                         </CardFooter>
                     </Card>
