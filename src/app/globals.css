@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    /* SaaS Studio Theme - Inspired by WebbyPages Screenshot */
-    --background: 210 40% 98%;      /* Soft Gray-Blue Background (Changed from Pure White) */
+    /* Environmental Studio Theme - Inspired by Screenshot */
+    --background: 120 40% 98%;      /* Very Soft Mint-White Background */
     --foreground: 222.2 84% 4.9%;   /* Deep Charcoal Text */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 18 100% 58%;         /* Coral Orange (#FF6B2C) from the screenshot button */
+    --primary: 131 43% 50%;         /* Leafy Green (#5CBA6E) from screenshot */
     --primary-foreground: 0 0% 100%;
-    --secondary: 262.1 83.3% 57.8%; /* Vibrant Purple (#8B5CF6) from design accents */
+    --secondary: 17 77% 63%;        /* Coral Orange (#E8815A) from design accents */
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 94%;           /* Slightly darker muted for contrast */
+    --muted: 120 20% 94%;           /* Slightly darker muted green for contrast */
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 262.1 83.3% 57.8%;    /* Purple Accent */
+    --accent: 17 77% 63%;           /* Coral Accent */
     --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 18 100% 58%;
+    --ring: 131 43% 50%;
     --radius: 1rem;
   }
   
@@ -63,10 +63,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Clean gradient for Light Mode inspired by screenshot backgrounds */
+    /* Clean gradient for Light Mode inspired by environmental themes */
     background-image: 
-      radial-gradient(at 100% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(18, 100%, 58%, 0.04) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(131, 43%, 50%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(17, 77%, 63%, 0.04) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -100,7 +100,7 @@
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-orange-600 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-green-600 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
 }
 
 ::-webkit-scrollbar {
@@ -308,7 +308,7 @@
 }
 
 .dark .btn-sliding-explore {
-  background: linear-gradient(to top, #5c0032, #83124d, #be185d);
+  background: linear-gradient(to top, #064e3b, #059669);
 }
 
 .btn-sliding:active {
@@ -356,7 +356,7 @@
   font-size: 14px;
   font-weight: 900;
   color: white;
-  background: #0f172a;
+  background: #064e3b;
   transition: 1s;
   box-shadow: 6px 6px 0 hsl(var(--primary));
   transform: skewX(-15deg);
@@ -499,7 +499,7 @@
 .support-uiverse:hover,
 .support-uiverse:hover .uiverse-tooltip,
 .support-uiverse:hover .uiverse-tooltip::before {
-  background: linear-gradient(320deg, #000, #333);
+  background: linear-gradient(320deg, #064e3b, #065f46);
   color: #ffffff;
   border-color: transparent;
 }
@@ -536,7 +536,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(135deg, hsl(var(--primary)), #ea580c);
+  background: linear-gradient(135deg, hsl(var(--primary)), #059669);
   transform: translate(0%, 100%);
   z-index: 10;
   position: absolute;
