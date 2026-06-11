@@ -55,7 +55,9 @@ import {
     ChevronDown,
     FilePlus2,
     FileText,
-    Grip
+    Grip,
+    ArrowDownAz,
+    ArrowUpAz
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +144,6 @@ function SortablePage({
                 isDragging && "opacity-0"
             )}
         >
-            {/* FIXED PAGE NUMBER BADGE: Using page.index instead of array index */}
             <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
@@ -152,7 +153,7 @@ function SortablePage({
             </div>
 
             {page.type === 'blank' ? (
-                <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 pointer-events-none">
+                <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
                     <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                 </div>
@@ -325,6 +326,25 @@ export default function PdfOrganizer() {
         } else {
             toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
         }
+    };
+
+    const sortPages = (direction: 'asc' | 'desc') => {
+        setPages(prev => {
+            const sorted = [...prev].sort((a, b) => {
+                // Keep blank pages at their relative positions or at the end
+                if (a.type === 'blank' && b.type !== 'blank') return 1;
+                if (a.type !== 'blank' && b.type === 'blank') return -1;
+                if (a.type === 'blank' && b.type === 'blank') return 0;
+                
+                return direction === 'asc' ? a.index - b.index : b.index - a.index;
+            });
+            return sorted;
+        });
+        setResultPdfUrl(null);
+        toast({ 
+            title: direction === 'asc' ? "Sorted 1 to N" : "Sorted N to 1",
+            description: `Pages re-arranged by original index.`
+        });
     };
 
     // DnD Handlers
@@ -522,7 +542,6 @@ export default function PdfOrganizer() {
                                                     <div className={cn(
                                                         "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none"
                                                     )}>
-                                                        {/* Badge in Drag Overlay */}
                                                         <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
                                                             {activePage.type === 'blank' ? 'B' : activePage.index}
                                                         </div>
@@ -576,6 +595,16 @@ export default function PdfOrganizer() {
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-1 gap-3">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2" onClick={() => sortPages('asc')}>
+                                            <ArrowDownAz className="size-4 text-primary" />
+                                            <span>SORT 1 → N</span>
+                                        </Button>
+                                        <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2" onClick={() => sortPages('desc')}>
+                                            <ArrowUpAz className="size-4 text-primary" />
+                                            <span>SORT N → 1</span>
+                                        </Button>
+                                    </div>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => addBlankPage()}>
                                         <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600"><FilePlus2 className="size-4" /></div>
                                         ADD BLANK PAGE
