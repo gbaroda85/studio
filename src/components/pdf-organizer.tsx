@@ -106,13 +106,11 @@ function formatBytes(bytes: number, decimals = 2): string {
  */
 function SortablePage({ 
     page, 
-    index, 
     onDelete, 
     onRotate, 
     onInsertBlank 
 }: { 
     page: PageItem; 
-    index: number; 
     onDelete: (id: string) => void;
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
@@ -213,6 +211,8 @@ export default function PdfOrganizer() {
     const [activeId, setActiveId] = useState<string | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const studioWorkspaceRef = useRef<HTMLDivElement>(null);
+    const renderIdRef = useRef(0);
 
     // DnD Sensors
     const sensors = useSensors(
@@ -225,6 +225,16 @@ export default function PdfOrganizer() {
             if (resultPdfUrl) URL.revokeObjectURL(resultPdfUrl);
         }
     }, [resultPdfUrl]);
+
+    const handleReset = () => {
+        renderIdRef.current++;
+        setPdfFile(null);
+        setPages([]);
+        setResultPdfUrl(null);
+        setIsRendering(false);
+        setIsSaving(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
     const handleFileChange = async (file: File | null) => {
         if (file && file.type === 'application/pdf') {
@@ -411,7 +421,7 @@ export default function PdfOrganizer() {
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
+        <div ref={studioWorkspaceRef} className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -502,7 +512,6 @@ export default function PdfOrganizer() {
                                                         <SortablePage 
                                                             key={p.id} 
                                                             page={p} 
-                                                            index={i} 
                                                             onDelete={togglePageDeletion}
                                                             onRotate={rotatePage}
                                                             onInsertBlank={addBlankPage}

@@ -44,15 +44,15 @@ export default function OrganizePdfPage() {
     <main className="flex-1 flex flex-col items-center w-full pt-8 md:pt-12">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        {/* Main Tool Container with more breathing room */}
-        <div className="w-full flex flex-col items-center mb-16 md:mb-24 px-4">
+        {/* Main Tool Container with massive breathing room to avoid overlap */}
+        <div className="w-full flex flex-col items-center mb-24 md:mb-32 px-4 relative z-10">
             <div className="w-full flex justify-center">
                 <PdfOrganizer />
             </div>
         </div>
 
         {/* Guide Section with explicit spacing to avoid overlap */}
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20 mt-16 md:mt-24 border-t pt-16">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20 mt-16 md:mt-24 border-t pt-16 relative z-0">
             <HowToGuide title="PDF Organizer Pro" steps={deepSteps} />
 
             <section className="space-y-10 py-10 border-t">
