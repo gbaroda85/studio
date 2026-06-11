@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* SaaS Studio Theme - Inspired by WebbyPages Screenshot */
-    --background: 0 0% 100%;        /* Pure White Background */
+    --background: 210 40% 98%;      /* Soft Gray-Blue Background (Changed from Pure White) */
     --foreground: 222.2 84% 4.9%;   /* Deep Charcoal Text */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -15,7 +15,7 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 262.1 83.3% 57.8%; /* Vibrant Purple (#8B5CF6) from design accents */
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96.1%;         /* Light Grayish Blue */
+    --muted: 210 40% 94%;           /* Slightly darker muted for contrast */
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 262.1 83.3% 57.8%;    /* Purple Accent */
     --accent-foreground: 222.2 84% 4.9%;
@@ -28,7 +28,7 @@
   }
   
   .dark {
-    /* Deep and Mystic Dark Mode - UNTOUCHED as per instructions */
+    /* Deep and Mystic Dark Mode - UNTOUCHED */
     --background: 285 45% 4%;        
     --foreground: 330 30% 95%;       
     --card: 285 40% 8%;              
@@ -65,8 +65,8 @@
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
     /* Clean gradient for Light Mode inspired by screenshot backgrounds */
     background-image: 
-      radial-gradient(at 100% 0%, hsla(262, 83%, 58%, 0.03) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(18, 100%, 58%, 0.02) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(262, 83%, 58%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(18, 100%, 58%, 0.04) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
