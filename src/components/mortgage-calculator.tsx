@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -13,7 +12,8 @@ import {
     Wallet,
     Building2,
     Zap,
-    Sparkles
+    Sparkles,
+    Landmark
 } from "lucide-react";
 import { 
     PieChart, 
