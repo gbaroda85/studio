@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -177,7 +177,7 @@ export default function PdfMerger() {
             const imgs: string[] = [];
             const pagesToRender = Math.min(pdf.numPages, 10); 
 
-            for (let i = 1; i <= pagesToRender; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 1.2 });
                 const canvas = document.createElement('canvas');
@@ -253,7 +253,7 @@ export default function PdfMerger() {
                 {/* Left Column: List */}
                 <div className="lg:col-span-7 flex flex-col">
                     <Card className={cn(
-                        "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col",
+                        "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col min-h-[500px]",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                     )}
                         onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -264,7 +264,7 @@ export default function PdfMerger() {
                                 {pdfFiles.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full">{pdfFiles.length} DOCUMENTS</Badge>}
                             </div>
                         </CardHeader>
-                        <CardContent className={cn("p-6 md:p-8 flex-1 flex flex-col", pdfFiles.length === 0 ? "justify-center py-20 md:py-32" : "py-6")}>
+                        <CardContent className={cn("p-6 md:p-8 flex-1 flex flex-col min-h-[400px]", pdfFiles.length === 0 ? "justify-center py-20 md:py-32" : "py-6")}>
                             {pdfFiles.length === 0 ? (
                                 <div 
                                     className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
@@ -332,7 +332,7 @@ export default function PdfMerger() {
 
                 {/* Right Column: Actions */}
                 <div className="lg:col-span-5 flex flex-col">
-                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
+                    <Card className="border-2 shadow-xl border-primary/10 overflow-hidden rounded-[2rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col min-h-[500px]">
                         <CardHeader className="bg-primary/5 border-b p-6">
                             <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                                 <LayoutList className="size-6 text-primary" /> Stack Control
