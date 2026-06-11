@@ -37,7 +37,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { motion, AnimatePresence, Reorder, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -242,7 +242,7 @@ export default function PdfOrganizer() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver}
@@ -278,7 +278,7 @@ export default function PdfOrganizer() {
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
                         <Settings2 className="size-5 md:size-6" />
@@ -311,10 +311,10 @@ export default function PdfOrganizer() {
                                 <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-2 md:px-3 py-1 rounded-full border-none">
                                     {pages.filter(p => !p.isDeleted).length} PAGES
                                 </Badge>
-                                <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-2 md:px-3 rounded-lg shrink-0"><RefreshCcw className="mr-1 size-3" /> Change</Button>
+                                <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-2 md:px-3 rounded-lg shrink-0 no-print"><RefreshCcw className="mr-1 size-3" /> Change</Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-2 md:p-6 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative">
+                        <CardContent className="p-2 md:p-4 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative">
                             {isRendering ? (
                                 <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
                                     <div className="relative">
@@ -332,7 +332,7 @@ export default function PdfOrganizer() {
                                         axis="y" 
                                         values={pages} 
                                         onReorder={setPages} 
-                                        className="space-y-3 pb-20 px-2"
+                                        className="space-y-2 pb-12 px-2"
                                     >
                                         <AnimatePresence mode="popLayout">
                                             {pages.map((p) => (
@@ -345,43 +345,43 @@ export default function PdfOrganizer() {
                                                     whileDrag={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", zIndex: 100 }}
                                                     transition={{ duration: 0.15, ease: "easeInOut" }}
                                                     className={cn(
-                                                        "group relative flex items-center gap-3 md:gap-6 p-2 md:p-3 rounded-2xl border-2 bg-white dark:bg-slate-900 shadow-md transition-colors select-none cursor-default",
+                                                        "group relative flex items-center gap-3 md:gap-4 p-1.5 md:p-2 rounded-xl border-2 bg-white dark:bg-slate-900 shadow-sm transition-colors select-none cursor-default",
                                                         p.isDeleted ? "opacity-30 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent"
                                                     )}
                                                 >
                                                     {/* Drag Handle */}
                                                     {!p.isDeleted && (
-                                                        <div className="cursor-grab active:cursor-grabbing p-2 text-muted-foreground/30 hover:text-primary transition-colors shrink-0">
-                                                            <Grip className="size-5 md:size-6" />
+                                                        <div className="cursor-grab active:cursor-grabbing p-1.5 text-muted-foreground/20 hover:text-primary transition-colors shrink-0">
+                                                            <Grip className="size-5" />
                                                         </div>
                                                     )}
 
                                                     {/* Page Number */}
-                                                    <div className="flex flex-col items-center justify-center gap-0.5 shrink-0 w-8 md:w-12">
-                                                        <span className="text-[7px] md:text-[8px] font-black text-primary/40 uppercase">PAGE</span>
-                                                        <span className="text-base md:text-xl font-black text-slate-800 dark:text-slate-200">{p.index}</span>
+                                                    <div className="flex flex-col items-center justify-center gap-0 shrink-0 w-8 md:w-10">
+                                                        <span className="text-[6px] md:text-[7px] font-black text-primary/40 uppercase">PAGE</span>
+                                                        <span className="text-sm md:text-lg font-black text-slate-800 dark:text-slate-200 leading-none">{p.index}</span>
                                                     </div>
 
-                                                    {/* Preview (Compact) */}
-                                                    <div className="h-20 w-16 md:h-28 md:w-20 rounded-lg overflow-hidden border bg-slate-50 flex items-center justify-center p-1 relative shadow-inner shrink-0">
+                                                    {/* Preview (More Compact) */}
+                                                    <div className="h-14 w-11 md:h-16 md:w-12 rounded-md overflow-hidden border bg-slate-50 flex items-center justify-center p-0.5 relative shadow-inner shrink-0">
                                                         <div className="size-full flex items-center justify-center transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
                                                             <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
                                                         </div>
                                                     </div>
 
                                                     {/* Action Buttons (Condense) */}
-                                                    <div className="flex-1 flex items-center justify-end gap-2 pr-2">
-                                                        <Button size="icon" variant="outline" className="h-9 w-9 rounded-lg border-2 hover:bg-primary/5 hover:text-primary transition-all shrink-0" onClick={() => rotatePage(p.id)} disabled={p.isDeleted} title="Rotate 90°">
-                                                            <RotateCw className="size-4" />
+                                                    <div className="flex-1 flex items-center justify-end gap-1.5 pr-1">
+                                                        <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg border-2 hover:bg-primary/5 hover:text-primary transition-all shrink-0" onClick={() => rotatePage(p.id)} disabled={p.isDeleted} title="Rotate 90°">
+                                                            <RotateCw className="size-3.5" />
                                                         </Button>
-                                                        <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-9 w-9 rounded-lg shadow-md transition-all shrink-0" onClick={() => togglePageDeletion(p.id)} title={p.isDeleted ? "Restore Page" : "Delete Page"}>
-                                                            {p.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
+                                                        <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-md transition-all shrink-0" onClick={() => togglePageDeletion(p.id)} title={p.isDeleted ? "Restore Page" : "Delete Page"}>
+                                                            {p.isDeleted ? <Plus className="size-3.5" /> : <Trash2 className="size-3.5" />}
                                                         </Button>
                                                     </div>
                                                     
                                                     {p.isDeleted && (
-                                                        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none bg-rose-500/5 rounded-2xl">
-                                                            <Badge className="bg-rose-500 text-white font-black text-[8px] md:text-[10px] px-3 py-1 shadow-lg rounded-full">DELETED</Badge>
+                                                        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none bg-rose-500/5 rounded-xl">
+                                                            <Badge className="bg-rose-500 text-white font-black text-[7px] md:text-[8px] px-2 py-0.5 shadow-lg rounded-full">DELETED</Badge>
                                                         </div>
                                                     )}
                                                 </Reorder.Item>
@@ -394,7 +394,7 @@ export default function PdfOrganizer() {
                     </Card>
                 </div>
 
-                {/* Sidebar: Controls */}
+                {/* Sidebar: Controls (Stays visible) */}
                 <div className="lg:col-span-4 space-y-6 lg:h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
