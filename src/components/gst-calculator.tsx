@@ -1,18 +1,29 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { IndianRupee, Percent, Plus, Minus, RefreshCcw, Calculator, Trophy } from "lucide-react";
+import { IndianRupee, Percent, Plus, Minus, RefreshCcw, Calculator, Trophy, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 const GST_SLABS = [5, 12, 18, 28];
 
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
+
 export default function GstCalculator() {
+  const [countryIndex, setCountryIndex] = useState(0);
   const [amount, setAmount] = useState("");
   const [gstRate, setGstRate] = useState("18");
   const [mode, setMode] = useState<"add" | "remove">("add");
@@ -23,6 +34,8 @@ export default function GstCalculator() {
     cgst: number;
     sgst: number;
   } | null>(null);
+
+  const currentCountry = COUNTRIES[countryIndex];
 
   const calculateGst = () => {
     const amt = parseFloat(amount);
@@ -66,7 +79,10 @@ export default function GstCalculator() {
   };
 
   const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
+    new Intl.NumberFormat(currentCountry.locale, { 
+      style: 'currency', 
+      currency: currentCountry.currency 
+    }).format(val);
 
   return (
     <Card className="w-full max-w-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 rounded-[2rem] overflow-hidden">
@@ -77,6 +93,21 @@ export default function GstCalculator() {
         <CardDescription className="text-[10px] font-bold uppercase opacity-60">Calculate GST Add or Remove instantly</CardDescription>
       </CardHeader>
       <CardContent className="p-8 space-y-8">
+        {/* Country Selector */}
+        <div className="space-y-2 pb-4 border-b border-dashed">
+            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <Globe className="size-3" /> Select Country
+            </Label>
+            <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl border-2 shadow-2xl">
+                    {COUNTRIES.map((c, i) => (
+                        <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase opacity-60">Calculation Mode</Label>
           <RadioGroup value={mode} onValueChange={(v) => setMode(v as any)} className="flex gap-4">
@@ -90,10 +121,10 @@ export default function GstCalculator() {
         </div>
 
         <div className="space-y-4">
-          <Label htmlFor="amount" className="text-[10px] font-black uppercase opacity-60">Total Amount (₹)</Label>
+          <Label htmlFor="amount" className="text-[10px] font-black uppercase opacity-60">Input Amount</Label>
           <div className="relative">
             <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-14 text-2xl font-black pl-12 rounded-xl bg-muted/20 border-2" placeholder="0.00" />
-            <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground size-6" />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span>
           </div>
         </div>
 
@@ -113,11 +144,11 @@ export default function GstCalculator() {
           <div className="space-y-4 pt-4 animate-in zoom-in-95 duration-300">
              <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-muted/30 rounded-2xl border text-center space-y-1">
-                   <p className="text-[9px] font-black text-muted-foreground uppercase">CGST ({(parseFloat(gstRate)/2)}%)</p>
+                   <p className="text-[9px] font-black text-muted-foreground uppercase">Part Tax A ({(parseFloat(gstRate)/2)}%)</p>
                    <p className="text-sm font-black text-primary">{formatCurrency(result.cgst)}</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border text-center space-y-1">
-                   <p className="text-[9px] font-black text-muted-foreground uppercase">SGST ({(parseFloat(gstRate)/2)}%)</p>
+                   <p className="text-[9px] font-black text-muted-foreground uppercase">Part Tax B ({(parseFloat(gstRate)/2)}%)</p>
                    <p className="text-sm font-black text-primary">{formatCurrency(result.sgst)}</p>
                 </div>
              </div>

@@ -1,17 +1,28 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { TrendingUp, PieChart, Coins, RefreshCcw, Landmark, Info, Zap } from "lucide-react";
+import { TrendingUp, PieChart, Coins, RefreshCcw, Landmark, Info, Zap, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
+
 export default function SipCalculator() {
+  const [countryIndex, setCountryIndex] = useState(0);
   const [monthlyInvest, setMonthlyInvest] = useState(5000);
   const [expectedRate, setExpectedRate] = useState(12);
   const [tenure, setTenure] = useState(10);
@@ -20,6 +31,15 @@ export default function SipCalculator() {
     returns: number;
     total: number;
   } | null>(null);
+
+  const currentCountry = COUNTRIES[countryIndex];
+
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat(currentCountry.locale, { 
+      style: 'currency', 
+      currency: currentCountry.currency, 
+      maximumFractionDigits: 0 
+    }).format(val);
 
   const calculateSip = () => {
     const P = monthlyInvest;
@@ -48,9 +68,6 @@ export default function SipCalculator() {
     setTenure(10);
   };
 
-  const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
-
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700">
       
@@ -64,9 +81,24 @@ export default function SipCalculator() {
         </CardHeader>
         <CardContent className="p-8 space-y-10">
           <div className="space-y-6">
+            {/* Country Selector */}
+            <div className="space-y-3 pb-4 border-b border-dashed">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                    <Globe className="size-3" /> Select Country
+                </Label>
+                <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-2 shadow-2xl">
+                        {COUNTRIES.map((c, i) => (
+                            <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <Label className="text-[10px] font-black uppercase opacity-60">Monthly Investment (₹)</Label>
+                <Label className="text-[10px] font-black uppercase opacity-60">Monthly Investment</Label>
                 <Badge variant="secondary" className="font-black text-xs px-3">{formatCurrency(monthlyInvest)}</Badge>
               </div>
               <Slider min={500} max={100000} step={500} value={[monthlyInvest]} onValueChange={(v) => setMonthlyInvest(v[0])} />

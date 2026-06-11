@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, type ChangeEvent } from 'react';
@@ -35,7 +34,8 @@ import {
     Coffee,
     ImageIcon,
     Clock,
-    UserCircle
+    UserCircle,
+    Globe
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -68,6 +68,16 @@ const TEMPLATES = [
     { id: 'vintage', name: 'Vintage Classic', description: 'Double borders & serif fonts' },
 ];
 
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
+
 const INITIAL_DATA = {
     personal: {
         fullName: "Sanjay Singh",
@@ -97,7 +107,7 @@ const INITIAL_DATA = {
         occupation: "Project Manager",
         company: "Tech Solutions Inc.",
         workLocation: "Bangalore",
-        annualIncome: "₹ 15,00,000 PA"
+        annualIncome: "15,00,000"
     },
     family: {
         fatherName: "Mr. Pramod Singh",
@@ -119,6 +129,7 @@ const INITIAL_DATA = {
 
 export default function MarriageBiodataGenerator() {
     const { toast } = useToast();
+    const [countryIndex, setCountryIndex] = useState(0);
     const [formData, setFormData] = useState(INITIAL_DATA);
     const [profilePic, setProfilePic] = useState<string | null>("https://picsum.photos/seed/portrait1/400/500");
     const [godLogo, setGodLogo] = useState<string | null>(null);
@@ -129,6 +140,17 @@ export default function MarriageBiodataGenerator() {
     const previewRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
+
+    const currentCountry = COUNTRIES[countryIndex];
+
+    const formatCurrency = (val: string) => {
+        const num = parseFloat(val.replace(/,/g, '')) || 0;
+        return new Intl.NumberFormat(currentCountry.locale, { 
+            style: 'currency', 
+            currency: currentCountry.currency, 
+            maximumFractionDigits: 0 
+        }).format(num) + " PA";
+    };
 
     const handleInputChange = (section: keyof typeof INITIAL_DATA, field: string, value: string) => {
         setFormData(prev => ({
@@ -180,13 +202,11 @@ export default function MarriageBiodataGenerator() {
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            // Updated filename logic
             pdf.save(`GR7-Tools-Biodata-${formData.personal.fullName.replace(/\s+/g, '-')}.pdf`);
             toast({ title: "Success!", description: "High-quality PDF downloaded." });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate PDF.' });
         } finally {
-            setIsExporting(error);
             setIsExporting(false);
         }
     };
@@ -215,6 +235,21 @@ export default function MarriageBiodataGenerator() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-10">
                         
+                        {/* Country/Currency Selection */}
+                        <div className="space-y-4 pb-6 border-b border-dashed">
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                <Globe className="size-3" /> Select Country & Currency
+                            </Label>
+                            <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                                <SelectTrigger className="h-12 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                                <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                    {COUNTRIES.map((c, i) => (
+                                        <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         {/* 1. Visual Styling Section */}
                         <div className="space-y-6">
                              <div className="space-y-4">
@@ -250,7 +285,7 @@ export default function MarriageBiodataGenerator() {
                                                 onClick={() => setThemeColor(c.value)}
                                                 className={cn(
                                                     "size-8 rounded-xl border-2 transition-all flex items-center justify-center",
-                                                    themeColor === c.value ? "border-primary ring-4 ring-primary/10 scale-110" : "border-white/10"
+                                                    themeColor === c.value ? "border-primary ring-4 ring-primary/20 scale-110" : "border-white/10"
                                                 )}
                                                 style={{ backgroundColor: c.value }}
                                             >
@@ -464,6 +499,7 @@ export default function MarriageBiodataGenerator() {
                             profilePic={profilePic} 
                             themeColor={themeColor} 
                             godLogo={godLogo}
+                            formatCurrency={formatCurrency}
                         />
                     </div>
                 </div>
@@ -510,9 +546,9 @@ function Section({ title, themeColor, template, children }: { title: string, the
     );
 }
 
-function ResumeContent({ formData, template, profilePic, themeColor, godLogo }: { formData: typeof INITIAL_DATA, template: string, profilePic: string | null, themeColor: string, godLogo: string | null }) {
-    if (template === 'royal-gold') return <TemplateRoyalGold formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} />;
-    if (template === 'canva-pro') return <TemplateCanvaPro formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} />;
+function ResumeContent({ formData, template, profilePic, themeColor, godLogo, formatCurrency }: { formData: typeof INITIAL_DATA, template: string, profilePic: string | null, themeColor: string, godLogo: string | null, formatCurrency: (v: string) => string }) {
+    if (template === 'royal-gold') return <TemplateRoyalGold formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} formatCurrency={formatCurrency} />;
+    if (template === 'canva-pro') return <TemplateCanvaPro formData={formData} profilePic={profilePic} themeColor={themeColor} godLogo={godLogo} formatCurrency={formatCurrency} />;
     
     return (
         <div className="relative w-full min-h-[297mm] h-full flex flex-col p-[15mm] bg-white">
@@ -556,7 +592,7 @@ function ResumeContent({ formData, template, profilePic, themeColor, godLogo }: 
                         <Row label="Education" value={formData.education.qualification} />
                         <Row label="Institution" value={formData.education.institution} />
                         <Row label="Occupation" value={formData.education.occupation} />
-                        <Row label="Income" value={formData.education.annualIncome} />
+                        <Row label="Income" value={formatCurrency(formData.education.annualIncome)} />
                     </Section>
 
                     <Section title="Family Profile" themeColor={themeColor} template={template}>
@@ -592,7 +628,7 @@ function ResumeContent({ formData, template, profilePic, themeColor, godLogo }: 
 }
 
 // TEMPLATE: ROYAL GOLD (DARK)
-function TemplateRoyalGold({ themeColor, formData, profilePic, godLogo }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null }) {
+function TemplateRoyalGold({ themeColor, formData, profilePic, godLogo, formatCurrency }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null, formatCurrency: (v: string) => string }) {
     const goldColor = "#f3cc8a";
     return (
         <div className="w-[210mm] min-h-[297mm] h-full relative p-14 flex flex-col text-left" style={{ background: `linear-gradient(to bottom, ${themeColor}, #0a040d)` }}>
@@ -621,7 +657,7 @@ function TemplateRoyalGold({ themeColor, formData, profilePic, godLogo }: { them
                             <RoyalRow label="Physical" value={`${formData.personal.height} | ${formData.personal.complexion}`} color={goldColor} />
                             <RoyalRow label="Education" value={formData.education.qualification} color={goldColor} />
                             <RoyalRow label="Occupation" value={formData.education.occupation} color={goldColor} />
-                            <RoyalRow label="Income" value={formData.education.annualIncome} color={goldColor} />
+                            <RoyalRow label="Income" value={formatCurrency(formData.education.annualIncome)} color={goldColor} />
                         </div>
                     </div>
 
@@ -665,7 +701,7 @@ function RoyalRow({ label, value, color }: { label: string, value: string, color
 }
 
 // TEMPLATE: CANVA PRO (SIDEBAR)
-function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null }) {
+function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo, formatCurrency }: { themeColor: string, formData: typeof INITIAL_DATA, profilePic: string | null, godLogo: string | null, formatCurrency: (v: string) => string }) {
     return (
         <div className="w-[210mm] min-h-[297mm] h-full flex bg-[#FDFBF7] relative text-left">
             <div className="w-[35%] h-full min-h-[297mm] flex flex-col text-white p-8 space-y-10" style={{ backgroundColor: themeColor }}>
@@ -708,7 +744,7 @@ function TemplateCanvaPro({ themeColor, formData, profilePic, godLogo }: { theme
                             <MainRow label="Institution" value={formData.education.institution} />
                             <MainRow label="Occupation" value={formData.education.occupation} />
                             <MainRow label="Company" value={formData.education.company} />
-                            <MainRow label="Income" value={formData.education.annualIncome} />
+                            <MainRow label="Income" value={formatCurrency(formData.education.annualIncome)} />
                         </div>
                     </div>
 

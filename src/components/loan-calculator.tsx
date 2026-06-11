@@ -1,8 +1,7 @@
-
 "use client"
 
-import { useState } from "react"
-import { Landmark } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Landmark, Globe, RefreshCcw, ShieldCheck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,21 +11,34 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "./ui/separator"
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2,
-  }).format(value);
-}
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
 
 export default function LoanCalculator() {
   const { toast } = useToast()
+  const [countryIndex, setCountryIndex] = useState(0)
   const [principal, setPrincipal] = useState("")
   const [rate, setRate] = useState("")
   const [tenure, setTenure] = useState("")
   const [tenureUnit, setTenureUnit] = useState<"years" | "months">("years")
   const [result, setResult] = useState<{ emi: number, totalInterest: number, totalPayment: number } | null>(null)
+
+  const currentCountry = COUNTRIES[countryIndex];
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(currentCountry.locale, {
+      style: 'currency',
+      currency: currentCountry.currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
 
   const handleCalculate = () => {
     const p = parseFloat(principal)
@@ -76,8 +88,23 @@ export default function LoanCalculator() {
         <CardDescription>Calculate your monthly loan payments.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Country Selector */}
+        <div className="space-y-2 pb-2 border-b border-dashed">
+            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <Globe className="size-3" /> Select Country
+            </Label>
+            <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl border-2">
+                    {COUNTRIES.map((c, i) => (
+                        <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+
         <div className="space-y-2">
-          <Label htmlFor="principal">Loan Amount (₹)</Label>
+          <Label htmlFor="principal">Loan Amount</Label>
           <Input id="principal" type="number" value={principal} onChange={(e) => setPrincipal(e.target.value)} placeholder="e.g., 100000" />
         </div>
         <div className="space-y-2">
@@ -87,7 +114,7 @@ export default function LoanCalculator() {
         <div className="grid grid-cols-3 gap-2">
             <div className="col-span-2 space-y-2">
                 <Label htmlFor="tenure">Loan Tenure</Label>
-                <Input id="tenure" type="number" value={tenure} onChange={(e) => setTenure(e.target.value)} placeholder="e.g., 20" />
+                <Input id="tenure" type="number" value={tenure} onChange={(e) => setValue(e.target.value)} placeholder="e.g., 20" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="tenure-unit">Unit</Label>
@@ -121,7 +148,7 @@ export default function LoanCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 rounded-xl">
             <Landmark className="mr-2"/>
             Calculate EMI
         </Button>

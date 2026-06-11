@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +15,8 @@ import {
     PieChart,
     Wallet,
     ShieldCheck,
-    Sparkles
+    Sparkles,
+    Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -26,11 +26,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 type CalcMode = 'fd' | 'rd';
 
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
+
 export default function FdRdCalculator() {
+  const [countryIndex, setCountryIndex] = useState(0);
   const [mode, setMode] = useState<CalcMode>('fd');
 
   // FD States
@@ -50,8 +62,14 @@ export default function FdRdCalculator() {
     maturity: number;
   } | null>(null);
 
+  const currentCountry = COUNTRIES[countryIndex];
+
   const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    new Intl.NumberFormat(currentCountry.locale, { 
+      style: 'currency', 
+      currency: currentCountry.currency, 
+      maximumFractionDigits: 0 
+    }).format(val);
 
   const calculate = () => {
     if (mode === 'fd') {
@@ -127,24 +145,39 @@ export default function FdRdCalculator() {
                 </TabsList>
 
                 <div className="p-6 md:p-8 space-y-10">
+                    {/* Country Selector */}
+                    <div className="space-y-3 pb-4 border-b border-dashed">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                            <Globe className="size-3" /> Select Country
+                        </Label>
+                        <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                            <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                            <SelectContent className="rounded-xl border-2">
+                                {COUNTRIES.map((c, i) => (
+                                    <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <TabsContent value="fd" className="m-0 space-y-8 animate-in slide-in-from-left duration-300">
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Investment Amount (₹)</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">Investment Amount</Label>
                                 <Badge variant="secondary" className="font-black px-3">{formatCurrency(fdPrincipal)}</Badge>
                             </div>
                             <Slider min={1000} max={10000000} step={1000} value={[fdPrincipal]} onValueChange={(v) => setFdPrincipal(v[0])} />
-                            <Input type="number" value={fdPrincipal} onChange={(e) => setFdPrincipal(Number(e.target.value))} className="h-10 border-2 font-bold text-center" />
+                            <Input type="number" value={fdPrincipal} onChange={(e) => setFdPrincipal(Number(e.target.value))} className="h-10 border-2 font-bold text-center rounded-xl" />
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Interest Rate (% p.a.)</Label>
-                                <Input type="number" step="0.1" value={fdRate} onChange={(e) => setFdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center" />
+                                <Input type="number" step="0.1" value={fdRate} onChange={(e) => setFdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Tenure (Years)</Label>
-                                <Input type="number" value={fdTenure} onChange={(e) => setFdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center" />
+                                <Input type="number" value={fdTenure} onChange={(e) => setFdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
                         </div>
                     </TabsContent>
@@ -152,21 +185,21 @@ export default function FdRdCalculator() {
                     <TabsContent value="rd" className="m-0 space-y-8 animate-in slide-in-from-right duration-300">
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Monthly Installment (₹)</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">Monthly Installment</Label>
                                 <Badge variant="secondary" className="font-black px-3">{formatCurrency(rdMonthly)}</Badge>
                             </div>
                             <Slider min={500} max={500000} step={500} value={[rdMonthly]} onValueChange={(v) => setRdMonthly(v[0])} />
-                            <Input type="number" value={rdMonthly} onChange={(e) => setRdMonthly(Number(e.target.value))} className="h-10 border-2 font-bold text-center" />
+                            <Input type="number" value={rdMonthly} onChange={(e) => setRdMonthly(Number(e.target.value))} className="h-10 border-2 font-bold text-center rounded-xl" />
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Rate of Return (%)</Label>
-                                <Input type="number" step="0.1" value={rdRate} onChange={(e) => setRdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center" />
+                                <Input type="number" step="0.1" value={rdRate} onChange={(e) => setRdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Tenure (Years)</Label>
-                                <Input type="number" value={rdTenure} onChange={(e) => setRdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center" />
+                                <Input type="number" value={rdTenure} onChange={(e) => setRdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
                         </div>
                     </TabsContent>

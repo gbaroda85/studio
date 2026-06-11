@@ -1,8 +1,7 @@
-
 "use client"
 
 import { useState } from "react"
-import { Coins } from "lucide-react"
+import { Coins, Globe, RefreshCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,16 +11,19 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2,
-  }).format(value);
-}
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
 
 export default function InterestCalculator() {
   const { toast } = useToast()
+  const [countryIndex, setCountryIndex] = useState(0)
   const [interestType, setInterestType] = useState<"simple" | "compound">("simple")
   const [principal, setPrincipal] = useState("")
   const [rate, setRate] = useState("")
@@ -29,6 +31,16 @@ export default function InterestCalculator() {
   const [tenureUnit, setTenureUnit] = useState<"years" | "months">("years")
   
   const [result, setResult] = useState<{ totalInterest: number, totalAmount: number } | null>(null)
+
+  const currentCountry = COUNTRIES[countryIndex];
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(currentCountry.locale, {
+      style: 'currency',
+      currency: currentCountry.currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
 
   const handleCalculate = () => {
     const p = parseFloat(principal)
@@ -75,6 +87,21 @@ export default function InterestCalculator() {
         <CardDescription>Calculate simple or compound interest.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Country Selector */}
+        <div className="space-y-2 pb-2 border-b border-dashed">
+            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <Globe className="size-3" /> Select Country
+            </Label>
+            <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl border-2">
+                    {COUNTRIES.map((c, i) => (
+                        <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+
         <Tabs value={interestType} onValueChange={(v) => { setInterestType(v as "simple" | "compound"); setResult(null); }} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="simple">Simple Interest</TabsTrigger>
@@ -83,7 +110,7 @@ export default function InterestCalculator() {
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="principal">Principal Amount (₹)</Label>
+          <Label htmlFor="principal">Principal Amount</Label>
           <Input id="principal" type="number" value={principal} onChange={(e) => setPrincipal(e.target.value)} placeholder="e.g., 50000" />
         </div>
         <div className="space-y-2">
@@ -123,7 +150,7 @@ export default function InterestCalculator() {
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+         <Button onClick={handleCalculate} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 rounded-xl">
             <Coins className="mr-2"/>
             Calculate Interest
         </Button>

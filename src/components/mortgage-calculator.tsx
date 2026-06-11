@@ -13,7 +13,8 @@ import {
     Building2,
     Zap,
     Sparkles,
-    Landmark
+    Landmark,
+    Globe
 } from "lucide-react";
 import { 
     PieChart, 
@@ -35,11 +36,19 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const COLORS = ["#043873", "#4F9CF9", "#FF9F1C", "#2EC4B6"];
 
-const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+const COUNTRIES = [
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
 
 export default function MortgageCalculator() {
     // 1. STATE & INPUTS
+    const [countryIndex, setCountryIndex] = useState(0);
     const [homePrice, setHomePrice] = useState(300000);
     const [downPaymentAmount, setDownPaymentAmount] = useState(60000);
     const [downPaymentPercent, setDownPaymentPercent] = useState(20);
@@ -51,6 +60,15 @@ export default function MortgageCalculator() {
     const [propertyTax, setPropertyTax] = useState(3600); // per year
     const [homeInsurance, setHomeInsurance] = useState(1200); // per year
     const [hoaFees, setHoaFees] = useState(0); // per month
+
+    const currentCountry = COUNTRIES[countryIndex];
+
+    const formatCurrency = (val: number) => 
+        new Intl.NumberFormat(currentCountry.locale, { 
+            style: 'currency', 
+            currency: currentCountry.currency, 
+            maximumFractionDigits: 0 
+        }).format(val);
 
     // 2. LIVE CALCULATIONS
     const stats = useMemo(() => {
@@ -144,13 +162,30 @@ export default function MortgageCalculator() {
                         </CardHeader>
                         
                         <CardContent className="p-8 space-y-10">
+                            {/* Country/Currency Selection */}
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Globe className="size-3" /> Select Country & Currency
+                                </Label>
+                                <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                                    <SelectTrigger className="h-12 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                        {COUNTRIES.map((c, i) => (
+                                            <SelectItem key={i} value={String(i)} className="font-bold py-2">
+                                                {c.name} ({c.currency})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             {/* Home Price */}
                             <div className="space-y-5">
                                 <div className="flex justify-between items-center px-1">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Home Price</Label>
                                     <Badge variant="secondary" className="font-black text-sm px-4 py-1 rounded-lg shadow-sm">{formatCurrency(homePrice)}</Badge>
                                 </div>
-                                <Slider min={50000} max={2000000} step={5000} value={[homePrice]} onValueChange={(v) => handleHomePriceChange(v[0])} />
+                                <Slider min={5000} max={2000000} step={5000} value={[homePrice]} onValueChange={(v) => handleHomePriceChange(v[0])} />
                                 <div className="relative group">
                                     <Input type="number" value={homePrice} onChange={(e) => handleHomePriceChange(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg pl-10" />
                                     <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-primary opacity-30 group-focus-within:opacity-100 transition-opacity" />
@@ -162,7 +197,7 @@ export default function MortgageCalculator() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Down Payment</Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <p className="text-[8px] font-black uppercase opacity-40">Amount ($)</p>
+                                        <p className="text-[8px] font-black uppercase opacity-40">Amount</p>
                                         <Input type="number" value={downPaymentAmount} onChange={(e) => handleDownAmountChange(Number(e.target.value))} className="h-10 border-2 font-bold" />
                                     </div>
                                     <div className="space-y-2">

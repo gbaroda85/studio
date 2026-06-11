@@ -35,7 +35,8 @@ import {
     Stethoscope,
     PiggyBank,
     ListFilter,
-    LayoutGrid
+    LayoutGrid,
+    Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -46,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 /**
@@ -72,12 +74,19 @@ interface RegimeResult {
     slabs: TaxSlab[];
 }
 
-// --- UTILS ---
-const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+const COUNTRIES = [
+  { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
+  { name: "UK", currency: "GBP", locale: "en-GB" },
+  { name: "Europe", currency: "EUR", locale: "de-DE" },
+  { name: "UAE", currency: "AED", locale: "ar-AE" },
+  { name: "Canada", currency: "CAD", locale: "en-CA" },
+  { name: "Australia", currency: "AUD", locale: "en-AU" },
+];
 
 export default function IncomeTaxCalculator() {
   const { toast } = useToast();
+  const [countryIndex, setCountryIndex] = useState(0);
 
   // 1. INPUT STATES
   const [salary, setSalary] = useState("1200000");
@@ -93,6 +102,15 @@ export default function IncomeTaxCalculator() {
 
   // 3. CALCULATION TRIGGER
   const [isCalculated, setIsCalculated] = useState(false);
+
+  const currentCountry = COUNTRIES[countryIndex];
+
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat(currentCountry.locale, { 
+      style: 'currency', 
+      currency: currentCountry.currency, 
+      maximumFractionDigits: 0 
+    }).format(val);
 
   // --- CORE CALCULATION LOGIC ---
   const results = useMemo(() => {
@@ -238,6 +256,21 @@ export default function IncomeTaxCalculator() {
           </CardHeader>
           
           <CardContent className="p-0">
+             <div className="p-6 md:p-8 space-y-4 border-b border-dashed">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                    <Globe className="size-3" /> Currency Selector
+                </Label>
+                <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
+                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-2 shadow-2xl">
+                        {COUNTRIES.map((c, i) => (
+                            <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <p className="text-[8px] text-muted-foreground font-black uppercase opacity-40">Note: Tax laws and slabs are calculated based on Indian Union Budget 2025.</p>
+             </div>
+
              <Accordion type="multiple" defaultValue={['income']} className="w-full">
                 {/* Section 1: Income Sources */}
                 <AccordionItem value="income" className="border-none">
@@ -250,20 +283,20 @@ export default function IncomeTaxCalculator() {
                     <AccordionContent className="p-8 space-y-6 bg-muted/10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase opacity-60">Gross Salary (₹)</Label>
-                                <div className="relative"><Input type="number" value={salary} onChange={(e) => setSalary(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <Label className="text-[9px] font-black uppercase opacity-60">Gross Salary</Label>
+                                <div className="relative"><Input type="number" value={salary} onChange={(e) => setSalary(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase opacity-60">House Property Income (₹)</Label>
-                                <div className="relative"><Input type="number" value={rentalIncome} onChange={(e) => setRentalIncome(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Home className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <Label className="text-[9px] font-black uppercase opacity-60">House Property Income</Label>
+                                <div className="relative"><Input type="number" value={rentalIncome} onChange={(e) => setRentalIncome(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase opacity-60">Capital Gains (₹)</Label>
-                                <div className="relative"><Input type="number" value={capitalGains} onChange={(e) => setCapitalGains(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Zap className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <Label className="text-[9px] font-black uppercase opacity-60">Capital Gains</Label>
+                                <div className="relative"><Input type="number" value={capitalGains} onChange={(e) => setCapitalGains(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase opacity-60">Other / Interest Income (₹)</Label>
-                                <div className="relative"><Input type="number" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Wallet className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <Label className="text-[9px] font-black uppercase opacity-60">Other / Interest Income</Label>
+                                <div className="relative"><Input type="number" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                         </div>
                     </AccordionContent>
@@ -281,20 +314,20 @@ export default function IncomeTaxCalculator() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
                                 <Label className="text-[9px] font-black uppercase opacity-60">Section 80C (PPF, ELSS, Insurance)</Label>
-                                <div className="relative"><Input type="number" value={sec80C} onChange={(e) => setSec80C(e.target.value)} className="h-10 pl-9 font-bold border-2" /><PiggyBank className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <div className="relative"><Input type="number" value={sec80C} onChange={(e) => setSec80C(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                                 <p className="text-[8px] opacity-40 font-bold">MAX LIMIT: ₹ 1.5 LAKH</p>
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-[9px] font-black uppercase opacity-60">Section 80D (Mediclaim)</Label>
-                                <div className="relative"><Input type="number" value={sec80D} onChange={(e) => setSec80D(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <div className="relative"><Input type="number" value={sec80D} onChange={(e) => setSec80D(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-[9px] font-black uppercase opacity-60">Section 24 (Home Loan Int.)</Label>
-                                <div className="relative"><Input type="number" value={homeLoanInt} onChange={(e) => setHomeLoanInt(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <div className="relative"><Input type="number" value={homeLoanInt} onChange={(e) => setHomeLoanInt(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-[9px] font-black uppercase opacity-60">HRA Exemption</Label>
-                                <div className="relative"><Input type="number" value={hraExemption} onChange={(e) => setHraExemption(e.target.value)} className="h-10 pl-9 font-bold border-2" /><ReceiptText className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <div className="relative"><Input type="number" value={hraExemption} onChange={(e) => setHraExemption(e.target.value)} className="h-10 pl-9 font-bold border-2 rounded-xl" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span></div>
                             </div>
                         </div>
                     </AccordionContent>
@@ -345,12 +378,14 @@ export default function IncomeTaxCalculator() {
                         result={results.new} 
                         isWinner={results.new.finalTax <= results.old.finalTax} 
                         theme="primary"
+                        formatCurrency={formatCurrency}
                     />
                     <RegimeCard 
                         title="OLD REGIME" 
                         result={results.old} 
                         isWinner={results.old.finalTax < results.new.finalTax} 
                         theme="rose"
+                        formatCurrency={formatCurrency}
                     />
                 </div>
 
@@ -411,23 +446,6 @@ export default function IncomeTaxCalculator() {
                         </Button>
                     </CardFooter>
                 </Card>
-
-                {/* 4. PRINT-ONLY SUMMARY LAYER */}
-                <div className="hidden print:block bg-white text-black p-10 space-y-10">
-                    <h1 className="text-3xl font-black text-center border-b pb-4">TAX ANALYSIS REPORT - GR7 TOOLS</h1>
-                    <div className="grid grid-cols-2 gap-10">
-                        <div className="p-6 border-2 rounded-2xl space-y-4">
-                            <h2 className="text-xl font-black">NEW REGIME</h2>
-                            <p>Taxable Income: {formatCurrency(results.new.taxableIncome)}</p>
-                            <p className="text-2xl font-black">Final Tax: {formatCurrency(results.new.finalTax)}</p>
-                        </div>
-                        <div className="p-6 border-2 rounded-2xl space-y-4">
-                            <h2 className="text-xl font-black">OLD REGIME</h2>
-                            <p>Taxable Income: {formatCurrency(results.old.taxableIncome)}</p>
-                            <p className="text-2xl font-black">Final Tax: {formatCurrency(results.old.finalTax)}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         )}
       </div>
@@ -437,7 +455,7 @@ export default function IncomeTaxCalculator() {
 
 // --- SUBCOMPONENTS ---
 
-function RegimeCard({ title, result, isWinner, theme }: { title: string, result: RegimeResult, isWinner: boolean, theme: 'primary' | 'rose' }) {
+function RegimeCard({ title, result, isWinner, theme, formatCurrency }: { title: string, result: RegimeResult, isWinner: boolean, theme: 'primary' | 'rose', formatCurrency: (v: number) => string }) {
     const isPrimary = theme === 'primary';
     return (
         <Card className={cn(
