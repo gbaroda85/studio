@@ -114,6 +114,7 @@ export default function PdfOrganizer() {
                 const totalPages = pdf.numPages;
 
                 const newPages: PageItem[] = [];
+                const timestamp = Date.now();
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
                     const viewport = page.getViewport({ scale: 0.8 });
@@ -127,7 +128,7 @@ export default function PdfOrganizer() {
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: context, viewport }).promise;
                         newPages.push({
-                            id: `page-${i}-${Date.now()}`, // Highly unique and stable ID
+                            id: `p-${i}-${timestamp}`, 
                             index: i,
                             rotation: 0,
                             isDeleted: false,
@@ -338,17 +339,12 @@ export default function PdfOrganizer() {
                                     </div>
                                 ) : (
                                     <ScrollArea className="h-full w-full">
-                                        {/* 
-                                            CRITICAL FIX: 
-                                            Using axis="y" in Reorder.Group is standard.
-                                            The grid flow is maintained by CSS. 
-                                            Each item must have layoutId for smooth transition.
-                                        */}
+                                        {/* CRITICAL FIX: Explicit axis="y" with stable popLayout for 2D Grid feel */}
                                         <Reorder.Group 
                                             axis="y" 
                                             values={pages} 
                                             onReorder={setPages} 
-                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24 transform-gpu"
+                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24"
                                         >
                                             <AnimatePresence mode="popLayout">
                                                 {pages.map((p, i) => (
@@ -396,7 +392,7 @@ export default function PdfOrganizer() {
 
                                                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
                                                             <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); addBlankPage(p.id); }} title="Insert Blank After">
-                                                                <FilePlus2 className="size-4" />
+                                                                <Plus className="size-4" />
                                                             </Button>
                                                             <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); rotatePage(p.id); }} title="Rotate 90">
                                                                 <RotateCw className="size-4" />
