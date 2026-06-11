@@ -177,7 +177,7 @@ export default function PdfMerger() {
             const imgs: string[] = [];
             const pagesToRender = Math.min(pdf.numPages, 10); 
 
-            for (let i = 1; i <= totalPages; i++) {
+            for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 1.2 });
                 const canvas = document.createElement('canvas');
@@ -272,7 +272,7 @@ export default function PdfMerger() {
                                 >
                                     <div className="relative">
                                         <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDFs to Merge</p>
