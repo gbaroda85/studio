@@ -163,11 +163,13 @@ export default function PdfMerger() {
         clearMergedFile();
         if (fileInputRef.current) fileInputRef.current.value = "";
         
-        // Ensure scroll happens after state has cleared the results
-        // This ensures the layout has finished shifting
+        // Robust scroll-to-top logic with delay to allow layout calculation
         setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 100);
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }, 150);
     }
 
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
