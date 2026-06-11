@@ -176,7 +176,7 @@ function GR7Logo({ className }: { className?: string }) {
             x="4" 
             y="70" 
             style={{ 
-              fill: '#043873', 
+              fill: '#0d5a71', 
               fontSize: '46px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
@@ -188,7 +188,7 @@ function GR7Logo({ className }: { className?: string }) {
             x="62" 
             y="75" 
             style={{ 
-              fill: '#4F9CF9', 
+              fill: '#ef4444', 
               fontSize: '68px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
