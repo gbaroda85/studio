@@ -1,5 +1,13 @@
+
 import { ShieldCheck, Database, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy - Your Data Stays on Your Device',
+  description: 'Learn how GR7 Tools protects your privacy. We use client-side processing, meaning your images and PDFs never leave your browser.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/privacy-policy' }
+};
 
 export default function PrivacyPolicyPage() {
   return (

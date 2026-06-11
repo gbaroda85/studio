@@ -1,5 +1,13 @@
+
 import { BookOpen, CheckCircle2, AlertTriangle, Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service - GR7 Tools Hub',
+  description: 'Read the terms and conditions for using GR7 Tools. Our services are provided locally for private and professional use.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/terms-of-service' }
+};
 
 export default function TermsOfServicePage() {
   return (

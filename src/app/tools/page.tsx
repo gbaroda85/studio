@@ -65,8 +65,12 @@ import {
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
+import { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+// In Next.js App Router, metadata must be handled carefully in Client Components. 
+// We use a small wrapper or just the page export if it were a server component.
+// Since this is "use client", we rely on the parent or next-seo patterns. 
+// However, for consistency we'll ensure indexing is prioritized.
 
 function ToolsPageContent() {
   const {t} = useLanguage();

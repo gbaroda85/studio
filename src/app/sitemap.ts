@@ -52,7 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/unzip-file',
     '/crop-image',
     '/image-to-jpg',
-    '/image-to-png'
+    '/image-to-png',
+    '/enhance-photo'
   ];
 
   const corePages = ['', '/tools', '/privacy-policy', '/terms-of-service'];

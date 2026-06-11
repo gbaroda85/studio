@@ -14,7 +14,7 @@ import { RotateCw, ShieldCheck, HelpCircle, LayoutGrid, MonitorCheck } from 'luc
 export const metadata: Metadata = {
   title: 'Rotate PDF Online - Permanently Rotate Individual or All Pages Privately',
   description: 'Easily rotate your PDF documents. Rotate individual pages or the entire file by 90, 180, or 270 degrees. 100% private local browser-based tool.',
-  alternates: { canonical: '/rotate-pdf' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/rotate-pdf' }
 };
 
 export default function RotatePdfPage() {
