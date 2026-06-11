@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'PDF Locker - Password Protect PDF Online with AES Encryption',
   description: 'Seal your PDF documents with professional AES-128 encryption. No server uploads - 100% private local protection for bank statements, IDs, and legal docs.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/lock-pdf' }
 };
 
 export default function LockPdfPage() {

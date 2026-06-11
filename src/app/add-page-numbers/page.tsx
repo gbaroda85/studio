@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Layout, AlignCenter, Hash } from 'lucide-react';
 import { PdfPageNumbererClient } from '@/components/client-tool-wrappers';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Add Page Numbers to PDF Online - Customize Position & Format Privately',
   description: 'Easily insert page numbers into your PDF documents. Choose positions, font sizes, and ranges. 100% private local browser-based tool.',
-  alternates: { canonical: '/add-page-numbers' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/add-page-numbers' }
 };
 
 export default function AddPageNumbersPage() {

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Calculator, Trophy } from 'lucide-react';
 import StandardCalculator from '@/components/standard-calculator';
@@ -8,6 +7,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'Standard Calculator Online - Simple Math for Daily Use',
   description: 'A clean and simple online calculator for everyday math. Addition, subtraction, multiplication, and division made easy in your browser.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/standard-calculator' }
 };
 
 const steps = [
@@ -30,7 +30,7 @@ export default function StandardCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Standard <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     A simple and efficient tool for your everyday mathematical calculations.
                 </p>
             </div>

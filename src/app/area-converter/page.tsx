@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Landmark, Map, Scaling, Trophy } from 'lucide-react';
 import AreaConverter from '@/components/area-converter';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Area Converter - Acre, Hectare, Bigha, Sq Ft, Sq Meter Units Online India',
   description: 'Convert between different area units like Acres, Hectares, Bigha, Square Feet, and Square Meters. Perfect for land measurements and property records.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/area-converter' }
 };
 
 export default function AreaConverterPage() {
@@ -29,7 +29,7 @@ export default function AreaConverterPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Area <span className="text-gradient-hero">Converter</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Convert between international and local Indian land units like Bigha, Acre, and Hectare.
                 </p>
             </div>

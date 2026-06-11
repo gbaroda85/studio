@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'HTML to PDF Converter - Convert Web Code to Professional Document Online',
   description: 'Convert raw HTML/CSS code into professional PDF documents instantly. 100% private local processing for developers and designers with live preview.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/html-to-pdf' }
 };
 
 export default function HtmlToPdfPage() {

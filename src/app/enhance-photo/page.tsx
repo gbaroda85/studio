@@ -6,6 +6,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'AI Photo Enhancer - Fix Blurry, Dark & Low-Quality Photos Online HD',
   description: 'Automatically improve photo quality, brightness, and sharpness using local AI. Professional enhancement with zero data risk. 100% private and free.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/enhance-photo' }
 };
 
 export const dynamic = 'force-dynamic';

@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Professional Document Scanner - AI Filters & HD PDF Export Online',
   description: 'Premium mobile scanner with AI filters. BW PRO, Magic Color, and high-fidelity text enhancement. 100% private local processing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/document-scan' }
 };
 
 export default function DocumentScanPage() {

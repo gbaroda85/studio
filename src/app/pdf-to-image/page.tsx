@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import PdfToImageConverter from '@/components/pdf-to-image-converter';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -7,7 +6,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'High Quality PDF to Image Converter - Extract PDF Pages as HD JPG/PNG Online',
   description: 'Convert every page of your PDF into high-resolution JPG or PNG images. Features batch processing, ZIP download, and 300 DPI quality extraction. 100% private local tool.',
-  alternates: { canonical: '/pdf-to-image' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/pdf-to-image' }
 };
 
 export default function PdfToImagePage() {

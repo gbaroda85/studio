@@ -13,6 +13,7 @@ import { Gift, Clock, Sparkles, HelpCircle } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Advanced Age Calculator - Exact Years, Months, Days & Life Analytics Online',
   description: 'Discover your exact age with detailed life metrics. Calculate total months, weeks, hours, and seconds lived. Find days left for your next birthday instantly.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/age-calculator' }
 };
 
 export default function AgeCalculatorPage() {

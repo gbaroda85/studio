@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { HelpCircle, Package, Lock } from 'lucide-react';
 import ZipCreator from '@/components/zip-creator';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Create ZIP Archive Online - Bundle Multiple Files Free',
   description: 'Bundle and compress multiple files into a single ZIP archive instantly. Secure, fast, and works entirely in your browser memory.',
-  alternates: { canonical: '/create-zip' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/create-zip' }
 };
 
 export default function CreateZipPage() {

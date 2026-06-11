@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Scan to PDF - Turn Device Camera into a Mobile Document Scanner Online',
   description: 'Scan physical documents using your mobile or desktop camera and save them as professional PDFs. 100% local, secure, and easy document scanning.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/scan-to-pdf' }
 };
 
 export default function ScanToPdfPage() {

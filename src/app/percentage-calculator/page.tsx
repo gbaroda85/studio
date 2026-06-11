@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Percent, HelpCircle, ShieldCheck, GraduationCap, Coins, Trophy } from 'lucide-react';
 import PercentageCalculator from '@/components/percentage-calculator';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Percentage Calculator - Marks, Ratios, School Result & GST Percentages',
   description: 'Calculate percentages for exam marks, discount ratios, and profit/loss instantly. Perfect for students and professional financial calculations.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/percentage-calculator' }
 };
 
 export default function PercentageCalculatorPage() {
@@ -29,7 +29,7 @@ export default function PercentageCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Percentage <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Quickly calculate percentages for marks, discounts, and financial ratios.
                 </p>
             </div>

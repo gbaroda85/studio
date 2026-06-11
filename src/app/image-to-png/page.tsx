@@ -6,6 +6,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'Image to PNG Converter - Convert JPG, WEBP to Transparent PNG Online',
   description: 'Convert any image format to lossless PNG. Maintain transparency and crystal clear document quality with local browser processing. 100% private.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/image-to-png' }
 };
 
 export default function ImageToPngPage() {

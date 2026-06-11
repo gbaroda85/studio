@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { TrendingUp, Wallet, HelpCircle, ShieldCheck, Zap, Calculator, Trophy } from 'lucide-react';
 import InterestCalculator from '@/components/interest-calculator';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Interest Calculator - Simple & Compound Interest Online India (HD)',
   description: 'Calculate simple and compound interest for your savings, FDs, or loans instantly. Detailed breakdown of total interest and final amount with 100% privacy.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/interest-calculator' }
 };
 
 export default function InterestCalculatorPage() {
@@ -29,7 +29,7 @@ export default function InterestCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Interest <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Calculate simple and compound interest for your investments and loans.
                 </p>
             </div>

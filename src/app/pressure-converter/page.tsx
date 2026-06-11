@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Waves, ShieldCheck, HelpCircle, Activity, MonitorCheck, Trophy } from 'lucide-react';
 import PressureConverter from '@/components/pressure-converter';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Pressure Converter - Bar, PSI, Pa, ATM Units Online HD',
   description: 'Instant pressure unit conversion. Convert between Pascal, Bar, PSI, and Atmosphere units. Precise for industrial and automotive use.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/pressure-converter' }
 };
 
 export default function PressureConverterPage() {
@@ -37,7 +37,7 @@ export default function PressureConverterPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Pressure <span className="text-gradient-hero">Converter</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Convert between Bar, PSI, Pascal, and Atmosphere units with high precision.
                 </p>
             </div>

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Music, ShieldCheck, HelpCircle, FileVideo, Zap, MonitorPlay } from 'lucide-react';
 import VideoToMp3Converter from '@/components/video-to-mp3-converter';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Video to MP3 Converter - Extract High Quality Audio Online Privately',
   description: 'Convert MP4, WebM, and other video formats to high-quality audio files instantly. 100% private local browser extraction with zero server uploads.',
-  alternates: { canonical: '/video-to-mp3' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/video-to-mp3' }
 };
 
 export default function VideoToMp3Page() {

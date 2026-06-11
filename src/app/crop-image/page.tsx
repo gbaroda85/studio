@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize } from 'lucide-react';
 import ImageCropper from '@/components/image-cropper';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Smart Image Cropper - Crop, Rotate & Fix Perspective Online (HD)',
   description: 'Professional image cropping tool with Scanner Mode. Fix tilted documents, crop photos for SSC/UPSC, and extract area with 100% quality preservation.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/crop-image' }
 };
 
 export default function CropImagePage() {
@@ -105,7 +105,7 @@ export default function CropImagePage() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-4" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe to upload my Aadhaar card or PAN card here?</AccordionTrigger>
+                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for upload my Aadhaar card or PAN card here?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
                             Absolutely. We use <strong>Client-Side Processing</strong>. This means your images are processed entirely inside your browser's temporary memory (RAM) and are <strong>never uploaded</strong> to any server. Your data stays on your device.
                         </AccordionContent>

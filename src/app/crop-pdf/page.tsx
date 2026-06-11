@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Precise PDF Cropper - Crop PDF Page Margins & Areas Online Privately',
   description: 'Trim PDF margins or fix perspective with 4-dot scanner mode. Perfect for extracting charts, tables, or cleaning document photos locally in HD.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/crop-pdf' }
 };
 
 export default function CropPdfPage() {

@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Scissors, ShieldCheck, HelpCircle, LayoutGrid, MousePointer2 } from 'lucide-react';
 import PdfSplitter from '@/components/pdf-splitter';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Visual PDF Splitter - Extract & Split PDF Pages Online Privately',
   description: 'Visually select and extract specific pages from any PDF file. Features grid-preview selection and instant local processing. 100% private and secure.',
-  alternates: { canonical: '/split-pdf' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/split-pdf' }
 };
 
 export default function SplitPdfPage() {

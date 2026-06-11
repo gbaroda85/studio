@@ -6,6 +6,7 @@ import { ToolNavigation } from '@/components/tool-navigation';
 export const metadata: Metadata = {
   title: 'Image to JPG Converter - Convert PNG, WEBP, BMP to JPG Online HD',
   description: 'Convert any image format to standard high-quality JPG instantly. Best for passport photos, web uploads, and social media with 100% privacy.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/image-to-jpg' }
 };
 
 export default function ImageToJpgPage() {

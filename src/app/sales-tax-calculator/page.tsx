@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { HelpCircle, ShieldCheck, BadgeIndianRupee, Percent, ShoppingCart, Trophy } from 'lucide-react';
 import SalesTaxCalculator from '@/components/sales-tax-calculator';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Sales Tax & GST Calculator - Calculate Bill Tax and Total Price Online',
   description: 'Quickly calculate sales tax, GST, or VAT amount for any item. Find out the final bill amount with tax-inclusive or exclusive pricing instantly.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/sales-tax-calculator' }
 };
 
 export default function SalesTaxCalculatorPage() {
@@ -29,7 +29,7 @@ export default function SalesTaxCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     GST & Sales <span className="text-gradient-hero">Tax Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Quickly calculate tax-inclusive or exclusive pricing for any product or service.
                 </p>
             </div>

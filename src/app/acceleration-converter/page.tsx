@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Activity, Target, ShieldCheck, HelpCircle, Waves, Trophy } from 'lucide-react';
 import AccelerationConverter from '@/components/acceleration-converter';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Acceleration Converter - m/s², km/h², g-force Units Online HD',
   description: 'Instant acceleration unit conversion. Convert between meters per second squared, standard gravity, and more. Precise and fast for physics and engineering.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/acceleration-converter' }
 };
 
 export default function AccelerationConverterPage() {

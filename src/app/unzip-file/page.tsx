@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { HelpCircle, ShieldCheck, Zap, FileArchive, Unlock, Lock } from 'lucide-react';
 import Unzipper from '@/components/unzipper';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Unzip Files Online - Extract ZIP, RAR & 7Z Archives Privately (HD)',
   description: 'Professional online unzipper. Extract multiple files from ZIP archives instantly. 100% secure local browser processing. No server uploads, zero data risk.',
-  alternates: { canonical: '/unzip-file' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/unzip-file' }
 };
 
 export default function UnzipFilePage() {

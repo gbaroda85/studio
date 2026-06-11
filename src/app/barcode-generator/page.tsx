@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Barcode, ShieldCheck, HelpCircle, LayoutGrid, Scan, Maximize, Printer, Sparkles, Download, Zap } from 'lucide-react';
 import BarcodeGenerator from '@/components/barcode-generator';
@@ -14,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Professional Barcode Generator - Create Scannable CODE128, EAN & UPC Online',
   description: 'Generate high-quality barcodes for free. Supports CODE128, EAN-13, UPC, and more. Download as PNG, SVG, or PDF. Batch processing and ZIP export included.',
-  alternates: { canonical: '/barcode-generator' }
+  alternates: { canonical: 'https://www.gr7imagepdf.com/barcode-generator' }
 };
 
 export default function BarcodeGeneratorPage() {

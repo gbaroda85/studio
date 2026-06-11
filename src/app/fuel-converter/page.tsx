@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Gauge, HelpCircle, ShieldCheck, Landmark, Target, Trophy } from 'lucide-react';
 import FuelConverter from '@/components/fuel-converter';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Fuel Consumption Converter - km/L to MPG (US/UK) Online Free HD',
   description: 'Convert fuel efficiency units instantly. Support for km/L, MPG (US), MPG (UK), and L/100km. Simple vehicle mileage and distance tool.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/fuel-converter' }
 };
 
 export default function FuelConverterPage() {
@@ -29,7 +29,7 @@ export default function FuelConverterPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Fuel Consumption <span className="text-gradient-hero">Converter</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Convert between km/L, MPG, and L/100km efficiency standards instantly.
                 </p>
             </div>

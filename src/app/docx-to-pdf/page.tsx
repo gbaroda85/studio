@@ -13,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Word to PDF Converter - Convert DOCX to PDF Online Free (HD)',
   description: 'Convert Word (.docx) documents to high-quality PDF files instantly. 100% private local browser processing. No file size limits and no server uploads.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/docx-to-pdf' }
 };
 
 export default function DocxToPdfPage() {

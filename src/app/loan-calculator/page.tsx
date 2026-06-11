@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Landmark, TrendingUp, PieChart, HelpCircle, Calculator, Wallet, Trophy } from 'lucide-react';
 import LoanCalculator from '@/components/loan-calculator';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Loan EMI Calculator - Home, Car, Personal Loan EMI Online India',
   description: 'Calculate your monthly EMI, total interest, and total payment for any loan. Simple and accurate financial planning tool with local processing.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/loan-calculator' }
 };
 
 export default function LoanCalculatorPage() {
@@ -29,7 +29,7 @@ export default function LoanCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Loan & EMI <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Calculate your monthly loan payments and interest breakdowns with precision.
                 </p>
             </div>

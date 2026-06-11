@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { Gauge, HelpCircle, ShieldCheck, MapPin, Fuel, Trophy } from 'lucide-react';
 import FuelCostCalculator from '@/components/fuel-cost-calculator';
@@ -14,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Fuel Cost Calculator - Estimate Trip Petrol & Diesel Expense Online',
   description: 'Plan your road trip budget with our fuel expense calculator. Calculate required fuel and total cost based on distance and mileage accurately.',
+  alternates: { canonical: 'https://www.gr7imagepdf.com/fuel-cost-calculator' }
 };
 
 export default function FuelCostCalculatorPage() {
@@ -29,7 +29,7 @@ export default function FuelCostCalculatorPage() {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
                     Fuel Cost <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-sm md:text-base">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Plan your road trip budget by calculating estimated petrol and diesel expenses.
                 </p>
             </div>
