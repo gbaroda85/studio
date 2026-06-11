@@ -35,7 +35,6 @@ import {
     Layers, 
     Trash2, 
     RotateCw, 
-    RotateCcw,
     X, 
     RefreshCcw, 
     CheckCircle2, 
@@ -57,7 +56,10 @@ import {
     FileText,
     Grip,
     ArrowDownAz,
-    ArrowUpAz
+    ArrowUpAz,
+    History,
+    Undo,
+    RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +67,14 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -138,7 +148,7 @@ function SortablePage({
             style={style} 
             className={cn(
                 "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all",
-                page.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent shadow-primary/5",
+                "hover:border-primary/40 border-transparent shadow-primary/5",
                 isDragging && "opacity-0"
             )}
         >
@@ -161,12 +171,6 @@ function SortablePage({
                 </div>
             )}
 
-            {page.isDeleted && (
-                <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center z-30">
-                    <Trash2 className="size-10 text-rose-600" />
-                </div>
-            )}
-
             <div className="absolute bottom-2 right-2 flex gap-1.5 transition-all z-40">
                 <button 
                     className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
@@ -183,14 +187,11 @@ function SortablePage({
                     <RotateCw className="size-4" />
                 </button>
                 <button 
-                    className={cn(
-                        "h-8 w-8 rounded-lg shadow-xl transition-all flex items-center justify-center",
-                        page.isDeleted ? "bg-primary text-white" : "bg-rose-500 text-white"
-                    )} 
+                    className="h-8 w-8 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600" 
                     onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
                     title="Delete Page"
                 >
-                    {page.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
+                    <Trash2 className="size-4" />
                 </button>
             </div>
         </div>
@@ -206,10 +207,15 @@ export default function PdfOrganizer() {
     const [isRendering, setIsRendering] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    
+    // Core State: Split between active and deleted
     const [pages, setPages] = useState<PageItem[]>([]);
+    const [deletedPages, setDeletedPages] = useState<PageItem[]>([]);
+    
     const [progress, setProgress] = useState(0);
     const [resultPdfUrl, setResultPdfUrl] = useState<string | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [isRestoreOpen, setIsRestoreOpen] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const studioWorkspaceRef = useRef<HTMLDivElement>(null);
@@ -231,6 +237,7 @@ export default function PdfOrganizer() {
         renderIdRef.current++;
         setPdfFile(null);
         setPages([]);
+        setDeletedPages([]);
         setResultPdfUrl(null);
         setIsRendering(false);
         setIsSaving(false);
@@ -241,6 +248,7 @@ export default function PdfOrganizer() {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setPages([]);
+            setDeletedPages([]);
             setResultPdfUrl(null);
             setIsRendering(true);
             setProgress(0);
@@ -297,9 +305,39 @@ export default function PdfOrganizer() {
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-    const togglePageDeletion = (id: string) => {
-        setPages(prev => prev.map(p => p.id === id ? { ...p, isDeleted: !p.isDeleted } : p));
+    /**
+     * MOVE TO TRASH
+     */
+    const deletePage = (id: string) => {
+        const pageToDelete = pages.find(p => p.id === id);
+        if (!pageToDelete) return;
+
+        setPages(prev => prev.filter(p => p.id !== id));
+        setDeletedPages(prev => [...prev, { ...pageToDelete, isDeleted: true }]);
         setResultPdfUrl(null);
+        toast({ title: "Page Moved to Trash" });
+    };
+
+    /**
+     * RESTORE FROM TRASH
+     */
+    const restorePage = (id: string) => {
+        const pageToRestore = deletedPages.find(p => p.id === id);
+        if (!pageToRestore) return;
+
+        setDeletedPages(prev => prev.filter(p => p.id !== id));
+        setPages(prev => [...prev, { ...pageToRestore, isDeleted: false }]);
+        setResultPdfUrl(null);
+        toast({ title: "Page Restored" });
+    };
+
+    const restoreAll = () => {
+        if (deletedPages.length === 0) return;
+        setPages(prev => [...prev, ...deletedPages.map(p => ({ ...p, isDeleted: false }))]);
+        setDeletedPages([]);
+        setResultPdfUrl(null);
+        setIsRestoreOpen(false);
+        toast({ title: "All Pages Restored" });
     };
 
     const rotatePage = (id: string) => {
@@ -328,14 +366,16 @@ export default function PdfOrganizer() {
         toast({ title: "Blank Page Inserted" });
     };
 
+    const resetAllRotations = () => {
+        setPages(prev => prev.map(p => ({ ...p, rotation: 0 })));
+        setResultPdfUrl(null);
+        toast({ title: "Rotations Reset", description: "All pages set to original orientation." });
+    };
+
     const rotateAll = (deg: number) => {
         setPages(prev => prev.map(p => ({ ...p, rotation: deg % 360 })));
         setResultPdfUrl(null);
-        if (deg === 0) {
-            toast({ title: "Rotations Reset", description: "All pages set to original orientation." });
-        } else {
-            toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
-        }
+        toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
     };
 
     const sortPages = (direction: 'asc' | 'desc') => {
@@ -373,20 +413,14 @@ export default function PdfOrganizer() {
     };
 
     const handleSavePdf = async () => {
-        if (!pdfFile) return;
-        const activePages = pages.filter(p => !p.isDeleted);
-        if (activePages.length === 0) {
-            toast({ variant: 'destructive', title: 'Empty Selection', description: 'At least one page must be kept.' });
-            return;
-        }
-
+        if (!pdfFile || pages.length === 0) return;
         setIsSaving(true);
         try {
             const existingPdfBytes = await pdfFile.arrayBuffer();
             const originalPdf = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             const newPdfDoc = await PDFDocument.create();
 
-            for (const p of activePages) {
+            for (const p of pages) {
                 if (p.type === 'blank') {
                     newPdfDoc.addPage([595.28, 841.89]); 
                 } else {
@@ -401,7 +435,7 @@ export default function PdfOrganizer() {
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             setResultPdfUrl(url);
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#f3cc8a', '#ffffff'] });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#043873', '#4F9CF9', '#ffffff'] });
             toast({ title: "Organize Success!", description: "Changes bundled into new PDF." });
         } catch (error) {
             console.error(error);
@@ -480,14 +514,14 @@ export default function PdfOrganizer() {
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
-                                        {pages.filter(p => !p.isDeleted).length} ACTIVE PAGES
+                                        {pages.length} ACTIVE PAGES
                                     </Badge>
                                     <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg shrink-0 no-print">
                                         <RefreshCcw className="mr-1.5 size-3" /> Change
                                     </Button>
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative">
+                            <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative border-b">
                                 {isRendering ? (
                                     <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
                                         <div className="relative">
@@ -509,11 +543,11 @@ export default function PdfOrganizer() {
                                         >
                                             <SortableContext items={pages} strategy={rectSortingStrategy}>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24">
-                                                    {pages.map((p, i) => (
+                                                    {pages.map((p) => (
                                                         <SortablePage 
                                                             key={p.id} 
                                                             page={p} 
-                                                            onDelete={togglePageDeletion}
+                                                            onDelete={deletePage}
                                                             onRotate={rotatePage}
                                                             onInsertBlank={addBlankPage}
                                                         />
@@ -546,7 +580,7 @@ export default function PdfOrganizer() {
                                     </ScrollArea>
                                 )}
                             </CardContent>
-                            <CardFooter className="bg-white dark:bg-slate-950 border-t p-4 flex justify-center items-center relative shrink-0">
+                            <CardFooter className="bg-white dark:bg-slate-950 p-4 flex justify-center items-center relative shrink-0">
                                  <div className="inline-flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
                                     <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Drag tiles to reorder pages
                                 </div>
@@ -576,13 +610,66 @@ export default function PdfOrganizer() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="grid grid-cols-2 gap-2">
-                                        <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-14" data-label="SORT 1 → N" />
-                                        <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14" data-label="SORT N → 1" />
+                                        <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="SORT 1 → N" />
+                                        <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="SORT N → 1" />
                                     </div>
-                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14" data-label="ADD BLANK PAGE" />
-                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14" data-label="ROTATE ALL 90°" />
-                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ALL ROTATIONS" />
-                                    <button onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))} className="btn-pos-uiverse h-14" data-label="RESTORE DELETED" />
+                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="ADD BLANK PAGE" />
+                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="ROTATE ALL 90°" />
+                                    <button onClick={() => resetAllRotations()} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESET ALL ROTATIONS" />
+                                    
+                                    <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
+                                        <DialogTrigger asChild>
+                                            <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all relative" data-label="RESTORE DELETED">
+                                                {deletedPages.length > 0 && (
+                                                    <span className="absolute -top-1 -right-1 size-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50">
+                                                        {deletedPages.length}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                                            <DialogHeader className="p-8 border-b bg-primary/5">
+                                                <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                                                    <History className="size-6 text-primary" /> Trash Bin Recovery
+                                                </DialogTitle>
+                                                <CardDescription className="uppercase font-bold text-[10px] tracking-widest">Select pages to restore back to workspace</CardDescription>
+                                            </DialogHeader>
+                                            
+                                            <ScrollArea className="flex-1 p-8 bg-slate-100 dark:bg-slate-900/40 shadow-inner">
+                                                {deletedPages.length === 0 ? (
+                                                    <div className="h-64 flex flex-col items-center justify-center text-center opacity-20 gap-4">
+                                                        <Trash2 className="size-16" />
+                                                        <p className="font-black uppercase tracking-widest text-sm">Trash is empty</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                                        {deletedPages.map((p) => (
+                                                            <div key={p.id} className="relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 bg-white shadow-lg group">
+                                                                <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100">
+                                                                    <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="trash" />
+                                                                </div>
+                                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white">{p.index === -1 ? 'B' : p.index}</div>
+                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                    <Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg" onClick={() => restorePage(p.id)}>RESTORE</Button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </ScrollArea>
+
+                                            <DialogFooter className="p-8 border-t bg-muted/10 gap-4">
+                                                <Button variant="ghost" onClick={() => setIsRestoreOpen(false)} className="font-black uppercase text-[10px] tracking-widest px-8">CLOSE BIN</Button>
+                                                <Button 
+                                                    disabled={deletedPages.length === 0} 
+                                                    onClick={restoreAll}
+                                                    className="bg-primary text-white font-black text-xs uppercase px-10 h-12 rounded-xl shadow-xl"
+                                                >
+                                                    RESTORE ALL PAGES
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             </div>
 
