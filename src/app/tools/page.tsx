@@ -62,9 +62,12 @@ import {
   Barcode,
   QrCode,
   ChevronUp,
+  ScanLine as ScanLineIcon,
+  Wand2 as Wand2Icon,
   IndianRupee,
   TrendingUp,
-  PiggyBank
+  PiggyBank,
+  Layers
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -178,6 +181,14 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/organize-pdf',
+      labelKey: 'organize_pdf_label',
+      descriptionKey: 'organize_pdf_description',
+      icon: Layers,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#eef2ff]'
+    },
     {
       href: '/merge-pdf',
       labelKey: 'merge_pdf_label',
@@ -496,7 +507,7 @@ function ToolsPageContent() {
 
   const allFeatureGroups = [
     { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
-    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-red-500' },
+    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500' },
     { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Video, color: 'text-indigo-500' },
     { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
     { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },

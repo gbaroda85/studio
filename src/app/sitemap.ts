@@ -1,4 +1,3 @@
-
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -23,7 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/gst-calculator',
     '/sip-calculator',
     '/fd-rd-calculator',
-    '/income-tax-calculator'
+    '/income-tax-calculator',
+    '/organize-pdf'
   ];
 
   const otherTools = [

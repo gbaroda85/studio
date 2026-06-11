@@ -58,7 +58,8 @@ import {
   Wand2,
   IndianRupee,
   TrendingUp,
-  PiggyBank
+  PiggyBank,
+  Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -80,6 +81,7 @@ const ALL_TOOLS = [
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   
   // PDF Toolkit
+  { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf-kit" },
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "pdf-kit" },
   { icon: RotateCw, title: "ROTATE PDF", description: "Rotate PDF pages permanently and save.", href: "/rotate-pdf", colorClass: "bg-blue-500", lightBg: "bg-blue-50", category: "pdf-kit" },
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
@@ -234,7 +236,7 @@ export default function Page() {
         <div className="w-full max-w-[2000px] px-8 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-12 font-body">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-12 font-body">
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

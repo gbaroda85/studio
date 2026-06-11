@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -55,6 +54,8 @@ const translations = {
     split_pdf_description: 'Extract specific pages from a PDF.',
     rotate_pdf_label: 'Rotate PDF',
     rotate_pdf_description: 'Rotate PDF pages permanently and save.',
+    organize_pdf_label: 'Organize PDF',
+    organize_pdf_description: 'Delete, reorder and rotate pages visually.',
     crop_pdf_label: 'Crop PDF',
     crop_pdf_description: 'Crop the visible area of PDF pages.',
     edit_pdf_label: 'Edit PDF',
@@ -171,6 +172,8 @@ const translations = {
     split_pdf_description: 'PDF से विशिष्ट पन्ने निकालें।',
     rotate_pdf_label: 'PDF रोटेट',
     rotate_pdf_description: 'PDF पन्नों को घुमाएं और सेव करें।',
+    organize_pdf_label: 'PDF व्यवस्थित करें',
+    organize_pdf_description: 'पन्नों को डिलीट, व्यवस्थित और रोटेट करें।',
     crop_pdf_label: 'PDF क्रॉप',
     crop_pdf_description: 'PDF पन्नों को क्रॉप करें।',
     edit_pdf_label: 'PDF एडिट',
@@ -287,6 +290,8 @@ const translations = {
     split_pdf_description: 'Extrae páginas de un PDF.',
     rotate_pdf_label: 'Rotar PDF',
     rotate_pdf_description: 'Rota páginas de PDF permanentemente.',
+    organize_pdf_label: 'Organizar PDF',
+    organize_pdf_description: 'Elimina, reordena y rota páginas visualmente.',
     crop_pdf_label: 'Recortar PDF',
     crop_pdf_description: 'Recorta páginas de PDF.',
     edit_pdf_label: 'Editar PDF',

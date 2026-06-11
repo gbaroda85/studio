@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -58,9 +57,11 @@ import {
   RotateCw,
   Barcode,
   QrCode,
+  ChevronUp,
   IndianRupee,
   TrendingUp,
-  PiggyBank
+  PiggyBank,
+  Layers
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -109,6 +110,7 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
+      { href: '/organize-pdf', label: 'organize_pdf_label', icon: Layers },
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/rotate-pdf', label: 'rotate_pdf_label', icon: RotateCw },
       { href: '/lock-pdf', label: 'lock_pdf_label', icon: Lock },
