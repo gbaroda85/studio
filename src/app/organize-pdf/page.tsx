@@ -45,18 +45,6 @@ export default function OrganizePdfPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-6 px-4">
-            <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-2.5" /> STRUCTURE STUDIO
-                </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Organize <span className="text-gradient-hero">PDF Pro</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
-                    Delete, Reorder and Rotate. The most complete visual page manager for your browser.
-                </p>
-            </div>
-
             <div className="w-full flex justify-center">
                 <PdfOrganizer />
             </div>
