@@ -47,7 +47,7 @@ export default function AiUpscalerPage() {
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
                     AI Image <span className="text-gradient-hero">Upscaler</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
                     Increase resolution and fix blurry photos with browser-side AI. 100% Private. No limits.
                 </p>
             </div>

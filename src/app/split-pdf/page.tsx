@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import { Scissors, ShieldCheck, HelpCircle, LayoutGrid, MousePointer2 } from 'lucide-react';
 import PdfSplitter from '@/components/pdf-splitter';

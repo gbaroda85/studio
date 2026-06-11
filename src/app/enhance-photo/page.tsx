@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import PhotoEnhancer from '@/components/photo-enhancer';
 import { HowToGuide } from '@/components/how-to-guide';

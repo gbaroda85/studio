@@ -65,12 +65,6 @@ import {
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
-import { Metadata } from 'next';
-
-// In Next.js App Router, metadata must be handled carefully in Client Components. 
-// We use a small wrapper or just the page export if it were a server component.
-// Since this is "use client", we rely on the parent or next-seo patterns. 
-// However, for consistency we'll ensure indexing is prioritized.
 
 function ToolsPageContent() {
   const {t} = useLanguage();
@@ -83,12 +77,20 @@ function ToolsPageContent() {
 
   const imageFeatures = [
     {
-      href: '/ai-upscaler',
+      href: '/enhance-photo',
       labelKey: 'enhance_photo_label',
       descriptionKey: 'enhance_photo_description',
+      icon: Wand2,
+      color: 'bg-violet-600',
+      lightBg: 'bg-[#f5f3ff]'
+    },
+    {
+      href: '/ai-upscaler',
+      labelKey: 'ai_upscaler_label',
+      descriptionKey: 'ai_upscaler_description',
       icon: Sparkles,
       color: 'bg-indigo-600',
-      lightBg: 'bg-[#f5f3ff]'
+      lightBg: 'bg-[#eef2ff]'
     },
     {
       href: '/image-to-pdf',
