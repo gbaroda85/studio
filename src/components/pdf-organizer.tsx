@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -35,6 +34,7 @@ import {
     Layers, 
     Trash2, 
     RotateCw, 
+    RotateCcw,
     X, 
     RefreshCcw, 
     CheckCircle2, 
@@ -303,7 +303,11 @@ export default function PdfOrganizer() {
     const rotateAll = (deg: number) => {
         setPages(prev => prev.map(p => ({ ...p, rotation: deg % 360 })));
         setResultPdfUrl(null);
-        toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
+        if (deg === 0) {
+            toast({ title: "Rotations Reset", description: "All pages set to original orientation." });
+        } else {
+            toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
+        }
     };
 
     // DnD Handlers
@@ -558,6 +562,10 @@ export default function PdfOrganizer() {
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => rotateAll(90)}>
                                         <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600"><RotateCw className="size-4" /></div>
                                         ROTATE ALL 90°
+                                    </Button>
+                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => rotateAll(0)}>
+                                        <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-600"><RotateCcw className="size-4" /></div>
+                                        RESET ALL ROTATIONS
                                     </Button>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))}>
                                         <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>
