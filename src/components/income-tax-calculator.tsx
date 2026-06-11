@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -34,7 +33,9 @@ import {
     Percent,
     Building2,
     Stethoscope,
-    PiggyBank
+    PiggyBank,
+    ListFilter,
+    LayoutGrid
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -45,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * @fileOverview Professional Indian Income Tax Calculator (FY 2025-26)
@@ -75,6 +77,8 @@ const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
 export default function IncomeTaxCalculator() {
+  const { toast } = useToast();
+
   // 1. INPUT STATES
   const [salary, setSalary] = useState("1200000");
   const [rentalIncome, setRentalIncome] = useState("0");
@@ -211,8 +215,6 @@ export default function IncomeTaxCalculator() {
   const handlePrint = () => {
     window.print();
   };
-
-  const { toast } = useToast();
 
   return (
     <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4 md:px-8 pb-32 animate-in fade-in duration-700">
@@ -394,7 +396,7 @@ export default function IncomeTaxCalculator() {
                                         </div>
                                         <span className="text-xs font-black">{formatCurrency(s.amount)}</span>
                                     </div>
-                                    <Progress value={results.new.taxableIncome > 0 ? (s.amount / results.new.finalTax) * 100 : 0} className="h-1.5" />
+                                    <Progress value={results.new.taxableIncome > 0 && results.new.finalTax > 0 ? (s.amount / results.new.finalTax) * 100 : 0} className="h-1.5" />
                                 </div>
                             ))}
                          </div>
