@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    /* Environmental Studio Theme - Inspired by Screenshot */
-    --background: 120 40% 98%;      /* Very Soft Mint-White Background */
-    --foreground: 222.2 84% 4.9%;   /* Deep Charcoal Text */
+    /* SaaS Professional Theme - Inspired by provided image */
+    --background: 210 100% 98%;      /* Very Light Tinted Blue-White (#F7F9FF) */
+    --foreground: 212 93% 15%;      /* Deep Navy Charcoal Text */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 212 93% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 131 43% 50%;         /* Leafy Green (#5CBA6E) from screenshot */
+    --popover-foreground: 212 93% 15%;
+    --primary: 212 93% 23%;         /* Deep Navy Blue (#043873) from image */
     --primary-foreground: 0 0% 100%;
-    --secondary: 17 77% 63%;        /* Coral Orange (#E8815A) from design accents */
+    --secondary: 213 94% 64%;        /* Bright Sky Blue (#4F9CF9) from image */
     --secondary-foreground: 0 0% 100%;
-    --muted: 120 20% 94%;           /* Slightly darker muted green for contrast */
+    --muted: 210 20% 94%;           /* Soft muted blue-grey */
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 17 77% 63%;           /* Coral Accent */
-    --accent-foreground: 222.2 84% 4.9%;
+    --accent: 213 94% 64%;           /* Bright Sky Blue Accent */
+    --accent-foreground: 212 93% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 131 43% 50%;
+    --ring: 212 93% 23%;
     --radius: 1rem;
   }
   
   .dark {
-    /* Deep and Mystic Dark Mode - UNTOUCHED */
+    /* Deep and Mystic Dark Mode - UNTOUCHED as per user instruction */
     --background: 285 45% 4%;        
     --foreground: 330 30% 95%;       
     --card: 285 40% 8%;              
@@ -63,10 +63,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Clean gradient for Light Mode inspired by environmental themes */
+    /* Updated gradient for Light Mode matching SaaS theme */
     background-image: 
-      radial-gradient(at 100% 0%, hsla(131, 43%, 50%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(17, 77%, 63%, 0.04) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(212, 93%, 23%, 0.03) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(213, 94%, 64%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -100,7 +100,7 @@
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-green-600 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-blue-700 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
 }
 
 ::-webkit-scrollbar {
@@ -356,9 +356,9 @@
   font-size: 14px;
   font-weight: 900;
   color: white;
-  background: #064e3b;
+  background: #043873;
   transition: 1s;
-  box-shadow: 6px 6px 0 hsl(var(--primary));
+  box-shadow: 6px 6px 0 hsl(var(--secondary));
   transform: skewX(-15deg);
   border: none;
   cursor: pointer;
@@ -371,7 +371,7 @@
 
 .explore-all-cta:hover {
   transition: 0.5s;
-  box-shadow: 10px 10px 0 hsl(var(--primary));
+  box-shadow: 10px 10px 0 hsl(var(--secondary));
 }
 
 .explore-all-cta .second {
@@ -426,7 +426,7 @@
   }
 
   50% {
-    fill: hsl(var(--primary));
+    fill: hsl(var(--secondary));
   }
 
   100% {
@@ -499,7 +499,7 @@
 .support-uiverse:hover,
 .support-uiverse:hover .uiverse-tooltip,
 .support-uiverse:hover .uiverse-tooltip::before {
-  background: linear-gradient(320deg, #064e3b, #065f46);
+  background: linear-gradient(320deg, #043873, #0d4a96);
   color: #ffffff;
   border-color: transparent;
 }
@@ -536,7 +536,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(135deg, hsl(var(--primary)), #059669);
+  background: linear-gradient(135deg, hsl(var(--primary)), #0a4a8e);
   transform: translate(0%, 100%);
   z-index: 10;
   position: absolute;
