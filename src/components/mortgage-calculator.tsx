@@ -18,7 +18,8 @@ import {
     Building2,
     ShieldAlert,
     Zap,
-    Sparkles
+    Sparkles,
+    Printer
 } from "lucide-react";
 import { 
     PieChart, 
