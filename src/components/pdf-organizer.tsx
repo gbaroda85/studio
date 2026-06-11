@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -456,7 +455,7 @@ export default function PdfOrganizer() {
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div ref={studioWorkspaceRef} className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -618,15 +617,16 @@ export default function PdfOrganizer() {
                                     <button onClick={() => resetAllRotations()} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESET ALL ROTATIONS" />
                                     
                                     <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
-                                        <DialogTrigger asChild>
-                                            <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all relative" data-label="RESTORE DELETED">
-                                                {deletedPages.length > 0 && (
-                                                    <span className="absolute -top-1 -right-1 size-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50">
-                                                        {deletedPages.length}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        </DialogTrigger>
+                                        <div className="relative w-full">
+                                            <DialogTrigger asChild>
+                                                <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESTORE DELETED" />
+                                            </DialogTrigger>
+                                            {deletedPages.length > 0 && (
+                                                <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50 pointer-events-none shadow-xl border-2 border-white">
+                                                    {deletedPages.length}
+                                                </span>
+                                            )}
+                                        </div>
                                         <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
                                             <DialogHeader className="p-8 border-b bg-primary/5">
                                                 <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
