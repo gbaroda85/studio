@@ -92,7 +92,6 @@ const CATEGORIES = [
     color: "text-blue-500",
     tools: [
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
-      { href: '/ai-upscaler', label: 'ai_upscaler_label', icon: Sparkles },
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
       { href: '/crop-image', label: 'crop_image_label', icon: Crop },

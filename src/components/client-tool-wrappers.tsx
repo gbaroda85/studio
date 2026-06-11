@@ -1,4 +1,3 @@
-
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -40,7 +39,3 @@ export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper')
   loading: () => <LoadingState message="Initializing Crop Studio..." />
 });
 
-export const AiUpscalerClient = dynamic(() => import('@/components/ai-upscaler'), {
-  ssr: false,
-  loading: () => <LoadingState message="Initializing AI Engine..." />
-});

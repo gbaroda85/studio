@@ -5,7 +5,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   
   // All active tools paths for comprehensive indexing
   const highPriorityTools = [
-    '/ai-upscaler',
     '/image-compress',
     '/image-resize',
     '/marriage-biodata',

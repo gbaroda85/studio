@@ -116,8 +116,6 @@ const translations = {
     remove_signature_description: 'Extract clean signatures from paper photos.',
     enhance_photo_label: 'Enhance Photo',
     enhance_photo_description: 'Improve photo quality professionally.',
-    ai_upscaler_label: 'AI Image Upscaler',
-    ai_upscaler_description: 'Increase image resolution to 4K locally.',
     image_to_text_label: 'Image to Text (OCR)',
     image_to_text_description: 'Extract text from any image locally.',
     text_to_pdf_label: 'Text to PDF',

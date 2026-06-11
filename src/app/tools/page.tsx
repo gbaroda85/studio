@@ -91,14 +91,6 @@ function ToolsPageContent() {
       lightBg: 'bg-[#f5f3ff]'
     },
     {
-      href: '/ai-upscaler',
-      labelKey: 'ai_upscaler_label',
-      descriptionKey: 'ai_upscaler_description',
-      icon: Sparkles,
-      color: 'bg-indigo-600',
-      lightBg: 'bg-[#eef2ff]'
-    },
-    {
       href: '/image-to-pdf',
       labelKey: 'image_to_pdf_label',
       descriptionKey: 'image_to_pdf_description',
