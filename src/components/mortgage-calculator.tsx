@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { motion, AnimatePresence } from "framer-motion";
 
 const COLORS = ["#043873", "#4F9CF9", "#FF9F1C", "#2EC4B6"];
 
