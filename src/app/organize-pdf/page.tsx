@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, Layers, Trash2, RotateCw, Move, CheckCircle2, Sparkles, LayoutGrid } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Layers, Trash2, RotateCw, Move, CheckCircle2, Sparkles, LayoutGrid, Scan, Maximize, Printer } from 'lucide-react';
 import PdfOrganizer from '@/components/pdf-organizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -44,8 +44,8 @@ export default function OrganizePdfPage() {
     <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="w-full flex flex-col items-center mb-6 px-4">
+            <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Sparkles className="size-2.5" /> STRUCTURE STUDIO
                 </div>
@@ -62,7 +62,7 @@ export default function OrganizePdfPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20 mt-12">
             <HowToGuide title="PDF Organizer" steps={deepSteps} />
 
             <section className="space-y-10 py-10 border-t">
