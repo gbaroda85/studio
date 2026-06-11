@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -622,7 +623,7 @@ export default function PdfOrganizer() {
                                                 <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESTORE DELETED" />
                                             </DialogTrigger>
                                             {deletedPages.length > 0 && (
-                                                <span className="absolute -top-3 -right-2 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50 pointer-events-none shadow-xl border-2 border-white">
+                                                <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-[100] pointer-events-none shadow-xl border-2 border-white">
                                                     {deletedPages.length}
                                                 </span>
                                             )}
