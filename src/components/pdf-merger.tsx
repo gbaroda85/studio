@@ -162,8 +162,12 @@ export default function PdfMerger() {
         setPdfFiles([]);
         clearMergedFile();
         if (fileInputRef.current) fileInputRef.current.value = "";
-        // Bring the focus back to the top of the studio workspace
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Ensure scroll happens after state has cleared the results
+        // This ensures the layout has finished shifting
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
     }
 
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
