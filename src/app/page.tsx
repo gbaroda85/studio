@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -191,18 +190,27 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="btn-sliding btn-sliding-blue group">
-              <span className="btn-text-one">Image Tools</span>
-              <span className="btn-text-two">Explore Now</span>
+          <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner">
+                  <span>Image Tools</span>
+                </div>
+              </div>
             </Link>
-            <Link href="/tools?tab=pdf" className="btn-sliding btn-sliding-blue group">
-              <span className="btn-text-one">PDF Tools</span>
-              <span className="btn-text-two">Try Studio</span>
+            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner">
+                  <span>PDF Tools</span>
+                </div>
+              </div>
             </Link>
-            <Link href="/tools?tab=calculator" className="btn-sliding btn-sliding-blue group">
-              <span className="btn-text-one">Calculators</span>
-              <span className="btn-text-two">Instant Result</span>
+            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner">
+                  <span>Calculators</span>
+                </div>
+              </div>
             </Link>
           </div>
 
