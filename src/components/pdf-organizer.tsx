@@ -1,9 +1,31 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
+import { 
+    DndContext, 
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+    defaultDropAnimationSideEffects,
+    type DragStartEvent,
+    type DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -40,7 +62,6 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -50,8 +71,8 @@ if (typeof window !== 'undefined') {
 
 interface PageItem {
     id: string;
-    index: number;       // For original pages, matches original index
-    rotation: number;    // 0, 90, 180, 270
+    index: number;       
+    rotation: number;    
     previewSrc: string;
     isDeleted: boolean;
     type: 'original' | 'blank';
@@ -78,6 +99,91 @@ function formatBytes(bytes: number, decimals = 2): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
+/**
+ * SORTABLE PAGE CARD COMPONENT
+ */
+function SortablePage({ 
+    page, 
+    index, 
+    onDelete, 
+    onRotate, 
+    onInsertBlank 
+}: { 
+    page: PageItem; 
+    index: number; 
+    onDelete: (id: string) => void;
+    onRotate: (id: string) => void;
+    onInsertBlank: (id: string) => void;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: page.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 999 : undefined,
+        opacity: isDragging ? 0.4 : 1,
+    };
+
+    return (
+        <div 
+            ref={setNodeRef} 
+            style={style} 
+            className={cn(
+                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-xl transition-all",
+                page.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent shadow-primary/5",
+                isDragging && "opacity-0"
+            )}
+        >
+            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
+                {index + 1}
+            </div>
+            
+            <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Grip className="size-12 text-primary opacity-20" />
+            </div>
+
+            {page.type === 'blank' ? (
+                <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 pointer-events-none">
+                    <FilePlus2 className="size-8 opacity-20" />
+                    <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
+                </div>
+            ) : (
+                <div className="size-full flex items-center justify-center p-3 transition-transform duration-300 pointer-events-none" style={{ transform: `rotate(${page.rotation}deg)` }}>
+                    <img src={page.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
+                </div>
+            )}
+
+            {page.isDeleted && (
+                <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center z-30">
+                    <Trash2 className="size-10 text-rose-600" />
+                </div>
+            )}
+
+            <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
+                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} title="Insert Blank After">
+                    <Plus className="size-4" />
+                </Button>
+                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} title="Rotate 90">
+                    <RotateCw className="size-4" />
+                </Button>
+                <Button size="icon" variant={page.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} title="Delete Page">
+                    {page.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * MAIN COMPONENT
+ */
 export default function PdfOrganizer() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -87,8 +193,15 @@ export default function PdfOrganizer() {
     const [pages, setPages] = useState<PageItem[]>([]);
     const [progress, setProgress] = useState(0);
     const [resultPdfUrl, setResultPdfUrl] = useState<string | null>(null);
+    const [activeId, setActiveId] = useState<string | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // DnD Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
 
     useEffect(() => {
         return () => {
@@ -193,6 +306,24 @@ export default function PdfOrganizer() {
         toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
     };
 
+    // DnD Handlers
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setPages((items) => {
+                const oldIndex = items.findIndex((i) => i.id === active.id);
+                const newIndex = items.findIndex((i) => i.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+            setResultPdfUrl(null);
+        }
+        setActiveId(null);
+    };
+
     const handleSavePdf = async () => {
         if (!pdfFile) return;
         const activePages = pages.filter(p => !p.isDeleted);
@@ -254,6 +385,8 @@ export default function PdfOrganizer() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const activePage = pages.find(p => p.id === activeId);
+
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
@@ -303,11 +436,6 @@ export default function PdfOrganizer() {
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
-                            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><Move className="size-3.5 text-primary" /> DRAG & DROP</div>
-                                <div className="flex items-center gap-1.5"><Trash2 className="size-3.5 text-rose-500" /> PAGE DELETE</div>
-                            </CardFooter>
                         </Card>
                     ) : (
                         <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
@@ -339,76 +467,54 @@ export default function PdfOrganizer() {
                                     </div>
                                 ) : (
                                     <ScrollArea className="h-full w-full">
-                                        {/* CRITICAL FIX: Explicit axis="y" with stable popLayout for 2D Grid feel */}
-                                        <Reorder.Group 
-                                            axis="y" 
-                                            values={pages} 
-                                            onReorder={setPages} 
-                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24"
+                                        <DndContext
+                                            sensors={sensors}
+                                            collisionDetection={closestCenter}
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
                                         >
-                                            <AnimatePresence mode="popLayout">
-                                                {pages.map((p, i) => (
-                                                    <Reorder.Item 
-                                                        key={p.id} 
-                                                        value={p}
-                                                        layout
-                                                        initial={{ opacity: 0, scale: 0.9 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        exit={{ opacity: 0, scale: 0.8 }}
-                                                        whileDrag={{ 
-                                                            scale: 1.05, 
-                                                            zIndex: 100, 
-                                                            boxShadow: "0 40px 100px -20px rgba(0, 0, 0, 0.5)",
-                                                            cursor: "grabbing"
-                                                        }}
-                                                        transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                                                        className={cn(
-                                                            "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-xl transition-all cursor-grab active:cursor-grabbing",
-                                                            p.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent shadow-primary/5"
-                                                        )}
-                                                    >
-                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
-                                                            {i + 1}
-                                                        </div>
-                                                        
-                                                        {p.type === 'blank' ? (
+                                            <SortableContext items={pages} strategy={rectSortingStrategy}>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24">
+                                                    {pages.map((p, i) => (
+                                                        <SortablePage 
+                                                            key={p.id} 
+                                                            page={p} 
+                                                            index={i} 
+                                                            onDelete={togglePageDeletion}
+                                                            onRotate={rotatePage}
+                                                            onInsertBlank={addBlankPage}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </SortableContext>
+                                            
+                                            <DragOverlay adjustScale dropAnimation={{
+                                                sideEffects: defaultDropAnimationSideEffects({
+                                                    styles: {
+                                                        active: {
+                                                            opacity: '0.4',
+                                                        },
+                                                    },
+                                                }),
+                                            }}>
+                                                {activeId && activePage ? (
+                                                    <div className={cn(
+                                                        "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none"
+                                                    )}>
+                                                        {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4">
                                                                 <FilePlus2 className="size-8 opacity-20" />
                                                                 <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="size-full flex items-center justify-center p-3 transition-transform duration-300 pointer-events-none" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                                <img src={p.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
+                                                            <div className="size-full flex items-center justify-center p-3" style={{ transform: `rotate(${activePage.rotation}deg)` }}>
+                                                                <img src={activePage.previewSrc} className="max-w-full max-h-full object-contain" alt="drag" />
                                                             </div>
                                                         )}
-
-                                                        {p.isDeleted && (
-                                                            <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center z-30">
-                                                                <Trash2 className="size-10 text-rose-600" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10 pointer-events-none" />
-
-                                                        <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
-                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); addBlankPage(p.id); }} title="Insert Blank After">
-                                                                <Plus className="size-4" />
-                                                            </Button>
-                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); rotatePage(p.id); }} title="Rotate 90">
-                                                                <RotateCw className="size-4" />
-                                                            </Button>
-                                                            <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); togglePageDeletion(p.id); }} title="Delete Page">
-                                                                {p.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
-                                                            </Button>
-                                                        </div>
-                                                        
-                                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-10 pointer-events-none transition-opacity">
-                                                            <Grip className="size-16" />
-                                                        </div>
-                                                    </Reorder.Item>
-                                                ))}
-                                            </AnimatePresence>
-                                        </Reorder.Group>
+                                                    </div>
+                                                ) : null}
+                                            </DragOverlay>
+                                        </DndContext>
                                         <ScrollBar />
                                     </ScrollArea>
                                 )}
