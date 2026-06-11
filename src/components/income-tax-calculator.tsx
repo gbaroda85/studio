@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
     IndianRupee, 
     Landmark, 
@@ -17,7 +17,24 @@ import {
     ArrowRight,
     PieChart,
     Wallet,
-    SearchCode
+    SearchCode,
+    Printer,
+    Download,
+    Plus,
+    Minus,
+    ChevronDown,
+    ChevronUp,
+    ShieldAlert,
+    Target,
+    Trophy,
+    TrendingDown,
+    ArrowUpRight,
+    ArrowDownRight,
+    ReceiptText,
+    Percent,
+    Building2,
+    Stethoscope,
+    PiggyBank
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -26,281 +43,444 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
 
-export default function IncomeTaxCalculator() {
-  // Income States
-  const [salary, setSalary] = useState("1200000");
-  const [rent, setRental] = useState("0");
-  const [others, setOthers] = useState("0");
-  const [deductions, setDeductions] = useState("75000"); // Standard deduction FY 24-25
-  
-  const [isCalculated, setIsCalculated] = useState(false);
-  const [result, setResult] = useState<{
+/**
+ * @fileOverview Professional Indian Income Tax Calculator (FY 2025-26)
+ * Features side-by-side regime comparison, deep deductions, and visual analytics.
+ */
+
+// --- TYPES ---
+interface TaxSlab {
+    range: string;
+    rate: number;
+    amount: number;
+}
+
+interface RegimeResult {
     grossTotal: number;
+    totalDeductions: number;
     taxableIncome: number;
     totalTax: number;
     cess: number;
     finalTax: number;
     effectiveRate: number;
     takeHome: number;
-    slabs: { range: string; rate: string; amount: number }[];
-  } | null>(null);
+    slabs: TaxSlab[];
+}
 
-  const calculateTax = () => {
+// --- UTILS ---
+const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+
+export default function IncomeTaxCalculator() {
+  // 1. INPUT STATES
+  const [salary, setSalary] = useState("1200000");
+  const [rentalIncome, setRentalIncome] = useState("0");
+  const [otherIncome, setOtherIncome] = useState("0");
+  const [capitalGains, setCapitalGains] = useState("0");
+
+  // 2. DEDUCTION STATES (Old Regime Focus)
+  const [sec80C, setSec80C] = useState("150000");
+  const [sec80D, setSec80D] = useState("25000");
+  const [hraExemption, setHraExemption] = useState("0");
+  const [homeLoanInt, setHomeLoanInt] = useState("0");
+
+  // 3. CALCULATION TRIGGER
+  const [isCalculated, setIsCalculated] = useState(false);
+
+  // --- CORE CALCULATION LOGIC ---
+  const results = useMemo(() => {
     const grossSalary = parseFloat(salary) || 0;
-    const grossRent = parseFloat(rent) || 0;
-    const grossOthers = parseFloat(others) || 0;
-    const ded = parseFloat(deductions) || 0;
+    const rent = parseFloat(rentalIncome) || 0;
+    const others = parseFloat(otherIncome) || 0;
+    const gains = parseFloat(capitalGains) || 0;
+    const grossTotal = grossSalary + rent + others + gains;
 
-    const grossTotal = grossSalary + grossRent + grossOthers;
-    if (grossTotal <= 0) {
-      setResult(null);
-      setIsCalculated(false);
-      return;
-    }
+    if (grossTotal === 0) return null;
 
-    const taxable = Math.max(0, grossTotal - ded);
-    let tax = 0;
-    const slabsResults = [];
+    // --- NEW REGIME (FY 2025-26 / 2026-27 Slabs) ---
+    // Std Deduction: 75k
+    // 0-3L: 0 | 3-7L: 5% | 7-10L: 10% | 10-12L: 15% | 12-15L: 20% | >15L: 30%
+    const newStdDeduction = 75000;
+    const newTaxable = Math.max(0, grossTotal - newStdDeduction);
+    let newTax = 0;
+    const newSlabs: TaxSlab[] = [];
 
-    // New Regime Slab FY 2024-25 (India - Post July Budget)
-    // 0-3L: Nil
-    // 3-7L: 5%
-    // 7-10L: 10%
-    // 10-12L: 15%
-    // 12-15L: 20%
-    // Above 15L: 30%
-
-    const slabs = [
-      { limit: 300000, rate: 0 },
-      { limit: 700000, rate: 5 },
-      { limit: 1000000, rate: 10 },
-      { limit: 1200000, rate: 15 },
-      { limit: 1500000, rate: 20 },
-      { limit: Infinity, rate: 30 },
+    const nSlabs = [
+        { limit: 300000, rate: 0 },
+        { limit: 700000, rate: 5 },
+        { limit: 1000000, rate: 10 },
+        { limit: 1200000, rate: 15 },
+        { limit: 1500000, rate: 20 },
+        { limit: Infinity, rate: 30 }
     ];
 
-    let prevLimit = 0;
-    for (let i = 0; i < slabs.length; i++) {
-        const slab = slabs[i];
-        const rangeText = i === 0 ? "0 - 3L" : i === 5 ? "Above 15L" : `${prevLimit/100000}L - ${slab.limit/100000}L`;
-        
-        if (taxable > prevLimit) {
-            const amountInSlab = Math.min(taxable - prevLimit, slab.limit - prevLimit);
-            const slabTax = (amountInSlab * slab.rate) / 100;
-            tax += slabTax;
-            slabsResults.push({ range: rangeText, rate: `${slab.rate}%`, amount: slabTax });
-        } else {
-            slabsResults.push({ range: rangeText, rate: `${slab.rate}%`, amount: 0 });
+    let nPrev = 0;
+    nSlabs.forEach((s, idx) => {
+        const text = idx === 0 ? "0 - 3L" : idx === 5 ? "Above 15L" : `${nPrev/100000}L - ${s.limit/100000}L`;
+        let slabAmount = 0;
+        if (newTaxable > nPrev) {
+            const rangeAmount = Math.min(newTaxable - nPrev, s.limit - nPrev);
+            slabAmount = (rangeAmount * s.rate) / 100;
+            newTax += slabAmount;
         }
-        prevLimit = slab.limit;
-    }
-
-    // Tax Rebate for Income up to 7L (u/s 87A)
-    // In new regime, if taxable income is <= 7L, tax is zero
-    if (taxable <= 700000) {
-        tax = 0;
-    }
-
-    const cess = tax * 0.04;
-    const finalTax = tax + cess;
-    const effectiveRate = grossTotal > 0 ? (finalTax / grossTotal) * 100 : 0;
-    const takeHome = grossTotal - finalTax;
-
-    setResult({
-      grossTotal,
-      taxableIncome: taxable,
-      totalTax: tax,
-      cess: cess,
-      finalTax: finalTax,
-      effectiveRate,
-      takeHome,
-      slabs: slabsResults,
+        newSlabs.push({ range: text, rate: s.rate, amount: slabAmount });
+        nPrev = s.limit;
     });
-    setIsCalculated(true);
+
+    // Rebate 87A for New Regime: If Taxable Income <= 7,00,000, Tax = 0
+    if (newTaxable <= 700000) newTax = 0;
+
+    const newResult: RegimeResult = {
+        grossTotal,
+        totalDeductions: newStdDeduction,
+        taxableIncome: newTaxable,
+        totalTax: newTax,
+        cess: newTax * 0.04,
+        finalTax: newTax + (newTax * 0.04),
+        effectiveRate: grossTotal > 0 ? ((newTax + (newTax * 0.04)) / grossTotal) * 100 : 0,
+        takeHome: grossTotal - (newTax + (newTax * 0.04)),
+        slabs: newSlabs
+    };
+
+    // --- OLD REGIME ---
+    // Std Deduction: 50k
+    // 0-2.5L: 0 | 2.5-5L: 5% | 5-10L: 20% | >10L: 30%
+    const oldStdDeduction = 50000;
+    const oldOtherDeductions = Math.min(150000, parseFloat(sec80C) || 0) + 
+                                Math.min(100000, parseFloat(sec80D) || 0) + 
+                                (parseFloat(hraExemption) || 0) + 
+                                Math.min(200000, parseFloat(homeLoanInt) || 0);
+    
+    const oldTotalDed = oldStdDeduction + oldOtherDeductions;
+    const oldTaxable = Math.max(0, grossTotal - oldTotalDed);
+    let oldTax = 0;
+    const oldSlabs: TaxSlab[] = [];
+
+    const oSlabs = [
+        { limit: 250000, rate: 0 },
+        { limit: 500000, rate: 5 },
+        { limit: 1000000, rate: 20 },
+        { limit: Infinity, rate: 30 }
+    ];
+
+    let oPrev = 0;
+    oSlabs.forEach((s, idx) => {
+        const text = idx === 0 ? "0 - 2.5L" : idx === 3 ? "Above 10L" : `${oPrev/100000}L - ${s.limit/100000}L`;
+        let slabAmount = 0;
+        if (oldTaxable > oPrev) {
+            const rangeAmount = Math.min(oldTaxable - oPrev, s.limit - oPrev);
+            slabAmount = (rangeAmount * s.rate) / 100;
+            oldTax += slabAmount;
+        }
+        oldSlabs.push({ range: text, rate: s.rate, amount: slabAmount });
+        oPrev = s.limit;
+    });
+
+    // Rebate 87A for Old Regime: If Taxable Income <= 5,00,000, Tax = 0
+    if (oldTaxable <= 500000) oldTax = 0;
+
+    const oldResult: RegimeResult = {
+        grossTotal,
+        totalDeductions: oldTotalDed,
+        taxableIncome: oldTaxable,
+        totalTax: oldTax,
+        cess: oldTax * 0.04,
+        finalTax: oldTax + (oldTax * 0.04),
+        effectiveRate: grossTotal > 0 ? ((oldTax + (oldTax * 0.04)) / grossTotal) * 100 : 0,
+        takeHome: grossTotal - (oldTax + (oldTax * 0.04)),
+        slabs: oldSlabs
+    };
+
+    return { new: newResult, old: oldResult };
+  }, [salary, rentalIncome, otherIncome, capitalGains, sec80C, sec80D, hraExemption, homeLoanInt]);
+
+  const handleCalculate = () => {
+      setIsCalculated(true);
+      toast({ title: "Profile Analysis Ready", description: "Tax comparison generated side-by-side." });
   };
 
   const handleReset = () => {
-    setSalary("");
-    setRental("0");
-    setOthers("0");
-    setDeductions("75000");
-    setResult(null);
+    setSalary(""); setRentalIncome("0"); setOtherIncome("0"); setCapitalGains("0");
+    setSec80C("150000"); setSec80D("25000"); setHraExemption("0"); setHomeLoanInt("0");
     setIsCalculated(false);
   };
 
-  const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const { toast } = useToast();
 
   return (
-    <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700 mx-auto pb-20">
+    <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4 md:px-8 pb-32 animate-in fade-in duration-700">
       
-      {/* Left Column: Detailed Inputs */}
-      <div className="lg:col-span-5 space-y-6">
-        <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
-          <CardHeader className="bg-primary/5 border-b p-6">
-            <CardTitle className="flex items-center gap-3 font-black uppercase tracking-tighter">
-              <Landmark className="text-primary size-6" /> Tax Estimator Pro
-            </CardTitle>
-            <CardDescription className="text-[10px] font-bold uppercase opacity-60">India New Regime • FY 2024-25 (AY 2025-26)</CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8 space-y-6">
-            
-            {/* Income Sources Group */}
-            <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                    <TrendingUp className="size-3" /> Income Sources
-                </Label>
-                
-                <div className="space-y-4 bg-muted/20 p-4 rounded-2xl border-2 border-dashed">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="salary" className="text-[9px] font-black uppercase opacity-60">Annual Base Salary (₹)</Label>
-                        <div className="relative">
-                            <Input id="salary" type="number" value={salary} onChange={(e) => setSalary(e.target.value)} className="h-10 font-bold pl-9 rounded-lg" placeholder="0" />
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        </div>
+      {/* LEFT: DEEP INPUTS */}
+      <div className="lg:col-span-5 space-y-6 no-print">
+        <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+          <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                        <Landmark className="size-7" />
                     </div>
-
-                    <div className="space-y-1.5">
-                        <Label htmlFor="rent" className="text-[9px] font-black uppercase opacity-60">Rental Income / Property (₹)</Label>
-                        <div className="relative">
-                            <Input id="rent" type="number" value={rent} onChange={(e) => setRental(e.target.value)} className="h-10 font-bold pl-9 rounded-lg" placeholder="0" />
-                            <Home className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <Label htmlFor="others" className="text-[9px] font-black uppercase opacity-60">Interest / Other Income (₹)</Label>
-                        <div className="relative">
-                            <Input id="others" type="number" value={others} onChange={(e) => setOthers(e.target.value)} className="h-10 font-bold pl-9 rounded-lg" placeholder="0" />
-                            <Zap className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        </div>
+                    <div>
+                        <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Tax Studio Pro</CardTitle>
+                        <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">FY 2025-26 Comparison</CardDescription>
                     </div>
                 </div>
-            </div>
+                <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1.5" /> Reset</Button>
+             </div>
+          </CardHeader>
+          
+          <CardContent className="p-0">
+             <Accordion type="multiple" defaultValue={['income']} className="w-full">
+                {/* Section 1: Income Sources */}
+                <AccordionItem value="income" className="border-none">
+                    <AccordionTrigger className="px-8 py-6 hover:bg-muted/30 hover:no-underline border-b group">
+                        <div className="flex items-center gap-3">
+                            <TrendingUp className="size-5 text-primary group-data-[state=open]:animate-pulse" />
+                            <span className="font-black uppercase tracking-widest text-xs">Annual Income Sources</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-8 space-y-6 bg-muted/10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Gross Salary (₹)</Label>
+                                <div className="relative"><Input type="number" value={salary} onChange={(e) => setSalary(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">House Property Income (₹)</Label>
+                                <div className="relative"><Input type="number" value={rentalIncome} onChange={(e) => setRentalIncome(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Home className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Capital Gains (₹)</Label>
+                                <div className="relative"><Input type="number" value={capitalGains} onChange={(e) => setCapitalGains(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Zap className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Other / Interest Income (₹)</Label>
+                                <div className="relative"><Input type="number" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Wallet className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                 <Label htmlFor="deductions" className="text-[10px] font-black uppercase opacity-60 tracking-widest">Standard Deduction (₹)</Label>
-                 <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase border-none">Update: 75K</Badge>
-              </div>
-              <Input id="deductions" type="number" value={deductions} onChange={(e) => setDeductions(e.target.value)} className="h-11 font-black border-2 rounded-xl bg-muted/20" />
-            </div>
+                {/* Section 2: Deductions (For Old Regime) */}
+                <AccordionItem value="deductions" className="border-none">
+                    <AccordionTrigger className="px-8 py-6 hover:bg-muted/30 hover:no-underline border-b group">
+                        <div className="flex items-center gap-3">
+                            <ListFilter className="size-5 text-emerald-500" />
+                            <span className="font-black uppercase tracking-widest text-xs">Old Regime Deductions</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-8 space-y-6 bg-emerald-500/5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Section 80C (PPF, ELSS, Insurance)</Label>
+                                <div className="relative"><Input type="number" value={sec80C} onChange={(e) => setSec80C(e.target.value)} className="h-10 pl-9 font-bold border-2" /><PiggyBank className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                                <p className="text-[8px] opacity-40 font-bold">MAX LIMIT: ₹ 1.5 LAKH</p>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Section 80D (Mediclaim)</Label>
+                                <div className="relative"><Input type="number" value={sec80D} onChange={(e) => setSec80D(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">Section 24 (Home Loan Int.)</Label>
+                                <div className="relative"><Input type="number" value={homeLoanInt} onChange={(e) => setHomeLoanInt(e.target.value)} className="h-10 pl-9 font-bold border-2" /><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase opacity-60">HRA Exemption</Label>
+                                <div className="relative"><Input type="number" value={hraExemption} onChange={(e) => setHraExemption(e.target.value)} className="h-10 pl-9 font-bold border-2" /><ReceiptText className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-30" /></div>
+                            </div>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+             </Accordion>
 
-            <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex gap-3">
-               <Info className="size-4 text-blue-600 shrink-0 mt-0.5" />
-               <p className="text-[9px] text-blue-700 font-bold leading-tight uppercase">
-                  FY 24-25 (New Regime): Zero tax if total income is up to ₹7.75 Lakhs (inclusive of deduction).
-               </p>
-            </div>
+             <div className="p-8 bg-blue-500/5 rounded-b-[2.5rem] border-t-2 border-dashed border-primary/10">
+                <div className="flex gap-4">
+                    <div className="size-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0"><Info className="size-5 text-blue-600" /></div>
+                    <p className="text-[10px] text-blue-700 font-bold leading-relaxed uppercase">
+                        New Regime update: Standard deduction increased to ₹ 75,000 for FY 2025-26. 
+                        Rebate u/s 87A makes income up to ₹ 7.75L tax-free (incl. SD).
+                    </p>
+                </div>
+             </div>
           </CardContent>
-          <CardFooter className="bg-muted/5 p-6 border-t flex flex-col gap-4">
+
+          <CardFooter className="p-8 bg-muted/10 border-t flex flex-col gap-4">
              <Button 
-                onClick={calculateTax} 
+                onClick={handleCalculate} 
                 className="w-full h-16 bg-primary text-primary-foreground font-black text-lg rounded-2xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all group"
              >
-                <Calculator className="mr-2 size-6 group-hover:rotate-12 transition-transform" /> 
-                CALCULATE TAX LIABILITY
-             </Button>
-             <Button variant="ghost" onClick={handleReset} className="w-full font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-2 size-3" /> Clear All Data
+                <Calculator className="mr-3 size-7 group-hover:rotate-12 transition-transform" /> 
+                ANALYZE TAX PROFILE
              </Button>
           </CardFooter>
         </Card>
       </div>
 
-      {/* Right Column: Deep Breakdown */}
-      <div className="lg:col-span-7 space-y-6">
-        {!isCalculated || !result ? (
-            <Card className="h-full border-2 border-dashed flex flex-col items-center justify-center p-12 text-center opacity-30 rounded-[3rem] bg-muted/10 min-h-[500px]">
+      {/* RIGHT: COMPARISON & ANALYTICS */}
+      <div className="lg:col-span-7 space-y-6 min-h-[800px]">
+        {!isCalculated || !results ? (
+            <Card className="h-full border-2 border-dashed flex flex-col items-center justify-center p-12 text-center opacity-30 rounded-[3rem] bg-muted/10 min-h-[600px]">
                 <div className="relative mb-6">
-                    <Calculator className="size-24 text-primary opacity-20" />
-                    <SearchCode className="absolute inset-0 m-auto size-10 text-primary animate-pulse" />
+                    <Landmark className="size-24 text-primary opacity-20" />
+                    <SearchCode className="absolute inset-0 m-auto size-12 text-primary animate-pulse" />
                 </div>
-                <div className="space-y-2">
-                    <p className="text-xl font-black uppercase tracking-widest">Input Income Details</p>
-                    <p className="text-xs font-bold uppercase opacity-60">Click calculate to generate your FY 24-25 Tax Profile</p>
-                </div>
+                <p className="text-2xl font-black uppercase tracking-widest">Awaiting Inputs</p>
+                <p className="text-xs font-bold uppercase opacity-60 mt-2">Fill your income details and click analyze to unlock comparison</p>
             </Card>
         ) : (
             <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                {/* PRIMARY TAX HEADER */}
-                <Card className="border-none shadow-3xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 neon-border">
-                    <CardHeader className="bg-primary/5 p-6 border-b text-center">
-                       <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Net Tax Payable</p>
-                       <p className="text-5xl md:text-7xl font-black text-primary mt-2 tracking-tighter">{formatCurrency(result.finalTax)}</p>
-                    </CardHeader>
-                    <CardContent className="p-8 space-y-8">
-                        {/* Summary Stats */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="p-4 bg-muted/20 rounded-2xl border text-center">
-                               <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">Gross Total</p>
-                               <p className="text-xs font-black">{formatCurrency(result.grossTotal)}</p>
+                
+                {/* 1. Comparison Dashboard */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <RegimeCard 
+                        title="NEW REGIME" 
+                        result={results.new} 
+                        isWinner={results.new.finalTax <= results.old.finalTax} 
+                        theme="primary"
+                    />
+                    <RegimeCard 
+                        title="OLD REGIME" 
+                        result={results.old} 
+                        isWinner={results.old.finalTax < results.new.finalTax} 
+                        theme="rose"
+                    />
+                </div>
+
+                {/* 2. Winner Badge & Saving Info */}
+                <Card className="border-none shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-emerald-500 to-teal-600 text-white overflow-hidden group">
+                    <div className="absolute top-0 right-0 size-40 bg-white/10 blur-3xl rounded-full" />
+                    <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                        <div className="flex items-center gap-6">
+                            <div className="size-20 rounded-3xl bg-white/20 backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                                <Trophy className="size-10 text-white drop-shadow-lg" />
                             </div>
-                            <div className="p-4 bg-muted/20 rounded-2xl border text-center">
-                               <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">Taxable</p>
-                               <p className="text-xs font-black">{formatCurrency(result.taxableIncome)}</p>
-                            </div>
-                            <div className="p-4 bg-muted/20 rounded-2xl border text-center">
-                               <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">Cess (4%)</p>
-                               <p className="text-xs font-black">{formatCurrency(result.cess)}</p>
-                            </div>
-                            <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/20 text-center">
-                               <p className="text-[8px] font-black text-primary uppercase mb-1">Effective %</p>
-                               <p className="text-xs font-black text-primary">{result.effectiveRate.toFixed(2)}%</p>
+                            <div className="text-center md:text-left">
+                                <h4 className="text-lg font-black uppercase tracking-[0.2em] opacity-80">PRO TAX RECOMMENDATION</h4>
+                                <p className="text-3xl md:text-4xl font-black tracking-tighter">
+                                    {results.new.finalTax <= results.old.finalTax ? 'Switch to New Regime' : 'Stay with Old Regime'}
+                                </p>
                             </div>
                         </div>
-
-                        {/* Slab Breakdown */}
-                        <div className="space-y-4">
-                           <div className="flex items-center justify-between px-1">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                                    <PieChart className="size-3" /> Slab-wise Breakdown
-                                </Label>
-                                <Badge variant="outline" className="text-[8px] font-mono">NEW REGIME</Badge>
-                           </div>
-                           <div className="grid gap-2">
-                                {result.slabs.map((slab, i) => (
-                                    <div key={i} className={cn(
-                                        "flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 border-2 rounded-xl transition-all",
-                                        slab.amount > 0 ? "border-primary/20 bg-primary/5" : "border-muted opacity-40"
-                                    )}>
-                                        <div className="flex items-center gap-4">
-                                            <div className={cn(
-                                                "size-9 rounded-lg flex items-center justify-center font-black text-[10px]",
-                                                slab.amount > 0 ? "bg-primary text-white" : "bg-muted text-muted-foreground"
-                                            )}>{slab.rate}</div>
-                                            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{slab.range}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className={cn("text-sm font-black", slab.amount > 0 ? "text-primary" : "text-muted-foreground")}>{formatCurrency(slab.amount)}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                           </div>
-                        </div>
-
-                        {/* Take-home Section */}
-                        <div className="p-6 bg-emerald-500/5 rounded-[2.5rem] border-2 border-dashed border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
-                            <div className="flex items-center gap-4">
-                                <div className="size-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg"><Wallet className="size-6" /></div>
-                                <div className="text-left">
-                                    <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Est. Take Home Income</p>
-                                    <p className="text-2xl font-black text-emerald-800">{formatCurrency(result.takeHome)}</p>
-                                </div>
-                            </div>
-                            <Badge className="bg-emerald-600 text-white font-black text-[9px] uppercase px-4 py-1.5 rounded-full">ANNUAL POST-TAX</Badge>
+                        <div className="bg-white/10 backdrop-blur-xl px-10 py-5 rounded-[2rem] border-2 border-white/20 text-center shadow-inner">
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">ANNUAL SAVINGS</p>
+                            <p className="text-4xl font-black tracking-tighter mt-1">
+                                {formatCurrency(Math.abs(results.new.finalTax - results.old.finalTax))}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
 
-                <div className="flex items-center justify-center gap-10 text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.3em] py-4">
-                    <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE LOCAL RAM</div>
-                    <div className="flex items-center gap-2"><CheckCircle2 className="size-4 text-blue-500" /> 2024-25 UPDATED</div>
+                {/* 3. Detailed Slab Breakdown Table */}
+                <Card className="border-2 shadow-xl rounded-[3rem] overflow-hidden bg-card">
+                    <CardHeader className="bg-muted/30 border-b p-8">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
+                            <LayoutGrid className="size-5 text-primary" /> Visual Slab Mapping (New Regime)
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                         <div className="space-y-4">
+                            {results.new.slabs.map((s, idx) => (
+                                <div key={idx} className="space-y-2">
+                                    <div className="flex justify-between items-center px-1">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[10px] font-black bg-primary/10 text-primary px-3 py-1 rounded-full">{s.rate}%</span>
+                                            <span className="text-xs font-bold text-muted-foreground">{s.range}</span>
+                                        </div>
+                                        <span className="text-xs font-black">{formatCurrency(s.amount)}</span>
+                                    </div>
+                                    <Progress value={results.new.taxableIncome > 0 ? (s.amount / results.new.finalTax) * 100 : 0} className="h-1.5" />
+                                </div>
+                            ))}
+                         </div>
+                    </CardContent>
+                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-6 text-muted-foreground/40 text-[9px] font-black uppercase tracking-widest">
+                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE LOCAL RAM</div>
+                            <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3 text-blue-500" /> FY 2025-26 COMPLIANT</div>
+                        </div>
+                        <Button variant="outline" className="h-12 border-2 rounded-xl font-black text-[10px] uppercase px-6 hover:bg-slate-900 hover:text-white transition-all shadow-sm no-print" onClick={handlePrint}>
+                            <Printer className="size-4 mr-2" /> Print Summary
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* 4. PRINT-ONLY SUMMARY LAYER */}
+                <div className="hidden print:block bg-white text-black p-10 space-y-10">
+                    <h1 className="text-3xl font-black text-center border-b pb-4">TAX ANALYSIS REPORT - GR7 TOOLS</h1>
+                    <div className="grid grid-cols-2 gap-10">
+                        <div className="p-6 border-2 rounded-2xl space-y-4">
+                            <h2 className="text-xl font-black">NEW REGIME</h2>
+                            <p>Taxable Income: {formatCurrency(results.new.taxableIncome)}</p>
+                            <p className="text-2xl font-black">Final Tax: {formatCurrency(results.new.finalTax)}</p>
+                        </div>
+                        <div className="p-6 border-2 rounded-2xl space-y-4">
+                            <h2 className="text-xl font-black">OLD REGIME</h2>
+                            <p>Taxable Income: {formatCurrency(results.old.taxableIncome)}</p>
+                            <p className="text-2xl font-black">Final Tax: {formatCurrency(results.old.finalTax)}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         )}
       </div>
     </div>
   );
+}
+
+// --- SUBCOMPONENTS ---
+
+function RegimeCard({ title, result, isWinner, theme }: { title: string, result: RegimeResult, isWinner: boolean, theme: 'primary' | 'rose' }) {
+    const isPrimary = theme === 'primary';
+    return (
+        <Card className={cn(
+            "border-2 shadow-xl rounded-[2.5rem] overflow-hidden transition-all duration-500 relative",
+            isWinner ? (isPrimary ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-rose-500 bg-rose-500/5 ring-4 ring-rose-500/10") : "bg-card opacity-80"
+        )}>
+            {isWinner && (
+                <div className={cn(
+                    "absolute top-4 right-4 flex items-center gap-2 px-3 py-1 rounded-full text-white text-[9px] font-black uppercase shadow-lg animate-in zoom-in-95",
+                    isPrimary ? "bg-primary" : "bg-rose-500"
+                )}>
+                    <CheckCircle2 className="size-3" /> BEST OPTION
+                </div>
+            )}
+            <CardHeader className="bg-muted/30 border-b p-6">
+                <CardTitle className="text-sm font-black uppercase tracking-widest opacity-60">{title}</CardTitle>
+                <div className="mt-4 space-y-1">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground opacity-50">Estimated Tax Payable</p>
+                    <p className={cn("text-3xl font-black tracking-tighter", isPrimary ? "text-primary" : "text-rose-600")}>{formatCurrency(result.finalTax)}</p>
+                </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <StatItem label="Taxable" value={formatCurrency(result.taxableIncome)} />
+                    <StatItem label="Deductions" value={formatCurrency(result.totalDeductions)} />
+                    <StatItem label="Cess (4%)" value={formatCurrency(result.cess)} />
+                    <StatItem label="Eff. Rate" value={`${result.effectiveRate.toFixed(1)}%`} />
+                </div>
+                <div className={cn("p-4 rounded-2xl flex items-center justify-between border shadow-inner", isPrimary ? "bg-primary/10 border-primary/20" : "bg-rose-500/10 border-rose-500/20")}>
+                    <div>
+                        <p className="text-[9px] font-black uppercase opacity-60">Est. Monthly Take-home</p>
+                        <p className={cn("text-lg font-black", isPrimary ? "text-primary" : "text-rose-700")}>{formatCurrency(result.takeHome / 12)}</p>
+                    </div>
+                    <Wallet className={cn("size-6 opacity-20", isPrimary ? "text-primary" : "text-rose-700")} />
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+function StatItem({ label, value }: { label: string, value: string }) {
+    return (
+        <div className="space-y-0.5">
+            <p className="text-[8px] font-black uppercase text-muted-foreground opacity-40">{label}</p>
+            <p className="text-xs font-black tracking-tight">{value}</p>
+        </div>
+    );
 }
