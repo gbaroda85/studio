@@ -62,7 +62,7 @@ export default function MortgageCalculator() {
 
     // 2. LIVE CALCULATIONS
     const stats = useMemo(() => {
-        const principal = homePrice - downPaymentAmount;
+        const principal = Math.max(0, homePrice - downPaymentAmount);
         const monthlyRate = interestRate / 100 / 12;
         const numberOfPayments = loanTerm * 12;
 
@@ -74,7 +74,7 @@ export default function MortgageCalculator() {
                 (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
             );
         } else {
-            monthlyPI = principal / numberOfPayments;
+            monthlyPI = numberOfPayments > 0 ? principal / numberOfPayments : 0;
         }
 
         const monthlyTax = propertyTax / 12;
@@ -103,25 +103,34 @@ export default function MortgageCalculator() {
 
     // Down Payment Sync Logic
     const handleDownAmountChange = (val: number) => {
-        setDownPaymentAmount(val);
-        setDownPaymentPercent(Math.round((val / homePrice) * 100));
+        const amount = Math.max(0, val);
+        setDownPaymentAmount(amount);
+        if (homePrice > 0) {
+            setDownPaymentPercent(Math.round((amount / homePrice) * 100));
+        }
     };
 
     const handleDownPercentChange = (val: number) => {
-        setDownPaymentPercent(val);
-        setDownPaymentAmount(Math.round((val / 100) * homePrice));
+        const percent = Math.max(0, Math.min(100, val));
+        setDownPaymentPercent(percent);
+        setDownPaymentAmount(Math.round((percent / 100) * homePrice));
     };
 
     const handleHomePriceChange = (val: number) => {
-        setHomePrice(val);
-        setDownPaymentAmount(Math.round((downPaymentPercent / 100) * val));
+        const price = Math.max(0, val);
+        setHomePrice(price);
+        setDownPaymentAmount(Math.round((downPaymentPercent / 100) * price));
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     return (
         <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700">
             
-            {/* LEFT COLUMN: INPUTS */}
-            <div className="lg:col-span-5 space-y-6">
+            {/* LEFT COLUMN: INPUTS (Hidden on Print) */}
+            <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center gap-4">
@@ -230,8 +239,8 @@ export default function MortgageCalculator() {
                 </Card>
             </div>
 
-            {/* RIGHT COLUMN: RESULTS & CHART */}
-            <div className="lg:col-span-7 space-y-6">
+            {/* RIGHT COLUMN: RESULTS & CHART (Hidden on Print) */}
+            <div className="lg:col-span-7 space-y-6 no-print">
                 <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-primary/20 relative group">
                     <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-3xl rounded-full" />
                     
@@ -302,19 +311,19 @@ export default function MortgageCalculator() {
 
                         {/* Amortization Progress visualization */}
                         <div className="space-y-4 pt-10 border-t-2 border-dashed border-primary/10">
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center px-1">
                                 <div className="flex items-center gap-2">
                                     <PieIcon className="size-4 text-primary" />
                                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Interest Ratio</span>
                                 </div>
                                 <Badge className="bg-primary text-white font-black text-[10px]">
-                                    {((stats.totalInterest / stats.totalCost) * 100).toFixed(1)}% OVER LIFE
+                                    {stats.totalCost > 0 ? ((stats.totalInterest / stats.totalCost) * 100).toFixed(1) : 0}% OVER LIFE
                                 </Badge>
                             </div>
                             <div className="h-4 bg-muted rounded-full overflow-hidden p-1 border shadow-inner">
                                 <div 
                                     className="h-full bg-primary rounded-full transition-all duration-1000 ease-out" 
-                                    style={{ width: `${(stats.principal / stats.totalCost) * 100}%` }} 
+                                    style={{ width: `${stats.totalCost > 0 ? (stats.principal / stats.totalCost) * 100 : 0}%` }} 
                                 />
                             </div>
                             <div className="flex justify-between text-[8px] font-black uppercase tracking-widest opacity-40">
@@ -333,35 +342,113 @@ export default function MortgageCalculator() {
                                 ESTIMATE BASED ON <span className="text-primary font-black">{loanTerm} YEARS</span> FIXED AT <span className="text-primary font-black">{interestRate}%</span>
                              </p>
                         </div>
-                        <Button variant="outline" className="h-12 px-8 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm" onClick={() => window.print()}>
+                        <Button variant="outline" className="h-12 px-8 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm" onClick={handlePrint}>
                             <Printer className="mr-2 size-4" /> Print Repayment Report
                         </Button>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* Hidden Print Layer */}
-            <div className="hidden print:block bg-white text-black p-10 space-y-10">
-                <h1 className="text-4xl font-black text-center border-b pb-4">MORTGAGE ANALYSIS - GR7 STUDIO</h1>
-                <div className="grid grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-black">LOAN PARAMETERS</h3>
-                        <p>Home Price: {formatCurrency(homePrice)}</p>
-                        <p>Down Payment: {formatCurrency(downPaymentAmount)} ({downPaymentPercent}%)</p>
-                        <p>Interest Rate: {interestRate}%</p>
-                        <p>Loan Term: {loanTerm} Years</p>
+            {/* THE ACTUAL PRINT LAYER - VISIBLE ONLY ON PRINT */}
+            <div className="hidden print:block fixed inset-0 bg-white z-[999999] p-0 m-0">
+                 <div className="w-[210mm] mx-auto bg-white p-12 text-black space-y-12" id="mortgage-print-report">
+                    <header className="flex justify-between items-start border-b-4 border-slate-900 pb-8">
+                        <div className="space-y-2 text-left">
+                            <h1 className="text-5xl font-black uppercase tracking-tighter">Mortgage Analysis</h1>
+                            <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">GR7 TOOLS HUB • PROFESSIONAL STUDIO</p>
+                        </div>
+                        <div className="text-right space-y-1">
+                            <p className="font-black text-xl">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                            <p className="text-[10px] font-black uppercase opacity-40">Financial Estimate Report</p>
+                        </div>
+                    </header>
+
+                    <div className="grid grid-cols-2 gap-16">
+                        {/* Summary Block */}
+                        <div className="space-y-8 text-left">
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-black uppercase tracking-widest border-b-2 border-slate-200 pb-1">Loan Parameters</h3>
+                                <div className="space-y-2">
+                                    <PrintRow label="Property Value" value={formatCurrency(homePrice)} />
+                                    <PrintRow label="Down Payment" value={`${formatCurrency(downPaymentAmount)} (${downPaymentPercent}%)`} />
+                                    <PrintRow label="Loan Principal" value={formatCurrency(stats.principal)} bold />
+                                    <PrintRow label="Annual Interest" value={`${interestRate}%`} />
+                                    <PrintRow label="Term Duration" value={`${loanTerm} Years`} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-black uppercase tracking-widest border-b-2 border-slate-200 pb-1">Lifetime Cost</h3>
+                                <div className="space-y-2">
+                                    <PrintRow label="Total Interest Paid" value={formatCurrency(stats.totalInterest)} />
+                                    <PrintRow label="Total Loan Cost" value={formatCurrency(stats.totalCost)} bold />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Monthly Block */}
+                        <div className="space-y-8 text-left">
+                             <div className="space-y-4">
+                                <h3 className="text-lg font-black uppercase tracking-widest border-b-2 border-slate-200 pb-1">Monthly Breakdown</h3>
+                                <div className="space-y-2">
+                                    <PrintRow label="Principal & Interest" value={formatCurrency(stats.monthlyPI)} bold />
+                                    <PrintRow label="Property Taxes" value={formatCurrency(propertyTax / 12)} />
+                                    <PrintRow label="Home Insurance" value={formatCurrency(homeInsurance / 12)} />
+                                    <PrintRow label="HOA Fees" value={formatCurrency(hoaFees)} />
+                                    <div className="pt-4 border-t-4 border-slate-900 mt-4">
+                                        <PrintRow label="TOTAL MONTHLY" value={formatCurrency(stats.totalMonthly)} bold large />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-slate-100 p-6 rounded-2xl border-2 border-slate-200 text-center">
+                                <p className="text-[10px] font-black uppercase opacity-60">Interest to Principal Ratio</p>
+                                <p className="text-3xl font-black mt-1">{( (stats.totalInterest / stats.totalCost) * 100).toFixed(1)}%</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-black">MONTHLY SUMMARY</h3>
-                        <p className="text-2xl font-black">Total Payment: {formatCurrency(stats.totalMonthly)}</p>
-                        <p>Principal & Interest: {formatCurrency(stats.monthlyPI)}</p>
-                        <p>Taxes & Insurance: {formatCurrency((propertyTax + homeInsurance) / 12)}</p>
-                    </div>
-                </div>
+
+                    <footer className="pt-10 border-t border-slate-200 text-center space-y-2">
+                        <p className="text-[9px] font-black uppercase tracking-[0.5em] opacity-30">GR7 TOOLS • PROFESSIONAL FINANCIAL ANALYTICS STUDIO</p>
+                        <p className="text-[8px] font-bold text-slate-400 italic text-left">* This estimate is based on the inputs provided and does not account for taxes, PMI, or local bank fees that may vary.</p>
+                    </footer>
+                 </div>
             </div>
+
+            <style jsx global>{`
+                @media print {
+                    /* Reset everything */
+                    html, body {
+                        background: white !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                    }
+                    /* Hide non-print elements */
+                    body > *:not(.hidden.print\:block) {
+                        display: none !important;
+                    }
+                    .no-print { display: none !important; }
+                    /* Show only the target */
+                    .hidden.print\:block {
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                    }
+                    @page {
+                        size: A4 portrait;
+                        margin: 0;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
+
+// --- SUBCOMPONENTS ---
 
 function StatItem({ label, value, icon: Icon, color = "text-primary" }: { label: string, value: string, icon: any, color?: string }) {
     return (
@@ -374,6 +461,15 @@ function StatItem({ label, value, icon: Icon, color = "text-primary" }: { label:
                 <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">{label}</p>
                 <p className={cn("text-sm font-black tracking-tight", color)}>{value}</p>
             </div>
+        </div>
+    );
+}
+
+function PrintRow({ label, value, bold = false, large = false }: { label: string, value: string, bold?: boolean, large?: boolean }) {
+    return (
+        <div className="flex justify-between items-baseline py-1">
+            <span className={cn("text-xs uppercase tracking-tight font-bold text-slate-500", bold && "font-black text-slate-900")}>{label}</span>
+            <span className={cn("text-sm font-bold", bold && "font-black", large && "text-3xl")}>{value}</span>
         </div>
     );
 }

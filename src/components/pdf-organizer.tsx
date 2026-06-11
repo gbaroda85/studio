@@ -484,7 +484,7 @@ export default function PdfOrganizer() {
                             "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
-                            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={onDrop}
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <CardHeader className="bg-muted/30 border-b p-6 text-center">
@@ -622,7 +622,7 @@ export default function PdfOrganizer() {
                                                 <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESTORE DELETED" />
                                             </DialogTrigger>
                                             {deletedPages.length > 0 && (
-                                                <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50 pointer-events-none shadow-xl border-2 border-white">
+                                                <span className="absolute -top-3 -right-2 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-50 pointer-events-none shadow-xl border-2 border-white">
                                                     {deletedPages.length}
                                                 </span>
                                             )}
