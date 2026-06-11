@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -141,8 +142,9 @@ function SortablePage({
                 isDragging && "opacity-0"
             )}
         >
+            {/* FIXED PAGE NUMBER BADGE: Using page.index instead of array index */}
             <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
-                {index + 1}
+                {page.type === 'blank' ? 'B' : page.index}
             </div>
             
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -167,15 +169,30 @@ function SortablePage({
             )}
 
             <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
-                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} title="Insert Blank After">
+                <button 
+                    className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 flex items-center justify-center hover:text-primary transition-all" 
+                    onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
+                    title="Insert Blank After"
+                >
                     <Plus className="size-4" />
-                </Button>
-                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} title="Rotate 90">
+                </button>
+                <button 
+                    className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 flex items-center justify-center hover:text-primary transition-all" 
+                    onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
+                    title="Rotate 90"
+                >
                     <RotateCw className="size-4" />
-                </Button>
-                <Button size="icon" variant={page.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} title="Delete Page">
+                </button>
+                <button 
+                    className={cn(
+                        "h-8 w-8 rounded-lg shadow-xl transition-all flex items-center justify-center",
+                        page.isDeleted ? "bg-primary text-white" : "bg-rose-500 text-white"
+                    )} 
+                    onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
+                    title="Delete Page"
+                >
                     {page.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
-                </Button>
+                </button>
             </div>
         </div>
     );
@@ -505,6 +522,10 @@ export default function PdfOrganizer() {
                                                     <div className={cn(
                                                         "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none"
                                                     )}>
+                                                        {/* Badge in Drag Overlay */}
+                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
+                                                            {activePage.type === 'blank' ? 'B' : activePage.index}
+                                                        </div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4">
                                                                 <FilePlus2 className="size-8 opacity-20" />
