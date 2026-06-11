@@ -99,7 +99,11 @@ export default function PdfOrganizer() {
 
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                const pdf = await pdfjs.getDocument({ 
+                    data: new Uint8Array(arrayBuffer),
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                    cMapPacked: true
+                }).promise;
                 const totalPages = pdf.numPages;
 
                 const newPages: PageItem[] = [];
@@ -137,6 +141,11 @@ export default function PdfOrganizer() {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a PDF file.' });
         }
     };
+
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+    const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+    const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
     const togglePageDeletion = (id: string) => {
         setPages(prev => prev.map(p => p.id === id ? { ...p, isDeleted: !p.isDeleted } : p));
@@ -227,9 +236,9 @@ export default function PdfOrganizer() {
                     "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+                    onDragOver={onDragOver}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
                 >
                     <CardHeader className="bg-muted/30 border-b p-6 text-center">
