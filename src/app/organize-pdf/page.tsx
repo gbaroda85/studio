@@ -41,7 +41,7 @@ export default function OrganizePdfPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center w-full pt-8 md:pt-12">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-6 px-4">
