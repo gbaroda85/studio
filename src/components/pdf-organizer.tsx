@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -136,7 +137,7 @@ function SortablePage({
             ref={setNodeRef} 
             style={style} 
             className={cn(
-                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-xl transition-all",
+                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all",
                 page.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent shadow-primary/5",
                 isDragging && "opacity-0"
             )}
@@ -150,7 +151,7 @@ function SortablePage({
             </div>
 
             {page.type === 'blank' ? (
-                <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 pointer-events-none border">
+                <div className="size-full flex flex-col items-center justify-center bg-white dark:bg-slate-900 text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
                     <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                 </div>
@@ -166,16 +167,16 @@ function SortablePage({
                 </div>
             )}
 
-            <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
+            <div className="absolute bottom-2 right-2 flex gap-1.5 transition-all z-40">
                 <button 
-                    className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 flex items-center justify-center hover:text-primary transition-all" 
+                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
                     onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
                     title="Insert Blank After"
                 >
                     <Plus className="size-4" />
                 </button>
                 <button 
-                    className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 flex items-center justify-center hover:text-primary transition-all" 
+                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
                     onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
                     title="Rotate 90"
                 >
@@ -404,7 +405,7 @@ export default function PdfOrganizer() {
             toast({ title: "Organize Success!", description: "Changes bundled into new PDF." });
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Save Error', description: "Check if document is protected." });
+            toast({ variant: 'destructive', title: 'Save Error', description: "Check if document is password protected." });
         } finally {
             setIsSaving(false);
         }
@@ -575,25 +576,13 @@ export default function PdfOrganizer() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="grid grid-cols-2 gap-2">
-                                        <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => sortPages('asc')}>
-                                            <ArrowDownAz className="size-4 text-primary" /><span>SORT 1 → N</span>
-                                        </Button>
-                                        <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => sortPages('desc')}>
-                                            <ArrowUpAz className="size-4 text-primary" /><span>SORT N → 1</span>
-                                        </Button>
+                                        <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-14" data-label="SORT 1 → N" />
+                                        <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14" data-label="SORT N → 1" />
                                     </div>
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => addBlankPage()}>
-                                        <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600"><FilePlus2 className="size-4" /></div>ADD BLANK PAGE
-                                    </Button>
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => rotateAll(90)}>
-                                        <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600"><RotateCw className="size-4" /></div>ROTATE ALL 90°
-                                    </Button>
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => rotateAll(0)}>
-                                        <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-600"><RotateCcw className="size-4" /></div>RESET ALL ROTATIONS
-                                    </Button>
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))}>
-                                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>RESTORE DELETED
-                                    </Button>
+                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14" data-label="ADD BLANK PAGE" />
+                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14" data-label="ROTATE ALL 90°" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ALL ROTATIONS" />
+                                    <button onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))} className="btn-pos-uiverse h-14" data-label="RESTORE DELETED" />
                                 </div>
                             </div>
 
