@@ -186,7 +186,12 @@ export default function PdfUnlocker() {
     }
 
     const handleUnlockProcess = async () => {
-        if (!pdfFile || !password) return;
+        if (!pdfFile) return;
+        if (isProtected && !password) {
+            toast({ variant: 'destructive', title: "Missing Password", description: "This file is encrypted." });
+            return;
+        }
+
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
@@ -203,11 +208,19 @@ export default function PdfUnlocker() {
             });
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
+            
+            // USE POINTS UNIT FOR PDF GENERATION TO MAINTAIN CORRECT SIZE
             const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true });
+            
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
+                
+                // CRITICAL FIX: Scale 1.0 viewport is needed for point-to-point mapping
+                const originalViewport = page.getViewport({ scale: 1.0 });
+                // Higher scale viewport for actual canvas rendering (HD Quality)
                 const renderViewport = page.getViewport({ scale: 2.2 }); 
+                
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
                 if (ctx) {
@@ -217,10 +230,17 @@ export default function PdfUnlocker() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
-                    const orientation = renderViewport.width > renderViewport.height ? 'l' : 'p';
-                    if (i === 1) newPdf.deletePage(1);
-                    newPdf.addPage([renderViewport.width, renderViewport.height], orientation);
-                    newPdf.addImage(imgData, 'JPEG', 0, 0, renderViewport.width, renderViewport.height, undefined, 'FAST');
+                    
+                    const orientation = originalViewport.width > originalViewport.height ? 'l' : 'p';
+                    
+                    if (i === 1) {
+                        newPdf.deletePage(1);
+                    }
+                    
+                    // Add page with original point dimensions
+                    newPdf.addPage([originalViewport.width, originalViewport.height], orientation);
+                    // Draw HD image onto original-sized point canvas
+                    newPdf.addImage(imgData, 'JPEG', 0, 0, originalViewport.width, originalViewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
@@ -336,11 +356,11 @@ export default function PdfUnlocker() {
                                         <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
                                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Checking Encryption...</p>
                                     </div>
-                                ) : isProtected === false ? (
+                                ) : isProtected === false && !unlockedPdfUrl ? (
                                     <div className="p-8 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-3xl text-center space-y-4">
                                         <Info className="size-12 mx-auto text-blue-500 opacity-40" />
                                         <p className="font-bold text-sm text-blue-800 uppercase">No Password Needed</p>
-                                        <p className="text-xs text-muted-foreground">This file is already open and accessible.</p>
+                                        <p className="text-xs text-muted-foreground">This file is already open. You can still process it to sanitize the structure.</p>
                                     </div>
                                 ) : isProtected === true && !unlockedPdfUrl ? (
                                     <div className="space-y-6">
@@ -367,7 +387,7 @@ export default function PdfUnlocker() {
                                         {isUnlocking && (
                                             <div className="space-y-4 text-center py-4">
                                                 <div className="relative inline-block">
-                                                    <Loader2 className="h-14 w-14 animate-spin text-primary opacity-20" />
+                                                    <Loader2 className="h-14 w-14 animate-spin text-primary opacity-20 stroke-[3]" />
                                                     <Zap className="absolute inset-0 m-auto h-7 w-7 text-primary animate-pulse" />
                                                 </div>
                                                 <div className="space-y-2">
@@ -393,7 +413,7 @@ export default function PdfUnlocker() {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xl font-black text-green-800 uppercase tracking-tighter">PERMANENTLY UNLOCKED!</p>
-                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving</p>
+                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving in standard A4 size</p>
                                         </div>
                                     </div>
                                 ) : null}
@@ -403,14 +423,14 @@ export default function PdfUnlocker() {
                                 {!unlockedPdfUrl ? (
                                     <Button 
                                         onClick={handleUnlockProcess} 
-                                        disabled={isUnlocking || !password || isChecking} 
+                                        disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
                                         className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                                     >
                                         <StarIcons />
                                         {isUnlocking ? "DECODING..." : (
                                             <div className="flex items-center gap-3">
-                                                <Unlock className="size-7 group-hover:rotate-12 transition-transform" />
-                                                <span className="uppercase tracking-tighter">UNLOCK DOCUMENT</span>
+                                                {isProtected ? <Unlock className="size-7 group-hover:rotate-12 transition-transform" /> : <Zap className="size-7 group-hover:scale-110 transition-transform" />}
+                                                <span className="uppercase tracking-tighter">{isProtected ? 'UNLOCK DOCUMENT' : 'SANITIZE & PROCESS'}</span>
                                             </div>
                                         )}
                                     </Button>
