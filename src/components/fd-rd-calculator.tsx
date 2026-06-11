@@ -14,7 +14,8 @@ import {
     ArrowUpRight,
     CircleDollarSign,
     PieChart,
-    Wallet
+    Wallet,
+    ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -212,11 +213,11 @@ export default function FdRdCalculator() {
                         <div className="grid grid-cols-2 gap-6">
                             <div className="p-6 bg-muted/20 rounded-[2.5rem] border text-center space-y-1.5 shadow-inner">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">Total Invested</p>
-                                <p className="text-2xl font-black">{formatCurrency(result.invested)}</p>
+                                <p className="text-xl font-black">{formatCurrency(result.invested)}</p>
                             </div>
                             <div className="p-6 bg-green-500/5 rounded-[2.5rem] border-2 border-green-500/20 text-center space-y-1.5 shadow-lg group-hover:scale-105 transition-transform">
                                 <p className="text-[10px] font-black text-green-700 uppercase">Interest Earned</p>
-                                <p className="text-2xl font-black text-green-600">+{formatCurrency(result.interest)}</p>
+                                <p className="text-xl font-black text-green-600">+{formatCurrency(result.interest)}</p>
                             </div>
                         </div>
 
