@@ -310,6 +310,8 @@ export default function PdfCropper() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        if (idx === null || !next[idx]) return prev;
+
         if ([0, 2, 4, 6].includes(idx)) {
             next[idx] = { x, y };
         } else {
@@ -518,8 +520,12 @@ export default function PdfCropper() {
                                     for(const [_,s] of croppedEntries){
                                         const b = await fetch(s.result!).then(r=>r.arrayBuffer());
                                         const ei = await finalPdf.embedJpg(b);
-                                        const p = finalPdf.addPage([ei.width*0.75, ei.height*0.75]);
-                                        p.drawImage(ei, {x:0,y:0,width:p.getWidth(),height:p.getHeight()});
+                                        // Fix scaling: Map pixel dimensions back to standard points
+                                        // Original render was 2.2x, so divisor 2.2 gives original points
+                                        const pWidth = ei.width / 2.2;
+                                        const pHeight = ei.height / 2.2;
+                                        const p = finalPdf.addPage([pWidth, pHeight]);
+                                        p.drawImage(ei, { x: 0, y: 0, width: p.getWidth(), height: p.getHeight() });
                                     }
                                     const bytes = await finalPdf.save();
                                     const link = document.createElement('a'); 
