@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -162,6 +162,8 @@ export default function PdfMerger() {
         setPdfFiles([]);
         clearMergedFile();
         if (fileInputRef.current) fileInputRef.current.value = "";
+        // Bring the focus back to the top of the studio workspace
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
