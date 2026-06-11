@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/qr-code-generator',
     '/gst-calculator',
     '/sip-calculator',
+    '/fd-rd-calculator',
     '/income-tax-calculator'
   ];
 

@@ -63,7 +63,8 @@ import {
   Barcode,
   QrCode,
   IndianRupee,
-  TrendingUp
+  TrendingUp,
+  PiggyBank
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -353,6 +354,14 @@ function ToolsPageContent() {
       icon: TrendingUp,
       color: 'bg-blue-600',
       lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/fd-rd-calculator',
+      labelKey: 'fd_rd_calculator_label',
+      descriptionKey: 'fd_rd_calculator_description',
+      icon: PiggyBank,
+      color: 'bg-orange-500',
+      lightBg: 'bg-[#fff7ed]'
     },
     {
       href: '/income-tax-calculator',

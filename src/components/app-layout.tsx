@@ -59,7 +59,8 @@ import {
   Barcode,
   QrCode,
   IndianRupee,
-  TrendingUp
+  TrendingUp,
+  PiggyBank
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -130,6 +131,7 @@ const CATEGORIES = [
     tools: [
       { href: '/gst-calculator', label: 'gst_calculator_label', icon: IndianRupee },
       { href: '/sip-calculator', label: 'sip_calculator_label', icon: TrendingUp },
+      { href: '/fd-rd-calculator', label: 'fd_rd_calculator_label', icon: PiggyBank },
       { href: '/income-tax-calculator', label: 'income_tax_calculator_label', icon: Landmark },
       { href: '/standard-calculator', label: 'standard_calculator_label', icon: Calculator },
       { href: '/loan-calculator', label: 'loan_emi_calculator_label', icon: Landmark },

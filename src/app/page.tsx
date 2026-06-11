@@ -58,7 +58,8 @@ import {
   ScanLine,
   Wand2,
   IndianRupee,
-  TrendingUp
+  TrendingUp,
+  PiggyBank
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -90,6 +91,7 @@ const ALL_TOOLS = [
   // CALCULATORS
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
+  { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
   { icon: Landmark, title: "TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "calculator" },
 
   // IMAGE TOOLS
