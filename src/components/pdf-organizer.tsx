@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -30,7 +29,9 @@ import {
     Plus,
     Undo2,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    FilePlus2,
+    FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -48,10 +49,11 @@ if (typeof window !== 'undefined') {
 
 interface PageItem {
     id: string;
-    index: number;
-    rotation: number;      // 0, 90, 180, 270
+    index: number;       // For original pages, matches original index
+    rotation: number;    // 0, 90, 180, 270
     previewSrc: string;
     isDeleted: boolean;
+    type: 'original' | 'blank';
 }
 
 const StarIcons = () => (
@@ -128,7 +130,8 @@ export default function PdfOrganizer() {
                             index: i,
                             rotation: 0,
                             isDeleted: false,
-                            previewSrc: canvas.toDataURL('image/jpeg', 0.7)
+                            previewSrc: canvas.toDataURL('image/jpeg', 0.7),
+                            type: 'original'
                         });
                     }
                     setProgress(Math.round((i / totalPages) * 100));
@@ -161,6 +164,27 @@ export default function PdfOrganizer() {
         setResultPdfUrl(null);
     };
 
+    const addBlankPage = (afterId?: string) => {
+        const blankId = Math.random().toString(36).substr(2, 9);
+        const blankPage: PageItem = {
+            id: blankId,
+            index: -1,
+            rotation: 0,
+            isDeleted: false,
+            previewSrc: "", // Represented as white box in UI
+            type: 'blank'
+        };
+
+        setPages(prev => {
+            if (!afterId) return [...prev, blankPage];
+            const index = prev.findIndex(p => p.id === afterId);
+            const next = [...prev];
+            next.splice(index + 1, 0, blankPage);
+            return next;
+        });
+        toast({ title: "Blank Page Inserted" });
+    };
+
     const rotateAll = (deg: number) => {
         setPages(prev => prev.map(p => ({ ...p, rotation: deg % 360 })));
         setResultPdfUrl(null);
@@ -182,10 +206,15 @@ export default function PdfOrganizer() {
             const newPdfDoc = await PDFDocument.create();
 
             for (const p of activePages) {
-                const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [p.index - 1]);
-                const currentRot = copiedPage.getRotation().angle;
-                copiedPage.setRotation(degrees(currentRot + p.rotation));
-                newPdfDoc.addPage(copiedPage);
+                if (p.type === 'blank') {
+                    // Create standard A4 blank page
+                    newPdfDoc.addPage([595.28, 841.89]); // A4 in points
+                } else {
+                    const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [p.index - 1]);
+                    const currentRot = copiedPage.getRotation().angle;
+                    copiedPage.setRotation(degrees(currentRot + p.rotation));
+                    newPdfDoc.addPage(copiedPage);
+                }
             }
 
             const pdfBytes = await newPdfDoc.save();
@@ -248,7 +277,7 @@ export default function PdfOrganizer() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-250px)]">
                 {/* Main Viewport: Grid of Pages */}
-                <div className="lg:col-span-8 h-full flex flex-col">
+                <div className="lg:col-span-8 h-full flex flex-col min-h-[500px]">
                     {!pdfFile ? (
                         <Card className={cn(
                             "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col min-h-[500px]",
@@ -268,13 +297,13 @@ export default function PdfOrganizer() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Organize</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Delete or re-order any page instantly.</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Delete, re-order, rotate or insert blank pages.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
                             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Move className="size-3.5 text-primary" /> DRAG & DROP</div>
                                 <div className="flex items-center gap-1.5"><Trash2 className="size-3.5 text-rose-500" /> PAGE DELETE</div>
                             </CardFooter>
@@ -284,7 +313,7 @@ export default function PdfOrganizer() {
                             <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
                                 <div className="flex items-center gap-2">
                                     <LayoutGrid className="h-4 w-4 text-primary" />
-                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Map</CardTitle>
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Visual Document Map</CardTitle>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
@@ -334,9 +363,16 @@ export default function PdfOrganizer() {
                                                             {i + 1}
                                                         </div>
                                                         
-                                                        <div className="size-full flex items-center justify-center p-3 transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                            <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
-                                                        </div>
+                                                        {p.type === 'blank' ? (
+                                                            <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4">
+                                                                <FilePlus2 className="size-8 opacity-20" />
+                                                                <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="size-full flex items-center justify-center p-3 transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                                                <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
+                                                            </div>
+                                                        )}
 
                                                         {p.isDeleted && (
                                                             <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center z-30">
@@ -347,10 +383,13 @@ export default function PdfOrganizer() {
                                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
 
                                                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
-                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); rotatePage(p.id); }}>
+                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); addBlankPage(p.id); }} title="Insert Blank After">
+                                                                <FilePlus2 className="size-4" />
+                                                            </Button>
+                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); rotatePage(p.id); }} title="Rotate 90">
                                                                 <RotateCw className="size-4" />
                                                             </Button>
-                                                            <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); togglePageDeletion(p.id); }}>
+                                                            <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); togglePageDeletion(p.id); }} title="Delete Page">
                                                                 {p.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
                                                             </Button>
                                                         </div>
@@ -386,25 +425,25 @@ export default function PdfOrganizer() {
                                      <Zap className="size-5 text-yellow-500 animate-pulse" />
                                 </div>
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
-                                    <span className="font-black block mb-1 text-primary">SCROLLABLE GRID:</span>
-                                    Layout is fixed to prevent stretching. Use the scrollbar to browse all pages.
+                                    <span className="font-black block mb-1 text-primary">VECTOR LOCK:</span>
+                                    Rotation and reordering are applied as high-fidelity metadata changes.
                                 </p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-1 gap-3">
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))}>
-                                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>
-                                        RESTORE ALL
+                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => addBlankPage()}>
+                                        <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600"><FilePlus2 className="size-4" /></div>
+                                        ADD BLANK PAGE
                                     </Button>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => rotateAll(90)}>
                                         <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600"><RotateCw className="size-4" /></div>
                                         ROTATE ALL 90°
                                     </Button>
-                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => rotateAll(0)}>
-                                        <div className="size-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-600"><RefreshCcw className="size-4" /></div>
-                                        RESET ORIENTATION
+                                    <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4" onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))}>
+                                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>
+                                        RESTORE DELETED
                                     </Button>
                                 </div>
                             </div>
@@ -450,4 +489,3 @@ export default function PdfOrganizer() {
         </div>
     );
 }
-

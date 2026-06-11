@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, Layers, Trash2, RotateCw, Move, CheckCircle2, Sparkles, LayoutGrid, Scan, Maximize, Printer } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Layers, Trash2, RotateCw, Move, CheckCircle2, LayoutGrid, Scan, Maximize, Printer } from 'lucide-react';
 import PdfOrganizer from '@/components/pdf-organizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: 'Organize PDF Online - Delete, Reorder & Rotate PDF Pages Privately',
-  description: 'The ultimate visual PDF manager. Delete individual pages, drag to reorder, and rotate pages locally in your browser. 100% private and secure.',
+  title: 'Professional PDF Organizer - Delete, Reorder & Insert Blank Pages Online',
+  description: 'The ultimate visual PDF manager. Delete pages, drag to reorder, rotate, and insert blank pages locally in your browser. 100% private and secure.',
   alternates: { canonical: 'https://www.gr7imagepdf.com/organize-pdf' }
 };
 
@@ -29,9 +29,9 @@ export default function OrganizePdfPage() {
       icon: "Layers"
     },
     {
-      title: "Orientation Fix",
-      description: "Rotate individual pages or the entire stack. Our vector-lock logic preserves original text and font quality perfectly.",
-      icon: "RotateCw"
+      title: "Interactive Controls",
+      description: "Rotate individual pages or insert fresh blank A4 pages exactly where you need them using the card-level action buttons.",
+      icon: "Plus"
     },
     {
       title: "Final Bundle",
@@ -51,7 +51,7 @@ export default function OrganizePdfPage() {
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20 mt-12">
-            <HowToGuide title="PDF Organizer" steps={deepSteps} />
+            <HowToGuide title="PDF Organizer Pro" steps={deepSteps} />
 
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
