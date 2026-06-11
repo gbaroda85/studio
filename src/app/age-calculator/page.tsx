@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import AgeCalculator from '@/components/age-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -9,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Gift, Clock, Sparkles, HelpCircle } from 'lucide-react';
+import { Gift, Clock, Sparkles, HelpCircle, Cake } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Advanced Age Calculator - Exact Years, Months, Days & Life Analytics Online',
@@ -19,11 +18,26 @@ export const metadata: Metadata = {
 
 export default function AgeCalculatorPage() {
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-4 md:pt-8">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            <AgeCalculator />
+            {/* Restored Hero Header Section */}
+            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                    <Sparkles className="size-2.5" /> LIFE ANALYTICS
+                </div>
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">
+                    Age <span className="text-gradient-hero">Calculator</span>
+                </h1>
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                    Find out your exact age in years, months, and days. Explore your lifetime analytics and birthday countdown.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <AgeCalculator />
+            </div>
         </div>
 
         <div className="w-full max-w-4xl space-y-16 px-4 pb-20">
