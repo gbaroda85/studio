@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -331,11 +330,9 @@ export default function PdfOrganizer() {
     const sortPages = (direction: 'asc' | 'desc') => {
         setPages(prev => {
             const sorted = [...prev].sort((a, b) => {
-                // Keep blank pages at their relative positions or at the end
                 if (a.type === 'blank' && b.type !== 'blank') return 1;
                 if (a.type !== 'blank' && b.type === 'blank') return -1;
                 if (a.type === 'blank' && b.type === 'blank') return 0;
-                
                 return direction === 'asc' ? a.index - b.index : b.index - a.index;
             });
             return sorted;
@@ -347,7 +344,6 @@ export default function PdfOrganizer() {
         });
     };
 
-    // DnD Handlers
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id as string);
     };
@@ -394,14 +390,7 @@ export default function PdfOrganizer() {
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             setResultPdfUrl(url);
-            
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#3b82f6', '#f3cc8a', '#ffffff']
-            });
-
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#f3cc8a', '#ffffff'] });
             toast({ title: "Organize Success!", description: "Changes bundled into new PDF." });
         } catch (error) {
             console.error(error);
@@ -419,17 +408,10 @@ export default function PdfOrganizer() {
         link.click();
     };
 
-    const handleReset = () => {
-        setPdfFile(null);
-        setPages([]);
-        setResultPdfUrl(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -450,12 +432,12 @@ export default function PdfOrganizer() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-280px)]">
-                {/* Main Viewport: Grid of Pages */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-280px)] md:h-[650px]">
+                {/* Main Viewport */}
                 <div className="lg:col-span-8 h-full flex flex-col min-h-[450px]">
                     {!pdfFile ? (
                         <Card className={cn(
-                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col min-h-[450px]",
+                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -531,25 +513,16 @@ export default function PdfOrganizer() {
                                             
                                             <DragOverlay adjustScale dropAnimation={{
                                                 sideEffects: defaultDropAnimationSideEffects({
-                                                    styles: {
-                                                        active: {
-                                                            opacity: '0.4',
-                                                        },
-                                                    },
+                                                    styles: { active: { opacity: '0.4' } },
                                                 }),
                                             }}>
                                                 {activeId && activePage ? (
-                                                    <div className={cn(
-                                                        "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none"
-                                                    )}>
+                                                    <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none">
                                                         <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
                                                             {activePage.type === 'blank' ? 'B' : activePage.index}
                                                         </div>
                                                         {activePage.type === 'blank' ? (
-                                                            <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4">
-                                                                <FilePlus2 className="size-8 opacity-20" />
-                                                                <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
-                                                            </div>
+                                                            <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
                                                             <div className="size-full flex items-center justify-center p-3" style={{ transform: `rotate(${activePage.rotation}deg)` }}>
                                                                 <img src={activePage.previewSrc} className="max-w-full max-h-full object-contain" alt="drag" />
@@ -572,7 +545,7 @@ export default function PdfOrganizer() {
                     )}
                 </div>
 
-                {/* Sidebar: Controls */}
+                {/* Sidebar */}
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
@@ -581,11 +554,8 @@ export default function PdfOrganizer() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
-                            
                             <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner">
-                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                     <Zap className="size-5 text-yellow-500 animate-pulse" />
-                                </div>
+                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><Zap className="size-5 text-yellow-500 animate-pulse" /></div>
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                     <span className="font-black block mb-1 text-primary">VECTOR LOCK:</span>
                                     Rotation and reordering are applied as high-fidelity metadata changes.
@@ -597,29 +567,23 @@ export default function PdfOrganizer() {
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="grid grid-cols-2 gap-2">
                                         <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => sortPages('asc')}>
-                                            <ArrowDownAz className="size-4 text-primary" />
-                                            <span>SORT 1 → N</span>
+                                            <ArrowDownAz className="size-4 text-primary" /><span>SORT 1 → N</span>
                                         </Button>
                                         <Button variant="outline" className="h-14 border-2 font-black text-[9px] uppercase tracking-widest hover:bg-primary/5 transition-all rounded-xl flex flex-col gap-1 p-2 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => sortPages('desc')}>
-                                            <ArrowUpAz className="size-4 text-primary" />
-                                            <span>SORT N → 1</span>
+                                            <ArrowUpAz className="size-4 text-primary" /><span>SORT N → 1</span>
                                         </Button>
                                     </div>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => addBlankPage()}>
-                                        <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600"><FilePlus2 className="size-4" /></div>
-                                        ADD BLANK PAGE
+                                        <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600"><FilePlus2 className="size-4" /></div>ADD BLANK PAGE
                                     </Button>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => rotateAll(90)}>
-                                        <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600"><RotateCw className="size-4" /></div>
-                                        ROTATE ALL 90°
+                                        <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600"><RotateCw className="size-4" /></div>ROTATE ALL 90°
                                     </Button>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => rotateAll(0)}>
-                                        <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-600"><RotateCcw className="size-4" /></div>
-                                        RESET ALL ROTATIONS
+                                        <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-600"><RotateCcw className="size-4" /></div>RESET ALL ROTATIONS
                                     </Button>
                                     <Button variant="outline" className="h-14 border-2 font-black text-xs uppercase tracking-widest hover:bg-primary/5 transition-all rounded-[1.2rem] justify-start px-6 gap-4 hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 hover:shadow-md" onClick={() => setPages(prev => prev.map(p => ({ ...p, isDeleted: false })))}>
-                                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>
-                                        RESTORE DELETED
+                                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Undo2 className="size-4" /></div>RESTORE DELETED
                                     </Button>
                                 </div>
                             </div>
@@ -628,37 +592,17 @@ export default function PdfOrganizer() {
 
                             <div className="space-y-4 mt-auto">
                                 {!resultPdfUrl ? (
-                                    <Button 
-                                        className="magic-button w-full h-16 md:h-20 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                                        onClick={handleSavePdf}
-                                        disabled={isSaving || isRendering || pages.length === 0}
-                                    >
+                                    <Button className="magic-button w-full h-16 md:h-20 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" onClick={handleSavePdf} disabled={isSaving || isRendering || pages.length === 0}>
                                         <StarIcons />
-                                        {isSaving ? (
-                                            <div className="flex items-center gap-3">
-                                                <Loader2 className="size-6 md:size-7 animate-spin" />
-                                                <span className="uppercase text-sm md:text-base tracking-tighter">BUNDLING...</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-3">
-                                                <FileDigit className="size-6 md:size-7 text-white/50 group-hover:scale-125 transition-transform" />
-                                                <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE CHANGES</span>
-                                            </div>
-                                        )}
+                                        {isSaving ? <div className="flex items-center gap-3"><Loader2 className="size-6 md:size-7 animate-spin" /><span className="uppercase text-sm md:text-base tracking-tighter">BUNDLING...</span></div> : <div className="flex items-center gap-3"><FileDigit className="size-6 md:size-7 text-white/50 group-hover:scale-125 transition-transform" /><span className="uppercase tracking-tighter text-lg md:text-xl">SAVE CHANGES</span></div>}
                                     </Button>
                                 ) : (
                                     <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 flex items-center justify-center gap-4 px-10 animate-in zoom-in-95">
-                                        <StarIcons />
-                                        <Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                                        <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
+                                        <StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                     </Button>
                                 )}
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-4 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest shrink-0">
-                            <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> LOSSLESS</div>
-                        </CardFooter>
                     </Card>
                 </div>
             </div>
