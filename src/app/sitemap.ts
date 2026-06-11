@@ -22,7 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/sip-calculator',
     '/fd-rd-calculator',
     '/income-tax-calculator',
-    '/organize-pdf'
+    '/organize-pdf',
+    '/mortgage-calculator'
   ];
 
   const otherTools = [

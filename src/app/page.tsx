@@ -59,7 +59,8 @@ import {
   IndianRupee,
   TrendingUp,
   PiggyBank,
-  Layers
+  Layers,
+  Home as HomeIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -90,6 +91,7 @@ const ALL_TOOLS = [
   { icon: FilePenLine, title: "EDIT PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "pdf-kit" },
 
   // CALCULATORS
+  { icon: HomeIcon, title: "MORTGAGE CALC", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
@@ -98,7 +100,7 @@ const ALL_TOOLS = [
   // IMAGE TOOLS
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
-  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "image" },
+  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP IMAGE", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
   { icon: Maximize, title: "IMAGE RESIZE", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "image" },
 ];

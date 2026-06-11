@@ -67,7 +67,8 @@ import {
   IndianRupee,
   TrendingUp,
   PiggyBank,
-  Layers
+  Layers,
+  Home as HomeIcon
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -342,6 +343,14 @@ function ToolsPageContent() {
   ];
 
   const calculatorFeatures = [
+    {
+      href: '/mortgage-calculator',
+      labelKey: 'mortgage_calculator_label',
+      descriptionKey: 'mortgage_calculator_description',
+      icon: HomeIcon,
+      color: 'bg-primary',
+      lightBg: 'bg-[#f0f9ff]'
+    },
     {
       href: '/gst-calculator',
       labelKey: 'gst_calculator_label',
