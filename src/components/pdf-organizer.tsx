@@ -27,10 +27,8 @@ import {
     Settings2,
     Move,
     FileDigit,
-    GripVertical,
     Plus,
     Undo2,
-    Grip,
     ChevronUp,
     ChevronDown
 } from 'lucide-react';
@@ -115,7 +113,7 @@ export default function PdfOrganizer() {
                 const newPages: PageItem[] = [];
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.0 });
+                    const viewport = page.getViewport({ scale: 0.8 });
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -130,7 +128,7 @@ export default function PdfOrganizer() {
                             index: i,
                             rotation: 0,
                             isDeleted: false,
-                            previewSrc: canvas.toDataURL('image/jpeg', 0.8)
+                            previewSrc: canvas.toDataURL('image/jpeg', 0.7)
                         });
                     }
                     setProgress(Math.round((i / totalPages) * 100));
@@ -226,68 +224,6 @@ export default function PdfOrganizer() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const movePage = (index: number, direction: 'up' | 'down') => {
-        const newPages = [...pages];
-        const page = newPages.splice(index, 1)[0];
-        if (direction === 'up') newPages.splice(Math.max(0, index - 1), 0, page);
-        else newPages.splice(Math.min(pages.length - 1, index + 1), 0, page);
-        setPages(newPages);
-        setResultPdfUrl(null);
-    };
-
-    if (!pdfFile) {
-        return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-                        <Layers className="size-8" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        PDF <span className="text-gradient-hero">Organizer Pro</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Delete, Reorder and Rotate pages visually. <br/>100% Private local RAM processing.
-                    </p>
-                </motion.div>
-
-                <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
-                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-                )}
-                    onDragOver={onDragOver}
-                    onDragLeave={onDragLeave}
-                    onDrop={onDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-10 md:p-16">
-                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
-                            <div className="relative">
-                                <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
-                            </div>
-                            <div className="text-center px-4">
-                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Organize</p>
-                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Delete or re-order any page instantly.</p>
-                            </div>
-                        </div>
-                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                    </CardContent>
-                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><Move className="size-3.5 text-primary" /> DRAG & DROP</div>
-                        <div className="flex items-center gap-1.5"><Trash2 className="size-3.5 text-rose-500" /> PAGE DELETE</div>
-                    </CardFooter>
-                </Card>
-            </div>
-        );
-    }
-
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
@@ -311,115 +247,132 @@ export default function PdfOrganizer() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-250px)]">
-                {/* Main Viewport: Page List (Merge PDF Style) */}
+                {/* Main Viewport: Grid of Pages */}
                 <div className="lg:col-span-8 h-full flex flex-col">
-                    <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
-                        <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
-                            <div className="flex items-center gap-2">
-                                <LayoutGrid className="h-4 w-4 text-primary" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Structural Map</CardTitle>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
-                                    {pages.filter(p => !p.isDeleted).length} ACTIVE PAGES
-                                </Badge>
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    onClick={handleReset} 
-                                    className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg shrink-0 no-print"
-                                >
-                                    <RefreshCcw className="mr-1.5 size-3" /> Change
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative">
-                            {isRendering ? (
-                                <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
+                    {!pdfFile ? (
+                        <Card className={cn(
+                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col min-h-[500px]",
+                            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+                        )}
+                            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-1 flex flex-col items-center justify-center p-10 md:p-16">
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                                     <div className="relative">
-                                        <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
-                                        <Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <div className="space-y-3 w-full max-w-xs text-center">
-                                        <p className="font-black text-sm text-primary uppercase tracking-widest animate-pulse">Rendering Pages...</p>
-                                        <Progress value={progress} className="h-1.5 shadow-inner" />
+                                    <div className="text-center px-4">
+                                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Organize</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Delete or re-order any page instantly.</p>
                                     </div>
                                 </div>
-                            ) : (
-                                <ScrollArea className="h-full w-full pr-0 md:pr-4">
-                                    <Reorder.Group 
-                                        axis="y" 
-                                        values={pages} 
-                                        onReorder={setPages} 
-                                        className="space-y-2 pb-24 p-4"
-                                    >
-                                        <AnimatePresence mode="popLayout">
-                                            {pages.map((p, i) => (
-                                                <Reorder.Item 
-                                                    key={p.id} 
-                                                    value={p}
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, scale: 0.95 }}
-                                                    whileDrag={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", zIndex: 100 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className={cn(
-                                                        "group relative flex items-center justify-between p-3 rounded-2xl border-2 bg-white dark:bg-slate-900 shadow-md transition-all",
-                                                        p.isDeleted ? "opacity-30 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-4 overflow-hidden flex-1">
-                                                        {/* Drag / Up-Down Control (Merge Style) */}
-                                                        <div className="flex flex-col gap-1 opacity-30 group-hover:opacity-100 transition-opacity shrink-0">
-                                                            <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg bg-muted/50 hover:bg-primary/10" onClick={() => movePage(i, 'up')} disabled={i === 0 || p.isDeleted}><ChevronUp className="h-4 w-4" /></Button>
-                                                            <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg bg-muted/50 hover:bg-primary/10" onClick={() => movePage(i, 'down')} disabled={i === pages.length - 1 || p.isDeleted}><ChevronDown className="h-4 w-4" /></Button>
+                                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                            </CardContent>
+                            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><Move className="size-3.5 text-primary" /> DRAG & DROP</div>
+                                <div className="flex items-center gap-1.5"><Trash2 className="size-3.5 text-rose-500" /> PAGE DELETE</div>
+                            </CardFooter>
+                        </Card>
+                    ) : (
+                        <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                            <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <LayoutGrid className="h-4 w-4 text-primary" />
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Map</CardTitle>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
+                                        {pages.filter(p => !p.isDeleted).length} ACTIVE PAGES
+                                    </Badge>
+                                    <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg shrink-0 no-print">
+                                        <RefreshCcw className="mr-1.5 size-3" /> Change
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative">
+                                {isRendering ? (
+                                    <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
+                                        <div className="relative">
+                                            <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
+                                            <Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                        </div>
+                                        <div className="space-y-3 w-full max-w-xs text-center">
+                                            <p className="font-black text-sm text-primary uppercase tracking-widest animate-pulse">Rendering Pages...</p>
+                                            <Progress value={progress} className="h-1.5 shadow-inner" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <ScrollArea className="h-full w-full">
+                                        <Reorder.Group 
+                                            axis="y" 
+                                            values={pages} 
+                                            onReorder={setPages} 
+                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24"
+                                        >
+                                            <AnimatePresence mode="popLayout">
+                                                {pages.map((p, i) => (
+                                                    <Reorder.Item 
+                                                        key={p.id} 
+                                                        value={p}
+                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        exit={{ opacity: 0, scale: 0.8 }}
+                                                        whileDrag={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", zIndex: 100 }}
+                                                        transition={{ duration: 0.2 }}
+                                                        className={cn(
+                                                            "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-lg transition-all cursor-move touch-none",
+                                                            p.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent"
+                                                        )}
+                                                    >
+                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
+                                                            {i + 1}
+                                                        </div>
+                                                        
+                                                        <div className="size-full flex items-center justify-center p-3 transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                                            <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
                                                         </div>
 
-                                                        {/* Page Badge & Preview */}
-                                                        <div className="flex items-center gap-4 truncate">
-                                                            <div className="size-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary shrink-0 border border-primary/20 shadow-inner">
-                                                                <span className="text-[7px] font-black uppercase opacity-60">PAGE</span>
-                                                                <span className="text-lg font-black leading-none">{p.index}</span>
+                                                        {p.isDeleted && (
+                                                            <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center z-30">
+                                                                <Trash2 className="size-10 text-rose-600" />
                                                             </div>
-                                                            <div className="h-20 w-16 rounded-xl overflow-hidden border-2 bg-slate-50 flex items-center justify-center p-1 relative shadow-inner shrink-0 group-hover:scale-105 transition-transform">
-                                                                <div className="size-full flex items-center justify-center transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                                    <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
-                                                                </div>
-                                                                {p.isDeleted && <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center"><Trash2 className="size-6 text-rose-600" /></div>}
-                                                            </div>
-                                                            <div className="hidden sm:flex flex-col text-left">
-                                                                <p className="text-xs font-black uppercase tracking-tight text-slate-800 dark:text-slate-200">{p.isDeleted ? "Removed from output" : `Source Page #${p.index}`}</p>
-                                                                <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">{p.rotation}° Rotation Applied</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                        )}
 
-                                                    {/* Row Actions */}
-                                                    <div className="flex items-center gap-2 shrink-0">
-                                                        <Button size="icon" variant="outline" className="h-10 w-10 rounded-xl border-2 hover:bg-primary/5 hover:text-primary transition-all shrink-0" onClick={() => rotatePage(p.id)} disabled={p.isDeleted}>
-                                                            <RotateCw className="size-5" />
-                                                        </Button>
-                                                        <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-10 w-10 rounded-xl shadow-lg transition-all shrink-0" onClick={() => togglePageDeletion(p.id)}>
-                                                            {p.isDeleted ? <Plus className="size-5" /> : <Trash2 className="size-5" />}
-                                                        </Button>
-                                                    </div>
-                                                </Reorder.Item>
-                                            ))}
-                                        </AnimatePresence>
-                                    </Reorder.Group>
-                                </ScrollArea>
-                            )}
-                        </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 flex justify-center items-center relative">
-                             <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
-                                <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Re-order pages like a pro dashboard
-                            </div>
-                        </CardFooter>
-                    </Card>
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
+
+                                                        <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
+                                                            <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); rotatePage(p.id); }}>
+                                                                <RotateCw className="size-4" />
+                                                            </Button>
+                                                            <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); togglePageDeletion(p.id); }}>
+                                                                {p.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
+                                                            </Button>
+                                                        </div>
+                                                    </Reorder.Item>
+                                                ))}
+                                            </AnimatePresence>
+                                        </Reorder.Group>
+                                        <ScrollBar />
+                                    </ScrollArea>
+                                )}
+                            </CardContent>
+                            <CardFooter className="bg-white dark:bg-slate-950 border-t p-4 flex justify-center items-center relative shrink-0">
+                                 <div className="inline-flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
+                                    <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Drag tiles to reorder pages
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    )}
                 </div>
 
                 {/* Sidebar: Controls */}
-                <div className="lg:col-span-4 space-y-6 lg:h-full flex flex-col no-print">
+                <div className="lg:col-span-4 space-y-6 h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
@@ -433,8 +386,8 @@ export default function PdfOrganizer() {
                                      <Zap className="size-5 text-yellow-500 animate-pulse" />
                                 </div>
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
-                                    <span className="font-black block mb-1 text-primary">SMOOTH STACKING:</span>
-                                    Re-order logic is locked to vertical axis for 100% stability. No glitches.
+                                    <span className="font-black block mb-1 text-primary">SCROLLABLE GRID:</span>
+                                    Layout is fixed to prevent stretching. Use the scrollbar to browse all pages.
                                 </p>
                             </div>
 
