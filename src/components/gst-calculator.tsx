@@ -20,6 +20,15 @@ const COUNTRIES = [
   { name: "UAE", currency: "AED", locale: "ar-AE" },
   { name: "Canada", currency: "CAD", locale: "en-CA" },
   { name: "Australia", currency: "AUD", locale: "en-AU" },
+  { name: "New Zealand", currency: "NZD", locale: "en-NZ" },
+  { name: "Saudi Arabia", currency: "SAR", locale: "ar-SA" },
+  { name: "Kuwait", currency: "KWD", locale: "ar-KW" },
+  { name: "Qatar", currency: "QAR", locale: "ar-QA" },
+  { name: "Oman", currency: "OMR", locale: "ar-OM" },
+  { name: "Bahrain", currency: "BHD", locale: "ar-BH" },
+  { name: "Singapore", currency: "SGD", locale: "en-SG" },
+  { name: "Malaysia", currency: "MYR", locale: "en-MY" },
+  { name: "Thailand", currency: "THB", locale: "th-TH" },
 ];
 
 export default function GstCalculator() {
@@ -99,7 +108,7 @@ export default function GstCalculator() {
                 <Globe className="size-3" /> Select Country
             </Label>
             <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
-                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
                 <SelectContent className="rounded-xl border-2 shadow-2xl">
                     {COUNTRIES.map((c, i) => (
                         <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>

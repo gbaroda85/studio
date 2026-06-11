@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Receipt, Globe, RefreshCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -18,13 +18,22 @@ const COUNTRIES = [
   { name: "UAE", currency: "AED", locale: "ar-AE" },
   { name: "Canada", currency: "CAD", locale: "en-CA" },
   { name: "Australia", currency: "AUD", locale: "en-AU" },
+  { name: "New Zealand", currency: "NZD", locale: "en-NZ" },
+  { name: "Saudi Arabia", currency: "SAR", locale: "ar-SA" },
+  { name: "Kuwait", currency: "KWD", locale: "ar-KW" },
+  { name: "Qatar", currency: "QAR", locale: "ar-QA" },
+  { name: "Oman", currency: "OMR", locale: "ar-OM" },
+  { name: "Bahrain", currency: "BHD", locale: "ar-BH" },
+  { name: "Singapore", currency: "SGD", locale: "en-SG" },
+  { name: "Malaysia", currency: "MYR", locale: "en-MY" },
+  { name: "Thailand", currency: "THB", locale: "th-TH" },
 ];
 
 export default function SalesTaxCalculator() {
   const { toast } = useToast()
   const [countryIndex, setCountryIndex] = useState(0)
-  const [initialPrice, setInitialPrice] = useState("")
-  const [taxRate, setTaxRate] = useState("")
+  const [initialPrice, setInitialPrice] = useState("1000")
+  const [taxRate, setTaxRate] = useState("18")
   const [result, setResult] = useState<{ taxAmount: number, totalPrice: number } | null>(null)
 
   const currentCountry = COUNTRIES[countryIndex];
@@ -55,27 +64,32 @@ export default function SalesTaxCalculator() {
 
     setResult({ taxAmount, totalPrice })
   }
+
+  useEffect(() => {
+      handleCalculate();
+  }, [initialPrice, taxRate, countryIndex]);
   
   const handleReset = () => {
-      setInitialPrice("");
-      setTaxRate("");
-      setResult(null);
+      setInitialPrice("1000");
+      setTaxRate("18");
   }
 
   return (
-    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 rounded-[2rem] overflow-hidden">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Receipt className="text-primary" /> Sales Tax Calculator</CardTitle>
-        <CardDescription>Quickly calculate tax and total price.</CardDescription>
+    <Card className="w-full max-w-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-primary/80 hover:shadow-2xl hover:shadow-primary/20 hover:ring-2 hover:ring-primary/50 dark:hover:shadow-primary/10 rounded-[2.5rem] overflow-hidden">
+      <CardHeader className="bg-primary/5 border-b p-6">
+        <CardTitle className="flex items-center gap-3 font-black uppercase tracking-tighter">
+            <Receipt className="text-primary size-6" /> Tax Estimator
+        </CardTitle>
+        <CardDescription className="text-[10px] font-bold uppercase opacity-60">Quickly calculate tax and total price</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 p-6 md:p-8">
+      <CardContent className="space-y-6 p-8">
         {/* Country Selector */}
         <div className="space-y-2 pb-4 border-b border-dashed">
             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                 <Globe className="size-3" /> Select Country
             </Label>
             <Select value={String(countryIndex)} onValueChange={(v) => setCountryIndex(Number(v))}>
-                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
                 <SelectContent className="rounded-xl border-2 shadow-2xl">
                     {COUNTRIES.map((c, i) => (
                         <SelectItem key={i} value={String(i)} className="font-bold py-2">{c.name} ({c.currency})</SelectItem>
@@ -85,35 +99,34 @@ export default function SalesTaxCalculator() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="initial-price">Initial Price</Label>
-          <Input id="initial-price" type="number" value={initialPrice} onChange={(e) => setInitialPrice(e.target.value)} placeholder="e.g., 1000" className="h-12 border-2 rounded-xl" />
+          <Label htmlFor="initial-price" className="text-[10px] font-black uppercase opacity-60">Initial Price</Label>
+          <div className="relative">
+            <Input id="initial-price" type="number" value={initialPrice} onChange={(e) => setInitialPrice(e.target.value)} className="h-12 pl-10 border-2 font-bold rounded-xl bg-muted/20" placeholder="e.g., 1000" />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm opacity-40">{currentCountry.currency === 'INR' ? '₹' : currentCountry.currency}</span>
+          </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="tax-rate">Tax Rate (%)</Label>
-          <Input id="tax-rate" type="number" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} placeholder="e.g., 18" className="h-12 border-2 rounded-xl" />
+          <Label htmlFor="tax-rate" className="text-[10px] font-black uppercase opacity-60">Tax Rate (%)</Label>
+          <Input id="tax-rate" type="number" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} className="h-12 border-2 font-bold rounded-xl text-center text-lg" placeholder="e.g., 18" />
         </div>
 
         {result && (
             <div className="pt-6 space-y-4 animate-in zoom-in-95 duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                    <div className="p-4 bg-muted/50 rounded-lg border-2">
-                         <p className="text-[10px] font-black uppercase opacity-60">Tax Amount</p>
+                    <div className="p-5 bg-muted/30 rounded-2xl border shadow-sm">
+                         <p className="text-[9px] font-black text-muted-foreground uppercase opacity-60">Tax Amount</p>
                          <p className="text-lg font-black">{formatCurrency(result.taxAmount)}</p>
                     </div>
-                     <div className="p-4 bg-primary/10 rounded-lg border-2 border-primary/20 shadow-inner">
+                     <div className="p-5 bg-primary/10 rounded-2xl border-2 border-primary/20 shadow-inner">
                          <p className="text-[10px] font-black text-primary uppercase">Total Price</p>
-                         <p className="text-lg font-black text-primary">{formatCurrency(result.totalPrice)}</p>
+                         <p className="text-xl font-black text-primary">{formatCurrency(result.totalPrice)}</p>
                     </div>
                 </div>
             </div>
         )}
       </CardContent>
-      <CardFooter className="flex flex-col gap-2 p-6 md:p-8 bg-muted/10 border-t">
-         <Button onClick={handleCalculate} className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-xl shadow-lg transform active:scale-95 transition-all">
-            <Receipt className="mr-2 size-5"/>
-            CALCULATE TAX
-        </Button>
-        {result && <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40"><RefreshCcw className="mr-2 size-3"/> Reset</Button>}
+      <CardFooter className="flex flex-col gap-2 p-6 bg-muted/5 border-t">
+        <Button variant="ghost" onClick={handleReset} className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100 hover:text-destructive"><RefreshCcw className="mr-2 size-3"/> Reset</Button>
       </CardFooter>
     </Card>
   )

@@ -19,6 +19,15 @@ const COUNTRIES = [
   { name: "UAE", currency: "AED", locale: "ar-AE" },
   { name: "Canada", currency: "CAD", locale: "en-CA" },
   { name: "Australia", currency: "AUD", locale: "en-AU" },
+  { name: "New Zealand", currency: "NZD", locale: "en-NZ" },
+  { name: "Saudi Arabia", currency: "SAR", locale: "ar-SA" },
+  { name: "Kuwait", currency: "KWD", locale: "ar-KW" },
+  { name: "Qatar", currency: "QAR", locale: "ar-QA" },
+  { name: "Oman", currency: "OMR", locale: "ar-OM" },
+  { name: "Bahrain", currency: "BHD", locale: "ar-BH" },
+  { name: "Singapore", currency: "SGD", locale: "en-SG" },
+  { name: "Malaysia", currency: "MYR", locale: "en-MY" },
+  { name: "Thailand", currency: "THB", locale: "th-TH" },
 ];
 
 export default function SipCalculator() {

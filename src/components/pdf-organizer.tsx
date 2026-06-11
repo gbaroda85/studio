@@ -622,7 +622,7 @@ export default function PdfOrganizer() {
                                                 <button className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESTORE DELETED" />
                                             </DialogTrigger>
                                             {deletedPages.length > 0 && (
-                                                <span className="absolute -top-3 -right-2 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-[110] pointer-events-none shadow-xl border-2 border-white">
+                                                <span className="absolute -top-4 -right-2 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce z-[120] pointer-events-none shadow-xl border-2 border-white">
                                                     {deletedPages.length}
                                                 </span>
                                             )}

@@ -37,13 +37,22 @@ import { motion, AnimatePresence } from "framer-motion";
 const COLORS = ["#043873", "#4F9CF9", "#FF9F1C", "#2EC4B6"];
 
 const COUNTRIES = [
-  { name: "USA", currency: "USD", locale: "en-US" },
   { name: "India", currency: "INR", locale: "en-IN" },
+  { name: "USA", currency: "USD", locale: "en-US" },
   { name: "UK", currency: "GBP", locale: "en-GB" },
   { name: "Europe", currency: "EUR", locale: "de-DE" },
   { name: "UAE", currency: "AED", locale: "ar-AE" },
   { name: "Canada", currency: "CAD", locale: "en-CA" },
   { name: "Australia", currency: "AUD", locale: "en-AU" },
+  { name: "New Zealand", currency: "NZD", locale: "en-NZ" },
+  { name: "Saudi Arabia", currency: "SAR", locale: "ar-SA" },
+  { name: "Kuwait", currency: "KWD", locale: "ar-KW" },
+  { name: "Qatar", currency: "QAR", locale: "ar-QA" },
+  { name: "Oman", currency: "OMR", locale: "ar-OM" },
+  { name: "Bahrain", currency: "BHD", locale: "ar-BH" },
+  { name: "Singapore", currency: "SGD", locale: "en-SG" },
+  { name: "Malaysia", currency: "MYR", locale: "en-MY" },
+  { name: "Thailand", currency: "THB", locale: "th-TH" },
 ];
 
 export default function MortgageCalculator() {
@@ -265,10 +274,11 @@ export default function MortgageCalculator() {
                             </div>
                         </CardContent>
                         
-                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-center">
+                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-between gap-4">
                             <div className="flex items-center gap-4 text-muted-foreground/40 text-[9px] font-black uppercase tracking-widest">
                                 <ShieldCheck className="size-3.5 text-green-500" /> Secure Local Math
                             </div>
+                            <Button variant="ghost" onClick={handleReset} className="h-8 text-[9px] font-black uppercase text-muted-foreground hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-1.5" /> Start New</Button>
                         </CardFooter>
                     </Card>
                 </div>
@@ -376,9 +386,6 @@ export default function MortgageCalculator() {
                                     ESTIMATE BASED ON <span className="text-primary font-black">{loanTerm} YEARS</span> FIXED AT <span className="text-primary font-black">{interestRate}%</span>
                                  </p>
                             </div>
-                            <Button variant="ghost" onClick={handleReset} className="h-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-destructive">
-                                <RefreshCcw className="size-3.5 mr-2" /> Start New Calculation
-                            </Button>
                         </CardFooter>
                     </Card>
                 </div>
