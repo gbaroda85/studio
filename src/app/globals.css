@@ -4,44 +4,44 @@
 
 @layer base {
   :root {
-    /* "Unique Combinations" Palette - Inspired by Extra and Ordinary */
-    --background: 348 44% 98%;      /* Soft Off-White/Pinkish */
-    --foreground: 218 44% 18%;     /* Deep Navy for readability */
+    /* Whitespace Theme - Professional Navy & Blue */
+    --background: 0 0% 100%;        /* Pure White */
+    --foreground: 212 93% 10%;      /* Dark Navy Text */
     --card: 0 0% 100%;
-    --card-foreground: 218 44% 18%;
+    --card-foreground: 212 93% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 218 44% 18%;
-    --primary: 208 73% 43%;        /* Vibrant Studio Blue */
+    --popover-foreground: 212 93% 10%;
+    --primary: 212 93% 23%;         /* Deep Navy Primary (#043873) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 69% 67%;         /* Rose/Salmon Accent */
+    --secondary: 213 94% 64%;       /* Bright Blue CTA (#4F9CF9) */
     --secondary-foreground: 0 0% 100%;
-    --muted: 348 20% 94%;
-    --muted-foreground: 218 20% 45%;
-    --accent: 66 70% 61%;           /* Creative Lime Green */
-    --accent-foreground: 218 44% 18%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 210 10% 90%;
-    --input: 210 10% 90%;
-    --ring: 208 73% 43%;
-    --radius: 1.5rem;
+    --muted: 212 30% 96%;           /* Soft Blue-Grey Muted */
+    --muted-foreground: 212 20% 45%;
+    --accent: 46 100% 79%;          /* Soft Yellow Accent (#FFE492) */
+    --accent-foreground: 212 93% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 212 30% 90%;
+    --input: 212 30% 90%;
+    --ring: 213 94% 64%;
+    --radius: 1rem;
   }
   
   .dark {
-    /* Deep and Mystic Dark Mode */
-    --background: 285 45% 4%;        /* Midnight Purple/Plum (#0a040d) */
-    --foreground: 330 30% 95%;       /* Pale Rose text */
-    --card: 285 40% 8%;              /* Deep Plum Card */
+    /* Deep and Mystic Dark Mode - UNTOUCHED as requested */
+    --background: 285 45% 4%;        
+    --foreground: 330 30% 95%;       
+    --card: 285 40% 8%;              
     --card-foreground: 330 30% 95%;
     --popover: 285 45% 4%;
     --popover-foreground: 330 30% 95%;
-    --primary: 333 100% 68%;         /* Strike Magenta/Rose (#ff5ea5) */
+    --primary: 333 100% 68%;         
     --primary-foreground: 285 45% 4%;
-    --secondary: 285 30% 20%;        /* Muted Lavender-Plum */
+    --secondary: 285 30% 20%;        
     --secondary-foreground: 330 30% 95%;
     --muted: 285 20% 15%;
     --muted-foreground: 285 10% 60%;
-    --accent: 333 70% 50%;           /* Deep Rose Accent */
+    --accent: 333 70% 50%;           
     --accent-foreground: 330 30% 95%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 330 30% 95%;
@@ -63,21 +63,18 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Artistic Gradients for Light Mode */
+    /* Clean background for Light Mode */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(208, 73%, 43%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(66, 70%, 61%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(0, 69%, 67%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(213, 94%, 64%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(46, 100%, 79%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
-  /* GLOBAL CURSOR HAND FIX - REMOVED 'img' to allow cropping tools to work properly */
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
     cursor: pointer !important;
   }
 
   .dark body {
-    /* Mystic Magenta radial overlays for Dark Mode */
     background-image: 
       radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.1) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),
@@ -90,7 +87,6 @@
   font-family: 'Orbitron', sans-serif;
 }
 
-/* Glassmorphism Professionals */
 .glass-panel {
   @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
 }
@@ -100,14 +96,13 @@
 }
 
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-accent;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-secondary;
 }
 
 .bg-gradient-button {
   @apply bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg transition-all duration-300;
 }
 
-/* Custom Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -127,7 +122,6 @@
   @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-blue-400 rounded-[inherit] blur opacity-30 -z-10 group-hover:opacity-70 transition-opacity duration-500;
 }
 
-/* MAGIC STAR BUTTON STYLES (UIVERSE ADAPTED) */
 .magic-button {
   position: relative;
   transition: all 0.3s ease-in-out;
@@ -179,7 +173,6 @@
 
 .fil0 { fill: #fff; }
 
-/* LAUNCH ARROW BUTTON (UIVERSE ADAPTED) */
 .launch-arrow-btn {
   display: block;
   position: relative;
@@ -265,7 +258,6 @@
   @apply text-primary;
 }
 
-/* HERO UIVERSE BUTTON */
 .hero-btn-uiverse {
   @apply px-6 py-4 font-bold flex items-center gap-3 transition-all duration-1000 bg-white dark:bg-[#0a041a] rounded-[0.5rem] relative cursor-pointer;
   color: blueviolet;
@@ -290,7 +282,6 @@
     rgba(240, 46, 170, 0.2) 15px 15px;
 }
 
-/* SLIDING TEXT BUTTON (UIVERSE ADAPTED) */
 .btn-sliding {
   width: 170px;
   height: 56px;
@@ -308,18 +299,15 @@
   transition: all 0.3s ease;
 }
 
-/* Default blue style used by hero buttons */
 .btn-sliding-blue {
-  background: linear-gradient(to top, #00154c, #12376e, #23487f);
+  background: linear-gradient(to top, #043873, #1e40af, #2563eb);
 }
 
-/* Color variant for Explore All (Adaptive) */
 .btn-sliding-explore {
   @apply bg-gradient-button;
 }
 
 .dark .btn-sliding-explore {
-  /* Vibrant magenta-pink gradient for dark mode change */
   background: linear-gradient(to top, #5c0032, #83124d, #be185d);
 }
 
@@ -360,7 +348,6 @@
   top: 50%;
 }
 
-/* EXPLORE ALL CTA (UIVERSE ADAPTED) */
 .explore-all-cta {
   display: flex;
   padding: 10px 25px;
@@ -369,9 +356,9 @@
   font-size: 14px;
   font-weight: 900;
   color: white;
-  background: #6225e6;
+  background: #4F9CF9;
   transition: 1s;
-  box-shadow: 6px 6px 0 black;
+  box-shadow: 6px 6px 0 #043873;
   transform: skewX(-15deg);
   border: none;
   cursor: pointer;
@@ -384,7 +371,7 @@
 
 .explore-all-cta:hover {
   transition: 0.5s;
-  box-shadow: 10px 10px 0 #fbc638;
+  box-shadow: 10px 10px 0 #FFE492;
 }
 
 .explore-all-cta .second {
@@ -439,7 +426,7 @@
   }
 
   50% {
-    fill: #fbc638;
+    fill: #FFE492;
   }
 
   100% {
@@ -447,7 +434,6 @@
   }
 }
 
-/* SUPPORT BUTTON TOOLTIP (UIVERSE) */
 .support-uiverse {
   position: relative;
   background: #ffffff;
@@ -513,12 +499,11 @@
 .support-uiverse:hover,
 .support-uiverse:hover .uiverse-tooltip,
 .support-uiverse:hover .uiverse-tooltip::before {
-  background: linear-gradient(320deg, rgb(3, 77, 146), rgb(0, 60, 255));
+  background: linear-gradient(320deg, #043873, #4F9CF9);
   color: #ffffff;
   border-color: transparent;
 }
 
-/* POSITION BUTTONS SLIDING STYLE (UIVERSE) */
 .btn-pos-uiverse {
   position: relative;
   background-color: transparent;
@@ -551,7 +536,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(135deg, #7b4397, #dc2430);
+  background: linear-gradient(135deg, #043873, #4F9CF9);
   transform: translate(0%, 100%);
   z-index: 10;
   position: absolute;

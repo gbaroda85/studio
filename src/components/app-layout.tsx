@@ -176,7 +176,7 @@ function GR7Logo({ className }: { className?: string }) {
             x="4" 
             y="70" 
             style={{ 
-              fill: '#0d5a71', 
+              fill: '#043873', 
               fontSize: '46px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
@@ -188,7 +188,7 @@ function GR7Logo({ className }: { className?: string }) {
             x="62" 
             y="75" 
             style={{ 
-              fill: '#ef4444', 
+              fill: '#4F9CF9', 
               fontSize: '68px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
@@ -356,7 +356,7 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-20 fixed top-0 left-0 right-0 bg-gradient-to-r from-background/90 via-white/80 to-secondary/60 dark:from-slate-950/80 dark:via-slate-950/80 dark:to-slate-950/80 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
+    <header className="h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
       <div className="w-full h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
