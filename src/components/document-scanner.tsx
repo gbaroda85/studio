@@ -377,10 +377,52 @@ export default function DocumentScanner() {
     });
   }, [draggingPoint, points]);
 
-  const handleDownloadPdf = () => {
-    const pdf = new jsPDF();
-    scannedPages.forEach((p, i) => { if(i > 0) pdf.addPage(); pdf.addImage(p.processedSrc, 'JPEG', 0, 0, 210, 297); });
-    pdf.save(`Scan-${Date.now()}.pdf`);
+  const handleDownloadPdf = async () => {
+    if (scannedPages.length === 0) return;
+    setIsProcessing(true);
+    try {
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        for (let i = 0; i < scannedPages.length; i++) {
+            if (i > 0) pdf.addPage();
+            
+            const p = scannedPages[i];
+            const img = new window.Image();
+            img.src = p.processedSrc;
+
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    const imgProps = pdf.getImageProperties(img);
+                    
+                    // Maintain aspect ratio to prevent stretching seen in user screenshot
+                    const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+                    const finalWidth = imgProps.width * ratio;
+                    const finalHeight = imgProps.height * ratio;
+                    
+                    // Center the image on the A4 page
+                    const x = (pageWidth - finalWidth) / 2;
+                    const y = (pageHeight - finalHeight) / 2;
+
+                    pdf.addImage(p.processedSrc, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
+                    resolve(null);
+                };
+                img.onerror = () => reject(new Error("Image Load Failed"));
+            });
+        }
+        pdf.save(`Scan-${Date.now()}.pdf`);
+        toast({ title: "PDF Ready", description: "Document saved with correct aspect ratio." });
+    } catch (e) {
+        toast({ variant: 'destructive', title: 'Export Failed' });
+    } finally {
+        setIsProcessing(false);
+    }
   };
 
   const resetAdjustments = () => {
@@ -439,7 +481,7 @@ export default function DocumentScanner() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white" onClick={handleDownloadPdf}>DOWNLOAD PDF <Download className="ml-2 size-4" /></Button></CardFooter>
+                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0 || isProcessing} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white" onClick={handleDownloadPdf}>{isProcessing ? <Loader2 className="animate-spin" /> : "DOWNLOAD PDF"} <Download className="ml-2 size-4" /></Button></CardFooter>
                     </Card>
                 </div>
             </div>
@@ -484,7 +526,7 @@ export default function DocumentScanner() {
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:scale-110 active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
+                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
                                             style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} 
                                             onMouseDown={(e) => { setDraggingPoint(i); setMagnifierPos({ x: p.x, y: p.y }); }} 
                                             onTouchStart={(e) => { setDraggingPoint(i); setMagnifierPos({ x: p.x, y: p.y }); }}><div className="size-2.5 bg-primary rounded-full" /></div>
