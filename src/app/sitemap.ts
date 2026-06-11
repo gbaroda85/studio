@@ -17,10 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/remove-signature',
     '/aadhaar-printer',
     '/image-to-pdf',
-    '/video-to-mp3',
     '/image-to-text',
     '/barcode-generator',
-    '/qr-code-generator'
+    '/qr-code-generator',
+    '/gst-calculator',
+    '/sip-calculator',
+    '/income-tax-calculator'
   ];
 
   const otherTools = [

@@ -57,7 +57,9 @@ import {
   Video,
   RotateCw,
   Barcode,
-  QrCode
+  QrCode,
+  IndianRupee,
+  TrendingUp
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -122,18 +124,13 @@ const CATEGORIES = [
     ]
   },
   {
-    name: "video_tools",
-    icon: Video,
-    color: "text-indigo-500",
-    tools: [
-      { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
-    ]
-  },
-  {
     name: "calculator_pro",
     icon: Calculator,
     color: "text-emerald-500",
     tools: [
+      { href: '/gst-calculator', label: 'gst_calculator_label', icon: IndianRupee },
+      { href: '/sip-calculator', label: 'sip_calculator_label', icon: TrendingUp },
+      { href: '/income-tax-calculator', label: 'income_tax_calculator_label', icon: Landmark },
       { href: '/standard-calculator', label: 'standard_calculator_label', icon: Calculator },
       { href: '/loan-calculator', label: 'loan_emi_calculator_label', icon: Landmark },
       { href: '/age-calculator', label: 'age_calculator_label', icon: Cake },

@@ -61,7 +61,9 @@ import {
   Video,
   RotateCw,
   Barcode,
-  QrCode
+  QrCode,
+  IndianRupee,
+  TrendingUp
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -336,6 +338,30 @@ function ToolsPageContent() {
   ];
 
   const calculatorFeatures = [
+    {
+      href: '/gst-calculator',
+      labelKey: 'gst_calculator_label',
+      descriptionKey: 'gst_calculator_description',
+      icon: IndianRupee,
+      color: 'bg-emerald-500',
+      lightBg: 'bg-[#f0fdf4]'
+    },
+    {
+      href: '/sip-calculator',
+      labelKey: 'sip_calculator_label',
+      descriptionKey: 'sip_calculator_description',
+      icon: TrendingUp,
+      color: 'bg-blue-600',
+      lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/income-tax-calculator',
+      labelKey: 'income_tax_calculator_label',
+      descriptionKey: 'income_tax_calculator_description',
+      icon: Landmark,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#eef2ff]'
+    },
     {
       href: '/standard-calculator',
       labelKey: 'standard_calculator_label',
