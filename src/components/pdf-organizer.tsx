@@ -31,7 +31,8 @@ import {
     ChevronUp,
     ChevronDown,
     FilePlus2,
-    FileText
+    FileText,
+    Grip
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -126,7 +127,7 @@ export default function PdfOrganizer() {
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: context, viewport }).promise;
                         newPages.push({
-                            id: Math.random().toString(36).substr(2, 9),
+                            id: `page-${i}-${Date.now()}`, // Highly unique and stable ID
                             index: i,
                             rotation: 0,
                             isDeleted: false,
@@ -165,13 +166,13 @@ export default function PdfOrganizer() {
     };
 
     const addBlankPage = (afterId?: string) => {
-        const blankId = Math.random().toString(36).substr(2, 9);
+        const blankId = `blank-${Math.random().toString(36).substr(2, 9)}`;
         const blankPage: PageItem = {
             id: blankId,
             index: -1,
             rotation: 0,
             isDeleted: false,
-            previewSrc: "", // Represented as white box in UI
+            previewSrc: "", 
             type: 'blank'
         };
 
@@ -207,8 +208,7 @@ export default function PdfOrganizer() {
 
             for (const p of activePages) {
                 if (p.type === 'blank') {
-                    // Create standard A4 blank page
-                    newPdfDoc.addPage([595.28, 841.89]); // A4 in points
+                    newPdfDoc.addPage([595.28, 841.89]); 
                 } else {
                     const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [p.index - 1]);
                     const currentRot = copiedPage.getRotation().angle;
@@ -303,7 +303,7 @@ export default function PdfOrganizer() {
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
                             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-600" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Move className="size-3.5 text-primary" /> DRAG & DROP</div>
                                 <div className="flex items-center gap-1.5"><Trash2 className="size-3.5 text-rose-500" /> PAGE DELETE</div>
                             </CardFooter>
@@ -338,28 +338,40 @@ export default function PdfOrganizer() {
                                     </div>
                                 ) : (
                                     <ScrollArea className="h-full w-full">
+                                        {/* 
+                                            CRITICAL FIX: 
+                                            Using axis="y" in Reorder.Group is standard.
+                                            The grid flow is maintained by CSS. 
+                                            Each item must have layoutId for smooth transition.
+                                        */}
                                         <Reorder.Group 
                                             axis="y" 
                                             values={pages} 
                                             onReorder={setPages} 
-                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24"
+                                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24 transform-gpu"
                                         >
                                             <AnimatePresence mode="popLayout">
                                                 {pages.map((p, i) => (
                                                     <Reorder.Item 
                                                         key={p.id} 
                                                         value={p}
+                                                        layout
                                                         initial={{ opacity: 0, scale: 0.9 }}
                                                         animate={{ opacity: 1, scale: 1 }}
                                                         exit={{ opacity: 0, scale: 0.8 }}
-                                                        whileDrag={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)", zIndex: 100 }}
-                                                        transition={{ duration: 0.2 }}
+                                                        whileDrag={{ 
+                                                            scale: 1.05, 
+                                                            zIndex: 100, 
+                                                            boxShadow: "0 40px 100px -20px rgba(0, 0, 0, 0.5)",
+                                                            cursor: "grabbing"
+                                                        }}
+                                                        transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                                         className={cn(
-                                                            "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-lg transition-all cursor-move touch-none",
-                                                            p.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent"
+                                                            "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white shadow-xl transition-all cursor-grab active:cursor-grabbing",
+                                                            p.isDeleted ? "opacity-20 grayscale blur-[1px] border-rose-500/20" : "hover:border-primary/40 border-transparent shadow-primary/5"
                                                         )}
                                                     >
-                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
+                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
                                                             {i + 1}
                                                         </div>
                                                         
@@ -369,8 +381,8 @@ export default function PdfOrganizer() {
                                                                 <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="size-full flex items-center justify-center p-3 transition-transform duration-300" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                                <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="p" />
+                                                            <div className="size-full flex items-center justify-center p-3 transition-transform duration-300 pointer-events-none" style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                                                <img src={p.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
                                                             </div>
                                                         )}
 
@@ -380,7 +392,7 @@ export default function PdfOrganizer() {
                                                             </div>
                                                         )}
 
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10 pointer-events-none" />
 
                                                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-40 translate-y-2 group-hover:translate-y-0">
                                                             <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg bg-white shadow-xl border-2 hover:text-primary transition-all" onClick={(e) => { e.stopPropagation(); addBlankPage(p.id); }} title="Insert Blank After">
@@ -392,6 +404,10 @@ export default function PdfOrganizer() {
                                                             <Button size="icon" variant={p.isDeleted ? "default" : "destructive"} className="h-8 w-8 rounded-lg shadow-xl transition-all" onClick={(e) => { e.stopPropagation(); togglePageDeletion(p.id); }} title="Delete Page">
                                                                 {p.isDeleted ? <Plus className="size-4" /> : <Trash2 className="size-4" />}
                                                             </Button>
+                                                        </div>
+                                                        
+                                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-10 pointer-events-none transition-opacity">
+                                                            <Grip className="size-16" />
                                                         </div>
                                                     </Reorder.Item>
                                                 ))}
