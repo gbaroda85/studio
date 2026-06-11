@@ -580,7 +580,7 @@
   scale: 0.95;
 }
 
-/* From Uiverse.io by FColombati */ 
+/* From Uiverse.io by FColombati - CLAY BUTTON SYSTEM */ 
 .uiverse-clay-btn {
   all: unset;
   cursor: pointer;
@@ -626,7 +626,8 @@
     0.15em 0.3em 0.1em -0.01em rgba(5, 5, 5, 0.25);
 }
 
-.uiverse-clay-btn:hover .button-outer {
+.uiverse-clay-btn:hover .button-outer,
+[data-state=active] .button-outer {
   box-shadow:
     0 0 0 0 rgba(5, 5, 5, 1),
     0 0 0 0 rgba(5, 5, 5, 0.5),
@@ -662,7 +663,8 @@
     -0.075em -0.25em 0.25em 0.1em inset rgba(5, 5, 5, 0.25);
 }
 
-.uiverse-clay-btn:hover .button-inner {
+.uiverse-clay-btn:hover .button-inner,
+[data-state=active] .button-inner {
   clip-path: inset(
     clamp(1px, 0.0625em, 2px) clamp(1px, 0.0625em, 2px)
       clamp(1px, 0.0625em, 2px) clamp(1px, 0.0625em, 2px) round 100em
@@ -703,7 +705,8 @@
   font-size: 11px;
 }
 
-.uiverse-clay-btn:hover .button-inner span {
+.uiverse-clay-btn:hover .button-inner span,
+[data-state=active] .button-inner span {
   transform: scale(0.975);
 }
 

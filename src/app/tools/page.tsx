@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -62,6 +61,7 @@ import {
   RotateCw,
   Barcode,
   QrCode,
+  ChevronUp,
   IndianRupee,
   TrendingUp,
   PiggyBank
@@ -600,21 +600,21 @@ function ToolsPageContent() {
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full font-body">
             <div className="flex justify-center mb-16">
-              <TabsList className="flex h-auto flex-wrap justify-center gap-4 bg-[#f1f0fb] dark:bg-slate-900/40 rounded-[2.5rem] p-4 border-none shadow-inner px-8 md:px-12">
+              <TabsList className="flex h-auto flex-wrap justify-center gap-6 bg-transparent border-none p-4 px-8 md:px-12">
                   {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                   <TabsTrigger 
                     key={value} 
                     value={value} 
-                    className={cn(
-                      "px-6 md:px-8 py-3.5 h-auto text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-full transition-all duration-300",
-                      "bg-[#f1f0fb] text-slate-500 shadow-[4px_4px_10px_rgba(0,0,0,0.04),-4px_-4px_10px_rgba(255,255,255,0.8)] border border-white/50",
-                      "data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-[6px_6px_15px_rgba(0,0,0,0.08),-6px_-6px_15px_rgba(255,255,255,1),0_0_0_8px_rgba(230,230,250,1)] data-[state=active]:scale-[1.05] data-[state=active]:z-10",
-                      "dark:bg-slate-800 dark:text-slate-400 dark:shadow-none dark:border-white/5",
-                      "dark:data-[state=active]:bg-primary dark:data-[state=active]:text-white dark:data-[state=active]:shadow-[0_0_30px_-5px_rgba(var(--primary),0.4)]"
-                    )}
+                    className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
                   >
-                      <Icon className={cn("mr-2.5 h-4 w-4 shrink-0 transition-transform group-hover:scale-110", color)} />
-                      {t(categoryKey)}
+                      <div className="uiverse-clay-btn">
+                        <div className="button-outer">
+                            <div className="button-inner flex items-center gap-3">
+                                <Icon className={cn("size-4 transition-transform", color)} />
+                                <span>{t(categoryKey)}</span>
+                            </div>
+                        </div>
+                      </div>
                   </TabsTrigger>
                   ))}
               </TabsList>
