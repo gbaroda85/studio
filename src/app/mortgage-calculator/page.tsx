@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Landmark, Trophy, HelpCircle, ShieldCheck, Sparkles, Building2 } from 'lucide-react';
+import { Landmark, Trophy, HelpCircle, ShieldCheck, Sparkles, Building2, Zap } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Comprehensive Mortgage Calculator - Estimate Home Loans & Interest Online',
