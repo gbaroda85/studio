@@ -96,7 +96,9 @@ export default function PdfMerger() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const studioWorkspaceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         return () => {
@@ -163,12 +165,13 @@ export default function PdfMerger() {
         clearMergedFile();
         if (fileInputRef.current) fileInputRef.current.value = "";
         
-        // Robust scroll-to-top logic with delay to allow layout calculation
+        // Scroll to top of the Studio Workspace area
         setTimeout(() => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            if (studioWorkspaceRef.current) {
+                studioWorkspaceRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }, 150);
     }
 
@@ -255,7 +258,7 @@ export default function PdfMerger() {
     }
     
     return (
-        <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20">
+        <div ref={studioWorkspaceRef} className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20">
             {/* Top Grid: Stack & Selection */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Left Column: List */}
