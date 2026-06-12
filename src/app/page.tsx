@@ -61,7 +61,8 @@ import {
   Home as HomeIcon,
   Scissors,
   MonitorPlay,
-  PlayCircle
+  PlayCircle,
+  PenLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
