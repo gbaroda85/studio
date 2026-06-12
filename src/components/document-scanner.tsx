@@ -218,7 +218,7 @@ export default function DocumentScanner() {
     setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
   };
 
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
 
@@ -305,8 +305,8 @@ export default function DocumentScanner() {
     const cCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
     if (!cCtx) return "";
 
-    // PERFORMANCE FIX: Use lower scale for live preview while dragging
-    const previewScaleLimit = 1000;
+    // PERFORMANCE FIX: Use lower scale for live preview while dragging for "instant" feel
+    const previewScaleLimit = draggingPoint !== null ? 400 : 800; 
     const originalWidth = image.naturalWidth;
     const originalHeight = image.naturalHeight;
     const previewScale = Math.min(1, previewScaleLimit / Math.max(originalWidth, originalHeight));
@@ -361,67 +361,66 @@ export default function DocumentScanner() {
         cCtx.putImageData(imgData, 0, 0);
     }
 
-    // Heavy Filters logic
-    const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
-    const pixels = imageData.data;
-    const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
+    // Heavy Filters logic - SKIP WHILE DRAGGING FOR MAXIMUM SPEED
+    if (draggingPoint === null || isHighRes) {
+        const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
+        const pixels = imageData.data;
+        const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
 
-    for (let i = 0; i < pixels.length; i += 4) {
-        let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-        const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-        
-        if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
-        else if (activeFilter === 'document') {
-            const v = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
-            r = g = b = v;
-        } else if (activeFilter === 'gray') r = g = b = luma;
-        else if (activeFilter === 'photo') {
-            r = r * 1.05; g = g * 1.05; b = b * 1.05;
-        }
-
-        if (activeFilter !== 'bw' && activeFilter !== 'gray') {
-            r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF;
-        }
-        pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
-        pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
-        pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
-    }
-    cCtx.putImageData(imageData, 0, 0);
-
-    // Apply sharpness (Simulation of AI Edge focus)
-    if (sharpness[0] > 0) {
-        const factor = sharpness[0] / 3.0;
-        const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
-        const curData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
-        const src = curData.data, out = cCtx.createImageData(cropCanvas.width, cropCanvas.height), dst = out.data;
-        for (let y = 0; y < cropCanvas.height; y++) {
-            for (let x = 0; x < cropCanvas.width; x++) {
-                const i = (y * cropCanvas.width + x) * 4;
-                let r = 0, g = 0, b = 0;
-                for (let ky = -1; ky <= 1; ky++) {
-                    for (let kx = -1; kx <= 1; kx++) {
-                        const sy = Math.min(cropCanvas.height - 1, Math.max(0, y + ky)), sx = Math.min(cropCanvas.width - 1, Math.max(0, x + kx));
-                        const si = (sy * cropCanvas.width + sx) * 4, wt = weights[(ky + 1) * 3 + (kx + 1)];
-                        r += src[si] * wt; g += src[si + 1] * wt; b += src[si + 2] * wt;
-                    }
-                }
-                dst[i] = Math.max(0, Math.min(255, r)); dst[i+1] = Math.max(0, Math.min(255, g)); dst[i+2] = Math.max(0, Math.min(255, b)); dst[i+3] = src[i+3];
+        for (let i = 0; i < pixels.length; i += 4) {
+            let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
+            const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+            
+            if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
+            else if (activeFilter === 'document') {
+                const v = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
+                r = g = b = v;
+            } else if (activeFilter === 'gray') r = g = b = luma;
+            else if (activeFilter === 'photo') {
+                r = r * 1.05; g = g * 1.05; b = b * 1.05;
             }
+
+            if (activeFilter !== 'bw' && activeFilter !== 'gray') {
+                r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF;
+            }
+            pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
+            pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
+            pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
         }
-        cCtx.putImageData(out, 0, 0);
+        cCtx.putImageData(imageData, 0, 0);
+
+        // Apply sharpness (Simulation of AI Edge focus)
+        if (sharpness[0] > 0) {
+            const factor = sharpness[0] / 3.0;
+            const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
+            const curData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
+            const src = curData.data, out = cCtx.createImageData(cropCanvas.width, cropCanvas.height), dst = out.data;
+            for (let y = 0; y < cropCanvas.height; y++) {
+                for (let x = 0; x < cropCanvas.width; x++) {
+                    const i = (y * cropCanvas.width + x) * 4;
+                    let r = 0, g = 0, b = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const sy = Math.min(cropCanvas.height - 1, Math.max(0, y + ky)), sx = Math.min(cropCanvas.width - 1, Math.max(0, x + kx));
+                            const si = (sy * cropCanvas.width + sx) * 4, wt = weights[(ky + 1) * 3 + (kx + 1)];
+                            r += src[si] * wt; g += src[si + 1] * wt; b += src[si + 2] * wt;
+                        }
+                    }
+                    dst[i] = Math.max(0, Math.min(255, r)); dst[i+1] = Math.max(0, Math.min(255, g)); dst[i+2] = Math.max(0, Math.min(255, b)); dst[i+3] = src[i+3];
+                }
+            }
+            cCtx.putImageData(out, 0, 0);
+        }
     }
-    return cropCanvas.toDataURL('image/jpeg', isHighRes ? 0.95 : 0.7);
-  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness]);
+    return cropCanvas.toDataURL('image/jpeg', isHighRes ? 0.95 : 0.6);
+  }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness, draggingPoint]);
 
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage && isImageReady) {
         const timer = setTimeout(async () => {
-            setIsProcessing(true);
-            // Request Low-Res for instant movement feel
             const res = await applyIntelligentScan(false);
             setLiveResultSrc(res);
-            setIsProcessing(false);
-        }, 50); // Lowered timeout for "Instant" feel
+        }, 10); 
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
@@ -787,7 +786,7 @@ export default function DocumentScanner() {
                                                         <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
                                                         <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div><Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} /></div>
                                                         <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
-                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-primary"/> Sharpness HD<Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
                                                     </div>
                                                 </div>
                                             </PopoverContent>
@@ -816,4 +815,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
