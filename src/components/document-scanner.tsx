@@ -49,7 +49,9 @@ import {
     Archive,
     RotateCw as RotateIcon,
     FileDigit,
-    Edit3
+    Edit3,
+    CameraIcon,
+    Images
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -61,7 +63,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
+import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -173,7 +175,7 @@ export default function DocumentScanner() {
             videoRef.current.srcObject = stream;
         }
     } catch (err) {
-        toast({ variant: 'destructive', title: 'Camera Error', description: 'Webcam not found. Switching to picker.' });
+        toast({ variant: 'destructive', title: 'Camera Error', description: 'In-app viewfinder blocked. Using native camera.' });
         cameraInputRef.current?.click();
     } finally {
         setIsCameraStarting(false);
@@ -220,6 +222,8 @@ export default function DocumentScanner() {
     const filesArray = Array.from(filesList);
     setBatchProgress({ current: 0, total: filesArray.length });
 
+    const newPages: ScannedPage[] = [];
+
     for (let i = 0; i < filesArray.length; i++) {
         const file = filesArray[i];
         setBatchProgress({ current: i + 1, total: filesArray.length });
@@ -245,12 +249,12 @@ export default function DocumentScanner() {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: ctx, viewport }).promise;
                         const data = canvas.toDataURL('image/jpeg', 0.9);
-                        setScannedPages(prev => [...prev, {
+                        newPages.push({
                             id: Math.random().toString(36).substr(2, 9),
                             originalSrc: data,
                             processedSrc: data,
                             points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
-                        }]);
+                        });
                     }
                 }
             } catch (err) {
@@ -262,29 +266,28 @@ export default function DocumentScanner() {
                 reader.onload = (ev) => resolve(ev.target?.result as string);
                 reader.readAsDataURL(file);
             });
-            setScannedPages(prev => [...prev, {
+            newPages.push({
                 id: Math.random().toString(36).substr(2, 9),
                 originalSrc: dataUrl,
                 processedSrc: dataUrl,
                 points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
-            }]);
+            });
         }
     }
 
+    setScannedPages(prev => [...prev, ...newPages]);
     setIsProcessing(false);
     setBatchProgress(null);
-    if (scannedPages.length > 0 || filesArray.length > 0) {
-        // Automatically start editing the first new page added
-        const lastPage = (scannedPages.length > 0) ? scannedPages[scannedPages.length - 1] : null;
-        if (lastPage) {
-            handleEditPage(lastPage);
-        } else {
-             setStage('viewfinder');
-        }
-    } else {
-        setStage('viewfinder');
+
+    // If exactly one image is uploaded, or if it's a first upload, jump to edit mode for the last added page
+    if (newPages.length > 0) {
+        const pageToEdit = newPages[newPages.length - 1];
+        setCurrentRawImage(pageToEdit.originalSrc);
+        setEditingId(pageToEdit.id);
+        setPoints(pageToEdit.points);
+        setStage('adjust');
+        setIsImageReady(false);
     }
-    toast({ title: "Batch Processed", description: "All pages added to bundle." });
   };
 
   const handleEditPage = (page: ScannedPage) => {
@@ -295,7 +298,7 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
-  const onImageLoad = () => {
+  const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     setIsImageReady(true);
   };
 
@@ -381,7 +384,7 @@ export default function DocumentScanner() {
                 r = g = b = v;
             } else if (activeFilter === 'gray') r = g = b = luma;
             else if (activeFilter === 'photo') {
-                r = r * 1.05; g = g * 1.05; b = b * 1.05;
+                r = Math.min(255, r * 1.05); g = Math.min(255, g * 1.05); b = Math.min(255, b * 1.05);
             } else if (activeFilter === 'magic') {
                  r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15);
             }
@@ -618,7 +621,7 @@ export default function DocumentScanner() {
                             <div className="mx-auto mb-4 grid size-16 place-items-center rounded-3xl bg-primary/10 text-primary"><ScanLine className="size-8" /></div>
                             <CardTitle className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-10 pt-2 px-10">
+                        <CardContent className="pb-10 pt-2 px-6">
                             {isProcessing && batchProgress ? (
                                 <div className="py-20 space-y-6 animate-in fade-in duration-500">
                                     <div className="relative inline-block">
@@ -632,14 +635,18 @@ export default function DocumentScanner() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                                    <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                                    <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-6 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
                                         <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-7" /></div>
-                                        <p className="text-xs font-black uppercase tracking-widest">Live Capture</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-center">Live Viewfinder</p>
                                     </div>
-                                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
-                                        <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-7" /></div>
-                                        <p className="text-xs font-black uppercase tracking-widest text-center">Batch PDF / Photos</p>
+                                    <div className="border-4 border-dashed border-rose-500/20 rounded-[2.5rem] p-6 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-rose-500/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => cameraInputRef.current?.click()}>
+                                        <div className="size-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xl"><CameraIcon className="size-7" /></div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-center">Take Photo</p>
+                                    </div>
+                                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-6 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
+                                        <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><Images className="size-7" /></div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-center">Import Gallery</p>
                                     </div>
                                 </div>
                             )}
@@ -767,7 +774,7 @@ export default function DocumentScanner() {
                 </Card>
 
                 {/* LARGE HD PREVIEW + CONTROLS AREA */}
-                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[2.5rem] bg-card flex flex-col flex-1">
+                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col flex-1">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-3"><div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 border border-green-500/20"><Eye className="size-4" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW</CardTitle></div>
                     </CardHeader>
@@ -780,11 +787,15 @@ export default function DocumentScanner() {
                     <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
                         {/* FILTERS AREA */}
                         <div className="w-full space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Studio Filters</Label>
-                            <div className="grid grid-cols-5 gap-2 w-full">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Studio Filters</Label>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-4"/></Button>
+                            </div>
+                            <div className="grid grid-cols-6 gap-1 w-full">
                                 <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                                 <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                             </div>
@@ -792,10 +803,6 @@ export default function DocumentScanner() {
                         
                         {/* ADJUSTMENTS AREA */}
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground">Fine-Tune Adjustment</Label>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-4"/></Button>
-                            </div>
                             <div className="grid gap-6">
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center text-[10px] font-black uppercase text-muted-foreground"><span>Exposure</span><span>{brightness[0]}%</span></div>
@@ -829,8 +836,8 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-11 w-11 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-5"/></Button>
-            <span className="text-[8px] font-black uppercase text-muted-foreground">{label}</span>
+            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-10 w-10 md:h-11 md:w-11 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-5"/></Button>
+            <span className="text-[7px] md:text-[8px] font-black uppercase text-muted-foreground">{label}</span>
         </div>
     );
 }
