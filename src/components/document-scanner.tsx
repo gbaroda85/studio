@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -5,6 +6,7 @@ import React, { useState, useRef, useEffect, useCallback, type SyntheticEvent, t
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import JSZip from 'jszip';
+import * as pdfjs from 'pdfjs-dist';
 import { 
     Camera, 
     Download, 
@@ -46,7 +48,9 @@ import {
     ShieldCheck,
     Share2,
     Archive,
-    RotateCw as RotateIcon
+    RotateCw as RotateIcon,
+    FileDigit,
+    Edit3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -58,13 +62,18 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+}
 
 interface Point { x: number; y: number; }
 
@@ -99,6 +108,8 @@ type Stage = 'viewfinder' | 'camera' | 'adjust';
 interface ScannedPage {
     id: string;
     processedSrc: string;
+    originalSrc: string;
+    points: Point[];
 }
 
 const StarIcons = () => (
@@ -130,11 +141,13 @@ export default function DocumentScanner() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
 
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
@@ -193,6 +206,7 @@ export default function DocumentScanner() {
         ctx.drawImage(video, 0, 0);
         const data = canvas.toDataURL('image/jpeg', 1.0);
         setCurrentRawImage(data);
+        setEditingId(null);
         setIsImageReady(false);
         stopCamera();
         setStage('adjust');
@@ -204,18 +218,77 @@ export default function DocumentScanner() {
     setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setCurrentRawImage(event.target?.result as string);
-        setIsImageReady(false);
-        setStage('adjust');
-        resetDots();
-      };
-      reader.readAsDataURL(file);
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const filesList = e.target.files;
+    if (!filesList || filesList.length === 0) return;
+
+    setIsProcessing(true);
+    const filesArray = Array.from(filesList);
+    setBatchProgress({ current: 0, total: filesArray.length });
+
+    for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        setBatchProgress({ current: i + 1, total: filesArray.length });
+
+        if (file.type === 'application/pdf') {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjs.getDocument({ 
+                    data: new Uint8Array(arrayBuffer),
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                    cMapPacked: true
+                }).promise;
+
+                for (let p = 1; p <= pdf.numPages; p++) {
+                    const page = await pdf.getPage(p);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        await page.render({ canvasContext: ctx, viewport }).promise;
+                        const data = canvas.toDataURL('image/jpeg', 0.9);
+                        setScannedPages(prev => [...prev, {
+                            id: Math.random().toString(36).substr(2, 9),
+                            originalSrc: data,
+                            processedSrc: data,
+                            points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
+                        }]);
+                    }
+                }
+            } catch (err) {
+                toast({ variant: 'destructive', title: 'PDF Error', description: `Failed to read ${file.name}` });
+            }
+        } else if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            const dataUrl = await new Promise<string>((resolve) => {
+                reader.onload = (ev) => resolve(ev.target?.result as string);
+                reader.readAsDataURL(file);
+            });
+            setScannedPages(prev => [...prev, {
+                id: Math.random().toString(36).substr(2, 9),
+                originalSrc: dataUrl,
+                processedSrc: dataUrl,
+                points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
+            }]);
+        }
     }
+
+    setIsProcessing(false);
+    setBatchProgress(null);
+    setStage('viewfinder');
+    toast({ title: "Batch Processed", description: "All pages added to bundle." });
+  };
+
+  const handleEditPage = (page: ScannedPage) => {
+      setCurrentRawImage(page.originalSrc);
+      setEditingId(page.id);
+      setPoints(page.points);
+      setStage('adjust');
+      setIsImageReady(false);
   };
 
   const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
@@ -224,7 +297,7 @@ export default function DocumentScanner() {
     setIsImageReady(true);
   };
 
-  const applyIntelligentScan = useCallback(async (): Promise<string> => {
+  const applyIntelligentScan = useCallback(async (isHighRes = false): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
 
@@ -232,17 +305,28 @@ export default function DocumentScanner() {
     const cCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
     if (!cCtx) return "";
 
+    // PERFORMANCE FIX: Use lower scale for live preview while dragging
+    const previewScaleLimit = 1000;
+    const originalWidth = image.naturalWidth;
+    const originalHeight = image.naturalHeight;
+    const previewScale = Math.min(1, previewScaleLimit / Math.max(originalWidth, originalHeight));
+    
+    // Scale mapping for calculations
+    const activeScale = isHighRes ? 1 : previewScale;
+    const workW = originalWidth * activeScale;
+    const workH = originalHeight * activeScale;
+
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
-        const scaleX = image.naturalWidth / image.width;
-        const scaleY = image.naturalHeight / image.height;
-        cropCanvas.width = Math.max(10, c.width * scaleX);
-        cropCanvas.height = Math.max(10, c.height * scaleY);
+        const scaleX = originalWidth / image.width;
+        const scaleY = originalHeight / image.height;
+        cropCanvas.width = Math.max(10, c.width * scaleX * activeScale);
+        cropCanvas.height = Math.max(10, c.height * scaleY * activeScale);
         cCtx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, cropCanvas.width, cropCanvas.height);
     } else {
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
-            x: (p.x / 100) * image.naturalWidth, 
-            y: (p.y / 100) * image.naturalHeight 
+            x: (p.x / 100) * workW, 
+            y: (p.y / 100) * workH 
         }));
         const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
         const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
@@ -257,18 +341,18 @@ export default function DocumentScanner() {
         const imgData = cCtx.createImageData(tw, th);
         
         const srcCanvas = document.createElement('canvas');
-        srcCanvas.width = image.naturalWidth; srcCanvas.height = image.naturalHeight;
+        srcCanvas.width = workW; srcCanvas.height = workH;
         const srcCtx = srcCanvas.getContext('2d');
-        srcCtx?.drawImage(image, 0, 0);
-        const srcPixels = srcCtx?.getImageData(0, 0, image.naturalWidth, image.naturalHeight).data;
+        srcCtx?.drawImage(image, 0, 0, workW, workH);
+        const srcPixels = srcCtx?.getImageData(0, 0, workW, workH).data;
 
         for (let y = 0; y < th; y++) {
             for (let x = 0; x < tw; x++) {
                 const z = h[6] * x + h[7] * y + 1;
                 const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
                 const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                if (sx >= 0 && sx < image.naturalWidth && sy >= 0 && sy < image.naturalHeight) {
-                    const di = (y * tw + x) * 4, si = (sy * image.naturalWidth + sx) * 4;
+                if (sx >= 0 && sx < workW && sy >= 0 && sy < workH) {
+                    const di = (y * tw + x) * 4, si = (sy * workW + sx) * 4;
                     imgData.data[di] = srcPixels![si]; imgData.data[di+1] = srcPixels![si+1];
                     imgData.data[di+2] = srcPixels![si+2]; imgData.data[di+3] = srcPixels![si+3];
                 }
@@ -277,6 +361,7 @@ export default function DocumentScanner() {
         cCtx.putImageData(imgData, 0, 0);
     }
 
+    // Heavy Filters logic
     const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
     const pixels = imageData.data;
     const bF = brightness[0] / 100, cF = contrast[0] / 100, sF = saturation[0] / 100;
@@ -303,6 +388,7 @@ export default function DocumentScanner() {
     }
     cCtx.putImageData(imageData, 0, 0);
 
+    // Apply sharpness (Simulation of AI Edge focus)
     if (sharpness[0] > 0) {
         const factor = sharpness[0] / 3.0;
         const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -324,17 +410,18 @@ export default function DocumentScanner() {
         }
         cCtx.putImageData(out, 0, 0);
     }
-    return cropCanvas.toDataURL('image/jpeg', 0.95);
+    return cropCanvas.toDataURL('image/jpeg', isHighRes ? 0.95 : 0.7);
   }, [currentRawImage, cropMode, points, activeFilter, completedRectCrop, brightness, contrast, saturation, sharpness]);
 
   useEffect(() => {
     if (stage === 'adjust' && currentRawImage && isImageReady) {
         const timer = setTimeout(async () => {
             setIsProcessing(true);
-            const res = await applyIntelligentScan();
+            // Request Low-Res for instant movement feel
+            const res = await applyIntelligentScan(false);
             setLiveResultSrc(res);
             setIsProcessing(false);
-        }, 300);
+        }, 50); // Lowered timeout for "Instant" feel
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
@@ -356,11 +443,21 @@ export default function DocumentScanner() {
     };
   };
 
-  const handleConfirmAdd = () => {
-    if (!liveResultSrc) return;
-    setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), processedSrc: liveResultSrc }]);
+  const handleConfirmAdd = async () => {
+    setIsProcessing(true);
+    // On confirm, render high-res for storage
+    const highRes = await applyIntelligentScan(true);
+    
+    if (editingId) {
+        setScannedPages(prev => prev.map(p => p.id === editingId ? { ...p, processedSrc: highRes, points } : p));
+        setEditingId(null);
+    } else {
+        setScannedPages(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), originalSrc: currentRawImage!, processedSrc: highRes, points }]);
+    }
+    
     setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
-    toast({ title: "Added to Bundle" });
+    setIsProcessing(false);
+    toast({ title: "Page Saved to Bundle" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -501,42 +598,63 @@ export default function DocumentScanner() {
         
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-start w-full px-4">
-                <div className="lg:col-span-8">
-                    <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-lg hover:border-primary/40 transition-all">
+                <div className="lg:col-span-8 h-full flex flex-col">
+                    <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-lg hover:border-primary/40 transition-all flex-1 flex flex-col justify-center">
                         <CardHeader className="pt-8 pb-4">
                             <div className="mx-auto mb-4 grid size-16 place-items-center rounded-3xl bg-primary/10 text-primary"><ScanLine className="size-8" /></div>
                             <CardTitle className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Smart <span className="text-primary">Scanner</span></CardTitle>
                         </CardHeader>
                         <CardContent className="pb-10 pt-2 px-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                                <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
-                                    <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-7" /></div>
-                                    <p className="text-xs font-black uppercase tracking-widest">Live Capture</p>
+                            {isProcessing && batchProgress ? (
+                                <div className="py-20 space-y-6 animate-in fade-in duration-500">
+                                    <div className="relative inline-block">
+                                        <Loader2 className="size-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                        <FileDigit className="absolute inset-0 m-auto size-8 text-primary animate-pulse" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-lg font-black uppercase tracking-tighter text-primary">Importing Bundle...</p>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Page {batchProgress.current} of {batchProgress.total}</p>
+                                        <Progress value={(batchProgress.current / batchProgress.total) * 100} className="h-1.5 w-64 mx-auto" />
+                                    </div>
                                 </div>
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-7" /></div>
-                                    <p className="text-xs font-black uppercase tracking-widest">Gallery</p>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                                    <div className="border-4 border-dashed border-primary/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={startCamera}>
+                                        <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl"><Camera className="size-7" /></div>
+                                        <p className="text-xs font-black uppercase tracking-widest">Live Capture</p>
+                                    </div>
+                                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all shadow-sm bg-white dark:bg-slate-900" onClick={() => fileInputRef.current?.click()}>
+                                        <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground shadow-xl"><UploadCloud className="size-7" /></div>
+                                        <p className="text-xs font-black uppercase tracking-widest text-center">Batch PDF / Photos</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
-                <div className="lg:col-span-4">
-                    <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] min-h-[320px]">
+                <div className="lg:col-span-4 h-full flex flex-col">
+                    <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] min-h-[400px] flex-1">
                         <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest">BUNDLE ({scannedPages.length})</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><FileStack className="size-4 text-primary" /> BUNDLE ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-10 opacity-20"><FileArchive className="size-12" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
+                                <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-12" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {scannedPages.map((p) => (
-                                        <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 bg-white shadow-md group">
+                                <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {scannedPages.map((p, i) => (
+                                        <div key={p.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 bg-white shadow-md group cursor-pointer" onClick={() => handleEditPage(p)}>
                                             <img src={p.processedSrc} className="size-full object-cover" alt="s" />
-                                            <Button size="icon" variant="destructive" className="absolute top-1 right-1 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3.5" /></Button>
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <Button size="icon" variant="secondary" className="size-8 rounded-lg shadow-xl"><Edit3 className="size-4" /></Button>
+                                                <Button size="icon" variant="destructive" className="size-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); setScannedPages(prev => prev.filter(pg => pg.id !== p.id)) }}><Trash2 className="size-4" /></Button>
+                                            </div>
+                                            <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{i+1}</div>
                                         </div>
                                     ))}
+                                    <button className="aspect-[3/4] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px]" onClick={() => fileInputRef.current?.click()}>
+                                        <Plus className="size-6" /> Add
+                                    </button>
                                 </div>
                             )}
                         </CardContent>
@@ -576,12 +694,12 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1600px] mx-auto">
                 
                 {/* ADJUSTMENT PANEL */}
-                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
+                <Card className="lg:col-span-8 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
                     <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                        <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT</CardTitle></div>
+                        <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT STUDIO</CardTitle></div>
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
                             <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
                         </Tabs>
@@ -591,11 +709,11 @@ export default function DocumentScanner() {
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-2xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -618,83 +736,84 @@ export default function DocumentScanner() {
                         </div>
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 z-40 shadow-2xl"><Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-4">
-                        <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>CONFIRM & ADD PAGE <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" /></Button>
-                        <Button variant="ghost" className="w-full h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col md:flex-row gap-4 justify-between">
+                         <div className="flex items-center gap-3">
+                            <Button variant="ghost" className="h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
+                            <Button variant="outline" size="sm" onClick={resetAdjustments} className="h-10 text-[9px] font-black uppercase border-2"><RefreshCcw className="size-3 mr-1.5" /> Defaults</Button>
+                        </div>
+                        <Button className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
+                            {editingId ? 'SAVE CHANGES' : 'CONFIRM & ADD'} <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" />
+                        </Button>
                     </CardFooter>
                 </Card>
 
                 {/* HD RESULT PREVIEW */}
-                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
-                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
-                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
-                         <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
-                    </CardHeader>
-                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
-                        <div className="relative bg-white shadow-lg border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
-                            {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Studio...</p></div>}
-                        </div>
-                    </CardContent>
-                    <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
-                        <div className="w-full flex flex-col gap-4">
-                             <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1 w-full">
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'document' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }}><FileText className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Doc Pro</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'magic' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }}><Sparkles className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Magic</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'photo' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }}><ImageIcon className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Photo</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant={activeFilter === 'bw' ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }}><Highlighter className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground">BW Pro</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance}><Zap className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-indigo-600 text-center">AI Enhance</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
-                                            <div className="space-y-6">
-                                                <div className="flex items-center justify-between"><h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm"><Settings2 className="size-4"/> FINE-TUNE</h4><Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button></div>
-                                                <div className="space-y-6 py-2">
-                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
-                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div><Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} /></div>
-                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
-                                                    <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                <div className="lg:col-span-4 flex flex-col gap-6">
+                    <Card className="border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col flex-1">
+                        <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
+                            <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-sm font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
+                            <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
+                        </CardHeader>
+                        <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
+                            <div className="relative bg-white shadow-lg border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
+                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
+                                {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Preview...</p></div>}
+                            </div>
+                        </CardContent>
+                        <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
+                            <div className="w-full space-y-6">
+                                <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1 w-full">
+                                    <FilterBtn active={activeFilter === 'document'} label="Doc Pro" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
+                                    <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
+                                    <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }} />
+                                    <FilterBtn active={activeFilter === 'bw'} label="BW Pro" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance}><Zap className="size-5"/></Button>
+                                        <span className="text-[8px] font-black uppercase text-indigo-600 text-center">AI Enhance</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-5"/></Button>
+                                        <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center justify-between"><h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm"><Settings2 className="size-4"/> FINE-TUNE</h4><Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button></div>
+                                                    <div className="space-y-6 py-2">
+                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
+                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div><Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} /></div>
+                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
+                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Zap className="size-3.5 inline mr-1.5 text-primary"/> Sharpness HD</span><Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <span className="text-[8px] font-black uppercase text-muted-foreground">Adjust</span>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <span className="text-[8px] font-black uppercase text-muted-foreground">Adjust</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-center gap-1">
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-rose-500 hover:bg-destructive/5 transition-all" onClick={resetAdjustments}><RotateCcw className="size-5"/></Button>
-                                    <span className="text-[8px] font-black uppercase text-rose-500">Reset</span>
-                                </div>
-                             </div>
-                        </div>
-                    </CardFooter>
-                </Card>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </div>
             </div>
         )}
 
-        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFileUpload} />
+        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf" multiple onChange={handleFilesUpload} />
     </div>
   );
 }
+
+function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
+    return (
+        <div className="flex flex-col items-center gap-1">
+            <Button variant={active ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={onClick}><Icon className="size-5"/></Button>
+            <span className="text-[8px] font-black uppercase text-muted-foreground">{label}</span>
+        </div>
+    );
+}
+
