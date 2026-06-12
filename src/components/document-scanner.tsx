@@ -4,6 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import React, { useState, useRef, useEffect, useCallback, type SyntheticEvent, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import JSZip from 'jszip';
 import { 
     Camera, 
     Download, 
@@ -43,6 +44,8 @@ import {
     Grip,
     Circle,
     ShieldCheck,
+    Share2,
+    Archive,
     RotateCw as RotateIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -98,6 +101,18 @@ interface ScannedPage {
     processedSrc: string;
 }
 
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
+
 export default function DocumentScanner() {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('viewfinder');
@@ -119,6 +134,7 @@ export default function DocumentScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
@@ -377,51 +393,94 @@ export default function DocumentScanner() {
     });
   }, [draggingPoint, points]);
 
+  const generatePdfBlob = async (): Promise<Blob | null> => {
+    if (scannedPages.length === 0) return null;
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    for (let i = 0; i < scannedPages.length; i++) {
+        if (i > 0) pdf.addPage();
+        const p = scannedPages[i];
+        const img = new window.Image();
+        img.src = p.processedSrc;
+        await new Promise((resolve) => {
+            img.onload = () => {
+                const imgProps = pdf.getImageProperties(img);
+                const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+                const finalWidth = imgProps.width * ratio;
+                const finalHeight = imgProps.height * ratio;
+                const x = (pageWidth - finalWidth) / 2;
+                const y = (pageHeight - finalHeight) / 2;
+                pdf.addImage(p.processedSrc, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
+                resolve(null);
+            };
+        });
+    }
+    return pdf.output('blob');
+  };
+
   const handleDownloadPdf = async () => {
+    setIsProcessing(true);
+    const blob = await generatePdfBlob();
+    if (blob) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Scan-${Date.now()}.pdf`;
+        link.click();
+        toast({ title: "PDF Ready" });
+    }
+    setIsProcessing(false);
+  };
+
+  const handleDownloadJpg = async () => {
     if (scannedPages.length === 0) return;
     setIsProcessing(true);
     try {
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4'
-        });
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-
-        for (let i = 0; i < scannedPages.length; i++) {
-            if (i > 0) pdf.addPage();
-            
-            const p = scannedPages[i];
-            const img = new window.Image();
-            img.src = p.processedSrc;
-
-            await new Promise((resolve, reject) => {
-                img.onload = () => {
-                    const imgProps = pdf.getImageProperties(img);
-                    
-                    // Maintain aspect ratio to prevent stretching seen in user screenshot
-                    const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
-                    const finalWidth = imgProps.width * ratio;
-                    const finalHeight = imgProps.height * ratio;
-                    
-                    // Center the image on the A4 page
-                    const x = (pageWidth - finalWidth) / 2;
-                    const y = (pageHeight - finalHeight) / 2;
-
-                    pdf.addImage(p.processedSrc, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
-                    resolve(null);
-                };
-                img.onerror = () => reject(new Error("Image Load Failed"));
+        if (scannedPages.length === 1) {
+            const link = document.createElement('a');
+            link.href = scannedPages[0].processedSrc;
+            link.download = `Scan-${Date.now()}.jpg`;
+            link.click();
+        } else {
+            const zip = new JSZip();
+            scannedPages.forEach((p, i) => {
+                const base64Data = p.processedSrc.split(',')[1];
+                zip.file(`Page-${i+1}.jpg`, base64Data, { base64: true });
             });
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `Scanned-Photos-${Date.now()}.zip`;
+            link.click();
         }
-        pdf.save(`Scan-${Date.now()}.pdf`);
-        toast({ title: "PDF Ready", description: "Document saved with correct aspect ratio." });
+        toast({ title: "Images Saved" });
     } catch (e) {
         toast({ variant: 'destructive', title: 'Export Failed' });
     } finally {
         setIsProcessing(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+        const blob = await generatePdfBlob();
+        if (blob && navigator.share) {
+            const file = new File([blob], `Scan-${Date.now()}.pdf`, { type: 'application/pdf' });
+            await navigator.share({
+                files: [file],
+                title: 'Scanned Document',
+                text: 'Sharing my scanned document from GR7 Tools.'
+            });
+            toast({ title: "Shared Successfully" });
+        } else {
+            toast({ variant: 'destructive', title: "Not Supported", description: "Sharing is not available on this browser." });
+        }
+    } catch (e) {
+        console.log(e);
+    } finally {
+        setIsSharing(false);
     }
   };
 
@@ -481,7 +540,22 @@ export default function DocumentScanner() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t"><Button disabled={scannedPages.length === 0 || isProcessing} className="w-full h-14 bg-green-600 font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white" onClick={handleDownloadPdf}>{isProcessing ? <Loader2 className="animate-spin" /> : "DOWNLOAD PDF"} <Download className="ml-2 size-4" /></Button></CardFooter>
+                        <CardFooter className="p-6 border-t flex flex-col gap-3">
+                            <Button disabled={scannedPages.length === 0 || isProcessing} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white border-4 border-primary" onClick={handleDownloadPdf}>
+                                <StarIcons />
+                                {isProcessing ? <Loader2 className="animate-spin" /> : <FileText className="size-4 mr-2" />}
+                                <span className="uppercase text-xs tracking-widest">DOWNLOAD PDF</span>
+                            </Button>
+                            
+                            <div className="grid grid-cols-2 gap-3 w-full">
+                                <Button variant="outline" disabled={scannedPages.length === 0 || isProcessing} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-50 text-emerald-600 border-emerald-100" onClick={handleDownloadJpg}>
+                                    <ImageIcon className="mr-2 size-3" /> SAVE JPG
+                                </Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0 || isSharing} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-50 text-blue-600 border-blue-100" onClick={handleShare}>
+                                    {isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE
+                                </Button>
+                            </div>
+                        </CardFooter>
                     </Card>
                 </div>
             </div>
@@ -624,3 +698,4 @@ export default function DocumentScanner() {
     </div>
   );
 }
+
