@@ -4,31 +4,37 @@
 
 @layer base {
   :root {
-    /* SaaS Professional Theme - Inspired by provided image */
-    --background: 210 100% 98%;      /* Very Light Tinted Blue-White (#F7F9FF) */
-    --foreground: 212 93% 15%;      /* Deep Navy Charcoal Text */
+    /* Color Palette Inspired by provided image */
+    /* Peach/Pink background: #EDC7B7 -> 17 53% 82% */
+    /* Off-white: #EEE2DC -> 17 24% 91% */
+    /* Muted Grey: #BAB2B5 -> 343 5% 72% */
+    /* Navy Blue: #123C69 -> 210 71% 24% */
+    /* Rose/Magenta: #AC3B61 -> 339 49% 45% */
+    
+    --background: 17 53% 96%;        /* Very light version of #EDC7B7 */
+    --foreground: 210 71% 24%;      /* Navy Blue #123C69 */
     --card: 0 0% 100%;
-    --card-foreground: 212 93% 15%;
+    --card-foreground: 210 71% 24%;
     --popover: 0 0% 100%;
-    --popover-foreground: 212 93% 15%;
-    --primary: 212 93% 23%;         /* Deep Navy Blue (#043873) from image */
+    --popover-foreground: 210 71% 24%;
+    --primary: 210 71% 24%;         /* Navy Blue #123C69 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 213 94% 64%;        /* Bright Sky Blue (#4F9CF9) from image */
+    --secondary: 339 49% 45%;        /* Rose #AC3B61 */
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 20% 94%;           /* Soft muted blue-grey */
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 213 94% 64%;           /* Bright Sky Blue Accent */
-    --accent-foreground: 212 93% 15%;
+    --muted: 17 24% 91%;            /* Off-white #EEE2DC */
+    --muted-foreground: 343 5% 45%;
+    --accent: 17 53% 82%;           /* Peach #EDC7B7 */
+    --accent-foreground: 210 71% 24%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 212 93% 23%;
+    --border: 343 5% 85%;
+    --input: 343 5% 85%;
+    --ring: 210 71% 24%;
     --radius: 1rem;
   }
   
   .dark {
-    /* Deep and Mystic Dark Mode - UNTOUCHED as per user instruction */
+    /* Deep and Mystic Dark Mode - UNTOUCHED */
     --background: 285 45% 4%;        
     --foreground: 330 30% 95%;       
     --card: 285 40% 8%;              
@@ -63,10 +69,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Updated gradient for Light Mode matching SaaS theme */
+    /* Soft gradient based on image palette */
     background-image: 
-      radial-gradient(at 100% 0%, hsla(212, 93%, 23%, 0.03) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(213, 94%, 64%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 100% 0%, hsla(17, 53%, 82%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(210, 71%, 24%, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
