@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,32 +12,24 @@ import {
     UploadCloud, 
     Download, 
     Loader2, 
-    NotebookPen, 
-    Settings2, 
-    Eye, 
-    ShieldCheck, 
-    Zap, 
-    RefreshCcw, 
     Hash, 
     Layout, 
-    Maximize, 
+    RefreshCcw, 
     Sparkles,
     CheckCircle2,
     Palette,
     X,
-    FileText,
-    SearchCode,
-    ListFilter,
+    ShieldCheck,
+    Zap,
+    Eye,
     Monitor,
-    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Type,
     Layers,
     Bold,
     Italic,
-    GripVertical,
-    Move,
-    ChevronLeft,
-    ChevronRight
+    Move
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -47,7 +39,6 @@ import { Badge } from './ui/badge';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Progress } from './ui/progress';
 import { Slider } from './ui/slider';
-import { Separator } from './ui/separator';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -220,14 +211,15 @@ export default function PdfPageNumberer() {
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(arrayBuffer),
             cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-            cMapPacked: true
+            cMapPacked: true,
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
         });
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
         setTotalPagesPreview(count);
         
         const imgs: string[] = [];
-        const pagesToRender = Math.min(count, 10); // Render first 10 for visual context
+        const pagesToRender = Math.min(count, 10); 
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
@@ -336,6 +328,14 @@ export default function PdfPageNumberer() {
             });
         }
 
+        // FIXED: Force Viewer Preference for normal display size
+        const catalog = pdfDoc.catalog;
+        catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+            FitWindow: true,
+            CenterWindow: true,
+            DisplayDocTitle: true
+        }));
+
         const newPdfBytes = await pdfDoc.save();
         const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -394,7 +394,7 @@ export default function PdfPageNumberer() {
           padding: '2px'
       };
 
-      const m = `${(margin[0] / 595) * 100}%`; // Calculate relative % margin based on A4 width approx
+      const m = `${(margin[0] / 595) * 100}%`; 
       
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
@@ -613,7 +613,7 @@ export default function PdfPageNumberer() {
                     <CardFooter className="p-6 md:p-8 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-18 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleAddPageNumbers}
                                 disabled={isProcessing || !format}
                             >
@@ -644,7 +644,7 @@ export default function PdfPageNumberer() {
                 </Card>
             </div>
 
-            {/* Workspace: Live Preview - FIXED HEIGHT WITH SCROLLBAR */}
+            {/* Workspace: Live Preview */}
             <div className="lg:col-span-7 h-full flex flex-col no-print">
                 <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[600px] lg:h-[850px] flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
@@ -719,4 +719,3 @@ export default function PdfPageNumberer() {
     </div>
   );
 }
-

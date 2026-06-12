@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -158,7 +159,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -209,17 +210,19 @@ export default function PdfUnlocker() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
             
-            // USE POINTS UNIT FOR PDF GENERATION TO MAINTAIN CORRECT SIZE
-            const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true });
+            // FIXED: Using standard points (pt) to match original dimensions perfectly
+            const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true, hotfixes: ['px_scaling'] });
             
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // CRITICAL FIX: Scale 1.0 viewport is needed for point-to-point mapping
-                const originalViewport = page.getViewport({ scale: 1.0 });
-                // Higher scale viewport for actual canvas rendering (HD Quality)
-                const renderViewport = page.getViewport({ scale: 2.2 }); 
+                // Get standard viewport at 100% scale (72DPI equivalent)
+                const viewport = page.getViewport({ scale: 1.0 });
+                
+                // Render at high scale for HD quality, but map back to point dimensions
+                const renderScale = 2.0; 
+                const renderViewport = page.getViewport({ scale: renderScale }); 
                 
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -231,19 +234,25 @@ export default function PdfUnlocker() {
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     
-                    const orientation = originalViewport.width > originalViewport.height ? 'l' : 'p';
+                    const orientation = viewport.width > viewport.height ? 'l' : 'p';
                     
                     if (i === 1) {
                         newPdf.deletePage(1);
                     }
                     
-                    // Add page with original point dimensions
-                    newPdf.addPage([originalViewport.width, originalViewport.height], orientation);
-                    // Draw HD image onto original-sized point canvas
-                    newPdf.addImage(imgData, 'JPEG', 0, 0, originalViewport.width, originalViewport.height, undefined, 'FAST');
+                    // FIXED: Add page with EXACT original point dimensions
+                    // format [w, h] in points ensures standard display size
+                    newPdf.addPage([viewport.width, viewport.height], orientation);
+                    
+                    // FIXED: Scale image back to fit points exactly
+                    newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
+
+            // FORCED: Set display mode to fit width so it doesn't look "huge" due to zoom defaults
+            newPdf.setDisplayMode('fullwidth');
+
             const pdfBlob = newPdf.output('blob');
             const url = URL.createObjectURL(pdfBlob);
             setUnlockedPdfUrl(url);
@@ -409,7 +418,7 @@ export default function PdfUnlocker() {
                                     <div className="p-10 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2.5rem] flex flex-col items-center gap-6 text-center animate-in zoom-in-95">
                                         <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                             <CheckCircle2 className="size-10" />
-                                            <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
+                                            <div className="absolute -top-2 -right-2"><Sparkles className="text-yellow-400 size-6" /></div>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xl font-black text-green-800 uppercase tracking-tighter">PERMANENTLY UNLOCKED!</p>
