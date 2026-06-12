@@ -298,7 +298,7 @@ export default function PdfMerger() {
                                             <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary/5">
                                                 <Plus className="size-3 mr-1"/> Add Files
                                             </Button>
-                                            <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase hover:bg-destructive/5">
+                                            <Button variant="ghost" size="sm" onClick={handleReset} className="btn-uiverse-secondary h-7">
                                                 <Trash2 className="size-3 mr-1"/> Clear All
                                             </Button>
                                         </div>
@@ -467,7 +467,7 @@ export default function PdfMerger() {
                                     </div>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                                    <Button variant="outline" onClick={handleReset} className="h-14 md:h-16 px-6 font-black text-[10px] uppercase border-2 rounded-xl bg-white/50">
+                                    <Button variant="outline" onClick={handleReset} className="btn-uiverse-secondary h-14 md:h-16 px-6">
                                         <RefreshCcw className="mr-2 size-4" /> CHANGE FILES
                                     </Button>
                                     <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>

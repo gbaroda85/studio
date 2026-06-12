@@ -21,7 +21,8 @@ import {
   Eye,
   ArrowLeftRight,
   Plus,
-  ChevronRight
+  ChevronRight,
+  RefreshCcw
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -317,7 +318,7 @@ export default function ImageCompressor() {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center px-1">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Optimization Stack</p>
-                                <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-destructive font-black h-7 text-[9px] uppercase">
+                                <Button variant="ghost" size="sm" onClick={() => setResults([])} className="btn-uiverse-secondary h-7">
                                     <Trash2 className="size-3 mr-1"/> Clear All
                                 </Button>
                             </div>
@@ -442,7 +443,7 @@ export default function ImageCompressor() {
                         </div>
                         <Button 
                             size="lg" 
-                            className="magic-button magic-button-success w-full md:w-auto h-14 md:h-16 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-3" 
+                            className="magic-button magic-button-success w-full md:w-auto h-14 md:h-16 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
                             onClick={downloadAllAsZip}
                         >
                             <StarIcons />
@@ -561,7 +562,7 @@ export default function ImageCompressor() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 border-t border-dashed">
+                <CardFooter className="bg-muted/10 p-6 border-t border-dashed gap-3 flex flex-col">
                     <Button 
                         className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={results.length === 0 || isBulkProcessing}
@@ -580,6 +581,11 @@ export default function ImageCompressor() {
                             </div>
                         )}
                     </Button>
+                    {results.length > 0 && (
+                        <Button variant="outline" onClick={handleReset} className="btn-uiverse-secondary w-full h-11">
+                            <RefreshCcw className="mr-2 h-4 w-4" /> Start Over
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>

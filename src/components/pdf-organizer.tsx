@@ -515,7 +515,12 @@ export default function PdfOrganizer() {
                                     <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
                                         {pages.length} ACTIVE PAGES
                                     </Badge>
-                                    <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[8px] md:text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg shrink-0 no-print">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        onClick={handleReset} 
+                                        className="btn-uiverse-secondary h-8 px-4 shrink-0"
+                                    >
                                         <RefreshCcw className="mr-1.5 size-3" /> Change
                                     </Button>
                                 </div>
@@ -682,9 +687,14 @@ export default function PdfOrganizer() {
                                         {isSaving ? <div className="flex items-center gap-3"><Loader2 className="size-6 md:size-7 animate-spin" /><span className="uppercase text-sm md:text-base tracking-tighter">BUNDLING...</span></div> : <div className="flex items-center gap-3"><FileDigit className="size-6 md:size-7 text-white/50 group-hover:scale-125 transition-transform" /><span className="uppercase tracking-tighter text-lg md:text-xl">SAVE CHANGES</span></div>}
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 flex items-center justify-center gap-4 px-10 animate-in zoom-in-95">
-                                        <StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
-                                    </Button>
+                                    <div className="space-y-3">
+                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 flex items-center justify-center gap-4 px-10 animate-in zoom-in-95">
+                                            <StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
+                                        </Button>
+                                        <Button variant="ghost" onClick={handleReset} className="btn-uiverse-secondary w-full h-11">
+                                            <RefreshCcw className="mr-2 h-4 w-4" /> Start New
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
                         </CardContent>
