@@ -137,10 +137,12 @@ export default function PdfUnlocker() {
             await loadingTask.promise;
             setIsProtected(false);
         } catch (error: any) {
-            if (error.name === 'PasswordException') {
+            // Robust detection of password protection
+            if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setIsProtected(true);
             } else {
                 setIsProtected(null);
+                toast({ variant: 'destructive', title: 'Check Error', description: 'Could not verify document security.' });
             }
         } finally {
             setIsChecking(false);
@@ -156,10 +158,11 @@ export default function PdfUnlocker() {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if (e.target?.result) {
+                    // FIXED: Use ArrayBuffer instead of DataURL for pdfjs compatibility
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -210,17 +213,14 @@ export default function PdfUnlocker() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
             
-            // FIXED: Using standard points (pt) to match original dimensions perfectly
+            // Using standard points (pt) to match original dimensions perfectly
             const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true, hotfixes: ['px_scaling'] });
             
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Get standard viewport at 100% scale (72DPI equivalent)
                 const viewport = page.getViewport({ scale: 1.0 });
-                
-                // Render at high scale for HD quality, but map back to point dimensions
                 const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
@@ -236,21 +236,14 @@ export default function PdfUnlocker() {
                     
                     const orientation = viewport.width > viewport.height ? 'l' : 'p';
                     
-                    if (i === 1) {
-                        newPdf.deletePage(1);
-                    }
+                    if (i === 1) newPdf.deletePage(1);
                     
-                    // FIXED: Add page with EXACT original point dimensions
-                    // format [w, h] in points ensures standard display size
                     newPdf.addPage([viewport.width, viewport.height], orientation);
-                    
-                    // FIXED: Scale image back to fit points exactly
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
 
-            // FORCED: Set display mode to fit width so it doesn't look "huge" due to zoom defaults
             newPdf.setDisplayMode('fullwidth');
 
             const pdfBlob = newPdf.output('blob');
@@ -425,7 +418,12 @@ export default function PdfUnlocker() {
                                             <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving in standard A4 size</p>
                                         </div>
                                     </div>
-                                ) : null}
+                                ) : (
+                                    <div className="py-12 flex flex-col items-center justify-center gap-4 opacity-40">
+                                        <SearchCode className="h-12 w-12 text-primary animate-pulse" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">Detecting Security Layers...</p>
+                                    </div>
+                                )}
                             </CardContent>
 
                             <CardFooter className="flex flex-col gap-3 p-6 bg-muted/10 border-t">
@@ -461,3 +459,4 @@ export default function PdfUnlocker() {
         </div>
     );
 }
+
