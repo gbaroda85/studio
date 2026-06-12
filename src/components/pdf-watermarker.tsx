@@ -36,7 +36,8 @@ import {
     LayoutGrid,
     MonitorCheck,
     Trash2,
-    Move
+    Move,
+    SearchCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -80,6 +81,15 @@ const StarIcons = () => (
         ))}
     </>
 );
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
 
 function hexToRgb(hex: string) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -229,9 +239,14 @@ export default function PdfWatermarker() {
         }
 
         const rgbColor = hexToRgb(textColor);
-        const rotDeg = -rotation[0]; // Mirror CSS rotation
+        const rotDeg = -rotation[0]; // CSS rotation is CW, PDF-Lib Degrees is CCW, so mirror.
         const op = opacity[0] / 100;
         const currentMargin = margin[0];
+
+        // TRIGONOMETRY FOR CENTER ROTATION
+        const radians = (rotDeg * Math.PI) / 180;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
 
         for (const page of pages) {
             const { width, height } = page.getSize();
@@ -246,7 +261,7 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // Calculate anchor point (Center of where the watermark should be)
+            // Target Anchor Point (The fixed center where watermark stays regardless of rotation)
             let cx = 0, cy = 0;
             switch (position) {
                 case 'top-left': cx = currentMargin + tw/2; cy = height - currentMargin - th/2; break;
@@ -262,20 +277,10 @@ export default function PdfWatermarker() {
                 case 'bottom-right': cx = width - currentMargin - tw/2; cy = currentMargin + th/2; break;
             }
 
-            // Math to center content relative to rotation
-            const radians = (rotDeg * Math.PI) / 180;
-            const cos = Math.cos(radians);
-            const sin = Math.sin(radians);
-
-            // Positioning for drawText and drawImage needs to be start point (bottom-left)
-            // but we want to rotate around the center point (cx, cy)
-            // PDF-Lib rotation is around the specified (x,y) point. 
-            // So we pass cx, cy as center and adjust internally or calculate the rotated start point.
-            
-            // Simpler: PDF-lib draws from x,y. If we use rotate, it pivots at x,y.
-            // To make it look like the preview (centered at cx, cy), we adjust x and y.
-            const drawX = cx - (cos * tw / 2) + (sin * th / 2);
-            const drawY = cy - (sin * tw / 2) - (cos * th / 2);
+            // Pivot compensation math: To rotate around center (cx, cy) 
+            // while pdf-lib rotates around bottom-left (x, y)
+            const drawX = cx - (tw/2 * cos) + (th/2 * sin);
+            const drawY = cy - (tw/2 * sin) - (th/2 * cos);
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
@@ -287,11 +292,6 @@ export default function PdfWatermarker() {
                     opacity: op,
                     rotate: degrees(rotDeg),
                 });
-                
-                if (isUnderline) {
-                   // Underline math is tricky with rotation, so we apply it visually in the same call if possible
-                   // standard fonts don't have underline property in drawText
-                }
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
                     x: drawX,
@@ -309,7 +309,7 @@ export default function PdfWatermarker() {
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Watermark Applied!", description: "Positioning aligned with preview." });
+        toast({ title: "Watermark Applied!", description: "Positioning exactly matches preview." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Process Error' });
@@ -346,20 +346,19 @@ export default function PdfWatermarker() {
           pointerEvents: 'none',
           color: textColor,
           opacity: opacity[0] / 100,
-          fontSize: `${(fontSize / 60) * 40}px`, // Scaled for preview viewport
+          fontSize: `${(fontSize / 595) * 550}px`, // Standard A4 scale to preview container
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
           textDecoration: isUnderline ? 'underline' : 'none',
           textAlign: 'center',
           transition: 'all 0.1s linear',
-          zIndex: 50,
+          zIndex: layer === 'over' ? 50 : 5,
           whiteSpace: 'nowrap',
           transformOrigin: 'center center'
       };
 
-      const m = `${(margin[0] / 800) * 100}%`; 
+      const m = `${(margin[0] / 595) * 100}%`; 
       
-      // We use flexbox logic for preview alignment to stay consistent
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = `translate(-50%, 0) rotate(${-rotation[0]}deg)`; break;
@@ -524,7 +523,7 @@ export default function PdfWatermarker() {
                              <div className="space-y-2">
                                 <div className="flex justify-between items-center mb-2">
                                     <Label className="text-[10px] font-black uppercase opacity-60">{wType === 'text' ? 'Font Size' : 'Scale %'}</Label>
-                                    <Badge variant="secondary" className="font-mono text-[9px]">{wType === 'text' ? fontSize : imageScale[0]}</Badge>
+                                    <Badge variant="secondary" className="font-mono text-[9px] h-5">{wType === 'text' ? fontSize : imageScale[0]}</Badge>
                                 </div>
                                 <Input 
                                     type="number" 
@@ -638,7 +637,7 @@ export default function PdfWatermarker() {
                                                         <img 
                                                             src={imageWatermarkSrc} 
                                                             alt="preview" 
-                                                            style={{ width: `${imageScale[0] * 3.5}px`, height: 'auto', display: 'block' }} 
+                                                            style={{ width: `${(imageScale[0] / 100) * 550}px`, height: 'auto', display: 'block' }} 
                                                         />
                                                     ) : null}
                                                 </div>
@@ -679,3 +678,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
