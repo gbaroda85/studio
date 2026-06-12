@@ -4,11 +4,6 @@
 
 @layer base {
   :root {
-    /* Color Palette Inspired by SaaSto SaaS Template Image */
-    /* Vibrant Purple (Primary): #7C3AED -> 258 89% 60% */
-    /* Deep Navy (Foreground): #1E293B -> 222 47% 11% */
-    /* Soft Lavender (Secondary): #F5F3FF -> 255 100% 98% */
-    
     --background: 0 0% 100%;       
     --foreground: 222 47% 11%;      
     --card: 0 0% 100%;
@@ -32,7 +27,6 @@
   }
   
   .dark {
-    /* Deep and Mystic Dark Mode - UNTOUCHED */
     --background: 285 45% 4%;        
     --foreground: 330 30% 95%;       
     --card: 285 40% 8%;              
@@ -67,7 +61,6 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Soft glowing purple gradient from the SaaSto image */
     background-image: 
       radial-gradient(at 0% 0%, hsla(258, 89%, 60%, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(258, 89%, 60%, 0.03) 0px, transparent 50%);
@@ -175,8 +168,6 @@
 .magic-button:hover .star-5 { top: 65%; left: 110%; width: 15px; }
 .magic-button:hover .star-6 { top: -30%; left: 60%; width: 10px; }
 
-.fil0 { fill: #fff; }
-
 .launch-arrow-btn {
   display: block;
   position: relative;
@@ -262,245 +253,62 @@
   @apply text-primary;
 }
 
-.hero-btn-uiverse {
-  @apply px-6 py-4 font-bold flex items-center gap-3 transition-all duration-1000 bg-white dark:bg-[#0a041a] rounded-[0.5rem] relative cursor-pointer;
-  color: blueviolet;
-  border-bottom: 2px solid blueviolet;
-  border-right: 2px solid blueviolet;
-  border-top: 2px solid white;
-  border-left: 2px solid white;
+/* From Uiverse.io by Madflows - 3D LEARN MORE BUTTON */
+.learn-more {
+ position: relative;
+ display: inline-block;
+ cursor: pointer;
+ outline: none;
+ border: 0;
+ vertical-align: middle;
+ text-decoration: none;
+ font-family: inherit;
+ font-size: 12px;
+ font-weight: 600;
+ color: #382b22;
+ text-transform: uppercase;
+ padding: 0.8em 1.4em;
+ background: #fff0f0;
+ border: 2px solid #b18597;
+ border-radius: 0.75em;
+ transform-style: preserve-3d;
+ transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
-.dark .hero-btn-uiverse {
-  border-top-color: #1a1a2e;
-  border-left-color: #1a1a2e;
+.learn-more::before {
+ position: absolute;
+ content: '';
+ width: 100%;
+ height: 100%;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: #f9c4d2;
+ border-radius: inherit;
+ box-shadow: 0 0 0 2px #b18597, 0 0.4em 0 0 hsl(var(--primary) / 0.15);
+ transform: translate3d(0, 0.5em, -1em);
+ transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
-.hero-btn-uiverse.active-uiverse,
-.hero-btn-uiverse:hover {
-  border-top: 2px solid blueviolet;
-  border-left: 2px solid blueviolet;
-  border-bottom: 2px solid rgb(238, 103, 238);
-  border-right: 2px solid rgb(238, 103, 238);
-  box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px,
-    rgba(240, 46, 170, 0.2) 15px 15px;
+.learn-more:hover {
+ background: #ffe9e9;
+ transform: translate(0, 0.15em);
 }
 
-.btn-sliding {
-  width: 170px;
-  height: 56px;
-  color: #fff;
-  border-radius: 50px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
+.learn-more:hover::before {
+ box-shadow: 0 0 0 2px #b18597, 0 0.3em 0 0 hsl(var(--primary) / 0.2);
+ transform: translate3d(0, 0.35em, -1em);
 }
 
-.btn-sliding-blue {
-  background: linear-gradient(to top, #0f172a, #334155);
+.learn-more:active {
+ background: #ffe9e9;
+ transform: translate(0em, 0.5em);
 }
 
-.btn-sliding-explore {
-  @apply bg-gradient-button;
-}
-
-.dark .btn-sliding-explore {
-  background: linear-gradient(to top, #064e3b, #059669);
-}
-
-.btn-sliding:active {
-  transform: scale(0.96);
-}
-
-.btn-sliding span {
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: top 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-  pointer-events: none;
-}
-
-.btn-sliding .btn-text-one {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-}
-
-.btn-sliding .btn-text-two {
-  position: absolute;
-  width: 100%;
-  top: 150%;
-  left: 0;
-  transform: translateY(-50%);
-}
-
-.btn-sliding:hover .btn-text-one {
-  top: -100%;
-}
-
-.btn-sliding:hover .btn-text-two {
-  top: 50%;
-}
-
-.explore-all-cta {
-  display: flex;
-  padding: 10px 25px;
-  text-decoration: none;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 900;
-  color: white;
-  background: hsl(var(--primary));
-  transition: 1s;
-  box-shadow: 6px 6px 0 hsl(var(--primary) / 0.15);
-  transform: skewX(-15deg);
-  border: none;
-  cursor: pointer;
-  align-items: center;
-}
-
-.dark .explore-all-cta {
-  background: #043873;
-  box-shadow: 6px 6px 0 hsl(var(--secondary));
-}
-
-.explore-all-cta:focus {
-  outline: none;
-}
-
-.explore-all-cta:hover {
-  transition: 0.5s;
-  box-shadow: 10px 10px 0 hsl(var(--primary) / 0.2);
-}
-
-.dark .explore-all-cta:hover {
-  box-shadow: 10px 10px 0 hsl(var(--secondary));
-}
-
-.explore-all-cta .second {
-  transition: 0.5s;
-  margin-right: 0px;
-}
-
-.explore-all-cta:hover .second {
-  transition: 0.5s;
-  margin-right: 45px;
-}
-
-.explore-all-cta .span {
-  transform: skewX(15deg);
-}
-
-.explore-all-cta .second {
-  width: 20px;
-  margin-left: 15px;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.explore-all-cta .one {
-  transition: 0.4s;
-  transform: translateX(-60%);
-}
-
-.explore-all-cta .two {
-  transition: 0.5s;
-  transform: translateX(-30%);
-}
-
-@keyframes color_anim {
-  0% {
-    fill: white;
-  }
-
-  50% {
-    fill: hsl(var(--secondary));
-  }
-
-  100% {
-    fill: white;
-  }
-}
-
-.support-uiverse {
-  position: relative;
-  background: #ffffff;
-  color: #000;
-  padding: 0 15px;
-  border-radius: 10px;
-  width: 110px;
-  height: 38px;
-  font-size: 13px;
-  font-weight: 900;
-  text-transform: uppercase;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  border: 1.5px solid rgba(0, 0, 0, 0.05);
-}
-
-.dark .support-uiverse {
-  background: #0a041a;
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.support-uiverse .uiverse-tooltip {
-  position: absolute;
-  top: 45px;
-  font-size: 10px;
-  background: #ffffff;
-  color: #000;
-  padding: 5px 10px;
-  border-radius: 5px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  font-weight: 900;
-  white-space: nowrap;
-  z-index: 100;
-}
-
-.support-uiverse .uiverse-tooltip::before {
-  position: absolute;
-  content: "";
-  height: 8px;
-  width: 8px;
-  background: inherit;
-  top: -3px;
-  left: 50%;
-  transform: translate(-50%) rotate(45deg);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.support-uiverse:hover .uiverse-tooltip {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.support-uiverse:hover,
-.support-uiverse:hover .uiverse-tooltip,
-.support-uiverse:hover .uiverse-tooltip::before {
-  background: linear-gradient(320deg, #043873, #0d4a96);
-  color: #ffffff;
-  border-color: transparent;
+.learn-more:active::before {
+ box-shadow: 0 0 0 2px #b18597, 0 0 hsl(var(--primary) / 0.2);
+ transform: translate3d(0, 0, -1em);
 }
 
 .btn-pos-uiverse {
@@ -579,7 +387,6 @@
   scale: 0.95;
 }
 
-/* From Uiverse.io by FColombati - CLAY BUTTON SYSTEM */ 
 .uiverse-clay-btn {
   all: unset;
   cursor: pointer;
@@ -714,108 +521,79 @@
   transform: scale(0.975);
 }
 
-/* From Uiverse.io by Creatlydev - SECONDARY BUTTON STYLE */
-.btn-uiverse-secondary {
-  line-height: 1;
-  background-color: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35em;
-  padding: 0.75em 1.25em;
-  color: #fff !important;
-  border: 1px solid transparent;
+.support-uiverse {
+  position: relative;
+  background: #ffffff;
+  color: #000;
+  padding: 0 15px;
+  border-radius: 10px;
+  width: 110px;
+  height: 38px;
+  font-size: 13px;
   font-weight: 900;
-  border-radius: 2em;
-  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0.7em 1.5em -0.5em hsla(249, 62%, 51%, 0.745);
-  transition: all 0.3s;
-  background: linear-gradient(
-    90deg,
-    rgba(77, 54, 208, 1) 0%,
-    rgba(132, 116, 254, 1) 100%
-  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border: 1.5px solid rgba(0, 0, 0, 0.05);
 }
 
-.btn-uiverse-secondary:hover {
-  border-color: #f4f5f2;
-  transform: translateY(-1px);
+.dark .support-uiverse {
+  background: #0a041a;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.btn-uiverse-secondary:active {
-  transform: scale(0.98);
-  box-shadow: 0 0.5em 1.5em -0.5em hsla(249, 62%, 51%, 0.745);
+.support-uiverse .uiverse-tooltip {
+  position: absolute;
+  top: 45px;
+  font-size: 10px;
+  background: #ffffff;
+  color: #000;
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-weight: 900;
+  white-space: nowrap;
+  z-index: 100;
 }
 
-.btn-uiverse-secondary svg {
-  width: 1.5em;
-  height: 1.5em;
+.support-uiverse .uiverse-tooltip::before {
+  position: absolute;
+  content: "";
+  height: 8px;
+  width: 8px;
+  background: inherit;
+  top: -3px;
+  left: 50%;
+  transform: translate(-50%) rotate(45deg);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* From Uiverse.io by Madflows - 3D LEARN MORE BUTTON */
-.learn-more {
- position: relative;
- display: inline-block;
- cursor: pointer;
- outline: none;
- border: 0;
- vertical-align: middle;
- text-decoration: none;
- font-family: inherit;
- font-size: 12px;
- font-weight: 600;
- color: #382b22;
- text-transform: uppercase;
- padding: 0.8em 1.4em;
- background: #fff0f0;
- border: 2px solid #b18597;
- border-radius: 0.75em;
- transform-style: preserve-3d;
- transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1);
+.support-uiverse:hover .uiverse-tooltip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
-.learn-more::before {
- position: absolute;
- content: '';
- width: 100%;
- height: 100%;
- top: 0;
- left: 0;
- right: 0;
- bottom: 0;
- background: #f9c4d2;
- border-radius: inherit;
- box-shadow: 0 0 0 2px #b18597, 0 0.4em 0 0 hsl(var(--primary) / 0.15);
- transform: translate3d(0, 0.5em, -1em);
- transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
-}
-
-.learn-more:hover {
- background: #ffe9e9;
- transform: translate(0, 0.15em);
-}
-
-.learn-more:hover::before {
- box-shadow: 0 0 0 2px #b18597, 0 0.3em 0 0 hsl(var(--primary) / 0.2);
- transform: translate3d(0, 0.35em, -1em);
-}
-
-.learn-more:active {
- background: #ffe9e9;
- transform: translate(0em, 0.5em);
-}
-
-.learn-more:active::before {
- box-shadow: 0 0 0 2px #b18597, 0 0 hsl(var(--primary) / 0.2);
- transform: translate3d(0, 0, -1em);
+.support-uiverse:hover,
+.support-uiverse:hover .uiverse-tooltip,
+.support-uiverse:hover .uiverse-tooltip::before {
+  background: linear-gradient(320deg, #043873, #0d4a96);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 /* From Uiverse.io by Galahhad - THEME SWITCH */
 .theme-switch {
-  --toggle-size: 16px;
+  --toggle-size: 14px;
   --container-width: 5.625em;
   --container-height: 2.5em;
   --container-radius: 6.25em;
