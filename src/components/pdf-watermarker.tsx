@@ -34,7 +34,8 @@ import {
     Plus,
     LayoutGrid,
     MonitorCheck,
-    Trash2
+    Trash2,
+    Move
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -104,6 +105,7 @@ export default function PdfWatermarker() {
   const [fontSize, setFontSize] = useState(60);
   const [imageScale, setImageScale] = useState([30]);
   const [rotation, setRotation] = useState([45]);
+  const [margin, setMargin] = useState([40]);
   const [layer, setLayer] = useState<'over' | 'under'>('over');
   
   // Text Styling
@@ -226,6 +228,7 @@ export default function PdfWatermarker() {
         const rgbColor = hexToRgb(textColor);
         const rotDeg = rotation[0];
         const op = opacity[0] / 100;
+        const currentMargin = margin[0];
 
         for (const page of pages) {
             const { width, height } = page.getSize();
@@ -242,24 +245,24 @@ export default function PdfWatermarker() {
             }
 
             // Calculate Position
-            const marginSize = 30;
             switch (position) {
-                case 'top-left': x = marginSize; y = height - marginSize - th; break;
-                case 'top-center': x = (width - tw) / 2; y = height - marginSize - th; break;
-                case 'top-right': x = width - tw - marginSize; y = height - marginSize - th; break;
-                case 'center-left': x = marginSize; y = (height - th) / 2; break;
+                case 'top-left': x = currentMargin; y = height - currentMargin - th; break;
+                case 'top-center': x = (width - tw) / 2; y = height - currentMargin - th; break;
+                case 'top-right': x = width - tw - currentMargin; y = height - currentMargin - th; break;
+                case 'center-left': x = currentMargin; y = (height - th) / 2; break;
                 case 'center-center': x = (width - tw) / 2; y = (height - th) / 2; break;
-                case 'center-right': x = width - tw - marginSize; y = (height - th) / 2; break;
-                case 'bottom-left': x = marginSize; y = marginSize; break;
-                case 'bottom-center': x = (width - tw) / 2; y = marginSize; break;
-                case 'bottom-right': x = width - tw - marginSize; y = marginSize; break;
+                case 'center-right': x = width - tw - currentMargin; y = (height - th) / 2; break;
+                case 'bottom-left': x = currentMargin; y = currentMargin; break;
+                case 'bottom-center': x = (width - tw) / 2; y = currentMargin; break;
+                case 'bottom-right': x = width - tw - currentMargin; y = currentMargin; break;
             }
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
                     x: x + tw / 2, 
                     y: y + th / 2,
-                    font, size: fontSize,
+                    font, 
+                    size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
                     opacity: op,
                     rotate: degrees(rotDeg),
@@ -315,6 +318,10 @@ export default function PdfWatermarker() {
       setWatermarkedPdfUrl(null);
       setImageWatermarkSrc(null);
       setWType('text');
+      setMargin([40]);
+      setFontSize(60);
+      setOpacity([30]);
+      setRotation([45]);
       if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -324,6 +331,7 @@ export default function PdfWatermarker() {
           pointerEvents: 'none',
           color: textColor,
           opacity: opacity[0] / 100,
+          fontSize: `${(fontSize / 60) * 40}px`, // Scaled for preview viewport
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
           textDecoration: isUnderline ? 'underline' : 'none',
@@ -333,7 +341,7 @@ export default function PdfWatermarker() {
           whiteSpace: 'nowrap'
       };
 
-      const m = "5%";
+      const m = `${(margin[0] / 800) * 100}%`; 
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = `translateX(-50%) rotate(${-rotation[0]}deg)`; break;
@@ -408,7 +416,7 @@ export default function PdfWatermarker() {
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
                         <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
-                            <Palette className="size-5" /> Config Panel
+                            <Palette className="size-5 text-primary" /> Config Panel
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -452,10 +460,10 @@ export default function PdfWatermarker() {
                                         </Button>
                                     ) : (
                                         <div className="relative group">
-                                            <div className="aspect-video bg-muted/30 rounded-2xl border-2 flex items-center justify-center p-4">
+                                            <div className="aspect-video bg-muted/30 rounded-2xl border-2 flex items-center justify-center p-4 shadow-inner">
                                                 <img src={imageWatermarkSrc} alt="watermark" className="max-h-full object-contain" />
                                             </div>
-                                            <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setImageWatermarkSrc(null)}><Trash2 className="size-3.5"/></Button>
+                                            <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" onClick={() => setImageWatermarkSrc(null)}><Trash2 className="size-3.5"/></Button>
                                         </div>
                                     )}
                                     <input ref={imageWatermarkInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageWatermarkUpload} />
@@ -463,7 +471,7 @@ export default function PdfWatermarker() {
                             </TabsContent>
                         </Tabs>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t-2 border-dashed">
                              <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <LayoutGrid className="size-3" /> Position
@@ -496,33 +504,46 @@ export default function PdfWatermarker() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t-2 border-dashed">
                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">{wType === 'text' ? 'Font Size' : 'Scale %'}</Label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">{wType === 'text' ? 'Font Size' : 'Scale %'}</Label>
+                                    <Badge variant="secondary" className="font-mono text-[9px]">{wType === 'text' ? fontSize : imageScale[0]}</Badge>
+                                </div>
                                 <Input 
                                     type="number" 
                                     value={wType === 'text' ? fontSize : imageScale[0]} 
                                     onChange={(e) => wType === 'text' ? setFontSize(Number(e.target.value)) : setImageScale([Number(e.target.value)])} 
-                                    className="h-10 border-2 font-bold rounded-xl text-center" 
+                                    className="h-10 border-2 font-bold rounded-xl text-center shadow-inner" 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Layer</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">Layer Logic</Label>
                                 <Select value={layer} onValueChange={(v) => setLayer(v as any)}>
-                                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-inner"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-xl border-2">
                                         <SelectItem value="over" className="font-bold">Over Content</SelectItem>
-                                        <SelectItem value="under" className="font-bold">Behind Content</SelectItem>
+                                        <SelectItem value="under" className="font-bold">Under Content</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
+                        <div className="space-y-4 pt-6 border-t-2 border-dashed">
+                            <div className="flex justify-between items-center px-1">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
+                                    <Move className="size-3" /> Corner Margin
+                                </Label>
+                                <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
+                            </div>
+                            <Slider value={margin} min={0} max={200} step={1} onValueChange={setMargin} />
+                        </div>
+
                         <div className="p-4 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm mt-4">
                             <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Hard-Embedded</p>
-                                <p className="text-[8px] font-medium text-muted-foreground leading-relaxed mt-0.5 uppercase">Watermarks are merged into the PDF structure for maximum protection.</p>
+                                <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Industrial Secure</p>
+                                <p className="text-[8px] font-medium text-muted-foreground leading-relaxed mt-0.5 uppercase">Watermarks are hard-encoded into the PDF structure.</p>
                             </div>
                         </div>
 
@@ -549,7 +570,7 @@ export default function PdfWatermarker() {
                             </Button>
                         ) : (
                             <div className="space-y-3 w-full animate-in zoom-in-95">
-                                <Button size="lg" className="magic-button magic-button-success w-full h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all" onClick={handleDownload}>
+                                <Button size="lg" className="magic-button magic-button-success w-full h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
                                     <StarIcons />
                                     <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> 
                                     <span className="uppercase tracking-tighter">SAVE PROTECTED PDF</span>
@@ -579,8 +600,8 @@ export default function PdfWatermarker() {
                                 {isGeneratingPreview ? (
                                     <div className="flex flex-col items-center gap-6 text-center py-40">
                                         <div className="relative">
-                                            <Loader2 className="size-20 text-primary opacity-20 animate-spin stroke-[3]" />
-                                            <Monitor className="absolute inset-0 m-auto size-10 text-primary/40 animate-pulse" />
+                                            <Loader2 className="size-20 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
+                                            <Monitor className="absolute inset-0 m-auto h-10 w-10 text-primary/40 animate-pulse" />
                                         </div>
                                         <div className="space-y-3 w-full max-w-[280px]">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page Samples...</p>
