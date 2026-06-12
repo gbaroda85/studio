@@ -4,33 +4,32 @@
 
 @layer base {
   :root {
-    /* Color Palette Inspired by provided image */
-    /* Peach/Pink background: #EDC7B7 -> 17 53% 82% */
-    /* Off-white: #EEE2DC -> 17 24% 91% */
-    /* Muted Grey: #BAB2B5 -> 343 5% 72% */
-    /* Navy Blue: #123C69 -> 210 71% 24% */
-    /* Rose/Magenta: #AC3B61 -> 339 49% 45% */
+    /* Color Palette Inspired by provided Crypto Dashboard Image */
+    /* Light Blue (Primary): #35C2F2 -> 195 88% 58% */
+    /* Magenta (Secondary): #FF7DB4 -> 335 100% 75% */
+    /* Deep Slate/Purple (Foreground): #626284 -> 240 15% 45% */
+    /* Soft Background: #FDF9FB -> 345 40% 99% */
     
-    --background: 17 53% 96%;        /* Very light version of #EDC7B7 */
-    --foreground: 210 71% 24%;      /* Navy Blue #123C69 */
+    --background: 345 40% 99%;       
+    --foreground: 240 20% 30%;      
     --card: 0 0% 100%;
-    --card-foreground: 210 71% 24%;
+    --card-foreground: 240 20% 30%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 71% 24%;
-    --primary: 210 71% 24%;         /* Navy Blue #123C69 */
+    --popover-foreground: 240 20% 30%;
+    --primary: 195 88% 58%;         /* Sky Blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 339 49% 45%;        /* Rose #AC3B61 */
+    --secondary: 335 100% 75%;       /* Magenta */
     --secondary-foreground: 0 0% 100%;
-    --muted: 17 24% 91%;            /* Off-white #EEE2DC */
-    --muted-foreground: 343 5% 45%;
-    --accent: 17 53% 82%;           /* Peach #EDC7B7 */
-    --accent-foreground: 210 71% 24%;
+    --muted: 240 10% 95%;           
+    --muted-foreground: 240 10% 45%;
+    --accent: 195 88% 96%;          /* Very light blue */
+    --accent-foreground: 195 88% 40%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 343 5% 85%;
-    --input: 343 5% 85%;
-    --ring: 210 71% 24%;
-    --radius: 1rem;
+    --border: 240 10% 92%;
+    --input: 240 10% 92%;
+    --ring: 195 88% 58%;
+    --radius: 1.5rem;
   }
   
   .dark {
@@ -69,10 +68,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Soft gradient based on image palette */
+    /* Soft glowing pink/blue gradient from the dashboard image */
     background-image: 
-      radial-gradient(at 100% 0%, hsla(17, 53%, 82%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(210, 71%, 24%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(335, 100%, 94%, 0.6) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(195, 100%, 96%, 0.4) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -106,7 +105,7 @@
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-blue-700 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-blue-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
 }
 
 ::-webkit-scrollbar {
