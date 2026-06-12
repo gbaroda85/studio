@@ -541,7 +541,7 @@ export default function DocumentScanner() {
                             )}
                         </CardContent>
                         <CardFooter className="p-6 border-t flex flex-col gap-3">
-                            <Button disabled={scannedPages.length === 0 || isProcessing} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white border-4 border-primary" onClick={handleDownloadPdf}>
+                            <Button disabled={scannedPages.length === 0 || isProcessing} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white hover:text-primary border-4 border-primary" onClick={handleDownloadPdf}>
                                 <StarIcons />
                                 {isProcessing ? <Loader2 className="animate-spin" /> : <FileText className="size-4 mr-2" />}
                                 <span className="uppercase text-xs tracking-widest">DOWNLOAD PDF</span>
@@ -698,4 +698,3 @@ export default function DocumentScanner() {
     </div>
   );
 }
-
