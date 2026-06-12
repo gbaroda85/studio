@@ -278,6 +278,11 @@ export default function ImageCompressor() {
     setResults(prev => prev.filter(r => r.id !== id));
   };
 
+  const handleReset = () => {
+    setResults([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const allProcessed = results.length > 0 && results.every(r => r.newSize > 0);
 
   return (
@@ -420,7 +425,7 @@ export default function ImageCompressor() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4 shrink-0">
                     <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                     <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> ADAPTIVE SCALE</div>
                     <div className="flex items-center gap-1.5"><Layers className="size-3 text-purple-500" /> BATCH READY</div>
@@ -562,7 +567,7 @@ export default function ImageCompressor() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 border-t border-dashed gap-3 flex flex-col">
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed gap-3 flex flex-col">
                     <Button 
                         className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center gap-4" 
                         disabled={results.length === 0 || isBulkProcessing}
