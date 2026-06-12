@@ -28,7 +28,6 @@ import {
   Printer,
   FileArchive,
   Merge,
-  Scissors,
   UserCircle,
   FilePenLine,
   Unlock,
@@ -71,15 +70,13 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
-  // IMAGE SOLUTION
+  // IMAGE SOLUTION (FEATURED)
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
-  { icon: Heart, title: "MARRIAGE BIODATA", description: "Design professional A4 biodata with premium templates.", href: "/marriage-biodata", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
-  { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional passport-sized photos instantly.", href: "/passport-photo", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   
   // PDF Toolkit
   { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf-kit" },
@@ -88,21 +85,18 @@ const ALL_TOOLS = [
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
   { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf-kit" },
-  { icon: FilePenLine, title: "EDIT PDF", description: "Add text, images, and organize pages in your PDF document.", href: "/edit-pdf", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "pdf-kit" },
 
-  // CALCULATORS
+  // CALCULATORS (FINANCE CENTER)
   { icon: HomeIcon, title: "MORTGAGE CALC", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
   { icon: Landmark, title: "TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "calculator" },
+  { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
 
-  // IMAGE TOOLS
+  // ADDITIONAL IMAGE TOOLS
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
-  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from any image locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
-  { icon: Crop, title: "CROP IMAGE", description: "Easily crop your images to the perfect size.", href: "/crop-image", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
-  { icon: Maximize, title: "IMAGE RESIZE", description: "Change the dimensions of your image quickly.", href: "/image-resize", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "image" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
@@ -162,14 +156,16 @@ export default function Page() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
-            <Image 
-              src={placeholderData.hero_bg.url} 
-              alt="Hero Background" 
-              fill 
-              className="object-cover opacity-20 transition-opacity duration-700"
-              priority
-              data-ai-hint={placeholderData.hero_bg.hint}
-            />
+            {placeholderData.hero_bg.url && (
+              <Image 
+                src={placeholderData.hero_bg.url} 
+                alt="Hero Background" 
+                fill 
+                className="object-cover opacity-20 transition-opacity duration-700"
+                priority
+                data-ai-hint={placeholderData.hero_bg.hint}
+              />
+            )}
           </div>
           <div className="absolute inset-0 bg-slate-900/60 mix-blend-multiply opacity-0 dark:opacity-100 transition-opacity duration-500" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/90" />
@@ -253,13 +249,14 @@ export default function Page() {
             </div>
           ) : (
             <>
+                {/* IMAGE SOLUTION - LIMIT 6 */}
                 <div className="mb-12">
                     <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
                         <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools" className="explore-all-cta hidden sm:flex group">
+                        <Link href="/tools?tab=image" className="explore-all-cta hidden sm:flex group">
                           <span className="span font-black tracking-widest uppercase">Explore All</span>
                           <span className="second">
                             <svg width="30px" height="15px" viewBox="0 0 66 43" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -273,27 +270,29 @@ export default function Page() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'featured').map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                <div className="py-12 w-full flex justify-center">
-                    <div className="w-full h-0.5 border-t-2 border-primary relative opacity-20">
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-6">
-                            <div className="size-10 rounded-full border-2 border-dashed border-primary flex items-center justify-center text-primary">
-                                <Sparkles className="size-4" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mb-24">
+                {/* PDF TOOLKIT - LIMIT 6 */}
+                <div className="mb-12">
                     <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
                         <div className="w-12 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                    </div>
+                </div>
+
+                {/* FINANCE CENTER - LIMIT 6 */}
+                <div className="mb-24">
+                    <div className="flex items-center gap-2 text-indigo-500 font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
+                        <div className="w-12 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE CENTER</span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">Smart Calculators</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
@@ -336,20 +335,6 @@ export default function Page() {
                                 <div className="space-y-2 font-body">
                                     <h3 className="text-lg font-bold tracking-tight">Studio Quality</h3>
                                     <p className="text-xs text-muted-foreground leading-relaxed font-semibold">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="pt-8">
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-background dark:bg-slate-800 border-2 rounded-2xl shadow-lg border-primary/5 dark:border-white/5 font-body">
-                                <div className="flex items-center -space-x-3">
-                                    {[1,2,3,4].map(i => (
-                                        <div key={i} className="size-8 rounded-full border-2 border-white bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">U{i}</div>
-                                    ))}
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-[10px] font-bold uppercase leading-none">Trusted by 10,000+ Users</p>
-                                    <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">For official document management</p>
                                 </div>
                             </div>
                         </div>
