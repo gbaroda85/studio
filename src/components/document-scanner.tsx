@@ -291,12 +291,6 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
-  const onImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    setRectCrop(centerCrop({ unit: '%', width: 90, height: 90 }, width, height));
-    setIsImageReady(true);
-  };
-
   const applyIntelligentScan = useCallback(async (isHighRes = false): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
@@ -305,23 +299,23 @@ export default function DocumentScanner() {
     const cCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
     if (!cCtx) return "";
 
-    // PERFORMANCE FIX: Use lower scale for live preview while dragging for "instant" feel
-    const previewScaleLimit = draggingPoint !== null ? 400 : 800; 
     const originalWidth = image.naturalWidth;
     const originalHeight = image.naturalHeight;
+
+    // Use a high-quality scaling factor for the preview to ensure logic works for portrait too
+    const previewScaleLimit = draggingPoint !== null ? 600 : 1000; 
     const previewScale = Math.min(1, previewScaleLimit / Math.max(originalWidth, originalHeight));
     
-    // Scale mapping for calculations
     const activeScale = isHighRes ? 1 : previewScale;
-    const workW = originalWidth * activeScale;
-    const workH = originalHeight * activeScale;
+    const workW = Math.round(originalWidth * activeScale);
+    const workH = Math.round(originalHeight * activeScale);
 
     if (cropMode === 'rect') {
         const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
         const scaleX = originalWidth / image.width;
         const scaleY = originalHeight / image.height;
-        cropCanvas.width = Math.max(10, c.width * scaleX * activeScale);
-        cropCanvas.height = Math.max(10, c.height * scaleY * activeScale);
+        cropCanvas.width = Math.max(10, Math.round(c.width * scaleX * activeScale));
+        cropCanvas.height = Math.max(10, Math.round(c.height * scaleY * activeScale));
         cCtx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, cropCanvas.width, cropCanvas.height);
     } else {
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
@@ -346,22 +340,26 @@ export default function DocumentScanner() {
         srcCtx?.drawImage(image, 0, 0, workW, workH);
         const srcPixels = srcCtx?.getImageData(0, 0, workW, workH).data;
 
-        for (let y = 0; y < th; y++) {
-            for (let x = 0; x < tw; x++) {
-                const z = h[6] * x + h[7] * y + 1;
-                const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
-                const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
-                if (sx >= 0 && sx < workW && sy >= 0 && sy < workH) {
-                    const di = (y * tw + x) * 4, si = (sy * workW + sx) * 4;
-                    imgData.data[di] = srcPixels![si]; imgData.data[di+1] = srcPixels![si+1];
-                    imgData.data[di+2] = srcPixels![si+2]; imgData.data[di+3] = srcPixels![si+3];
+        if (srcPixels) {
+            for (let y = 0; y < th; y++) {
+                for (let x = 0; x < tw; x++) {
+                    const z = h[6] * x + h[7] * y + 1;
+                    const sx = Math.floor((h[0] * x + h[1] * y + h[2]) / z);
+                    const sy = Math.floor((h[3] * x + h[4] * y + h[5]) / z);
+                    if (sx >= 0 && sx < workW && sy >= 0 && sy < workH) {
+                        const di = (y * tw + x) * 4, si = (sy * workW + sx) * 4;
+                        imgData.data[di] = srcPixels[si]; 
+                        imgData.data[di+1] = srcPixels[si+1];
+                        imgData.data[di+2] = srcPixels[si+2]; 
+                        imgData.data[di+3] = srcPixels[si+3];
+                    }
                 }
             }
+            cCtx.putImageData(imgData, 0, 0);
         }
-        cCtx.putImageData(imgData, 0, 0);
     }
 
-    // Heavy Filters logic - SKIP WHILE DRAGGING FOR MAXIMUM SPEED
+    // Heavy Filters logic
     if (draggingPoint === null || isHighRes) {
         const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
         const pixels = imageData.data;
@@ -444,7 +442,6 @@ export default function DocumentScanner() {
 
   const handleConfirmAdd = async () => {
     setIsProcessing(true);
-    // On confirm, render high-res for storage
     const highRes = await applyIntelligentScan(true);
     
     if (editingId) {
@@ -474,6 +471,7 @@ export default function DocumentScanner() {
     setPoints(prev => {
         const next = [...prev];
         const idx = draggingPoint;
+        if (idx === null || !next[idx]) return prev;
         if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
         else {
             if (idx === 1) { next[0].y = y; next[2].y = y; } 
@@ -693,34 +691,37 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1600px] mx-auto">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
                 
-                {/* ADJUSTMENT PANEL */}
-                <Card className="lg:col-span-8 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[400px]">
+                {/* LARGER ADJUSTMENT PANEL */}
+                <Card className="lg:col-span-9 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
                     <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT STUDIO</CardTitle></div>
-                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
-                            <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
-                        </Tabs>
+                        <div className="flex items-center gap-4">
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
+                                <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
+                            </Tabs>
+                            <Button variant="ghost" className="h-9 w-9 rounded-full text-destructive" onClick={() => setStage('viewfinder')}><X className="size-5"/></Button>
+                        </div>
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1 group"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-2xl border-4 border-white">
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-3xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[60vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
                                     {points.map((p, i) => (
-                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
+                                        <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
                                             style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} 
-                                            onMouseDown={(e) => { setDraggingPoint(i); setMagnifierPos({ x: p.x, y: p.y }); }} 
-                                            onTouchStart={(e) => { setDraggingPoint(i); setMagnifierPos({ x: p.x, y: p.y }); }}><div className="size-2.5 bg-primary rounded-full" /></div>
+                                            onMouseDown={(e) => handlePointDown(i, e)} 
+                                            onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
                                     ))}
                                     {draggingPoint !== null && (
                                         <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-44 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50">
@@ -735,9 +736,8 @@ export default function DocumentScanner() {
                         </div>
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/60 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 z-40 shadow-2xl"><Grip className="size-4 text-primary animate-pulse" /> PRECISION HANDLES ACTIVE</div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col md:flex-row gap-4 justify-between">
+                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col md:flex-row gap-4 justify-between shrink-0">
                          <div className="flex items-center gap-3">
-                            <Button variant="ghost" className="h-10 font-black uppercase text-[10px] opacity-40 hover:opacity-100" onClick={() => setStage('viewfinder')}>CANCEL SCAN</Button>
                             <Button variant="outline" size="sm" onClick={resetAdjustments} className="h-10 text-[9px] font-black uppercase border-2"><RefreshCcw className="size-3 mr-1.5" /> Defaults</Button>
                         </div>
                         <Button className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
@@ -746,54 +746,35 @@ export default function DocumentScanner() {
                     </CardFooter>
                 </Card>
 
-                {/* HD RESULT PREVIEW */}
-                <div className="lg:col-span-4 flex flex-col gap-6">
-                    <Card className="border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col flex-1">
-                        <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-6 flex flex-row items-center justify-between">
-                            <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><Eye className="size-5" /></div><CardTitle className="text-sm font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
-                            <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-destructive/5 text-destructive" onClick={() => { setCurrentRawImage(null); setStage('viewfinder'); }}><X className="size-6" /></Button>
+                {/* SIDE PREVIEW & FILTERS */}
+                <div className="lg:col-span-3 flex flex-col gap-6">
+                    <Card className="border-2 shadow-xl overflow-hidden rounded-[2.5rem] bg-card flex flex-col flex-1">
+                        <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 flex flex-row items-center justify-between shrink-0">
+                            <div className="flex items-center gap-3"><div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 border border-green-500/20"><Eye className="size-4" /></div><CardTitle className="text-[10px] font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
                         </CardHeader>
                         <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
-                            <div className="relative bg-white shadow-lg border-[8px] border-white max-w-full flex items-center justify-center overflow-hidden transition-all duration-300 max-w-[320px]">
-                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-16 text-primary opacity-20" />}
-                                {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-12 text-primary" /><p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering HD Preview...</p></div>}
+                            <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[280px] flex items-center justify-center overflow-hidden transition-all duration-300">
+                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[40vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                                {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
                             </div>
                         </CardContent>
-                        <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800">
-                            <div className="w-full space-y-6">
-                                <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1 w-full">
-                                    <FilterBtn active={activeFilter === 'document'} label="Doc Pro" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
-                                    <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
-                                    <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([110]); setContrast([115]); setSaturation([105]); }} />
-                                    <FilterBtn active={activeFilter === 'bw'} label="BW Pro" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
-                                    <div className="flex flex-col items-center gap-1">
-                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-indigo-600 hover:bg-indigo-50" onClick={handleAiEnhance}><Zap className="size-5"/></Button>
-                                        <span className="text-[8px] font-black uppercase text-indigo-600 text-center">AI Enhance</span>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-5"/></Button>
-                                        <span className="text-[8px] font-black uppercase text-primary">Rotate</span>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl shadow-md border-2 text-primary hover:bg-primary/5 transition-all"><Settings2 className="size-5"/></Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-80 p-6 rounded-[2rem] border-2 shadow-xl bg-white dark:bg-slate-950" align="end" side="top" sideOffset={12}>
-                                                <div className="space-y-6">
-                                                    <div className="flex items-center justify-between"><h4 className="uppercase font-black tracking-widest text-primary flex items-center gap-2 text-sm"><Settings2 className="size-4"/> FINE-TUNE</h4><Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 text-[8px] font-black uppercase opacity-60">Reset Defaults</Button></div>
-                                                    <div className="space-y-6 py-2">
-                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Sun className="size-3.5 inline mr-1.5 text-yellow-500"/> Brightness</span><Badge variant="secondary" className="font-mono text-[10px]">{brightness[0]}%</Badge></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
-                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Contrast className="size-3.5 inline mr-1.5 text-orange-500"/> Contrast</span><Badge variant="secondary" className="font-mono text-[10px]">{contrast[0]}%</Badge></div><Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} /></div>
-                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-muted-foreground"><Droplets className="size-3.5 inline mr-1.5 text-blue-500"/> Saturation</span><Badge variant="secondary" className="font-mono text-[10px]">{saturation[0]}%</Badge></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
-                                                        <div className="space-y-3"><div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-primary"/> Sharpness HD<Badge variant="secondary" className="font-mono text-[10px]">{sharpness[0]}</Badge></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
-                                                    </div>
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <span className="text-[8px] font-black uppercase text-muted-foreground">Adjust</span>
-                                    </div>
+                        <CardFooter className="p-5 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6">
+                            <div className="grid grid-cols-3 gap-2 w-full">
+                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
+                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
+                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
+                            </div>
+                            
+                            <div className="w-full space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-[8px] font-black uppercase text-muted-foreground">Adjust</Label>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRotateResult}><RotateCw className="size-3.5"/></Button>
                                 </div>
+                                <div className="space-y-4">
+                                    <div className="space-y-1"><div className="flex justify-between text-[8px] font-bold"><span>Bright</span><span>{brightness[0]}%</span></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
+                                    <div className="space-y-1"><div className="flex justify-between text-[8px] font-bold"><span>Sharp</span><span>{sharpness[0]}</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
+                                </div>
+                                <Button variant="outline" className="w-full h-9 border-2 text-[8px] font-black uppercase rounded-lg text-indigo-600 border-indigo-100 bg-indigo-50/50" onClick={handleAiEnhance}><Zap className="size-3 mr-1.5" /> AI ENHANCE</Button>
                             </div>
                         </CardFooter>
                     </Card>
@@ -810,7 +791,7 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-            <Button variant={active ? 'default' : 'outline'} size="icon" className="h-12 w-12 rounded-xl shadow-md border-2" onClick={onClick}><Icon className="size-5"/></Button>
+            <Button variant={active ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-md border-2" onClick={onClick}><Icon className="size-4"/></Button>
             <span className="text-[8px] font-black uppercase text-muted-foreground">{label}</span>
         </div>
     );
