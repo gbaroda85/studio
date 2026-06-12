@@ -612,7 +612,7 @@ function ToolsPageContent() {
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full font-body">
             <div className="flex justify-center mb-16">
-              <TabsList className="flex h-auto flex-wrap justify-center gap-6 bg-transparent border-none p-4 px-8 md:px-12">
+              <TabsList className="flex h-auto flex-wrap justify-center gap-2 md:gap-6 bg-transparent border-none p-2 md:p-4 px-2 md:px-12">
                   {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                   <TabsTrigger 
                     key={value} 
