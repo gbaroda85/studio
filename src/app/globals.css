@@ -360,13 +360,18 @@
   font-size: 14px;
   font-weight: 900;
   color: white;
-  background: #043873;
+  background: hsl(var(--primary));
   transition: 1s;
-  box-shadow: 6px 6px 0 hsl(var(--secondary));
+  box-shadow: 6px 6px 0 hsl(var(--primary) / 0.15);
   transform: skewX(-15deg);
   border: none;
   cursor: pointer;
   align-items: center;
+}
+
+.dark .explore-all-cta {
+  background: #043873;
+  box-shadow: 6px 6px 0 hsl(var(--secondary));
 }
 
 .explore-all-cta:focus {
@@ -375,6 +380,10 @@
 
 .explore-all-cta:hover {
   transition: 0.5s;
+  box-shadow: 10px 10px 0 hsl(var(--primary) / 0.2);
+}
+
+.dark .explore-all-cta:hover {
   box-shadow: 10px 10px 0 hsl(var(--secondary));
 }
 
@@ -759,4 +768,5 @@
   width: 1.5em;
   height: 1.5em;
 }
+
 
