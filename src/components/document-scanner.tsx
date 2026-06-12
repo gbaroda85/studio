@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -291,6 +290,10 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
+  const onImageLoad = () => {
+    setIsImageReady(true);
+  };
+
   const applyIntelligentScan = useCallback(async (isHighRes = false): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
@@ -302,7 +305,6 @@ export default function DocumentScanner() {
     const originalWidth = image.naturalWidth;
     const originalHeight = image.naturalHeight;
 
-    // Use a high-quality scaling factor for the preview to ensure logic works for portrait too
     const previewScaleLimit = draggingPoint !== null ? 600 : 1000; 
     const previewScale = Math.min(1, previewScaleLimit / Math.max(originalWidth, originalHeight));
     
@@ -359,7 +361,6 @@ export default function DocumentScanner() {
         }
     }
 
-    // Heavy Filters logic
     if (draggingPoint === null || isHighRes) {
         const imageData = cCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
         const pixels = imageData.data;
@@ -387,7 +388,6 @@ export default function DocumentScanner() {
         }
         cCtx.putImageData(imageData, 0, 0);
 
-        // Apply sharpness (Simulation of AI Edge focus)
         if (sharpness[0] > 0) {
             const factor = sharpness[0] / 3.0;
             const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -486,6 +486,16 @@ export default function DocumentScanner() {
         return next;
     });
   }, [draggingPoint, points]);
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+    setDraggingPoint(idx);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+    setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
+  };
 
   const generatePdfBlob = async (): Promise<Blob | null> => {
     if (scannedPages.length === 0) return null;
@@ -693,7 +703,6 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
                 
-                {/* LARGER ADJUSTMENT PANEL */}
                 <Card className="lg:col-span-9 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
                     <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT STUDIO</CardTitle></div>
@@ -746,7 +755,6 @@ export default function DocumentScanner() {
                     </CardFooter>
                 </Card>
 
-                {/* SIDE PREVIEW & FILTERS */}
                 <div className="lg:col-span-3 flex flex-col gap-6">
                     <Card className="border-2 shadow-xl overflow-hidden rounded-[2.5rem] bg-card flex flex-col flex-1">
                         <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 flex flex-row items-center justify-between shrink-0">
@@ -796,3 +804,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
