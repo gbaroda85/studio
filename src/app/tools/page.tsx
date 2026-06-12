@@ -525,7 +525,7 @@ function ToolsPageContent() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       {/* 3D Elevated Header Section */}
-      <section className="relative w-full max-w-[2000px] pt-14 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-10 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <Image 
             src={placeholderData.hero_bg.url} 
@@ -544,8 +544,8 @@ function ToolsPageContent() {
         </div>
 
         <div className="w-full px-8 md:px-16 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm font-jakarta">
-            <LayoutGrid className="size-2.5" /> THE COMPLETE GR7 TOOLKIT
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm font-jakarta">
+            <LayoutGrid className="size-3" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-headline">
