@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -462,25 +463,34 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const prevPathRef = useRef(pathname);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // GLOBAL ROUTE TRANSITION HANDLER
+  // RESTRICTED ROUTE TRANSITION HANDLER
   useEffect(() => {
     if (!isMounted) return;
     
-    // Trigger loader on pathname/search change
-    setIsNavigating(true);
+    // Only show loader when navigating AWAY from Home Page ('/') to any other page
+    const wasOnHome = prevPathRef.current === '/';
+    const isNowOnOtherPage = pathname !== '/';
     
-    // Set a minimum visible time for the premium animation
-    const timer = setTimeout(() => {
-      setIsNavigating(false);
-    }, 800);
+    if (wasOnHome && isNowOnOtherPage) {
+        setIsNavigating(true);
+        
+        // Show for 1 second for premium entry feel
+        const timer = setTimeout(() => {
+          setIsNavigating(false);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+    }
     
-    return () => clearTimeout(timer);
-  }, [pathname, searchParams, isMounted]);
+    // Update ref for next navigation
+    prevPathRef.current = pathname;
+  }, [pathname, isMounted]);
 
   if (!isMounted) return null;
   
