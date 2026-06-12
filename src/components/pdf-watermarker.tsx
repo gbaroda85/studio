@@ -33,7 +33,8 @@ import {
     ImageIcon,
     Plus,
     LayoutGrid,
-    MonitorCheck
+    MonitorCheck,
+    Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -44,6 +45,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from './ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -136,7 +138,8 @@ export default function PdfWatermarker() {
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(arrayBuffer),
             cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-            cMapPacked: true
+            cMapPacked: true,
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
         });
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
@@ -213,7 +216,7 @@ export default function PdfWatermarker() {
             font = await pdfDoc.embedFont(fontVariant);
         }
 
-        let embeddedImage;
+        let embeddedImage: any;
         if (wType === 'image' && imageWatermarkSrc) {
             const imgBuffer = await fetch(imageWatermarkSrc).then(r => r.arrayBuffer());
             const isPng = imageWatermarkSrc.startsWith('data:image/png');
@@ -239,17 +242,17 @@ export default function PdfWatermarker() {
             }
 
             // Calculate Position
-            const margin = 30;
+            const marginSize = 30;
             switch (position) {
-                case 'top-left': x = margin; y = height - margin - th; break;
-                case 'top-center': x = (width - tw) / 2; y = height - margin - th; break;
-                case 'top-right': x = width - tw - margin; y = height - margin - th; break;
-                case 'center-left': x = margin; y = (height - th) / 2; break;
+                case 'top-left': x = marginSize; y = height - marginSize - th; break;
+                case 'top-center': x = (width - tw) / 2; y = height - marginSize - th; break;
+                case 'top-right': x = width - tw - marginSize; y = height - marginSize - th; break;
+                case 'center-left': x = marginSize; y = (height - th) / 2; break;
                 case 'center-center': x = (width - tw) / 2; y = (height - th) / 2; break;
-                case 'center-right': x = width - tw - margin; y = (height - th) / 2; break;
-                case 'bottom-left': x = margin; y = margin; break;
-                case 'bottom-center': x = (width - tw) / 2; y = margin; break;
-                case 'bottom-right': x = width - tw - margin; y = margin; break;
+                case 'center-right': x = width - tw - marginSize; y = (height - th) / 2; break;
+                case 'bottom-left': x = marginSize; y = marginSize; break;
+                case 'bottom-center': x = (width - tw) / 2; y = marginSize; break;
+                case 'bottom-right': x = width - tw - marginSize; y = marginSize; break;
             }
 
             if (wType === 'text') {
@@ -262,7 +265,6 @@ export default function PdfWatermarker() {
                     rotate: degrees(rotDeg),
                 });
                 if (isUnderline) {
-                    // Manual underline logic for pdf-lib
                     const lineY = y + th / 2 - 2;
                     page.drawLine({
                         start: { x: x + tw / 2 - tw/2, y: lineY },
