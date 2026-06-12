@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -468,176 +467,144 @@ export default function PdfPageNumberer() {
             {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
+                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6 md:p-8 space-y-10">
+                    <CardContent className="p-4 md:p-6 space-y-6">
                         
-                        {/* Position Grid Selector */}
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
-                                <Layout className="size-3" /> Position Alignment
-                            </Label>
-                            <div className="grid grid-cols-3 gap-1.5 p-3 bg-muted/20 border-2 border-dashed rounded-2xl w-fit mx-auto">
-                                {POSITIONS.map((pos) => (
-                                    <button
-                                        key={pos}
-                                        onClick={() => setPosition(pos)}
-                                        className={cn(
-                                            "size-12 md:size-14 rounded-lg border-2 transition-all flex items-center justify-center relative overflow-hidden group",
-                                            position === pos ? "bg-primary border-primary text-white shadow-lg" : "bg-white/50 border-border hover:border-primary/40"
-                                        )}
-                                        title={pos}
-                                    >
-                                        <div className={cn(
-                                            "size-3 rounded-full transition-all",
-                                            position === pos ? "bg-white scale-125" : "bg-muted-foreground/30 group-hover:bg-primary/20"
-                                        )} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Style Options: Bold, Italic, Color */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-dashed">
-                             <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Text Style</Label>
-                                <div className="flex gap-2">
-                                    <Button 
-                                        variant="outline" 
-                                        className={cn("h-11 flex-1 rounded-xl border-2", isBold && "bg-primary/10 border-primary text-primary")}
-                                        onClick={() => setIsBold(!isBold)}
-                                    >
-                                        <Bold className="size-4" />
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        className={cn("h-11 flex-1 rounded-xl border-2", isItalic && "bg-primary/10 border-primary text-primary")}
-                                        onClick={() => setIsItalic(!isItalic)}
-                                    >
-                                        <Italic className="size-4" />
-                                    </Button>
-                                </div>
-                             </div>
-
-                             <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Font Color</Label>
-                                <div className="flex items-center gap-3 bg-muted/20 p-1.5 rounded-xl border-2 shadow-inner">
-                                    <input 
-                                        type="color" 
-                                        value={textColor} 
-                                        onChange={(e) => setTextColor(e.target.value)}
-                                        className="size-8 rounded-lg cursor-pointer border-none bg-transparent"
-                                    />
-                                    <span className="text-[10px] font-black uppercase font-mono">{textColor}</span>
-                                </div>
-                             </div>
-                        </div>
-
-                        {/* Margin Control */}
-                        <div className="space-y-6 pt-4 border-t border-dashed">
-                            <div className="flex justify-between items-center px-1">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2">
-                                    <Move className="size-3" /> Page Margins
+                        {/* Compact Position and Style Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Layout className="size-3" /> Position
                                 </Label>
-                                <Badge variant="secondary" className="font-mono text-[9px]">{margin[0]}pt</Badge>
-                            </div>
-                            <Slider value={margin} min={10} max={100} step={1} onValueChange={setMargin} />
-                        </div>
-
-                        <div className="space-y-4 pt-4 border-t border-dashed">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <Type className="size-3" /> Number System
-                            </Label>
-                            <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
-                                <SelectTrigger className="h-12 border-2 font-black rounded-xl bg-background shadow-inner"><SelectValue /></SelectTrigger>
-                                <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                    {NUMBER_STYLES.map(s => (
-                                        <SelectItem key={s.value} value={s.value} className="font-bold py-3 uppercase text-[10px]">{s.label}</SelectItem>
+                                <div className="grid grid-cols-3 gap-1 p-2 bg-muted/20 border-2 border-dashed rounded-xl w-fit mx-auto">
+                                    {POSITIONS.map((pos) => (
+                                        <button
+                                            key={pos}
+                                            onClick={() => setPosition(pos)}
+                                            className={cn(
+                                                "size-8 rounded-md border-2 transition-all flex items-center justify-center relative",
+                                                position === pos ? "bg-primary border-primary text-white shadow-md" : "bg-white/50 border-border hover:border-primary/40"
+                                            )}
+                                            title={pos}
+                                        >
+                                            <div className={cn("size-1.5 rounded-full", position === pos ? "bg-white" : "bg-muted-foreground/30")} />
+                                        </button>
                                     ))}
-                                </SelectContent>
-                            </Select>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">Text Style</Label>
+                                    <div className="flex gap-1.5">
+                                        <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isBold && "bg-primary/10 border-primary text-primary")} onClick={() => setIsBold(!isBold)}><Bold className="size-3" /></Button>
+                                        <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isItalic && "bg-primary/10 border-primary text-primary")} onClick={() => setIsItalic(!isItalic)}><Italic className="size-3" /></Button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">Color</Label>
+                                    <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-lg border-2 shadow-inner">
+                                        <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="size-6 rounded-md cursor-pointer border-none bg-transparent" />
+                                        <span className="text-[8px] font-black uppercase font-mono">{textColor}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="space-y-4 pt-4 border-t border-dashed">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 flex items-center gap-2 mb-2">
-                                <Layers className="size-3" /> Quick Formats
-                            </Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {QUICK_FORMATS.map((f) => (
-                                    <button
-                                        key={f.value}
-                                        onClick={() => setFormat(f.value)}
-                                        className={cn(
-                                            "btn-pos-uiverse h-10",
-                                            format === f.value && "active-uiverse"
-                                        )}
-                                        data-label={f.display}
-                                    />
-                                ))}
+                        {/* Formatting Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Type className="size-3" /> System</Label>
+                                <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
+                                    <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-lg border-2 shadow-2xl">
+                                        {NUMBER_STYLES.map(s => (
+                                            <SelectItem key={s.value} value={s.value} className="font-bold py-2 uppercase text-[10px]">{s.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <Input 
-                                value={format} 
-                                onChange={(e) => setFormat(e.target.value)}
-                                placeholder="Custom: {page} of {total}"
-                                className="h-11 border-2 font-bold rounded-xl bg-background mt-2 text-center"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed">
-                            <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size</Label>
-                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 border-2 font-bold rounded-xl" />
-                            </div>
-                            <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Page Range</Label>
-                                <Select value={pageRange} onValueChange={setPageRange}>
-                                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2">
-                                        <SelectItem value="all" className="font-bold">All Pages</SelectItem>
-                                        <SelectItem value="custom" className="font-bold">Custom Range</SelectItem>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Layers className="size-3" /> Format</Label>
+                                <Select value={format} onValueChange={setFormat}>
+                                    <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-lg border-2 shadow-2xl">
+                                        {QUICK_FORMATS.map(f => (
+                                            <SelectItem key={f.value} value={f.value} className="font-bold py-2 uppercase text-[10px]">{f.display}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
+                        {/* Range and Size Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed">
+                             <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Range</Label>
+                                <Select value={pageRange} onValueChange={setPageRange}>
+                                    <SelectTrigger className="h-9 border-2 font-bold rounded-lg text-[10px]"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-lg border-2">
+                                        <SelectItem value="all" className="font-bold text-[10px]">All Pages</SelectItem>
+                                        <SelectItem value="custom" className="font-bold text-[10px]">Custom Range</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Size (pt)</Label>
+                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-9 border-2 font-bold rounded-lg text-[10px]" />
+                            </div>
+                        </div>
+
                         {pageRange === 'custom' && (
-                            <div className="space-y-2 animate-in slide-in-from-top-2">
-                                <Label className="text-[9px] font-black uppercase opacity-60">Range String</Label>
-                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="e.g. 1, 3-5, 8" className="h-10 border-2 font-bold rounded-xl" />
+                            <div className="space-y-1.5 animate-in slide-in-from-top-2">
+                                <Label className="text-[8px] font-black uppercase opacity-40 tracking-widest">Example: 1, 3-5, 8</Label>
+                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="Enter range..." className="h-9 border-2 font-bold rounded-lg text-[10px]" />
                             </div>
                         )}
+
+                        {/* Margin Control */}
+                        <div className="space-y-4 pt-4 border-t border-dashed">
+                            <div className="flex justify-between items-center px-1">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
+                                    <Move className="size-3" /> Margins
+                                </Label>
+                                <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
+                            </div>
+                            <Slider value={margin} min={10} max={100} step={1} onValueChange={setMargin} />
+                        </div>
+
                     </CardContent>
-                    <CardFooter className="p-6 md:p-8 border-t flex flex-col gap-3">
+                    <CardFooter className="p-4 md:p-6 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-16 md:h-18 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-14 md:h-16 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleAddPageNumbers}
                                 disabled={isProcessing || !format}
                             >
                                 <StarIcons />
                                 {isProcessing ? (
                                     <div className="flex items-center gap-3">
-                                        <Loader2 className="size-7 md:size-8 animate-spin" />
-                                        <span className="uppercase text-sm md:text-base tracking-tighter">PROCESSING...</span>
+                                        <Loader2 className="size-6 md:size-7 animate-spin" />
+                                        <span className="uppercase text-xs md:text-sm tracking-tighter">PROCESSING...</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-3">
-                                        <Hash className="size-7 md:size-8 text-white group-hover:scale-125 transition-transform" />
-                                        <span className="uppercase tracking-tighter">APPLY NUMBERS</span>
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                        <Hash className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
+                                        <span className="uppercase tracking-tighter text-sm md:text-base">APPLY NUMBERS</span>
                                     </div>
                                 )}
                             </Button>
                         ) : (
                             <div className="space-y-3 w-full">
-                                <Button size="lg" className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg md:text-2xl font-black rounded-[1.5rem] shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
+                                <Button size="lg" className="magic-button magic-button-success w-full h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-sm md:text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
                                     <StarIcons />
-                                    <Download className="mr-3 md:mr-4 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                                    <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
+                                    <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> 
+                                    <span className="uppercase tracking-tighter">SAVE PDF</span>
                                 </Button>
-                                <Button variant="outline" onClick={resetState} className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3" /> Start Over</Button>
+                                <Button variant="outline" onClick={resetState} className="w-full h-10 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3" /> Start Over</Button>
                             </div>
                         )}
                     </CardFooter>
