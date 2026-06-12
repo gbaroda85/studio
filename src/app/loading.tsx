@@ -1,26 +1,28 @@
 'use client';
 
-import { Sparkles, Cpu, Zap } from 'lucide-react';
+import { Sparkles, Cpu, Zap, Box } from 'lucide-react';
 
 export default function Loading() {
   return (
-    <div className="fixed inset-0 w-full h-full z-[9999] flex flex-col items-center justify-center bg-background/90 backdrop-blur-xl animate-in fade-in duration-700">
-      {/* Decorative Background Glows */}
-      <div className="absolute top-1/4 left-1/4 size-[400px] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 size-[400px] bg-accent/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="fixed inset-0 w-full h-full z-[9999] flex flex-col items-center justify-center bg-background/95 backdrop-blur-md animate-in fade-in duration-700">
+      {/* Subtle Background Ambiance */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
+        <div className="absolute top-1/4 left-1/4 size-64 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 size-64 bg-accent/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
 
       <div className="relative flex flex-col items-center">
-        {/* Complex Orbital Animation */}
-        <div className="absolute inset-[-40px] rounded-full border border-primary/10 animate-[spin_4s_linear_infinite]" />
-        <div className="absolute inset-[-30px] rounded-full border-2 border-dashed border-primary/5 animate-[spin_8s_linear_infinite_reverse]" />
-        <div className="absolute inset-[-20px] rounded-full border-t-4 border-primary shadow-[0_0_40px_-5px_hsl(var(--primary)/0.4)] animate-[spin_1.5s_cubic-bezier(0.5,0.1,0.4,0.9)_infinite]" />
-
-        {/* GR7 LOGO CONTAINER */}
-        <div className="relative size-32 md:size-40 flex items-center justify-center bg-white dark:bg-slate-900 border-[3px] border-slate-200 dark:border-primary/20 rounded-[2.5rem] shadow-2xl overflow-hidden animate-float group">
-            {/* Shimmer Effect over Logo */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite] pointer-events-none z-10" />
+        {/* COMPACT STUDIO BOX */}
+        <div className="relative size-28 md:size-32 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-primary/30 rounded-[2rem] shadow-2xl overflow-hidden flex items-center justify-center group">
             
-            <svg viewBox="0 0 100 100" className="w-full h-full p-4 relative z-0">
+            {/* NEURAL SCANNING LINE EFFECT */}
+            <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+                <div className="w-full h-1/2 bg-gradient-to-b from-primary/20 to-transparent -translate-y-full animate-[scanning_2s_infinite_ease-in-out]" />
+                <div className="w-full h-[2px] bg-primary shadow-[0_0_15px_rgba(var(--primary),1)] -translate-y-full animate-[scanning_2s_infinite_ease-in-out]" />
+            </div>
+
+            {/* GR7 LOGO SIZED FOR BOX */}
+            <svg viewBox="0 0 100 100" className="w-full h-full p-6 relative z-0 opacity-90 scale-110">
                 <text 
                     x="4" 
                     y="70" 
@@ -47,49 +49,55 @@ export default function Loading() {
                     7
                 </text>
             </svg>
-            
-            {/* Status Icons */}
-            <div className="absolute -bottom-1 -right-1 bg-primary text-white p-1.5 rounded-tl-xl shadow-xl z-20">
-                <Sparkles className="size-4 animate-pulse" />
-            </div>
+
+            {/* BOX CORNER ELEMENTS */}
+            <div className="absolute top-3 left-3 size-1.5 bg-primary/20 rounded-full" />
+            <div className="absolute top-3 right-3 size-1.5 bg-primary/20 rounded-full" />
+            <div className="absolute bottom-3 left-3 size-1.5 bg-primary/20 rounded-full" />
+            <div className="absolute bottom-3 right-3 size-1.5 bg-primary/20 rounded-full" />
         </div>
         
-        {/* Status Text & Progress */}
-        <div className="mt-16 flex flex-col items-center gap-4">
-            <div className="flex items-center gap-3">
-                <Cpu className="size-3 text-primary animate-bounce" />
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.5em] text-primary animate-pulse">
-                    Initializing GR7 Studio
+        {/* STATUS SECTION */}
+        <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/50 border border-border/50 shadow-sm">
+                <Cpu className="size-3 text-primary animate-spin-slow" />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/70">
+                    Initializing Studio
                 </p>
-                <Zap className="size-3 text-yellow-500 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="flex gap-0.5">
+                    <span className="size-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                    <span className="size-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    <span className="size-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                </div>
             </div>
             
-            {/* Modern Slim Progress Bar */}
-            <div className="w-48 h-1 bg-primary/10 rounded-full overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent w-full animate-[loading-shimmer_1.5s_infinite_ease-in-out]" />
+            {/* MINI PROGRESS BAR */}
+            <div className="w-32 h-0.5 bg-muted rounded-full overflow-hidden relative">
+                <div className="absolute inset-0 bg-primary w-full -translate-x-full animate-[progress-flow_1.5s_infinite_linear]" />
             </div>
-            
-            <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
-                Optimizing Local RAM Buffers
-            </p>
         </div>
+
+        {/* FLOATING PARTICLES (SUBTLE) */}
+        <div className="absolute -top-10 -left-10 size-4 bg-primary/10 rounded-full blur-sm animate-pulse" />
+        <div className="absolute top-20 -right-12 size-3 bg-accent/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute -bottom-12 left-1/2 size-2 bg-primary/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.2s' }} />
       </div>
 
       <style jsx>{`
-        @keyframes loading-shimmer {
+        @keyframes scanning {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(200%); }
+        }
+        @keyframes progress-flow {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(200%) rotate(45deg); }
+        .animate-spin-slow {
+            animation: spin 3s linear infinite;
         }
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
