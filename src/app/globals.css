@@ -4,31 +4,30 @@
 
 @layer base {
   :root {
-    /* Color Palette Inspired by provided Crypto Dashboard Image */
-    /* Light Blue (Primary): #35C2F2 -> 195 88% 58% */
-    /* Magenta (Secondary): #FF7DB4 -> 335 100% 75% */
-    /* Deep Slate/Purple (Foreground): #626284 -> 240 15% 45% */
-    /* Soft Background: #FDF9FB -> 345 40% 99% */
+    /* Color Palette Inspired by SaaSto SaaS Template Image */
+    /* Vibrant Purple (Primary): #7C3AED -> 258 89% 60% */
+    /* Deep Navy (Foreground): #1E293B -> 222 47% 11% */
+    /* Soft Lavender (Secondary): #F5F3FF -> 255 100% 98% */
     
-    --background: 345 40% 99%;       
-    --foreground: 240 20% 30%;      
+    --background: 0 0% 100%;       
+    --foreground: 222 47% 11%;      
     --card: 0 0% 100%;
-    --card-foreground: 240 20% 30%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 20% 30%;
-    --primary: 195 88% 58%;         /* Sky Blue */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 335 100% 75%;       /* Magenta */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 240 10% 95%;           
-    --muted-foreground: 240 10% 45%;
-    --accent: 195 88% 96%;          /* Very light blue */
-    --accent-foreground: 195 88% 40%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 258 89% 60%;         /* Vibrant Purple */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 255 100% 98%;       /* Soft Lavender */
+    --secondary-foreground: 258 89% 40%;
+    --muted: 210 40% 96.1%;           
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 255 100% 98%;          
+    --accent-foreground: 258 89% 40%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 240 10% 92%;
-    --input: 240 10% 92%;
-    --ring: 195 88% 58%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 258 89% 60%;
     --radius: 1.5rem;
   }
   
@@ -68,10 +67,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
-    /* Soft glowing pink/blue gradient from the dashboard image */
+    /* Soft glowing purple gradient from the SaaSto image */
     background-image: 
-      radial-gradient(at 0% 0%, hsla(335, 100%, 94%, 0.6) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(195, 100%, 96%, 0.4) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(258, 89%, 60%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(258, 89%, 60%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -105,7 +104,7 @@
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-blue-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
 }
 
 ::-webkit-scrollbar {
