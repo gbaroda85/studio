@@ -63,11 +63,6 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -278,7 +273,17 @@ export default function DocumentScanner() {
 
     setIsProcessing(false);
     setBatchProgress(null);
-    setStage('viewfinder');
+    if (scannedPages.length > 0 || filesArray.length > 0) {
+        // Automatically start editing the first new page added
+        const lastPage = (scannedPages.length > 0) ? scannedPages[scannedPages.length - 1] : null;
+        if (lastPage) {
+            handleEditPage(lastPage);
+        } else {
+             setStage('viewfinder');
+        }
+    } else {
+        setStage('viewfinder');
+    }
     toast({ title: "Batch Processed", description: "All pages added to bundle." });
   };
 
@@ -305,7 +310,7 @@ export default function DocumentScanner() {
     const originalWidth = image.naturalWidth;
     const originalHeight = image.naturalHeight;
 
-    const previewScaleLimit = draggingPoint !== null ? 600 : 1000; 
+    const previewScaleLimit = draggingPoint !== null ? 800 : 1200; 
     const previewScale = Math.min(1, previewScaleLimit / Math.max(originalWidth, originalHeight));
     
     const activeScale = isHighRes ? 1 : previewScale;
@@ -377,6 +382,8 @@ export default function DocumentScanner() {
             } else if (activeFilter === 'gray') r = g = b = luma;
             else if (activeFilter === 'photo') {
                 r = r * 1.05; g = g * 1.05; b = b * 1.05;
+            } else if (activeFilter === 'magic') {
+                 r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15);
             }
 
             if (activeFilter !== 'bw' && activeFilter !== 'gray') {
@@ -703,9 +710,13 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
                 
-                <Card className="lg:col-span-9 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
-                    <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                        <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">ADJUSTMENT STUDIO</CardTitle></div>
+                {/* LARGE ADJUSTMENT AREA */}
+                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
+                    <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between shrink-0">
+                        <div className="flex items-center gap-4">
+                            <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle>
+                        </div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
                                 <TabsList className="h-9 bg-transparent w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList>
@@ -747,7 +758,7 @@ export default function DocumentScanner() {
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-6 border-t flex flex-col md:flex-row gap-4 justify-between shrink-0">
                          <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" onClick={resetAdjustments} className="h-10 text-[9px] font-black uppercase border-2"><RefreshCcw className="size-3 mr-1.5" /> Defaults</Button>
+                            <Button variant="outline" size="sm" onClick={resetDots} className="h-10 text-[9px] font-black uppercase border-2"><RefreshCcw className="size-3 mr-1.5" /> Reset Box</Button>
                         </div>
                         <Button className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
                             {editingId ? 'SAVE CHANGES' : 'CONFIRM & ADD'} <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" />
@@ -755,38 +766,57 @@ export default function DocumentScanner() {
                     </CardFooter>
                 </Card>
 
-                <div className="lg:col-span-3 flex flex-col gap-6">
-                    <Card className="border-2 shadow-xl overflow-hidden rounded-[2.5rem] bg-card flex flex-col flex-1">
-                        <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 flex flex-row items-center justify-between shrink-0">
-                            <div className="flex items-center gap-3"><div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 border border-green-500/20"><Eye className="size-4" /></div><CardTitle className="text-[10px] font-black uppercase tracking-tighter">HD PREVIEW</CardTitle></div>
-                        </CardHeader>
-                        <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden">
-                            <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[280px] flex items-center justify-center overflow-hidden transition-all duration-300">
-                                {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[40vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
-                                {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
-                            </div>
-                        </CardContent>
-                        <CardFooter className="p-5 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6">
-                            <div className="grid grid-cols-3 gap-2 w-full">
+                {/* LARGE HD PREVIEW + CONTROLS AREA */}
+                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[2.5rem] bg-card flex flex-col flex-1">
+                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 flex flex-row items-center justify-between shrink-0">
+                        <div className="flex items-center gap-3"><div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 border border-green-500/20"><Eye className="size-4" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW</CardTitle></div>
+                    </CardHeader>
+                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden min-h-[350px]">
+                        <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[320px] flex items-center justify-center overflow-hidden transition-all duration-300">
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                            {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
+                        </div>
+                    </CardContent>
+                    <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
+                        {/* FILTERS AREA */}
+                        <div className="w-full space-y-4">
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Studio Filters</Label>
+                            <div className="grid grid-cols-5 gap-2 w-full">
                                 <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
+                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); }} />
+                                <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                             </div>
-                            
-                            <div className="w-full space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-[8px] font-black uppercase text-muted-foreground">Adjust</Label>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRotateResult}><RotateCw className="size-3.5"/></Button>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="space-y-1"><div className="flex justify-between text-[8px] font-bold"><span>Bright</span><span>{brightness[0]}%</span></div><Slider min={50} max={200} step={1} value={brightness} onValueChange={setBrightness} /></div>
-                                    <div className="space-y-1"><div className="flex justify-between text-[8px] font-bold"><span>Sharp</span><span>{sharpness[0]}</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
-                                </div>
-                                <Button variant="outline" className="w-full h-9 border-2 text-[8px] font-black uppercase rounded-lg text-indigo-600 border-indigo-100 bg-indigo-50/50" onClick={handleAiEnhance}><Zap className="size-3 mr-1.5" /> AI ENHANCE</Button>
+                        </div>
+                        
+                        {/* ADJUSTMENTS AREA */}
+                        <div className="w-full space-y-4 pt-4 border-t border-white/10">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground">Fine-Tune Adjustment</Label>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={handleRotateResult}><RotateCw className="size-4"/></Button>
                             </div>
-                        </CardFooter>
-                    </Card>
-                </div>
+                            <div className="grid gap-6">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase text-muted-foreground"><span>Exposure</span><span>{brightness[0]}%</span></div>
+                                    <Slider min={50} max={250} step={1} value={brightness} onValueChange={setBrightness} />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase text-muted-foreground"><span>Sharpness</span><span>{sharpness[0]}x</span></div>
+                                    <Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase text-muted-foreground"><span>Contrast</span><span>{contrast[0]}%</span></div>
+                                    <Slider min={50} max={250} step={1} value={contrast} onValueChange={setContrast} />
+                                </div>
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <Button variant="outline" className="flex-1 h-10 border-2 text-[9px] font-black uppercase rounded-lg text-indigo-600 border-indigo-100 bg-indigo-50/50" onClick={handleAiEnhance}><Zap className="size-3 mr-1.5" /> AI ENHANCE</Button>
+                                <Button variant="outline" size="sm" onClick={resetAdjustments} className="h-10 text-[9px] font-black uppercase border-2 rounded-lg"><RefreshCcw className="size-3 mr-1.5" /> Reset</Button>
+                            </div>
+                        </div>
+                    </CardFooter>
+                </Card>
             </div>
         )}
 
@@ -799,9 +829,8 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-            <Button variant={active ? 'default' : 'outline'} size="icon" className="h-10 w-10 rounded-xl shadow-md border-2" onClick={onClick}><Icon className="size-4"/></Button>
+            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-11 w-11 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-5"/></Button>
             <span className="text-[8px] font-black uppercase text-muted-foreground">{label}</span>
         </div>
     );
 }
-
