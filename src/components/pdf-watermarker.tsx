@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -293,7 +292,6 @@ export default function PdfWatermarker() {
             else { lcx = vcx; lcy = vh - vcy; }
 
             // 3. Drawing anchor compensation for Center-Pivot rotation
-            // pdf-lib's drawText draws from bottom-left of the line
             const dx = lcx - (tw/2 * cos) + (th/2 * sin);
             const dy = lcy - (tw/2 * sin) - (th/2 * cos);
 
@@ -330,6 +328,19 @@ export default function PdfWatermarker() {
     link.href = watermarkedPdfUrl;
     link.download = `Watermarked_${pdfFile.name}`;
     link.click();
+  };
+
+  const resetState = () => {
+      setPdfFile(null);
+      setPreviewPages([]);
+      setWatermarkedPdfUrl(null);
+      setWatermarkText('CONFIDENTIAL');
+      setImageWatermarkSrc(null);
+      setOpacity([30]);
+      setFontSize(60);
+      setRotation([45]);
+      setMargin([40]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const getPreviewStyle = (): React.CSSProperties => {
@@ -657,4 +668,3 @@ export default function PdfWatermarker() {
     </div>
   );
 }
-
