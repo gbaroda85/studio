@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, Cpu, Zap, Box } from 'lucide-react';
+import { Cpu, Sparkles } from 'lucide-react';
 
 export default function Loading() {
   return (
@@ -12,23 +12,21 @@ export default function Loading() {
       </div>
 
       <div className="relative flex flex-col items-center">
-        {/* COMPACT STUDIO BOX */}
-        <div className="relative size-28 md:size-32 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-primary/30 rounded-[2rem] shadow-2xl overflow-hidden flex items-center justify-center group">
+        {/* COMPACT STUDIO BOX - GLOWING STYLE */}
+        <div className="relative size-28 md:size-32 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-primary/30 rounded-[2.5rem] shadow-2xl flex items-center justify-center group overflow-hidden animate-breathing">
             
-            {/* NEURAL SCANNING LINE EFFECT */}
-            <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
-                <div className="w-full h-1/2 bg-gradient-to-b from-primary/20 to-transparent -translate-y-full animate-[scanning_2s_infinite_ease-in-out]" />
-                <div className="w-full h-[2px] bg-primary shadow-[0_0_15px_rgba(var(--primary),1)] -translate-y-full animate-[scanning_2s_infinite_ease-in-out]" />
-            </div>
-
-            {/* GR7 LOGO SIZED FOR BOX */}
-            <svg viewBox="0 0 100 100" className="w-full h-full p-6 relative z-0 opacity-90 scale-110">
+            {/* SOFT PULSING BACKGLOW */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 animate-pulse" />
+            
+            {/* GR7 LOGO - CLEAN SVG */}
+            <svg viewBox="0 0 100 100" className="w-full h-full p-6 relative z-10 opacity-90 scale-110 drop-shadow-sm">
                 <text 
                     x="4" 
-                    y="70" 
+                    y="72" 
+                    stroke="none"
                     style={{ 
                         fill: '#0d5a71', 
-                        fontSize: '44px', 
+                        fontSize: '46px', 
                         fontWeight: 900, 
                         fontFamily: 'Arial Black, sans-serif'
                     }}
@@ -38,10 +36,11 @@ export default function Loading() {
                 </text>
                 <text 
                     x="62" 
-                    y="75" 
+                    y="76" 
+                    stroke="none"
                     style={{ 
                         fill: '#ef4444', 
-                        fontSize: '66px', 
+                        fontSize: '68px', 
                         fontWeight: 900, 
                         fontFamily: 'Arial Black, sans-serif'
                     }}
@@ -50,16 +49,16 @@ export default function Loading() {
                 </text>
             </svg>
 
-            {/* BOX CORNER ELEMENTS */}
-            <div className="absolute top-3 left-3 size-1.5 bg-primary/20 rounded-full" />
-            <div className="absolute top-3 right-3 size-1.5 bg-primary/20 rounded-full" />
-            <div className="absolute bottom-3 left-3 size-1.5 bg-primary/20 rounded-full" />
-            <div className="absolute bottom-3 right-3 size-1.5 bg-primary/20 rounded-full" />
+            {/* DECORATIVE CORNER ACCENTS */}
+            <div className="absolute top-4 left-4 size-1 bg-primary/20 rounded-full" />
+            <div className="absolute top-4 right-4 size-1 bg-primary/20 rounded-full" />
+            <div className="absolute bottom-4 left-4 size-1 bg-primary/20 rounded-full" />
+            <div className="absolute bottom-4 right-4 size-1 bg-primary/20 rounded-full" />
         </div>
         
         {/* STATUS SECTION */}
-        <div className="mt-8 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/50 border border-border/50 shadow-sm">
+        <div className="mt-10 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2.5 px-5 py-2 rounded-full bg-muted/50 border border-border/50 shadow-sm">
                 <Cpu className="size-3 text-primary animate-spin-slow" />
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/70">
                     Initializing Studio
@@ -71,33 +70,42 @@ export default function Loading() {
                 </div>
             </div>
             
-            {/* MINI PROGRESS BAR */}
-            <div className="w-32 h-0.5 bg-muted rounded-full overflow-hidden relative">
-                <div className="absolute inset-0 bg-primary w-full -translate-x-full animate-[progress-flow_1.5s_infinite_linear]" />
+            {/* MINIMAL PROGRESS TRACK */}
+            <div className="w-32 h-1 bg-muted rounded-full overflow-hidden relative border border-border/10 shadow-inner">
+                <div className="absolute inset-0 bg-primary w-full -translate-x-full animate-progress-flow" />
             </div>
         </div>
 
-        {/* FLOATING PARTICLES (SUBTLE) */}
-        <div className="absolute -top-10 -left-10 size-4 bg-primary/10 rounded-full blur-sm animate-pulse" />
-        <div className="absolute top-20 -right-12 size-3 bg-accent/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute -bottom-12 left-1/2 size-2 bg-primary/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.2s' }} />
+        {/* FLOATING SPARKLE PARTICLES */}
+        <div className="absolute -top-6 -left-6 opacity-30">
+            <Sparkles className="size-4 text-primary animate-pulse" />
+        </div>
+        <div className="absolute top-20 -right-8 opacity-20" style={{ animationDelay: '0.8s' }}>
+            <Sparkles className="size-3 text-accent animate-pulse" />
+        </div>
       </div>
 
       <style jsx>{`
-        @keyframes scanning {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(200%); }
-        }
         @keyframes progress-flow {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
+        .animate-progress-flow {
+            animation: progress-flow 2s infinite linear;
+        }
         .animate-spin-slow {
-            animation: spin 3s linear infinite;
+            animation: spin 4s linear infinite;
+        }
+        .animate-breathing {
+            animation: breathing 3s ease-in-out infinite;
         }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+            50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(var(--primary), 0.15); }
         }
       `}</style>
     </div>
