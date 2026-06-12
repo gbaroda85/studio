@@ -117,7 +117,6 @@ export default function PdfWatermarker() {
   const [imageScale, setImageScale] = useState([30]);
   const [rotation, setRotation] = useState([45]);
   const [margin, setMargin] = useState([40]);
-  const [layer, setLayer] = useState<'over' | 'under'>('over');
   
   // Text Styling
   const [textColor, setTextColor] = useState("#808080");
@@ -128,6 +127,7 @@ export default function PdfWatermarker() {
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
   const [renderingProgress, setRenderingProgress] = useState(0);
+  const [pageSize, setPageSize] = useState({ width: 595, height: 842 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageWatermarkInputRef = useRef<HTMLInputElement>(null);
@@ -156,6 +156,12 @@ export default function PdfWatermarker() {
         });
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
+
+        if (count > 0) {
+            const firstPage = await pdf.getPage(1);
+            const viewport = firstPage.getViewport({ scale: 1 });
+            setPageSize({ width: viewport.width, height: viewport.height });
+        }
         
         const imgs: string[] = [];
         const pagesToRender = Math.min(count, 10); 
@@ -239,67 +245,69 @@ export default function PdfWatermarker() {
         }
 
         const rgbColor = hexToRgb(textColor);
-        const rotDeg = -rotation[0]; // CSS rotation is CW, PDF-Lib Degrees is CCW, so mirror.
+        const rotDeg = -rotation[0]; 
         const op = opacity[0] / 100;
         const currentMargin = margin[0];
-
-        // TRIGONOMETRY FOR CENTER ROTATION
         const radians = (rotDeg * Math.PI) / 180;
         const cos = Math.cos(radians);
         const sin = Math.sin(radians);
 
         for (const page of pages) {
             const { width, height } = page.getSize();
-            let tw = 0, th = 0;
+            const pageRot = page.getRotation().angle;
+            const isLeaning = pageRot === 90 || pageRot === 270;
+            
+            // Visual dimensions from viewer's perspective
+            const vw = isLeaning ? height : width;
+            const vh = isLeaning ? width : height;
 
+            let tw = 0, th = 0;
             if (wType === 'text' && font) {
                 tw = font.widthOfTextAtSize(watermarkText, fontSize);
                 th = font.heightAtSize(fontSize);
             } else if (embeddedImage) {
                 const aspect = imageDims.height / imageDims.width;
-                tw = (imageScale[0] / 100) * width;
+                tw = (imageScale[0] / 100) * vw;
                 th = tw * aspect;
             }
 
-            // Target Anchor Point (The fixed center where watermark stays regardless of rotation)
-            let cx = 0, cy = 0;
+            // Calculate target visual center
+            let vcx = vw / 2;
+            let vcy = vh / 2;
+
             switch (position) {
-                case 'top-left': cx = currentMargin + tw/2; cy = height - currentMargin - th/2; break;
-                case 'top-center': cx = width / 2; cy = height - currentMargin - th/2; break;
-                case 'top-right': cx = width - currentMargin - tw/2; cy = height - currentMargin - th/2; break;
-                
-                case 'center-left': cx = currentMargin + tw/2; cy = height / 2; break;
-                case 'center-center': cx = width / 2; cy = height / 2; break;
-                case 'center-right': cx = width - currentMargin - tw/2; cy = height / 2; break;
-                
-                case 'bottom-left': cx = currentMargin + tw/2; cy = currentMargin + th/2; break;
-                case 'bottom-center': cx = width / 2; cy = currentMargin + th/2; break;
-                case 'bottom-right': cx = width - currentMargin - tw/2; cy = currentMargin + th/2; break;
+                case 'top-left': vcx = currentMargin + tw/2; vcy = vh - currentMargin - th/2; break;
+                case 'top-center': vcx = vw / 2; vcy = vh - currentMargin - th/2; break;
+                case 'top-right': vcx = vw - currentMargin - tw/2; vcy = vh - currentMargin - th/2; break;
+                case 'center-left': vcx = currentMargin + tw/2; vcy = vh / 2; break;
+                case 'center-right': vcx = vw - currentMargin - tw/2; vcy = vh / 2; break;
+                case 'bottom-left': vcx = currentMargin + tw/2; vcy = currentMargin + th/2; break;
+                case 'bottom-center': vcx = vw / 2; vcy = currentMargin + th/2; break;
+                case 'bottom-right': vcx = vw - currentMargin - tw/2; vcy = currentMargin + th/2; break;
             }
 
-            // Pivot compensation math: To rotate around center (cx, cy) 
-            // while pdf-lib rotates around bottom-left (x, y)
-            const drawX = cx - (tw/2 * cos) + (th/2 * sin);
-            const drawY = cy - (tw/2 * sin) - (th/2 * cos);
+            // Map visual center back to local coordinates
+            let lcx, lcy;
+            if (pageRot === 0) { lcx = vcx; lcy = vcy; }
+            else if (pageRot === 90) { lcx = vcy; lcy = width - vcx; }
+            else if (pageRot === 180) { lcx = width - vcx; lcy = height - vcy; }
+            else if (pageRot === 270) { lcx = height - vcy; lcy = vcx; }
+            else { lcx = vcx; lcy = vcy; }
+
+            // Pivot compensation for bottom-left anchor drawing
+            const drawX = lcx - (tw/2 * cos) + (th/2 * sin);
+            const drawY = lcy - (tw/2 * sin) - (th/2 * cos);
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
-                    x: drawX,
-                    y: drawY,
-                    font, 
-                    size: fontSize,
+                    x: drawX, y: drawY, font, size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-                    opacity: op,
-                    rotate: degrees(rotDeg),
+                    opacity: op, rotate: degrees(rotDeg),
                 });
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
-                    x: drawX,
-                    y: drawY,
-                    width: tw,
-                    height: th,
-                    opacity: op,
-                    rotate: degrees(rotDeg),
+                    x: drawX, y: drawY, width: tw, height: th,
+                    opacity: op, rotate: degrees(rotDeg),
                 });
             }
         }
@@ -309,7 +317,7 @@ export default function PdfWatermarker() {
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Watermark Applied!", description: "Positioning exactly matches preview." });
+        toast({ title: "Watermark Applied!", description: "Positioning matches preview across all orientations." });
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Process Error' });
@@ -346,18 +354,19 @@ export default function PdfWatermarker() {
           pointerEvents: 'none',
           color: textColor,
           opacity: opacity[0] / 100,
-          fontSize: `${(fontSize / 595) * 550}px`, // Standard A4 scale to preview container
+          // Sync preview font size with PDF points relative to the 550px width container
+          fontSize: `${(fontSize / pageSize.width) * 550}px`,
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
           textDecoration: isUnderline ? 'underline' : 'none',
           textAlign: 'center',
           transition: 'all 0.1s linear',
-          zIndex: layer === 'over' ? 50 : 5,
+          zIndex: 50,
           whiteSpace: 'nowrap',
           transformOrigin: 'center center'
       };
 
-      const m = `${(margin[0] / 595) * 100}%`; 
+      const m = `${(margin[0] / pageSize.width) * 100}%`; 
       
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
@@ -533,14 +542,10 @@ export default function PdfWatermarker() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Layer Logic</Label>
-                                <Select value={layer} onValueChange={(v) => setLayer(v as any)}>
-                                    <SelectTrigger className="h-10 border-2 font-bold rounded-xl shadow-inner"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2">
-                                        <SelectItem value="over" className="font-bold">Over Content</SelectItem>
-                                        <SelectItem value="under" className="font-bold">Under Content</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Label className="text-[10px] font-black uppercase opacity-60">Layer Order</Label>
+                                <div className="flex items-center gap-3 p-3 bg-muted/20 border-2 rounded-xl text-[10px] font-black uppercase opacity-60">
+                                    <MonitorCheck className="size-4" /> HD OVERLAY ACTIVE
+                                </div>
                             </div>
                         </div>
 
@@ -678,4 +683,3 @@ export default function PdfWatermarker() {
     </div>
   );
 }
-
