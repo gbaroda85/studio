@@ -227,7 +227,7 @@ export default function PdfPageNumberer() {
         setTotalPagesPreview(count);
         
         const imgs: string[] = [];
-        const pagesToRender = Math.min(count, 5); // Render first 5 for visual context
+        const pagesToRender = Math.min(count, 10); // Render first 10 for visual context
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
@@ -464,10 +464,10 @@ export default function PdfPageNumberer() {
             </CardFooter>
         </Card>
       ) : (
-        <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-500">
+        <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <CardTitle className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
@@ -610,10 +610,10 @@ export default function PdfPageNumberer() {
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-3">
+                    <CardFooter className="p-6 md:p-8 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50"
                                 onClick={handleAddPageNumbers}
                                 disabled={isProcessing || !format}
                             >
@@ -637,17 +637,17 @@ export default function PdfPageNumberer() {
                                     <Download className="mr-3 md:mr-4 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
                                     <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                 </Button>
-                                <Button variant="outline" onClick={resetState} className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="mr-2 size-3" /> Start Over</Button>
+                                <Button variant="outline" onClick={resetState} className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3" /> Start Over</Button>
                             </div>
                         )}
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* Workspace: Live Preview */}
+            {/* Workspace: Live Preview - FIXED HEIGHT WITH SCROLLBAR */}
             <div className="lg:col-span-7 h-full flex flex-col no-print">
-                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] flex-1 flex flex-col">
-                    <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[600px] lg:h-[850px] flex flex-col">
+                    <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Studio View</CardTitle>

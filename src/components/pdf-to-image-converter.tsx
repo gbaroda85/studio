@@ -35,15 +35,16 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Initialize PDF.js worker with stable CDN
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type OutputFormat = 'png' | 'jpeg';
@@ -72,21 +73,6 @@ const StarIcons = () => (
             </svg>
         </div>
         <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
             <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
                 <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
@@ -312,7 +298,7 @@ export default function PdfToImageConverter() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -360,7 +346,7 @@ export default function PdfToImageConverter() {
                 </div>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="grid lg:grid-cols-12">
+                <div className="grid lg:grid-cols-12 items-stretch">
                     {/* LEFT SIDEBAR: CONTROLS */}
                     <div className="lg:col-span-4 border-r bg-muted/20 p-6 space-y-8 no-print">
                         <div className="space-y-8 animate-in slide-in-from-left duration-300">
@@ -383,31 +369,31 @@ export default function PdfToImageConverter() {
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative", 
                                             selectedPage?.vAlign === 'top' && "active-uiverse"
                                         )} 
                                         data-label="      Top"
-                                        onClick={() => updateSelectedPage({ vAlign: 'top' })}
+                                        onClick={() => updateAlignment('top')}
                                     >
                                         <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative", 
                                             selectedPage?.vAlign === 'center' && "active-uiverse"
                                         )} 
                                         data-label="      Center"
-                                        onClick={() => updateSelectedPage({ vAlign: 'center' })}
+                                        onClick={() => updateAlignment('center')}
                                     >
                                         <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative", 
                                             selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
                                         data-label="      Bottom"
-                                        onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
+                                        onClick={() => updateAlignment('bottom')}
                                     >
                                         <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
@@ -418,7 +404,7 @@ export default function PdfToImageConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                     <RotateCw className="size-3" /> Orientation
                                 </Label>
-                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-[10px] uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
+                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
                                     <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
                                 </Button>
                              </div>
@@ -450,19 +436,11 @@ export default function PdfToImageConverter() {
                                 )}
                              </Button>
                         </div>
-                        
-                        <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
-                            <Zap className="size-5 text-yellow-500 shrink-0" />
-                            <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
-                                <span className="font-black block mb-0.5 text-primary">HD RENDER:</span>
-                                Pages are sampled at 300 DPI equivalent for professional print quality.
-                            </p>
-                        </div>
                     </div>
 
-                    {/* RIGHT VIEWPORT: GRID OF PAGES */}
-                    <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] md:h-[850px] relative shadow-inner">
-                        <ScrollArea className="flex-1 p-6 md:p-10">
+                    {/* RIGHT VIEWPORT: GRID OF PAGES - FIXED HEIGHT WITH SCROLLBAR */}
+                    <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[600px] lg:h-[850px] relative shadow-inner">
+                        <ScrollArea className="flex-1 w-full h-full p-6 md:p-10">
                             {isProcessing && pages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-40 gap-8">
                                     <div className="relative">
@@ -528,9 +506,11 @@ export default function PdfToImageConverter() {
                             <ScrollBar />
                         </ScrollArea>
                         
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
-                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Select page to adjust
-                        </div>
+                        {pages.length > 0 && (
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
+                                 <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Select page to adjust
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>
@@ -543,3 +523,4 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
+

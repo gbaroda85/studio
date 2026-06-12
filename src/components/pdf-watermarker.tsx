@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -23,7 +24,9 @@ import {
     Sparkles,
     CheckCircle2,
     Palette,
-    X
+    X,
+    Monitor,
+    Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -31,12 +34,13 @@ import { Input } from './ui/input';
 import { Slider } from './ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from './ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Initialize PDF.js worker with stable CDN
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type WatermarkPosition = 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'diagonal-bottom-up' | 'diagonal-top-down';
@@ -58,21 +62,6 @@ const StarIcons = () => (
                 <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
     </>
 );
 
@@ -90,7 +79,7 @@ export default function PdfWatermarker() {
   const [rotation, setRotation] = useState<number | string>(45); 
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
-  const [originalPageImage, setOriginalPageImage] = useState<string | null>(null);
+  const [originalPageImages, setOriginalPageImages] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,28 +93,34 @@ export default function PdfWatermarker() {
     if (file && file.type === 'application/pdf') {
       setPdfFile(file);
       setWatermarkedPdfUrl(null);
-      setOriginalPageImage(null);
+      setOriginalPageImages([]);
       setIsGeneratingPreview(true);
       try {
         const arrayBuffer = await file.arrayBuffer();
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(arrayBuffer),
-            cMapUrl: 'https://unpkg.com/pdfjs-dist@4.2.67/cmaps/',
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
             cMapPacked: true
         });
         const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.0 });
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        if (context) {
-            context.fillStyle = '#FFFFFF';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: context, viewport }).promise;
-            setOriginalPageImage(canvas.toDataURL('image/jpeg', 0.9));
+        const imgs: string[] = [];
+        const count = Math.min(pdf.numPages, 10);
+
+        for (let i = 1; i <= count; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            if (context) {
+                context.fillStyle = '#FFFFFF';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                await page.render({ canvasContext: context, viewport }).promise;
+                imgs.push(canvas.toDataURL('image/jpeg', 0.85));
+            }
         }
+        setOriginalPageImages(imgs);
       } catch (e) {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF for preview.' });
       } finally {
@@ -224,7 +219,7 @@ export default function PdfWatermarker() {
 
   const resetState = () => {
       setPdfFile(null);
-      setOriginalPageImage(null);
+      setOriginalPageImages([]);
       setWatermarkedPdfUrl(null);
       setWatermarkText('CONFIDENTIAL');
       setPosition('diagonal-bottom-up');
@@ -317,9 +312,9 @@ export default function PdfWatermarker() {
             </CardFooter>
         </Card>
       ) : (
-        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start animate-in fade-in duration-500 pb-20">
-            <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30">
+        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch animate-in fade-in duration-500 pb-20">
+            <div className="lg:col-span-4 space-y-6 no-print">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full">
                     <CardHeader className="bg-primary/5 border-b p-5 md:p-6">
                         <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
                             <Palette className="size-5 text-primary" /> Configuration
@@ -392,7 +387,7 @@ export default function PdfWatermarker() {
                             <Slider value={opacity} min={5} max={100} step={1} onValueChange={setOpacity} className="py-2" />
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-5 md:p-8 border-t flex flex-col gap-3">
+                    <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-3">
                         {!watermarkedPdfUrl ? (
                             <Button 
                                 className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50"
@@ -423,7 +418,7 @@ export default function PdfWatermarker() {
                                 <span className="uppercase tracking-tighter text-lg md:text-2xl">SAVE PDF</span>
                             </Button>
                         )}
-                        <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
+                        <Button variant="outline" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-destructive/5 hover:text-destructive">
                             <RefreshCcw className="mr-2 size-3" /> Change File
                         </Button>
                     </CardFooter>
@@ -431,8 +426,8 @@ export default function PdfWatermarker() {
             </div>
 
             <div className="lg:col-span-8 h-full">
-                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-full flex flex-col">
-                    <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[600px] lg:h-[850px] flex flex-col">
+                    <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Preview</CardTitle>
@@ -444,36 +439,44 @@ export default function PdfWatermarker() {
                              </div>
                         )}
                     </CardHeader>
-                    <CardContent className="p-6 md:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[450px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1">
-                        {isGeneratingPreview ? (
-                            <div className="flex flex-col items-center gap-6 text-center">
-                                <div className="relative">
-                                    <Loader2 className="size-16 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
-                                    <Eye className="absolute inset-0 m-auto size-6 md:size-8 text-primary animate-pulse" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page 1...</p>
-                            </div>
-                        ) : originalPageImage ? (
-                            <div className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
-                                <img src={originalPageImage} alt="Preview" className="w-full h-auto block" />
-                                <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none">
-                                    <div style={getPreviewStyle()}>
-                                        {watermarkText}
+                    <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1 flex flex-col">
+                        <ScrollArea className="flex-1 w-full h-full p-6 md:p-12 lg:p-16">
+                            <div className="flex flex-col items-center gap-16 pb-20">
+                                {isGeneratingPreview ? (
+                                    <div className="flex flex-col items-center gap-6 text-center py-40">
+                                        <div className="relative">
+                                            <Loader2 className="size-16 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
+                                            <Eye className="absolute inset-0 m-auto size-6 md:size-8 text-primary animate-pulse" />
+                                        </div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page Samples...</p>
                                     </div>
-                                </div>
-                                <div className="absolute top-2 right-2 opacity-20">
-                                    <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE 1 VIEW</Badge>
-                                </div>
+                                ) : originalPageImages.length > 0 ? (
+                                    originalPageImages.map((src, i) => (
+                                        <div key={i} className="relative group w-full max-w-[500px] shadow-3xl border-4 md:border-8 border-white bg-white rounded-sm animate-in zoom-in-95 duration-300 overflow-hidden">
+                                            <img src={src} alt="Preview" className="w-full h-auto block" />
+                                            <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none">
+                                                <div style={getPreviewStyle()}>
+                                                    {watermarkText}
+                                                </div>
+                                            </div>
+                                            <div className="absolute top-2 right-2 opacity-20">
+                                                <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE {i+1} VIEW</Badge>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : null}
                             </div>
-                        ) : null}
-                        {!watermarkedPdfUrl && originalPageImage && (
-                            <div className="mt-8 flex items-center gap-3 px-6 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40">
+                            <ScrollBar />
+                        </ScrollArea>
+                        
+                        {!watermarkedPdfUrl && originalPageImages.length > 0 && (
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
                                 <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" /> 
                                 Real-time Studio Sync Active
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8">
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex justify-center gap-8 shrink-0">
                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                             <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
                         </div>
@@ -488,3 +491,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
