@@ -235,7 +235,7 @@ export default function ScannerToPdf() {
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
         
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
+        <div className="grid lg:grid-cols-12 gap-8 items-start mt-8">
             
             {/* LEFT: WORKSPACE */}
             <div className="lg:col-span-8 space-y-6">
@@ -298,7 +298,7 @@ export default function ScannerToPdf() {
                                                 )}
                                             >
                                                 <div className={cn(
-                                                    "absolute inset-0 flex flex-col p-1 transition-all duration-300",
+                                                    "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
                                                     <img src={p.src} className="max-w-full max-h-[90%] object-contain mx-auto" alt="thumb" />
@@ -459,7 +459,7 @@ export default function ScannerToPdf() {
         </div>
         
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf" multiple onChange={handleFilesUpload} />
     </div>
   );
 }
