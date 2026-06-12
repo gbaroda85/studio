@@ -48,7 +48,6 @@ import {
   Trophy,
   Music,
   Video,
-  PenLine,
   RotateCw,
   Barcode,
   QrCode,
@@ -115,18 +114,18 @@ const ALL_TOOLS = [
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "pdf" },
   { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Protect your PDFs with custom text watermarks.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf" },
-  { icon: NotebookPen, title: "PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "pdf" },
+  { icon: NotebookPen, title: "PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-[#f7fee7]", category: "pdf" },
   { icon: Archive, title: "CREATE ZIP", description: "Bundle multiple files into a single ZIP archive.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "file" },
-  { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from any ZIP archive locally.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-stone-50", category: "file" },
+  { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from any ZIP archive locally.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
   { icon: Barcode, title: "BARCODE GENERATOR", description: "Create scannable industrial-grade barcodes.", href: "/barcode-generator", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "converters" },
   { icon: Gauge, title: "ACCELERATION CONV.", description: "Convert between various acceleration units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "converters" },
-  { icon: AreaChart, title: "AREA CONVERTER", description: "Convert international and local land area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-lime-50", category: "converters" },
-  { icon: Fuel, title: "FUEL CONVERTER", description: "Convert between MPG and km/L efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "converters" },
-  { icon: Waves, title: "PRESSURE CONVERTER", description: "Convert Bar, PSI, and Pascal units with precision.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "converters" },
-  { icon: Route, title: "FUEL COST CALC", description: "Estimate trip fuel expenses and distance.", href: "/fuel-cost-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
-  { icon: Coins, title: "INTEREST CALC", description: "Calculate simple and compound interest returns.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-yellow-50", category: "calculator" },
-  { icon: Receipt, title: "SALES TAX CALC", description: "Calculate bill tax and final price inclusive of tax.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "calculator" },
-  { icon: Percent, title: "PERCENTAGE CALC", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-blue-50", category: "calculator" },
+  { icon: AreaChart, title: "AREA CONVERTER", description: "Convert international and local land area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converters" },
+  { icon: Fuel, title: "FUEL CONVERTER", description: "Convert between MPG and km/L efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converters" },
+  { icon: Waves, title: "PRESSURE CONVERTER", description: "Convert Bar, PSI, and Pascal units with precision.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "converters" },
+  { icon: Route, title: "FUEL COST CALC", description: "Estimate trip fuel expenses and distance.", href: "/fuel-cost-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
+  { icon: Coins, title: "INTEREST CALC", description: "Calculate simple and compound interest returns.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
+  { icon: Receipt, title: "SALES TAX CALC", description: "Calculate bill tax and final price inclusive of tax.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
+  { icon: Percent, title: "PERCENTAGE CALC", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
@@ -137,7 +136,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
           <Icon className="size-6" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tight uppercase leading-tight">{title}</h3>
+          <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
           <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-4 uppercase opacity-60 tracking-tight">{description}</p>
           
           <div className="flex flex-wrap gap-2 mt-auto">
@@ -287,17 +286,10 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools?tab=image" className="explore-all-cta hidden sm:flex group">
-                          <span className="span font-black tracking-widest uppercase">Explore All</span>
-                          <span className="second">
-                            <svg width="30px" height="15px" viewBox="0 0 66 43" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                              <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                                <path className="one" d="M40.1543933,3.89485589 L40.3151592,2.18569696 C40.3601096,1.70693552 41.0261314,1.58550198 41.2291244,1.99616239 L45.2016838,9.75704901 C45.3090623,9.97014693 45.3090623,10.2201314 45.2016838,10.4332293 L41.2291244,18.194116 C41.0261314,18.6047764 40.3601096,18.4833428 40.3151592,18.0045814 L40.1543933,16.2954224 L0,16.2954224 L0,3.89485589 L40.1543933,3.89485589 Z" fill="#FFFFFF"></path>
-                                <path className="two" d="M55.1543933,3.89485589 L55.3151592,2.18569696 C55.3601096,1.70693552 56.0261314,1.58550198 56.2291244,1.99616239 L60.2016838,9.75704901 C60.3090623,9.97014693 60.3090623,10.2201314 60.2016838,10.4332293 L56.2291244,18.194116 C56.0261314,18.6047764 55.3601096,18.4833428 55.3151592,18.0045814 L55.1543933,16.2954224 L15,16.2954224 L15,3.89485589 L55.1543933,3.89485589 Z" fill="#FFFFFF"></path>
-                                <path className="three" d="M70.1543933,3.89485589 L70.3151592,2.18569696 C70.3601096,1.70693552 71.0261314,1.58550198 71.2291244,1.99616239 L75.2016838,9.75704901 C75.3090623,9.97014693 75.3090623,10.2201314 75.2016838,10.4332293 L71.2291244,18.194116 C71.0261314,18.6047764 70.3601096,18.4833428 70.3151592,18.0045814 L70.1543933,16.2954224 L30,16.2954224 L30,3.89485589 L70.1543933,3.89485589 Z" fill="#FFFFFF"></path>
-                              </g>
-                            </svg>
-                          </span>
+                        <Link href="/tools?tab=image" className="hidden sm:flex">
+                          <button className="learn-more">
+                            <span className="font-black tracking-widest uppercase">Explore All</span>
+                          </button>
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
