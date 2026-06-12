@@ -35,7 +35,9 @@ import {
     Bold,
     Italic,
     GripVertical,
-    Move
+    Move,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -48,8 +50,9 @@ import { Slider } from './ui/slider';
 import { Separator } from './ui/separator';
 import confetti from 'canvas-confetti';
 
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 type PageNumberPosition = 
@@ -716,3 +719,4 @@ export default function PdfPageNumberer() {
     </div>
   );
 }
+
