@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
-import { PDFDocument, degrees } from 'pdf-lib';
+import { PDFDocument, degrees, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -305,9 +305,6 @@ export default function PdfOrganizer() {
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-    /**
-     * MOVE TO TRASH
-     */
     const deletePage = (id: string) => {
         const pageToDelete = pages.find(p => p.id === id);
         if (!pageToDelete) return;
@@ -318,9 +315,6 @@ export default function PdfOrganizer() {
         toast({ title: "Page Moved to Trash" });
     };
 
-    /**
-     * RESTORE FROM TRASH
-     */
     const restorePage = (id: string) => {
         const pageToRestore = deletedPages.find(p => p.id === id);
         if (!pageToRestore) return;
@@ -366,17 +360,10 @@ export default function PdfOrganizer() {
         toast({ title: "Blank Page Inserted" });
     };
 
-    const resetAllRotations = () => {
-        setPages(prev => prev.map(p => ({ ...p, rotation: 0 })));
-        setResultPdfUrl(null);
-        toast({ title: "Rotations Reset", description: "All pages set to original orientation." });
-    };
-
     const rotateAll = (deg: number) => {
         if (deg === 0) {
             setPages(prev => prev.map(p => ({ ...p, rotation: 0 })));
         } else {
-            // Incremental rotation: har click par 90 degree ghumega
             setPages(prev => prev.map(p => ({ ...p, rotation: (p.rotation + deg) % 360 })));
         }
         setResultPdfUrl(null);
@@ -438,6 +425,14 @@ export default function PdfOrganizer() {
                     newPdfDoc.addPage(copiedPage);
                 }
             }
+
+            // Set Viewer Preferences to prevent "huge" display
+            const catalog = newPdfDoc.catalog;
+            catalog.set(PDFName.of('ViewerPreferences'), newPdfDoc.context.obj({
+                FitWindow: true,
+                CenterWindow: true,
+                DisplayDocTitle: true
+            }));
 
             const pdfBytes = await newPdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -507,7 +502,7 @@ export default function PdfOrganizer() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Organize</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Delete, re-order, rotate or insert blank pages.</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold uppercase opacity-60">Delete, re-order, rotate or insert blank pages.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -528,7 +523,7 @@ export default function PdfOrganizer() {
                                         variant="ghost" 
                                         size="sm" 
                                         onClick={handleReset} 
-                                        className="btn-uiverse-secondary h-8 px-4 shrink-0"
+                                        className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive px-3 rounded-lg"
                                     >
                                         <RefreshCcw className="mr-1.5 size-3" /> Change
                                     </Button>

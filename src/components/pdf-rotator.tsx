@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
-import { PDFDocument, degrees } from 'pdf-lib';
+import { PDFDocument, degrees, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -120,7 +120,11 @@ export default function PdfRotator() {
 
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                const pdf = await pdfjs.getDocument({ 
+                    data: new Uint8Array(arrayBuffer),
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                    cMapPacked: true
+                }).promise;
                 const totalPages = pdf.numPages;
 
                 const newPages: PageItem[] = [];
@@ -195,6 +199,14 @@ export default function PdfRotator() {
                 page.setRotation(degrees(currentRot + p.rotation));
             });
 
+            // Set Viewer Preferences to prevent "huge" display
+            const catalog = pdfDoc.catalog;
+            catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+                FitWindow: true,
+                CenterWindow: true,
+                DisplayDocTitle: true
+            }));
+
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
@@ -250,7 +262,7 @@ export default function PdfRotator() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -399,9 +411,7 @@ export default function PdfRotator() {
                             </div>
 
                             <div className="p-5 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4 shadow-inner">
-                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                     <Zap className="size-5 text-yellow-500 animate-pulse" />
-                                </div>
+                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><Zap className="size-5 text-yellow-500 animate-pulse" /></div>
                                 <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                     <span className="font-black block mb-1 text-primary">VECTOR LOCK:</span>
                                     Rotation is applied as metadata. Original quality is preserved 100%.

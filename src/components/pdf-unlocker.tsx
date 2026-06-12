@@ -137,7 +137,6 @@ export default function PdfUnlocker() {
             await loadingTask.promise;
             setIsProtected(false);
         } catch (error: any) {
-            // Robust detection of password protection
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setIsProtected(true);
             } else {
@@ -158,7 +157,6 @@ export default function PdfUnlocker() {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if (e.target?.result) {
-                    // FIXED: Use ArrayBuffer instead of DataURL for pdfjs compatibility
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
@@ -214,13 +212,13 @@ export default function PdfUnlocker() {
             const totalPages = pdf.numPages;
             
             // Using standard points (pt) to match original dimensions perfectly
-            const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true, hotfixes: ['px_scaling'] });
+            const newPdf = new jsPDF({ orientation: 'p', unit: 'pt', compress: true });
             
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                const viewport = page.getViewport({ scale: 1.0 });
+                const viewport = page.getViewport({ scale: 1.0 }); // Reference scale for PDF points
                 const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
@@ -238,6 +236,7 @@ export default function PdfUnlocker() {
                     
                     if (i === 1) newPdf.deletePage(1);
                     
+                    // Add page with standard point dimensions
                     newPdf.addPage([viewport.width, viewport.height], orientation);
                     newPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
                 }
@@ -299,7 +298,7 @@ export default function PdfUnlocker() {
 
                         <Card
                             className={cn(
-                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                             )}
                             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -459,4 +458,3 @@ export default function PdfUnlocker() {
         </div>
     );
 }
-
