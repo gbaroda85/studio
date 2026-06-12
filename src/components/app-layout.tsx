@@ -462,25 +462,26 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isMounted, setIsMounted] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const prevPathRef = useRef(pathname);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // RESTRICTED ROUTE TRANSITION HANDLER
+  // UPDATED RESTRICTED ROUTE TRANSITION HANDLER
   useEffect(() => {
     if (!isMounted) return;
     
-    // Only show loader when navigating AWAY from Home Page ('/') to any other page
     const wasOnHome = prevPathRef.current === '/';
-    const isNowOnOtherPage = pathname !== '/';
+    const isNowOnHome = pathname === '/';
     
-    if (wasOnHome && isNowOnOtherPage) {
+    // Animation only for: Home -> Tool OR Any Tool -> Home (Home Button Press)
+    const shouldShowLoader = (wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome);
+    
+    if (shouldShowLoader) {
         setIsNavigating(true);
         
-        // Show for 1 second for premium entry feel
+        // Show for 1 second for premium entry/exit feel
         const timer = setTimeout(() => {
           setIsNavigating(false);
         }, 1000);
@@ -488,7 +489,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
         return () => clearTimeout(timer);
     }
     
-    // Update ref for next navigation
+    // Update ref for next navigation check
     prevPathRef.current = pathname;
   }, [pathname, isMounted]);
 
