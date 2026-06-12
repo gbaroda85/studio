@@ -52,7 +52,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-// Initialize PDF.js worker
+// STABLE WORKER CONFIG
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
@@ -107,7 +107,7 @@ export default function PdfWatermarker() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
-  // Watermark Settings
+  // Watermark Core Settings
   const [wType, setWType] = useState<WatermarkType>('text');
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [imageWatermarkSrc, setImageWatermarkSrc] = useState<string | null>(null);
@@ -122,7 +122,6 @@ export default function PdfWatermarker() {
   const [textColor, setTextColor] = useState("#808080");
   const [isBold, setIsBold] = useState(true);
   const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
@@ -205,7 +204,7 @@ export default function PdfWatermarker() {
           reader.onload = (ev) => {
               setImageWatermarkSrc(ev.target?.result as string);
               setWType('image');
-              toast({ title: "Watermark Image Uploaded" });
+              toast({ title: "Logo Uploaded" });
           };
           reader.readAsDataURL(file);
       }
@@ -214,10 +213,7 @@ export default function PdfWatermarker() {
   const handleApplyWatermark = async () => {
     if (!pdfFile) return;
     if (wType === 'text' && !watermarkText) return;
-    if (wType === 'image' && !imageWatermarkSrc) {
-        toast({ variant: 'destructive', title: "Missing Image", description: "Please upload an image first." });
-        return;
-    }
+    if (wType === 'image' && !imageWatermarkSrc) return;
 
     setIsProcessing(true);
 
@@ -226,6 +222,7 @@ export default function PdfWatermarker() {
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
         const pages = pdfDoc.getPages();
         
+        // Font Selection
         let font;
         if (wType === 'text') {
             let fontVariant = StandardFonts.Helvetica;
@@ -235,6 +232,7 @@ export default function PdfWatermarker() {
             font = await pdfDoc.embedFont(fontVariant);
         }
 
+        // Image Selection
         let embeddedImage: any;
         let imageDims = { width: 0, height: 0 };
         if (wType === 'image' && imageWatermarkSrc) {
@@ -246,20 +244,20 @@ export default function PdfWatermarker() {
 
         const rgbColor = hexToRgb(textColor);
         const rotDeg = -rotation[0]; 
+        const rad = (rotDeg * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
         const op = opacity[0] / 100;
         const currentMargin = margin[0];
-        const radians = (rotDeg * Math.PI) / 180;
-        const cos = Math.cos(radians);
-        const sin = Math.sin(radians);
 
         for (const page of pages) {
             const { width, height } = page.getSize();
             const pageRot = page.getRotation().angle;
-            const isLeaning = pageRot === 90 || pageRot === 270;
             
-            // Visual dimensions from viewer's perspective
-            const vw = isLeaning ? height : width;
-            const vh = isLeaning ? width : height;
+            // Visual viewport depends on page rotation
+            const isSideways = pageRot === 90 || pageRot === 270;
+            const vw = isSideways ? height : width;
+            const vh = isSideways ? width : height;
 
             let tw = 0, th = 0;
             if (wType === 'text' && font) {
@@ -271,56 +269,56 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // Calculate target visual center
-            let vcx = vw / 2;
-            let vcy = vh / 2;
-
+            // 1. Calculate visual center (X, Y) relative to top-left viewer origin
+            let vcx, vcy;
             switch (position) {
-                case 'top-left': vcx = currentMargin + tw/2; vcy = vh - currentMargin - th/2; break;
-                case 'top-center': vcx = vw / 2; vcy = vh - currentMargin - th/2; break;
-                case 'top-right': vcx = vw - currentMargin - tw/2; vcy = vh - currentMargin - th/2; break;
+                case 'top-left': vcx = currentMargin + tw/2; vcy = currentMargin + th/2; break;
+                case 'top-center': vcx = vw / 2; vcy = currentMargin + th/2; break;
+                case 'top-right': vcx = vw - currentMargin - tw/2; vcy = currentMargin + th/2; break;
                 case 'center-left': vcx = currentMargin + tw/2; vcy = vh / 2; break;
+                case 'center-center': vcx = vw / 2; vcy = vh / 2; break;
                 case 'center-right': vcx = vw - currentMargin - tw/2; vcy = vh / 2; break;
-                case 'bottom-left': vcx = currentMargin + tw/2; vcy = currentMargin + th/2; break;
-                case 'bottom-center': vcx = vw / 2; vcy = currentMargin + th/2; break;
-                case 'bottom-right': vcx = vw - currentMargin - tw/2; vcy = currentMargin + th/2; break;
+                case 'bottom-left': vcx = currentMargin + tw/2; vcy = vh - currentMargin - th/2; break;
+                case 'bottom-center': vcx = vw / 2; vcy = vh - currentMargin - th/2; break;
+                case 'bottom-right': vcx = vw - currentMargin - tw/2; vcy = vh - currentMargin - th/2; break;
+                default: vcx = vw/2; vcy = vh/2;
             }
 
-            // Map visual center back to local coordinates
+            // 2. Transform visual center to PDF local coordinates (Bottom-Left origin)
             let lcx, lcy;
-            if (pageRot === 0) { lcx = vcx; lcy = vcy; }
-            else if (pageRot === 90) { lcx = vcy; lcy = width - vcx; }
-            else if (pageRot === 180) { lcx = width - vcx; lcy = height - vcy; }
-            else if (pageRot === 270) { lcx = height - vcy; lcy = vcx; }
-            else { lcx = vcx; lcy = vcy; }
+            if (pageRot === 0) { lcx = vcx; lcy = vh - vcy; }
+            else if (pageRot === 90) { lcx = vcy; lcy = vcx; }
+            else if (pageRot === 180) { lcx = vw - vcx; lcy = vcy; }
+            else if (pageRot === 270) { lcx = vh - vcy; lcy = vw - vcx; }
+            else { lcx = vcx; lcy = vh - vcy; }
 
-            // Pivot compensation for bottom-left anchor drawing
-            const drawX = lcx - (tw/2 * cos) + (th/2 * sin);
-            const drawY = lcy - (tw/2 * sin) - (th/2 * cos);
+            // 3. Drawing anchor compensation for Center-Pivot rotation
+            // pdf-lib's drawText draws from bottom-left of the line
+            const dx = lcx - (tw/2 * cos) + (th/2 * sin);
+            const dy = lcy - (tw/2 * sin) - (th/2 * cos);
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
-                    x: drawX, y: drawY, font, size: fontSize,
+                    x: dx, y: dy, font, size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-                    opacity: op, rotate: degrees(rotDeg),
+                    opacity: op, rotate: degrees(rotDeg)
                 });
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
-                    x: drawX, y: drawY, width: tw, height: th,
-                    opacity: op, rotate: degrees(rotDeg),
+                    x: dx, y: dy, width: tw, height: th,
+                    opacity: op, rotate: degrees(rotDeg)
                 });
             }
         }
 
-        const newPdfBytes = await pdfDoc.save();
-        const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+        const finalPdfBytes = await pdfDoc.save();
+        const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Watermark Applied!", description: "Positioning matches preview across all orientations." });
+        toast({ title: "Watermark Applied!", description: "High-fidelity mapping complete." });
     } catch (error) {
-        console.error(error);
-        toast({ variant: 'destructive', title: 'Process Error' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
     } finally {
         setIsProcessing(false);
     }
@@ -330,35 +328,22 @@ export default function PdfWatermarker() {
     if (!watermarkedPdfUrl || !pdfFile) return;
     const link = document.createElement('a');
     link.href = watermarkedPdfUrl;
-    const originalName = pdfFile.name.replace('.pdf', '');
-    link.download = `GR7-Tools-Watermarked-${originalName}.pdf`;
+    link.download = `Watermarked_${pdfFile.name}`;
     link.click();
   };
 
-  const resetState = () => {
-      setPdfFile(null);
-      setPreviewPages([]);
-      setWatermarkedPdfUrl(null);
-      setImageWatermarkSrc(null);
-      setWType('text');
-      setMargin([40]);
-      setFontSize(60);
-      setOpacity([30]);
-      setRotation([45]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const getPreviewStyle = (): React.CSSProperties => {
+      const containerWidth = 550; // The fixed display width in CSS
+      const scale = containerWidth / pageSize.width;
+      
       const styles: React.CSSProperties = {
           position: 'absolute',
           pointerEvents: 'none',
           color: textColor,
           opacity: opacity[0] / 100,
-          // Sync preview font size with PDF points relative to the 550px width container
-          fontSize: `${(fontSize / pageSize.width) * 550}px`,
+          fontSize: `${fontSize * scale}px`,
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
-          textDecoration: isUnderline ? 'underline' : 'none',
           textAlign: 'center',
           transition: 'all 0.1s linear',
           zIndex: 50,
@@ -372,18 +357,15 @@ export default function PdfWatermarker() {
           case 'top-left': styles.top = m; styles.left = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = `translate(-50%, 0) rotate(${-rotation[0]}deg)`; break;
           case 'top-right': styles.top = m; styles.right = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
-          
           case 'center-left': styles.top = '50%'; styles.left = m; styles.transform = `translate(0, -50%) rotate(${-rotation[0]}deg)`; break;
           case 'center-center': styles.top = '50%'; styles.left = '50%'; styles.transform = `translate(-50%, -50%) rotate(${-rotation[0]}deg)`; break;
           case 'center-right': styles.top = '50%'; styles.right = m; styles.transform = `translate(0, -50%) rotate(${-rotation[0]}deg)`; break;
-          
           case 'bottom-left': styles.bottom = m; styles.left = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
           case 'bottom-center': styles.bottom = m; styles.left = '50%'; styles.transform = `translate(-50%, 0) rotate(${-rotation[0]}deg)`; break;
           case 'bottom-right': styles.bottom = m; styles.right = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
       }
-
       return styles;
-  }
+  };
 
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
@@ -405,7 +387,7 @@ export default function PdfWatermarker() {
       {!pdfFile ? (
         <Card
             className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -440,7 +422,7 @@ export default function PdfWatermarker() {
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
                         <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
-                            <Palette className="size-5 text-primary" /> Config Panel
+                            <Palette className="size-5 text-primary" /> Configuration
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -455,13 +437,12 @@ export default function PdfWatermarker() {
                                     <Label className="text-[10px] font-black uppercase opacity-60">Watermark Text</Label>
                                     <Input value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} className="h-12 text-lg font-bold border-2 rounded-xl bg-muted/20" placeholder="CONFIDENTIAL" />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-black uppercase opacity-60">Style</Label>
+                                        <Label className="text-[10px] font-black uppercase opacity-60">Text Style</Label>
                                         <div className="flex gap-1">
                                             <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isBold && "bg-primary/10 border-primary text-primary")} onClick={() => setIsBold(!isBold)}><Bold className="size-3" /></Button>
                                             <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isItalic && "bg-primary/10 border-primary text-primary")} onClick={() => setIsItalic(!isItalic)}><Italic className="size-3" /></Button>
-                                            <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isUnderline && "bg-primary/10 border-primary text-primary")} onClick={() => setIsUnderline(!isUnderline)}><Underline className="size-3" /></Button>
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
@@ -480,7 +461,7 @@ export default function PdfWatermarker() {
                                     {!imageWatermarkSrc ? (
                                         <Button variant="outline" className="w-full h-16 border-2 border-dashed rounded-2xl flex flex-col gap-1" onClick={() => imageWatermarkInputRef.current?.click()}>
                                             <UploadCloud className="size-5 text-muted-foreground" />
-                                            <span className="text-[9px] font-black uppercase opacity-40">Click to Upload PNG/JPG</span>
+                                            <span className="text-[9px] font-black uppercase opacity-40">Upload PNG Logo</span>
                                         </Button>
                                     ) : (
                                         <div className="relative group">
@@ -541,22 +522,15 @@ export default function PdfWatermarker() {
                                     className="h-10 border-2 font-bold rounded-xl text-center shadow-inner" 
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Layer Order</Label>
-                                <div className="flex items-center gap-3 p-3 bg-muted/20 border-2 rounded-xl text-[10px] font-black uppercase opacity-60">
-                                    <MonitorCheck className="size-4" /> HD OVERLAY ACTIVE
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-1">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
+                                        <Move className="size-3" /> Corner Margin
+                                    </Label>
+                                    <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
                                 </div>
+                                <Slider value={margin} min={0} max={200} step={1} onValueChange={setMargin} />
                             </div>
-                        </div>
-
-                        <div className="space-y-4 pt-6 border-t-2 border-dashed">
-                            <div className="flex justify-between items-center px-1">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
-                                    <Move className="size-3" /> Corner Margin
-                                </Label>
-                                <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
-                            </div>
-                            <Slider value={margin} min={0} max={200} step={1} onValueChange={setMargin} />
                         </div>
 
                         <div className="p-4 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm mt-4">
@@ -683,3 +657,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
