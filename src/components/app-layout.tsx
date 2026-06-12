@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {usePathname, useSearchParams} from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import {
   Crop,
@@ -84,6 +84,8 @@ import {
 } from "@/components/ui/sheet";
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
+import Loading from '@/app/loading';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const CATEGORIES = [
   {
@@ -457,16 +459,49 @@ export function AppFooter() {
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // GLOBAL ROUTE TRANSITION HANDLER
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    // Trigger loader on pathname/search change
+    setIsNavigating(true);
+    
+    // Set a minimum visible time for the premium animation
+    const timer = setTimeout(() => {
+      setIsNavigating(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [pathname, searchParams, isMounted]);
 
   if (!isMounted) return null;
   
   return (
     <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-20">
       <AppHeader />
+      
+      {/* Global Page Transition Loader */}
+      <AnimatePresence>
+        {isNavigating && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] pointer-events-auto"
+          >
+            <Loading />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
          <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
          <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
