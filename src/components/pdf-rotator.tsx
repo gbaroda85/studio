@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -168,9 +169,16 @@ export default function PdfRotator() {
     };
 
     const rotateAll = (deg: number) => {
-        setPages(prev => prev.map(p => ({ ...p, rotation: deg % 360 })));
+        if (deg === 0) {
+            setPages(prev => prev.map(p => ({ ...p, rotation: 0 })));
+        } else {
+            setPages(prev => prev.map(p => ({ ...p, rotation: (p.rotation + deg) % 360 })));
+        }
         setRotatedPdfUrl(null);
-        toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
+        toast({ 
+            title: deg === 0 ? "Rotations Reset" : "Rotated All Pages", 
+            description: deg === 0 ? "All pages set to original orientation." : `Rotated entire stack by another ${deg}°.` 
+        });
     };
 
     const handleSavePdf = async () => {
@@ -242,7 +250,7 @@ export default function PdfRotator() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}

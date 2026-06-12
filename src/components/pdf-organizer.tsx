@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -372,9 +373,17 @@ export default function PdfOrganizer() {
     };
 
     const rotateAll = (deg: number) => {
-        setPages(prev => prev.map(p => ({ ...p, rotation: deg % 360 })));
+        if (deg === 0) {
+            setPages(prev => prev.map(p => ({ ...p, rotation: 0 })));
+        } else {
+            // Incremental rotation: har click par 90 degree ghumega
+            setPages(prev => prev.map(p => ({ ...p, rotation: (p.rotation + deg) % 360 })));
+        }
         setResultPdfUrl(null);
-        toast({ title: "Rotated All Pages", description: `Applied ${deg}° to the entire stack.` });
+        toast({ 
+            title: deg === 0 ? "Rotations Reset" : "Rotated All Pages", 
+            description: deg === 0 ? "All pages set to original orientation." : `Rotated entire stack by another ${deg}°.` 
+        });
     };
 
     const sortPages = (direction: 'asc' | 'desc') => {
@@ -619,7 +628,7 @@ export default function PdfOrganizer() {
                                     </div>
                                     <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="ADD BLANK PAGE" />
                                     <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="ROTATE ALL 90°" />
-                                    <button onClick={() => resetAllRotations()} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESET ALL ROTATIONS" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14 hover:scale-105 active:scale-95 transition-all" data-label="RESET ALL ROTATIONS" />
                                     
                                     <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
                                         <div className="relative w-full overflow-visible">
@@ -691,7 +700,7 @@ export default function PdfOrganizer() {
                                         <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 flex items-center justify-center gap-4 px-10 animate-in zoom-in-95">
                                             <StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                         </Button>
-                                        <Button variant="ghost" onClick={handleReset} className="btn-uiverse-secondary w-full h-11">
+                                        <Button variant="outline" onClick={handleReset} className="btn-uiverse-secondary w-full h-11">
                                             <RefreshCcw className="mr-2 h-4 w-4" /> Start New
                                         </Button>
                                     </div>
