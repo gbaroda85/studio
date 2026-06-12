@@ -468,29 +468,37 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     setIsMounted(true);
   }, []);
 
-  // UPDATED RESTRICTED ROUTE TRANSITION HANDLER
+  // RESTRICTED LOADING TRANSITION: ONLY Home -> Tool OR Tool -> Home
   useEffect(() => {
     if (!isMounted) return;
     
-    const wasOnHome = prevPathRef.current === '/';
-    const isNowOnHome = pathname === '/';
+    const fromPath = prevPathRef.current;
+    const toPath = pathname;
+
+    // Condition: 
+    // 1. From Home (/) to anywhere else (like /tools or /image-compress)
+    // 2. From anywhere else back to Home (/) via Home button
+    const wasOnHome = fromPath === '/';
+    const isNowOnHome = toPath === '/';
     
-    // Animation only for: Home -> Tool OR Any Tool -> Home (Home Button Press)
+    // Animation logic: (Left Home) OR (Returning Home)
     const shouldShowLoader = (wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome);
     
     if (shouldShowLoader) {
         setIsNavigating(true);
         
-        // Show for 1 second for premium entry/exit feel
+        // Show for exactly 1 second for premium feel
         const timer = setTimeout(() => {
           setIsNavigating(false);
         }, 1000);
         
+        // Update ref immediately after deciding to show loader
+        prevPathRef.current = toPath;
         return () => clearTimeout(timer);
     }
     
-    // Update ref for next navigation check
-    prevPathRef.current = pathname;
+    // If navigating between tools (e.g. /tools -> /image-compress), just update ref and skip loader
+    prevPathRef.current = toPath;
   }, [pathname, isMounted]);
 
   if (!isMounted) return null;
