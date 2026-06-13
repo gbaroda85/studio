@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useCallback, useEffect } from "react";
@@ -61,8 +62,8 @@ export default function SignatureResizer() {
     const [fileName, setFileName] = useState<string>("");
     const [unit, setUnit] = useState<Unit>('cm'); 
     const [dpi, setDpi] = useState<string>("200");
-    const [width, setWidth] = useState<string>("14"); 
-    const [height, setHeight] = useState<string>("6"); 
+    const [width, setWidth] = useState<string>("140"); 
+    const [height, setHeight] = useState<string>("60"); 
     const [targetSize, setTargetSize] = useState<string>("20");
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -92,6 +93,14 @@ export default function SignatureResizer() {
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
+    const handleUnitChange = (val: Unit) => {
+        setUnit(val);
+        // Sync defaults to 140 x 60 for both as requested
+        setWidth("140");
+        setHeight("60");
+        setResultUrl(null);
+    };
 
     const processResize = async () => {
         if (!imageSrc) return;
@@ -123,10 +132,10 @@ export default function SignatureResizer() {
                 targetH = (targetH / 2.54) * d;
             }
 
-            // Cap dimensions to prevent memory crashes on 140cm+ entries
-            const MAX_DIM = 6000;
+            // Memory Cap for stability
+            const MAX_DIM = 4000;
             if (targetW > MAX_DIM || targetH > MAX_DIM) {
-                throw new Error("Dimensions are extremely high. Please reduce CM or DPI.");
+                throw new Error("Dimensions are extremely high. Browser limit hit.");
             }
 
             canvas.width = Math.round(targetW);
@@ -139,27 +148,31 @@ export default function SignatureResizer() {
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // 3. Ultra-Precision Iterative Compression (20 steps for 19.9KB result)
+            // 3. Precision Binary Search Compression
             const limitKB = parseFloat(targetSize) || 20;
-            const targetBytes = limitKB * 1024;
+            const targetBytes = limitKB * 1024 * 0.97; // Stricter margin to prevent download swell
             
             let bestBlob: Blob | null = null;
-            let low = 0.001, high = 1.0;
+            let low = 0.01, high = 1.0;
             
-            for(let i=0; i < 20; i++) {
+            for(let i=0; i < 15; i++) {
                 const mid = (low + high) / 2;
                 const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
                 
                 if (blob.size <= targetBytes) {
                     bestBlob = blob;
-                    low = mid; // Try higher quality
+                    low = mid; 
                 } else {
-                    high = mid; // Too big, lower quality
+                    high = mid; 
                 }
             }
 
-            if (!bestBlob) {
-                bestBlob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.05));
+            // If target not reached (too small), use 1.0 quality
+            if (!bestBlob || bestBlob.size < targetBytes * 0.5) {
+                const maxBlob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 1.0));
+                if (maxBlob.size <= targetBytes * 1.1) {
+                    bestBlob = maxBlob;
+                }
             }
 
             const finalUrl = URL.createObjectURL(bestBlob!);
@@ -172,7 +185,7 @@ export default function SignatureResizer() {
                 origin: { y: 0.6 },
                 colors: ['#f97316', '#ffffff']
             });
-            toast({ title: "Optimized Successfully", description: `File Size: ${formatBytes(bestBlob!.size)}` });
+            toast({ title: "Process Complete", description: `Optimized to ${formatBytes(bestBlob!.size)}` });
         } catch (error: any) {
             toast({ variant: 'destructive', title: "Process Error", description: error.message || "Failed to resize." });
         } finally {
@@ -210,7 +223,7 @@ export default function SignatureResizer() {
                             </div>
                             <div>
                                 <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Sign Studio Pro</CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">20-Pass KB Extraction</CardDescription>
+                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Strict 20KB Extraction</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
@@ -218,12 +231,12 @@ export default function SignatureResizer() {
                     <CardContent className="p-8 space-y-8">
                         <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">1. Dimension System</Label>
-                            <RadioGroup value={unit} onValueChange={(v) => setUnit(v as Unit)} className="flex gap-4">
-                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm", unit === 'cm' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => setUnit('cm')}>
+                            <RadioGroup value={unit} onValueChange={(v) => handleUnitChange(v as Unit)} className="flex gap-4">
+                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm", unit === 'cm' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => handleUnitChange('cm')}>
                                     <RadioGroupItem value="cm" id="cm" className="sr-only" />
                                     <Label htmlFor="cm" className="font-black text-xs cursor-pointer uppercase tracking-widest">Centimeter</Label>
                                 </div>
-                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm", unit === 'px' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => setUnit('px')}>
+                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm", unit === 'px' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => handleUnitChange('px')}>
                                     <RadioGroupItem value="px" id="px" className="sr-only" />
                                     <Label htmlFor="px" className="font-black text-xs cursor-pointer uppercase tracking-widest">Pixel (px)</Label>
                                 </div>
@@ -240,9 +253,9 @@ export default function SignatureResizer() {
                                 <Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/10 shadow-inner" />
                             </div>
                             <div className="col-span-full space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">DPI Density</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">DPI Control</Label>
                                 <Input type="number" value={dpi} onChange={(e) => setDpi(e.target.value)} className="h-12 border-2 rounded-xl font-black text-center bg-muted/30 shadow-inner text-primary" />
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1 text-center">Default: 200 DPI for standard portal forms</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1 text-center">Standard: 200 DPI for application forms</p>
                             </div>
                         </div>
 
@@ -252,9 +265,9 @@ export default function SignatureResizer() {
                             </Label>
                             <div className="relative group">
                                 <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-16 border-2 rounded-2xl font-black text-4xl text-center text-primary bg-primary/5 shadow-inner focus:ring-4 focus:ring-primary/20 transition-all" />
-                                <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg">STRICT LIMIT</Badge>
+                                <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg">TARGET</Badge>
                             </div>
-                            <p className="text-[9px] text-center font-bold text-green-600 uppercase">Hits ~{(parseFloat(targetSize) * 0.98).toFixed(1)} KB for compliance</p>
+                            <p className="text-[9px] text-center font-bold text-green-600 uppercase">Aims for ~{(parseFloat(targetSize) * 0.96).toFixed(1)} KB for safe download</p>
                         </div>
 
                         {!imageSrc ? (
@@ -266,10 +279,10 @@ export default function SignatureResizer() {
                                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                                 onClick={() => fileInputRef.current?.click()}
                             >
-                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-orange-500 transition-colors group-hover:scale-110 duration-300" />
+                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-orange-500 transition-colors duration-300" />
                                 <div className="text-center">
                                     <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Signature</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">100% Private local RAM process</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">Local RAM processing only</p>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
                             </div>
