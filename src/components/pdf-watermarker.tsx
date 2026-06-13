@@ -51,7 +51,6 @@ import { Progress } from './ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-// STABLE WORKER CONFIG
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
@@ -286,8 +285,8 @@ export default function PdfWatermarker() {
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
-                    x: finalX,
-                    y: finalY,
+                    x: finalX - tw/2,
+                    y: finalY - th/2,
                     font,
                     size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
@@ -296,7 +295,7 @@ export default function PdfWatermarker() {
                 });
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
-                    x: finalX - tw/2, // Simple centering for image
+                    x: finalX - tw/2,
                     y: finalY - th/2,
                     width: tw,
                     height: th,
@@ -308,6 +307,8 @@ export default function PdfWatermarker() {
 
         const finalPdfBytes = await pdfDoc.save();
         const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
+        
+        if (watermarkedPdfUrl) URL.revokeObjectURL(watermarkedPdfUrl);
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
