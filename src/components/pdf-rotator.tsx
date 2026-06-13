@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -306,13 +305,7 @@ export default function PdfRotator() {
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                    {rotatedPdfUrl && (
-                        <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                            <StarIcons />
-                            <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                            <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD ROTATED PDF</span>
-                        </Button>
-                    )}
+                    {/* Header download button removed per user request */}
                 </div>
             </div>
 
