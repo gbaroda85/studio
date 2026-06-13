@@ -408,6 +408,7 @@ export default function PdfMerger() {
                                     ) : (
                                         <div className="space-y-4 animate-in zoom-in-95">
                                             <Button 
+                                                variant="outline"
                                                 className="w-full h-14 rounded-2xl border-2 border-primary font-black uppercase text-[10px] tracking-widest text-primary hover:bg-primary/5 flex items-center justify-center gap-2"
                                                 onClick={() => setIsPreviewOpen(true)}
                                             >
