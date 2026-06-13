@@ -417,8 +417,8 @@ export default function PdfMerger() {
                          <DialogTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Visual Render Confirmation</DialogTitle>
                     </DialogHeader>
                     
-                    <CardContent className="p-0 flex-1 bg-slate-200 dark:bg-slate-900/50 shadow-inner overflow-hidden relative flex flex-col">
-                        <ScrollArea className="flex-1 w-full h-full p-6 md:p-12">
+                    <CardContent className="p-0 flex-1 bg-slate-200 dark:bg-slate-900/50 shadow-inner relative flex flex-col overflow-hidden">
+                        <div className="flex-1 w-full overflow-y-auto custom-scrollbar p-6 md:p-12">
                             <div className="flex flex-col items-center gap-8 pb-10">
                                 {isGeneratingPreview ? (
                                     <div className="flex flex-col items-center gap-4 py-20 text-center">
@@ -429,14 +429,13 @@ export default function PdfMerger() {
                                         <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">Rendering HD Previews...</p>
                                     </div>
                                 ) : previewImages.map((img, i) => (
-                                    <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[450px] animate-in slide-in-from-bottom-4 duration-500">
-                                        <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
+                                    <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white w-full max-w-[550px] animate-in slide-in-from-bottom-4 duration-500">
+                                        <img src={img} alt={`Page ${i+1}`} className="w-full h-auto block" />
                                         <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
                                     </div>
                                 ))}
                             </div>
-                            <ScrollBar />
-                        </ScrollArea>
+                        </div>
                     </CardContent>
 
                     <CardFooter className="bg-green-500/10 p-6 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-green-500/20">
