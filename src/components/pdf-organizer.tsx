@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -468,15 +467,6 @@ export default function PdfOrganizer() {
                     <div>
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
                     </div>
-                </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    {resultPdfUrl && (
-                        <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                            <StarIcons />
-                            <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                            <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD PDF</span>
-                        </Button>
-                    )}
                 </div>
             </div>
 
