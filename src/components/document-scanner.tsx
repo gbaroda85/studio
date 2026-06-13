@@ -51,7 +51,8 @@ import {
     Edit3,
     CameraIcon,
     Images,
-    CheckCircle
+    CheckCircle,
+    LayoutGrid
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -125,7 +126,6 @@ export default function DocumentScanner() {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('viewfinder');
   
-  // Work-flow split states
   const [pendingPages, setPendingPages] = useState<ScannedPage[]>([]);
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   
@@ -243,9 +243,9 @@ export default function DocumentScanner() {
                     const page = await pdf.getPage(p);
                     const viewport = page.getViewport({ scale: 2.0 });
                     const canvas = document.createElement('canvas');
-                    canvas.width = viewport.width; canvas.height = viewport.height;
                     const ctx = canvas.getContext('2d');
                     if (ctx) {
+                        canvas.width = viewport.width; canvas.height = viewport.height;
                         ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: ctx, viewport }).promise;
                         const data = canvas.toDataURL('image/jpeg', 0.9);
@@ -391,6 +391,8 @@ export default function DocumentScanner() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
 
+  const onImageLoad = () => setIsImageReady(true);
+
   const handleConfirmAdd = async () => {
     setIsProcessing(true);
     const highRes = await applyIntelligentScan(true);
@@ -398,10 +400,7 @@ export default function DocumentScanner() {
     
     const newPage: ScannedPage = { id, originalSrc: currentRawImage!, processedSrc: highRes, points, isScanned: true };
     
-    // Remove from pending if it was there
     setPendingPages(prev => prev.filter(p => p.id !== id));
-    
-    // Add to scanned or update if editing
     setScannedPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
         return [...filtered, newPage];
@@ -495,17 +494,42 @@ export default function DocumentScanner() {
     setIsProcessing(false);
   };
 
+  const handleShare = async () => {
+      if (scannedPages.length === 0 || !navigator.share) return;
+      setIsSharing(true);
+      try {
+          const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+          const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
+          for (let i = 0; i < scannedPages.length; i++) {
+              if (i > 0) pdf.addPage();
+              const p = scannedPages[i];
+              const img = new window.Image(); img.src = p.processedSrc;
+              await new Promise((r) => { img.onload = () => {
+                  const props = pdf.getImageProperties(img);
+                  const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
+                  pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - props.width * ratio) / 2, (pageHeight - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
+                  r(null);
+              }; });
+          }
+          const blob = pdf.output('blob');
+          const file = new File([blob], "Scanned_Document.pdf", { type: "application/pdf" });
+          await navigator.share({ files: [file], title: "Scanned Document", text: "Sent via GR7 Tools" });
+      } catch (e) { console.error(e); } finally { setIsSharing(false); }
+  };
+
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4 overflow-x-hidden">
         
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch w-full px-4 min-h-[70vh]">
                 
-                {/* LEFT: PENDING PAGES (Original Box) */}
+                {/* LEFT: PENDING PAGES */}
                 <div className="lg:col-span-4 flex flex-col">
                     <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-muted/30 border-b p-6 flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><LayoutGrid className="size-4 text-primary" /> PAGES TO SCAN ({pendingPages.length})</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                                <LayoutGrid className="size-4 text-primary" /> PAGES TO SCAN ({pendingPages.length})
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {pendingPages.length === 0 ? (
@@ -560,7 +584,7 @@ export default function DocumentScanner() {
                     </Card>
                 </div>
 
-                {/* RIGHT: SCANNED BUNDLE (Results Box) */}
+                {/* RIGHT: SCANNED BUNDLE */}
                 <div className="lg:col-span-4 flex flex-col">
                     <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-emerald-500/5 border-b p-6 flex items-center justify-between">
