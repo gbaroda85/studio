@@ -32,13 +32,11 @@ import {
     Smartphone,
     Sparkles
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -89,6 +87,15 @@ const StarIcons = () => (
         </div>
     </>
 );
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
 
 export default function ScannerToPdf() {
   const { toast } = useToast();
@@ -205,9 +212,10 @@ export default function ScannerToPdf() {
               const pData = pages[i];
               const img = new window.Image();
               img.src = pData.src;
+              
               await new Promise((resolve) => {
                   img.onload = () => {
-                      const props = pdf.getImageProperties(img);
+                      const props = { width: img.naturalWidth, height: img.naturalHeight };
                       const margin = 10;
                       const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
                       const ratio = Math.min(safeW / props.width, safeH / props.height);
@@ -217,9 +225,12 @@ export default function ScannerToPdf() {
                       if (pData.vAlign === 'top') y = margin;
                       else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
                       else y = (pageHeight - fh) / 2;
-                      pdf.addImage(pData.src, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+                      
+                      // Explicitly pass 'JPEG' to prevent UNKNOWN type error
+                      pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
                       resolve(null);
                   };
+                  img.onerror = () => resolve(null);
               });
               setRenderingProgress(Math.round(((i + 1) / pages.length) * 100));
           }
@@ -259,7 +270,7 @@ export default function ScannerToPdf() {
             img.src = pData.src;
             await new Promise((resolve, reject) => {
                 img.onload = () => {
-                    const props = pdf.getImageProperties(img);
+                    const props = { width: img.naturalWidth, height: img.naturalHeight };
                     const margin = 10;
                     const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
                     const ratio = Math.min(safeW / props.width, safeH / props.height);
@@ -269,7 +280,8 @@ export default function ScannerToPdf() {
                     if (pData.vAlign === 'top') y = margin;
                     else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
                     else y = (pageHeight - fh) / 2;
-                    pdf.addImage(pData.src, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+                    
+                    pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
                     resolve(null);
                 };
                 img.onerror = () => reject(new Error("Image Load Failed"));
@@ -282,6 +294,13 @@ export default function ScannerToPdf() {
     } finally {
         setIsGenerating(false);
     }
+  };
+
+  const handleReset = () => {
+      setPages([]);
+      setPreviewImages([]);
+      setSelectedId(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const selectedPage = pages.find(p => p.id === selectedId);
@@ -361,10 +380,10 @@ export default function ScannerToPdf() {
                                                 
                                                 {/* ACTION BUTTONS: PERMANENTLY VISIBLE */}
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
-                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/90 hover:bg-white text-primary border border-primary/20" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
+                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
                                                     </Button>
-                                                    <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
+                                                    <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg border-2 border-white/20" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
                                                         <Trash2 className="size-3.5" />
                                                     </Button>
                                                 </div>
@@ -405,7 +424,7 @@ export default function ScannerToPdf() {
                 {/* PDF VISUAL PREVIEW AFTER RENDER */}
                 <AnimatePresence>
                     {previewImages.length > 0 && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="w-full">
                             <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem]">
                                 <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20 flex flex-row items-center justify-center gap-3">
                                     <Eye className="size-4 text-green-600" />
@@ -495,20 +514,7 @@ export default function ScannerToPdf() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/10">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
-                                        <RotateCw className="size-3" /> Orientation
-                                    </Label>
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-foreground hover:bg-primary hover:text-white border-primary/20 transition-all"
-                                        onClick={() => handleRotate(selectedId)}
-                                    >
-                                        <RotateCw className="size-4 mr-2" /> Rotate 90°
-                                    </Button>
-                                </div>
-
-                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-white border-primary/20 rounded-xl transition-all" onClick={applyAlignmentToAll}>
+                                <Button variant="outline" className="w-full h-11 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-white border-primary/20 rounded-xl transition-all" onClick={applyAlignmentToAll}>
                                     <Layers className="size-3 mr-2" /> Apply to All Pages
                                 </Button>
                             </div>
@@ -551,4 +557,3 @@ export default function ScannerToPdf() {
     </div>
   );
 }
-
