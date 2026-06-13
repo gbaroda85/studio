@@ -24,7 +24,8 @@ import {
     Baseline,
     MoveVertical,
     Square,
-    Target
+    Target,
+    Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
@@ -63,6 +65,7 @@ export default function PassportDateNameMaker() {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [name, setName] = useState("YOUR NAME HERE");
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB').split('/').join('-')); // DD-MM-YYYY
+    const [showDopPrefix, setShowDopPrefix] = useState(true);
     
     // Adjustment States
     const [nameSize, setNameSize] = useState([32]);
@@ -127,7 +130,8 @@ export default function PassportDateNameMaker() {
             ctx.fillText(name.toUpperCase(), targetW / 2, targetH - stripHeight + (stripHeight * 0.45));
 
             ctx.font = `bold ${dateSize[0]}px Arial`;
-            ctx.fillText(`D.O.P: ${date}`, targetW / 2, targetH - stripHeight + (stripHeight * 0.85));
+            const dateText = showDopPrefix ? `D.O.P: ${date}` : date;
+            ctx.fillText(dateText, targetW / 2, targetH - stripHeight + (stripHeight * 0.85));
 
             // 5. Draw External Border
             if (borderWidth[0] > 0) {
@@ -154,15 +158,13 @@ export default function PassportDateNameMaker() {
             }
 
             let finalBlob: Blob = bestBlob || await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
-
-            // Optional: If even at 100% it's too small, we can't do much without bloating headers (usually not needed for 50KB)
             
             if (resultUrl) URL.revokeObjectURL(resultUrl);
             const url = URL.createObjectURL(finalBlob);
             setResultUrl(url);
             setResultSize(finalBlob.size);
         };
-    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth, targetKB]);
+    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth, targetKB, showDopPrefix]);
 
     useEffect(() => {
         const timer = setTimeout(renderPhoto, 300);
@@ -207,6 +209,7 @@ export default function PassportDateNameMaker() {
         setResultUrl(null);
         setName("YOUR NAME HERE");
         setDate(new Date().toLocaleDateString('en-GB').split('/').join('-'));
+        setShowDopPrefix(true);
         setNameSize([32]);
         setDateSize([28]);
         setStripHeightFactor([14]);
@@ -249,12 +252,19 @@ export default function PassportDateNameMaker() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Calendar className="size-3" /> Date of Photo (DOP)
                                 </Label>
-                                <Input 
-                                    value={date} 
-                                    onChange={(e) => setDate(e.target.value)} 
-                                    placeholder="DD-MM-YYYY"
-                                    className="h-12 border-2 rounded-xl font-bold"
-                                />
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={date} 
+                                        onChange={(e) => setDate(e.target.value)} 
+                                        placeholder="DD-MM-YYYY"
+                                        className="h-12 border-2 rounded-xl font-bold flex-1"
+                                    />
+                                    <div className="flex flex-col items-center justify-center gap-1 px-3 bg-muted/30 rounded-xl border-2">
+                                        <span className="text-[7px] font-black uppercase opacity-40">Prefix</span>
+                                        <Switch checked={showDopPrefix} onCheckedChange={setShowDopPrefix} size="sm" />
+                                    </div>
+                                </div>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Tip: Toggle switch to hide "D.O.P:" label.</p>
                             </div>
                         </div>
 
@@ -334,7 +344,7 @@ export default function PassportDateNameMaker() {
                                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                             </div>
                         ) : (
-                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95">
+                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95 shadow-sm">
                                 <div className="flex items-center gap-4 truncate">
                                     <div className="size-12 rounded-xl overflow-hidden border-2 border-white shrink-0 bg-white relative shadow-md">
                                         <img src={imageSrc} className="size-full object-cover" alt="thumb" />
@@ -425,4 +435,3 @@ export default function PassportDateNameMaker() {
         </div>
     );
 }
-
