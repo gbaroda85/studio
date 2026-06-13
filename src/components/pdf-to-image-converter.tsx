@@ -30,7 +30,9 @@ import {
   Eye,
   FileDigit,
   Monitor,
-  Plus
+  Plus,
+  Trash2,
+  ListFilter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +40,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -80,6 +83,32 @@ const StarIcons = () => (
     </>
 );
 
+function parsePageRanges(ranges: string, maxPage: number): number[] {
+    const result = new Set<number>();
+    if (!ranges) return [];
+
+    const parts = ranges.split(',');
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [startStr, endStr] = trimmedPart.split('-');
+            const start = parseInt(startStr, 10);
+            const end = parseInt(endStr, 10);
+            if (!isNaN(start) && !isNaN(end) && start <= end && start > 0 && end <= maxPage) {
+                for (let i = start; i <= end; i++) {
+                    result.add(i);
+                }
+            }
+        } else {
+            const page = parseInt(trimmedPart, 10);
+            if (!isNaN(page) && page > 0 && page <= maxPage) {
+                result.add(page);
+            }
+        }
+    }
+    return Array.from(result).sort((a, b) => a - b);
+}
+
 export default function PdfToImageConverter() {
     const { toast } = useToast();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -92,7 +121,10 @@ export default function PdfToImageConverter() {
     const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Define selectedPage in scope
+    // Range Selection States
+    const [pageRangeMode, setPageRangeMode] = useState<'all' | 'custom'>('all');
+    const [customRange, setCustomRange] = useState('');
+
     const selectedPage = pages.find(p => p.id === selectedId);
 
     const renderProcessedImage = useCallback((originalSrc: string, vAlign: VAlign, fitMode: FitMode): Promise<string> => {
@@ -237,6 +269,33 @@ export default function PdfToImageConverter() {
         };
     };
 
+    const rotateAllPages = async () => {
+        if (pages.length === 0) return;
+        setIsProcessing(true);
+        const updatedPages = await Promise.all(pages.map(async (p) => {
+            return new Promise<PageItem>((resolve) => {
+                const img = new window.Image();
+                img.src = p.originalSrc;
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return resolve(p);
+                    canvas.width = img.height;
+                    canvas.height = img.width;
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate((90 * Math.PI) / 180);
+                    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                    const rotatedOriginal = canvas.toDataURL(`image/${outputFormat === 'jpeg' ? 'jpeg' : 'png'}`, 1.0);
+                    const newFinal = await renderProcessedImage(rotatedOriginal, p.vAlign, p.fitMode);
+                    resolve({ ...p, originalSrc: rotatedOriginal, finalSrc: newFinal });
+                };
+            });
+        }));
+        setPages(updatedPages);
+        setIsProcessing(false);
+        toast({ title: "Global Rotation", description: "All pages rotated by 90°." });
+    };
+
     const applyToAll = async () => {
         const selected = pages.find(p => p.id === selectedId);
         if (!selected) return;
@@ -253,18 +312,34 @@ export default function PdfToImageConverter() {
     const handleDownloadAll = async () => {
         if (pages.length === 0 || !pdfFile) return;
         setIsZipping(true);
+
+        const indicesToDownload = pageRangeMode === 'all' 
+            ? pages.map(p => p.index)
+            : parsePageRanges(customRange, pages.length);
+
+        if (indicesToDownload.length === 0 && pageRangeMode === 'custom') {
+            toast({ variant: 'destructive', title: 'Invalid Range', description: 'Please enter a valid page range.' });
+            setIsZipping(false);
+            return;
+        }
+
         try {
             const zip = new JSZip();
             const ext = outputFormat === 'jpeg' ? 'jpg' : 'png';
+            
             pages.forEach((p) => {
-                const base64Data = p.finalSrc.split(',')[1];
-                zip.file(`extracted-page-${p.index}.${ext}`, base64Data, { base64: true });
+                if (indicesToDownload.includes(p.index)) {
+                    const base64Data = p.finalSrc.split(',')[1];
+                    zip.file(`extracted-page-${p.index}.${ext}`, base64Data, { base64: true });
+                }
             });
+
             const zipBlob = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(zipBlob);
             link.download = `GR7-Tools-Extracted-Images.zip`;
             link.click();
+            toast({ title: "Bundle Downloaded", description: `Saved ${indicesToDownload.length} images.` });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to bundle archive.' });
         } finally {
@@ -276,6 +351,8 @@ export default function PdfToImageConverter() {
         setPdfFile(null);
         setPages([]);
         setSelectedId(null);
+        setPageRangeMode('all');
+        setCustomRange('');
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -314,7 +391,7 @@ export default function PdfToImageConverter() {
                                 <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center px-4">
-                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop PDF here</p>
+                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF here</p>
                                 <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Extraction happens locally.</p>
                             </div>
                         </div>
@@ -373,7 +450,7 @@ export default function PdfToImageConverter() {
                                             selectedPage?.vAlign === 'top' && "active-uiverse"
                                         )} 
                                         data-label="      Top"
-                                        onClick={() => updateAlignment('top')}
+                                        onClick={() => updateSelectedPage({ vAlign: 'top' })}
                                     >
                                         <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
@@ -383,7 +460,7 @@ export default function PdfToImageConverter() {
                                             selectedPage?.vAlign === 'center' && "active-uiverse"
                                         )} 
                                         data-label="      Center"
-                                        onClick={() => updateAlignment('center')}
+                                        onClick={() => updateSelectedPage({ vAlign: 'center' })}
                                     >
                                         <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
@@ -393,7 +470,7 @@ export default function PdfToImageConverter() {
                                             selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
                                         data-label="      Bottom"
-                                        onClick={() => updateAlignment('bottom')}
+                                        onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
                                     >
                                         <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
                                     </button>
@@ -404,22 +481,47 @@ export default function PdfToImageConverter() {
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                     <RotateCw className="size-3" /> Orientation
                                 </Label>
-                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
-                                    <RotateCw className="size-4 mr-2" /> Rotate 90° Clockwise
-                                </Button>
+                                <div className="grid gap-3">
+                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
+                                        <RotateCw className="size-4 mr-2" /> Rotate Page 90°
+                                    </Button>
+                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm text-primary border-primary/20" onClick={rotateAllPages} disabled={pages.length < 2 || isProcessing}>
+                                        <Layers className="size-4 mr-2" /> Rotate All 90°
+                                    </Button>
+                                </div>
                              </div>
 
                              <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Controls</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
+                                    <ListFilter className="size-3" /> Number of Pages
+                                </Label>
+                                <Tabs value={pageRangeMode} onValueChange={(v) => setPageRangeMode(v as any)} className="w-full">
+                                    <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
+                                        <TabsTrigger value="all" className="font-bold text-[9px] uppercase">All Pages</TabsTrigger>
+                                        <TabsTrigger value="custom" className="font-bold text-[9px] uppercase">Custom Range</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                                {pageRangeMode === 'custom' && (
+                                    <Input 
+                                        value={customRange} 
+                                        onChange={(e) => setCustomRange(e.target.value)}
+                                        placeholder="e.g. 1-5, 8, 10" 
+                                        className="h-11 font-bold border-2 rounded-xl text-center"
+                                    />
+                                )}
+                             </div>
+
+                             <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Sync Control</Label>
                                 <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
-                                    <Layers className="size-3.5 mr-2" /> Apply to All Pages
+                                    <RefreshCcw className="size-3.5 mr-2" /> Apply Alignment to All
                                 </Button>
                              </div>
                         </div>
 
-                        <div className="pt-6 border-t-2 border-dashed">
+                        <div className="pt-6 border-t-2 border-dashed mt-auto">
                              <Button 
-                                className="w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                                className="magic-button w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
                                 onClick={handleDownloadAll} 
                                 disabled={pages.length === 0 || isZipping || isProcessing}
                              >
@@ -431,14 +533,14 @@ export default function PdfToImageConverter() {
                                 ) : (
                                     <div className="flex items-center gap-3">
                                         <Download className="size-6 group-hover:translate-y-1 transition-transform" />
-                                        <span className="uppercase tracking-tighter">EXTRACT ALL</span>
+                                        <span className="uppercase tracking-tighter">EXTRACT IMAGES</span>
                                     </div>
                                 )}
                              </Button>
                         </div>
                     </div>
 
-                    {/* RIGHT VIEWPORT: GRID OF PAGES - FIXED HEIGHT WITH SCROLLBAR */}
+                    {/* RIGHT VIEWPORT: GRID OF PAGES */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[600px] lg:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 w-full h-full p-6 md:p-10">
                             {isProcessing && pages.length === 0 ? (
@@ -493,13 +595,13 @@ export default function PdfToImageConverter() {
                                     ))}
                                     
                                     <button 
-                                        className="border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group"
+                                        className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                             <Plus className="size-6 text-primary" />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase text-primary tracking-widest">Add Files</span>
+                                        <span className="text-[10px] font-black uppercase text-primary tracking-widest">Add PDF</span>
                                     </button>
                                 </div>
                             )}
@@ -523,4 +625,3 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
-
