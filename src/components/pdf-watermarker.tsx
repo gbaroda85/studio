@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, rgb, degrees, StandardFonts, PDFName } from 'pdf-lib';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
@@ -72,7 +72,7 @@ const POSITIONS: WatermarkPosition[] = [
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i}`}>
+            <div key={i} className={`star-${i} pointer-events-none`}>
                 <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
@@ -231,9 +231,6 @@ export default function PdfWatermarker() {
 
         const rgbColor = hexToRgb(textColor);
         const rotDeg = -rotation[0]; 
-        const rad = (rotDeg * Math.PI) / 180;
-        const cos = Math.cos(rad);
-        const sin = Math.sin(rad);
         const op = opacity[0] / 100;
         const curMargin = margin[0];
 
@@ -256,6 +253,7 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
+            // Calculation in Visual Coordinates (origin Top-Left)
             let vcx, vcy;
             switch (position) {
                 case 'top-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
@@ -270,36 +268,43 @@ export default function PdfWatermarker() {
                 default: vcx = vw/2; vcy = vh/2;
             }
 
-            let lcx, lcy;
-            if (pageRot === 0) { lcx = vcx; lcy = vh - vcy; }
-            else if (pageRot === 90) { lcx = vcy; lcy = vcx; }
-            else if (pageRot === 180) { lcx = vw - vcx; lcy = vcy; }
-            else if (pageRot === 270) { lcx = vh - vcy; lcy = vw - vcx; }
-            else { lcx = vcx; lcy = vh - vcy; }
-
-            const dx = lcx - (tw/2 * cos) + (th/2 * sin);
-            const dy = lcy - (tw/2 * sin) - (th/2 * cos);
+            // Convert Visual to PDF Coordinates (origin Bottom-Left of unrotated page)
+            let finalX = 0, finalY = 0;
+            if (pageRot === 0) { 
+                finalX = vcx; 
+                finalY = vh - vcy; 
+            } else if (pageRot === 90) { 
+                finalX = vcy; 
+                finalY = vcx; 
+            } else if (pageRot === 180) { 
+                finalX = vw - vcx; 
+                finalY = vcy; 
+            } else if (pageRot === 270) { 
+                finalX = vh - vcy; 
+                finalY = vw - vcx; 
+            }
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
-                    x: dx, y: dy, font, size: fontSize,
+                    x: finalX,
+                    y: finalY,
+                    font,
+                    size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-                    opacity: op, rotate: degrees(rotDeg)
+                    opacity: op,
+                    rotate: degrees(rotDeg),
                 });
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
-                    x: dx, y: dy, width: tw, height: th,
-                    opacity: op, rotate: degrees(rotDeg)
+                    x: finalX - tw/2, // Simple centering for image
+                    y: finalY - th/2,
+                    width: tw,
+                    height: th,
+                    opacity: op,
+                    rotate: degrees(rotDeg),
                 });
             }
         }
-
-        const catalog = pdfDoc.catalog;
-        catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
-            FitWindow: true,
-            CenterWindow: true,
-            DisplayDocTitle: true
-        }));
 
         const finalPdfBytes = await pdfDoc.save();
         const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
@@ -320,7 +325,9 @@ export default function PdfWatermarker() {
     link.href = watermarkedPdfUrl;
     const originalName = pdfFile.name.replace('.pdf', '');
     link.download = `Watermarked_${originalName}.pdf`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   }
 
   const resetState = () => {
@@ -391,7 +398,7 @@ export default function PdfWatermarker() {
       {!pdfFile ? (
         <Card
             className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
             )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -661,4 +668,3 @@ export default function PdfWatermarker() {
     </div>
   );
 }
-
