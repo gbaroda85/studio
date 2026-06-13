@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, degrees, StandardFonts, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,7 +50,7 @@ import confetti from 'canvas-confetti';
 
 // STABLE WORKER CONFIG
 const PDF_JS_VERSION = '4.2.67';
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
@@ -103,7 +103,6 @@ export default function PdfWatermarker() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
-  // Watermark Core Settings
   const [wType, setWType] = useState<WatermarkType>('text');
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [imageWatermarkSrc, setImageWatermarkSrc] = useState<string | null>(null);
@@ -114,7 +113,6 @@ export default function PdfWatermarker() {
   const [rotation, setRotation] = useState([45]);
   const [margin, setMargin] = useState([40]);
   
-  // Text Styling
   const [textColor, setTextColor] = useState("#808080");
   const [isBold, setIsBold] = useState(true);
   const [isItalic, setIsItalic] = useState(false);
@@ -146,8 +144,7 @@ export default function PdfWatermarker() {
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(arrayBuffer),
             cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-            cMapPacked: true,
-            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+            cMapPacked: true
         });
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
@@ -179,12 +176,12 @@ export default function PdfWatermarker() {
         }
         setPreviewPages(imgs);
       } catch (e) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF for preview.' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF.' });
       } finally {
         setIsGeneratingPreview(false);
       }
     } else if (file) {
-      toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
+      toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF.' });
     }
   };
 
@@ -200,7 +197,6 @@ export default function PdfWatermarker() {
           reader.onload = (ev) => {
               setImageWatermarkSrc(ev.target?.result as string);
               setWType('image');
-              toast({ title: "Logo Uploaded" });
           };
           reader.readAsDataURL(file);
       }
@@ -208,33 +204,25 @@ export default function PdfWatermarker() {
 
   const handleApplyWatermark = async () => {
     if (!pdfFile) return;
-    if (wType === 'text' && !watermarkText) return;
-    if (wType === 'image' && !imageWatermarkSrc) return;
-
     setIsProcessing(true);
 
     try {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-        const pages = pdfDoc.getPages();
         
-        // Font Selection
         let font;
         if (wType === 'text') {
-            let fontVariant = StandardFonts.Helvetica;
-            if (isBold && isItalic) fontVariant = StandardFonts.HelveticaBoldOblique;
-            else if (isBold) fontVariant = StandardFonts.HelveticaBold;
-            else if (isItalic) fontVariant = StandardFonts.HelveticaOblique;
-            font = await pdfDoc.embedFont(fontVariant);
+            const variant = (isBold && isItalic) ? StandardFonts.HelveticaBoldOblique : 
+                           isBold ? StandardFonts.HelveticaBold : 
+                           isItalic ? StandardFonts.HelveticaOblique : StandardFonts.Helvetica;
+            font = await pdfDoc.embedFont(variant);
         }
 
-        // Image Selection
         let embeddedImage: any;
         let imageDims = { width: 0, height: 0 };
         if (wType === 'image' && imageWatermarkSrc) {
             const imgBuffer = await fetch(imageWatermarkSrc).then(r => r.arrayBuffer());
-            const isPng = imageWatermarkSrc.startsWith('data:image/png');
-            embeddedImage = isPng ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
+            embeddedImage = imageWatermarkSrc.startsWith('data:image/png') ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
             imageDims = { width: embeddedImage.width, height: embeddedImage.height };
         }
 
@@ -244,13 +232,13 @@ export default function PdfWatermarker() {
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
         const op = opacity[0] / 100;
-        const currentMargin = margin[0];
+        const curMargin = margin[0];
 
+        const pages = pdfDoc.getPages();
         for (const page of pages) {
             const { width, height } = page.getSize();
             const pageRot = page.getRotation().angle;
             
-            // Visual viewport depends on page rotation
             const isSideways = pageRot === 90 || pageRot === 270;
             const vw = isSideways ? height : width;
             const vh = isSideways ? width : height;
@@ -265,22 +253,20 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // 1. Calculate visual center (X, Y) relative to top-left viewer origin
             let vcx, vcy;
             switch (position) {
-                case 'top-left': vcx = currentMargin + tw/2; vcy = currentMargin + th/2; break;
-                case 'top-center': vcx = vw / 2; vcy = currentMargin + th/2; break;
-                case 'top-right': vcx = vw - currentMargin - tw/2; vcy = currentMargin + th/2; break;
-                case 'center-left': vcx = currentMargin + tw/2; vcy = vh / 2; break;
+                case 'top-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
+                case 'top-center': vcx = vw / 2; vcy = curMargin + th/2; break;
+                case 'top-right': vcx = vw - curMargin - tw/2; vcy = curMargin + th/2; break;
+                case 'center-left': vcx = curMargin + tw/2; vcy = vh / 2; break;
                 case 'center-center': vcx = vw / 2; vcy = vh / 2; break;
-                case 'center-right': vcx = vw - currentMargin - tw/2; vcy = vh / 2; break;
-                case 'bottom-left': vcx = currentMargin + tw/2; vcy = vh - currentMargin - th/2; break;
-                case 'bottom-center': vcx = vw / 2; vcy = vh - currentMargin - th/2; break;
-                case 'bottom-right': vcx = vw - currentMargin - tw/2; vcy = vh - currentMargin - th/2; break;
+                case 'center-right': vcx = vw - curMargin - tw/2; vcy = vh / 2; break;
+                case 'bottom-left': vcx = curMargin + tw/2; vcy = vh - curMargin - th/2; break;
+                case 'bottom-center': vcx = vw / 2; vcy = vh - curMargin - th/2; break;
+                case 'bottom-right': vcx = vw - curMargin - tw/2; vcy = vh - curMargin - th/2; break;
                 default: vcx = vw/2; vcy = vh/2;
             }
 
-            // 2. Transform visual center to PDF local coordinates (Bottom-Left origin)
             let lcx, lcy;
             if (pageRot === 0) { lcx = vcx; lcy = vh - vcy; }
             else if (pageRot === 90) { lcx = vcy; lcy = vcx; }
@@ -288,8 +274,6 @@ export default function PdfWatermarker() {
             else if (pageRot === 270) { lcx = vh - vcy; lcy = vw - vcx; }
             else { lcx = vcx; lcy = vh - vcy; }
 
-            // 3. Drawing anchor compensation for Center-Pivot rotation
-            // pdf-lib draw commands anchor at the pre-rotated bounding box bottom-left
             const dx = lcx - (tw/2 * cos) + (th/2 * sin);
             const dy = lcy - (tw/2 * sin) - (th/2 * cos);
 
@@ -307,25 +291,24 @@ export default function PdfWatermarker() {
             }
         }
 
+        const catalog = pdfDoc.catalog;
+        catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+            FitWindow: true,
+            CenterWindow: true,
+            DisplayDocTitle: true
+        }));
+
         const finalPdfBytes = await pdfDoc.save();
         const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Watermark Applied!", description: "High-fidelity mapping complete." });
+        toast({ title: "Success", description: "Watermark applied to all pages." });
     } catch (error) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
     } finally {
         setIsProcessing(false);
     }
-  };
-
-  const handleDownload = () => {
-    if (!watermarkedPdfUrl || !pdfFile) return;
-    const link = document.createElement('a');
-    link.href = watermarkedPdfUrl;
-    link.download = `Watermarked_${pdfFile.name}`;
-    link.click();
   };
 
   const resetState = () => {
@@ -342,7 +325,7 @@ export default function PdfWatermarker() {
   };
 
   const getPreviewStyle = (): React.CSSProperties => {
-      const containerWidth = 550; // Reference display width for scaling
+      const containerWidth = 550; 
       const scale = containerWidth / pageSize.width;
       
       const styles: React.CSSProperties = {
@@ -406,7 +389,7 @@ export default function PdfWatermarker() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -656,7 +639,7 @@ export default function PdfWatermarker() {
                         )}
                     </CardContent>
                     <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
-                         <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                         <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
                         <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI RENDER</div>
                     </CardFooter>
                 </Card>
