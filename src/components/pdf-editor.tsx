@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees, PDFName } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
 import { 
     UploadCloud, 
@@ -57,7 +57,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-// HARDCODED STABLE VERSION FOR WORKER
+// PDF.js Worker Configuration
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
@@ -68,8 +68,8 @@ type ElementType = 'text' | 'image' | 'shape' | 'mask' | 'arrow' | 'highlight';
 interface BaseElement {
     id: string;
     type: ElementType;
-    x: number; // %
-    y: number; // %
+    x: number; // % from left
+    y: number; // % from top
     opacity: number;
 }
 
@@ -84,7 +84,7 @@ interface OverlayText extends BaseElement {
 interface OverlayImage extends BaseElement {
     type: 'image';
     src: string;
-    width: number; // %
+    width: number; // % of page width
     rotation: number;
 }
 
@@ -116,38 +116,32 @@ interface PageState {
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+        <div className="star-1 pointer-events-none">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+        <div className="star-2 pointer-events-none">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+        <div className="star-3 pointer-events-none">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
     </>
 );
+
+function formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
 
 export default function PdfEditor() {
     const { toast } = useToast();
@@ -222,7 +216,7 @@ export default function PdfEditor() {
 
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 2.0 });
+                    const viewport = page.getViewport({ scale: 2.2 }); // Higher fidelity render for editor
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -451,51 +445,54 @@ export default function PdfEditor() {
             const activePageStates = pages.filter(p => !p.isDeleted);
             
             for (const pageState of activePageStates) {
-                // Copy the original page into the new document to ensure modifications are clean
                 const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [pageState.index - 1]);
                 const pdfPage = newPdfDoc.addPage(copiedPage);
                 
-                const { width, height } = pdfPage.getSize();
-                const cropBox = pdfPage.getCropBox();
+                const pageWidth = pdfPage.getWidth();
+                const pageHeight = pdfPage.getHeight();
                 const pageRotation = pdfPage.getRotation().angle;
-
-                // ORIGIN COMPENSATION: Handle PDFs with non-zero CropBox origins
+                const cropBox = pdfPage.getCropBox();
+                
                 const ox = cropBox.x;
                 const oy = cropBox.y;
 
                 for (const el of pageState.elements) {
-                    // MAPPING: Convert UI percentages to PDF local coordinates
-                    // pdf-lib's origin is bottom-left of the unrotated page
-                    // The UI elements are relative to the "visual" viewport (after rotation)
-
                     const isLeaning = pageRotation === 90 || pageRotation === 270;
-                    const visualW = isLeaning ? height : width;
-                    const visualH = isLeaning ? width : height;
+                    const visualW = isLeaning ? pageHeight : pageWidth;
+                    const visualH = isLeaning ? pageWidth : pageHeight;
 
-                    let localX = 0;
-                    let localY = 0;
+                    // POINT MAPPING: Convert UI % to PDF points
+                    const px = (el.x / 100) * visualW;
+                    const py = (el.y / 100) * visualH;
 
+                    let finalX = 0;
+                    let finalY = 0;
+
+                    // CONVERSION: Map visual (top-left) to PDF (bottom-left)
                     if (pageRotation === 0) {
-                        localX = ox + (el.x / 100) * width;
-                        localY = oy + height - (el.y / 100) * height;
+                        finalX = px;
+                        finalY = pageHeight - py;
                     } else if (pageRotation === 90) {
-                        localX = ox + (el.y / 100) * width;
-                        localY = oy + (el.x / 100) * height;
+                        finalX = py;
+                        finalY = px;
                     } else if (pageRotation === 180) {
-                        localX = ox + width - (el.x / 100) * width;
-                        localY = oy + (el.y / 100) * height;
+                        finalX = pageWidth - px;
+                        finalY = py;
                     } else if (pageRotation === 270) {
-                        localX = ox + width - (el.y / 100) * width;
-                        localY = oy + height - (el.x / 100) * height;
+                        finalX = pageWidth - py;
+                        finalY = pageHeight - px;
                     }
+
+                    const x = ox + finalX;
+                    const y = oy + finalY;
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await newPdfDoc.embedFont(fontName);
                         
                         pdfPage.drawText(el.text, { 
-                            x: localX, 
-                            y: localY - (el.size * 0.8), // Approx baseline offset
+                            x, 
+                            y: y - (el.size * 0.8), 
                             size: el.size, 
                             font, 
                             color: hexToRgb(el.color), 
@@ -505,8 +502,8 @@ export default function PdfEditor() {
                         const shapeW = (el.width / 100) * visualW;
                         const shapeH = (el.height / 100) * visualH;
                         pdfPage.drawRectangle({
-                            x: localX,
-                            y: localY - shapeH,
+                            x,
+                            y: y - shapeH,
                             width: shapeW,
                             height: shapeH,
                             color: hexToRgb(el.color),
@@ -521,8 +518,8 @@ export default function PdfEditor() {
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
                         
                         pdfPage.drawImage(embeddedImg, { 
-                            x: localX, 
-                            y: localY - imgH, 
+                            x, 
+                            y: y - imgH, 
                             width: imgW, 
                             height: imgH, 
                             rotate: degrees(-el.rotation), 
@@ -531,11 +528,11 @@ export default function PdfEditor() {
                     } else if (el.type === 'arrow') {
                         const angleRad = (el.rotation * Math.PI) / 180;
                         const len = (el.length / 100) * visualW;
-                        const endX = localX + Math.cos(angleRad) * len;
-                        const endY = localY - Math.sin(angleRad) * len;
+                        const endX = x + Math.cos(angleRad) * len;
+                        const endY = y - Math.sin(angleRad) * len;
 
                         pdfPage.drawLine({
-                            start: { x: localX, y: localY },
+                            start: { x, y },
                             end: { x: endX, y: endY },
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
@@ -560,12 +557,19 @@ export default function PdfEditor() {
                 }
             }
 
+            const catalog = newPdfDoc.catalog;
+            catalog.set(PDFName.of('ViewerPreferences'), newPdfDoc.context.obj({
+                FitWindow: true,
+                CenterWindow: true,
+                DisplayDocTitle: true
+            }));
+
             const finalPdfBytes = await newPdfDoc.save();
             const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Edited_${pdfFile.name}`;
+            link.download = `GR7-Edited-${pdfFile.name}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -591,17 +595,17 @@ export default function PdfEditor() {
                 <div className="w-full h-16 bg-slate-900 dark:bg-slate-950 border-b border-white/10 rounded-t-[2rem] flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl z-50 no-print">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
                         <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl shrink-0">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white" onClick={handleRedo} disabled={historyIndex >= history.length - 1}><Redo2 className="size-4"/></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10" onClick={handleUndo} disabled={historyIndex <= 0}><Undo2 className="size-4"/></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10" onClick={handleRedo} disabled={historyIndex >= history.length - 1}><Redo2 className="size-4"/></Button>
                         </div>
                         <Separator orientation="vertical" className="h-6 opacity-10 mx-2" />
                         <div className="flex items-center gap-1 md:gap-2">
-                            <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
+                            <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg hover:bg-primary/90 hover:text-primary-foreground" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
                             <Dialog>
-                                <DialogTrigger asChild><Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button></DialogTrigger>
+                                <DialogTrigger asChild><Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button></DialogTrigger>
                                 <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl rounded-[2.5rem]">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary">Handwriting Signature</DialogTitle></DialogHeader>
                                     <div className="bg-white rounded-xl overflow-hidden touch-none border-4 border-primary/20 shadow-inner">
@@ -609,11 +613,11 @@ export default function PdfEditor() {
                                     </div>
                                     <DialogFooter className="gap-2 pt-4">
                                         <Button variant="ghost" onClick={() => drawingCanvasRef.current?.getContext('2d')?.clearRect(0,0,400,200)} className="font-black text-[10px] uppercase text-white/60">Clear Pad</Button>
-                                        <Button onClick={saveDrawnSignature} className="bg-primary text-black font-black uppercase text-[10px] px-8">Add to PDF</Button>
+                                        <Button onClick={saveDrawnSignature} className="bg-primary text-black font-black uppercase text-[10px] px-8 hover:bg-primary/90 hover:text-primary-foreground">Add to PDF</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10 font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
