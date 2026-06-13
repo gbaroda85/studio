@@ -17,7 +17,8 @@ import {
     Type,
     PenTool,
     Eye,
-    MousePointer2
+    MousePointer2,
+    X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -286,6 +287,14 @@ export default function SignatureResizer() {
                         <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local Hardware Processing Active</p>
                     </CardFooter>
                 </Card>
+
+                <div className="p-4 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4">
+                    <ShieldCheck className="size-6 text-primary shrink-0 mt-0.5" />
+                    <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
+                        <span className="font-black block mb-0.5 text-primary">PORTAL COMPLIANCE:</span>
+                        Our algorithm uses multi-pass compression to stay under the KB limit while keeping the ink sharp.
+                    </p>
+                </div>
             </div>
 
             {/* Right: Preview */}
@@ -298,7 +307,7 @@ export default function SignatureResizer() {
                             </div>
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">Studio Viewport</CardTitle>
                         </div>
-                        {resultUrl && <Badge className="bg-green-600 text-white font-black text-[10px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse">RENDER COMPLETE</Badge>}
+                        {resultUrl && <Badge className="bg-green-600 text-white font-black text-[10px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER COMPLETE</Badge>}
                     </CardHeader>
                     <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden">
                         <AnimatePresence mode="wait">
