@@ -295,7 +295,7 @@ export default function PdfMerger() {
                                     <div className="flex justify-between items-center px-1 shrink-0">
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
                                         <div className="flex items-center gap-2">
-                                            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary hover:text-white transition-colors">
+                                            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                                                 <Plus className="size-3 mr-1"/> Add Files
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={handleReset} className="btn-uiverse-secondary h-7">
@@ -323,7 +323,7 @@ export default function PdfMerger() {
                                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
                                                 </div>
                                             ))}
-                                            <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary/5 transition-all group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                                            <Button variant="ghost" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300 group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                                                 <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
                                             </Button>
                                         </div>
