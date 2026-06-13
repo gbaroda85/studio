@@ -236,44 +236,58 @@ export default function VideoToMp3Converter() {
                                 </div>
                                 <Badge className="font-mono text-[9px]">{formatBytes(videoFile.size)}</Badge>
                             </CardHeader>
-                            <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center min-h-[400px] bg-slate-100 dark:bg-black/20 shadow-inner">
-                                <AnimatePresence mode="wait">
-                                    {isProcessing ? (
-                                        <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-6 text-center">
-                                            <div className="relative">
-                                                <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
-                                                <Volume2 className="absolute inset-0 m-auto h-7 w-7 text-primary/30 animate-pulse" />
-                                            </div>
-                                            <div className="space-y-3 w-full max-w-[200px]">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Extracting Audio Buffer...</p>
-                                                <Progress value={progress} className="h-1" />
-                                            </div>
-                                        </motion.div>
-                                    ) : audioUrl ? (
-                                        <motion.div key="result" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full flex flex-col items-center gap-10">
-                                            <div className="size-32 rounded-[2.5rem] bg-green-500/10 flex items-center justify-center border-4 border-dashed border-green-500/30 animate-pulse shadow-2xl relative">
-                                                <Music className="size-16 text-green-600" />
-                                                <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
-                                            </div>
-                                            <div className="w-full space-y-4">
-                                                <p className="text-center font-black uppercase tracking-widest text-green-700 text-lg">Audio Stack Ready!</p>
-                                                <div className="bg-white dark:bg-slate-950 p-2 rounded-[2rem] border-2 shadow-xl">
-                                                    <audio controls src={audioUrl} className="w-full h-12" />
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ) : (
-                                        <div className="w-full space-y-6">
-                                            <video src={videoUrl!} className="w-full max-h-[35vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800" />
-                                            <div className="p-4 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 flex gap-4">
-                                                <Zap className="size-5 text-yellow-500 shrink-0 mt-0.5" />
-                                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
-                                                    We decode the audio track into raw PCM buffers for 100% original fidelity.
-                                                </p>
+                            <CardContent className="p-6 md:p-10 flex flex-col gap-8 bg-slate-100 dark:bg-black/20 shadow-inner min-h-[400px]">
+                                {/* Always Visible Video Player with Native Controls */}
+                                <div className="w-full relative group">
+                                    <video 
+                                        src={videoUrl!} 
+                                        controls 
+                                        className="w-full max-h-[45vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                    />
+                                    {isProcessing && (
+                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10 gap-4">
+                                            <Loader2 className="h-12 w-12 animate-spin text-primary opacity-80 stroke-[3]" />
+                                            <div className="space-y-2 w-full max-w-[200px] px-4">
+                                                <p className="text-[10px] font-black uppercase text-white tracking-widest text-center animate-pulse">Extracting Audio Track...</p>
+                                                <Progress value={progress} className="h-1.5 shadow-inner" />
                                             </div>
                                         </div>
                                     )}
+                                </div>
+
+                                {/* Audio Result Section - Appears below video when ready */}
+                                <AnimatePresence>
+                                    {audioUrl && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 20 }} 
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="w-full space-y-6 pt-6 border-t-2 border-dashed border-primary/20"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-lg shrink-0 border border-green-500/20">
+                                                    <Music className="size-6" />
+                                                </div>
+                                                <div className="text-left">
+                                                    <p className="text-sm font-black uppercase tracking-tighter text-green-700">Audio isolated successfully!</p>
+                                                    <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">High-fidelity WAV container render</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-white dark:bg-slate-900 p-2 rounded-[2rem] border-2 shadow-xl">
+                                                <audio controls src={audioUrl} className="w-full h-12" />
+                                            </div>
+                                        </motion.div>
+                                    )}
                                 </AnimatePresence>
+
+                                {!audioUrl && !isProcessing && (
+                                    <div className="p-4 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 flex gap-4">
+                                        <Zap className="size-5 text-yellow-500 shrink-0 mt-0.5" />
+                                        <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
+                                            We decode the audio track into raw PCM buffers for 100% original fidelity. Click 'Extract Audio' to begin.
+                                        </p>
+                                    </div>
+                                )}
                             </CardContent>
                             <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col gap-4">
                                 {!audioUrl ? (
