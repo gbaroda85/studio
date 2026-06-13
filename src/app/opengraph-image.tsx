@@ -35,7 +35,7 @@ export default function Image() {
           gap: '30px',
           marginBottom: '20px'
         }}>
-           {/* The Official Logo Box */}
+           {/* The Official Logo Box - matching user design */}
            <div style={{
               width: '220px',
               height: '220px',
