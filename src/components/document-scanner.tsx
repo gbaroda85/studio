@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -552,7 +553,11 @@ export default function DocumentScanner() {
           }
           const blob = pdf.output('blob');
           const file = new File([blob], "Scanned_Document.pdf", { type: "application/pdf" });
-          await navigator.share({ files: [file], title: "Scanned Document", text: "Sent via GR7 Tools" });
+          await navigator.share({ 
+              files: [file], 
+              title: "Scanned Document", 
+              text: "Sent via GR7 Tools - https://www.gr7imagepdf.com/" 
+          });
       } catch (e) { console.error(e); } finally { setIsSharing(false); }
   };
 
@@ -664,14 +669,14 @@ export default function DocumentScanner() {
                             )}
                         </CardContent>
                         <CardFooter className="p-6 border-t flex flex-col gap-3 shrink-0 bg-muted/5">
-                            <Button disabled={scannedPages.length === 0} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl transition-all text-white hover:text-primary border-4 border-primary" onClick={handleDownloadPdf}>
+                            <Button disabled={scannedPages.length === 0} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl transition-all text-white hover:text-primary-foreground border-4 border-primary" onClick={handleDownloadPdf}>
                                 <StarIcons />
                                 <FileText className="size-4 mr-2" />
                                 <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
                             </Button>
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-primary-foreground text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-primary-foreground text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-white text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
                             </div>
                         </CardFooter>
                     </Card>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: 'GR7 Tools - 100% Private Image & PDF Studio (No Upload)',
     template: '%s | GR7 Tools',
   },
-  description: 'Fastest local browser tools. Compress images to 20kb/50kb for SSC & UPSC, resize photos, remove background, unlock Aadhaar PDF, and merge files without server uploads. 100% Secure & Private.',
+  description: 'Fastest local browser tools. Compress images to 20kb/50kb for SSC & UPSC, resize photos, remove background, and merge files without server uploads. 100% Secure & Private.',
   metadataBase: new URL('https://www.gr7imagepdf.com'),
   alternates: {
     canonical: 'https://www.gr7imagepdf.com',
@@ -56,10 +56,10 @@ export const metadata: Metadata = {
     url: 'https://www.gr7imagepdf.com',
     siteName: 'GR7 Tools Hub',
     title: 'GR7 Tools - 100% Private Online Image & PDF Studio',
-    description: 'Professional Image and PDF manipulation using high-performance local processing. No server storage, total privacy for SSC, UPSC and Banking documents.',
+    description: 'Fastest professional local browser tools for Images, PDFs and Calculators. No server storage, total privacy for your documents.',
     images: [
       {
-        url: 'https://picsum.photos/seed/gr7tools/1200/630',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'GR7 Tools Hub Dashboard',
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'GR7 Tools - 100% Private Local Browser Toolkit',
     description: 'Edit, Compress and Convert Images & PDFs locally in your browser. No files are ever uploaded.',
-    images: ['https://picsum.photos/seed/gr7tools/1200/630'],
+    images: ['/opengraph-image'],
   }
 };
 
