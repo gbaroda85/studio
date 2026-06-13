@@ -20,12 +20,12 @@ export default function Icon() {
           justifyContent: 'center',
           backgroundColor: 'white',
           borderRadius: '8px',
-          border: '1.5px solid #e2e8f0', // Matches Header Logo border exactly
+          border: '1.5px solid #e2e8f0',
           padding: '1px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', position: 'relative', width: '100%', height: '100%' }}>
-            {/* GR Text - Dark Teal (#0d5a71) */}
+            {/* GR Text - Dark Teal */}
             <span style={{ 
               color: '#0d5a71', 
               fontSize: '13px', 
@@ -36,7 +36,7 @@ export default function Icon() {
               bottom: '4px',
               letterSpacing: '-0.5px'
             }}>GR</span>
-            {/* 7 - Bright Red (#ef4444) */}
+            {/* 7 - Bright Red */}
             <span style={{ 
               color: '#ef4444', 
               fontSize: '20px', 
