@@ -213,6 +213,14 @@ export default function DocumentScanner() {
     setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
   };
 
+  const resetAdjustments = () => {
+      setBrightness([145]);
+      setContrast([96]);
+      setSaturation([70]);
+      setSharpness([2.5]);
+      setActiveFilter('document');
+  };
+
   const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
@@ -815,7 +823,7 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                                 <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                             </div>
