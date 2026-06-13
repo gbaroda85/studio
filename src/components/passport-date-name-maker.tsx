@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -22,7 +23,8 @@ import {
     Loader2,
     Baseline,
     MoveVertical,
-    Square
+    Square,
+    Target
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -47,6 +49,15 @@ const StarIcons = () => (
     </>
 );
 
+function formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+
 export default function PassportDateNameMaker() {
     const { toast } = useToast();
     const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -58,27 +69,29 @@ export default function PassportDateNameMaker() {
     const [dateSize, setDateSize] = useState([28]);
     const [stripHeightFactor, setStripHeightFactor] = useState([14]); // % of total height
     const [borderWidth, setBorderWidth] = useState([0]); // Border thickness in px
+    const [targetKB, setTargetKB] = useState<string>("50"); // Target file size in KB
     
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
+    const [resultSize, setResultSize] = useState<number>(0);
     const [isDragOver, setIsDragOver] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const renderPhoto = useCallback(() => {
+    const renderPhoto = useCallback(async () => {
         if (!imageSrc) return;
         
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
         const img = new window.Image();
         img.src = imageSrc;
-        img.onload = () => {
-            // Standard Passport Ratio: 3.5cm x 4.5cm (approx 350x450 pixels @ 250DPI)
-            const targetW = 350 * 2; // High DPI render
+        img.onload = async () => {
+            // Standard Passport Ratio: 3.5cm x 4.5cm
+            const targetW = 350 * 2; // High DPI render for sharp text
             const targetH = 450 * 2;
             canvas.width = targetW;
             canvas.height = targetH;
@@ -96,12 +109,12 @@ export default function PassportDateNameMaker() {
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-            // 3. Draw White Strip at bottom (Dynamic height)
+            // 3. Draw White Strip at bottom
             const stripHeight = (stripHeightFactor[0] / 100) * targetH;
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, targetH - stripHeight, targetW, stripHeight);
             
-            // Thin black border for the strip for clarity
+            // Thin black border for the strip
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 1;
             ctx.strokeRect(0, targetH - stripHeight, targetW, stripHeight);
@@ -110,31 +123,50 @@ export default function PassportDateNameMaker() {
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
             
-            // Name Rendering
-            const finalNameSize = nameSize[0];
-            ctx.font = `bold ${finalNameSize}px Arial`;
-            // Position name slightly above the center of the strip
+            ctx.font = `bold ${nameSize[0]}px Arial`;
             ctx.fillText(name.toUpperCase(), targetW / 2, targetH - stripHeight + (stripHeight * 0.45));
 
-            // Date Rendering
-            const finalDateSize = dateSize[0];
-            ctx.font = `bold ${finalDateSize}px Arial`;
-            // Position date slightly below the center of the strip
+            ctx.font = `bold ${dateSize[0]}px Arial`;
             ctx.fillText(`D.O.P: ${date}`, targetW / 2, targetH - stripHeight + (stripHeight * 0.85));
 
-            // 5. Draw External Border if enabled
+            // 5. Draw External Border
             if (borderWidth[0] > 0) {
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = borderWidth[0] * 2; // Multiplied for high DPI
+                ctx.lineWidth = borderWidth[0] * 2; 
                 ctx.strokeRect(0, 0, targetW, targetH);
             }
 
-            setResultUrl(canvas.toDataURL('image/jpeg', 0.95));
+            // 6. STRICT KB TARGET OPTIMIZATION LOOP
+            const targetBytes = (parseFloat(targetKB) || 50) * 1024 * 0.98; // 2% safety buffer
+            let low = 0.1, high = 1.0;
+            let bestBlob: Blob | null = null;
+
+            // Binary search for optimal quality
+            for (let i = 0; i < 15; i++) {
+                const mid = (low + high) / 2;
+                const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
+                if (blob.size <= targetBytes) {
+                    bestBlob = blob;
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+
+            let finalBlob: Blob = bestBlob || await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
+
+            // Optional: If even at 100% it's too small, we can't do much without bloating headers (usually not needed for 50KB)
+            
+            if (resultUrl) URL.revokeObjectURL(resultUrl);
+            const url = URL.createObjectURL(finalBlob);
+            setResultUrl(url);
+            setResultSize(finalBlob.size);
         };
-    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth]);
+    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth, targetKB]);
 
     useEffect(() => {
-        renderPhoto();
+        const timer = setTimeout(renderPhoto, 300);
+        return () => clearTimeout(timer);
     }, [renderPhoto]);
 
     const handleFileChange = (file: File | null) => {
@@ -159,7 +191,7 @@ export default function PassportDateNameMaker() {
         if (!resultUrl) return;
         const link = document.createElement('a');
         link.href = resultUrl;
-        link.download = `Passport-Photo-${name.replace(/\s+/g, '-')}.jpg`;
+        link.download = `Passport-${name.replace(/\s+/g, '-')}.jpg`;
         link.click();
         
         confetti({
@@ -179,6 +211,7 @@ export default function PassportDateNameMaker() {
         setDateSize([28]);
         setStripHeightFactor([14]);
         setBorderWidth([0]);
+        setTargetKB("50");
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -234,7 +267,7 @@ export default function PassportDateNameMaker() {
                             <div className="space-y-5">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center px-1">
-                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><Square className="size-3"/> All Border Width</Label>
+                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><Square className="size-3"/> Border Width</Label>
                                         <Badge variant="secondary" className="font-mono text-[9px]">{borderWidth[0]}px</Badge>
                                     </div>
                                     <Slider min={0} max={10} step={1} value={borderWidth} onValueChange={setBorderWidth} />
@@ -262,6 +295,22 @@ export default function PassportDateNameMaker() {
                                         <Badge variant="secondary" className="font-mono text-[9px]">{dateSize[0]}px</Badge>
                                     </div>
                                     <Slider min={15} max={50} step={1} value={dateSize} onValueChange={setDateSize} />
+                                </div>
+
+                                <div className="space-y-3 pt-2 border-t border-dashed">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
+                                        <Target className="size-3" /> Target Size Limit (KB)
+                                    </Label>
+                                    <div className="relative group">
+                                        <Input 
+                                            type="number" 
+                                            value={targetKB} 
+                                            onChange={(e) => setTargetKB(e.target.value)} 
+                                            className="h-14 border-2 rounded-2xl font-black text-3xl text-center text-primary bg-primary/5 shadow-inner"
+                                        />
+                                        <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg uppercase">KB Limit</Badge>
+                                    </div>
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 text-center">Engine will strictly optimize for this limit.</p>
                                 </div>
                             </div>
                         </div>
@@ -308,7 +357,7 @@ export default function PassportDateNameMaker() {
                         >
                             <StarIcons />
                             {isProcessing ? <Loader2 className="size-7 animate-spin mr-2" /> : <Download className="size-7 mr-2 group-hover:translate-y-1 transition-transform" />}
-                            <span className="uppercase tracking-tighter">DOWNLOAD PASSPORT</span>
+                            <span className="uppercase tracking-tighter">DOWNLOAD PHOTO</span>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -331,11 +380,29 @@ export default function PassportDateNameMaker() {
                             {imageSrc ? (
                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-8 w-full">
                                     <div className="relative group overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[12px] border-white bg-white">
-                                        <canvas ref={canvasRef} className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500" style={{ maxWidth: '350px' }} />
+                                        {/* Result preview uses a canvas behind the scenes for optimization search */}
+                                        <canvas ref={canvasRef} className="hidden" />
+                                        {resultUrl ? (
+                                            <img src={resultUrl} alt="Passport result" className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500 shadow-inner" style={{ maxWidth: '350px' }} />
+                                        ) : (
+                                            <div className="size-[350px] flex items-center justify-center bg-muted/20 animate-pulse"><Loader2 className="size-10 animate-spin text-primary opacity-20" /></div>
+                                        )}
                                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+                                        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 text-center shadow-lg">
+                                            <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-1">Optimized Size</p>
+                                            <p className="text-lg font-black text-green-600">{formatBytes(resultSize)}</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 text-center shadow-lg">
+                                            <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-1">Resolution</p>
+                                            <p className="text-lg font-black text-primary">3.5 x 4.5 CM</p>
+                                        </div>
+                                    </div>
+
                                     <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-6 py-2.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
-                                        <Sparkles className="size-4 text-primary animate-pulse" /> 3.5cm x 4.5cm High-Density Render
+                                        <Sparkles className="size-4 text-primary animate-pulse" /> High-Density 300DPI Render
                                     </div>
                                 </motion.div>
                             ) : (
@@ -358,3 +425,4 @@ export default function PassportDateNameMaker() {
         </div>
     );
 }
+
