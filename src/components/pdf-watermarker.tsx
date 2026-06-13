@@ -52,7 +52,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
@@ -467,7 +467,7 @@ export default function PdfWatermarker() {
                                 </div>
                             </TabsContent>
 
-                            <TabsContent value="image" className="space-y-6 m-0 animate-in fade-in duration-300">
+                            <TabsContent value="image" className="space-y-4 m-0 animate-in fade-in duration-300">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Watermark Image</Label>
                                     {!imageWatermarkSrc ? (
@@ -536,7 +536,7 @@ export default function PdfWatermarker() {
                             </div>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center px-1">
-                                    <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-1.5">
                                         <Move className="size-3" /> Corner Margin
                                     </Label>
                                     <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
