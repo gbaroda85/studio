@@ -116,8 +116,9 @@ export default function HtmlToPdfConverter() {
 
         setIsGenerating(true);
         try {
+            const scale = 2.5; // High fidelity scale
             const canvas = await html2canvas(previewRef.current, {
-                scale: 2.5, // High fidelity
+                scale,
                 useCORS: true,
                 logging: false,
                 backgroundColor: '#FFFFFF',
@@ -127,13 +128,26 @@ export default function HtmlToPdfConverter() {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             setPreviewImage(imgData);
 
+            // Calculate dimensions in points (pt) for standard size opening
+            // points = pixels / scale
+            const pdfWidth = canvas.width / scale;
+            const pdfHeight = canvas.height / scale;
+
             const pdf = new jsPDF({
-                orientation: canvas.width > canvas.height ? 'l' : 'p',
-                unit: 'px',
-                format: [canvas.width, canvas.height],
+                orientation: pdfWidth > pdfHeight ? 'l' : 'p',
+                unit: 'pt',
+                format: [pdfWidth, pdfHeight],
             });
 
-            pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            
+            // Set Viewer Preferences to prevent "huge" display and fit to window
+            pdf.viewerPreferences({
+                'FitWindow': true,
+                'CenterWindow': true,
+                'DisplayDocTitle': true
+            });
+
             setPdfBlob(pdf.output('blob'));
         } catch (error) {
             console.error("Live preview error:", error);
@@ -248,7 +262,7 @@ export default function HtmlToPdfConverter() {
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
                     ref={previewRef} 
-                    className="w-[794px] bg-white p-0 m-0 overflow-hidden" 
+                    className="w-[794px] bg-white p-0 m-0 overflow-hidden text-left" 
                     style={{ minHeight: '1123px' }}
                     dangerouslySetInnerHTML={{ __html: htmlContent }} 
                 />
