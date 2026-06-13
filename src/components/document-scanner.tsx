@@ -47,7 +47,6 @@ import {
     ShieldCheck,
     Share2,
     Archive,
-    RotateCw as RotateIcon,
     FileDigit,
     Edit3,
     CameraIcon,
@@ -279,7 +278,6 @@ export default function DocumentScanner() {
     setIsProcessing(false);
     setBatchProgress(null);
 
-    // If exactly one image is uploaded, or if it's a first upload, jump to edit mode for the last added page
     if (newPages.length > 0) {
         const pageToEdit = newPages[newPages.length - 1];
         setCurrentRawImage(pageToEdit.originalSrc);
@@ -547,6 +545,14 @@ export default function DocumentScanner() {
     setIsProcessing(false);
   };
 
+  const handleDownloadIndividualJpg = (page: ScannedPage, index: number) => {
+      const link = document.createElement('a');
+      link.href = page.processedSrc;
+      link.download = `Scanned-Page-${index + 1}-${Date.now()}.jpg`;
+      link.click();
+      toast({ title: `Page ${index + 1} Saved` });
+  };
+
   const handleDownloadJpg = async () => {
     if (scannedPages.length === 0) return;
     setIsProcessing(true);
@@ -596,12 +602,6 @@ export default function DocumentScanner() {
     } finally {
         setIsSharing(false);
     }
-  };
-
-  const resetAdjustments = () => {
-      setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]);
-      setActiveFilter('document');
-      toast({ title: "Reset Defaults" });
   };
 
   const handleAiEnhance = () => {
@@ -656,25 +656,45 @@ export default function DocumentScanner() {
                 <div className="lg:col-span-4 h-full flex flex-col">
                     <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] min-h-[400px] flex-1">
                         <CardHeader className="bg-primary/5 border-b p-6 flex items-center justify-between">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><FileStack className="size-4 text-primary" /> BUNDLE ({scannedPages.length})</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><FileStack className="size-4 text-primary" /> SCANNED RESULTS ({scannedPages.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-6">
                             {scannedPages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-12" /><p className="text-[10px] font-black uppercase mt-4">Queue Empty</p></div>
+                                <div className="flex flex-col items-center justify-center py-20 opacity-20"><FileArchive className="size-12" /><p className="text-[10px] font-black uppercase mt-4">No Scanned Pages</p></div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p, i) => (
-                                        <div key={p.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 bg-white shadow-md group cursor-pointer" onClick={() => handleEditPage(p)}>
-                                            <img src={p.processedSrc} className="size-full object-cover" alt="s" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                <Button size="icon" variant="secondary" className="size-8 rounded-lg shadow-xl"><Edit3 className="size-4" /></Button>
-                                                <Button size="icon" variant="destructive" className="size-8 rounded-lg shadow-xl" onClick={(e) => { e.stopPropagation(); setScannedPages(prev => prev.filter(pg => pg.id !== p.id)) }}><Trash2 className="size-4" /></Button>
+                                        <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-sm flex flex-col rounded-2xl animate-in slide-in-from-bottom-2 duration-300">
+                                            <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
+                                                <img src={p.processedSrc} className="size-full object-cover transition-transform group-hover:scale-105" alt={`Page ${i+1}`} />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
+                                                    <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-3 h-8 rounded-lg shadow-xl"><Edit3 className="size-3 mr-1" /> Edit</Button>
+                                                </div>
+                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white border border-white/10">P{i+1}</div>
                                             </div>
-                                            <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">P{i+1}</div>
-                                        </div>
+                                            <div className="p-2 bg-muted/30 border-t flex items-center justify-between gap-1">
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="default" 
+                                                    className="flex-1 h-8 text-[9px] font-black uppercase rounded-lg shadow-md bg-emerald-600 hover:bg-emerald-700" 
+                                                    onClick={() => handleDownloadIndividualJpg(p, i)}
+                                                >
+                                                    <Download className="size-3 mr-1" /> SAVE JPG
+                                                </Button>
+                                                <Button 
+                                                    size="icon" 
+                                                    variant="destructive" 
+                                                    className="h-8 w-8 rounded-lg shadow-md" 
+                                                    onClick={(e) => { e.stopPropagation(); setScannedPages(prev => prev.filter(pg => pg.id !== p.id)) }}
+                                                >
+                                                    <Trash2 className="size-3" />
+                                                </Button>
+                                            </div>
+                                        </Card>
                                     ))}
-                                    <button className="aspect-[3/4] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px]" onClick={() => fileInputRef.current?.click()}>
-                                        <Plus className="size-6" /> Add
+                                    <button className="aspect-[3/4] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] bg-white dark:bg-slate-900 shadow-inner" onClick={() => fileInputRef.current?.click()}>
+                                        <Plus className="size-8" />
+                                        <span>Add Page</span>
                                     </button>
                                 </div>
                             )}
@@ -683,12 +703,12 @@ export default function DocumentScanner() {
                             <Button disabled={scannedPages.length === 0 || isProcessing} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-white hover:text-primary border-4 border-primary" onClick={handleDownloadPdf}>
                                 <StarIcons />
                                 {isProcessing ? <Loader2 className="animate-spin" /> : <FileText className="size-4 mr-2" />}
-                                <span className="uppercase text-xs tracking-widest">DOWNLOAD PDF</span>
+                                <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
                             </Button>
                             
                             <div className="grid grid-cols-2 gap-3 w-full">
                                 <Button variant="outline" disabled={scannedPages.length === 0 || isProcessing} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-50 text-emerald-600 border-emerald-100" onClick={handleDownloadJpg}>
-                                    <ImageIcon className="mr-2 size-3" /> SAVE JPG
+                                    <Archive className="mr-2 size-3" /> BUNDLE ZIP
                                 </Button>
                                 <Button variant="outline" disabled={scannedPages.length === 0 || isSharing} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-50 text-blue-600 border-blue-100" onClick={handleShare}>
                                     {isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE
