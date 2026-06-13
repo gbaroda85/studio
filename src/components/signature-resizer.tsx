@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, useCallback, useEffect } from "react";
@@ -62,11 +61,12 @@ export default function SignatureResizer() {
     const [fileName, setFileName] = useState<string>("");
     const [unit, setUnit] = useState<Unit>('cm'); 
     const [dpi, setDpi] = useState<string>("200");
-    const [width, setWidth] = useState<string>("14"); // Adjusted default to 14cm (realistic)
-    const [height, setHeight] = useState<string>("6"); // Adjusted default to 6cm (realistic)
+    const [width, setWidth] = useState<string>("14"); 
+    const [height, setHeight] = useState<string>("6"); 
     const [targetSize, setTargetSize] = useState<string>("20");
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
+    const [originalFileSize, setOriginalFileSize] = useState<number>(0);
     const [resultSize, setResultSize] = useState<number>(0);
     const [isDragOver, setIsDragOver] = useState(false);
 
@@ -75,10 +75,12 @@ export default function SignatureResizer() {
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith("image/")) {
             setFileName(file.name);
+            setOriginalFileSize(file.size);
             const reader = new FileReader();
             reader.onload = (ev) => {
                 setImageSrc(ev.target?.result as string);
                 setResultUrl(null);
+                setResultSize(0);
             };
             reader.readAsDataURL(file);
         } else if (file) {
@@ -96,19 +98,22 @@ export default function SignatureResizer() {
         setIsProcessing(true);
         setResultUrl(null);
 
-        // Visual buffer
+        // UI Feedback delay
         await new Promise(r => setTimeout(r, 600));
 
         try {
             const img = new window.Image();
             img.src = imageSrc;
-            await new Promise((resolve) => (img.onload = resolve));
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
 
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d", { willReadFrequently: true });
-            if (!ctx) throw new Error("Canvas init failed");
+            if (!ctx) throw new Error("Canvas context init failed.");
 
-            // 1. Calculate Pixels based on DPI and Unit
+            // 1. Convert Units to Pixels based on DPI
             let targetW = parseFloat(width) || 140;
             let targetH = parseFloat(height) || 60;
             const d = parseFloat(dpi) || 200;
@@ -118,26 +123,25 @@ export default function SignatureResizer() {
                 targetH = (targetH / 2.54) * d;
             }
 
-            // Safety check to prevent browser crash
-            if (targetW > 10000 || targetH > 10000) {
-                throw new Error("Dimensions are too large. Please check your inputs.");
+            // Cap dimensions to prevent memory crashes on 140cm+ entries
+            const MAX_DIM = 6000;
+            if (targetW > MAX_DIM || targetH > MAX_DIM) {
+                throw new Error("Dimensions are extremely high. Please reduce CM or DPI.");
             }
 
             canvas.width = Math.round(targetW);
             canvas.height = Math.round(targetH);
 
-            // 2. High Quality Rendering
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+            // 2. High Quality Background and Draw
             ctx.fillStyle = '#FFFFFF'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // 3. Ultra-Precision KB Optimization (20-step search for 19-20KB result)
+            // 3. Ultra-Precision Iterative Compression (20 steps for 19.9KB result)
             const limitKB = parseFloat(targetSize) || 20;
             const targetBytes = limitKB * 1024;
-            // Aim for 98% of target for maximum efficiency
-            const idealBytes = targetBytes * 0.98; 
             
             let bestBlob: Blob | null = null;
             let low = 0.001, high = 1.0;
@@ -148,16 +152,14 @@ export default function SignatureResizer() {
                 
                 if (blob.size <= targetBytes) {
                     bestBlob = blob;
-                    // If we are close to ideal (within 1KB), we can stop earlier but 20 steps is fast anyway
-                    low = mid; 
+                    low = mid; // Try higher quality
                 } else {
-                    high = mid; 
+                    high = mid; // Too big, lower quality
                 }
             }
 
-            // Final fallback check
             if (!bestBlob) {
-                bestBlob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.01));
+                bestBlob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.05));
             }
 
             const finalUrl = URL.createObjectURL(bestBlob!);
@@ -170,9 +172,9 @@ export default function SignatureResizer() {
                 origin: { y: 0.6 },
                 colors: ['#f97316', '#ffffff']
             });
-            toast({ title: "Precision Resize Success", description: `Result: ${formatBytes(bestBlob!.size)} (Target: ${limitKB}KB)` });
+            toast({ title: "Optimized Successfully", description: `File Size: ${formatBytes(bestBlob!.size)}` });
         } catch (error: any) {
-            toast({ variant: 'destructive', title: "Error", description: error.message || "Failed to process." });
+            toast({ variant: 'destructive', title: "Process Error", description: error.message || "Failed to resize." });
         } finally {
             setIsProcessing(false);
         }
@@ -191,13 +193,14 @@ export default function SignatureResizer() {
         setImageSrc(null);
         setResultUrl(null);
         setFileName("");
+        setOriginalFileSize(0);
         setResultSize(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700">
-            {/* Left: Settings Panel */}
+            {/* Left: Input Panel */}
             <div className="lg:col-span-5 space-y-6">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
@@ -213,7 +216,6 @@ export default function SignatureResizer() {
                     </CardHeader>
                     
                     <CardContent className="p-8 space-y-8">
-                        {/* System Toggle */}
                         <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">1. Dimension System</Label>
                             <RadioGroup value={unit} onValueChange={(v) => setUnit(v as Unit)} className="flex gap-4">
@@ -228,7 +230,6 @@ export default function SignatureResizer() {
                             </RadioGroup>
                         </div>
 
-                        {/* Controls Grid */}
                         <div className="grid grid-cols-2 gap-6 pt-6 border-t border-dashed">
                              <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
@@ -239,25 +240,23 @@ export default function SignatureResizer() {
                                 <Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/10 shadow-inner" />
                             </div>
                             <div className="col-span-full space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Resolution Density (DPI)</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60">DPI Density</Label>
                                 <Input type="number" value={dpi} onChange={(e) => setDpi(e.target.value)} className="h-12 border-2 rounded-xl font-black text-center bg-muted/30 shadow-inner text-primary" />
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1 text-center">Standard: 200 DPI for Govt Forms</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1 text-center">Default: 200 DPI for standard portal forms</p>
                             </div>
                         </div>
 
-                        {/* File Size Target */}
                         <div className="space-y-3 pt-6 border-t border-dashed">
                             <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
                                 <Maximize className="size-3" /> Target Size Limit (KB)
                             </Label>
                             <div className="relative group">
                                 <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-16 border-2 rounded-2xl font-black text-4xl text-center text-primary bg-primary/5 shadow-inner focus:ring-4 focus:ring-primary/20 transition-all" />
-                                <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg">STRICT KB</Badge>
+                                <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg">STRICT LIMIT</Badge>
                             </div>
-                            <p className="text-[9px] text-center font-bold text-green-600 uppercase">Aims for ~{(parseFloat(targetSize) * 0.98).toFixed(1)} KB result</p>
+                            <p className="text-[9px] text-center font-bold text-green-600 uppercase">Hits ~{(parseFloat(targetSize) * 0.98).toFixed(1)} KB for compliance</p>
                         </div>
 
-                        {/* Upload Zone */}
                         {!imageSrc ? (
                             <div 
                                 className={cn(
@@ -269,8 +268,8 @@ export default function SignatureResizer() {
                             >
                                 <UploadCloud className="size-14 text-muted-foreground group-hover:text-orange-500 transition-colors group-hover:scale-110 duration-300" />
                                 <div className="text-center">
-                                    <p className="text-[11px] font-black uppercase tracking-widest">Upload Original Sign</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">Instant 100% Private local process</p>
+                                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Signature</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">100% Private local RAM process</p>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
                             </div>
@@ -304,7 +303,7 @@ export default function SignatureResizer() {
                 </Card>
             </div>
 
-            {/* Right: Studio Dashboard */}
+            {/* Right: Studio Preview */}
             <div className="lg:col-span-7 space-y-6">
                 <Card className="border-2 shadow-2xl rounded-[3rem] overflow-hidden bg-slate-100 dark:bg-slate-950 border-primary/10 h-full flex flex-col min-h-[500px]">
                     <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
@@ -360,7 +359,7 @@ export default function SignatureResizer() {
                     <CardFooter className="p-8 border-t bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-8 justify-between items-center shrink-0">
                         <div className="flex items-center gap-10 text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em]">
                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 200DPI PRECISION</div>
+                            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> PRECISION LOGIC</div>
                         </div>
                         {resultUrl && (
                             <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 shadow-3xl" onClick={handleDownload}>
