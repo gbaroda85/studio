@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-muted-foreground font-medium">
             If you have any questions regarding this privacy policy or the functionality of our local tools, please reach out to us at:
             <br />
-            <a href="mailto:gaurav.thearmy@yahoo.com" className="text-primary font-bold hover:underline">gaurav.thearmy@yahoo.com</a>
+            <a href="mailto:grs.business29@gmail.com" className="text-primary font-bold hover:underline">grs.business29@gmail.com</a>
           </p>
         </section>
         

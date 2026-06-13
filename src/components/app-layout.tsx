@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -393,8 +392,9 @@ function AppHeader() {
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
             <div className="flex items-center gap-1">
-                <a href="mailto:gaurav.thearmy@yahoo.com" className="support-uiverse hidden sm:flex">
-                    <span className="uiverse-tooltip">gaurav.thearmy@yahoo.com</span>
+                <a href="mailto:grs.business29@gmail.com" className="support-uiverse hidden sm:flex">
+                    <span className="uiverse-tooltip">grs.business29@gmail.com</span>
+                    <Mail className="size-4 mr-2" />
                     <span>Support</span>
                 </a>
                 
@@ -443,7 +443,7 @@ export function AppFooter() {
             <div>
             <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
             <ul className="space-y-4 text-sm font-bold text-muted-foreground">
-                <li><a href="mailto:gaurav.thearmy@yahoo.com" className="hover:text-primary transition-colors">Email Support</a></li>
+                <li><a href="mailto:grs.business29@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
                 <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
             </ul>
             </div>
