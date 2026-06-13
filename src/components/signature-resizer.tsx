@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useCallback, useEffect } from "react";
@@ -18,7 +19,8 @@ import {
     PenTool,
     Eye,
     MousePointer2,
-    X
+    X,
+    FileImage
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -58,7 +60,7 @@ export default function SignatureResizer() {
     const { toast } = useToast();
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string>("");
-    const [unit, setUnit] = useState<Unit>('cm');
+    const [unit, setUnit] = useState<Unit>('px'); // Default to Pixels for 140x60
     const [dpi, setDpi] = useState<string>("200");
     const [width, setWidth] = useState<string>("140");
     const [height, setHeight] = useState<string>("60");
@@ -94,8 +96,8 @@ export default function SignatureResizer() {
         setIsProcessing(true);
         setResultUrl(null);
 
-        // UI responsiveness delay
-        await new Promise(r => setTimeout(r, 300));
+        // Responsive delay
+        await new Promise(r => setTimeout(r, 400));
 
         try {
             const img = new window.Image();
@@ -104,15 +106,14 @@ export default function SignatureResizer() {
 
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d", { willReadFrequently: true });
-            if (!ctx) throw new Error("Canvas not supported");
+            if (!ctx) throw new Error("Canvas init failed");
 
-            // Calculate dimensions in pixels
+            // 1. Calculate Target Pixels
             let targetW = parseFloat(width) || 140;
             let targetH = parseFloat(height) || 60;
             const d = parseFloat(dpi) || 200;
 
             if (unit === 'cm') {
-                // Formula: px = (cm / 2.54) * DPI
                 targetW = (targetW / 2.54) * d;
                 targetH = (targetH / 2.54) * d;
             }
@@ -120,28 +121,39 @@ export default function SignatureResizer() {
             canvas.width = Math.round(targetW);
             canvas.height = Math.round(targetH);
 
-            // High quality drawing
+            // 2. Render with HQ Smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             ctx.fillStyle = '#FFFFFF'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // Iterative compression to hit target size
+            // 3. Strict KB Binary Search Compression
             const targetBytes = parseFloat(targetSize) * 1024;
-            let quality = 0.95;
-            let currentUrl = canvas.toDataURL('image/jpeg', quality);
-            let blob = await (await fetch(currentUrl)).blob();
-
-            // Loop to reach KB target if necessary
-            while (blob.size > targetBytes && quality > 0.1) {
-                quality -= 0.05;
-                currentUrl = canvas.toDataURL('image/jpeg', quality);
-                blob = await (await fetch(currentUrl)).blob();
+            let bestBlob: Blob | null = null;
+            let low = 0.01, high = 1.0;
+            
+            // Maximum 8 iterations for precision
+            for(let i=0; i < 8; i++) {
+                const mid = (low + high) / 2;
+                const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
+                
+                if (blob.size <= targetBytes) {
+                    bestBlob = blob;
+                    low = mid; // Try higher quality
+                } else {
+                    high = mid; // Need more compression
+                }
             }
 
-            setResultUrl(currentUrl);
-            setResultSize(blob.size);
+            // Fallback if target is extremely small
+            if (!bestBlob) {
+                bestBlob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
+            }
+
+            const finalUrl = URL.createObjectURL(bestBlob!);
+            setResultUrl(finalUrl);
+            setResultSize(bestBlob!.size);
             
             confetti({
                 particleCount: 150,
@@ -149,7 +161,7 @@ export default function SignatureResizer() {
                 origin: { y: 0.6 },
                 colors: ['#f97316', '#ffffff']
             });
-            toast({ title: "Resize Success", description: `Signature optimized to ${Math.round(blob.size / 1024)} KB.` });
+            toast({ title: "Resize Success", description: `Optimized to ${formatBytes(bestBlob!.size)}.` });
         } catch (error) {
             toast({ variant: 'destructive', title: "Error", description: "Failed to process image." });
         } finally {
@@ -162,7 +174,7 @@ export default function SignatureResizer() {
         const link = document.createElement('a');
         link.href = resultUrl;
         const baseName = fileName.includes('.') ? fileName.split('.').slice(0, -1).join('.') : fileName;
-        link.download = `resized-sign-${baseName || Date.now()}.jpg`;
+        link.download = `GR7-Sign-${baseName || Date.now()}.jpg`;
         link.click();
     };
 
@@ -175,68 +187,70 @@ export default function SignatureResizer() {
 
     return (
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700">
-            {/* Left: Controls */}
+            {/* Left: Input Dashboard */}
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
+                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center gap-4">
                             <div className="size-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600 shadow-inner">
                                 <PenTool className="size-7" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Signature Resizer</CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">Optimize for Official Portals</CardDescription>
+                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Sign Studio</CardTitle>
+                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">Pixel-Perfect Resizing</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
                     
                     <CardContent className="p-8 space-y-8">
-                        {/* Unit Selector */}
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">Measurement Unit</Label>
-                            <RadioGroup value={unit} onValueChange={(v) => setUnit(v as Unit)} className="flex gap-4">
+                        {/* Unit Toggle */}
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">1. Select Unit</Label>
+                            <RadioGroup value={unit} onValueChange={(v) => {
+                                setUnit(v as Unit);
+                                if (v === 'cm') { setWidth("4.5"); setHeight("2.0"); }
+                                else { setWidth("140"); setHeight("60"); }
+                                setResultUrl(null);
+                            }} className="flex gap-4">
+                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all cursor-pointer", unit === 'px' ? "border-primary bg-primary/5" : "border-muted")} onClick={() => setUnit('px')}>
+                                    <RadioGroupItem value="px" id="px" className="sr-only" />
+                                    <Label htmlFor="px" className="font-bold text-sm cursor-pointer">Pixel (px)</Label>
+                                </div>
                                 <div className={cn("flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all cursor-pointer", unit === 'cm' ? "border-primary bg-primary/5" : "border-muted")} onClick={() => setUnit('cm')}>
                                     <RadioGroupItem value="cm" id="cm" className="sr-only" />
                                     <Label htmlFor="cm" className="font-bold text-sm cursor-pointer">Centimeter</Label>
                                 </div>
-                                <div className={cn("flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all cursor-pointer", unit === 'px' ? "border-primary bg-primary/5" : "border-muted")} onClick={() => setUnit('px')}>
-                                    <RadioGroupItem value="px" id="px" className="sr-only" />
-                                    <Label htmlFor="px" className="font-bold text-sm cursor-pointer">Pixel</Label>
-                                </div>
                             </RadioGroup>
                         </div>
 
-                        {/* DPI Setting */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase opacity-60">DPI Setting</Label>
-                                <Badge variant="secondary" className="font-black text-[9px] uppercase tracking-widest">Recommended: 200</Badge>
-                            </div>
-                            <Input type="number" value={dpi} onChange={(e) => setDpi(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/20 shadow-inner" placeholder="200" />
-                        </div>
-
-                        {/* Dimensions */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
-                                <Input type="number" value={width} onChange={(e) => setWidth(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/20 shadow-inner" />
+                        {/* Dimensions & DPI */}
+                        <div className="space-y-6 pt-4 border-t border-dashed">
+                             <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
+                                    <Input type="number" value={width} onChange={(e) => setWidth(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
+                                    <Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
+                                </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
-                                <Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/20 shadow-inner" />
+                                <Label className="text-[10px] font-black uppercase opacity-60">Target DPI</Label>
+                                <Input type="number" value={dpi} onChange={(e) => setDpi(e.target.value)} className="h-12 border-2 rounded-xl font-bold text-center bg-muted/20" />
                             </div>
                         </div>
 
-                        {/* Target Size */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Max File Size (KB)</Label>
-                                <Badge className="bg-orange-500 text-white font-black text-[9px] px-2 py-0.5 rounded">SSC/UPSC: 20KB</Badge>
-                            </div>
-                            <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center bg-muted/20 shadow-inner" placeholder="20" />
+                        {/* KB Target */}
+                        <div className="space-y-3 pt-4 border-t border-dashed">
+                            <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2">
+                                <Maximize className="size-3" /> Max File Size (KB)
+                            </Label>
+                            <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-12 border-2 rounded-xl font-black text-2xl text-center text-primary bg-primary/5" placeholder="20" />
+                            <p className="text-[9px] text-center font-bold text-muted-foreground uppercase">Commonly 20KB to 50KB for Govt Forms</p>
                         </div>
 
-                        {/* Upload Trigger if no image */}
+                        {/* Upload Zone */}
                         {!imageSrc ? (
                             <div 
                                 className={cn(
@@ -248,8 +262,8 @@ export default function SignatureResizer() {
                             >
                                 <UploadCloud className="size-12 text-muted-foreground group-hover:text-orange-500 transition-colors" />
                                 <div className="text-center">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-orange-600 transition-colors">Click or Drop Photo</p>
-                                    <p className="text-[8px] font-bold text-muted-foreground/40 mt-1 uppercase">JPG, PNG OR WEBP</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Click to Import sign</p>
+                                    <p className="text-[8px] font-bold text-muted-foreground/40 mt-1 uppercase">JPG or PNG</p>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
                             </div>
@@ -257,11 +271,11 @@ export default function SignatureResizer() {
                              <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between">
                                 <div className="flex items-center gap-3 truncate">
                                     <div className="size-10 rounded-xl overflow-hidden border shrink-0 bg-white relative">
-                                        <img src={imageSrc} className="size-full object-contain p-1" alt="prev" />
+                                        <img src={imageSrc} className="size-full object-contain p-1" alt="thumb" />
                                     </div>
-                                    <p className="text-[10px] font-black uppercase truncate max-w-[150px]">{fileName}</p>
+                                    <p className="text-[10px] font-black uppercase truncate max-w-[120px]">{fileName}</p>
                                 </div>
-                                <Button size="icon" variant="ghost" className="rounded-full text-destructive hover:bg-destructive/5" onClick={handleReset}><X className="size-4" /></Button>
+                                <Button size="icon" variant="ghost" className="rounded-full text-destructive" onClick={handleReset}><X className="size-4" /></Button>
                              </div>
                         )}
                     </CardContent>
@@ -272,33 +286,15 @@ export default function SignatureResizer() {
                             disabled={!imageSrc || isProcessing}
                         >
                             <StarIcons />
-                            {isProcessing ? (
-                                <div className="flex items-center gap-3">
-                                    <Loader2 className="size-6 animate-spin" />
-                                    <span className="uppercase text-sm tracking-tighter">PROCESSING...</span>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    <Maximize className="size-6 group-hover:scale-110 transition-transform" />
-                                    <span className="uppercase tracking-tighter">RESIZE SIGNATURE</span>
-                                </div>
-                            )}
+                            {isProcessing ? <Loader2 className="size-6 animate-spin mr-2" /> : <Scaling className="size-6 mr-2 group-hover:scale-110 transition-transform" />}
+                            <span className="uppercase tracking-tighter">RESIZE & OPTIMIZE</span>
                         </Button>
-                        <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local Hardware Processing Active</p>
                     </CardFooter>
                 </Card>
-
-                <div className="p-4 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4">
-                    <ShieldCheck className="size-6 text-primary shrink-0 mt-0.5" />
-                    <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
-                        <span className="font-black block mb-0.5 text-primary">PORTAL COMPLIANCE:</span>
-                        Our algorithm uses multi-pass compression to stay under the KB limit while keeping the ink sharp.
-                    </p>
-                </div>
             </div>
 
-            {/* Right: Preview */}
-            <div className="lg:col-span-7 flex flex-col gap-6">
+            {/* Right: Studio Viewport */}
+            <div className="lg:col-span-7 space-y-6">
                 <Card className="border-2 shadow-2xl rounded-[3rem] overflow-hidden bg-slate-100 dark:bg-slate-950 border-primary/10 h-full flex flex-col min-h-[500px]">
                     <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -307,23 +303,24 @@ export default function SignatureResizer() {
                             </div>
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">Studio Viewport</CardTitle>
                         </div>
-                        {resultUrl && <Badge className="bg-green-600 text-white font-black text-[10px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER COMPLETE</Badge>}
+                        {resultUrl && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>}
                     </CardHeader>
                     <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden">
                         <AnimatePresence mode="wait">
                             {resultUrl ? (
                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-10 w-full">
-                                    <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-[0_35px_80px_-15px_rgba(0,0,0,0.3)] border-8 border-white max-w-full group relative overflow-hidden">
-                                        <img src={resultUrl} alt="result" className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500" />
+                                    {/* The result is displayed at its actual CSS scale to let user see how 'big' it is */}
+                                    <div className="bg-white p-6 md:p-10 rounded-xl shadow-2xl border-2 border-white flex items-center justify-center relative group overflow-hidden">
+                                        <img src={resultUrl} alt="result" className="max-w-full h-auto block shadow-md" style={{ width: unit === 'px' ? `${width}px` : 'auto' }} />
                                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-                                        <div className="p-6 bg-white dark:bg-slate-950 rounded-3xl border-2 text-center shadow-lg transform transition-transform hover:-translate-y-1">
-                                            <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 mb-1">Target Size</p>
+                                        <div className="p-5 bg-white dark:bg-slate-950 rounded-3xl border-2 text-center shadow-lg">
+                                            <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 mb-1">Final Size</p>
                                             <p className="text-xl font-black text-green-600 tracking-tight">{formatBytes(resultSize)}</p>
                                         </div>
-                                        <div className="p-6 bg-white dark:bg-slate-950 rounded-3xl border-2 text-center shadow-lg transform transition-transform hover:-translate-y-1">
-                                            <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 mb-1">Canvas Grid</p>
+                                        <div className="p-5 bg-white dark:bg-slate-950 rounded-3xl border-2 text-center shadow-lg">
+                                            <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 mb-1">Dimensions</p>
                                             <p className="text-xl font-black text-primary tracking-tight">{width}x{height} {unit}</p>
                                         </div>
                                     </div>
@@ -334,18 +331,12 @@ export default function SignatureResizer() {
                                         <img src={imageSrc} alt="raw" className="max-w-[280px] max-h-[280px] object-contain rounded-2xl shadow-2xl border-4 border-white grayscale opacity-20" />
                                         <div className="absolute inset-0 flex items-center justify-center"><MousePointer2 className="size-16 text-primary animate-bounce" /></div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-black uppercase tracking-widest text-slate-400">Settings Configured</p>
-                                        <p className="text-[10px] font-bold text-slate-400/60 uppercase">Click 'Resize Signature' to render final HD output</p>
-                                    </div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Click 'Resize' to render final output</p>
                                 </motion.div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center gap-8 opacity-10 py-20">
-                                    <Scaling className="size-40" />
-                                    <div className="space-y-1 text-center">
-                                        <p className="text-2xl font-black uppercase tracking-widest">Workspace Empty</p>
-                                        <p className="text-sm font-bold uppercase">Import a signature photo on the left</p>
-                                    </div>
+                                <div className="flex flex-col items-center justify-center gap-6 opacity-10 py-20">
+                                    <FileImage className="size-32" />
+                                    <p className="text-xl font-black uppercase tracking-widest">Workspace Empty</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -353,13 +344,13 @@ export default function SignatureResizer() {
                     <CardFooter className="p-8 border-t bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-6 justify-between items-center shrink-0">
                         <div className="flex items-center gap-6 text-muted-foreground/40 text-[9px] font-black uppercase tracking-[0.3em]">
                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> Secure Local Math</div>
-                            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300DPI Precision</div>
+                            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> Strict KB Target</div>
                         </div>
                         {resultUrl && (
                             <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 shadow-3xl" onClick={handleDownload}>
                                 <StarIcons />
                                 <Download className="size-8 group-hover:translate-y-1 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE OPTIMIZED JPG</span>
+                                <span className="uppercase tracking-tighter text-lg md:text-xl">DOWNLOAD JPG</span>
                             </Button>
                         )}
                     </CardFooter>
@@ -368,3 +359,4 @@ export default function SignatureResizer() {
         </div>
     );
 }
+
