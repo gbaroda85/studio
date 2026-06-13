@@ -409,7 +409,7 @@ export default function PdfMerger() {
                                         <div className="space-y-4 animate-in zoom-in-95">
                                             <Button 
                                                 variant="outline"
-                                                className="w-full h-14 rounded-2xl border-2 border-primary font-black uppercase text-[10px] tracking-widest text-primary hover:bg-primary/5 flex items-center justify-center gap-2"
+                                                className="w-full h-14 rounded-2xl border-2 border-primary font-black uppercase text-[10px] tracking-widest text-primary hover:bg-primary hover:text-white flex items-center justify-center gap-2"
                                                 onClick={() => setIsPreviewOpen(true)}
                                             >
                                                 <Eye className="size-4" /> VIEW FULL PREVIEW
@@ -474,7 +474,7 @@ export default function PdfMerger() {
                             </div>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                            <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="h-14 md:h-16 px-6 border-2 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-slate-100 transition-all">
+                            <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="h-14 md:h-16 px-6 border-2 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-slate-900 hover:text-white transition-all">
                                 <X className="mr-2 size-4" /> CLOSE PREVIEW
                             </Button>
                             <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
