@@ -33,6 +33,8 @@ import {
     Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -55,32 +57,17 @@ interface ScannedPage {
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
+        <div className="star-1 pointer-events-none">
             <svg viewBox="0 0 784.11 815.53" className="fill-white">
                 <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
-        <div className="star-2">
+        <div className="star-2 pointer-events-none">
             <svg viewBox="0 0 784.11 815.53" className="fill-white">
                 <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
+        <div className="star-3 pointer-events-none">
             <svg viewBox="0 0 784.11 815.53" className="fill-white">
                 <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
@@ -226,7 +213,6 @@ export default function ScannerToPdf() {
                       else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
                       else y = (pageHeight - fh) / 2;
                       
-                      // Explicitly pass 'JPEG' to prevent UNKNOWN type error
                       pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
                       resolve(null);
                   };
@@ -307,7 +293,6 @@ export default function ScannerToPdf() {
 
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
-        
         <div className="grid lg:grid-cols-12 gap-8 items-start mt-8">
             
             {/* LEFT: WORKSPACE */}
@@ -378,7 +363,6 @@ export default function ScannerToPdf() {
                                                 </div>
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 
-                                                {/* ACTION BUTTONS: PERMANENTLY VISIBLE */}
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
                                                     <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
@@ -421,7 +405,6 @@ export default function ScannerToPdf() {
                     </CardFooter>
                 </Card>
 
-                {/* PDF VISUAL PREVIEW AFTER RENDER */}
                 <AnimatePresence>
                     {previewImages.length > 0 && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="w-full">
