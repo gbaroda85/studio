@@ -5,8 +5,8 @@ import { ToolNavigation } from '@/components/tool-navigation';
 import { Sparkles, Maximize, ShieldCheck, Zap, User, Calendar, Download } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'SSC/UPSC Photo Maker - Add Name & Date to Passport Photo Online',
-  description: 'Easily create passport size photos with your Name and Date of Photo (DOP) for SSC, UPSC, and IBPS applications. Standard 3.5x4.5cm format with high resolution.',
+  title: 'Add Name & Date on Photo Online – Free Photo Text Tool - GR7 Tools',
+  description: 'How to Add Name & Date on Photo Online (Step-by-Step) · Step 1: Open the Tool · Step 2: Upload Your Photo · Step 3: Enter Name & Date · Step 4: Download Optimized JPG for SSC, UPSC & IBPS.',
   alternates: { canonical: 'https://www.gr7imagepdf.com/passport-date-name' }
 };
 
@@ -44,7 +44,7 @@ export default function PassportDateNamePage() {
                     <Sparkles className="size-2.5" /> RECRUITMENT STUDIO
                 </div>
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Govt Job <span className="text-gradient-hero">Photo Maker</span>
+                    Add Name & <span className="text-gradient-hero">Date to Photo</span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
                     Create passport photos with Name & Date (DOP) for SSC, UPSC and Banking portals. 100% Private.
@@ -57,7 +57,7 @@ export default function PassportDateNamePage() {
         </div>
 
         <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
-            <HowToGuide title="SSC/UPSC Photo Maker" steps={steps} />
+            <HowToGuide title="Add Name & Date to Photo" steps={steps} />
 
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">

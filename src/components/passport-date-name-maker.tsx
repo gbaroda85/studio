@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -229,7 +228,7 @@ export default function PassportDateNameMaker() {
                                 <Camera className="size-7" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Job Photo Studio</CardTitle>
+                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Add Name & Date</CardTitle>
                                 <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">SSC, UPSC & IBPS Compliant</CardDescription>
                             </div>
                         </div>
