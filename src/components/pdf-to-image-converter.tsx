@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -385,7 +384,8 @@ export default function PdfToImageConverter() {
                         <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 md:p-12">
-                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative"
+                             onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                             <div className="relative">
                                 <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                 <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -452,7 +452,7 @@ export default function PdfToImageConverter() {
                                         data-label="      Top"
                                         onClick={() => updateSelectedPage({ vAlign: 'top' })}
                                     >
-                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                     </button>
                                     <button 
                                         className={cn(
@@ -462,7 +462,7 @@ export default function PdfToImageConverter() {
                                         data-label="      Center"
                                         onClick={() => updateSelectedPage({ vAlign: 'center' })}
                                     >
-                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                     </button>
                                     <button 
                                         className={cn(
@@ -472,7 +472,7 @@ export default function PdfToImageConverter() {
                                         data-label="      Bottom"
                                         onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
                                     >
-                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                     </button>
                                 </div>
                              </div>
@@ -563,7 +563,7 @@ export default function PdfToImageConverter() {
                                             onClick={() => setSelectedId(p.id)}
                                             className={cn(
                                                 "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
-                                                selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40"
+                                                selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
                                             )}
                                         >
                                             <div className={cn(
@@ -586,7 +586,7 @@ export default function PdfToImageConverter() {
                                             
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
                                             
-                                            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all z-20 translate-y-2 group-hover:translate-y-0">
+                                            <div className="absolute bottom-2 right-2 z-20 transition-all">
                                                 <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 hover:bg-green-700 shadow-2xl border-2 border-white/20" onClick={(e) => { e.stopPropagation(); const l=document.createElement('a'); l.href=p.finalSrc; l.download=`page-${p.index}.jpg`; l.click(); }}>
                                                     <Download className="size-4" />
                                                 </Button>
