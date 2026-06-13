@@ -31,7 +31,8 @@ import {
     Monitor,
     Smartphone,
     Sparkles,
-    Settings2
+    Settings2,
+    Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -94,6 +95,7 @@ export default function ScannerToPdf() {
   const [isRenderingPreview, setIsRenderingPreview] = useState(false);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [renderingProgress, setRenderingProgress] = useState(0);
+  const [isSharing, setIsSharing] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -185,7 +187,6 @@ export default function ScannerToPdf() {
       toast({ title: "Applied to All", description: `All pages synchronized.` });
   };
 
-  // Helper to ensure image is truly loaded and decoded to prevent blank pages
   const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
       return new Promise((resolve, reject) => {
           const img = new window.Image();
@@ -305,6 +306,39 @@ export default function ScannerToPdf() {
     } finally {
         setIsGenerating(false);
     }
+  };
+
+  const handleShare = async () => {
+      if (pages.length === 0 || !navigator.share) return;
+      setIsSharing(true);
+      try {
+          const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+
+          for (let i = 0; i < pages.length; i++) {
+              if (i > 0) pdf.addPage();
+              const pData = pages[i];
+              const img = await ensureImageLoaded(pData.src);
+              const margin = 10;
+              const ratio = Math.min((pageWidth - 20) / img.naturalWidth, (pageHeight - 20) / img.naturalHeight);
+              const fw = img.naturalWidth * ratio;
+              const fh = img.naturalHeight * ratio;
+              const x = (pageWidth - fw) / 2;
+              let y;
+              if (pData.vAlign === 'top') y = 10;
+              else if (pData.vAlign === 'bottom') y = pageHeight - fh - 10;
+              else y = (pageHeight - fh) / 2;
+              pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+          }
+          const blob = pdf.output('blob');
+          const file = new File([blob], "Scanned_Document.pdf", { type: "application/pdf" });
+          await navigator.share({ 
+              files: [file], 
+              title: "Scanned Document", 
+              text: "Sent via GR7 Tools - https://www.gr7imagepdf.com/" 
+          });
+      } catch (e) { console.error(e); } finally { setIsSharing(false); }
   };
 
   const handleReset = () => {
@@ -444,7 +478,16 @@ export default function ScannerToPdf() {
                                         <ScrollBar />
                                     </ScrollArea>
                                 </CardContent>
-                                <CardFooter className="bg-green-500/10 p-8 flex justify-center border-t border-green-500/20">
+                                <CardFooter className="bg-green-500/10 p-8 flex justify-center border-t border-green-500/20 gap-4">
+                                    <Button 
+                                        variant="outline"
+                                        size="lg"
+                                        className="h-16 px-10 border-2 border-emerald-600 text-emerald-700 font-black rounded-full hover:bg-emerald-50"
+                                        onClick={handleShare}
+                                    >
+                                        {isSharing ? <Loader2 className="size-5 animate-spin mr-2" /> : <Share2 className="size-5 mr-2" />}
+                                        SHARE PDF
+                                    </Button>
                                     <Button 
                                         size="lg" 
                                         className="magic-button magic-button-success w-full md:w-auto h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 shadow-3xl" 

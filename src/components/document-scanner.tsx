@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
