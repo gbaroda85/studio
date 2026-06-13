@@ -283,7 +283,7 @@ export default function PdfMerger() {
                                             <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                                                 <Plus className="size-3 mr-1"/> Add Files
                                             </Button>
-                                            <Button variant="ghost" size="sm" onClick={handleReset} className="btn-uiverse-secondary h-7">
+                                            <Button variant="ghost" size="sm" onClick={handleReset} className="text-destructive font-black h-7 text-[9px] uppercase hover:bg-destructive hover:text-white transition-all">
                                                 <Trash2 className="size-3 mr-1"/> Clear All
                                             </Button>
                                         </div>
@@ -385,24 +385,46 @@ export default function PdfMerger() {
                                     </p>
                                 </div>
 
-                                <Button 
-                                    className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                                    onClick={handleMergePdfs} 
-                                    disabled={pdfFiles.length < 2 || isMerging}
-                                >
-                                    <StarIcons />
-                                    {isMerging ? (
-                                        <div className="flex items-center gap-3">
-                                            <Loader2 className="size-7 md:size-8 animate-spin" />
-                                            <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
-                                        </div>
+                                <div className="flex flex-col gap-4">
+                                    {!mergedPdfUrl ? (
+                                        <Button 
+                                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                                            onClick={handleMergePdfs} 
+                                            disabled={pdfFiles.length < 2 || isMerging}
+                                        >
+                                            <StarIcons />
+                                            {isMerging ? (
+                                                <div className="flex items-center gap-3">
+                                                    <Loader2 className="size-7 md:size-8 animate-spin" />
+                                                    <span className="uppercase text-sm tracking-tighter">COMBINING...</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-3">
+                                                    <Merge className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
+                                                    <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
+                                                </div>
+                                            )}
+                                        </Button>
                                     ) : (
-                                        <div className="flex items-center gap-3">
-                                            <Merge className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
-                                            <span className="uppercase tracking-tighter">MERGE DOCUMENTS</span>
+                                        <div className="space-y-4 animate-in zoom-in-95">
+                                            <Button 
+                                                className="w-full h-14 rounded-2xl border-2 border-primary font-black uppercase text-[10px] tracking-widest text-primary hover:bg-primary/5 flex items-center justify-center gap-2"
+                                                onClick={() => setIsPreviewOpen(true)}
+                                            >
+                                                <Eye className="size-4" /> VIEW FULL PREVIEW
+                                            </Button>
+
+                                            <Button 
+                                                className="magic-button magic-button-success w-full h-16 md:h-20 text-lg md:text-xl font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
+                                                onClick={handleDownload}
+                                            >
+                                                <StarIcons />
+                                                <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
+                                                <span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
+                                            </Button>
                                         </div>
                                     )}
-                                </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -451,7 +473,7 @@ export default function PdfMerger() {
                             </div>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                            <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="btn-uiverse-secondary h-14 md:h-16 px-6">
+                            <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="h-14 md:h-16 px-6 border-2 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-slate-100 transition-all">
                                 <X className="mr-2 size-4" /> CLOSE PREVIEW
                             </Button>
                             <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
