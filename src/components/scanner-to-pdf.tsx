@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
@@ -197,7 +196,7 @@ export default function ScannerToPdf() {
                       await img.decode();
                       resolve(img);
                   } catch (e) {
-                      resolve(img); // Fallback for older browsers
+                      resolve(img); 
                   }
               } else {
                   resolve(img);
@@ -350,7 +349,7 @@ export default function ScannerToPdf() {
                                         <Camera className="size-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">Native Camera</p>
+                                        <p className="text-base font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Native Camera</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Full screen capture</p>
                                     </div>
                                 </div>
@@ -363,7 +362,7 @@ export default function ScannerToPdf() {
                                         <UploadCloud className="size-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">Photo Gallery</p>
+                                        <p className="text-base font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Photo Gallery</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple files</p>
                                     </div>
                                 </div>
@@ -389,7 +388,6 @@ export default function ScannerToPdf() {
                                                 </div>
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 
-                                                {/* PERMANENTLY VISIBLE ACTION BUTTONS */}
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
                                                     <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/95 hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
@@ -402,7 +400,7 @@ export default function ScannerToPdf() {
                                         ))}
                                         <button 
                                             className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
-                                            onClick={() => cameraInputRef.current?.click()}
+                                            onClick={() => fileInputRef.current?.click()}
                                         >
                                             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                                 <Plus className="size-5" />
@@ -412,13 +410,6 @@ export default function ScannerToPdf() {
                                     </div>
                                     <ScrollBar />
                                 </ScrollArea>
-                            </div>
-                        )}
-                        
-                        {isProcessing && (
-                            <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-center gap-3 animate-pulse">
-                                <Loader2 className="size-4 animate-spin text-primary" />
-                                <span className="text-[10px] font-black uppercase text-primary">Processing Photos...</span>
                             </div>
                         )}
                     </CardContent>
@@ -471,10 +462,10 @@ export default function ScannerToPdf() {
             </div>
 
             {/* RIGHT: POSITIONING PANEL */}
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-4 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter text-foreground">
+                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter text-slate-800 dark:text-slate-100">
                             <Layout className="size-6 text-primary" /> POSITIONING
                         </CardTitle>
                     </CardHeader>
@@ -482,7 +473,7 @@ export default function ScannerToPdf() {
                         {!selectedId ? (
                             <div className="py-12 text-center space-y-4 opacity-40 flex flex-col items-center">
                                  <MousePointer2 className="size-12 text-muted-foreground animate-bounce" />
-                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px] text-foreground">Select a page to<br/>unlock alignment</p>
+                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px] text-slate-800 dark:text-slate-100">Select a page to<br/>unlock alignment</p>
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
@@ -567,4 +558,3 @@ export default function ScannerToPdf() {
     </div>
   );
 }
-
