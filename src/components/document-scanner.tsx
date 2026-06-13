@@ -436,16 +436,13 @@ export default function DocumentScanner() {
   const handleNavigate = (direction: number) => {
       if (pendingPages.length <= 1 || !editingId) return;
       
-      // 1. Save current progress (points) to pending list
       const updatedPending = pendingPages.map(p => p.id === editingId ? { ...p, points } : p);
       setPendingPages(updatedPending);
 
-      // 2. Find next index
       const currentIndex = updatedPending.findIndex(p => p.id === editingId);
       const nextIndex = (currentIndex + direction + updatedPending.length) % updatedPending.length;
       const nextItem = updatedPending[nextIndex];
 
-      // 3. Load next item
       setEditingId(nextItem.id);
       setCurrentRawImage(nextItem.originalSrc);
       setPoints(nextItem.points);
@@ -673,8 +670,8 @@ export default function DocumentScanner() {
                                 <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
                             </Button>
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:!text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:!text-white text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-primary-foreground text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-primary-foreground text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
                             </div>
                         </CardFooter>
                     </Card>
@@ -697,9 +694,9 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-[calc(100vh-250px)]">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-[calc(100vh-320px)]">
                 <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
-                    <CardHeader className="bg-muted/30 border-b p-5 flex flex-row items-center justify-between shrink-0">
+                    <CardHeader className="bg-muted/30 border-b p-4 md:p-5 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border"><TabsList className="h-9 w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList></Tabs>
@@ -711,11 +708,11 @@ export default function DocumentScanner() {
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-2 shadow-3xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[40vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[40vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -740,21 +737,21 @@ export default function DocumentScanner() {
                         <Button className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(false)}>
                             <CheckCircle2 className="mr-2 size-5" /> CONFIRM & ADD
                         </Button>
-                        <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleNavigate(1)} disabled={pendingPages.length <= 1}>
+                        <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleConfirmAdd(true)} disabled={pendingPages.length <= 1}>
                             NEXT <ChevronRightIcon className="ml-1.5 size-4" />
                         </Button>
                     </CardFooter>
                 </Card>
 
                 <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
-                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
+                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-4 md:p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
                         <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[280px] flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[35vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[40vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
                         </div>
                     </CardContent>
-                    <CardFooter className="p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
+                    <CardFooter className="p-4 md:p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
                         <div className="w-full space-y-4">
                             <div className="flex items-center justify-between"><Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label></div>
                             <div className="grid grid-cols-6 gap-1 w-full">
