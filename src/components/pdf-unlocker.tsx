@@ -210,14 +210,14 @@ export default function PdfUnlocker() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
             
-            // Create a fresh PDF document with pdf-lib to ensure we have full control over Catalog/Preferences
+            // 1. Create a fresh PDF document with pdf-lib to ensure no "huge zoom" metadata persists
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Render at high scale for quality
+                // Render at 2.0x scale for high quality prints
                 const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
@@ -230,12 +230,13 @@ export default function PdfUnlocker() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     
-                    // Embed the rendered image into the fresh PDF
+                    // Embed into fresh PDF
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     const imgBuffer = await fetch(imgData).then(r => r.arrayBuffer());
                     const embeddedImg = await finalPdfDoc.embedJpg(imgBuffer);
                     
-                    // Map back to standard point dimensions (72 DPI)
+                    // CRITICAL FIX: Map back to standard point dimensions (1/72 inch)
+                    // Original points = pixels / scale
                     const pWidth = embeddedImg.width / renderScale;
                     const pHeight = embeddedImg.height / renderScale;
                     const newPage = finalPdfDoc.addPage([pWidth, pHeight]);
@@ -250,13 +251,23 @@ export default function PdfUnlocker() {
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
 
-            // CRITICAL FIX: Set Viewer Preferences to prevent "huge" zoom on open
+            // CRITICAL FIX: Set Viewer Preferences AND OpenAction to prevent "huge" zoom
             const catalog = finalPdfDoc.catalog;
+            
+            // 1. Set ViewerPreferences (Supported by most desktop/browser viewers)
             catalog.set(PDFName.of('ViewerPreferences'), finalPdfDoc.context.obj({
                 FitWindow: true,
                 CenterWindow: true,
                 DisplayDocTitle: true
             }));
+
+            // 2. Set OpenAction to "Fit" (Forces browser to fit the page to window on load)
+            const pdfPages = finalPdfDoc.getPages();
+            if (pdfPages.length > 0) {
+                const firstPage = pdfPages[0];
+                const dest = finalPdfDoc.context.obj([firstPage.ref, PDFName.of('Fit')]);
+                catalog.set(PDFName.of('OpenAction'), dest);
+            }
 
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
@@ -265,7 +276,7 @@ export default function PdfUnlocker() {
             setProgress(100);
             setStatusText("Unlocked Successfully!");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#48a9a4', '#fce7eb', '#ffffff'] });
-            toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
+            toast({ title: 'Success!', description: 'File unlocked and zoom-optimized.' });
         } catch (error: any) {
             console.error(error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
@@ -376,7 +387,7 @@ export default function PdfUnlocker() {
                                     <div className="p-8 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-3xl text-center space-y-4">
                                         <Info className="size-12 mx-auto text-blue-500 opacity-40" />
                                         <p className="font-bold text-sm text-blue-800 uppercase">No Password Needed</p>
-                                        <p className="text-xs text-muted-foreground">This file is already open. You can still process it to sanitize the structure.</p>
+                                        <p className="text-xs text-muted-foreground">This file is already open. You can still process it to sanitize the structure and zoom level.</p>
                                     </div>
                                 ) : isProtected === true && !unlockedPdfUrl ? (
                                     <div className="space-y-6">
@@ -428,8 +439,8 @@ export default function PdfUnlocker() {
                                             <div className="absolute -top-2 -right-2"><Sparkles className="text-yellow-400 size-6" /></div>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-xl font-black text-green-800 uppercase tracking-tighter">PERMANENTLY UNLOCKED!</p>
-                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving in standard A4 size</p>
+                                            <p className="text-xl font-black text-green-800 uppercase tracking-tighter">SUCCESSFULLY UNLOCKED!</p>
+                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving with 'Fit to Screen' optimization</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -445,7 +456,7 @@ export default function PdfUnlocker() {
                                     <Button 
                                         onClick={handleUnlockProcess} 
                                         disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
-                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-primary/90 rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 border-none"
                                     >
                                         <StarIcons />
                                         {isUnlocking ? "DECODING..." : (
@@ -456,7 +467,7 @@ export default function PdfUnlocker() {
                                         )}
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4">
+                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-green-700 text-white rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
                                         <StarIcons />
                                         <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
                                         <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
