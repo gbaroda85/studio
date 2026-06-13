@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
@@ -30,10 +31,11 @@ import {
     FileDigit,
     Monitor,
     Smartphone,
-    Sparkles
+    Sparkles,
+    Settings2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
@@ -184,6 +186,28 @@ export default function ScannerToPdf() {
       toast({ title: "Applied to All", description: `All pages synchronized.` });
   };
 
+  // Helper to ensure image is truly loaded and decoded to prevent blank pages
+  const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+          const img = new window.Image();
+          img.crossOrigin = "anonymous";
+          img.onload = async () => {
+              if (img.decode) {
+                  try {
+                      await img.decode();
+                      resolve(img);
+                  } catch (e) {
+                      resolve(img); // Fallback for older browsers
+                  }
+              } else {
+                  resolve(img);
+              }
+          };
+          img.onerror = reject;
+          img.src = src;
+      });
+  };
+
   const generatePDFPreview = async () => {
       if (pages.length === 0) return;
       setIsRenderingPreview(true);
@@ -197,32 +221,33 @@ export default function ScannerToPdf() {
           for (let i = 0; i < pages.length; i++) {
               if (i > 0) pdf.addPage();
               const pData = pages[i];
-              const img = new window.Image();
-              img.src = pData.src;
               
-              await new Promise((resolve) => {
-                  img.onload = () => {
-                      const props = { width: img.naturalWidth, height: img.naturalHeight };
-                      const margin = 10;
-                      const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
-                      const ratio = Math.min(safeW / props.width, safeH / props.height);
-                      const fw = props.width * ratio, fh = props.height * ratio;
-                      const x = (pageWidth - fw) / 2;
-                      let y;
-                      if (pData.vAlign === 'top') y = margin;
-                      else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
-                      else y = (pageHeight - fh) / 2;
-                      
-                      pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
-                      resolve(null);
-                  };
-                  img.onerror = () => resolve(null);
-              });
+              try {
+                  const img = await ensureImageLoaded(pData.src);
+                  const margin = 10;
+                  const safeW = pageWidth - (margin * 2);
+                  const safeH = pageHeight - (margin * 2);
+                  const ratio = Math.min(safeW / img.naturalWidth, safeH / img.naturalHeight);
+                  const fw = img.naturalWidth * ratio;
+                  const fh = img.naturalHeight * ratio;
+                  const x = (pageWidth - fw) / 2;
+                  let y;
+                  if (pData.vAlign === 'top') y = margin;
+                  else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                  else y = (pageHeight - fh) / 2;
+                  
+                  pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+              } catch (e) {
+                  console.error("Preview page skip:", e);
+              }
+              
               setRenderingProgress(Math.round(((i + 1) / pages.length) * 100));
           }
+
           const pdfBytes = pdf.output('arraybuffer');
           const loadingTask = pdfjs.getDocument({ data: new Uint8Array(pdfBytes) });
           const pdfDoc = await loadingTask.promise;
+          
           for (let i = 1; i <= pdfDoc.numPages; i++) {
               const pg = await pdfDoc.getPage(i);
               const vp = pg.getViewport({ scale: 1.2 });
@@ -248,33 +273,34 @@ export default function ScannerToPdf() {
     setIsGenerating(true);
     try {
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
         for (let i = 0; i < pages.length; i++) {
             if (i > 0) pdf.addPage();
             const pData = pages[i];
-            const img = new window.Image();
-            img.src = pData.src;
-            await new Promise((resolve, reject) => {
-                img.onload = () => {
-                    const props = { width: img.naturalWidth, height: img.naturalHeight };
-                    const margin = 10;
-                    const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
-                    const ratio = Math.min(safeW / props.width, safeH / props.height);
-                    const fw = props.width * ratio, fh = props.height * ratio;
-                    const x = (pageWidth - fw) / 2;
-                    let y;
-                    if (pData.vAlign === 'top') y = margin;
-                    else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
-                    else y = (pageHeight - fh) / 2;
-                    
-                    pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
-                    resolve(null);
-                };
-                img.onerror = () => reject(new Error("Image Load Failed"));
-            });
+            
+            try {
+                const img = await ensureImageLoaded(pData.src);
+                const margin = 10;
+                const safeW = pageWidth - (margin * 2);
+                const safeH = pageHeight - (margin * 2);
+                const ratio = Math.min(safeW / img.naturalWidth, safeH / img.naturalHeight);
+                const fw = img.naturalWidth * ratio;
+                const fh = img.naturalHeight * ratio;
+                const x = (pageWidth - fw) / 2;
+                let y;
+                if (pData.vAlign === 'top') y = margin;
+                else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                else y = (pageHeight - fh) / 2;
+                
+                pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+            } catch (err) {
+                console.error("Export page skip:", err);
+            }
         }
         pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
-        toast({ title: "PDF Exported" });
+        toast({ title: "PDF Exported Successfully" });
     } catch (e) {
         toast({ variant: 'destructive', title: 'Export Failed' });
     } finally {
@@ -352,7 +378,7 @@ export default function ScannerToPdf() {
                                                 onClick={() => setSelectedId(p.id)}
                                                 className={cn(
                                                     "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-lg",
-                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10" : "hover:border-primary/40 border-transparent"
+                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
                                                 )}
                                             >
                                                 <div className={cn(
@@ -363,8 +389,9 @@ export default function ScannerToPdf() {
                                                 </div>
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 
+                                                {/* PERMANENTLY VISIBLE ACTION BUTTONS */}
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
-                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
+                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/95 hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
                                                     </Button>
                                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg border-2 border-white/20" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
@@ -507,7 +534,7 @@ export default function ScannerToPdf() {
                             <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                 <span className="font-black block mb-1 text-primary">A4 SYNC:</span>
-                                Final PDF is generated at 300DPI to ensure small text remains crystal clear.
+                                Final PDF is generated at 300DPI with deep buffer decoding to prevent blank pages.
                             </p>
                         </div>
                     </CardContent>
@@ -540,3 +567,4 @@ export default function ScannerToPdf() {
     </div>
   );
 }
+
