@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import * as pdfjs from 'pdfjs-dist';
 import { 
     Download, 
     X, 
@@ -26,14 +27,22 @@ import {
     RefreshCcw,
     Plus,
     Eye,
-    FileDigit
+    FileDigit,
+    Monitor
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const PDF_JS_VERSION = '4.2.67';
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+}
 
 type VAlign = 'top' | 'center' | 'bottom';
 
@@ -47,33 +56,33 @@ interface ScannedPage {
 const StarIcons = () => (
     <>
         <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
     </>
@@ -85,6 +94,9 @@ export default function ScannerToPdf() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRenderingPreview, setIsRenderingPreview] = useState(false);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [renderingProgress, setRenderingProgress] = useState(0);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -94,6 +106,7 @@ export default function ScannerToPdf() {
     if (!filesList || filesList.length === 0) return;
 
     setIsProcessing(true);
+    setPreviewImages([]);
     const newFilesArray = Array.from(filesList);
     let loadedCount = 0;
 
@@ -110,8 +123,7 @@ export default function ScannerToPdf() {
                     name: file.name || `Scan-${Date.now()}.jpg`,
                     vAlign: 'center'
                 }];
-                // Auto-select the last added item
-                setSelectedId(id);
+                if (!selectedId) setSelectedId(id);
                 return updated;
             });
 
@@ -132,6 +144,7 @@ export default function ScannerToPdf() {
   };
 
   const handleRemovePage = (id: string) => {
+    setPreviewImages([]);
     setPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
         if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
@@ -140,6 +153,7 @@ export default function ScannerToPdf() {
   };
 
   const handleRotate = (id: string) => {
+    setPreviewImages([]);
     const item = pages.find(p => p.id === id);
     if (!item) return;
 
@@ -155,12 +169,13 @@ export default function ScannerToPdf() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         
-        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.9);
+        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.95);
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
     };
   };
 
   const updateAlignment = (vAlign: VAlign) => {
+      setPreviewImages([]);
       if (!selectedId) return;
       setPages(prev => prev.map(p => p.id === selectedId ? { ...p, vAlign } : p));
   };
@@ -168,63 +183,100 @@ export default function ScannerToPdf() {
   const applyAlignmentToAll = () => {
       const selected = pages.find(p => p.id === selectedId);
       if (!selected) return;
+      setPreviewImages([]);
       setPages(prev => prev.map(p => ({ ...p, vAlign: selected.vAlign })));
       toast({ title: "Applied to All", description: `All pages synchronized.` });
+  };
+
+  const generatePDFPreview = async () => {
+      if (pages.length === 0) return;
+      setIsRenderingPreview(true);
+      setRenderingProgress(0);
+      try {
+          const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const imgs: string[] = [];
+
+          for (let i = 0; i < pages.length; i++) {
+              if (i > 0) pdf.addPage();
+              const pData = pages[i];
+              const img = new window.Image();
+              img.src = pData.src;
+              await new Promise((resolve) => {
+                  img.onload = () => {
+                      const props = pdf.getImageProperties(img);
+                      const margin = 10;
+                      const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
+                      const ratio = Math.min(safeW / props.width, safeH / props.height);
+                      const fw = props.width * ratio, fh = props.height * ratio;
+                      const x = (pageWidth - fw) / 2;
+                      let y;
+                      if (pData.vAlign === 'top') y = margin;
+                      else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                      else y = (pageHeight - fh) / 2;
+                      pdf.addImage(pData.src, 'JPEG', x, y, fw, fh, undefined, 'FAST');
+                      resolve(null);
+                  };
+              });
+              setRenderingProgress(Math.round(((i + 1) / pages.length) * 100));
+          }
+          const pdfBytes = pdf.output('arraybuffer');
+          const loadingTask = pdfjs.getDocument({ data: new Uint8Array(pdfBytes) });
+          const pdfDoc = await loadingTask.promise;
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+              const pg = await pdfDoc.getPage(i);
+              const vp = pg.getViewport({ scale: 1.2 });
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                  canvas.height = vp.height; canvas.width = vp.width;
+                  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                  await pg.render({ canvasContext: ctx, viewport: vp }).promise;
+                  imgs.push(canvas.toDataURL('image/jpeg', 0.85));
+              }
+          }
+          setPreviewImages(imgs);
+      } catch (e) {
+          toast({ variant: 'destructive', title: "Preview Error" });
+      } finally {
+          setIsRenderingPreview(false);
+      }
   };
 
   const handleDownloadPdf = async () => {
     if (pages.length === 0) return;
     setIsGenerating(true);
     try {
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4'
-        });
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
         for (let i = 0; i < pages.length; i++) {
             if (i > 0) pdf.addPage();
-            
-            const pageData = pages[i];
+            const pData = pages[i];
             const img = new window.Image();
-            img.src = pageData.src;
-
+            img.src = pData.src;
             await new Promise((resolve, reject) => {
                 img.onload = () => {
-                    const imgProps = pdf.getImageProperties(img);
+                    const props = pdf.getImageProperties(img);
                     const margin = 10;
-                    const safeWidth = pageWidth - (margin * 2);
-                    const safeHeight = pageHeight - (margin * 2);
-                    
-                    const ratio = Math.min(safeWidth / imgProps.width, safeHeight / imgProps.height);
-                    const finalW = imgProps.width * ratio;
-                    const finalH = imgProps.height * ratio;
-
-                    const x = (pageWidth - finalW) / 2;
+                    const safeW = pageWidth - (margin * 2), safeH = pageHeight - (margin * 2);
+                    const ratio = Math.min(safeW / props.width, safeH / props.height);
+                    const fw = props.width * ratio, fh = props.height * ratio;
+                    const x = (pageWidth - fw) / 2;
                     let y;
-
-                    if (pageData.vAlign === 'top') {
-                        y = margin;
-                    } else if (pageData.vAlign === 'bottom') {
-                        y = pageHeight - finalH - margin;
-                    } else {
-                        y = (pageHeight - finalH) / 2;
-                    }
-
-                    pdf.addImage(pageData.src, 'JPEG', x, y, finalW, finalH, undefined, 'FAST');
+                    if (pData.vAlign === 'top') y = margin;
+                    else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                    else y = (pageHeight - fh) / 2;
+                    pdf.addImage(pData.src, 'JPEG', x, y, fw, fh, undefined, 'FAST');
                     resolve(null);
                 };
                 img.onerror = () => reject(new Error("Image Load Failed"));
             });
         }
-
-        pdf.save(`GR7-Tools-Scan-Bundle-${Date.now()}.pdf`);
-        toast({ title: "PDF Exported", description: "Document saved successfully." });
+        pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
+        toast({ title: "PDF Exported" });
     } catch (e) {
-        toast({ variant: 'destructive', title: 'Export Failed', description: "Check file permissions." });
+        toast({ variant: 'destructive', title: 'Export Failed' });
     } finally {
         setIsGenerating(false);
     }
@@ -239,13 +291,13 @@ export default function ScannerToPdf() {
             
             {/* LEFT: WORKSPACE */}
             <div className="lg:col-span-8 space-y-6">
-                <Card className="border-2 shadow-2xl overflow-hidden rounded-[2.5rem] bg-card/50">
+                <Card className="border-2 shadow-2xl overflow-hidden rounded-[2.5rem] bg-card/50 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 flex flex-row items-center justify-between">
                          <div className="space-y-1 text-left">
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
-                                <FileStack className="size-6 text-primary" /> BUNDLE STUDIO
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
+                                <FileStack className="size-6" /> BUNDLE STUDIO
                             </CardTitle>
-                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">Capture or upload to start bundle.</CardDescription>
+                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">High-fidelity local RAM processing.</CardDescription>
                          </div>
                          <div className="flex gap-2">
                              {pages.length > 0 && (
@@ -272,7 +324,7 @@ export default function ScannerToPdf() {
                                 </div>
 
                                 <div 
-                                    className="border-4 border-dashed border-muted-foreground/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
+                                    className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
@@ -294,16 +346,16 @@ export default function ScannerToPdf() {
                                                 onClick={() => setSelectedId(p.id)}
                                                 className={cn(
                                                     "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-lg",
-                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10" : "hover:border-primary/40"
+                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10" : "hover:border-primary/40 border-transparent"
                                                 )}
                                             >
                                                 <div className={cn(
                                                     "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
                                                     p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                 )}>
-                                                    <img src={p.src} className="max-w-full max-h-[90%] object-contain mx-auto" alt="thumb" />
+                                                    <img src={p.src} className="max-w-full max-h-[90%] object-contain mx-auto block" alt="thumb" />
                                                 </div>
-                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20">P{i + 1}</div>
+                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex gap-1">
                                                     <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
@@ -322,6 +374,7 @@ export default function ScannerToPdf() {
                                             Add Scan
                                         </button>
                                     </div>
+                                    <ScrollBar />
                                 </ScrollArea>
                             </div>
                         )}
@@ -329,31 +382,57 @@ export default function ScannerToPdf() {
                         {isProcessing && (
                             <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-center gap-3 animate-pulse">
                                 <Loader2 className="size-4 animate-spin text-primary" />
-                                <span className="text-[10px] font-black uppercase text-primary">Reading Photos...</span>
+                                <span className="text-[10px] font-black uppercase text-primary">Processing Photos...</span>
                             </div>
                         )}
                     </CardContent>
                     <CardFooter className="bg-muted/10 border-t p-4 flex justify-center gap-8">
-                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                         <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">
                             <ShieldCheck className="size-4 text-green-500" /> SECURE RAM
                         </div>
-                        <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">
                             <Zap className="size-4 text-yellow-500" /> 100% PRIVATE
                         </div>
                     </CardFooter>
                 </Card>
 
-                {pages.length > 0 && (
-                    <Button 
-                        onClick={handleDownloadPdf} 
-                        disabled={isGenerating || isProcessing}
-                        className="h-20 w-full bg-primary text-black font-black text-2xl rounded-3xl shadow-3xl transform active:scale-95 transition-all group relative overflow-hidden"
-                    >
-                        {isGenerating ? <Loader2 className="animate-spin mr-3 size-8" /> : <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" />}
-                        GENERATE PDF BUNDLE
-                        <ChevronRight className="absolute right-8 top-1/2 -translate-y-1/2 size-8 opacity-20" />
-                    </Button>
-                )}
+                {/* PDF VISUAL PREVIEW AFTER RENDER */}
+                <AnimatePresence>
+                    {previewImages.length > 0 && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem]">
+                                <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20 flex flex-row items-center justify-center gap-3">
+                                    <Eye className="size-4 text-green-600" />
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Visual Render View</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
+                                    <ScrollArea className="h-[450px] w-full p-8 md:p-12">
+                                        <div className="flex flex-col items-center gap-10 pb-10">
+                                            {previewImages.map((img, i) => (
+                                                <div key={i} className="shadow-3xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-[450px] animate-in slide-in-from-bottom-4 duration-500">
+                                                    <img src={img} alt="p" className="w-full h-auto block" />
+                                                    <div className="bg-muted text-[8px] font-black py-2 text-center uppercase tracking-widest text-muted-foreground border-t">A4 Optimized Page {i+1}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <ScrollBar />
+                                    </ScrollArea>
+                                </CardContent>
+                                <CardFooter className="bg-green-500/10 p-8 flex justify-center border-t border-green-500/20">
+                                    <Button 
+                                        size="lg" 
+                                        className="magic-button magic-button-success w-full md:w-auto h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 shadow-3xl" 
+                                        onClick={handleDownloadPdf}
+                                    >
+                                        <StarIcons />
+                                        <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
+                                        <span className="uppercase tracking-tighter text-lg md:text-xl">DOWNLOAD PDF BUNDLE</span>
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* RIGHT: POSITIONING PANEL */}
@@ -366,25 +445,13 @@ export default function ScannerToPdf() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-8 space-y-8">
                         {!selectedId ? (
-                            <div className="py-12 text-center space-y-4 opacity-40">
-                                 <MousePointer2 className="size-12 mx-auto text-muted-foreground" />
-                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed">Select a page thumbnail<br/>to adjust its position</p>
+                            <div className="py-12 text-center space-y-4 opacity-40 flex flex-col items-center">
+                                 <MousePointer2 className="size-12 text-muted-foreground animate-bounce" />
+                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px]">Select a page to<br/>unlock alignment</p>
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-2">
-                                    <Label className="text-[9px] font-black uppercase tracking-widest opacity-50">Current Selection</Label>
-                                    <div className="aspect-[3/4] w-32 mx-auto rounded-xl border-2 border-primary/20 bg-muted/20 overflow-hidden relative shadow-inner">
-                                        <div className={cn(
-                                            "absolute inset-0 flex flex-col p-1 transition-all duration-300",
-                                            selectedPage?.vAlign === 'top' ? 'justify-start' : selectedPage?.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                        )}>
-                                            <img src={selectedPage?.src} className="max-w-full max-h-[90%] object-contain mx-auto shadow-2xl" alt="selection" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                     </Label>
@@ -422,7 +489,7 @@ export default function ScannerToPdf() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t-2 border-dashed">
+                                <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/5">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <RotateCw className="size-3" /> Orientation
                                     </Label>
@@ -441,18 +508,33 @@ export default function ScannerToPdf() {
                             </div>
                         )}
 
-                        <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                        <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4 shadow-inner">
                             <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
-                                <span className="font-black block mb-1 text-primary">A4 AUTO-FIT:</span>
-                                Each capture is automatically scaled to fit standard A4 margins.
+                                <span className="font-black block mb-1 text-primary">A4 SYNC:</span>
+                                Final PDF is generated at 300DPI to ensure small text remains crystal clear.
                             </p>
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 border-t-2">
-                        <div className="flex items-center gap-3 text-muted-foreground/60 text-[8px] font-black uppercase tracking-widest mx-auto">
-                            <ShieldCheck className="size-3" /> Industrial Grade PDF Render
-                        </div>
+                    <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-4">
+                        <Button 
+                            className="w-full h-14 bg-primary text-black font-black text-base rounded-2xl shadow-xl transition-all active:scale-95 group"
+                            onClick={generatePDFPreview}
+                            disabled={pages.length === 0 || isRenderingPreview}
+                        >
+                            {isRenderingPreview ? (
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="size-4 animate-spin" />
+                                    <span className="text-[10px] font-black uppercase">{renderingProgress}% MAPPING...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <Eye className="size-5" />
+                                    <span>BUILD HD PREVIEW</span>
+                                </div>
+                            )}
+                        </Button>
+                        <p className="text-[8px] font-black text-center text-muted-foreground/40 uppercase tracking-widest">Local RAM Processing Active</p>
                     </CardFooter>
                 </Card>
             </div>
