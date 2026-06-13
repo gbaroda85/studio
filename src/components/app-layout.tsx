@@ -61,7 +61,8 @@ import {
   IndianRupee,
   TrendingUp,
   PiggyBank,
-  Layers
+  Layers,
+  CalendarDays
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -93,6 +94,7 @@ const CATEGORIES = [
     icon: ImageIcon,
     color: "text-blue-500",
     tools: [
+      { href: '/passport-date-name', label: 'passport_date_name_label', icon: CalendarDays },
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },

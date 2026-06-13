@@ -63,7 +63,8 @@ import {
   MonitorPlay,
   PlayCircle,
   PenLine,
-  PenTool
+  PenTool,
+  CalendarDays
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -75,12 +76,12 @@ import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS (Limit 6 for Home Grid)
+  { icon: CalendarDays, title: "SSC/UPSC PHOTO MAKER", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
-  { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
   
   // PDF TOOLKIT (Limit 6 for Home Grid)
   { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf-kit" },
@@ -99,6 +100,7 @@ const ALL_TOOLS = [
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
 
   // --- ALL OTHER TOOLS (Searchable only) ---
+  { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "image" },
   { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "image" },
   { icon: PlayCircle, title: "INSTAGRAM DOWNLOADER", description: "Download Reels and Videos from Instagram privately.", href: "/instagram-downloader", colorClass: "bg-pink-600", lightBg: "bg-pink-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "video" },

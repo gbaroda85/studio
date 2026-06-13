@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/signature-resizer',
     '/marriage-biodata',
     '/passport-photo',
+    '/passport-date-name',
     '/unlock-pdf',
     '/merge-pdf',
     '/remove-background',
