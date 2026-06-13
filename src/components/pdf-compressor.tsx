@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
@@ -86,7 +86,7 @@ const QUICK_SIZES = ["100", "200", "500", "1024"];
 
 export default function PdfCompressor() {
     const { toast } = useToast();
-    const { setSharedFile } = useFileStore();
+    const { sharedFile, setSharedFile } = useFileStore();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
@@ -133,7 +133,7 @@ export default function PdfCompressor() {
         }
     };
     
-    const handleFileChange = (file: File | null) => {
+    const handleFileChange = useCallback((file: File | null) => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
             setCompressedPdfUrl(null);
@@ -147,7 +147,14 @@ export default function PdfCompressor() {
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
         }
-    };
+    }, [toast, setSharedFile]);
+
+    useEffect(() => {
+        if (sharedFile) {
+            handleFileChange(sharedFile);
+            setSharedFile(null);
+        }
+    }, [sharedFile, handleFileChange, setSharedFile]);
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
@@ -170,7 +177,7 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.98; // Tighter buffer for better accuracy
+                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.98;
             }
 
             const newPdf = new jsPDF({
@@ -179,15 +186,12 @@ export default function PdfCompressor() {
                 compress: false 
             });
 
-            // QUALITY SETTINGS FOR TEXT
-            const QUALITY_FLOOR = 0.55; // Increased from 0.45 for better text
-            const SCALE_FLOOR = 1.0;   // Original size is minimum for readability
+            const QUALITY_FLOOR = 0.55; 
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Optimizing P${i}...`);
                 const page = await pdf.getPage(i);
                 
-                // Target budget per page
                 const targetBytesPerPage = mode === 'target' ? (targetBytes) / totalPages : Infinity;
                 
                 let finalDataUrl = "";
@@ -204,13 +208,11 @@ export default function PdfCompressor() {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // High quality rendering enabled
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     
                     await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                    // Apply a slight sharpening to text to maintain edge clarity
                     const amount = 0.1;
                     const weights = [0, -amount, 0, -amount, 1 + (4 * amount), -amount, 0, -amount, 0];
                     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -222,12 +224,11 @@ export default function PdfCompressor() {
 
                     for (let y = 1; y < h - 1; y++) {
                         for (let x = 1; x < w - 1; x++) {
-                            const sy = y, sx = x;
                             const dstOff = (y * w + x) * 4;
                             let r = 0, g = 0, b = 0;
                             for (let cy = 0; cy < 3; cy++) {
                                 for (let cx = 0; cx < 3; cx++) {
-                                    const srcOff = ((sy + cy - 1) * w + (sx + cx - 1)) * 4;
+                                    const srcOff = ((y + cy - 1) * w + (x + cx - 1)) * 4;
                                     const wt = weights[cy * 3 + cx];
                                     r += data[srcOff] * wt;
                                     g += data[srcOff + 1] * wt;
@@ -243,14 +244,12 @@ export default function PdfCompressor() {
                 };
 
                 if (mode === 'target') {
-                    // PREDICTIVE SPEED LOGIC: Only try 2 most common scales
                     const scalesToTry = [1.5, 1.0];
                     let bestFound = false;
 
                     for (const scale of scalesToTry) {
                         if (bestFound) break;
                         
-                        // Try 1 high-quality attempt
                         const midUrl = await getPageDataUrl(scale, 0.75);
                         const midSize = Math.round((midUrl.length - 22) * 0.75);
                         
@@ -258,7 +257,6 @@ export default function PdfCompressor() {
                             finalDataUrl = midUrl;
                             bestFound = true;
                         } else {
-                            // If high failed, try floor quality immediately (2 attempts max per scale)
                             const floorUrl = await getPageDataUrl(scale, QUALITY_FLOOR);
                             const floorSize = Math.round((floorUrl.length - 22) * 0.75);
                             if (floorSize <= targetBytesPerPage || scale === 1.0) {
@@ -268,7 +266,6 @@ export default function PdfCompressor() {
                         }
                     }
                 } else {
-                    // Manual mode: Standard HD
                     finalDataUrl = await getPageDataUrl(2.0, quality[0] / 100);
                 }
 
@@ -316,6 +313,56 @@ export default function PdfCompressor() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
+    if (!pdfFile) {
+        return (
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
+                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                        <FileArchive className="size-8" />
+                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                            <Sparkles className="size-2.5" />
+                        </div>
+                    </div>
+                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                        PDF <span className="text-gradient-hero">Optimizer Studio</span>
+                    </h1>
+                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+                        Reduce PDF size while maintaining sharp text. <br/>100% Private local RAM processing.
+                    </p>
+                </motion.div>
+
+                <Card className={cn(
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                )}
+                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 md:p-12">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-12 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-2 -right-2 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center">
+                                <h3 className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF File here</h3>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
+                            </div>
+                        </div>
+                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT CROP</div>
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
@@ -335,9 +382,9 @@ export default function PdfCompressor() {
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                             <div className="flex items-center gap-3 truncate pr-4">
                                 <FileText className="size-5 text-primary shrink-0" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate">{pdfFile?.name || 'Document'}</CardTitle>
                             </div>
-                            <Badge className="font-mono text-[9px] bg-white border-primary/10 text-primary">{formatBytes(pdfFile.size)}</Badge>
+                            <Badge className="font-mono text-[9px] bg-white border-primary/10 text-primary">{formatBytes(pdfFile?.size || 0)}</Badge>
                         </CardHeader>
                         <CardContent className="p-6 md:p-12 flex-1 bg-slate-50 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative">
                             {isChecking ? (
