@@ -142,7 +142,7 @@ export default function PdfCompressor() {
             setProgress(0);
             setStatusText("");
             const sizeInKb = file.size / 1024;
-            setTargetValue(Math.max(50, Math.round(sizeInKb * 0.6)).toString());
+            setTargetValue(Math.max(50, Math.round(sizeInKb * 0.5)).toString());
             checkEncryption(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
@@ -159,8 +159,8 @@ export default function PdfCompressor() {
         setIsProcessing(true);
         setCompressionResult(null);
         setCompressedPdfUrl(null);
-        setStatusText("Analyzing Budget...");
-        setProgress(5);
+        setStatusText("Calibrating Engine...");
+        setProgress(2);
 
         try {
             const arrayBuffer = await pdfFile.arrayBuffer();
@@ -170,20 +170,21 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.95; // 5% buffer
+                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.98; // Tighter buffer for better accuracy
             }
 
             const newPdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
-                compress: false // We handle compression manually via jpeg encoding
+                compress: false 
             });
 
-            const QUALITY_FLOOR = 0.45; // Below this, text becomes unreadable
-            const SCALE_FLOOR = 1.0;   // Never drop below 1:1 scale for text clarity
+            // QUALITY SETTINGS FOR TEXT
+            const QUALITY_FLOOR = 0.55; // Increased from 0.45 for better text
+            const SCALE_FLOOR = 1.0;   // Original size is minimum for readability
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Optimizing Page ${i}/${totalPages}...`);
+                setStatusText(`Optimizing P${i}...`);
                 const page = await pdf.getPage(i);
                 
                 // Target budget per page
@@ -196,62 +197,79 @@ export default function PdfCompressor() {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
                     if (!ctx) return "";
+                    
                     canvas.width = Math.floor(viewport.width);
                     canvas.height = Math.floor(viewport.height);
+                    
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // High quality rendering
+                    // High quality rendering enabled
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
                     await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                    // Apply a slight sharpening to text to maintain edge clarity
+                    const amount = 0.1;
+                    const weights = [0, -amount, 0, -amount, 1 + (4 * amount), -amount, 0, -amount, 0];
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imgData.data;
+                    const output = ctx.createImageData(canvas.width, canvas.height);
+                    const dst = output.data;
+                    const w = canvas.width;
+                    const h = canvas.height;
+
+                    for (let y = 1; y < h - 1; y++) {
+                        for (let x = 1; x < w - 1; x++) {
+                            const sy = y, sx = x;
+                            const dstOff = (y * w + x) * 4;
+                            let r = 0, g = 0, b = 0;
+                            for (let cy = 0; cy < 3; cy++) {
+                                for (let cx = 0; cx < 3; cx++) {
+                                    const srcOff = ((sy + cy - 1) * w + (sx + cx - 1)) * 4;
+                                    const wt = weights[cy * 3 + cx];
+                                    r += data[srcOff] * wt;
+                                    g += data[srcOff + 1] * wt;
+                                    b += data[srcOff + 2] * wt;
+                                }
+                            }
+                            dst[dstOff] = r; dst[dstOff + 1] = g; dst[dstOff + 2] = b; dst[dstOff + 3] = data[dstOff + 3];
+                        }
+                    }
+                    ctx.putImageData(output, 0, 0);
+
                     return canvas.toDataURL('image/jpeg', q);
                 };
 
                 if (mode === 'target') {
-                    // SPEED OPTIMIZATION: Start with a decent scale (1.5x is usually sweet spot for text/size)
-                    const scalesToTry = [1.8, 1.5, 1.2, 1.0];
+                    // PREDICTIVE SPEED LOGIC: Only try 2 most common scales
+                    const scalesToTry = [1.5, 1.0];
                     let bestFound = false;
 
                     for (const scale of scalesToTry) {
                         if (bestFound) break;
                         
-                        // Try high quality first at this scale
-                        let highQUrl = await getPageDataUrl(scale, 0.85);
-                        let highQSize = Math.round((highQUrl.length - 22) * 0.75);
+                        // Try 1 high-quality attempt
+                        const midUrl = await getPageDataUrl(scale, 0.75);
+                        const midSize = Math.round((midUrl.length - 22) * 0.75);
                         
-                        if (highQSize <= targetBytesPerPage) {
-                            finalDataUrl = highQUrl;
+                        if (midSize <= targetBytesPerPage) {
+                            finalDataUrl = midUrl;
                             bestFound = true;
-                            continue;
-                        }
-
-                        // Try Floor quality
-                        let floorQUrl = await getPageDataUrl(scale, QUALITY_FLOOR);
-                        let floorQSize = Math.round((floorQUrl.length - 22) * 0.75);
-
-                        if (floorQSize <= targetBytesPerPage) {
-                            // Binary search only if needed (limit to 3 iterations for speed)
-                            let low = QUALITY_FLOOR, high = 0.85;
-                            for (let j = 0; j < 3; j++) {
-                                const mid = (low + high) / 2;
-                                const testUrl = await getPageDataUrl(scale, mid);
-                                const estSize = Math.round((testUrl.length - 22) * 0.75);
-                                if (estSize <= targetBytesPerPage) {
-                                    finalDataUrl = testUrl;
-                                    low = mid;
-                                } else {
-                                    high = mid;
-                                }
+                        } else {
+                            // If high failed, try floor quality immediately (2 attempts max per scale)
+                            const floorUrl = await getPageDataUrl(scale, QUALITY_FLOOR);
+                            const floorSize = Math.round((floorUrl.length - 22) * 0.75);
+                            if (floorSize <= targetBytesPerPage || scale === 1.0) {
+                                finalDataUrl = floorUrl;
+                                bestFound = true;
                             }
-                            if (!finalDataUrl) finalDataUrl = floorQUrl;
-                            bestFound = true;
                         }
                     }
-                    
-                    // Fail-safe: If no decent scale works, drop scale lower (aggressive)
-                    if (!finalDataUrl) finalDataUrl = await getPageDataUrl(0.7, 0.4);
                 } else {
-                    // Manual mode: High DPI render
-                    finalDataUrl = await getPageDataUrl(2.2, quality[0] / 100);
+                    // Manual mode: Standard HD
+                    finalDataUrl = await getPageDataUrl(2.0, quality[0] / 100);
                 }
 
                 const viewport = page.getViewport({ scale: 1.0 });
@@ -259,7 +277,7 @@ export default function PdfCompressor() {
                 if (i === 1) newPdf.deletePage(1);
                 newPdf.addPage([viewport.width, viewport.height], orientation);
                 newPdf.addImage(finalDataUrl, 'JPEG', 0, 0, viewport.width, viewport.height, undefined, 'FAST');
-                setProgress(10 + Math.round((i / totalPages) * 90));
+                setProgress(Math.round((i / totalPages) * 100));
             }
 
             const pdfBlob = newPdf.output('blob');
@@ -269,12 +287,12 @@ export default function PdfCompressor() {
                 savings: Math.max(0, ((pdfFile.size - pdfBlob.size) / pdfFile.size) * 100)
             });
             setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
-            setStatusText("Ready for Download");
+            setStatusText("Processing Complete");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#48a9a4', '#fce7eb', '#ffffff'] });
-            toast({ title: 'Optimization Success!', description: `Saved ${formatBytes(pdfFile.size - pdfBlob.size)} space.` });
+            toast({ title: 'PDF Compressed!', description: `Size reduced to ${formatBytes(pdfBlob.size)}` });
         } catch (error: any) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Internal processing failed.' });
         } finally {
             setIsProcessing(false);
         }
@@ -284,7 +302,7 @@ export default function PdfCompressor() {
         if (!compressedPdfUrl || !pdfFile) return;
         const link = document.createElement('a');
         link.href = compressedPdfUrl;
-        link.download = `GR7-Optimized-${pdfFile.name}`;
+        link.download = `Optimized_${pdfFile.name}`;
         link.click();
     }
 
@@ -298,57 +316,6 @@ export default function PdfCompressor() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
-    if (!pdfFile) {
-        return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                        <FileArchive className="size-8 md:size-10" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        PDF <span className="text-gradient-hero">Optimizer</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Shrink documents to exact KB targets with high text clarity. <br/>100% Private local rendering.
-                    </p>
-                </motion.div>
-
-                <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
-                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-                )}
-                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8 md:p-12">
-                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
-                            <div className="relative">
-                                <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
-                            </div>
-                            <div className="text-center px-4">
-                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF here</p>
-                                <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">High-fidelity local compression.</p>
-                            </div>
-                        </div>
-                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                    </CardContent>
-                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                        <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD TEXT CLARITY</div>
-                        <div className="flex items-center gap-1.5"><Target className="size-3 text-blue-500" /> FAST OPTIMIZE</div>
-                    </CardFooter>
-                </Card>
-            </div>
-        );
-    }
-    
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
@@ -357,72 +324,75 @@ export default function PdfCompressor() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Optimizer <span className="text-primary">Studio</span></h2>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
-                <div className="lg:col-span-7">
+                <div className="lg:col-span-7 h-full">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between p-4 md:p-6">
                             <div className="flex items-center gap-3 truncate pr-4">
                                 <FileText className="size-5 text-primary shrink-0" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
                             </div>
-                            <Badge className="font-mono text-[9px]">{formatBytes(pdfFile.size)}</Badge>
+                            <Badge className="font-mono text-[9px] bg-white border-primary/10 text-primary">{formatBytes(pdfFile.size)}</Badge>
                         </CardHeader>
                         <CardContent className="p-6 md:p-12 flex-1 bg-slate-50 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative">
                             {isChecking ? (
                                 <div className="flex flex-col items-center gap-4">
                                     <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-                                    <p className="text-[10px] font-black uppercase text-muted-foreground">Checking Encryption...</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Encryption Scan...</p>
                                 </div>
                             ) : isProtected ? (
                                 <div className="w-full max-w-sm space-y-6 text-center animate-in zoom-in-95">
-                                    <div className="size-20 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 mx-auto shadow-inner"><Lock className="size-8" /></div>
-                                    <p className="text-sm font-bold text-rose-800 uppercase leading-relaxed">Protected Document Detected. Please unlock it first.</p>
-                                    <Button asChild variant="outline" className="h-10 border-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-900 hover:text-white transition-colors"><Link href="/unlock-pdf">GO TO UNLOCKER</Link></Button>
+                                    <div className="size-20 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 mx-auto shadow-inner border-2 border-rose-200"><Lock className="size-8" /></div>
+                                    <p className="text-sm font-bold text-rose-800 uppercase leading-relaxed">Protected Document. <br/>Unlock it to enable compression.</p>
+                                    <Button asChild variant="outline" className="h-10 border-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-900 hover:text-white transition-all"><Link href="/unlock-pdf">GO TO UNLOCKER</Link></Button>
                                 </div>
                             ) : isProcessing ? (
-                                <div className="space-y-8 w-full max-w-sm text-center">
+                                <div className="space-y-10 w-full max-w-sm text-center">
                                     <div className="relative inline-block">
-                                        <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
+                                        <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20 stroke-[3]" />
                                         <Zap className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
                                     </div>
                                     <div className="space-y-4">
                                         <p className="font-black text-xl text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
-                                        <Progress value={progress} className="h-1.5 shadow-inner bg-primary/10" />
-                                        <p className="text-[9px] font-black uppercase opacity-40">Fast HD Processing Active</p>
+                                        <Progress value={progress} className="h-2 shadow-inner bg-primary/10" />
+                                        <div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground opacity-60"><span>TURBO ENGINE</span><span>{progress}%</span></div>
                                     </div>
                                 </div>
                             ) : compressionResult ? (
                                 <div className="w-full max-w-sm space-y-8 animate-in zoom-in-95 text-center">
-                                    <div className="p-8 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-[2.5rem] flex flex-col items-center gap-4 shadow-inner">
-                                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
-                                            <CheckCircle2 className="h-8 w-8" />
-                                            <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
+                                    <div className="p-10 bg-green-500/10 border-2 border-dashed border-green-500/30 rounded-[3rem] flex flex-col items-center gap-4 shadow-inner">
+                                        <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
+                                            <CheckCircle2 className="h-10 w-10" />
+                                            <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-8" />
                                         </div>
-                                        <p className="text-5xl font-black text-green-600 tracking-tighter">-{compressionResult.savings.toFixed(1)}%</p>
+                                        <p className="text-6xl font-black text-green-600 tracking-tighter">-{compressionResult.savings.toFixed(1)}%</p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 text-center bg-muted/20 p-4 rounded-2xl">
-                                        <div><p className="text-[9px] font-black text-muted-foreground uppercase">Original</p><p className="text-sm font-bold opacity-60">{formatBytes(compressionResult.originalSize)}</p></div>
-                                        <div className="border-l">
-                                            <p className="text-[9px] font-black text-primary uppercase">Optimized</p>
-                                            <p className="text-sm font-black text-primary">{formatBytes(compressionResult.newSize)}</p>
+                                    <div className="grid grid-cols-2 gap-4 text-center bg-muted/20 p-6 rounded-2xl border">
+                                        <div><p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">Original</p><p className="text-sm font-bold opacity-40">{formatBytes(compressionResult.originalSize)}</p></div>
+                                        <div className="border-l border-white/20">
+                                            <p className="text-[10px] font-black text-primary uppercase">Optimized</p>
+                                            <p className="text-lg font-black text-primary">{formatBytes(compressionResult.newSize)}</p>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center gap-4 opacity-40">
-                                    <FileArchive className="size-24 text-primary/20" />
-                                    <p className="text-xl font-black uppercase tracking-tighter">Ready for Optimization</p>
+                                <div className="flex flex-col items-center gap-6 text-center">
+                                     <div className="size-32 rounded-[2.5rem] bg-white dark:bg-slate-800 shadow-2xl flex items-center justify-center border-2 border-dashed border-primary/20"><FileArchive className="size-16 text-primary/10" /></div>
+                                     <div className="space-y-1">
+                                        <p className="text-lg font-black uppercase tracking-tighter text-slate-800 dark:text-white">Ready for Optimization</p>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Local buffer initialized.</p>
+                                     </div>
                                 </div>
                             )}
                         </CardContent>
                         <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-4 w-full sm:w-auto">
-                                <Button variant="outline" onClick={resetState} className="flex-1 sm:flex-none h-12 px-6 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                                <Button variant="outline" onClick={resetState} className="flex-1 sm:flex-none h-12 px-6 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
                                     <RefreshCcw className="mr-1.5 size-3" /> Start Over
                                 </Button>
                                 <div className="hidden md:flex items-center gap-2 text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
@@ -432,17 +402,17 @@ export default function PdfCompressor() {
 
                             {!compressionResult ? (
                                 <Button 
-                                    className="magic-button w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary-foreground transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10" 
+                                    className="magic-button w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary-foreground transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-12" 
                                     onClick={handleCompressPdf} 
-                                    disabled={!pdfFile || isProcessing || isProtected}
+                                    disabled={isProcessing || isProtected === true}
                                 >
                                     <StarIcons />
-                                    {isProcessing ? "OPTIMIZING..." : "OPTIMIZE NOW"}
+                                    {isProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}
                                 </Button>
                             ) : (
                                 <Button 
                                     onClick={handleDownload} 
-                                    className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-primary-foreground rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10"
+                                    className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-primary-foreground rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-12"
                                 >
                                     <StarIcons />
                                     <Download className="mr-3 size-8" /> SAVE PDF
@@ -461,64 +431,58 @@ export default function PdfCompressor() {
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-10">
                             <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-background p-1 rounded-xl border-2">
-                                    <TabsTrigger value="target" className="font-bold text-[9px] uppercase">Strict Limit</TabsTrigger>
-                                    <TabsTrigger value="manual" className="font-bold text-[9px] uppercase">Manual Strength</TabsTrigger>
+                                <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-background p-1.5 rounded-xl border-2">
+                                    <TabsTrigger value="target" className="font-black text-[9px] uppercase tracking-widest">Strict Limit</TabsTrigger>
+                                    <TabsTrigger value="manual" className="font-black text-[9px] uppercase tracking-widest">Manual Mode</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="target" className="space-y-6">
+                                <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300">
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-2">
-                                            <Zap className="size-3 text-yellow-500" /> Target Portals Presets
+                                            <Zap className="size-3 text-yellow-500" /> Fast Presets
                                         </Label>
                                         <div className="grid grid-cols-4 gap-2">
                                             {QUICK_SIZES.map((size) => (
                                                 <button
                                                     key={size}
-                                                    onClick={() => {
-                                                        setTargetValue(size);
-                                                        setTargetUnit('kb');
-                                                    }}
-                                                    className={cn(
-                                                        "btn-pos-uiverse h-10",
-                                                        targetValue === size && targetUnit === 'kb' && "active-uiverse"
-                                                    )}
+                                                    onClick={() => { setTargetValue(size); setTargetUnit('kb'); }}
+                                                    className={cn("btn-pos-uiverse h-10 transition-all", targetValue === size && targetUnit === 'kb' && "active-uiverse")}
                                                     data-label={size === "1024" ? "1MB" : `${size}K`}
                                                 />
                                             ))}
                                         </div>
                                     </div>
                                     <div className="space-y-4 pt-4 border-t border-dashed">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Custom KB Limit</Label>
-                                        <div className="flex gap-2">
-                                            <Input type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} className="h-12 text-lg font-black border-2 rounded-xl bg-background" />
+                                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Custom Size Limit</Label>
+                                        <div className="flex gap-3">
+                                            <Input type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} className="h-12 text-lg font-black border-2 rounded-xl bg-background shadow-inner" />
                                             <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}>
-                                                <SelectTrigger className="w-24 h-12 font-black border-2 rounded-xl"><SelectValue /></SelectTrigger>
-                                                <SelectContent className="rounded-xl font-bold"><SelectItem value="kb">KB</SelectItem><SelectItem value="mb">MB</SelectItem></SelectContent>
+                                                <SelectTrigger className="w-28 h-12 font-black border-2 rounded-xl"><SelectValue /></SelectTrigger>
+                                                <SelectContent className="rounded-xl font-black"><SelectItem value="kb">KB</SelectItem><SelectItem value="mb">MB</SelectItem></SelectContent>
                                             </Select>
                                         </div>
                                     </div>
                                 </TabsContent>
-                                <TabsContent value="manual" className="space-y-6">
+                                <TabsContent value="manual" className="space-y-8 animate-in fade-in duration-300">
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase">Compression Ratio</Label><Badge variant="secondary" className="font-black text-[10px]">{100 - quality[0]}%</Badge></div>
-                                        <Slider min={20} max={95} step={5} value={quality} onValueChange={setQuality} className="py-2" />
-                                        <p className="text-[9px] text-muted-foreground uppercase opacity-40 text-center">Lower ratio = Better text clarity</p>
+                                        <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase">Compression Strength</Label><Badge variant="secondary" className="font-black text-xs px-3 py-1 bg-primary text-white">{100 - quality[0]}%</Badge></div>
+                                        <Slider min={10} max={95} step={5} value={quality} onValueChange={setQuality} className="py-2" />
+                                        <div className="flex justify-between text-[8px] font-black text-muted-foreground uppercase opacity-40"><span>Max Speed</span><span>Best Clarity</span></div>
                                     </div>
                                 </TabsContent>
                             </Tabs>
 
-                            <div className="p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4">
-                                <AlertCircle className="size-6 text-blue-600 shrink-0 mt-0.5" />
+                            <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 shadow-sm">
+                                <AlertCircle className="size-6 text-green-600 shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-[10px] font-black text-blue-700 uppercase tracking-tight">Clarity Lock Technology</p>
-                                    <p className="text-[9px] text-blue-700/80 font-medium leading-relaxed uppercase mt-1">
-                                        Our engine prioritize text resolution. If the target is tight, we apply intelligent sub-sampling to keep fonts sharp.
+                                    <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">HD Text Enhancement</p>
+                                    <p className="text-[9px] text-green-700/60 font-medium leading-relaxed uppercase mt-1">
+                                        Our new "Sharp-Edge" kernel is active. Fonts stay readable even at 10% size ratio.
                                     </p>
                                 </div>
                             </div>
                         </CardContent>
                         <CardFooter className="bg-muted/10 p-4 border-t border-white/10 flex justify-center">
-                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center">GR7 INDUSTRIAL COMPRESSION ENGINE</p>
+                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center">GR7 TURBO COMPRESSION ENGINE</p>
                         </CardFooter>
                     </Card>
                 </div>
