@@ -19,7 +19,9 @@ import {
     ImageIcon,
     RotateCw,
     Maximize,
-    Loader2
+    Loader2,
+    Baseline,
+    MoveVertical
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -28,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
@@ -48,6 +51,12 @@ export default function PassportDateNameMaker() {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [name, setName] = useState("YOUR NAME HERE");
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB').split('/').join('-')); // DD-MM-YYYY
+    
+    // NEW Adjustment States
+    const [nameSize, setNameSize] = useState([32]);
+    const [dateSize, setDateSize] = useState([28]);
+    const [stripHeightFactor, setStripHeightFactor] = useState([14]); // % of total height
+    
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -85,8 +94,8 @@ export default function PassportDateNameMaker() {
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-            // 3. Draw White Strip at bottom (approx 20% height)
-            const stripHeight = targetH * 0.20;
+            // 3. Draw White Strip at bottom (Dynamic height)
+            const stripHeight = (stripHeightFactor[0] / 100) * targetH;
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, targetH - stripHeight, targetW, stripHeight);
             
@@ -99,19 +108,21 @@ export default function PassportDateNameMaker() {
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
             
-            // Name
-            const nameSize = Math.floor(stripHeight * 0.35);
-            ctx.font = `black ${nameSize}px Arial`;
+            // Name Rendering
+            const finalNameSize = nameSize[0];
+            ctx.font = `bold ${finalNameSize}px Arial`;
+            // Position name slightly above the center of the strip
             ctx.fillText(name.toUpperCase(), targetW / 2, targetH - stripHeight + (stripHeight * 0.45));
 
-            // Date
-            const dateSize = Math.floor(stripHeight * 0.30);
-            ctx.font = `bold ${dateSize}px Arial`;
-            ctx.fillText(`D.O.P: ${date}`, targetW / 2, targetH - stripHeight + (stripHeight * 0.8));
+            // Date Rendering
+            const finalDateSize = dateSize[0];
+            ctx.font = `bold ${finalDateSize}px Arial`;
+            // Position date slightly below the center of the strip
+            ctx.fillText(`D.O.P: ${date}`, targetW / 2, targetH - stripHeight + (stripHeight * 0.85));
 
             setResultUrl(canvas.toDataURL('image/jpeg', 0.95));
         };
-    }, [imageSrc, name, date]);
+    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor]);
 
     useEffect(() => {
         renderPhoto();
@@ -155,6 +166,9 @@ export default function PassportDateNameMaker() {
         setResultUrl(null);
         setName("YOUR NAME HERE");
         setDate(new Date().toLocaleDateString('en-GB').split('/').join('-'));
+        setNameSize([32]);
+        setDateSize([28]);
+        setStripHeightFactor([14]);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -175,8 +189,8 @@ export default function PassportDateNameMaker() {
                         </div>
                     </CardHeader>
                     
-                    <CardContent className="p-8 space-y-8">
-                        <div className="space-y-4">
+                    <CardContent className="p-6 md:p-8 space-y-8">
+                        <div className="space-y-6">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Type className="size-3" /> Candidate Name
@@ -198,7 +212,39 @@ export default function PassportDateNameMaker() {
                                     placeholder="DD-MM-YYYY"
                                     className="h-12 border-2 rounded-xl font-bold"
                                 />
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Tip: Most forms require photo taken in last 3 months.</p>
+                            </div>
+                        </div>
+
+                        {/* NEW STUDIO CONTROLS */}
+                        <div className="space-y-6 pt-6 border-t border-dashed">
+                             <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
+                                <Settings2 className="size-3" /> Studio Refinement
+                            </Label>
+                            
+                            <div className="space-y-5">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><MoveVertical className="size-3"/> Strip Height</Label>
+                                        <Badge variant="secondary" className="font-mono text-[9px]">{stripHeightFactor[0]}%</Badge>
+                                    </div>
+                                    <Slider min={10} max={25} step={1} value={stripHeightFactor} onValueChange={setStripHeightFactor} />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><Baseline className="size-3"/> Name Font Size</Label>
+                                        <Badge variant="secondary" className="font-mono text-[9px]">{nameSize[0]}px</Badge>
+                                    </div>
+                                    <Slider min={20} max={60} step={1} value={nameSize} onValueChange={setNameSize} />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><Baseline className="size-3"/> Date Font Size</Label>
+                                        <Badge variant="secondary" className="font-mono text-[9px]">{dateSize[0]}px</Badge>
+                                    </div>
+                                    <Slider min={15} max={50} step={1} value={dateSize} onValueChange={setDateSize} />
+                                </div>
                             </div>
                         </div>
 
@@ -248,14 +294,6 @@ export default function PassportDateNameMaker() {
                         </Button>
                     </CardFooter>
                 </Card>
-
-                <div className="p-4 bg-primary/5 rounded-[1.5rem] border-2 border-primary/10 flex gap-4">
-                    <ShieldCheck className="size-6 text-green-500 shrink-0 mt-0.5" />
-                    <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">
-                        <span className="font-black block mb-0.5 text-primary">PORTAL READY:</span>
-                        Generated photo is strictly 3.5cm x 4.5cm with high DPI for official job applications.
-                    </p>
-                </div>
             </div>
 
             {/* Right: Results Dashboard */}
@@ -277,13 +315,9 @@ export default function PassportDateNameMaker() {
                                     <div className="relative group overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[12px] border-white bg-white">
                                         <canvas ref={canvasRef} className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500" style={{ maxWidth: '350px' }} />
                                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                        {/* Grid Helper Overlay */}
-                                        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-10 pointer-events-none group-hover:opacity-30 transition-opacity">
-                                            {[...Array(9)].map((_, i) => <div key={i} className="border border-black/10" />)}
-                                        </div>
                                     </div>
                                     <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-6 py-2.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
-                                        <Sparkles className="size-4 text-primary animate-pulse" /> Final render scaled to 3.5cm x 4.5cm
+                                        <Sparkles className="size-4 text-primary animate-pulse" /> 3.5cm x 4.5cm High-Density Render
                                     </div>
                                 </motion.div>
                             ) : (
