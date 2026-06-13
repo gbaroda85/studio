@@ -25,10 +25,12 @@ import {
     ChevronRight,
     Camera,
     RefreshCcw,
-    Plus,
+    Plus, 
     Eye,
     FileDigit,
-    Monitor
+    Monitor,
+    Smartphone,
+    Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -301,7 +303,7 @@ export default function ScannerToPdf() {
                          </div>
                          <div className="flex gap-2">
                              {pages.length > 0 && (
-                                <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-destructive hover:bg-destructive/5">
+                                <Button variant="outline" size="sm" onClick={() => setPages([])} className="h-8 text-[9px] font-black uppercase border-2 rounded-lg text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700">
                                     <Trash2 className="size-3 mr-1" /> Clear All
                                 </Button>
                              )}
@@ -314,11 +316,11 @@ export default function ScannerToPdf() {
                                     className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group"
                                     onClick={() => cameraInputRef.current?.click()}
                                 >
-                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
+                                    <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg">
                                         <Camera className="size-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter">Native Camera</p>
+                                        <p className="text-base font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">Native Camera</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Full screen capture</p>
                                     </div>
                                 </div>
@@ -327,11 +329,11 @@ export default function ScannerToPdf() {
                                     className="border-4 border-dashed border-primary/20 rounded-3xl p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/5 transition-all group"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
+                                    <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">
                                         <UploadCloud className="size-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter">Photo Gallery</p>
+                                        <p className="text-base font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">Photo Gallery</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple files</p>
                                     </div>
                                 </div>
@@ -356,8 +358,10 @@ export default function ScannerToPdf() {
                                                     <img src={p.src} className="max-w-full max-h-[90%] object-contain mx-auto block" alt="thumb" />
                                                 </div>
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
-                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex gap-1">
-                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
+                                                
+                                                {/* ACTION BUTTONS: PERMANENTLY VISIBLE */}
+                                                <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
+                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/90 hover:bg-white text-primary border border-primary/20" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
                                                     </Button>
                                                     <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
@@ -367,11 +371,13 @@ export default function ScannerToPdf() {
                                             </div>
                                         ))}
                                         <button 
-                                            className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px]"
+                                            className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
                                             onClick={() => cameraInputRef.current?.click()}
                                         >
-                                            <Plus className="size-6" />
-                                            Add Scan
+                                            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <Plus className="size-5" />
+                                            </div>
+                                            <span>Add Scan</span>
                                         </button>
                                     </div>
                                     <ScrollBar />
@@ -399,7 +405,7 @@ export default function ScannerToPdf() {
                 {/* PDF VISUAL PREVIEW AFTER RENDER */}
                 <AnimatePresence>
                     {previewImages.length > 0 && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
                             <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem]">
                                 <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20 flex flex-row items-center justify-center gap-3">
                                     <Eye className="size-4 text-green-600" />
@@ -439,7 +445,7 @@ export default function ScannerToPdf() {
             <div className="lg:col-span-4 space-y-6">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white dark:bg-slate-950">
                     <CardHeader className="bg-primary/5 border-b p-6">
-                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter">
+                        <CardTitle className="text-xl flex items-center gap-3 font-black uppercase tracking-tighter text-foreground">
                             <Layout className="size-6 text-primary" /> POSITIONING
                         </CardTitle>
                     </CardHeader>
@@ -447,12 +453,12 @@ export default function ScannerToPdf() {
                         {!selectedId ? (
                             <div className="py-12 text-center space-y-4 opacity-40 flex flex-col items-center">
                                  <MousePointer2 className="size-12 text-muted-foreground animate-bounce" />
-                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px]">Select a page to<br/>unlock alignment</p>
+                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px] text-foreground">Select a page to<br/>unlock alignment</p>
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
                                 <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
                                         <AlignVerticalJustifyCenter className="size-3" /> Vertical Alignment
                                     </Label>
                                     <div className="grid grid-cols-1 gap-2">
@@ -464,7 +470,7 @@ export default function ScannerToPdf() {
                                             data-label="      Top"
                                             onClick={() => updateAlignment('top')}
                                         >
-                                            <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                            <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                         </button>
                                         <button 
                                             className={cn(
@@ -474,7 +480,7 @@ export default function ScannerToPdf() {
                                             data-label="      Center"
                                             onClick={() => updateAlignment('center')}
                                         >
-                                            <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                            <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                         </button>
                                         <button 
                                             className={cn(
@@ -484,25 +490,25 @@ export default function ScannerToPdf() {
                                             data-label="      Bottom"
                                             onClick={() => updateAlignment('bottom')}
                                         >
-                                            <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                            <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/5">
+                                <div className="space-y-4 pt-4 border-t-2 border-dashed border-primary/10">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
                                         <RotateCw className="size-3" /> Orientation
                                     </Label>
                                     <Button 
                                         variant="outline" 
-                                        className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase"
+                                        className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-foreground hover:bg-primary hover:text-white border-primary/20 transition-all"
                                         onClick={() => handleRotate(selectedId)}
                                     >
                                         <RotateCw className="size-4 mr-2" /> Rotate 90°
                                     </Button>
                                 </div>
 
-                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5" onClick={applyAlignmentToAll}>
+                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-white border-primary/20 rounded-xl transition-all" onClick={applyAlignmentToAll}>
                                     <Layers className="size-3 mr-2" /> Apply to All Pages
                                 </Button>
                             </div>
@@ -518,7 +524,7 @@ export default function ScannerToPdf() {
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-6 border-t flex flex-col gap-4">
                         <Button 
-                            className="w-full h-14 bg-primary text-black font-black text-base rounded-2xl shadow-xl transition-all active:scale-95 group"
+                            className="w-full h-14 bg-primary text-white hover:bg-transparent border-4 border-primary hover:text-primary font-black text-base rounded-2xl shadow-xl transition-all active:scale-95 group flex items-center justify-center gap-3"
                             onClick={generatePDFPreview}
                             disabled={pages.length === 0 || isRenderingPreview}
                         >
@@ -545,3 +551,4 @@ export default function ScannerToPdf() {
     </div>
   );
 }
+
