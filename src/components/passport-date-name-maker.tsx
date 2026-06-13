@@ -21,7 +21,8 @@ import {
     Maximize,
     Loader2,
     Baseline,
-    MoveVertical
+    MoveVertical,
+    Square
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -52,10 +53,11 @@ export default function PassportDateNameMaker() {
     const [name, setName] = useState("YOUR NAME HERE");
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB').split('/').join('-')); // DD-MM-YYYY
     
-    // NEW Adjustment States
+    // Adjustment States
     const [nameSize, setNameSize] = useState([32]);
     const [dateSize, setDateSize] = useState([28]);
     const [stripHeightFactor, setStripHeightFactor] = useState([14]); // % of total height
+    const [borderWidth, setBorderWidth] = useState([0]); // Border thickness in px
     
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -120,9 +122,16 @@ export default function PassportDateNameMaker() {
             // Position date slightly below the center of the strip
             ctx.fillText(`D.O.P: ${date}`, targetW / 2, targetH - stripHeight + (stripHeight * 0.85));
 
+            // 5. Draw External Border if enabled
+            if (borderWidth[0] > 0) {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = borderWidth[0] * 2; // Multiplied for high DPI
+                ctx.strokeRect(0, 0, targetW, targetH);
+            }
+
             setResultUrl(canvas.toDataURL('image/jpeg', 0.95));
         };
-    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor]);
+    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth]);
 
     useEffect(() => {
         renderPhoto();
@@ -169,6 +178,7 @@ export default function PassportDateNameMaker() {
         setNameSize([32]);
         setDateSize([28]);
         setStripHeightFactor([14]);
+        setBorderWidth([0]);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -215,13 +225,21 @@ export default function PassportDateNameMaker() {
                             </div>
                         </div>
 
-                        {/* NEW STUDIO CONTROLS */}
+                        {/* STUDIO CONTROLS */}
                         <div className="space-y-6 pt-6 border-t border-dashed">
                              <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
                                 <Settings2 className="size-3" /> Studio Refinement
                             </Label>
                             
                             <div className="space-y-5">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><Square className="size-3"/> All Border Width</Label>
+                                        <Badge variant="secondary" className="font-mono text-[9px]">{borderWidth[0]}px</Badge>
+                                    </div>
+                                    <Slider min={0} max={10} step={1} value={borderWidth} onValueChange={setBorderWidth} />
+                                </div>
+
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center px-1">
                                         <Label className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1.5"><MoveVertical className="size-3"/> Strip Height</Label>
