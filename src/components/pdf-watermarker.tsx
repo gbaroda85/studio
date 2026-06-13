@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
+import { PDFDocument, rgb, degrees, StandardFonts, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
@@ -146,7 +146,8 @@ export default function PdfWatermarker() {
         const loadingTask = pdfjs.getDocument({ 
             data: new Uint8Array(arrayBuffer),
             cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-            cMapPacked: true
+            cMapPacked: true,
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
         });
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
@@ -238,6 +239,7 @@ export default function PdfWatermarker() {
             const { width, height } = page.getSize();
             const pageRot = page.getRotation().angle;
             
+            // Normalize dimensions for landscape vs portrait
             const isSideways = pageRot === 90 || pageRot === 270;
             const vw = isSideways ? height : width;
             const vh = isSideways ? width : height;
@@ -252,7 +254,7 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // Calculation in Visual Coordinates (origin Top-Left)
+            // 1. Calculate the visual coordinates in a virtual viewport (Origin: Top-Left)
             let vcx, vcy;
             switch (position) {
                 case 'top-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
@@ -267,7 +269,8 @@ export default function PdfWatermarker() {
                 default: vcx = vw/2; vcy = vh/2;
             }
 
-            // Convert Visual to PDF Coordinates (origin Bottom-Left of unrotated page)
+            // 2. Transform the coordinates to the native PDF system (Origin: Bottom-Left of UNROTATED page)
+            // This logic correctly places the point regardless of how the page was physically rotated in metadata.
             let finalX = 0, finalY = 0;
             if (pageRot === 0) { 
                 finalX = vcx; 
@@ -669,3 +672,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
