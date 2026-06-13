@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -230,7 +229,8 @@ export default function PdfWatermarker() {
         }
 
         const rgbColor = hexToRgb(textColor);
-        const rotDeg = -rotation[0]; 
+        // FIX: Counter-clockwise in UI (-45) is CCW. pdf-lib uses positive for CCW.
+        const rotDeg = rotation[0]; 
         const op = opacity[0] / 100;
         const curMargin = margin[0];
 
@@ -270,7 +270,6 @@ export default function PdfWatermarker() {
             }
 
             // 2. Transform the coordinates to the native PDF system (Origin: Bottom-Left of UNROTATED page)
-            // This logic correctly places the point regardless of how the page was physically rotated in metadata.
             let finalX = 0, finalY = 0;
             if (pageRot === 0) { 
                 finalX = vcx; 
@@ -672,4 +671,3 @@ export default function PdfWatermarker() {
     </div>
   );
 }
-
