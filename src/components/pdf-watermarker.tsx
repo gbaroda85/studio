@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -10,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { 
     UploadCloud, 
     Download, 
-    Loader2, 
     Copyright, 
     Settings2, 
     Eye, 
@@ -18,25 +18,22 @@ import {
     Zap, 
     RefreshCcw, 
     Type, 
-    Maximize, 
     RotateCw, 
     Sparkles,
     CheckCircle2,
     Palette,
     X,
     Monitor,
-    Smartphone,
     Bold,
     Italic,
-    Underline,
     Layers,
     ImageIcon,
     Plus,
     LayoutGrid,
-    MonitorCheck,
     Trash2,
     Move,
-    SearchCode
+    SearchCode,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -292,6 +289,7 @@ export default function PdfWatermarker() {
             else { lcx = vcx; lcy = vh - vcy; }
 
             // 3. Drawing anchor compensation for Center-Pivot rotation
+            // pdf-lib draw commands anchor at the pre-rotated bounding box bottom-left
             const dx = lcx - (tw/2 * cos) + (th/2 * sin);
             const dy = lcy - (tw/2 * sin) - (th/2 * cos);
 
@@ -344,7 +342,7 @@ export default function PdfWatermarker() {
   };
 
   const getPreviewStyle = (): React.CSSProperties => {
-      const containerWidth = 550; // The fixed display width in CSS
+      const containerWidth = 550; // Reference display width for scaling
       const scale = containerWidth / pageSize.width;
       
       const styles: React.CSSProperties = {
