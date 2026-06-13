@@ -35,6 +35,12 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle 
+} from '@/components/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -47,33 +53,33 @@ if (typeof window !== 'undefined') {
 const StarIcons = () => (
     <>
         <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
         <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
         </div>
     </>
@@ -96,6 +102,7 @@ export default function PdfMerger() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const studioWorkspaceRef = useRef<HTMLDivElement>(null);
@@ -114,6 +121,7 @@ export default function PdfMerger() {
             setMergedPdfUrl(null);
         }
         setPreviewImages([]);
+        setIsPreviewOpen(false);
     }
 
     const handleFilesChange = (files: FileList | null) => {
@@ -163,9 +171,9 @@ export default function PdfMerger() {
     const handleReset = () => {
         setPdfFiles([]);
         clearMergedFile();
+        setIsPreviewOpen(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
         
-        // Scroll to top of the Studio Workspace area
         setTimeout(() => {
             if (studioWorkspaceRef.current) {
                 studioWorkspaceRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -186,7 +194,7 @@ export default function PdfMerger() {
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
-            const pagesToRender = pdf.numPages; // Removed the 10-page limit
+            const pagesToRender = pdf.numPages;
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -232,6 +240,7 @@ export default function PdfMerger() {
             setMergedPdfUrl(url);
             
             await generateVisualPreviews(mergedPdfBytes);
+            setIsPreviewOpen(true);
             
             confetti({
                 particleCount: 150,
@@ -259,7 +268,6 @@ export default function PdfMerger() {
     
     return (
         <div ref={studioWorkspaceRef} className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20">
-            {/* Top Grid: Stack & Selection */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Left Column: List */}
                 <div className="lg:col-span-7 flex flex-col">
@@ -424,64 +432,61 @@ export default function PdfMerger() {
                 </div>
             </div>
 
-            {/* Bottom Row: Visual Preview (Appears after merge) */}
-            <AnimatePresence>
-                {mergedPdfUrl && (
-                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} className="w-full no-print">
-                        <Card className="border-2 border-green-500/20 shadow-3xl overflow-hidden bg-card/50 rounded-[2.5rem] hover:-translate-y-1 transition-all">
-                            <CardHeader className="bg-green-500/5 py-4 border-b border-green-500/20">
-                                <CardTitle className="text-[10px] font-black uppercase flex items-center justify-center gap-2 text-green-700 tracking-[0.2em]">
-                                    <Eye className="size-3 text-green-600" /> VISUAL PREVIEW CONFIRMATION
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0 bg-slate-200 dark:bg-slate-900/50">
-                                <ScrollArea className="h-[400px] md:h-[500px] w-full p-6 md:p-12">
-                                    <div className="flex flex-col items-center gap-8 pb-10">
-                                        {isGeneratingPreview ? (
-                                            <div className="flex flex-col items-center gap-4 py-20 text-center">
-                                                <div className="relative">
-                                                    <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
-                                                    <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
-                                                </div>
-                                                <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">Rendering HD Previews...</p>
-                                            </div>
-                                        ) : previewImages.map((img, i) => (
-                                            <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[450px] animate-in slide-in-from-bottom-4 duration-500">
-                                                <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
-                                                <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
-                                            </div>
-                                        ))}
+            {/* Visual Preview Dialog (Pop-up) */}
+            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                <DialogContent className="max-w-5xl max-h-[90vh] p-0 rounded-[2.5rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                    <DialogHeader className="bg-green-500/5 py-4 border-b border-green-500/20 flex flex-row items-center justify-center gap-3">
+                         <Eye className="size-4 text-green-600" />
+                         <DialogTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Visual Render Confirmation</DialogTitle>
+                    </DialogHeader>
+                    
+                    <CardContent className="p-0 flex-1 bg-slate-200 dark:bg-slate-900/50 shadow-inner overflow-hidden relative flex flex-col">
+                        <ScrollArea className="flex-1 w-full h-full p-6 md:p-12">
+                            <div className="flex flex-col items-center gap-8 pb-10">
+                                {isGeneratingPreview ? (
+                                    <div className="flex flex-col items-center gap-4 py-20 text-center">
+                                        <div className="relative">
+                                            <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
+                                            <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
+                                        </div>
+                                        <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">Rendering HD Previews...</p>
                                     </div>
-                                    <ScrollBar />
-                                </ScrollArea>
-                            </CardContent>
-                            <CardFooter className="bg-green-500/10 p-6 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-green-500/20">
-                                <div className="flex items-center gap-5">
-                                    <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
-                                        <CheckCircle2 className="size-10 md:size-12 z-10" />
-                                        <StarIcons />
-                                        <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
+                                ) : previewImages.map((img, i) => (
+                                    <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white max-w-full md:max-w-[450px] animate-in slide-in-from-bottom-4 duration-500">
+                                        <img src={img} alt={`Page ${i+1}`} className="max-full h-auto block" />
+                                        <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Page {i+1}</div>
                                     </div>
-                                    <div className="text-left">
-                                        <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">MERGE READY!</p>
-                                        <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                                    <Button variant="outline" onClick={handleReset} className="btn-uiverse-secondary h-14 md:h-16 px-6">
-                                        <RefreshCcw className="mr-2 size-4" /> CHANGE FILES
-                                    </Button>
-                                    <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
-                                        <StarIcons />
-                                        <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                        <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
-                                    </Button>
-                                </div>
-                            </CardFooter>
-                        </Card>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                ))}
+                            </div>
+                            <ScrollBar />
+                        </ScrollArea>
+                    </CardContent>
+
+                    <CardFooter className="bg-green-500/10 p-6 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-green-500/20">
+                        <div className="flex items-center gap-5">
+                            <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
+                                <CheckCircle2 className="size-10 md:size-12 z-10" />
+                                <StarIcons />
+                                <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-xl font-black text-green-800 uppercase tracking-tighter leading-none">MERGE READY!</p>
+                                <p className="text-[10px] text-green-700 font-bold mt-1.5 uppercase tracking-widest opacity-60">Bundle sanitized and complete</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="btn-uiverse-secondary h-14 md:h-16 px-6">
+                                <X className="mr-2 size-4" /> CLOSE PREVIEW
+                            </Button>
+                            <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
+                                <StarIcons />
+                                <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
+                                <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
+                            </Button>
+                        </div>
+                    </CardFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
