@@ -446,33 +446,33 @@ export default function PdfToImageConverter() {
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative", 
+                                            "btn-pos-uiverse h-14 relative group", 
                                             selectedPage?.vAlign === 'top' && "active-uiverse"
                                         )} 
                                         data-label="      Top"
                                         onClick={() => updateSelectedPage({ vAlign: 'top' })}
                                     >
-                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative", 
+                                            "btn-pos-uiverse h-14 relative group", 
                                             selectedPage?.vAlign === 'center' && "active-uiverse"
                                         )} 
                                         data-label="      Center"
                                         onClick={() => updateSelectedPage({ vAlign: 'center' })}
                                     >
-                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative", 
+                                            "btn-pos-uiverse h-14 relative group", 
                                             selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
                                         data-label="      Bottom"
                                         onClick={() => updateSelectedPage({ vAlign: 'bottom' })}
                                     >
-                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                 </div>
                              </div>
@@ -482,10 +482,10 @@ export default function PdfToImageConverter() {
                                     <RotateCw className="size-3" /> Orientation
                                 </Label>
                                 <div className="grid gap-3">
-                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
+                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
                                         <RotateCw className="size-4 mr-2" /> Rotate Page 90°
                                     </Button>
-                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm text-primary border-primary/20" onClick={rotateAllPages} disabled={pages.length < 2 || isProcessing}>
+                                    <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateAllPages} disabled={pages.length < 2 || isProcessing}>
                                         <Layers className="size-4 mr-2" /> Rotate All 90°
                                     </Button>
                                 </div>
@@ -513,7 +513,7 @@ export default function PdfToImageConverter() {
 
                              <div className="space-y-4 pt-4 border-t-2 border-dashed">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Sync Control</Label>
-                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
+                                <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-all duration-300" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
                                     <RefreshCcw className="size-3.5 mr-2" /> Apply Alignment to All
                                 </Button>
                              </div>
@@ -521,7 +521,7 @@ export default function PdfToImageConverter() {
 
                         <div className="pt-6 border-t-2 border-dashed mt-auto">
                              <Button 
-                                className="magic-button w-full h-16 text-lg font-black bg-green-600 hover:bg-green-700 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
+                                className="magic-button w-full h-16 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 shadow-2xl rounded-2xl transition-all active:scale-95 disabled:opacity-50 group" 
                                 onClick={handleDownloadAll} 
                                 disabled={pages.length === 0 || isZipping || isProcessing}
                              >
@@ -567,7 +567,7 @@ export default function PdfToImageConverter() {
                                             )}
                                         >
                                             <div className={cn(
-                                                "absolute inset-0 flex flex-col w-full h-full p-0 transition-all duration-300",
+                                                "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
                                                 p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                             )}>
                                                 <img 
@@ -625,3 +625,4 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
+
