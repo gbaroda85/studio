@@ -404,7 +404,7 @@ export default function ScannerToPdf() {
                         ) : (
                             <div className="space-y-6">
                                 <ScrollArea className="h-[450px] pr-2 custom-scrollbar">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
+                                    <div className="grid grid-cols-2 gap-4 p-1">
                                         {pages.map((p, i) => (
                                             <div 
                                                 key={p.id} 
