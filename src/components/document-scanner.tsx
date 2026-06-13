@@ -52,7 +52,8 @@ import {
     CameraIcon,
     Images,
     CheckCircle,
-    LayoutGrid
+    LayoutGrid,
+    SkipForward
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -108,6 +109,7 @@ interface ScannedPage {
     originalSrc: string;
     points: Point[];
     isScanned: boolean;
+    originalIndex: number;
 }
 
 const StarIcons = () => (
@@ -252,6 +254,7 @@ export default function DocumentScanner() {
                         newPages.push({
                             id: Math.random().toString(36).substr(2, 9),
                             originalSrc: data, processedSrc: data, isScanned: false,
+                            originalIndex: p, 
                             points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
                         });
                     }
@@ -268,6 +271,7 @@ export default function DocumentScanner() {
             newPages.push({
                 id: Math.random().toString(36).substr(2, 9),
                 originalSrc: dataUrl, processedSrc: dataUrl, isScanned: false,
+                originalIndex: pendingPages.length + scannedPages.length + newPages.length + 1,
                 points: [{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]
             });
         }
@@ -393,22 +397,38 @@ export default function DocumentScanner() {
 
   const onImageLoad = () => setIsImageReady(true);
 
-  const handleConfirmAdd = async () => {
+  const handleConfirmAdd = async (goToNext = false) => {
     setIsProcessing(true);
     const highRes = await applyIntelligentScan(true);
     const id = editingId || Math.random().toString(36).substr(2, 9);
     
-    const newPage: ScannedPage = { id, originalSrc: currentRawImage!, processedSrc: highRes, points, isScanned: true };
+    // Find original index from either pending or already scanned list
+    const sourceData = pendingPages.find(p => p.id === id) || scannedPages.find(p => p.id === id);
+    const originalIndex = sourceData?.originalIndex || (scannedPages.length + 1);
+
+    const newPage: ScannedPage = { id, originalSrc: currentRawImage!, processedSrc: highRes, points, isScanned: true, originalIndex };
     
-    setPendingPages(prev => prev.filter(p => p.id !== id));
+    const remainingPending = pendingPages.filter(p => p.id !== id);
+    setPendingPages(remainingPending);
+    
     setScannedPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
-        return [...filtered, newPage];
+        return [...filtered, newPage].sort((a,b) => a.originalIndex - b.originalIndex);
     });
     
-    setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
+    if (goToNext && remainingPending.length > 0) {
+        const next = remainingPending[0];
+        setCurrentRawImage(next.originalSrc);
+        setEditingId(next.id);
+        setPoints(next.points);
+        setIsImageReady(false);
+        setLiveResultSrc(null);
+        toast({ title: "Saved", description: "Loading next pending page..." });
+    } else {
+        setCurrentRawImage(null); setLiveResultSrc(null); setStage('viewfinder');
+        toast({ title: "Scanning Complete" });
+    }
     setIsProcessing(false);
-    toast({ title: "Page Scanned Successfully" });
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -475,7 +495,7 @@ export default function DocumentScanner() {
 
   const handleDownloadIndividualJpg = (page: ScannedPage, index: number) => {
       const link = document.createElement('a');
-      link.href = page.processedSrc; link.download = `Scanned-Page-${index + 1}.jpg`;
+      link.href = page.processedSrc; link.download = `Scanned-Page-${page.originalIndex}.jpg`;
       link.click();
   };
 
@@ -485,7 +505,7 @@ export default function DocumentScanner() {
     if (scannedPages.length === 1) handleDownloadIndividualJpg(scannedPages[0], 0);
     else {
         const zip = new JSZip();
-        scannedPages.forEach((p, i) => zip.file(`Page-${i+1}.jpg`, p.processedSrc.split(',')[1], { base64: true }));
+        scannedPages.forEach((p) => zip.file(`Page-${p.originalIndex}.jpg`, p.processedSrc.split(',')[1], { base64: true }));
         const blob = await zip.generateAsync({ type: "blob" });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob); link.download = `Scans-${Date.now()}.zip`;
@@ -539,14 +559,14 @@ export default function DocumentScanner() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {pendingPages.map((p, i) => (
+                                    {pendingPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-sm flex flex-col rounded-2xl animate-in slide-in-from-bottom-2">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
                                                 <img src={p.originalSrc} className="size-full object-cover grayscale opacity-60 transition-all group-hover:grayscale-0 group-hover:opacity-100" alt="p" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
                                                     <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-3 h-8 rounded-lg shadow-xl"><Scan className="size-3 mr-1" /> Scan</Button>
                                                 </div>
-                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">#{i+1}</div>
+                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white">#{p.originalIndex}</div>
                                             </div>
                                         </Card>
                                     ))}
@@ -598,20 +618,20 @@ export default function DocumentScanner() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {scannedPages.map((p, i) => (
+                                    {scannedPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl flex flex-col rounded-2xl animate-in zoom-in-95">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
                                                 <img src={p.processedSrc} className="size-full object-cover" alt="p" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
                                                     <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-3 h-8 rounded-lg shadow-xl"><Edit3 className="size-3 mr-1" /> Edit</Button>
                                                 </div>
-                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-green-600 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white border border-white/10 shadow-lg">✓ P{i+1}</div>
+                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-green-600 backdrop-blur-md flex items-center justify-center text-[8px] font-black text-white border border-white/10 shadow-lg">✓ P{p.originalIndex}</div>
                                             </div>
                                             <div className="p-2 bg-emerald-500/5 border-t border-emerald-500/20 flex flex-col gap-2">
                                                 <Button 
                                                     size="sm" 
                                                     className="w-full h-9 text-[9px] font-black uppercase rounded-lg shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white" 
-                                                    onClick={() => handleDownloadIndividualJpg(p, i)}
+                                                    onClick={() => handleDownloadIndividualJpg(p, 0)}
                                                 >
                                                     <Download className="size-3 mr-1.5" /> SAVE JPG
                                                 </Button>
@@ -631,8 +651,8 @@ export default function DocumentScanner() {
                                 <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
                             </Button>
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-50 text-emerald-600 border-emerald-100" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-50 text-blue-600 border-blue-100" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-white text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
                             </div>
                         </CardFooter>
                     </Card>
@@ -656,7 +676,7 @@ export default function DocumentScanner() {
 
         {stage === 'adjust' && currentRawImage && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
-                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[600px]">
+                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
                     <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
                         <div className="flex items-center gap-4">
@@ -666,14 +686,14 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-12 shadow-3xl border-4 border-white">
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-6 shadow-3xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[55vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -691,18 +711,23 @@ export default function DocumentScanner() {
                             )}
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 border-t shrink-0 flex justify-center">
-                        <Button className="h-16 px-20 rounded-2xl bg-primary text-primary-foreground font-black text-xl shadow-2xl active:scale-95 transition-all group" onClick={handleConfirmAdd}>
-                            {editingId ? 'SAVE CHANGES' : 'CONFIRM & ADD'} <ChevronRight className="ml-2 size-6 group-hover:translate-x-1 transition-transform" />
+                    <CardFooter className="bg-muted/10 p-6 border-t shrink-0 flex justify-center gap-4">
+                        <Button className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(false)}>
+                            <CheckCircle2 className="mr-2 size-5" /> CONFIRM & ADD
                         </Button>
+                        {pendingPages.length > 1 && (
+                            <Button className="h-14 px-12 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(true)}>
+                                <SkipForward className="mr-2 size-5" /> NEXT PAGE
+                            </Button>
+                        )}
                     </CardFooter>
                 </Card>
 
                 <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col flex-1">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
-                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden min-h-[350px]">
+                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden min-h-[300px]">
                         <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[320px] flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[45vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[35vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
                         </div>
                     </CardContent>
