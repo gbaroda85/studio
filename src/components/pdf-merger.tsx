@@ -295,7 +295,7 @@ export default function PdfMerger() {
                                     <div className="flex justify-between items-center px-1 shrink-0">
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Current Stack Order</p>
                                         <div className="flex items-center gap-2">
-                                            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary/5">
+                                            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-primary font-black h-7 text-[9px] uppercase hover:bg-primary hover:text-white transition-colors">
                                                 <Plus className="size-3 mr-1"/> Add Files
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={handleReset} className="btn-uiverse-secondary h-7">
@@ -459,6 +459,7 @@ export default function PdfMerger() {
                                 <div className="flex items-center gap-5">
                                     <div className="size-16 md:size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative shrink-0">
                                         <CheckCircle2 className="size-10 md:size-12 z-10" />
+                                        <StarIcons />
                                         <Sparkles className="absolute -top-1 -right-1 text-yellow-400 size-6" />
                                     </div>
                                     <div className="text-left">
