@@ -30,6 +30,8 @@ const translations = {
     image_compress_description: 'Reduce image file size without losing quality.',
     resize_image_label: 'Resize Image',
     resize_image_description: 'Change the dimensions of your image quickly.',
+    signature_resizer_label: 'Signature Resizer',
+    signature_resizer_description: 'Resize signature to exact CM/Pixel and KB size.',
     crop_image_label: 'Crop Image',
     crop_image_description: 'Easily crop your images to the perfect size.',
     passport_photo_label: 'Passport Photo Maker',
@@ -148,6 +150,8 @@ const translations = {
     image_compress_description: 'गुणवत्ता खोए बिना आकार कम करें।',
     resize_image_label: 'आकार बदलें',
     resize_image_description: 'छवि के आयाम तुरंत बदलें।',
+    signature_resizer_label: 'सिग्नेचर रिसाइज़र',
+    signature_resizer_description: 'सिग्नेचर को सही CM/Pixel और KB साइज में बदलें।',
     crop_image_label: 'इमेज क्रॉप',
     crop_image_description: 'छवियों को सही आकार में काटें।',
     passport_photo_label: 'पासपोर्ट फोटो मेकर',
@@ -207,7 +211,7 @@ const translations = {
     percentage_calculator_label: 'प्रतिशत कैलकुलेटर',
     percentage_calculator_description: 'प्रतिशत की गणना करें।',
     gst_calculator_label: 'GST कैलकुलेटर',
-    gst_calculator_description: 'Calculate GST Add or Remove instantly।',
+    gst_calculator_description: 'जीएसटी जोड़ें या हटाएं तुरंत।',
     sip_calculator_label: 'SIP कैलकुलेटर',
     sip_calculator_description: 'अपने म्यूचुअल फंड SIP रिटर्न की गणना करें।',
     fd_rd_calculator_label: 'FD और RD कैलकुलेटर',
@@ -236,8 +240,6 @@ const translations = {
     remove_signature_description: 'फोटो से सिग्नेचर निकालें।',
     enhance_photo_label: 'फोटो एनहांस',
     enhance_photo_description: 'फोटो क्वालिटी बेहतर करें।',
-    ai_upscaler_label: 'AI इमेज अपस्केलर',
-    ai_upscaler_description: 'इमेज रेजोल्यूशन 4K तक बढ़ाएं।',
     image_to_text_label: 'इमेज से टेक्स्ट (OCR)',
     image_to_text_description: 'इमेज से टेक्स्ट निकालें।',
     text_to_pdf_label: 'टेक्स्ट से PDF',
@@ -268,6 +270,8 @@ const translations = {
     image_compress_description: 'Reduce el tamaño sin perder calidad.',
     resize_image_label: 'Redimensionar',
     resize_image_description: 'Cambia dimensiones rápidamente.',
+    signature_resizer_label: 'Redimensionar Firma',
+    signature_resizer_description: 'Ajuste el tamaño de la firma a CM/Pixel y KB exactos.',
     crop_image_label: 'Recortar Imagen',
     crop_image_description: 'Recorta al tamaño perfecto.',
     passport_photo_label: 'Fotos de Pasaporte',
@@ -379,8 +383,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return langDict[key] || key;
   };
 
+  const value = {
+    language,
+    setLanguage,
+    t
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

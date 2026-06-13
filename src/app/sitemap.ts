@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const highPriorityTools = [
     '/image-compress',
     '/image-resize',
+    '/signature-resizer',
     '/marriage-biodata',
     '/passport-photo',
     '/unlock-pdf',

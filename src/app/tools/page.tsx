@@ -68,7 +68,8 @@ import {
   TrendingUp,
   PiggyBank,
   Layers,
-  Home as HomeIcon
+  Home as HomeIcon,
+  PenTool
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -90,6 +91,14 @@ function ToolsPageContent() {
       icon: Wand2,
       color: 'bg-violet-600',
       lightBg: 'bg-[#f5f3ff]'
+    },
+    {
+      href: '/signature-resizer',
+      labelKey: 'signature_resizer_label',
+      descriptionKey: 'signature_resizer_description',
+      icon: PenTool,
+      color: 'bg-orange-600',
+      lightBg: 'bg-orange-50'
     },
     {
       href: '/image-to-pdf',
