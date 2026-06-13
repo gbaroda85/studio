@@ -33,7 +33,10 @@ import {
     Trash2,
     Move,
     SearchCode,
-    Loader2
+    Loader2,
+    ChevronLeft,
+    ChevronRight,
+    Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -44,7 +47,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from './ui/separator';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from './ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -311,6 +314,15 @@ export default function PdfWatermarker() {
     }
   };
 
+  const handleDownload = () => {
+    if (!watermarkedPdfUrl || !pdfFile) return;
+    const link = document.createElement('a');
+    link.href = watermarkedPdfUrl;
+    const originalName = pdfFile.name.replace('.pdf', '');
+    link.download = `Watermarked_${originalName}.pdf`;
+    link.click();
+  }
+
   const resetState = () => {
       setPdfFile(null);
       setPreviewPages([]);
@@ -559,7 +571,7 @@ export default function PdfWatermarker() {
                                 <Button size="lg" className="magic-button magic-button-success w-full h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
                                     <StarIcons />
                                     <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> 
-                                    <span className="uppercase tracking-tighter">SAVE PROTECTED PDF</span>
+                                    <span className="uppercase tracking-tighter">SAVE WATERMARKED PDF</span>
                                 </Button>
                                 <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
                             </div>
@@ -649,3 +661,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
