@@ -21,6 +21,7 @@ import {
     Move,
     FileText,
     ChevronRight,
+    ChevronLeft,
     Trash2,
     RefreshCcw,
     Settings2,
@@ -53,7 +54,9 @@ import {
     Images,
     CheckCircle,
     LayoutGrid,
-    SkipForward
+    SkipForward,
+    ChevronRight as ChevronRightIcon,
+    ChevronLeft as ChevronLeftIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -402,7 +405,6 @@ export default function DocumentScanner() {
     const highRes = await applyIntelligentScan(true);
     const id = editingId || Math.random().toString(36).substr(2, 9);
     
-    // Find original index from either pending or already scanned list
     const sourceData = pendingPages.find(p => p.id === id) || scannedPages.find(p => p.id === id);
     const originalIndex = sourceData?.originalIndex || (scannedPages.length + 1);
 
@@ -429,6 +431,26 @@ export default function DocumentScanner() {
         toast({ title: "Scanning Complete" });
     }
     setIsProcessing(false);
+  };
+
+  const handleNavigate = (direction: number) => {
+      if (pendingPages.length <= 1 || !editingId) return;
+      
+      // 1. Save current progress (points) to pending list
+      const updatedPending = pendingPages.map(p => p.id === editingId ? { ...p, points } : p);
+      setPendingPages(updatedPending);
+
+      // 2. Find next index
+      const currentIndex = updatedPending.findIndex(p => p.id === editingId);
+      const nextIndex = (currentIndex + direction + updatedPending.length) % updatedPending.length;
+      const nextItem = updatedPending[nextIndex];
+
+      // 3. Load next item
+      setEditingId(nextItem.id);
+      setCurrentRawImage(nextItem.originalSrc);
+      setPoints(nextItem.points);
+      setIsImageReady(false);
+      setLiveResultSrc(null);
   };
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -593,8 +615,8 @@ export default function DocumentScanner() {
                                 <Button className="h-16 rounded-2xl bg-primary text-white font-black text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all group" onClick={startCamera}>
                                     <Camera className="size-6 mr-3 group-hover:rotate-12 transition-transform" /> LIVE CAMERA
                                 </Button>
-                                <Button variant="secondary" className="h-14 rounded-2xl bg-white dark:bg-slate-900 border-2 font-black text-xs shadow-xl" onClick={() => cameraInputRef.current?.click()}>
-                                    <CameraIcon className="size-5 mr-3 text-rose-500" /> TAKE PHOTO
+                                <Button variant="secondary" className="h-14 rounded-2xl bg-white dark:bg-slate-900 border-2 font-black text-xs shadow-xl" onClick={() => fileInputRef.current?.click()}>
+                                    <Plus className="size-5 mr-3 text-emerald-500" /> IMPORT PDF / IMAGES
                                 </Button>
                              </div>
                              <div className="p-4 bg-muted/20 rounded-2xl border border-dashed text-center">
@@ -651,8 +673,8 @@ export default function DocumentScanner() {
                                 <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
                             </Button>
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
-                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-white text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:!text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
+                                <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:!text-white text-blue-600 border-blue-100 transition-colors" onClick={handleShare}>{isSharing ? <Loader2 className="animate-spin size-3 mr-2" /> : <Share2 className="mr-2 size-3" />} SHARE</Button>
                             </div>
                         </CardFooter>
                     </Card>
@@ -675,9 +697,9 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
-                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col min-h-[500px]">
-                    <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between shrink-0">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-[calc(100vh-250px)]">
+                <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
+                    <CardHeader className="bg-muted/30 border-b p-5 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border"><TabsList className="h-9 w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList></Tabs>
@@ -686,14 +708,14 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-6 shadow-3xl border-4 border-white">
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-2 shadow-3xl border-4 border-white">
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[55vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[50vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -702,7 +724,7 @@ export default function DocumentScanner() {
                                             style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
                                     ))}
                                     {draggingPoint !== null && (
-                                        <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-44 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50">
+                                        <div className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50">
                                             <img src={currentRawImage} alt="m" className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
                                             <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-px bg-primary/40 absolute"/><div className="h-full w-px bg-primary/40 absolute"/></div>
                                         </div>
@@ -712,21 +734,22 @@ export default function DocumentScanner() {
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-6 border-t shrink-0 flex justify-center gap-4">
+                        <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleNavigate(-1)} disabled={pendingPages.length <= 1}>
+                            <ChevronLeftIcon className="mr-1.5 size-4" /> PREVIOUS
+                        </Button>
                         <Button className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(false)}>
                             <CheckCircle2 className="mr-2 size-5" /> CONFIRM & ADD
                         </Button>
-                        {pendingPages.length > 1 && (
-                            <Button className="h-14 px-12 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(true)}>
-                                <SkipForward className="mr-2 size-5" /> NEXT PAGE
-                            </Button>
-                        )}
+                        <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleNavigate(1)} disabled={pendingPages.length <= 1}>
+                            NEXT <ChevronRightIcon className="ml-1.5 size-4" />
+                        </Button>
                     </CardFooter>
                 </Card>
 
-                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col flex-1">
+                <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
-                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden min-h-[300px]">
-                        <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[320px] flex items-center justify-center overflow-hidden">
+                    <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
+                        <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[280px] flex items-center justify-center overflow-hidden">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[35vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
                         </div>
