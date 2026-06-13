@@ -186,7 +186,7 @@ export default function PdfMerger() {
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
-            const pagesToRender = Math.min(pdf.numPages, 10); 
+            const pagesToRender = pdf.numPages; // Removed the 10-page limit
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -323,7 +323,7 @@ export default function PdfMerger() {
                                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/5" onClick={() => handleRemoveFile(index)}><X className="h-4 w-4" /></Button>
                                                 </div>
                                             ))}
-                                            <Button variant="ghost" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300 group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                                            <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300 group" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                                                 <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> ADD MORE DOCUMENTS
                                             </Button>
                                         </div>
