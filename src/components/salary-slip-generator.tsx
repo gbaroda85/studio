@@ -208,41 +208,44 @@ export default function SalarySlipGenerator() {
         setIsExporting(true);
         
         try {
-            // Ensure fonts are ready
+            // Step 1: Wait for fonts to be ready
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
-            // A4 Dimensions in points: 595.28 x 841.89
+            // Step 2: Capture with optimal settings for typography
             const canvas = await html2canvas(previewRef.current, {
-                scale: 3, // High scale for crisp text
+                scale: 3, // High DPI for crispness
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
+                letterRendering: true, // CRITICAL: Renders letter by letter to prevent squishing
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
                         const target = el as HTMLElement;
-                        // Reset all scaling and force original A4 dimensions for the capture
+                        // Force 1:1 scale for capture
                         target.style.transform = 'none';
                         target.style.width = '210mm';
                         target.style.minHeight = '297mm';
                         target.style.margin = '0';
                         target.style.padding = '15mm';
                         
-                        // Force standard font metrics to prevent squishing
+                        // DEEP STYLE RESET: Force standard character spacing on all elements
                         const allElements = target.querySelectorAll('*');
                         allElements.forEach(item => {
-                            const style = (item as HTMLElement).style;
-                            style.letterSpacing = 'normal';
-                            style.fontKerning = 'none';
-                            style.fontVariantLigatures = 'none';
+                            const node = item as HTMLElement;
+                            node.style.letterSpacing = 'normal';
+                            node.style.wordSpacing = 'normal';
+                            node.style.fontVariantLigatures = 'none';
+                            node.style.fontKerning = 'none';
+                            node.style.fontFamily = 'Arial, sans-serif'; // Safe standard font
                         });
                     }
                 }
             });
 
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
             if (type === 'pdf') {
                 const pdf = new jsPDF({ 
@@ -326,11 +329,33 @@ export default function SalarySlipGenerator() {
                                     <Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label>
                                     <Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Date of Joining</Label>
+                                    <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">UAN Number</Label>
+                                    <Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
                             </div>
                         </div>
 
                         <div className="space-y-6 text-left">
-                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Bank Details</Badge>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Bank Name</Label>
+                                    <Input value={data.employee.bankName} onChange={(e) => updateNested('employee', 'bankName', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Account Number</Label>
+                                    <Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6 text-left">
+                            <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label>
@@ -339,6 +364,14 @@ export default function SalarySlipGenerator() {
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label>
                                     <Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label>
+                                    <Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (/hr)</Label>
+                                    <Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                             </div>
                         </div>
@@ -358,6 +391,26 @@ export default function SalarySlipGenerator() {
                                         </Select>
                                         <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
                                         <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-6 text-left">
+                             <div className="flex justify-between items-center">
+                                <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
+                                <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('deductions')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
+                            </div>
+                            <div className="space-y-3">
+                                {data.deductions.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
+                                        <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
+                                        <Select value={item.type} onValueChange={(v) => updateDynamic('deductions', item.id, 'type', v)}>
+                                            <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
+                                            <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
+                                        </Select>
+                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
+                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
                                     </div>
                                 ))}
                             </div>
