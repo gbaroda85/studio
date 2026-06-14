@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
@@ -312,7 +311,7 @@ export default function SalarySlipGenerator() {
             </div>
 
             {/* SIDEBAR EDITOR */}
-            <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2">
+            <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2 text-left">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
@@ -330,7 +329,7 @@ export default function SalarySlipGenerator() {
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                             <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5">
@@ -348,7 +347,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                             <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 space-y-1.5">
@@ -378,7 +377,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                             <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Bank Details</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -392,7 +391,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                             <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -418,7 +417,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                              <div className="flex justify-between items-center">
                                 <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances</Badge>
                                 <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
@@ -438,7 +437,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6 text-left">
+                        <div className="space-y-6">
                              <div className="flex justify-between items-center">
                                 <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
                                 <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('deductions')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>

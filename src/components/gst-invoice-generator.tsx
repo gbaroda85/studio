@@ -26,7 +26,8 @@ import {
     Receipt,
     ListFilter,
     ChevronRight,
-    SearchCode
+    SearchCode,
+    Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -160,13 +161,13 @@ export default function GstInvoiceGenerator() {
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 text-left">
                                 <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <Receipt className="size-7" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Invoice Panel</CardTitle>
-                                    <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">GST Compliant Billing</CardDescription>
+                                    <CardTitle className="text-xl md:text-2xl font-black uppercase leading-none">Invoice Panel</CardTitle>
+                                    <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">GST Compliant Billing</CardDescription>
                                 </div>
                             </div>
                             <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Clear</Button>
@@ -321,7 +322,7 @@ export default function GstInvoiceGenerator() {
                          >
                             {/* Header */}
                             <header className="flex justify-between items-start mb-10 pb-6 border-b-2 border-slate-900">
-                                <div className="space-y-1 max-w-[60%]">
+                                <div className="space-y-1 max-w-[60%] text-left">
                                     <h1 className="text-3xl font-black uppercase tracking-tighter leading-none">{businessName}</h1>
                                     <p className="text-xs font-black text-primary">GSTIN: {businessGstin}</p>
                                     <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2">{businessAddress}</p>
