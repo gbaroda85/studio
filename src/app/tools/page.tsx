@@ -69,7 +69,9 @@ import {
   PiggyBank,
   Layers,
   Home as HomeIcon,
-  PenTool
+  PenTool,
+  Banknote,
+  CalendarDays
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -84,6 +86,14 @@ function ToolsPageContent() {
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
 
   const imageFeatures = [
+    {
+      href: '/passport-date-name',
+      labelKey: 'passport_date_name_label',
+      descriptionKey: 'passport_date_name_description',
+      icon: CalendarDays,
+      color: 'bg-blue-600',
+      lightBg: 'bg-blue-50'
+    },
     {
       href: '/enhance-photo',
       labelKey: 'enhance_photo_label',
@@ -352,6 +362,14 @@ function ToolsPageContent() {
   ];
 
   const calculatorFeatures = [
+    {
+      href: '/salary-slip',
+      labelKey: 'salary_slip_label',
+      descriptionKey: 'salary_slip_description',
+      icon: Banknote,
+      color: 'bg-blue-600',
+      lightBg: 'bg-blue-50'
+    },
     {
       href: '/gst-invoice',
       labelKey: 'gst_invoice_label',
