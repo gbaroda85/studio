@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -36,7 +35,8 @@ import {
     Calculator,
     Coins,
     TrendingDown,
-    CreditCard
+    CreditCard,
+    UploadCloud
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -186,7 +186,8 @@ export default function SalarySlipGenerator() {
 
     const updateDynamic = (section: 'allowances' | 'deductions', id: string, field: keyof DynamicItem, value: any) => {
         setData(prev => ({
-            ...prev, section: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item)
+            ...prev,
+            [section]: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item)
         }));
     };
 
