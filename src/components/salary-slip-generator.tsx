@@ -186,8 +186,7 @@ export default function SalarySlipGenerator() {
 
     const updateDynamic = (section: 'allowances' | 'deductions', id: string, field: keyof DynamicItem, value: any) => {
         setData(prev => ({
-            ...prev,
-            [section]: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item)
+            ...prev, section: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item)
         }));
     };
 
@@ -255,151 +254,175 @@ export default function SalarySlipGenerator() {
     return (
         <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4 pb-32">
             
-            {/* LEFT: INPUTS (MATCHING IMAGE DESIGN) */}
+            {/* LEFT: INPUTS (SINGLE UNIFIED CARD DESIGN) */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2">
-                
-                {/* 1. EMPLOYEE DETAILS CARD */}
-                <Card className="border shadow-md rounded-[1rem] overflow-hidden bg-white dark:bg-slate-950">
-                    <CardContent className="p-6 space-y-6">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Employee Name</Label>
-                                <Input value={data.employee.name} onChange={(e) => updateNested('employee', 'name', e.target.value)} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
+                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+                    <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                    <Banknote className="size-7" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Salary Studio</CardTitle>
+                                    <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">Payroll Management</CardDescription>
+                                </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Designation</Label>
-                                <Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">UAN No.</Label>
-                                <Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Date of Joining</Label>
-                                <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} placeholder="e.g., DD/MM/YYYY" className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
+                            <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                        </div>
+                    </CardHeader>
+                    
+                    <CardContent className="p-6 md:p-8 space-y-10">
+                        
+                        {/* 1. COMPANY INFO */}
+                        <div className="space-y-6">
+                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
+                            <div className="grid gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label>
+                                    <Input value={data.company.name} onChange={(e) => updateNested('company', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Address</Label>
+                                    <Textarea value={data.company.address} onChange={(e) => updateNested('company', 'address', e.target.value)} className="rounded-xl border-2 font-medium" />
+                                </div>
+                                <Button variant="outline" size="sm" className="w-full h-10 rounded-xl border-2 border-dashed font-black text-[10px] uppercase" onClick={() => logoInputRef.current?.click()}>
+                                    <UploadCloud className="size-4 mr-2" /> {data.company.logo ? "CHANGE COMPANY LOGO" : "UPLOAD COMPANY LOGO"}
+                                </Button>
+                                <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* 2. BANK DETAILS CARD */}
-                <Card className="border shadow-md rounded-[1rem] overflow-hidden bg-white dark:bg-slate-950">
-                    <CardHeader className="py-4 px-6 bg-white border-b-0">
-                         <CardTitle className="text-xl font-black flex items-center gap-3">
-                            <CreditCard className="size-5 text-blue-400" /> Bank Details
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Bank Account No.</Label>
-                                <Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">IFSC Code</Label>
-                                <Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
+                        {/* 2. EMPLOYEE INFO */}
+                        <div className="space-y-6">
+                            <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2 space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Full Name</Label>
+                                    <Input value={data.employee.name} onChange={(e) => updateNested('employee', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Designation</Label>
+                                    <Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label>
+                                    <Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">UAN No.</Label>
+                                    <Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Joining Date</Label>
+                                    <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} placeholder="DD/MM/YYYY" className="h-10 rounded-xl font-bold border-2" />
+                                </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* 3. SALARY CALCULATION CARD */}
-                <Card className="border shadow-md rounded-[1rem] overflow-hidden bg-white dark:bg-slate-950">
-                    <CardHeader className="py-4 px-6 bg-white border-b-0">
-                         <CardTitle className="text-xl font-black flex items-center gap-3">
-                            <Calculator className="size-5 text-green-500" /> Salary Calculation
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Basic Salary Rate (per day, ₹)</Label>
-                                <Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Present Days</Label>
-                                <Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Overtime (Hours)</Label>
-                                <Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[11px] font-bold text-slate-700">Overtime Rate (₹/hour)</Label>
-                                <Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 bg-slate-50 border-none rounded-lg font-medium" />
+                        {/* 3. BANK DETAILS */}
+                        <div className="space-y-6">
+                            <Badge className="bg-slate-700 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Bank Details</Badge>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2 space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Bank Account No.</Label>
+                                    <Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label>
+                                    <Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label>
+                                    <Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* 4. ALLOWANCES CARD */}
-                <Card className="border shadow-md rounded-[1rem] overflow-hidden bg-white dark:bg-slate-950">
-                    <CardHeader className="py-4 px-6 bg-white border-b-0">
-                         <CardTitle className="text-xl font-black flex items-center gap-3">
-                            <Coins className="size-5 text-green-500" /> Allowances
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-4">
-                        {data.allowances.map((item) => (
-                            <div key={item.id} className="flex items-center gap-3 animate-in slide-in-from-bottom-2">
-                                <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-10 bg-slate-50 border-none rounded-lg text-xs" />
-                                <Select value={item.type} onValueChange={(v) => updateDynamic('allowances', item.id, 'type', v)}>
-                                    <SelectTrigger className="w-32 h-10 bg-slate-50 border-none rounded-lg text-[10px] uppercase font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2">
-                                        <SelectItem value="fixed">Fixed (₹)</SelectItem>
-                                        <SelectItem value="percentage">Percentage (%)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', Number(e.target.value))} className="w-20 h-10 bg-slate-50 border-none rounded-lg text-center font-bold" />
-                                <Button size="icon" variant="ghost" className="size-8 text-slate-400 hover:text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-4" /></Button>
+                        {/* 4. CALCULATION CONFIG */}
+                        <div className="space-y-6">
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Configuration</Badge>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily, ₹)</Label>
+                                    <Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label>
+                                    <Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime (Hrs)</Label>
+                                    <Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">OT Rate (₹/Hr)</Label>
+                                    <Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
                             </div>
-                        ))}
-                        <Button variant="outline" size="sm" onClick={() => handleAddDynamic('allowances')} className="h-10 border-none bg-slate-50 rounded-lg text-[10px] font-black uppercase hover:bg-primary/10 hover:text-primary">Add Allowance</Button>
-                    </CardContent>
-                </Card>
+                        </div>
 
-                {/* 5. DEDUCTIONS CARD */}
-                <Card className="border shadow-md rounded-[1rem] overflow-hidden bg-white dark:bg-slate-950">
-                    <CardHeader className="py-4 px-6 bg-white border-b-0">
-                         <CardTitle className="text-xl font-black flex items-center gap-3">
-                            <TrendingDown className="size-5 text-rose-500" /> Deductions
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-4">
-                        {data.deductions.map((item) => (
-                            <div key={item.id} className="flex items-center gap-3 animate-in slide-in-from-bottom-2">
-                                <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-10 bg-slate-50 border-none rounded-lg text-xs" />
-                                <Select value={item.type} onValueChange={(v) => updateDynamic('deductions', item.id, 'type', v)}>
-                                    <SelectTrigger className="w-32 h-10 bg-slate-50 border-none rounded-lg text-[10px] uppercase font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2">
-                                        <SelectItem value="fixed">Fixed (₹)</SelectItem>
-                                        <SelectItem value="percentage">Percentage (%)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', Number(e.target.value))} className="w-20 h-10 bg-slate-50 border-none rounded-lg text-center font-bold" />
-                                <Button size="icon" variant="ghost" className="size-8 text-slate-400 hover:text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-4" /></Button>
+                        {/* 5. ALLOWANCES & DEDUCTIONS */}
+                        <div className="space-y-10">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances</Badge>
+                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
+                                </div>
+                                <div className="space-y-3">
+                                    {data.allowances.map((item) => (
+                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2 animate-in slide-in-from-bottom-1">
+                                            <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
+                                            <Select value={item.type} onValueChange={(v) => updateDynamic('allowances', item.id, 'type', v)}>
+                                                <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
+                                                <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
+                                            </Select>
+                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
+                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        ))}
-                        <Button variant="outline" size="sm" onClick={() => handleAddDynamic('deductions')} className="h-10 border-none bg-slate-50 rounded-lg text-[10px] font-black uppercase hover:bg-rose-100 hover:text-rose-600">Add Deduction</Button>
-                    </CardContent>
-                </Card>
 
-                {/* EXPORT SECTION */}
-                <div className="space-y-4 pt-4 no-print">
-                    <Button onClick={handleExport} disabled={isExporting} className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 border-4 border-primary hover:bg-transparent hover:text-primary">
-                        {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
-                        GENERATE SALARY SLIP
-                    </Button>
-                </div>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
+                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('deductions')} className="h-7 text-[8px] font-black uppercase text-rose-600"><Plus className="size-3 mr-1" /> Add</Button>
+                                </div>
+                                <div className="space-y-3">
+                                    {data.deductions.map((item) => (
+                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2 animate-in slide-in-from-bottom-1">
+                                            <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
+                                            <Select value={item.type} onValueChange={(v) => updateDynamic('deductions', item.id, 'type', v)}>
+                                                <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
+                                                <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
+                                            </Select>
+                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
+                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                    </CardContent>
+                    <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
+                        <Button onClick={handleExport} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] transition-all active:scale-95 group border-4 border-primary hover:bg-transparent hover:text-primary">
+                            {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
+                            EXPORT SALARY SLIP PDF
+                        </Button>
+                        <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest opacity-60">Industrial 300DPI Render Output</p>
+                    </CardFooter>
+                </Card>
             </div>
 
-            {/* RIGHT: A4 PREVIEW */}
+            {/* RIGHT: A4 PREVIEW (MAINTAINING CURRENT HIGH-FIDELITY PREVIEW) */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2">
                         <Eye className="size-4 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Live Preview</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Live View</span>
                     </div>
                     <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">A4 LAYOUT</Badge>
                 </div>
@@ -538,7 +561,7 @@ export default function SalarySlipGenerator() {
     );
 }
 
-// INTERNAL UTILS
+// INTERNAL UI HELPERS
 function Row({ label, value }: { label: string, value: string }) {
     return (
         <div className="flex items-baseline gap-4 text-[12px]">
