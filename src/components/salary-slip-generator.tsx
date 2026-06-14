@@ -216,18 +216,23 @@ export default function SalarySlipGenerator() {
         setIsExporting(true);
         
         try {
-            // 1. Wait for Fonts
+            // 1. Wait for Fonts to ensure sharp typography
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
-            // 2. High Resolution Screenshot Generation
+            // 2. High Resolution Image Generation from HIDDEN A4 CANVAS
+            // This prevents all responsive issues and scaling artifacts
             const options = {
                 quality: 1.0,
-                pixelRatio: 3, // High DPI Scale
+                pixelRatio: 3, // High DPI Scale (300DPI equivalent)
                 backgroundColor: '#ffffff',
                 width: 794,
                 height: 1123,
+                style: {
+                    transform: 'none',
+                    letterSpacing: 'normal'
+                }
             };
 
             const dataUrl = await htmlToImage.toJpeg(exportRef.current, options);
@@ -236,9 +241,10 @@ export default function SalarySlipGenerator() {
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
                     unit: 'px', 
-                    format: [794, 1123] 
+                    format: [794, 1123],
+                    compress: false
                 });
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123);
+                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
                 pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
             } else {
                 const link = document.createElement('a');
@@ -260,9 +266,10 @@ export default function SalarySlipGenerator() {
     return (
         <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4 pb-32 overflow-x-hidden">
             
-            {/* HIDDEN EXPORT TARGET (Strict A4 Size) */}
+            {/* HIDDEN EXPORT TARGET (Strict A4 Size at 96DPI) */}
+            {/* This div is the only source of truth for the export engine */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
-                <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white' }}>
+                <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white', position: 'relative' }}>
                     <PayslipTemplate data={data} results={results} formatCurrency={formatCurrency} isExport />
                 </div>
             </div>
@@ -410,14 +417,14 @@ export default function SalarySlipGenerator() {
                 </Card>
             </div>
 
-            {/* RIGHT: LIVE UI PREVIEW */}
+            {/* RIGHT: LIVE UI PREVIEW (A4 LAYOUT) */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2">
                         <Eye className="size-4 text-primary" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Live View</span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">A4 LAYOUT</Badge>
+                    <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                 </div>
 
                 <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 transition-all overflow-visible min-h-[1000px]">
@@ -454,16 +461,17 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 width: '794px', 
                 minHeight: '1123px', 
                 padding: '50px',
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: 'Arial, Helvetica, sans-serif',
                 position: 'relative',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                letterSpacing: '0px'
             }}
         >
             {/* Header */}
             <header className="flex justify-between items-center mb-10 pb-8 border-b-4 border-slate-900 w-full">
                 <div className="space-y-1 max-w-[70%] text-left">
-                    <h1 className="text-3xl font-black uppercase leading-tight">{data.company.name}</h1>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2">{data.company.address}</p>
+                    <h1 className="text-3xl font-black uppercase leading-tight" style={{ letterSpacing: 'normal' }}>{data.company.name}</h1>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2" style={{ letterSpacing: 'normal' }}>{data.company.address}</p>
                 </div>
                 {data.company.logo ? (
                     <img src={data.company.logo} className="h-16 w-auto object-contain" alt="logo" />
@@ -475,12 +483,12 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             </header>
 
             <div className="text-center mb-10">
-                <h2 className="text-2xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-3 px-16">Pay Slip</h2>
-                <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-widest">MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
+                <h2 className="text-2xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-3 px-16" style={{ letterSpacing: '0.1em' }}>Pay Slip</h2>
+                <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
             </div>
 
             {/* Employee Info Grid */}
-            <div className="grid grid-cols-2 gap-y-5 gap-x-12 mb-10 bg-slate-50 p-10 rounded-[2rem] border border-slate-200 text-left">
+            <div className="grid grid-cols-2 gap-y-6 gap-x-12 mb-10 bg-slate-50 p-10 rounded-[2rem] border border-slate-200 text-left">
                 <Row label="Employee Name" value={data.employee.name} />
                 <Row label="Employee ID" value={data.employee.empId} />
                 <Row label="Designation" value={data.employee.designation} />
@@ -494,7 +502,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             {/* Salary Table */}
             <div className="grid grid-cols-2 border-2 border-slate-900 flex-1 min-h-[400px]">
                 <div className="border-r-2 border-slate-900 text-left flex flex-col">
-                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest">Earnings (In INR)</div>
+                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Earnings (In INR)</div>
                     <div className="p-6 space-y-6 flex-1">
                         <TableItem label="Basic Amount" value={results.basicAmt} />
                         {results.otAmt > 0 && <TableItem label={`Overtime (${data.calc.overtimeHours} Hrs)`} value={results.otAmt} />}
@@ -504,7 +512,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                     </div>
                 </div>
                 <div className="text-left flex flex-col">
-                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest">Deductions (In INR)</div>
+                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Deductions (In INR)</div>
                     <div className="p-6 space-y-6 flex-1">
                         {results.deductionItems.map((d: any, i: number) => (
                             <TableItem key={i} label={d.label} value={d.amount} isDeduction />
@@ -516,11 +524,11 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             {/* Totals */}
             <div className="grid grid-cols-2 border-x-2 border-b-2 border-slate-900 text-left">
                 <div className="p-6 flex justify-between items-center border-r-2 border-slate-900 bg-slate-50/30">
-                    <span className="text-[11px] font-black uppercase">Gross Earnings</span>
+                    <span className="text-[11px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Gross Earnings</span>
                     <span className="text-sm font-black">{formatCurrency(results.totalEarnings)}</span>
                 </div>
                 <div className="p-6 flex justify-between items-center bg-rose-50/50">
-                    <span className="text-[11px] font-black uppercase">Total Deductions</span>
+                    <span className="text-[11px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Total Deductions</span>
                     <span className="text-sm font-black text-rose-600">({formatCurrency(results.totalDeductions)})</span>
                 </div>
             </div>
@@ -528,13 +536,13 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             {/* Net Salary Highlight */}
             <div className="mt-12 p-10 bg-slate-900 text-white rounded-[2.5rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800">
                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Net Monthly Take-home</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-40" style={{ letterSpacing: '0.1em' }}>Net Monthly Take-home</p>
                     <h3 className="text-5xl font-black tracking-normal">{formatCurrency(results.netSalary)}</h3>
                 </div>
                 <div className="text-right">
                     <div className="inline-flex items-center gap-3 bg-white/10 px-6 py-3 rounded-2xl border border-white/10">
                         <Sparkles className="size-5 text-primary" />
-                        <span className="text-[11px] font-black uppercase tracking-widest">VERIFIED RENDER</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>VERIFIED RENDER</span>
                     </div>
                 </div>
             </div>
@@ -542,20 +550,20 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             {/* Signature Area */}
             <div className="mt-12 grid grid-cols-2 gap-16 items-end pb-6">
                 <div className="p-8 border-l-8 border-primary bg-slate-50 rounded-r-[2rem] text-left shadow-sm">
-                    <p className="text-[11px] font-black uppercase text-primary mb-3 tracking-widest">Digital Notice</p>
-                    <p className="text-[12px] font-medium leading-relaxed italic text-slate-500">
+                    <p className="text-[11px] font-black uppercase text-primary mb-3 tracking-widest" style={{ letterSpacing: '0.1em' }}>Digital Notice</p>
+                    <p className="text-[12px] font-medium leading-relaxed italic text-slate-500" style={{ letterSpacing: 'normal' }}>
                         "This is a system-generated salary statement. It is digitally verified and does not require a physical seal or signature."
                     </p>
                 </div>
                 <div className="flex flex-col items-center">
                     <div className="w-64 h-20 border-b-2 border-slate-200 mb-3 relative" />
-                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Authorized Personnel</p>
+                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-400" style={{ letterSpacing: '0.1em' }}>Authorized Personnel</p>
                 </div>
             </div>
 
             {/* Footer */}
             <footer className="mt-auto pt-10 text-center border-t border-slate-100">
-                <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">GENERATE SECURE PAYROLL AT WWW.GR7IMAGEPDF.COM</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300" style={{ letterSpacing: '0.5em' }}>GENERATE SECURE PAYROLL AT WWW.GR7IMAGEPDF.COM</p>
             </footer>
         </div>
     );
@@ -563,21 +571,20 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
 
 function Row({ label, value }: { label: string, value: string }) {
     return (
-        <div className="flex items-baseline gap-6 h-7 w-full overflow-hidden">
-            <span className="w-36 font-black text-slate-400 shrink-0 uppercase text-[10px]">{label}</span>
-            <span className="font-bold border-b-2 border-dotted border-slate-200 flex-1 pb-1 text-slate-800 truncate leading-none">{value || "---"}</span>
+        <div className="flex items-baseline gap-6 h-8 w-full overflow-hidden">
+            <span className="w-36 font-black text-slate-400 shrink-0 uppercase text-[10px]" style={{ letterSpacing: 'normal' }}>{label}</span>
+            <span className="font-bold border-b-2 border-dotted border-slate-200 flex-1 pb-1 text-slate-800 truncate leading-none" style={{ letterSpacing: 'normal' }}>{value || "---"}</span>
         </div>
     );
 }
 
 function TableItem({ label, value, isDeduction }: { label: string, value: number, isDeduction?: boolean }) {
     return (
-        <div className="flex justify-between items-center h-6 w-full overflow-hidden">
-            <span className="font-bold text-slate-600 uppercase text-[11px] truncate pr-4">{label}</span>
+        <div className="flex justify-between items-center h-7 w-full overflow-hidden">
+            <span className="font-bold text-slate-600 uppercase text-[11px] truncate pr-4" style={{ letterSpacing: 'normal' }}>{label}</span>
             <span className={cn("font-black shrink-0", isDeduction ? "text-rose-600" : "text-slate-900")}>
                 {isDeduction && value > 0 ? '-' : ''}{Math.round(value).toLocaleString()}
             </span>
         </div>
     );
 }
-
