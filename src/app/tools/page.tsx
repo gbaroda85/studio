@@ -138,7 +138,7 @@ function ToolsPageContent() {
       descriptionKey: 'remove_background_description',
       icon: Eraser,
       color: 'bg-rose-500',
-      lightBg: 'bg-[#faf5ff]'
+      lightBg: 'bg-rose-50'
     },
     {
       href: '/remove-signature',
