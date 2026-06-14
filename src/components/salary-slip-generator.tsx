@@ -210,21 +210,18 @@ export default function SalarySlipGenerator() {
         }));
     };
 
-    // --- PIXEL PERFECT EXPORT ENGINE ---
     const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
         if (!exportRef.current) return;
         setIsExporting(true);
         
         try {
-            // 1. Wait for Fonts to ensure sharp typography
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
-            // 2. High Resolution Image Generation from HIDDEN A4 CANVAS
             const options = {
                 quality: 1.0,
-                pixelRatio: 3, 
+                pixelRatio: 2, 
                 backgroundColor: '#ffffff',
                 width: 794,
                 height: 1123,
@@ -235,7 +232,7 @@ export default function SalarySlipGenerator() {
                 }
             };
 
-            const dataUrl = await htmlToImage.toJpeg(exportRef.current, options);
+            const dataUrl = await htmlToImage.toPng(exportRef.current, options);
 
             if (type === 'pdf') {
                 const pdf = new jsPDF({ 
@@ -244,7 +241,7 @@ export default function SalarySlipGenerator() {
                     format: [794, 1123],
                     compress: false
                 });
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
+                pdf.addImage(dataUrl, 'PNG', 0, 0, 794, 1123, undefined, 'FAST');
                 pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
             } else {
                 const link = document.createElement('a');
@@ -266,14 +263,12 @@ export default function SalarySlipGenerator() {
     return (
         <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4 pb-32 overflow-x-hidden">
             
-            {/* HIDDEN EXPORT TARGET (Strict A4 Size at 96DPI) */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
-                <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white', position: 'relative', overflow: 'visible' }}>
+                <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white', position: 'relative', overflow: 'hidden' }}>
                     <PayslipTemplate data={data} results={results} formatCurrency={formatCurrency} isExport />
                 </div>
             </div>
 
-            {/* LEFT: STUDIO EDITOR */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
@@ -416,7 +411,6 @@ export default function SalarySlipGenerator() {
                 </Card>
             </div>
 
-            {/* RIGHT: LIVE UI PREVIEW */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2">
@@ -458,37 +452,35 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             )}
             style={{ 
                 width: '794px', 
-                minHeight: '1123px', 
-                padding: '50px',
+                height: '1123px', 
+                padding: '40px',
                 fontFamily: 'Arial, Helvetica, sans-serif',
                 position: 'relative',
                 boxSizing: 'border-box',
                 letterSpacing: '0px',
-                overflow: 'visible'
+                overflow: 'hidden'
             }}
         >
-            {/* Header */}
-            <header className="flex justify-between items-center mb-10 pb-8 border-b-4 border-slate-900 w-full">
+            <header className="flex justify-between items-center mb-6 pb-6 border-b-4 border-slate-900 w-full">
                 <div className="space-y-1 max-w-[70%] text-left">
                     <h1 className="text-3xl font-black uppercase leading-tight" style={{ letterSpacing: 'normal' }}>{data.company.name}</h1>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2" style={{ letterSpacing: 'normal' }}>{data.company.address}</p>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-1" style={{ letterSpacing: 'normal' }}>{data.company.address}</p>
                 </div>
                 {data.company.logo ? (
-                    <img src={data.company.logo} className="h-16 w-auto object-contain" alt="logo" />
+                    <img src={data.company.logo} className="h-14 w-auto object-contain" alt="logo" />
                 ) : (
-                    <div className="size-20 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-slate-200">
-                        <Building2 className="size-10 text-slate-300" />
+                    <div className="size-16 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-slate-200">
+                        <Building2 className="size-8 text-slate-300" />
                     </div>
                 )}
             </header>
 
-            <div className="text-center mb-10">
-                <h2 className="text-2xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-3 px-16" style={{ letterSpacing: '0.1em' }}>Pay Slip</h2>
-                <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
+            <div className="text-center mb-6">
+                <h2 className="text-xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-2 px-12" style={{ letterSpacing: '0.1em' }}>Pay Slip</h2>
+                <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
             </div>
 
-            {/* Employee Info Grid */}
-            <div className="grid grid-cols-2 gap-y-6 gap-x-12 mb-10 bg-slate-50 p-10 rounded-[2rem] border border-slate-200 text-left overflow-visible">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-10 mb-6 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 text-left overflow-visible">
                 <Row label="Employee Name" value={data.employee.name} />
                 <Row label="Employee ID" value={data.employee.empId} />
                 <Row label="Designation" value={data.employee.designation} />
@@ -499,11 +491,10 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <Row label="IFSC Code" value={data.employee.ifsc} />
             </div>
 
-            {/* Salary Table */}
-            <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[400px] overflow-visible">
+            <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[300px] overflow-visible">
                 <div className="border-r-2 border-slate-900 text-left flex flex-col">
-                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Earnings (In INR)</div>
-                    <div className="p-6 space-y-6 flex-1">
+                    <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Earnings (In INR)</div>
+                    <div className="p-4 space-y-4 flex-1">
                         <TableItem label="Basic Amount" value={results.basicAmt} />
                         {results.otAmt > 0 && <TableItem label={`Overtime (${data.calc.overtimeHours} Hrs)`} value={results.otAmt} />}
                         {results.allowanceItems.map((a: any, i: number) => (
@@ -512,8 +503,8 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                     </div>
                 </div>
                 <div className="text-left flex flex-col">
-                    <div className="bg-slate-900 text-white p-4 text-center text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Deductions (In INR)</div>
-                    <div className="p-6 space-y-6 flex-1">
+                    <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Deductions (In INR)</div>
+                    <div className="p-4 space-y-4 flex-1">
                         {results.deductionItems.map((d: any, i: number) => (
                             <TableItem key={i} label={d.label} value={d.amount} isDeduction />
                         ))}
@@ -521,48 +512,44 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
             </div>
 
-            {/* Totals */}
             <div className="grid grid-cols-2 border-x-2 border-b-2 border-slate-900 text-left overflow-visible">
-                <div className="p-6 flex justify-between items-center border-r-2 border-slate-900 bg-slate-50/30">
-                    <span className="text-[11px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Gross Earnings</span>
+                <div className="p-4 flex justify-between items-center border-r-2 border-slate-900 bg-slate-50/30">
+                    <span className="text-[10px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Gross Earnings</span>
                     <span className="text-sm font-black">{formatCurrency(results.totalEarnings)}</span>
                 </div>
-                <div className="p-6 flex justify-between items-center bg-rose-50/50">
-                    <span className="text-[11px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Total Deductions</span>
+                <div className="p-4 flex justify-between items-center bg-rose-50/50">
+                    <span className="text-[10px] font-black uppercase" style={{ letterSpacing: 'normal' }}>Total Deductions</span>
                     <span className="text-sm font-black text-rose-600">({formatCurrency(results.totalDeductions)})</span>
                 </div>
             </div>
 
-            {/* Net Salary Highlight */}
-            <div className="mt-12 p-10 bg-slate-900 text-white rounded-[2.5rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800 overflow-visible">
-                <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-40" style={{ letterSpacing: '0.1em' }}>Net Monthly Take-home</p>
-                    <h3 className="text-5xl font-black tracking-normal">{formatCurrency(results.netSalary)}</h3>
+            <div className="mt-8 p-6 bg-slate-900 text-white rounded-[2rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800 overflow-visible">
+                <div className="space-y-1">
+                    <p className="text-[9px] font-bold uppercase tracking-widest opacity-40" style={{ letterSpacing: '0.1em' }}>Net Monthly Take-home</p>
+                    <h3 className="text-4xl font-black tracking-normal">{formatCurrency(results.netSalary)}</h3>
                 </div>
                 <div className="text-right">
-                    <div className="inline-flex items-center gap-3 bg-white/10 px-6 py-3 rounded-2xl border border-white/10">
-                        <Sparkles className="size-5 text-primary" />
-                        <span className="text-[11px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>VERIFIED RENDER</span>
+                    <div className="inline-flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border border-white/10">
+                        <Sparkles className="size-4 text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>VERIFIED RENDER</span>
                     </div>
                 </div>
             </div>
 
-            {/* Signature Area */}
-            <div className="mt-12 grid grid-cols-2 gap-16 items-end pb-6 overflow-visible">
-                <div className="p-8 border-l-8 border-primary bg-slate-50 rounded-r-[2rem] text-left shadow-sm">
-                    <p className="text-[11px] font-black uppercase text-primary mb-3 tracking-widest" style={{ letterSpacing: '0.1em' }}>Digital Notice</p>
-                    <p className="text-[12px] font-medium leading-relaxed italic text-slate-500" style={{ letterSpacing: 'normal' }}>
+            <div className="mt-8 grid grid-cols-2 gap-10 items-end pb-4 overflow-visible">
+                <div className="p-6 border-l-8 border-primary bg-slate-50 rounded-r-[1.5rem] text-left shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-widest" style={{ letterSpacing: '0.1em' }}>Digital Notice</p>
+                    <p className="text-[11px] font-medium leading-relaxed italic text-slate-500" style={{ letterSpacing: 'normal' }}>
                         "This is a system-generated salary statement. It is digitally verified and does not require a physical seal or signature."
                     </p>
                 </div>
                 <div className="flex flex-col items-center">
-                    <div className="w-64 h-20 border-b-2 border-slate-200 mb-3 relative" />
-                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-400" style={{ letterSpacing: '0.1em' }}>Authorized Personnel</p>
+                    <div className="w-56 h-14 border-b-2 border-slate-200 mb-2 relative" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400" style={{ letterSpacing: '0.1em' }}>Authorized Personnel</p>
                 </div>
             </div>
 
-            {/* Footer */}
-            <footer className="mt-auto pt-10 text-center border-t border-slate-100 shrink-0">
+            <footer className="mt-auto pt-6 text-center border-t border-slate-100 shrink-0">
                 <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300" style={{ letterSpacing: '0.5em' }}>GENERATE SECURE PAYROLL AT WWW.GR7IMAGEPDF.COM</p>
             </footer>
         </div>
@@ -571,18 +558,18 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
 
 function Row({ label, value }: { label: string, value: string }) {
     return (
-        <div className="flex items-baseline gap-6 min-h-8 w-full overflow-visible">
-            <span className="w-36 font-black text-slate-400 shrink-0 uppercase text-[10px]" style={{ letterSpacing: 'normal' }}>{label}</span>
-            <span className="font-bold border-b-2 border-dotted border-slate-200 flex-1 pb-1 text-slate-800 leading-none" style={{ letterSpacing: 'normal' }}>{value || "---"}</span>
+        <div className="flex items-baseline gap-4 min-h-6 w-full overflow-visible">
+            <span className="w-32 font-black text-slate-400 shrink-0 uppercase text-[9px]" style={{ letterSpacing: 'normal' }}>{label}</span>
+            <span className="font-bold border-b border-dotted border-slate-200 flex-1 pb-0.5 text-slate-800 leading-normal text-xs whitespace-normal">{value || "---"}</span>
         </div>
     );
 }
 
 function TableItem({ label, value, isDeduction }: { label: string, value: number, isDeduction?: boolean }) {
     return (
-        <div className="flex justify-between items-center min-h-7 w-full overflow-visible">
-            <span className="font-bold text-slate-600 uppercase text-[11px] pr-4" style={{ letterSpacing: 'normal' }}>{label}</span>
-            <span className={cn("font-black shrink-0", isDeduction ? "text-rose-600" : "text-slate-900")}>
+        <div className="flex justify-between items-center min-h-6 w-full overflow-visible">
+            <span className="font-bold text-slate-600 uppercase text-[10px] pr-4 whitespace-normal" style={{ letterSpacing: 'normal' }}>{label}</span>
+            <span className={cn("font-black shrink-0 text-xs", isDeduction ? "text-rose-600" : "text-slate-900")}>
                 {isDeduction && value > 0 ? '-' : ''}{Math.round(value).toLocaleString()}
             </span>
         </div>
