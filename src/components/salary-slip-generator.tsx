@@ -163,12 +163,8 @@ export default function SalarySlipGenerator() {
 
     const updateNested = (section: keyof SalaryData, field: string, value: any) => {
         setData(prev => ({
-            ...prev,
-            [section]: {
-                ...(prev[section] as object),
-                [field]: value
-            }
-        }));
+            ...prev, section: { ...(prev[section] as object), [field]: value }
+        } as any));
     };
 
     const handleAddDynamic = (section: 'allowances' | 'deductions') => {
@@ -226,7 +222,14 @@ export default function SalarySlipGenerator() {
     const handleExport = async () => {
         if (!previewRef.current) return;
         setIsExporting(true);
+        
         try {
+            // STEP 1: Wait for all fonts to be ready
+            if ('fonts' in document) {
+                await (document as any).fonts.ready;
+            }
+
+            // STEP 2: Trigger high-fidelity capture
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2.5, 
                 useCORS: true,
@@ -235,21 +238,20 @@ export default function SalarySlipGenerator() {
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
-                        const styles = (el as HTMLElement).style;
-                        styles.transform = 'none';
-                        styles.fontFamily = 'Arial, sans-serif';
-                        styles.letterSpacing = '0px';
-                        styles.fontKerning = 'none';
-                        styles.fontVariantLigatures = 'none';
+                        const target = el as HTMLElement;
+                        // Reset transforms and font spacing to prevent squishing
+                        target.style.transform = 'none';
+                        target.style.letterSpacing = '0px';
+                        target.style.fontVariantLigatures = 'none';
+                        target.style.fontFamily = 'Arial, sans-serif';
                         
-                        const allElements = el.querySelectorAll('*');
-                        allElements.forEach(item => {
+                        const allTextElements = target.querySelectorAll('*');
+                        allTextElements.forEach(item => {
                             const s = (item as HTMLElement).style;
                             s.letterSpacing = '0px';
-                            s.fontKerning = 'none';
-                            s.fontVariantLigatures = 'none';
-                            s.transform = 'none';
                             s.wordSpacing = '0px';
+                            s.transform = 'none';
+                            s.fontVariantLigatures = 'none';
                         });
                     }
                 }
@@ -298,7 +300,7 @@ export default function SalarySlipGenerator() {
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
                         
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left">
                             <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5">
@@ -316,7 +318,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left">
                             <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 space-y-1.5">
@@ -342,7 +344,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left">
                             <Badge className="bg-slate-700 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Bank Details</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 space-y-1.5">
@@ -360,7 +362,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left">
                             <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Configuration</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -383,7 +385,7 @@ export default function SalarySlipGenerator() {
                         </div>
 
                         <div className="space-y-10">
-                            <div className="space-y-4">
+                            <div className="space-y-4 text-left">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances</Badge>
                                     <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
@@ -403,7 +405,7 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-4 text-left">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
                                     <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('deductions')} className="h-7 text-[8px] font-black uppercase text-rose-600"><Plus className="size-3 mr-1" /> Add</Button>
@@ -450,12 +452,12 @@ export default function SalarySlipGenerator() {
                             ref={previewRef}
                             data-capture-box="true"
                             className="bg-white p-[15mm] flex flex-col text-slate-900 shadow-none border-0"
-                            style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif', letterSpacing: '0px' }}
+                            style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}
                          >
                             <header className="flex justify-between items-center mb-8 pb-6 border-b-4 border-slate-900">
                                 <div className="space-y-1 max-w-[70%] text-left">
-                                    <h1 className="text-3xl font-black uppercase leading-tight tracking-normal" style={{ letterSpacing: '0px' }}>{data.company.name}</h1>
-                                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2 tracking-normal" style={{ letterSpacing: '0px' }}>{data.company.address}</p>
+                                    <h1 className="text-3xl font-black uppercase leading-tight">{data.company.name}</h1>
+                                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-2">{data.company.address}</p>
                                 </div>
                                 {data.company.logo ? (
                                     <img src={data.company.logo} className="h-16 w-auto object-contain" alt="logo" />
@@ -467,8 +469,8 @@ export default function SalarySlipGenerator() {
                             </header>
 
                             <div className="text-center mb-8">
-                                <h2 className="text-2xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-2 px-12" style={{ letterSpacing: '2px' }}>Pay Slip</h2>
-                                <p className="text-xs font-bold text-slate-500 mt-3 uppercase tracking-wider" style={{ letterSpacing: '1px' }}>MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
+                                <h2 className="text-2xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-2 px-12">Pay Slip</h2>
+                                <p className="text-xs font-bold text-slate-500 mt-3 uppercase tracking-wider">MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-y-4 gap-x-12 mb-8 bg-slate-50 p-8 rounded-3xl border border-slate-200 text-left">
@@ -505,19 +507,19 @@ export default function SalarySlipGenerator() {
 
                             <div className="grid grid-cols-2 border-x-2 border-b-2 border-slate-900 text-left">
                                 <div className="p-5 flex justify-between items-center border-r-2 border-slate-900 bg-slate-50/30">
-                                    <span className="text-[11px] font-black uppercase tracking-normal" style={{ letterSpacing: '0px' }}>Gross Earnings</span>
-                                    <span className="text-sm font-black tracking-normal" style={{ letterSpacing: '0px' }}>{formatCurrency(results.totalEarnings)}</span>
+                                    <span className="text-[11px] font-black uppercase">Gross Earnings</span>
+                                    <span className="text-sm font-black">{formatCurrency(results.totalEarnings)}</span>
                                 </div>
                                 <div className="p-5 flex justify-between items-center bg-rose-50/50">
-                                    <span className="text-[11px] font-black uppercase tracking-normal" style={{ letterSpacing: '0px' }}>Total Deductions</span>
-                                    <span className="text-sm font-black text-rose-600 tracking-normal" style={{ letterSpacing: '0px' }}>({formatCurrency(results.totalDeductions)})</span>
+                                    <span className="text-[11px] font-black uppercase">Total Deductions</span>
+                                    <span className="text-sm font-black text-rose-600">({formatCurrency(results.totalDeductions)})</span>
                                 </div>
                             </div>
 
                             <div className="mt-10 p-8 bg-slate-900 text-white rounded-[2.5rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800">
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Net Monthly Take-home</p>
-                                    <h3 className="text-4xl font-black tracking-normal" style={{ letterSpacing: '0px' }}>{formatCurrency(results.netSalary)}</h3>
+                                    <h3 className="text-4xl font-black">{formatCurrency(results.netSalary)}</h3>
                                 </div>
                                 <div className="text-right">
                                     <div className="inline-flex items-center gap-2 bg-white/10 px-5 py-2.5 rounded-2xl border border-white/10">
@@ -530,7 +532,7 @@ export default function SalarySlipGenerator() {
                             <div className="mt-10 grid grid-cols-2 gap-12 items-end pb-4">
                                 <div className="p-6 border-l-8 border-primary bg-slate-50 rounded-r-3xl text-left shadow-sm">
                                     <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-widest">Digital Notice</p>
-                                    <p className="text-[11px] font-medium leading-relaxed italic text-slate-500 tracking-normal" style={{ letterSpacing: '0px' }}>
+                                    <p className="text-[11px] font-medium leading-relaxed italic text-slate-500">
                                         "This is a system-generated salary statement. It is digitally verified and does not require a physical seal or signature."
                                     </p>
                                 </div>
@@ -565,8 +567,8 @@ export default function SalarySlipGenerator() {
 function Row({ label, value }: { label: string, value: string }) {
     return (
         <div className="flex items-baseline gap-4 h-6">
-            <span className="w-32 font-black text-slate-400 shrink-0 uppercase text-[9px] tracking-normal" style={{ letterSpacing: '0px' }}>{label}</span>
-            <span className="font-bold border-b border-dotted border-slate-200 flex-1 pb-1 text-slate-800 truncate leading-none tracking-normal" style={{ letterSpacing: '0px' }}>{value || "---"}</span>
+            <span className="w-32 font-black text-slate-400 shrink-0 uppercase text-[9px]">{label}</span>
+            <span className="font-bold border-b border-dotted border-slate-200 flex-1 pb-1 text-slate-800 truncate leading-none">{value || "---"}</span>
         </div>
     );
 }
@@ -574,8 +576,8 @@ function Row({ label, value }: { label: string, value: string }) {
 function TableItem({ label, value, isDeduction }: { label: string, value: number, isDeduction?: boolean }) {
     return (
         <div className="flex justify-between items-center h-5">
-            <span className="font-bold text-slate-600 uppercase tracking-normal text-[10px]" style={{ letterSpacing: '0px' }}>{label}</span>
-            <span className={cn("font-black tracking-normal", isDeduction ? "text-rose-600" : "text-slate-900")} style={{ letterSpacing: '0px' }}>
+            <span className="font-bold text-slate-600 uppercase text-[10px]">{label}</span>
+            <span className={cn("font-black", isDeduction ? "text-rose-600" : "text-slate-900")}>
                 {isDeduction && value > 0 ? '-' : ''}{Math.round(value).toLocaleString()}
             </span>
         </div>
