@@ -21,7 +21,8 @@ import {
     ImageIcon,
     UploadCloud,
     X,
-    Layout
+    Layout,
+    Clock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -104,8 +105,8 @@ const INITIAL_DATA: SalaryData = {
     calc: {
         basicRate: 1500,
         presentDays: 22,
-        overtimeHours: 0,
-        overtimeRate: 0
+        overtimeHours: 5,
+        overtimeRate: 200
     },
     allowances: [
         { id: '1', label: 'House Rent', type: 'percentage', value: 16 },
@@ -221,7 +222,7 @@ export default function SalarySlipGenerator() {
 
             const options = {
                 quality: 1.0,
-                pixelRatio: 3, 
+                pixelRatio: 2.5, 
                 backgroundColor: '#ffffff',
                 width: 794,
                 height: 1123,
@@ -356,6 +357,14 @@ export default function SalarySlipGenerator() {
                                     <Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label>
                                     <Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label>
+                                    <Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hr)</Label>
+                                    <Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
                             </div>
                         </div>
 
@@ -453,7 +462,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             style={{ 
                 width: '794px', 
                 height: '1123px', 
-                padding: '40px 40px 60px 40px', // Increased bottom padding for margin
+                padding: '40px 40px 60px 40px',
                 fontFamily: 'Arial, Helvetica, sans-serif',
                 position: 'relative',
                 boxSizing: 'border-box',
