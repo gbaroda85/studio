@@ -29,13 +29,13 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
+      <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col transform-gpu">
         <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
-          <div className={cn("grid size-12 place-items-center rounded-2xl transition-all group-hover:scale-110 shadow-lg shrink-0", color)}>
+          <div className={cn("grid size-12 place-items-center rounded-2xl transition-transform duration-200 group-hover:scale-110 shadow-lg shrink-0", color)}>
             <Icon className="h-7 w-7 text-white" />
           </div>
           <div className="flex-1 flex flex-col mt-4">
-            <CardTitle className="text-lg md:text-xl font-bold mb-1.5 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors uppercase font-body tracking-tight">
+            <CardTitle className="text-lg md:text-xl font-bold mb-1.5 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors duration-200 uppercase font-body tracking-tight">
               {title}
             </CardTitle>
             <CardDescription className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-bold uppercase opacity-70 tracking-tight">

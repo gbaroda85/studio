@@ -52,26 +52,31 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   html, body {
     @apply h-full w-full m-0 p-0 overflow-x-hidden;
     background-color: hsl(var(--background));
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* Hardware acceleration for scroll */
+    -webkit-overflow-scrolling: touch;
   }
 
   * {
     @apply border-border outline-none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 min-h-screen flex flex-col;
+    @apply bg-background text-foreground selection:bg-primary/20 min-h-screen flex flex-col;
     background-image: 
       radial-gradient(at 0% 0%, hsla(38, 36%, 57%, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(38, 36%, 57%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
-    transform: translateZ(0); /* Hardware acceleration */
+    /* Force GPU rendering for smoother experience */
+    transform: translate3d(0, 0, 0);
   }
 
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
@@ -89,14 +94,15 @@
 
 /* Rendering Optimizations */
 .glass-card, .btn-pos-uiverse, .magic-button {
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform, opacity;
+  contain: content;
 }
 
 section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 5000px;
+  contain-intrinsic-size: 1px 1000px;
 }
 
 .font-headline {
@@ -110,6 +116,7 @@ section {
 
 .glass-card {
   @apply bg-white/70 dark:bg-slate-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 .text-gradient-hero {
@@ -117,7 +124,8 @@ section {
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg transition-all duration-300;
+  @apply bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg;
+  transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
 ::-webkit-scrollbar {
@@ -136,16 +144,17 @@ section {
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-primary rounded-[inherit] blur opacity-10 -z-10 group-hover:opacity-30 transition-opacity duration-500;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-primary rounded-[inherit] blur opacity-10 -z-10 group-hover:opacity-30;
+  transition: opacity 0.5s ease;
 }
 
 .magic-button {
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: visible !important;
   border-width: 3px !important;
   box-shadow: 0 0 0 rgba(var(--primary), 0.55);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .magic-button:hover {
@@ -250,7 +259,7 @@ section {
   position: absolute;
   top: 0;
   left: 0;
-  transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .launch-arrow-btn:hover .button-box,
@@ -347,11 +356,11 @@ section {
   cursor: pointer;
   overflow: hidden;
   box-shadow: 0 10px 20px rgba(51, 51, 51, 0.1);
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.320, 1), box-shadow 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
 }
 
 .dark .btn-pos-uiverse {
@@ -373,7 +382,7 @@ section {
   top: 0;
   left: 0;
   transform-origin: bottom;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.320, 1);
   color: white;
 }
 
@@ -388,7 +397,7 @@ section {
   pointer-events: none;
   transform-origin: top;
   transform: translate(0%, 0%);
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.320, 1);
   position: absolute;
   top: 0;
   left: 0;
@@ -407,7 +416,7 @@ section {
 }
 
 .btn-pos-uiverse:active {
-  scale: 0.95;
+  transform: scale(0.95) translateZ(0);
 }
 
 .uiverse-clay-btn {
@@ -481,7 +490,7 @@ section {
     clip-path 250ms ease,
     background-image 250ms ease,
     transform 250ms ease;
-  will-change: box-shadow, clip-path, background-image, transform;
+  will-change: box-shadow, clip-path, transform;
   overflow: clip;
   clip-path: inset(0 0 0 0 round 100em);
   box-shadow:
@@ -562,7 +571,7 @@ section {
   flex-direction: column;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.05);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), background 0.3s ease;
   border: 1.5px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -583,7 +592,7 @@ section {
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: transform 0.3s ease, opacity 0.3s ease;
   font-weight: 900;
   white-space: nowrap;
   z-index: 100;
@@ -598,7 +607,6 @@ section {
   top: -3px;
   left: 50%;
   transform: translate(-50%) rotate(45deg);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .support-uiverse:hover .uiverse-tooltip {

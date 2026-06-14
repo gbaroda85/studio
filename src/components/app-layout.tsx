@@ -520,8 +520,9 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
-         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" />
-         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ animationDelay: '2s' }} />
+         {/* OPTIMIZED BLUR CIRCLES: Forced to separate GPU layer with will-change */}
+         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }} />
+         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden', animationDelay: '2s' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
