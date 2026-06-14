@@ -64,9 +64,7 @@ import {
   PlayCircle,
   PenLine,
   PenTool,
-  CalendarDays,
-  Eye,
-  MousePointer2
+  CalendarDays
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -80,7 +78,7 @@ const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS (Limit 6 for Home Grid)
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
-  { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
+  { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-50", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
@@ -135,8 +133,8 @@ const ALL_TOOLS = [
   { icon: Percent, title: "PERCENTAGE CALC", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
 ];
 
-const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg, onInteraction }: any) => (
-  <Link href={href} className="group block h-full" onClick={onInteraction}>
+const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
+  <Link href={href} className="group block h-full">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
       <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
         <div className={cn(`size-11 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
@@ -153,7 +151,6 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg, o
         </div>
       </div>
       
-      {/* Footer Section with Uiverse Animated Button */}
       <div className="bg-white dark:bg-[#0a040d] p-1.5 px-6 flex items-center justify-between rounded-b-[2.5rem]">
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400">Launch Tool</span>
         <div className="launch-arrow-btn">
@@ -173,29 +170,17 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg, o
 
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [stats, setStats] = useState({ visits: 0, interactions: 0 });
 
   useEffect(() => {
-    // Local persistence logic for stats
-    const savedVisits = parseInt(localStorage.getItem('gr7_visits') || '0');
-    const savedInt = parseInt(localStorage.getItem('gr7_interactions') || '0');
-    
-    const newVisits = savedVisits + 1;
-    localStorage.setItem('gr7_visits', newVisits.toString());
-    
-    setStats({ visits: newVisits, interactions: savedInt });
+    // Tracking logic remains for owner but UI is removed
+    const visits = parseInt(localStorage.getItem('gr7_visits') || '0') + 1;
+    localStorage.setItem('gr7_visits', visits.toString());
+    console.log(`[Owner Access] Total Studio Visits: ${visits}`);
   }, []);
-
-  const handleInteraction = () => {
-    const newInt = stats.interactions + 1;
-    localStorage.setItem('gr7_interactions', newInt.toString());
-    setStats(prev => ({ ...prev, interactions: newInt }));
-  };
 
   const filteredTools = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return [];
-    // Enhanced search: check title and description
     return ALL_TOOLS.filter(tool => 
       tool.title.toLowerCase().includes(query) || 
       tool.description.toLowerCase().includes(query)
@@ -207,7 +192,6 @@ export default function Page() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       <section className="relative w-full max-w-[2000px] pt-8 pb-10 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
-        {/* Background Layer */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -241,27 +225,9 @@ export default function Page() {
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-4 font-semibold leading-relaxed animate-fade-in-up">
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-10 font-semibold leading-relaxed animate-fade-in-up">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
-
-          {/* Visit & Click Counter Badges */}
-          <div className="flex justify-center gap-4 mb-10 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/5 shadow-xl">
-              <Eye className="size-4 text-primary" />
-              <div className="flex flex-col items-start leading-tight">
-                <span className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Studio Visits</span>
-                <span className="text-sm font-black text-primary">{stats.visits}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/5 shadow-xl">
-              <MousePointer2 className="size-4 text-rose-500" />
-              <div className="flex flex-col items-start leading-tight">
-                <span className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Total Clicks</span>
-                <span className="text-sm font-black text-rose-600">{stats.interactions}</span>
-              </div>
-            </div>
-          </div>
 
           <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in-up">
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
@@ -311,7 +277,7 @@ export default function Page() {
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} onInteraction={handleInteraction} />)}
+                    {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
                 </div>
                 {filteredTools.length === 0 && (
                    <div className="text-center py-20 opacity-30 font-body">
@@ -336,7 +302,7 @@ export default function Page() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} onInteraction={handleInteraction} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
@@ -347,7 +313,7 @@ export default function Page() {
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} onInteraction={handleInteraction} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
@@ -358,7 +324,7 @@ export default function Page() {
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">Smart Calculators</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} onInteraction={handleInteraction} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
