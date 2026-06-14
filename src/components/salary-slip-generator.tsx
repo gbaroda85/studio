@@ -73,6 +73,7 @@ interface SalaryData {
     calc: {
         basicRate: number;
         presentDays: number;
+        totalDays: number;
         overtimeHours: number;
         overtimeRate: number;
     };
@@ -105,6 +106,7 @@ const INITIAL_DATA: SalaryData = {
     calc: {
         basicRate: 1500,
         presentDays: 22,
+        totalDays: 31,
         overtimeHours: 5,
         overtimeRate: 200
     },
@@ -318,6 +320,10 @@ export default function SalarySlipGenerator() {
                                     <Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Department</Label>
+                                    <Input value={data.employee.department} onChange={(e) => updateNested('employee', 'department', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label>
                                     <Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
@@ -352,6 +358,10 @@ export default function SalarySlipGenerator() {
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label>
                                     <Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Total Days in Month</Label>
+                                    <Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label>
@@ -498,6 +508,8 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <Row label="UAN Number" value={data.employee.uanNo} />
                 <Row label="Bank Account" value={data.employee.bankAccount} />
                 <Row label="IFSC Code" value={data.employee.ifsc} />
+                <Row label="Total Days" value={String(data.calc.totalDays)} />
+                <Row label="Present Days" value={String(data.calc.presentDays)} />
             </div>
 
             <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[250px] overflow-visible">
