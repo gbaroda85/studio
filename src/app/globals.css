@@ -7,7 +7,7 @@
     --background: 42 38% 93%;       /* Warm Cream from image */
     --foreground: 8 7% 16%;        /* Dark Graphite/Brown text */
     --card: 42 38% 95%;
-    --card-foreground: 8 7% 16%;
+    --card-foreground: 8% 7% 16%;
     --popover: 42 38% 93%;
     --popover-foreground: 8 7% 16%;
     --primary: 38 36% 57%;         /* Lumera Muted Gold/Tan */
@@ -50,9 +50,15 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   html, body {
     @apply h-full w-full m-0 p-0 overflow-x-hidden;
     background-color: hsl(var(--background));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
@@ -65,6 +71,7 @@
       radial-gradient(at 0% 0%, hsla(38, 36%, 57%, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(38, 36%, 57%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
+    transform: translateZ(0); /* Hardware acceleration */
   }
 
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
@@ -80,12 +87,25 @@
   }
 }
 
+/* Rendering Optimizations */
+.glass-card, .btn-pos-uiverse, .magic-button {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 5000px;
+}
+
 .font-headline {
   font-family: 'Orbitron', sans-serif;
 }
 
 .glass-panel {
   @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
+  transform: translateZ(0);
 }
 
 .glass-card {
@@ -121,7 +141,7 @@
 
 .magic-button {
   position: relative;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: visible !important;
   border-width: 3px !important;
@@ -144,7 +164,7 @@
   width: 25px;
   height: auto;
   z-index: -1;
-  transition: all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+  transition: all 0.8s cubic-bezier(0.05, 0.83, 0.43, 0.96);
   opacity: 0;
   pointer-events: none;
 }
@@ -230,7 +250,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  transition: 0.4s;
+  transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .launch-arrow-btn:hover .button-box,
@@ -331,6 +351,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateZ(0);
 }
 
 .dark .btn-pos-uiverse {
@@ -352,7 +373,7 @@
   top: 0;
   left: 0;
   transform-origin: bottom;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
   color: white;
 }
 
@@ -367,7 +388,7 @@
   pointer-events: none;
   transform-origin: top;
   transform: translate(0%, 0%);
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
   position: absolute;
   top: 0;
   left: 0;
@@ -401,6 +422,7 @@
     -0.15em -0.15em 0.15em -0.075em rgba(5, 5, 5, 0.25),
     0.0375em 0.0375em 0.0675em 0 rgba(5, 5, 5, 0.1);
   display: inline-block;
+  transform: translateZ(0);
 }
 
 .uiverse-clay-btn::after {
@@ -427,7 +449,7 @@
   position: relative;
   z-index: 1;
   border-radius: inherit;
-  transition: box-shadow 300ms ease;
+  transition: box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
   will-change: box-shadow;
   box-shadow:
     0 0.05em 0.05em -0.01em rgba(5, 5, 5, 1),

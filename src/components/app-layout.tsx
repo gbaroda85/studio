@@ -470,36 +470,30 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     setIsMounted(true);
   }, []);
 
-  // RESTRICTED LOADING TRANSITION: ONLY Home -> Tool OR Tool -> Home
+  // SNAPPY NAVIGATION TRANSITION: Trigger loader only on Home <-> Tool transitions
   useEffect(() => {
     if (!isMounted) return;
     
     const fromPath = prevPathRef.current;
     const toPath = pathname;
 
-    // Condition: 
-    // 1. From Home (/) to anywhere else (like /tools or /image-compress)
-    // 2. From anywhere else back to Home (/) via Home button
     const wasOnHome = fromPath === '/';
     const isNowOnHome = toPath === '/';
     
-    // Animation logic: (Left Home) OR (Returning Home)
     const shouldShowLoader = (wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome);
     
     if (shouldShowLoader) {
         setIsNavigating(true);
         
-        // Show for exactly 1 second for premium feel
+        // Reduced to 600ms for a snappier, more high-performance feel
         const timer = setTimeout(() => {
           setIsNavigating(false);
-        }, 1000);
+        }, 600);
         
-        // Update ref immediately after deciding to show loader
         prevPathRef.current = toPath;
         return () => clearTimeout(timer);
     }
     
-    // If navigating between tools (e.g. /tools -> /image-compress), just update ref and skip loader
     prevPathRef.current = toPath;
   }, [pathname, isMounted]);
 
@@ -509,14 +503,16 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-20">
       <AppHeader />
       
-      {/* Global Page Transition Loader */}
-      <AnimatePresence>
+      {/* Global Page Transition Loader with hardware acceleration */}
+      <AnimatePresence mode="wait">
         {isNavigating && (
           <motion.div 
+            key="global-loader"
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] pointer-events-auto"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 z-[9999] pointer-events-auto transform-gpu"
           >
             <Loading />
           </motion.div>
@@ -524,8 +520,8 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
-         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" />
-         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" />
+         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ animationDelay: '2s' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
