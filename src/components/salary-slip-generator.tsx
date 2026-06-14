@@ -515,7 +515,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[250px] overflow-visible">
                 <div className="border-r-2 border-slate-900 text-left flex flex-col">
                     <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Earnings (In INR)</div>
-                    <div className="p-4 space-y-4 flex-1">
+                    <div className="p-4 space-y-1.5 flex-1">
                         <TableItem label="Basic Amount" value={results.basicAmt} />
                         {results.otAmt > 0 && <TableItem label={`Overtime (${data.calc.overtimeHours} Hrs)`} value={results.otAmt} />}
                         {results.allowanceItems.map((a: any, i: number) => (
@@ -525,7 +525,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
                 <div className="text-left flex flex-col">
                     <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Deductions (In INR)</div>
-                    <div className="p-4 space-y-4 flex-1">
+                    <div className="p-4 space-y-1.5 flex-1">
                         {results.deductionItems.map((d: any, i: number) => (
                             <TableItem key={i} label={d.label} value={d.amount} isDeduction />
                         ))}
