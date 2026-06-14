@@ -202,23 +202,22 @@ export default function SalarySlipGenerator() {
         };
     }, [data.calc, data.allowances, data.deductions]);
 
-    // AGGRESSIVE INDUSTRIAL EXPORT ENGINE
+    // AGGRESSIVE INDUSTRIAL EXPORT ENGINE WITH TYPOGRAPHY LOCK
     const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
         if (!previewRef.current) return;
         setIsExporting(true);
         
         try {
-            // Wait for all fonts to be 100% ready
+            // Wait for fonts
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
             const canvas = await html2canvas(previewRef.current, {
-                scale: 3, // High-density rendering
+                scale: 3, 
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
-                letterRendering: true, // Forces individual character placement to prevent squishing
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
@@ -231,8 +230,8 @@ export default function SalarySlipGenerator() {
                         target.style.margin = '0';
                         target.style.padding = '15mm';
                         
-                        // 2. AGGRESSIVE TYPOGRAPHY NORMALIZATION
-                        // Select every single element and force standard spacing
+                        // 2. INDUSTRIAL TYPOGRAPHY LOCK
+                        // Iterate through EVERY single element and force-reset spacing
                         const allNodes = target.querySelectorAll('*');
                         allNodes.forEach(node => {
                             const htmlNode = node as HTMLElement;
@@ -240,8 +239,13 @@ export default function SalarySlipGenerator() {
                             htmlNode.style.wordSpacing = 'normal';
                             htmlNode.style.fontVariantLigatures = 'none';
                             htmlNode.style.fontKerning = 'none';
-                            htmlNode.style.textRendering = 'optimizeLegibility';
-                            htmlNode.style.fontFamily = 'Arial, sans-serif'; // Safe system font for canvas
+                            htmlNode.style.textRendering = 'geometricPrecision';
+                            htmlNode.style.fontFamily = 'Arial, sans-serif'; 
+                            
+                            // Prevent character squishing by making inline-blocks inherit clear flow
+                            if (htmlNode.tagName === 'SPAN') {
+                                htmlNode.style.display = 'inline-block';
+                            }
                         });
                     }
                 }
@@ -288,7 +292,7 @@ export default function SalarySlipGenerator() {
                                     <Banknote className="size-7" />
                                 </div>
                                 <div className="text-left">
-                                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Salary Studio</CardTitle>
+                                    <CardTitle className="text-xl md:text-2xl font-black uppercase leading-none">Salary Studio</CardTitle>
                                     <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Payroll Management</CardDescription>
                                 </div>
                             </div>
@@ -429,7 +433,7 @@ export default function SalarySlipGenerator() {
                 </Card>
             </div>
 
-            {/* RIGHT: A4 PREVIEW (Direct Screenshot Target) */}
+            {/* RIGHT: A4 PREVIEW */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2">
@@ -441,7 +445,6 @@ export default function SalarySlipGenerator() {
 
                 <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-12 shadow-inner border-[6px] border-white/5 transition-all overflow-visible">
                     <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top h-auto shadow-[0_60px_120px_-20px_rgba(0,0,0,0.6)]">
-                         {/* CRITICAL: Typography Reset Container */}
                          <div 
                             ref={previewRef}
                             data-capture-box="true"
