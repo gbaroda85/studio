@@ -353,20 +353,20 @@ function ToolsPageContent() {
 
   const calculatorFeatures = [
     {
-      href: '/mortgage-calculator',
-      labelKey: 'mortgage_calculator_label',
-      descriptionKey: 'mortgage_calculator_description',
-      icon: HomeIcon,
-      color: 'bg-primary',
-      lightBg: 'bg-[#f0f9ff]'
+      href: '/gst-invoice',
+      labelKey: 'gst_invoice_label',
+      descriptionKey: 'gst_invoice_description',
+      icon: Receipt,
+      color: 'bg-emerald-600',
+      lightBg: 'bg-[#f0fdf4]'
     },
     {
       href: '/gst-calculator',
       labelKey: 'gst_calculator_label',
       descriptionKey: 'gst_calculator_description',
       icon: IndianRupee,
-      color: 'bg-emerald-500',
-      lightBg: 'bg-[#f0fdf4]'
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/sip-calculator',
@@ -389,7 +389,7 @@ function ToolsPageContent() {
       labelKey: 'income_tax_calculator_label',
       descriptionKey: 'income_tax_calculator_description',
       icon: Landmark,
-      color: 'bg-indigo-600',
+      color: 'bg-blue-700',
       lightBg: 'bg-[#eef2ff]'
     },
     {
@@ -447,6 +447,14 @@ function ToolsPageContent() {
       icon: Receipt,
       color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/mortgage-calculator',
+      labelKey: 'mortgage_calculator_label',
+      descriptionKey: 'mortgage_calculator_description',
+      icon: HomeIcon,
+      color: 'bg-primary',
+      lightBg: 'bg-[#f0f9ff]'
     },
   ];
   
