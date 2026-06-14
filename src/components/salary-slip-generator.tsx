@@ -163,7 +163,7 @@ export default function SalarySlipGenerator() {
 
     const updateNested = (section: keyof SalaryData, field: string, value: any) => {
         setData(prev => ({
-            ...prev, section,
+            ...prev,
             [section]: {
                 ...(prev[section] as object),
                 [field]: value
@@ -228,26 +228,28 @@ export default function SalarySlipGenerator() {
         setIsExporting(true);
         try {
             const canvas = await html2canvas(previewRef.current, {
-                scale: 3, 
+                scale: 2.5, 
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
-                        (el as HTMLElement).style.transform = 'none';
-                        (el as HTMLElement).style.fontFamily = 'Arial, sans-serif';
-                        (el as HTMLElement).style.letterSpacing = '0px';
-                        (el as HTMLElement).style.fontKerning = 'none';
-                        (el as HTMLElement).style.webkitFontSmoothing = 'antialiased';
+                        const styles = (el as HTMLElement).style;
+                        styles.transform = 'none';
+                        styles.fontFamily = 'Arial, sans-serif';
+                        styles.letterSpacing = '0px';
+                        styles.fontKerning = 'none';
+                        styles.fontVariantLigatures = 'none';
                         
-                        const allNodes = el.querySelectorAll('*');
-                        allNodes.forEach(node => {
-                            const styles = (node as HTMLElement).style;
-                            styles.letterSpacing = '0px';
-                            styles.fontKerning = 'none';
-                            styles.transform = 'none';
-                            styles.wordSpacing = '0px';
+                        const allElements = el.querySelectorAll('*');
+                        allElements.forEach(item => {
+                            const s = (item as HTMLElement).style;
+                            s.letterSpacing = '0px';
+                            s.fontKerning = 'none';
+                            s.fontVariantLigatures = 'none';
+                            s.transform = 'none';
+                            s.wordSpacing = '0px';
                         });
                     }
                 }
