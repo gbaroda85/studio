@@ -68,6 +68,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -698,7 +699,7 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'adjust' && currentRawImage && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-[calc(100vh-320px)]">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-auto">
                 <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-5 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
@@ -709,14 +710,14 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-2 shadow-3xl border-4 border-white">
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white">
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[40vh] w-auto block" onLoad={onImageLoad} />
+                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedCrop(c)}>
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
-                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[40vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                    <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
                                     </svg>
@@ -750,8 +751,8 @@ export default function DocumentScanner() {
                 <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
                     <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-4 md:p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
-                        <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[280px] flex items-center justify-center overflow-hidden">
-                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[40vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
+                        <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[400px] flex items-center justify-center overflow-hidden">
+                            {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
                             {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
                         </div>
                     </CardContent>
