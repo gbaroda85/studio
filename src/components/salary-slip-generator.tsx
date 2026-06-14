@@ -480,7 +480,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 overflow: 'hidden'
             }}
         >
-            <header className="flex justify-between items-center mb-4 pb-4 border-b-4 border-slate-900 w-full">
+            <header className="flex justify-between items-center mb-3 pb-3 border-b-4 border-slate-900 w-full">
                 <div className="space-y-1 max-w-[70%] text-left">
                     <h1 className="text-3xl font-black uppercase leading-tight" style={{ letterSpacing: 'normal' }}>{data.company.name}</h1>
                     <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-1" style={{ letterSpacing: 'normal' }}>{data.company.address}</p>
@@ -494,12 +494,12 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 )}
             </header>
 
-            <div className="text-center mb-4">
+            <div className="text-center mb-3">
                 <h2 className="text-xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-2 px-12" style={{ letterSpacing: '0.1em' }}>Pay Slip</h2>
                 <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-10 mb-4 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 text-left overflow-visible">
+            <div className="grid grid-cols-2 gap-y-3 gap-x-10 mb-3 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 text-left overflow-visible">
                 <Row label="Employee Name" value={data.employee.name} />
                 <Row label="Employee ID" value={data.employee.empId} />
                 <Row label="Designation" value={data.employee.designation} />
@@ -515,7 +515,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[250px] overflow-visible">
                 <div className="border-r-2 border-slate-900 text-left flex flex-col">
                     <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Earnings (In INR)</div>
-                    <div className="p-4 space-y-1.5 flex-1">
+                    <div className="p-4 space-y-1 flex-1">
                         <TableItem label="Basic Amount" value={results.basicAmt} />
                         {results.otAmt > 0 && <TableItem label={`Overtime (${data.calc.overtimeHours} Hrs)`} value={results.otAmt} />}
                         {results.allowanceItems.map((a: any, i: number) => (
@@ -525,7 +525,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
                 <div className="text-left flex flex-col">
                     <div className="bg-slate-900 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest" style={{ letterSpacing: '0.1em' }}>Deductions (In INR)</div>
-                    <div className="p-4 space-y-1.5 flex-1">
+                    <div className="p-4 space-y-1 flex-1">
                         {results.deductionItems.map((d: any, i: number) => (
                             <TableItem key={i} label={d.label} value={d.amount} isDeduction />
                         ))}
@@ -544,7 +544,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
             </div>
 
-            <div className="mt-6 p-6 bg-slate-900 text-white rounded-[2rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800 overflow-visible">
+            <div className="mt-5 p-6 bg-slate-900 text-white rounded-[2rem] flex justify-between items-center shadow-xl text-left border-4 border-slate-800 overflow-visible">
                 <div className="space-y-1">
                     <p className="text-[9px] font-bold uppercase tracking-widest opacity-40" style={{ letterSpacing: '0.1em' }}>Net Monthly Take-home</p>
                     <h3 className="text-4xl font-black tracking-normal">{formatCurrency(results.netSalary)}</h3>
@@ -557,7 +557,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-10 items-end pb-8 overflow-visible">
+            <div className="mt-5 grid grid-cols-2 gap-10 items-end pb-8 overflow-visible">
                 <div className="p-6 border-l-8 border-primary bg-slate-50 rounded-r-[1.5rem] text-left shadow-sm">
                     <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-widest" style={{ letterSpacing: '0.1em' }}>Digital Notice</p>
                     <p className="text-[11px] font-medium leading-relaxed italic text-slate-500" style={{ letterSpacing: 'normal' }}>
@@ -579,7 +579,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
 
 function Row({ label, value }: { label: string, value: string }) {
     return (
-        <div className="flex items-baseline gap-4 min-h-6 w-full overflow-visible">
+        <div className="flex items-baseline gap-4 min-h-5 w-full overflow-visible">
             <span className="w-32 font-black text-slate-400 shrink-0 uppercase text-[9px]" style={{ letterSpacing: 'normal' }}>{label}</span>
             <span className="font-bold border-b border-dotted border-slate-200 flex-1 pb-0.5 text-slate-800 leading-normal text-xs whitespace-normal">{value || "---"}</span>
         </div>
@@ -588,7 +588,7 @@ function Row({ label, value }: { label: string, value: string }) {
 
 function TableItem({ label, value, isDeduction }: { label: string, value: number, isDeduction?: boolean }) {
     return (
-        <div className="flex justify-between items-center min-h-6 w-full overflow-visible">
+        <div className="flex justify-between items-center min-h-5 w-full overflow-visible">
             <span className="font-bold text-slate-600 uppercase text-[10px] pr-4 whitespace-normal" style={{ letterSpacing: 'normal' }}>{label}</span>
             <span className={cn("font-black shrink-0 text-xs", isDeduction ? "text-rose-600" : "text-slate-900")}>
                 {isDeduction && value > 0 ? '-' : ''}{Math.round(value).toLocaleString()}
