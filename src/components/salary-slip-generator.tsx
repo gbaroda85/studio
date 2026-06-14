@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { 
     Download, 
     RefreshCcw, 
@@ -22,7 +22,8 @@ import {
     UploadCloud,
     X,
     Layout,
-    Clock
+    Clock,
+    Eraser
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -138,14 +139,35 @@ export default function SalarySlipGenerator() {
     const { toast } = useToast();
     const [data, setData] = useState<SalaryData>(INITIAL_DATA);
     const [isExporting, setIsExporting] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
     
     const exportRef = useRef<HTMLDivElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
+    // PERSISTENCE: Load from LocalStorage
+    useEffect(() => {
+        const savedData = localStorage.getItem('gr7_salary_slip_data');
+        if (savedData) {
+            try {
+                setData(JSON.parse(savedData));
+            } catch (e) {
+                console.error("Failed to parse saved salary data", e);
+            }
+        }
+        setIsHydrated(true);
+    }, []);
+
+    // PERSISTENCE: Save to LocalStorage on changes
+    useEffect(() => {
+        if (isHydrated) {
+            localStorage.setItem('gr7_salary_slip_data', JSON.stringify(data));
+        }
+    }, [data, isHydrated]);
+
     // Dynamic Calculations
     const results = useMemo(() => {
-        const basicAmt = data.calc.basicRate * data.calc.presentDays;
-        const otAmt = data.calc.overtimeHours * data.calc.overtimeRate;
+        const basicAmt = (data.calc.basicRate || 0) * (data.calc.presentDays || 0);
+        const otAmt = (data.calc.overtimeHours || 0) * (data.calc.overtimeRate || 0);
         
         const allowanceItems = data.allowances.map(a => ({
             label: a.label,
@@ -213,14 +235,28 @@ export default function SalarySlipGenerator() {
         }));
     };
 
+    const handleClearAll = () => {
+        const clearedData: SalaryData = {
+            company: { ...data.company }, // Keep company info usually
+            employee: {
+                name: "", empId: "", designation: "", department: "", doj: "", pan: "", uanNo: "", bankName: "", bankAccount: "", ifsc: ""
+            },
+            payPeriod: { month: "SELECT", year: String(new Date().getFullYear()) },
+            calc: { basicRate: 0, presentDays: 0, totalDays: 30, overtimeHours: 0, overtimeRate: 0 },
+            allowances: [],
+            deductions: []
+        };
+        setData(clearedData);
+        localStorage.removeItem('gr7_salary_slip_data');
+        toast({ title: "Form Cleared", description: "All fields have been emptied." });
+    };
+
     const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
         if (!exportRef.current) return;
         setIsExporting(true);
         
         try {
-            if ('fonts' in document) {
-                await (document as any).fonts.ready;
-            }
+            await document.fonts.ready;
 
             const options = {
                 quality: 1.0,
@@ -245,11 +281,11 @@ export default function SalarySlipGenerator() {
                     compress: false
                 });
                 pdf.addImage(dataUrl, 'PNG', 0, 0, 794, 1123, undefined, 'FAST');
-                pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
+                pdf.save(`Salary_Slip_${data.employee.name || 'document'}.pdf`);
             } else {
                 const link = document.createElement('a');
                 link.href = dataUrl;
-                link.download = `Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.jpg`;
+                link.download = `Salary_Slip_${data.employee.name || 'document'}.jpg`;
                 link.click();
             }
             
@@ -263,15 +299,19 @@ export default function SalarySlipGenerator() {
         }
     };
 
+    if (!isHydrated) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin size-10 text-primary opacity-20" /></div>;
+
     return (
         <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4 pb-32 overflow-x-hidden">
             
+            {/* HIDDEN EXPORT CANVAS */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
                 <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white', position: 'relative', overflow: 'hidden' }}>
                     <PayslipTemplate data={data} results={results} formatCurrency={formatCurrency} isExport />
                 </div>
             </div>
 
+            {/* SIDEBAR EDITOR */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
@@ -285,7 +325,7 @@ export default function SalarySlipGenerator() {
                                     <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Payroll Management</CardDescription>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => setData(INITIAL_DATA)} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                            <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-8 text-[9px] font-black uppercase text-rose-600 hover:bg-rose-50"><Eraser className="size-3 mr-1" /> Clear All</Button>
                         </div>
                     </CardHeader>
                     
@@ -447,7 +487,7 @@ export default function SalarySlipGenerator() {
 
                 <div className="mt-8 flex items-center gap-6 text-muted-foreground/40 text-[10px] font-black uppercase tracking-widest no-print">
                     <div className="flex items-center gap-2"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-2"><Zap className="size-3 text-yellow-500" /> INSTANT RENDER</div>
+                    <div className="flex items-center gap-2"><Zap className="size-3 text-yellow-500" /> AUTO-SAVE ACTIVE</div>
                     <div className="flex items-center gap-2"><Sparkles className="size-3 text-primary" /> HD STUDIO OUTPUT</div>
                 </div>
             </div>
@@ -482,8 +522,8 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
         >
             <header className="flex justify-between items-center mb-3 pb-3 border-b-4 border-slate-900 w-full">
                 <div className="space-y-1 max-w-[70%] text-left">
-                    <h1 className="text-3xl font-black uppercase leading-tight" style={{ letterSpacing: 'normal' }}>{data.company.name}</h1>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-1" style={{ letterSpacing: 'normal' }}>{data.company.address}</p>
+                    <h1 className="text-3xl font-black uppercase leading-tight" style={{ letterSpacing: 'normal' }}>{data.company.name || "COMPANY NAME"}</h1>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed mt-1" style={{ letterSpacing: 'normal' }}>{data.company.address || "Company Address"}</p>
                 </div>
                 {data.company.logo ? (
                     <img src={data.company.logo} className="h-14 w-auto object-contain" alt="logo" />
