@@ -191,7 +191,7 @@ export default function Page() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-8 pb-10 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-6 pb-6 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -215,7 +215,7 @@ export default function Page() {
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
-        <div className="w-full px-8 md:px-16 relative z-10 text-center">
+        <div className="w-full px-8 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
@@ -225,11 +225,11 @@ export default function Page() {
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-10 font-semibold leading-relaxed animate-fade-in-up">
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up">
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in-up">
+          <div className="flex flex-wrap justify-center gap-6 mb-8 animate-fade-in-up">
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner">
