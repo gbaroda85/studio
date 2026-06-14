@@ -163,7 +163,7 @@ export default function SalarySlipGenerator() {
 
     const updateNested = (section: keyof SalaryData, field: string, value: any) => {
         setData(prev => ({
-            ...prev, section: { ...(prev[section] as object), [field]: value }
+            ...prev, [section]: { ...(prev[section] as object), [field]: value }
         } as any));
     };
 
@@ -224,12 +224,12 @@ export default function SalarySlipGenerator() {
         setIsExporting(true);
         
         try {
-            // STEP 1: Wait for all fonts to be ready
+            // STEP 1: Wait for all fonts to be fully rendered
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
-            // STEP 2: Trigger high-fidelity capture
+            // STEP 2: Capture with Industrial onclone overrides
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2.5, 
                 useCORS: true,
@@ -239,26 +239,41 @@ export default function SalarySlipGenerator() {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
                         const target = el as HTMLElement;
-                        // Reset transforms and font spacing to prevent squishing
-                        target.style.transform = 'none';
-                        target.style.letterSpacing = '0px';
-                        target.style.fontVariantLigatures = 'none';
-                        target.style.fontFamily = 'Arial, sans-serif';
                         
+                        // Force layout properties to prevent squishing
+                        target.style.transform = 'none';
+                        target.style.width = '210mm';
+                        target.style.minHeight = '297mm';
+                        
+                        // Deep typography reset to prevent letter overlapping
                         const allTextElements = target.querySelectorAll('*');
                         allTextElements.forEach(item => {
-                            const s = (item as HTMLElement).style;
-                            s.letterSpacing = '0px';
-                            s.wordSpacing = '0px';
-                            s.transform = 'none';
-                            s.fontVariantLigatures = 'none';
+                            const style = (item as HTMLElement).style;
+                            style.letterSpacing = '0px';
+                            style.wordSpacing = '0px';
+                            style.fontVariantLigatures = 'none';
+                            style.fontKerning = 'none';
+                            style.fontFamily = 'Arial, sans-serif';
                         });
                     }
                 }
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const pdf = new jsPDF({ 
+                orientation: 'portrait', 
+                unit: 'mm', 
+                format: 'a4',
+                putOnlyUsedFonts: true
+            });
+            
+            // Set Viewer Preferences to prevent "huge" display and fit to window
+            pdf.viewerPreferences({
+                'FitWindow': true,
+                'CenterWindow': true,
+                'DisplayDocTitle': true
+            });
+
             pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
             pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
             
@@ -272,7 +287,7 @@ export default function SalarySlipGenerator() {
         }
     };
 
-    const handleReset = () => {
+    const handleResetForm = () => {
         setData(INITIAL_DATA);
         toast({ title: "Form Restored" });
     };
@@ -290,11 +305,11 @@ export default function SalarySlipGenerator() {
                                     <Banknote className="size-7" />
                                 </div>
                                 <div className="text-left">
-                                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Salary Studio</CardTitle>
-                                    <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">Payroll Management</CardDescription>
+                                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Salary Studio</CardTitle>
+                                    <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Payroll Management</CardDescription>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                            <Button variant="ghost" size="sm" onClick={handleResetForm} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
                         </div>
                     </CardHeader>
                     
@@ -339,7 +354,7 @@ export default function SalarySlipGenerator() {
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Joining Date</Label>
-                                    <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} placeholder="DD/MM/YYYY" className="h-10 rounded-xl font-bold border-2" />
+                                    <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} placeholder="DD-MMM-YYYY" className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                             </div>
                         </div>
@@ -363,10 +378,10 @@ export default function SalarySlipGenerator() {
                         </div>
 
                         <div className="space-y-6 text-left">
-                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Configuration</Badge>
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculations</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily, ₹)</Label>
+                                    <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label>
                                     <Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
@@ -428,7 +443,7 @@ export default function SalarySlipGenerator() {
 
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
-                        <Button onClick={handleExport} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] transition-all active:scale-95 group border-4 border-primary hover:bg-transparent hover:text-primary">
+                        <Button onClick={handleExport} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] transition-all active:scale-95 group border-4 border-primary">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
                             EXPORT SALARY SLIP PDF
                         </Button>
