@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { 
     Download, 
     RefreshCcw, 
@@ -11,33 +11,16 @@ import {
     Zap, 
     Sparkles, 
     Settings2,
-    FileText,
     Building2,
     User2,
-    Calendar,
-    IndianRupee,
-    Printer,
-    Monitor,
-    Baseline,
-    Info,
-    Smartphone,
-    LayoutGrid,
-    Receipt,
-    ListFilter,
-    ChevronRight,
-    SearchCode,
+    Banknote,
     Plus,
     Trash2,
-    Wallet,
-    Briefcase,
-    Banknote,
-    ReceiptText,
     Loader2,
-    Calculator,
-    Coins,
-    TrendingDown,
-    CreditCard,
-    UploadCloud
+    Printer,
+    ImageIcon,
+    UploadCloud,
+    X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -155,7 +138,7 @@ export default function SalarySlipGenerator() {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 setData(prev => ({ ...prev, company: { ...prev.company, logo: ev.target?.result as string } }));
-                toast({ title: "Logo Set", description: "Company branding updated." });
+                toast({ title: "Logo Set" });
             };
             reader.readAsDataURL(file);
         }
@@ -219,19 +202,20 @@ export default function SalarySlipGenerator() {
         };
     }, [data.calc, data.allowances, data.deductions]);
 
-    const handleExport = async () => {
+    // CORE EXPORT ENGINE: SCREENSHOT-TO-PDF (PIXEL PERFECT)
+    const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
         if (!previewRef.current) return;
         setIsExporting(true);
         
         try {
-            // STEP 1: Wait for all fonts to be fully rendered
+            // Ensure fonts are ready
             if ('fonts' in document) {
                 await (document as any).fonts.ready;
             }
 
-            // STEP 2: Capture with Industrial onclone overrides
+            // A4 Dimensions in points: 595.28 x 841.89
             const canvas = await html2canvas(previewRef.current, {
-                scale: 2.5, 
+                scale: 3, // High scale for crisp text
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
@@ -239,57 +223,52 @@ export default function SalarySlipGenerator() {
                     const el = clonedDoc.querySelector('[data-capture-box="true"]');
                     if (el) {
                         const target = el as HTMLElement;
-                        
-                        // Force layout properties to prevent squishing
+                        // Reset all scaling and force original A4 dimensions for the capture
                         target.style.transform = 'none';
                         target.style.width = '210mm';
                         target.style.minHeight = '297mm';
+                        target.style.margin = '0';
+                        target.style.padding = '15mm';
                         
-                        // Deep typography reset to prevent letter overlapping
-                        const allTextElements = target.querySelectorAll('*');
-                        allTextElements.forEach(item => {
+                        // Force standard font metrics to prevent squishing
+                        const allElements = target.querySelectorAll('*');
+                        allElements.forEach(item => {
                             const style = (item as HTMLElement).style;
-                            style.letterSpacing = '0px';
-                            style.wordSpacing = '0px';
-                            style.fontVariantLigatures = 'none';
+                            style.letterSpacing = 'normal';
                             style.fontKerning = 'none';
-                            style.fontFamily = 'Arial, sans-serif';
+                            style.fontVariantLigatures = 'none';
                         });
                     }
                 }
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const pdf = new jsPDF({ 
-                orientation: 'portrait', 
-                unit: 'mm', 
-                format: 'a4',
-                putOnlyUsedFonts: true
-            });
-            
-            // Set Viewer Preferences to prevent "huge" display and fit to window
-            pdf.viewerPreferences({
-                'FitWindow': true,
-                'CenterWindow': true,
-                'DisplayDocTitle': true
-            });
 
-            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-            pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
+            if (type === 'pdf') {
+                const pdf = new jsPDF({ 
+                    orientation: 'portrait', 
+                    unit: 'mm', 
+                    format: 'a4',
+                    compress: true
+                });
+                
+                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+                pdf.save(`Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.pdf`);
+            } else {
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = `Salary_Slip_${data.employee.name.replace(/\s+/g, '_')}.jpg`;
+                link.click();
+            }
             
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            toast({ title: "Salary Slip Exported!" });
+            toast({ title: type === 'pdf' ? "PDF Downloaded" : "Image Downloaded" });
         } catch (error) {
             console.error(error);
             toast({ variant: 'destructive', title: 'Export Failed' });
         } finally {
             setIsExporting(false);
         }
-    };
-
-    const handleResetForm = () => {
-        setData(INITIAL_DATA);
-        toast({ title: "Form Restored" });
     };
 
     return (
@@ -309,12 +288,11 @@ export default function SalarySlipGenerator() {
                                     <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Payroll Management</CardDescription>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={handleResetForm} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setData(INITIAL_DATA)} className="h-8 text-[9px] font-black uppercase text-muted-foreground"><RefreshCcw className="size-3 mr-1" /> Reset</Button>
                         </div>
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
-                        
                         <div className="space-y-6 text-left">
                             <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
                             <div className="grid gap-4">
@@ -348,37 +326,11 @@ export default function SalarySlipGenerator() {
                                     <Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label>
                                     <Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">UAN No.</Label>
-                                    <Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Joining Date</Label>
-                                    <Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} placeholder="DD-MMM-YYYY" className="h-10 rounded-xl font-bold border-2" />
-                                </div>
                             </div>
                         </div>
 
                         <div className="space-y-6 text-left">
-                            <Badge className="bg-slate-700 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Bank Details</Badge>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2 space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Bank Account No.</Label>
-                                    <Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label>
-                                    <Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label>
-                                    <Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6 text-left">
-                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculations</Badge>
+                            <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label>
@@ -388,70 +340,42 @@ export default function SalarySlipGenerator() {
                                     <Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label>
                                     <Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Overtime (Hrs)</Label>
-                                    <Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">OT Rate (₹/Hr)</Label>
-                                    <Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-10">
-                            <div className="space-y-4 text-left">
-                                <div className="flex justify-between items-center">
-                                    <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances</Badge>
-                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
-                                </div>
-                                <div className="space-y-3">
-                                    {data.allowances.map((item) => (
-                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
-                                            <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
-                                            <Select value={item.type} onValueChange={(v) => updateDynamic('allowances', item.id, 'type', v)}>
-                                                <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
-                                                <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
-                                            </Select>
-                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
-                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
-                                        </div>
-                                    ))}
-                                </div>
+                        <div className="space-y-6 text-left">
+                             <div className="flex justify-between items-center">
+                                <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances</Badge>
+                                <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add</Button>
                             </div>
-
-                            <div className="space-y-4 text-left">
-                                <div className="flex justify-between items-center">
-                                    <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
-                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('deductions')} className="h-7 text-[8px] font-black uppercase text-rose-600"><Plus className="size-3 mr-1" /> Add</Button>
-                                </div>
-                                <div className="space-y-3">
-                                    {data.deductions.map((item) => (
-                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
-                                            <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
-                                            <Select value={item.type} onValueChange={(v) => updateDynamic('deductions', item.id, 'type', v)}>
-                                                <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
-                                                <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
-                                            </Select>
-                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
-                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="space-y-3">
+                                {data.allowances.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
+                                        <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none bg-transparent" />
+                                        <Select value={item.type} onValueChange={(v) => updateDynamic('allowances', item.id, 'type', v)}>
+                                            <SelectTrigger className="w-24 h-7 text-[8px] font-black uppercase border-none bg-white"><SelectValue /></SelectTrigger>
+                                            <SelectContent><SelectItem value="fixed">Fixed</SelectItem><SelectItem value="percentage">% Basic</SelectItem></SelectContent>
+                                        </Select>
+                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
+                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
-                        <Button onClick={handleExport} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] transition-all active:scale-95 group border-4 border-primary">
-                            {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
-                            EXPORT SALARY SLIP PDF
+                        <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group border-4 border-primary">
+                            {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
+                            EXPORT PIXEL-PERFECT PDF
+                        </Button>
+                        <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-700 transition-all">
+                            <ImageIcon className="mr-2 size-4" /> SAVE AS IMAGE (JPG)
                         </Button>
                     </CardFooter>
                 </Card>
             </div>
 
-            {/* RIGHT: A4 PREVIEW */}
+            {/* RIGHT: A4 PREVIEW (SCREENSHOT TARGET) */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2">
