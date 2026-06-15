@@ -71,7 +71,8 @@ import {
   Home as HomeIcon,
   PenTool,
   Banknote,
-  CalendarDays
+  CalendarDays,
+  Menu
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -81,9 +82,9 @@ function ToolsPageContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  const validTabs = ['image', 'pdf', 'video', 'file', 'calculator', 'converters'];
+  const validTabs = ['all', 'image', 'pdf', 'video', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
-  const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'image';
+  const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'all';
 
   const imageFeatures = [
     {
@@ -647,7 +648,20 @@ function ToolsPageContent() {
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full font-body">
             <div className="flex justify-center mb-16">
-              <TabsList className="flex h-auto flex-wrap justify-center gap-2 md:gap-6 bg-transparent border-none p-2 md:p-4 px-2 md:px-12">
+              <TabsList className="flex h-auto flex-wrap justify-center gap-2 md:gap-4 bg-transparent border-none p-2 md:p-4 px-2 md:px-12">
+                  <TabsTrigger 
+                    value="all" 
+                    className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
+                  >
+                      <div className="uiverse-clay-btn">
+                        <div className="button-outer">
+                            <div className="button-inner flex items-center gap-3">
+                                <Menu className="size-4 text-primary" />
+                                <span>ALL TOOLS</span>
+                            </div>
+                        </div>
+                      </div>
+                  </TabsTrigger>
                   {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
                   <TabsTrigger 
                     key={value} 
@@ -666,6 +680,34 @@ function ToolsPageContent() {
                   ))}
               </TabsList>
             </div>
+
+            <TabsContent value="all" className="space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+                {allFeatureGroups.map(({ categoryKey, features, icon: Icon, color }) => (
+                    <section key={categoryKey} className="space-y-10">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
+                                <Icon className="size-6" />
+                            </div>
+                            <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
+                                {t(categoryKey)}
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                            {features.map((feature) => (
+                                <FeatureCard
+                                    key={feature.href}
+                                    title={t(feature.labelKey) || feature.labelKey}
+                                    description={t(feature.descriptionKey) || feature.descriptionKey}
+                                    href={feature.href}
+                                    icon={feature.icon}
+                                    color={feature.color}
+                                    lightBg={feature.lightBg}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </TabsContent>
 
             {allFeatureGroups.map(({ value, features }) => (
                 <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">

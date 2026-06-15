@@ -298,7 +298,7 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools?tab=image" className="hidden sm:flex">
+                        <Link href="/tools?tab=all" className="hidden sm:flex">
                           <button className="learn-more">
                             <span className="font-black tracking-widest uppercase">Explore All</span>
                           </button>
