@@ -85,7 +85,8 @@ export default function TextToPdfConverter() {
                     cursorY = marginSize + (fontSize * 0.35);
                 }
                 doc.text(line, marginSize, cursorY);
-                cursorY += (fontSize * 0.6); 
+                // Tightened PDF spacing to match 1.2 lineHeight
+                cursorY += (fontSize * 0.5); 
             });
             
             doc.save(`GR7-Text-Document-${Date.now()}.pdf`);
@@ -149,7 +150,7 @@ export default function TextToPdfConverter() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                {/* LEFT: SOURCE EDITOR (5 spans) */}
+                {/* LEFT: SOURCE EDITOR */}
                 <Card className="lg:col-span-5 flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
@@ -174,7 +175,7 @@ export default function TextToPdfConverter() {
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
                                 placeholder="Start typing your document content here..."
-                                className="flex-1 min-h-[400px] text-base md:text-lg resize-none font-bold leading-relaxed border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-6 bg-muted/20 custom-scrollbar shadow-inner text-left"
+                                className="flex-1 min-h-[400px] text-base md:text-lg resize-none font-bold leading-normal border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-6 bg-muted/20 custom-scrollbar shadow-inner text-left"
                             />
                         </div>
 
@@ -208,7 +209,7 @@ export default function TextToPdfConverter() {
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT: HD VIEWPORT (7 spans) */}
+                {/* RIGHT: HD VIEWPORT */}
                 <Card className="lg:col-span-7 flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
@@ -219,7 +220,7 @@ export default function TextToPdfConverter() {
                     </CardHeader>
                     <CardContent className="flex-1 p-4 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
                         
-                        <div className="relative transform-gpu scale-[0.5] sm:scale-[0.75] md:scale-[0.85] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
+                        <div className="relative transform-gpu scale-[0.6] sm:scale-[0.8] md:scale-[0.9] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
                             <div 
                                 ref={previewRef} 
                                 className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
@@ -233,7 +234,7 @@ export default function TextToPdfConverter() {
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
-                                    lineHeight: '1.4',
+                                    lineHeight: '1.2', // Reduced from 1.4 for tighter gaps
                                     boxSizing: 'border-box',
                                     textAlign: 'left',
                                     display: 'block'
