@@ -36,7 +36,8 @@ import {
     Grid3X3,
     Maximize,
     ChevronRight,
-    PenTool
+    PenTool,
+    UploadCloud
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -237,6 +238,12 @@ export default function IdCardGenerator() {
         }
     };
 
+    const updateNested = (section: keyof IdCardData, field: string, value: any) => {
+        setData(prev => ({
+            ...prev, [section]: { ...(prev[section] as object), [field]: value }
+        } as any));
+    };
+
     const handleBulkImport = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -299,7 +306,7 @@ export default function IdCardGenerator() {
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 text-left">
                                 <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <Settings2 className="size-7" />
                                 </div>
@@ -591,4 +598,3 @@ function InfoRow({ label, value }: { label: string, value: string }) {
         </div>
     );
 }
-
