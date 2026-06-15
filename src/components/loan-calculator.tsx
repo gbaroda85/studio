@@ -76,9 +76,11 @@ interface YearlyBreakdown {
 
 export default function LoanCalculator() {
   const [countryIndex, setCountryIndex] = useState(0);
-  const [principal, setPrincipal] = useState(500000);
-  const [rate, setRate] = useState(8.5);
-  const [tenure, setTenure] = useState(5);
+  
+  // FIX: Using strings for inputs to allow empty values during deletion
+  const [principal, setPrincipal] = useState<string>("500000");
+  const [rate, setRate] = useState<string>("8.5");
+  const [tenure, setTenure] = useState<string>("5");
   const [tenureUnit, setTenureUnit] = useState<"years" | "months">("years");
 
   const currentCountry = COUNTRIES[countryIndex];
@@ -92,11 +94,11 @@ export default function LoanCalculator() {
   };
 
   const stats = useMemo(() => {
-    const p = principal;
-    const r = rate;
-    const t = tenure;
+    const p = parseFloat(principal) || 0;
+    const r = parseFloat(rate) || 0;
+    const t = parseFloat(tenure) || 0;
 
-    if (isNaN(p) || p <= 0 || isNaN(r) || r < 0 || isNaN(t) || t <= 0) {
+    if (p <= 0 || t <= 0) {
       return null;
     }
 
@@ -116,16 +118,16 @@ export default function LoanCalculator() {
     // Amortization Schedule Calculation
     const yearlyBreakdown: YearlyBreakdown[] = [];
     let currentBalance = p;
-    let totalInterestPaid = 0;
-    let totalPrincipalPaid = 0;
 
-    const years = Math.ceil(numberOfMonths / 12);
+    const totalYears = Math.ceil(numberOfMonths / 12);
 
-    for (let year = 1; year <= years; year++) {
+    for (let year = 1; year <= totalYears; year++) {
         let yearPrincipal = 0;
         let yearInterest = 0;
 
-        for (let month = 1; year === years ? month <= (numberOfMonths % 12 || 12) : month <= 12; month++) {
+        const monthsInThisYear = year === totalYears ? (numberOfMonths % 12 || 12) : 12;
+
+        for (let month = 1; month <= monthsInThisYear; month++) {
             const monthlyInterest = currentBalance * monthlyRate;
             const monthlyPrincipal = emi - monthlyInterest;
             
@@ -154,10 +156,16 @@ export default function LoanCalculator() {
   }, [principal, rate, tenure, tenureUnit]);
 
   const handleReset = () => {
-      setPrincipal(500000);
-      setRate(8.5);
-      setTenure(5);
+      setPrincipal("500000");
+      setRate("8.5");
+      setTenure("5");
       setTenureUnit("years");
+  };
+
+  const handleSliderChange = (val: number[], field: 'principal' | 'rate' | 'tenure') => {
+      if (field === 'principal') setPrincipal(String(val[0]));
+      if (field === 'rate') setRate(String(val[0]));
+      if (field === 'tenure') setTenure(String(val[0]));
   };
 
   return (
@@ -202,11 +210,11 @@ export default function LoanCalculator() {
                 <div className="space-y-5 text-left">
                     <div className="flex justify-between items-center px-1">
                         <Label className="text-[10px] font-black uppercase opacity-60">Principal Amount</Label>
-                        <Badge variant="secondary" className="font-black text-sm px-4 py-1 rounded-lg shadow-sm">{formatCurrency(principal)}</Badge>
+                        <Badge variant="secondary" className="font-black text-sm px-4 py-1 rounded-lg shadow-sm">{formatCurrency(parseFloat(principal) || 0)}</Badge>
                     </div>
-                    <Slider min={10000} max={10000000} step={10000} value={[principal]} onValueChange={(v) => setPrincipal(v[0])} />
+                    <Slider min={10000} max={10000000} step={10000} value={[parseFloat(principal) || 0]} onValueChange={(v) => handleSliderChange(v, 'principal')} />
                     <div className="relative group">
-                        <Input type="number" value={principal} onChange={(e) => setPrincipal(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg pl-10" />
+                        <Input type="number" value={principal} onChange={(e) => setPrincipal(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg pl-10" />
                         <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-primary opacity-30 group-focus-within:opacity-100 transition-opacity" />
                     </div>
                 </div>
@@ -215,10 +223,10 @@ export default function LoanCalculator() {
                 <div className="space-y-5 text-left">
                     <div className="flex justify-between items-center px-1">
                         <Label className="text-[10px] font-black uppercase opacity-60">Interest Rate (% p.a.)</Label>
-                        <Badge variant="secondary" className="font-black text-xs px-3 py-1 rounded-lg">{rate}%</Badge>
+                        <Badge variant="secondary" className="font-black text-xs px-3 py-1 rounded-lg">{rate || '0'}%</Badge>
                     </div>
-                    <Slider min={1} max={30} step={0.1} value={[rate]} onValueChange={(v) => setRate(v[0])} />
-                    <Input type="number" step="0.1" value={rate} onChange={(e) => setRate(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
+                    <Slider min={1} max={30} step={0.1} value={[parseFloat(rate) || 1]} onValueChange={(v) => handleSliderChange(v, 'rate')} />
+                    <Input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
                 </div>
 
                 {/* Tenure Section */}
@@ -230,8 +238,8 @@ export default function LoanCalculator() {
                             <button onClick={() => setTenureUnit('months')} className={cn("px-3 py-1 rounded-md text-[9px] font-black transition-all", tenureUnit === 'months' ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}>MONTHS</button>
                         </div>
                     </div>
-                    <Slider min={1} max={tenureUnit === 'years' ? 30 : 360} step={1} value={[tenure]} onValueChange={(v) => setTenure(v[0])} />
-                    <Input type="number" value={tenure} onChange={(e) => setTenure(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
+                    <Slider min={1} max={tenureUnit === 'years' ? 30 : 360} step={1} value={[parseFloat(tenure) || 1]} onValueChange={(v) => handleSliderChange(v, 'tenure')} />
+                    <Input type="number" value={tenure} onChange={(e) => setTenure(e.target.value)} className="h-12 border-2 rounded-xl font-black text-lg text-center" />
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/10 p-6 border-t flex justify-center gap-8">
@@ -244,7 +252,7 @@ export default function LoanCalculator() {
 
         {/* RIGHT COLUMN: RESULTS & CHARTS */}
         <div className="lg:col-span-7 space-y-6">
-            {stats && (
+            {stats ? (
                 <div className="space-y-6 animate-in zoom-in-95 duration-500">
                     {/* 1. Main EMI Display */}
                     <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-primary/20 relative group">
@@ -339,18 +347,23 @@ export default function LoanCalculator() {
                     </Card>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <HighlightStat icon={Zap} label="Inference Score" value={`${(stats.totalPayment / stats.principal).toFixed(2)}x`} color="text-yellow-500" />
-                        <HighlightStat icon={ArrowUpRight} label="Yield Factor" value={`${rate}%`} color="text-emerald-500" />
+                        <HighlightStat icon={Zap} label="Payback Factor" value={`${(stats.totalPayment / stats.principal).toFixed(2)}x`} color="text-yellow-500" />
+                        <HighlightStat icon={ArrowUpRight} label="Yield Factor" value={`${rate || '0'}%`} color="text-emerald-500" />
                         <HighlightStat icon={Trophy} label="Status" value="Calculated" color="text-primary" />
                     </div>
                 </div>
+            ) : (
+                <Card className="h-full border-2 border-dashed flex flex-col items-center justify-center p-12 text-center opacity-30 rounded-[3rem] bg-muted/10 min-h-[400px]">
+                    <Landmark className="size-20 mb-4" />
+                    <p className="font-black uppercase tracking-widest">Awaiting Inputs</p>
+                </Card>
             )}
         </div>
       </div>
 
       {/* BOTTOM SECTION: DEEP REPAYMENT SCHEDULE */}
       {stats && (
-          <Card className="border-2 shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 animate-in slide-in-from-bottom-6 duration-700">
+          <Card className="border-2 shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 animate-in slide-in-from-bottom-6 duration-700 mb-20">
               <CardHeader className="bg-muted/30 border-b p-8 flex flex-col md:flex-row items-center justify-between gap-4 text-left">
                   <div className="flex items-center gap-5">
                       <div className="size-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-2xl">
@@ -379,7 +392,7 @@ export default function LoanCalculator() {
                           </TableHeader>
                           <TableBody>
                               {stats.yearlyBreakdown.map((row) => {
-                                  const progress = 100 - (row.remainingBalance / principal * 100);
+                                  const progress = 100 - (row.remainingBalance / stats.principal * 100);
                                   return (
                                     <TableRow key={row.year} className="group hover:bg-primary/5 transition-colors border-b">
                                         <TableCell className="text-center py-6">
