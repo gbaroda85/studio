@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -75,6 +76,21 @@ const StarIcons = () => (
             </svg>
         </div>
         <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
             <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
                 <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
             </svg>
@@ -172,7 +188,12 @@ export default function PdfToImageConverter() {
         
         try {
             const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+            const pdf = await pdfjs.getDocument({ 
+                data: new Uint8Array(arrayBuffer),
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+            }).promise;
             const totalPages = pdf.numPages;
 
             for (let i = 1; i <= totalPages; i++) {
@@ -271,8 +292,13 @@ export default function PdfToImageConverter() {
     const rotateAllPages = async () => {
         if (pages.length === 0) return;
         setIsProcessing(true);
-        const updatedPages = await Promise.all(pages.map(async (p) => {
-            return new Promise<PageItem>((resolve) => {
+        setProgress(0);
+        const updatedPages: PageItem[] = [];
+        
+        // CRITICAL FIX: Sequential processing to prevent memory crash (Aw Snap!)
+        for (let i = 0; i < pages.length; i++) {
+            const p = pages[i];
+            const newItem = await new Promise<PageItem>((resolve) => {
                 const img = new window.Image();
                 img.src = p.originalSrc;
                 img.onload = async () => {
@@ -289,20 +315,30 @@ export default function PdfToImageConverter() {
                     resolve({ ...p, originalSrc: rotatedOriginal, finalSrc: newFinal });
                 };
             });
-        }));
+            updatedPages.push(newItem);
+            setProgress(Math.round(((i + 1) / pages.length) * 100));
+        }
+
         setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Global Rotation", description: "All pages rotated by 90°." });
+        toast({ title: "Global Rotation", description: "All pages rotated sequentially to save memory." });
     };
 
     const applyToAll = async () => {
         const selected = pages.find(p => p.id === selectedId);
         if (!selected) return;
         setIsProcessing(true);
-        const updatedPages = await Promise.all(pages.map(async (p) => {
+        setProgress(0);
+        const updatedPages: PageItem[] = [];
+
+        // CRITICAL FIX: Sequential processing to prevent memory crash (Aw Snap!)
+        for (let i = 0; i < pages.length; i++) {
+            const p = pages[i];
             const final = await renderProcessedImage(p.originalSrc, selected.vAlign, selected.fitMode);
-            return { ...p, vAlign: selected.vAlign, fitMode: selected.fitMode, finalSrc: final };
-        }));
+            updatedPages.push({ ...p, vAlign: selected.vAlign, fitMode: selected.fitMode, finalSrc: final });
+            setProgress(Math.round(((i + 1) / pages.length) * 100));
+        }
+
         setPages(updatedPages);
         setIsProcessing(false);
         toast({ title: "Global Sync Complete" });
@@ -311,6 +347,7 @@ export default function PdfToImageConverter() {
     const handleDownloadAll = async () => {
         if (pages.length === 0 || !pdfFile) return;
         setIsZipping(true);
+        setProgress(0);
 
         const indicesToDownload = pageRangeMode === 'all' 
             ? pages.map(p => p.index)
@@ -326,12 +363,14 @@ export default function PdfToImageConverter() {
             const zip = new JSZip();
             const ext = outputFormat === 'jpeg' ? 'jpg' : 'png';
             
-            pages.forEach((p) => {
-                if (indicesToDownload.includes(p.index)) {
-                    const base64Data = p.finalSrc.split(',')[1];
-                    zip.file(`extracted-page-${p.index}.${ext}`, base64Data, { base64: true });
-                }
-            });
+            const filteredPages = pages.filter(p => indicesToDownload.includes(p.index));
+
+            for (let i = 0; i < filteredPages.length; i++) {
+                const p = filteredPages[i];
+                const base64Data = p.finalSrc.split(',')[1];
+                zip.file(`extracted-page-${p.index}.${ext}`, base64Data, { base64: true });
+                setProgress(Math.round(((i + 1) / filteredPages.length) * 100));
+            }
 
             const zipBlob = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
@@ -525,6 +564,7 @@ export default function PdfToImageConverter() {
                                 onClick={handleDownloadAll} 
                                 disabled={pages.length === 0 || isZipping || isProcessing}
                              >
+                                <StarIcons />
                                 {isZipping ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="size-6 animate-spin" />
@@ -556,43 +596,45 @@ export default function PdfToImageConverter() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-                                    {pages.map((p) => (
-                                        <motion.div 
-                                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                            key={p.id} 
-                                            onClick={() => setSelectedId(p.id)}
-                                            className={cn(
-                                                "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
-                                                selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
-                                                p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
-                                            )}>
-                                                <img 
-                                                    src={p.finalSrc} 
-                                                    alt={`P${p.index}`} 
-                                                    className={cn(
-                                                        "w-full object-contain pointer-events-none mx-auto block shadow-sm",
-                                                        p.fitMode === 'original' ? "max-h-[90%]" : "max-h-full"
-                                                    )}
-                                                />
-                                            </div>
-                                            
-                                            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">
-                                                {p.index}
-                                            </div>
-                                            
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
-                                            
-                                            <div className="absolute bottom-2 right-2 z-20 transition-all">
-                                                <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 hover:bg-green-700 shadow-2xl border-2 border-white/20" onClick={(e) => { e.stopPropagation(); const l=document.createElement('a'); l.href=p.finalSrc; l.download=`page-${p.index}.jpg`; l.click(); }}>
-                                                    <Download className="size-4" />
-                                                </Button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                    <AnimatePresence>
+                                        {pages.map((p) => (
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                                key={p.id} 
+                                                onClick={() => setSelectedId(p.id)}
+                                                className={cn(
+                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
+                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
+                                                )}
+                                            >
+                                                <div className={cn(
+                                                    "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
+                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                )}>
+                                                    <img 
+                                                        src={p.finalSrc} 
+                                                        alt={`P${p.index}`} 
+                                                        className={cn(
+                                                            "w-full object-contain pointer-events-none mx-auto block shadow-sm",
+                                                            p.fitMode === 'original' ? "max-h-[90%]" : "max-h-full"
+                                                        )}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">
+                                                    {p.index}
+                                                </div>
+                                                
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors z-10" />
+                                                
+                                                <div className="absolute bottom-2 right-2 z-20 transition-all">
+                                                    <Button size="icon" className="h-8 w-8 rounded-lg bg-green-600 hover:bg-green-700 shadow-2xl border-2 border-white/20" onClick={(e) => { e.stopPropagation(); const l=document.createElement('a'); l.href=p.finalSrc; l.download=`page-${p.index}.jpg`; l.click(); }}>
+                                                        <Download className="size-4" />
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
                                     
                                     <button 
                                         className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group"
@@ -608,9 +650,20 @@ export default function PdfToImageConverter() {
                             <ScrollBar />
                         </ScrollArea>
                         
-                        {pages.length > 0 && (
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
-                                 <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Select page to adjust
+                        {(pages.length > 0 || isProcessing) && (
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 w-full max-w-sm px-8">
+                                {isProcessing && (
+                                    <div className="w-full space-y-1.5 animate-in slide-in-from-bottom-4">
+                                        <div className="flex justify-between items-center text-[8px] font-black uppercase text-primary">
+                                            <span>Processing Queue</span>
+                                            <span>{progress}%</span>
+                                        </div>
+                                        <Progress value={progress} className="h-1.5 shadow-xl border border-white/20" />
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl z-40">
+                                     <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Select page to adjust
+                                </div>
                             </div>
                         )}
                     </div>
@@ -618,11 +671,10 @@ export default function PdfToImageConverter() {
             </CardContent>
             <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
                 <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
-                <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> NATIVE WASM SPEED</div>
+                <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> SEQUENTIAL MEMORY LOCK</div>
                 <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> LOSSLESS VECTORS</div>
             </CardFooter>
             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
         </Card>
     );
 }
-
