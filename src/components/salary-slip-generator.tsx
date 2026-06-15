@@ -464,6 +464,7 @@ export default function SalarySlipGenerator() {
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-12 rounded-xl font-black border-2 border-primary/40 text-2xl text-center bg-white dark:bg-slate-900" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                             </div>
                         </div>
 
