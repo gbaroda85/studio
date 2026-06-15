@@ -38,7 +38,9 @@ import {
     ChevronRight,
     PenTool,
     UploadCloud,
-    FileDigit
+    FileDigit,
+    Heart,
+    Shield
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -372,7 +374,7 @@ export default function IdCardGenerator() {
                                             
                                             <div className="col-span-2 pt-2"><Separator className="opacity-10"/></div>
                                             
-                                            <Button variant="outline" className="h-11 rounded-xl border-2 border-dashed font-black text-[9px] uppercase" onClick={() => fileInputRef.current?.click()}><ImageIcon className="size-4 mr-2" /> CANDIDATE PHOTO</Button>
+                                            <Button variant="outline" className="h-11 rounded-xl border-2 border-dashed font-black text-[9px] uppercase" onClick={() => fileInputRef.current?.click()}><ImageIcon className="size-4 mr-2" /> PHOTO</Button>
                                             <Button variant="outline" className="h-11 rounded-xl border-2 border-dashed font-black text-[9px] uppercase" onClick={() => signInputRef.current?.click()}><PenTool className="size-4 mr-2" /> SIGNATURE</Button>
                                             
                                             <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
@@ -476,10 +478,6 @@ export default function IdCardGenerator() {
                             {isProcessing ? <Loader2 className="animate-spin mr-3 size-8" /> : <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" />}
                             GENERATE ID CARD
                         </Button>
-                        <div className="flex items-center justify-center gap-6 text-[9px] font-black uppercase tracking-widest opacity-40">
-                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT RENDER</div>
-                        </div>
                     </CardFooter>
                 </Card>
             </div>
@@ -504,7 +502,6 @@ export default function IdCardGenerator() {
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => exportSingleCard('pdf')}><Printer className="size-4 mr-2" /> PDF Print</Button>
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => exportSingleCard('png')}><ImageIcon className="size-4 mr-2" /> PNG High</Button>
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => { setData(prev => ({ ...prev, config: { ...prev.config, orientation: prev.config.orientation === 'vertical' ? 'horizontal' : 'vertical' } })) }}><ArrowLeftRight className="size-4 mr-2" /> Flip Axis</Button>
-                     <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => setActiveSection('bulk')}><FileSpreadsheet className="size-4 mr-2" /> Bulk Mode</Button>
                 </div>
             </div>
 
@@ -517,6 +514,7 @@ export default function IdCardGenerator() {
 function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData, barcodeRef: any, qrRef: any, cardRef: any }) {
     const isVertical = data.config.orientation === 'vertical';
     const primary = data.config.primaryColor;
+    const theme = data.config.theme;
     
     return (
         <div 
@@ -529,50 +527,97 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
                 fontFamily: 'Inter, sans-serif'
             }}
         >
-            {/* THEME LAYOUTS */}
+            {/* THEME SPECIFIC LAYOUTS */}
             
             {/* HEADER AREA */}
-            <div className="relative z-10 w-full flex flex-col items-center pt-5 pb-3 px-4 text-center" style={{ backgroundColor: primary }}>
+            <div 
+                className={cn(
+                    "relative z-10 w-full flex flex-col items-center pt-5 pb-3 px-4 text-center transition-all duration-500",
+                    theme === 'minimal' ? "bg-white pt-8" : "",
+                    theme === 'security' ? "border-b-8 border-yellow-400" : ""
+                )} 
+                style={{ backgroundColor: theme === 'minimal' ? 'transparent' : primary }}
+            >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-                <div className="size-10 bg-white rounded-lg p-1.5 shadow-xl flex items-center justify-center mb-2">
+                
+                {/* LOGO */}
+                <div className={cn(
+                    "size-10 bg-white rounded-lg p-1.5 shadow-xl flex items-center justify-center mb-2",
+                    theme === 'hospital' ? "rounded-full" : ""
+                )}>
                     {data.organization.logo ? <img src={data.organization.logo} className="size-full object-contain" /> : <Building2 className="size-6" style={{ color: primary }} />}
                 </div>
-                <h3 className="text-sm font-black text-white uppercase tracking-tight leading-none drop-shadow-sm">{data.organization.name}</h3>
-                <p className="text-[7px] font-bold text-white/60 uppercase mt-1 tracking-widest">{data.organization.address}</p>
+
+                <h3 className={cn(
+                    "text-sm font-black uppercase tracking-tight leading-none drop-shadow-sm",
+                    theme === 'minimal' ? "text-slate-900" : "text-white"
+                )}>
+                    {data.organization.name}
+                </h3>
+                <p className={cn(
+                    "text-[7px] font-bold uppercase mt-1 tracking-widest",
+                    theme === 'minimal' ? "text-slate-400" : "text-white/60"
+                )}>
+                    {data.organization.address}
+                </p>
+
+                {theme === 'hospital' && <div className="absolute top-4 right-4"><Heart className="size-4 text-white/40" /></div>}
+                {theme === 'security' && <div className="absolute top-4 right-4"><Shield className="size-4 text-white/40" /></div>}
             </div>
 
-            {/* CURVE DIVIDER */}
-            <div className="h-4 w-full relative z-0" style={{ backgroundColor: primary }}>
-                 <div className="absolute inset-0 bg-white rounded-t-[3rem]" />
-            </div>
+            {/* THEME DIVIDERS */}
+            {theme !== 'minimal' && (
+                <div className="h-4 w-full relative z-0" style={{ backgroundColor: primary }}>
+                     <div className={cn(
+                         "absolute inset-0 bg-white",
+                         theme === 'modern' ? "rounded-t-[3rem]" : "",
+                         theme === 'corporate' ? "clip-path-slant" : ""
+                     )} />
+                </div>
+            )}
 
             {/* MAIN BODY */}
-            <div className="flex-1 bg-white relative flex flex-col items-center px-6 pt-4 pb-6 overflow-hidden">
+            <div className={cn(
+                "flex-1 bg-white relative flex flex-col items-center px-6 pb-6 overflow-hidden",
+                isVertical ? "pt-4" : "flex-row justify-between items-start pt-10"
+            )}>
                 
-                {/* PHOTO FRAME */}
-                <div className="relative mb-4 group">
-                    <div className="size-28 rounded-2xl border-4 bg-slate-50 overflow-hidden shadow-2xl relative z-10" style={{ borderColor: primary }}>
-                        {data.personal.photo ? <img src={data.personal.photo} className="size-full object-cover" /> : <UserCircle className="size-full p-4 opacity-10" />}
+                <div className={cn("flex flex-col items-center", !isVertical && "w-1/3")}>
+                    {/* PHOTO FRAME */}
+                    <div className="relative mb-4 group">
+                        <div className={cn(
+                            "size-28 border-4 bg-slate-50 overflow-hidden shadow-2xl relative z-10 transition-all",
+                            theme === 'hospital' ? "rounded-full" : "rounded-2xl",
+                            theme === 'security' ? "border-slate-900" : ""
+                        )} style={{ borderColor: primary }}>
+                            {data.personal.photo ? <img src={data.personal.photo} className="size-full object-cover" /> : <UserCircle className="size-full p-4 opacity-10" />}
+                        </div>
+                        <div className="absolute -inset-2 bg-gradient-to-br from-primary/10 to-transparent blur-xl opacity-50" />
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-br from-primary/10 to-transparent blur-xl opacity-50" />
-                </div>
 
-                {/* NAME & TITLE */}
-                <div className="text-center space-y-1 mb-6">
-                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">{data.personal.name || "CANDIDATE NAME"}</h2>
-                    <p className="text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full inline-block" style={{ backgroundColor: `${primary}15`, color: primary }}>{data.personal.designation || "DESIGNATION"}</p>
+                    {/* NAME & TITLE */}
+                    <div className="text-center space-y-1 mb-6">
+                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">{data.personal.name || "CANDIDATE NAME"}</h2>
+                        <p className="text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full inline-block" style={{ backgroundColor: `${primary}15`, color: primary }}>{data.personal.designation || "DESIGNATION"}</p>
+                    </div>
                 </div>
 
                 {/* INFO GRID */}
-                <div className="w-full grid grid-cols-1 gap-y-1.5 text-left">
-                    <InfoRow label="Employee ID" value={data.personal.id} />
-                    <InfoRow label="Department" value={data.personal.department} />
-                    <InfoRow label="Blood Group" value={data.personal.bloodGroup} />
-                    <InfoRow label="Contact No" value={data.personal.mobile} />
+                <div className={cn(
+                    "grid grid-cols-1 gap-y-1.5 text-left",
+                    isVertical ? "w-full" : "w-1/2 pt-4"
+                )}>
+                    <InfoRow label="ID NUMBER" value={data.personal.id} />
+                    <InfoRow label="DEPARTMENT" value={data.personal.department} />
+                    <InfoRow label="BLOOD GROUP" value={data.personal.bloodGroup} />
+                    <InfoRow label="CONTACT" value={data.personal.mobile} />
                 </div>
 
                 {/* FOOTER COMPONENTS */}
-                <div className="mt-auto w-full flex items-end justify-between gap-4">
+                <div className={cn(
+                    "mt-auto w-full flex items-end justify-between gap-4",
+                    !isVertical && "hidden"
+                )}>
                     {data.config.showQr && (
                         <div ref={qrRef} className="size-16 p-1 bg-white border-2 rounded-xl shadow-lg border-slate-100 flex items-center justify-center shrink-0" />
                     )}
@@ -596,8 +641,14 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
 
             {/* BARCODE AT BOTTOM */}
             {data.config.showBarcode && (
-                <div className="h-12 bg-slate-50 border-t flex items-center justify-center p-2">
+                <div className="h-12 bg-slate-50 border-t flex items-center justify-center p-2 mt-auto">
                     <svg ref={barcodeRef} className="w-full h-full" />
+                </div>
+            )}
+
+            {theme === 'security' && (
+                <div className="absolute top-0 left-0 w-full h-2 bg-yellow-400 z-50 overflow-hidden">
+                    <div className="w-full h-full opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #000, #000 10px, transparent 10px, transparent 20px)' }} />
                 </div>
             )}
         </div>
