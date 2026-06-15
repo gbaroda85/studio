@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, PDFName } from 'pdf-lib';
+import { PDFDocument, PDFName, degrees } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -171,7 +171,7 @@ export default function PdfMerger() {
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
-            const pagesToRender = Math.min(pdf.numPages, 20); // Limit preview to first 20 pages for performance
+            const pagesToRender = Math.min(pdf.numPages, 20); 
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -218,7 +218,7 @@ export default function PdfMerger() {
                 DisplayDocTitle: true
             }));
             
-            // Force browser to fit to window on open
+            // Force browser to fit to window on open (OpenAction)
             const allPages = mergedPdf.getPages();
             if (allPages.length > 0) {
                 const firstPage = allPages[0];
