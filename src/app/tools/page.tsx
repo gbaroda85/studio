@@ -73,7 +73,8 @@ import {
   Banknote,
   CalendarDays,
   Menu,
-  Palette
+  Palette,
+  CreditCard
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -337,6 +338,14 @@ function ToolsPageContent() {
   ];
 
   const fileFeatures = [
+    {
+      href: '/id-card-generator',
+      labelKey: 'id_card_generator_label',
+      descriptionKey: 'id_card_generator_description',
+      icon: CreditCard,
+      color: 'bg-primary',
+      lightBg: 'bg-primary/5'
+    },
     {
       href: '/aadhaar-printer',
       labelKey: 'aadhaar_printer_label',

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -80,7 +79,7 @@ import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS (Limit 6 for Home Grid)
-  { icon: CreditCard, title: "ID CARD GENERATOR", description: "Design professional Employee & Student IDs with Bulk support.", href: "/id-card-generator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "featured" },
+  { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
@@ -103,8 +102,13 @@ const ALL_TOOLS = [
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
   { icon: Landmark, title: "TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
 
+  // --- FILE TOOLS ---
+  { icon: CreditCard, title: "ID CARD GENERATOR", description: "Design professional Employee & Student IDs with Bulk support.", href: "/id-card-generator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "file" },
+  { icon: Printer, title: "AADHAAR PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "file" },
+  { icon: Archive, title: "CREATE ZIP", description: "Bundle multiple files into a single ZIP archive.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "file" },
+  { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from any ZIP archive locally.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
+
   // --- ALL OTHER TOOLS (Searchable only) ---
-  { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "image" },
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALC", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
@@ -113,7 +117,6 @@ const ALL_TOOLS = [
   { icon: PlayCircle, title: "INSTAGRAM DOWNLOADER", description: "Download Reels and Videos from Instagram privately.", href: "/instagram-downloader", colorClass: "bg-pink-600", lightBg: "bg-pink-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "video" },
   { icon: UserCircle, title: "PASSPORT PHOTO", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
-  { icon: Printer, title: "AADHAAR PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "file" },
   { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-cyan-50", category: "image" },
   { icon: Maximize, title: "IMAGE RESIZER", description: "Change image dimensions for official forms.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "image" },
   { icon: PenLine, title: "SIGNATURE REMOVER", description: "Extract clean signatures from paper photos.", href: "/remove-signature", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
@@ -128,8 +131,6 @@ const ALL_TOOLS = [
   { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Protect your PDFs with custom text watermarks.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf" },
   { icon: NotebookPen, title: "PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-[#f7fee7]", category: "pdf" },
-  { icon: Archive, title: "CREATE ZIP", description: "Bundle multiple files into a single ZIP archive.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-violet-50", category: "file" },
-  { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from any ZIP archive locally.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
   { icon: Barcode, title: "BARCODE GENERATOR", description: "Create scannable industrial-grade barcodes.", href: "/barcode-generator", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "converters" },
   { icon: Gauge, title: "ACCELERATION CONV.", description: "Convert between various acceleration units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-[#f0fdf4]", category: "converters" },
   { icon: AreaChart, title: "AREA CONVERTER", description: "Convert international and local land area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converters" },
