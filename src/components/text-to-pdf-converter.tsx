@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -118,7 +119,7 @@ export default function TextToPdfConverter() {
     };
     
     return (
-        <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-700 mx-auto pb-32">
+        <div className="w-full max-w-[1800px] flex flex-col gap-8 px-4 animate-in fade-in duration-700 mx-auto pb-32">
             
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
@@ -147,8 +148,9 @@ export default function TextToPdfConverter() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                {/* LEFT: SOURCE EDITOR (5 spans) */}
+                <Card className="lg:col-span-5 flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -206,7 +208,8 @@ export default function TextToPdfConverter() {
                     </CardFooter>
                 </Card>
 
-                <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
+                {/* RIGHT: HD VIEWPORT (7 spans) */}
+                <Card className="lg:col-span-7 flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
@@ -214,9 +217,9 @@ export default function TextToPdfConverter() {
                         </div>
                         <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                     </CardHeader>
-                    <CardContent className="flex-1 p-6 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
+                    <CardContent className="flex-1 p-4 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
                         
-                        <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.85] xl:scale-0.95 origin-top transition-transform duration-500 flex justify-center w-full">
+                        <div className="relative transform-gpu scale-[0.5] sm:scale-[0.75] md:scale-[0.85] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
                             <div 
                                 ref={previewRef} 
                                 className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
