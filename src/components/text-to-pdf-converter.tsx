@@ -27,7 +27,9 @@ import {
     Move
 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -85,8 +87,8 @@ export default function TextToPdfConverter() {
             doc.setFont(font, isBold ? 'bold' : 'normal');
             doc.setFontSize(fontSize);
             
-            const rgb = hexToRgb(textColor);
-            doc.setTextColor(rgb.r, rgb.g, rgb.b);
+            const rgbValue = hexToRgb(textColor);
+            doc.setTextColor(rgbValue.r, rgbValue.g, rgbValue.b);
             
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
