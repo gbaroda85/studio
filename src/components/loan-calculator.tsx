@@ -43,6 +43,7 @@ import {
     TableRow 
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const COLORS = ["#043873", "#FF9F1C"];
 
@@ -255,7 +256,7 @@ export default function LoanCalculator() {
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 space-y-10 relative z-10">
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
-                                {/* Donut Chart */}
+                                {/* Visual Breakdown */}
                                 <div className="md:col-span-6 flex flex-col items-center">
                                     <div className="size-60 relative">
                                         <ResponsiveContainer width="100%" height="100%">
