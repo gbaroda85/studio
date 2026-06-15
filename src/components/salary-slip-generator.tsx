@@ -285,6 +285,7 @@ export default function SalarySlipGenerator() {
                     CenterWindow: true,
                     DisplayDocTitle: true
                 }));
+                
                 const dest = pdfDoc.context.obj([page.ref, PDFName.of('Fit')]);
                 catalog.set(PDFName.of('OpenAction'), dest);
 
@@ -466,7 +467,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
         <div 
             className={cn("bg-white flex flex-col text-slate-900", !isExport && "shadow-none border-0")}
             style={{ 
-                width: '794px', height: '1123px', padding: '40px 40px 60px 40px',
+                width: '794px', height: '1123px', padding: '40px 40px 80px 40px',
                 fontFamily: 'Arial, sans-serif', position: 'relative', boxSizing: 'border-box',
                 letterSpacing: 'normal', overflow: 'hidden'
             }}

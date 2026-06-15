@@ -45,9 +45,9 @@ interface InvoiceItem {
     id: string;
     description: string;
     hsn: string;
-    qty: number;
-    rate: number;
-    gstRate: number;
+    qty: number | string;
+    rate: number | string;
+    gstRate: number | string;
 }
 
 interface InvoiceData {
@@ -133,8 +133,12 @@ export default function GstInvoiceGenerator() {
 
     const totals = useMemo(() => {
         return data.items.reduce((acc, item) => {
-            const taxable = (item.qty || 0) * (item.rate || 0);
-            const gst = (taxable * (item.gstRate || 0)) / 100;
+            const q = parseFloat(String(item.qty)) || 0;
+            const r = parseFloat(String(item.rate)) || 0;
+            const g = parseFloat(String(item.gstRate)) || 0;
+            
+            const taxable = q * r;
+            const gst = (taxable * g) / 100;
             return {
                 taxable: acc.taxable + taxable,
                 gst: acc.gst + gst,
@@ -202,8 +206,6 @@ export default function GstInvoiceGenerator() {
 
             if (type === 'pdf') {
                 const pdfDoc = await PDFDocument.create();
-                
-                // Standard A4 in points (pt)
                 const pdfWidth = 595.28;
                 const pdfHeight = 841.89;
                 const page = pdfDoc.addPage([pdfWidth, pdfHeight]);
@@ -218,7 +220,6 @@ export default function GstInvoiceGenerator() {
                     height: pdfHeight
                 });
 
-                // Force browser to fit window on open
                 const catalog = pdfDoc.catalog;
                 catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
                     FitWindow: true,
@@ -324,9 +325,9 @@ export default function GstInvoiceGenerator() {
                                         <Button variant="ghost" size="icon" className="absolute top-2 right-2 size-7 text-destructive" onClick={() => removeItem(item.id)}><Trash2 className="size-4"/></Button>
                                         <div className="grid grid-cols-12 gap-3">
                                             <div className="col-span-12 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Description</Label><Input value={item.description} onChange={(e) => updateItem(item.id, 'description', e.target.value)} className="h-9 font-bold" /></div>
-                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Qty</Label><Input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
-                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Rate</Label><Input type="number" value={item.rate} onChange={(e) => updateItem(item.id, 'rate', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
-                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">GST %</Label><Input type="number" value={item.gstRate} onChange={(e) => updateItem(item.id, 'gstRate', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Qty</Label><Input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', e.target.value)} className="h-9 font-bold text-center" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Rate</Label><Input type="number" value={item.rate} onChange={(e) => updateItem(item.id, 'rate', e.target.value)} className="h-9 font-bold text-center" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">GST %</Label><Input type="number" value={item.gstRate} onChange={(e) => updateItem(item.id, 'gstRate', e.target.value)} className="h-9 font-bold text-center" /></div>
                                         </div>
                                     </Card>
                                 ))}
@@ -334,7 +335,7 @@ export default function GstInvoiceGenerator() {
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
-                        <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
+                        <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
                             GENERATE INVOICE PDF
                         </Button>
@@ -379,7 +380,7 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
         <div 
             className={cn("bg-white flex flex-col text-slate-900", !isExport && "shadow-none border-0")}
             style={{ 
-                width: '794px', height: '1123px', padding: '50px 50px 70px 50px',
+                width: '794px', height: '1123px', padding: '50px 50px 80px 50px',
                 fontFamily: 'Arial, sans-serif', position: 'relative', boxSizing: 'border-box',
                 letterSpacing: 'normal', overflow: 'hidden'
             }}
@@ -440,7 +441,7 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                                 <td className="p-3 text-center border">{item.qty}</td>
                                 <td className="p-3 text-right border">{item.rate.toLocaleString()}</td>
                                 <td className="p-3 text-center border">{item.gstRate}%</td>
-                                <td className="p-3 text-right border font-black text-slate-900">{(item.qty * item.rate).toLocaleString()}</td>
+                                <td className="p-3 text-right border font-black text-slate-900">{((parseFloat(String(item.qty)) || 0) * (parseFloat(String(item.rate)) || 0)).toLocaleString()}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -485,3 +486,4 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
         </div>
     );
 }
+
