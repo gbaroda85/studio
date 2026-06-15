@@ -211,7 +211,7 @@ export default function SalarySlipGenerator() {
         try {
             await document.fonts.ready;
             const canvas = await html2canvas(exportRef.current, {
-                scale: 3,
+                scale: 3, // High-res capture
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
@@ -233,16 +233,21 @@ export default function SalarySlipGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
+                // FIXED: Use standard point dimensions for A4 to prevent "huge" opening
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
-                    unit: 'px', 
-                    format: [794, 1123] 
+                    unit: 'pt', 
+                    format: 'a4' 
                 });
                 
-                // Add Image fitting strictly to page points
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
+                // Standard A4 dimensions in pt (at 72 DPI)
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                // Map high-res image to the physical page size
+                pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
                 
-                // CRITICAL FIX: Set Viewer Preferences to prevent "huge" opening
+                // Force Fit-to-Window metadata
                 pdf.viewerPreferences({
                     'FitWindow': true,
                     'CenterWindow': true,
@@ -483,4 +488,3 @@ function TableItem({ label, value, isDeduction }: { label: string, value: number
         </div>
     );
 }
-

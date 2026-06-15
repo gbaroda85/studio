@@ -178,9 +178,8 @@ export default function GstInvoiceGenerator() {
         
         try {
             await document.fonts.ready;
-
             const canvas = await html2canvas(exportRef.current, {
-                scale: 3,
+                scale: 3, // High-res capture
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
@@ -202,16 +201,21 @@ export default function GstInvoiceGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
+                // FIXED: Use standard point dimensions for A4 to prevent "huge" opening
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
-                    unit: 'px', 
-                    format: [794, 1123]
+                    unit: 'pt', 
+                    format: 'a4'
                 });
                 
-                // Add Image fitting strictly to page points
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
+                // Standard A4 dimensions in pt (at 72 DPI)
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                // Map high-res image to the physical page size
+                pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
                 
-                // CRITICAL FIX: Set Viewer Preferences to prevent "huge" opening
+                // Force Fit-to-Window metadata
                 pdf.viewerPreferences({
                     'FitWindow': true,
                     'CenterWindow': true,
@@ -225,7 +229,6 @@ export default function GstInvoiceGenerator() {
                 link.download = `GST_Invoice_${data.invoice.no}.jpg`;
                 link.click();
             }
-            
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Export Successful!" });
         } catch (error) {
@@ -239,7 +242,7 @@ export default function GstInvoiceGenerator() {
     if (!isHydrated) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin size-10 text-primary opacity-20" /></div>;
 
     return (
-        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32">
+        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32 overflow-x-hidden">
             
             {/* HIDDEN EXPORT CANVAS */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
@@ -471,4 +474,3 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
         </div>
     );
 }
-
