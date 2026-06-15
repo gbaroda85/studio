@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
@@ -138,6 +137,15 @@ const StarIcons = () => (
     </>
 );
 
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+
 export default function SalarySlipGenerator() {
     const { toast } = useToast();
     const [data, setData] = useState<SalaryData>(INITIAL_DATA);
@@ -163,13 +171,12 @@ export default function SalarySlipGenerator() {
         setIsHydrated(true);
     }, []);
 
-    // PERFORMANCE OPTIMIZATION: Debounced localStorage save to prevent "atak ke chalna" (lag)
     useEffect(() => {
         if (isHydrated) {
             const timer = setTimeout(() => {
                 localStorage.setItem('gr7_salary_slip_v6_persisted', JSON.stringify(data));
                 localStorage.setItem('gr7_employee_database', JSON.stringify(savedProfiles));
-            }, 1000); // 1s debounce
+            }, 1000);
             return () => clearTimeout(timer);
         }
     }, [data, savedProfiles, isHydrated]);
@@ -475,7 +482,6 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        {/* Rest of the form sections... */}
                         <div className="space-y-10 pt-4">
                             <div className="space-y-6">
                                 <Badge className="bg-muted text-muted-foreground font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Branding</Badge>
@@ -512,7 +518,6 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            {/* Allowances Section */}
                             <div className="space-y-6 pt-6 border-t border-dashed">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
@@ -537,7 +542,6 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            {/* Deductions Section */}
                             <div className="space-y-6 pt-4 border-t border-dashed">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
@@ -663,7 +667,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 </div>
                 <div className="p-4 flex justify-between items-center bg-rose-50/50">
                     <span className="text-[10px] font-black uppercase">Total Deductions</span>
-                    <span className="text-sm font-black text-rose-600">({formatCurrency(results.totalDeductions)})</span>
+                    <span className="text-sm font-black text-rose-600">{formatCurrency(results.totalDeductions)}</span>
                 </div>
             </div>
 
@@ -710,3 +714,4 @@ function TableItem({ label, value, isDeduction }: { label: string, value: number
         </div>
     );
 }
+
