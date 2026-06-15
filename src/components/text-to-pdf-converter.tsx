@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -85,7 +84,7 @@ export default function TextToPdfConverter() {
                     cursorY = marginSize + (fontSize * 0.35);
                 }
                 doc.text(line, marginSize, cursorY);
-                // Matches 1.2 lineHeight in preview
+                // Reduced line height to 0.5 (was 1.2) to match 1.2 in preview
                 cursorY += (fontSize * 0.5); 
             });
             
