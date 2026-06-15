@@ -150,13 +150,11 @@ export default function SalarySlipGenerator() {
 
     // --- HYDRATION & PERSISTENCE ---
     useEffect(() => {
-        // Load current form state
         const savedForm = localStorage.getItem('gr7_salary_slip_v6_persisted');
         if (savedForm) {
             try { setData(JSON.parse(savedForm)); } catch (e) { console.error(e); }
         }
         
-        // Load all employee profiles
         const savedDB = localStorage.getItem('gr7_employee_database');
         if (savedDB) {
             try { setSavedProfiles(JSON.parse(savedDB)); } catch (e) { console.error(e); }
@@ -165,17 +163,16 @@ export default function SalarySlipGenerator() {
         setIsHydrated(true);
     }, []);
 
+    // PERFORMANCE OPTIMIZATION: Debounced localStorage save to prevent "atak ke chalna" (lag)
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_v6_persisted', JSON.stringify(data));
+            const timer = setTimeout(() => {
+                localStorage.setItem('gr7_salary_slip_v6_persisted', JSON.stringify(data));
+                localStorage.setItem('gr7_employee_database', JSON.stringify(savedProfiles));
+            }, 1000); // 1s debounce
+            return () => clearTimeout(timer);
         }
-    }, [data, isHydrated]);
-
-    useEffect(() => {
-        if (isHydrated) {
-            localStorage.setItem('gr7_employee_database', JSON.stringify(savedProfiles));
-        }
-    }, [savedProfiles, isHydrated]);
+    }, [data, savedProfiles, isHydrated]);
 
     // --- PROFILE MANAGEMENT ---
     const saveCurrentProfile = () => {
@@ -185,7 +182,6 @@ export default function SalarySlipGenerator() {
         }
 
         setSavedProfiles(prev => {
-            // Check if profile exists by Emp ID or Name
             const exists = prev.findIndex(p => p.employee.empId === data.employee.empId && p.employee.name === data.employee.name);
             if (exists >= 0) {
                 const updated = [...prev];
@@ -201,10 +197,8 @@ export default function SalarySlipGenerator() {
     };
 
     const loadProfile = (id: string) => {
-        const profile = savedProfiles.find(p => p.employee.empId === id || p.id === id); // fallback to ID if needed
+        const profile = savedProfiles.find(p => p.employee.empId === id);
         if (profile) {
-            // Merge profile data but preserve current Month/Year/Days if preferred
-            // Usually user wants to load the whole structure
             setData(JSON.parse(JSON.stringify(profile)));
             toast({ title: "Profile Loaded", description: `Switched to ${profile.employee.name}'s data.` });
         }
@@ -292,7 +286,6 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_v6_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -375,7 +368,7 @@ export default function SalarySlipGenerator() {
     if (!isHydrated) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin size-10 text-primary opacity-20" /></div>;
 
     return (
-        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32 overflow-x-hidden">
+        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32 overflow-x-hidden text-left">
             
             {/* HIDDEN EXPORT CANVAS */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
@@ -387,59 +380,7 @@ export default function SalarySlipGenerator() {
             {/* SIDEBAR EDITOR */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2 text-left">
                 
-                {/* ADVANCED DATABASE ACCESS */}
-                <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-900 text-white border-white/10 mb-4 animate-in slide-in-from-top-4 duration-500">
-                    <CardHeader className="bg-white/5 border-b border-white/10 p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Database className="size-5 text-primary" />
-                                <CardTitle className="text-sm font-black uppercase tracking-widest">Employee Database</CardTitle>
-                            </div>
-                            <Badge className="bg-primary/20 text-primary border-primary/20 uppercase text-[8px] font-black">{savedProfiles.length} Saved</Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-5">
-                        <div className="space-y-4">
-                            <div className="flex gap-2">
-                                <div className="flex-1">
-                                    <Select onValueChange={loadProfile}>
-                                        <SelectTrigger className="h-12 bg-white/5 border-white/10 font-bold rounded-xl text-xs">
-                                            <div className="flex items-center gap-2">
-                                                <Users2 className="size-4 opacity-40" />
-                                                <SelectValue placeholder="Quick Load Employee..." />
-                                            </div>
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                            {savedProfiles.length === 0 ? (
-                                                <div className="p-4 text-center text-[10px] font-bold opacity-40 uppercase">No profiles saved yet</div>
-                                            ) : (
-                                                savedProfiles.map(p => (
-                                                    <SelectItem key={p.employee.empId} value={p.employee.empId} className="font-bold py-3">
-                                                        <div className="flex items-center justify-between w-full min-w-[200px]">
-                                                            <div className="flex flex-col">
-                                                                <span className="uppercase text-[11px]">{p.employee.name}</span>
-                                                                <span className="text-[8px] opacity-40">{p.employee.empId} | {p.employee.designation}</span>
-                                                            </div>
-                                                            <button onClick={(e) => deleteProfile(e, p.employee.empId)} className="ml-4 p-1 text-rose-400 hover:text-rose-600 transition-colors">
-                                                                <Trash2 className="size-3" />
-                                                            </button>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Button onClick={saveCurrentProfile} className="h-12 px-6 bg-primary text-white font-black rounded-xl shadow-lg border-none hover:scale-105 active:scale-95 transition-all">
-                                    <Save className="size-5 mr-2" /> SAVE
-                                </Button>
-                            </div>
-                            <p className="text-[8px] text-white/30 font-bold uppercase tracking-widest text-center">Save profiles to avoid re-typing details every month.</p>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 text-left">
@@ -455,97 +396,155 @@ export default function SalarySlipGenerator() {
                         </div>
                     </CardHeader>
                     
-                    <CardContent className="p-6 md:p-8 space-y-10">
-                        {/* CALCULATION ENGINE - NOW PROMINENT FOR QUICK EDITS */}
-                        <div className="space-y-6 bg-primary/5 p-6 rounded-[2rem] border-2 border-primary/10 shadow-inner animate-pulse-subtle">
-                            <div className="flex items-center justify-between">
-                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
-                                <Zap className="size-4 text-primary" />
+                    <CardContent className="p-6 md:p-8 space-y-8">
+                        
+                        {/* EMPLOYEE DATABASE DROPDOWN - INTEGRATED & THEMED */}
+                        <div className="space-y-4 bg-muted/30 p-5 rounded-[2rem] border-2 border-dashed border-foreground/10 animate-in slide-in-from-top-4">
+                            <div className="flex items-center justify-between px-1">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                    <Database className="size-3.5" /> Employee Profiles
+                                </Label>
+                                <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] font-black uppercase">{savedProfiles.length} SAVED</Badge>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Daily Rate</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-11 rounded-xl font-black border-2 border-primary/20 text-lg shadow-sm" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-11 rounded-xl font-black border-2 border-primary/30 text-2xl text-center bg-white" autoFocus /></div>
+                            
+                            <div className="flex gap-3">
+                                <div className="flex-1">
+                                    <Select onValueChange={loadProfile}>
+                                        <SelectTrigger className="h-12 border-2 font-bold rounded-xl bg-background shadow-sm hover:border-primary/50 transition-all">
+                                            <div className="flex items-center gap-2">
+                                                <Users2 className="size-4 text-muted-foreground" />
+                                                <SelectValue placeholder="Quick Load Employee..." />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-2 shadow-2xl z-[200]">
+                                            {savedProfiles.length === 0 ? (
+                                                <div className="p-6 text-center">
+                                                    <Search className="size-8 mx-auto mb-2 opacity-20" />
+                                                    <p className="text-[10px] font-black uppercase opacity-40">Database Empty</p>
+                                                </div>
+                                            ) : (
+                                                savedProfiles.map(p => (
+                                                    <SelectItem key={p.employee.empId} value={p.employee.empId} className="font-bold py-4">
+                                                        <div className="flex items-center justify-between w-full min-w-[250px]">
+                                                            <div className="flex flex-col text-left">
+                                                                <span className="uppercase text-xs font-black text-foreground">{p.employee.name}</span>
+                                                                <span className="text-[8px] opacity-40 uppercase font-bold">{p.employee.empId} • {p.employee.designation}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={(e) => deleteProfile(e, p.employee.empId)} 
+                                                                className="ml-6 p-2 rounded-lg bg-destructive/5 text-destructive hover:bg-destructive hover:text-white transition-all"
+                                                            >
+                                                                <Trash2 className="size-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button 
+                                    onClick={saveCurrentProfile} 
+                                    className="h-12 px-6 bg-primary text-white font-black rounded-xl shadow-lg border-none hover:scale-105 active:scale-95 transition-all"
+                                    title="Save current details to database"
+                                >
+                                    <Save className="size-5 mr-2" /> SAVE
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* CALCULATION ENGINE */}
+                        <div className="space-y-6 bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/20 shadow-inner">
+                            <div className="flex items-center justify-between">
+                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Attendance Engine</Badge>
+                                <Zap className="size-4 text-primary animate-pulse" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Daily Rate</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-12 rounded-xl font-black border-2 border-primary/20 text-lg shadow-sm" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-12 rounded-xl font-black border-2 border-primary/40 text-2xl text-center bg-white dark:bg-slate-900" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                            </div>
-                            <p className="text-[8px] text-primary/60 font-black uppercase tracking-widest text-center">Just update 'Days Present' for instant re-calculation.</p>
-                        </div>
-
-                        {/* Company Section */}
-                        <div className="space-y-6 pt-6 border-t border-dashed">
-                            <Badge className="bg-muted text-muted-foreground font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Branding</Badge>
-                            <div className="grid gap-4">
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label><Input value={data.company.name} onChange={(e) => updateNested('company', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Address</Label><Textarea value={data.company.address} onChange={(e) => updateNested('company', 'address', e.target.value)} className="rounded-xl border-2 font-medium" /></div>
-                                <Button variant="outline" size="sm" className="w-full h-10 rounded-xl border-2 border-dashed font-black text-[10px] uppercase" onClick={() => logoInputRef.current?.click()}><UploadCloud className="size-4 mr-2" /> {data.company.logo ? "CHANGE LOGO" : "UPLOAD LOGO"}</Button>
-                                <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
                             </div>
                         </div>
 
-                        {/* Employee Section */}
-                        <div className="space-y-6 pt-6 border-t border-dashed">
-                            <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Full Name</Label><Input value={data.employee.name} onChange={(e) => updateNested('employee', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Designation</Label><Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Department</Label><Input value={data.employee.department} onChange={(e) => updateNested('employee', 'department', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label><Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Date of Joining</Label><Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">UAN Number</Label><Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label><Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="col-span-2 space-y-1.5 pt-2"><Separator className="opacity-10"/></div>
-                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Bank Name</Label><Input value={data.employee.bankName} onChange={(e) => updateNested('employee', 'bankName', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Account No.</Label><Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label><Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                        {/* Rest of the form sections... */}
+                        <div className="space-y-10 pt-4">
+                            {/* Business Section */}
+                            <div className="space-y-6">
+                                <Badge className="bg-muted text-muted-foreground font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Branding</Badge>
+                                <div className="grid gap-4">
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label><Input value={data.company.name} onChange={(e) => updateNested('company', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Address</Label><Textarea value={data.company.address} onChange={(e) => updateNested('company', 'address', e.target.value)} className="rounded-xl border-2 font-medium" /></div>
+                                    <Button variant="outline" size="sm" className="w-full h-10 rounded-xl border-2 border-dashed font-black text-[10px] uppercase" onClick={() => logoInputRef.current?.click()}><UploadCloud className="size-4 mr-2" /> {data.company.logo ? "CHANGE LOGO" : "UPLOAD LOGO"}</Button>
+                                    <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Pay Period Section */}
-                        <div className="space-y-6 pt-6 border-t border-dashed">
-                            <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Pay Period</Badge>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month</Label><Input value={data.payPeriod.month} onChange={(e) => updateNested('payPeriod', 'month', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. AUGUST" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Year</Label><Input value={data.payPeriod.year} onChange={(e) => updateNested('payPeriod', 'year', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. 2024" /></div>
+                            {/* Employee Section */}
+                            <div className="space-y-6 pt-6 border-t border-dashed">
+                                <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Full Name</Label><Input value={data.employee.name} onChange={(e) => updateNested('employee', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Designation</Label><Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Department</Label><Input value={data.employee.department} onChange={(e) => updateNested('employee', 'department', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label><Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Date of Joining</Label><Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">UAN Number</Label><Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label><Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="col-span-2 pt-2"><Separator className="opacity-10"/></div>
+                                    <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Bank Name</Label><Input value={data.employee.bankName} onChange={(e) => updateNested('employee', 'bankName', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Account No.</Label><Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label><Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Allowances Section */}
-                        <div className="space-y-6 pt-6 border-t border-dashed">
-                            <div className="flex justify-between items-center">
-                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
-                                <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-emerald-600 hover:bg-emerald-50"><Plus className="size-3 mr-1" /> Add</Button>
+                            {/* Pay Period Section */}
+                            <div className="space-y-6 pt-6 border-t border-dashed">
+                                <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Pay Period</Badge>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month</Label><Input value={data.payPeriod.month} onChange={(e) => updateNested('payPeriod', 'month', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. AUGUST" /></div>
+                                    <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Year</Label><Input value={data.payPeriod.year} onChange={(e) => updateNested('payPeriod', 'year', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. 2024" /></div>
+                                </div>
                             </div>
-                            <div className="space-y-3">
-                                {data.allowances.map((item, index) => (
-                                    <div key={item.id + index} className="flex items-center gap-2 p-3 bg-emerald-500/5 rounded-xl border-2 border-emerald-100 dark:border-emerald-900/20 shadow-sm animate-in slide-in-from-left-2">
-                                        <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
-                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-emerald-200" />
-                                        <button onClick={() => updateDynamic('allowances', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
-                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
-                        {/* Deductions Section */}
-                        <div className="space-y-6 pt-4 border-t border-dashed">
-                             <div className="flex justify-between items-center">
-                                <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
-                                <Button size="sm" onClick={() => handleAddDynamic('deductions')} className="h-7 bg-rose-600 text-white font-black text-[8px] uppercase hover:bg-rose-700"><Plus className="size-3 mr-1" /> Add Deduction</Button>
+                            {/* Allowances Section */}
+                            <div className="space-y-6 pt-6 border-t border-dashed">
+                                <div className="flex justify-between items-center">
+                                    <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
+                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-emerald-600 hover:bg-emerald-50"><Plus className="size-3 mr-1" /> Add</Button>
+                                </div>
+                                <div className="space-y-3">
+                                    {data.allowances.map((item) => (
+                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-emerald-500/5 rounded-xl border-2 border-emerald-100 dark:border-emerald-900/20 shadow-sm animate-in slide-in-from-left-2">
+                                            <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
+                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-emerald-200" />
+                                            <button onClick={() => updateDynamic('allowances', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
+                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="space-y-3">
-                                {data.deductions.map((item, index) => (
-                                    <div key={item.id + index} className="flex items-center gap-2 p-3 bg-rose-500/5 rounded-xl border-2 border-rose-100 dark:border-rose-900/20 shadow-sm animate-in slide-in-from-right-2">
-                                        <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
-                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-rose-200" />
-                                        <button onClick={() => updateDynamic('deductions', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-rose-100 text-rose-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
-                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
-                                    </div>
-                                ))}
+
+                            {/* Deductions Section */}
+                            <div className="space-y-6 pt-4 border-t border-dashed">
+                                <div className="flex justify-between items-center">
+                                    <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
+                                    <Button size="sm" onClick={() => handleAddDynamic('deductions')} className="h-7 bg-rose-600 text-white font-black text-[8px] uppercase hover:bg-rose-700"><Plus className="size-3 mr-1" /> Add Deduction</Button>
+                                </div>
+                                <div className="space-y-3">
+                                    {data.deductions.map((item) => (
+                                        <div key={item.id} className="flex items-center gap-2 p-3 bg-rose-500/5 rounded-xl border-2 border-rose-100 dark:border-rose-900/20 shadow-sm animate-in slide-in-from-right-2">
+                                            <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
+                                            <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-rose-200" />
+                                            <button onClick={() => updateDynamic('deductions', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-rose-100 text-rose-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
+                                            <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </CardContent>
+                    
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                         <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
