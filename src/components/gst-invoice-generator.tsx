@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
@@ -206,8 +207,9 @@ export default function GstInvoiceGenerator() {
                     format: 'a4'
                 });
                 
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
+                // Standard A4 in points is 595 x 842
+                const pdfWidth = 595.28;
+                const pdfHeight = 841.89;
 
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
                 
@@ -237,7 +239,7 @@ export default function GstInvoiceGenerator() {
     if (!isHydrated) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin size-10 text-primary opacity-20" /></div>;
 
     return (
-        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32 overflow-x-hidden">
+        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32 overflow-x-hidden text-left">
             
             {/* HIDDEN EXPORT CANVAS */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
@@ -319,7 +321,7 @@ export default function GstInvoiceGenerator() {
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                         <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
-                            {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
+                            {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:rotate-12 transition-transform" />}
                             GENERATE INVOICE PDF
                         </Button>
                         <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all">

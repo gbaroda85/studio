@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
@@ -110,12 +111,12 @@ const INITIAL_DATA: SalaryData = {
         overtimeRate: 200
     },
     allowances: [
-        { id: '1', label: 'House Rent', type: 'percentage', value: 16 },
-        { id: '2', label: 'Washing Al', type: 'percentage', value: 3 }
+        { id: 'allow-1', label: 'House Rent', type: 'percentage', value: 16 },
+        { id: 'allow-2', label: 'Washing Al', type: 'percentage', value: 3 }
     ],
     deductions: [
-        { id: '1', label: 'Provident', type: 'percentage', value: 12 },
-        { id: '2', label: 'Professional Tax', type: 'fixed', value: 200 }
+        { id: 'deduct-1', label: 'Provident', type: 'percentage', value: 12 },
+        { id: 'deduct-2', label: 'Professional Tax', type: 'fixed', value: 200 }
     ]
 };
 
@@ -239,8 +240,9 @@ export default function SalarySlipGenerator() {
                     format: 'a4' 
                 });
                 
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
+                // Standard A4 in points is 595 x 842
+                const pdfWidth = 595.28;
+                const pdfHeight = 841.89;
 
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
                 
