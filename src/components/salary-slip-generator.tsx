@@ -21,7 +21,9 @@ import {
     UploadCloud,
     X,
     Eraser,
-    Landmark
+    Landmark,
+    Calendar,
+    Globe
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -141,7 +143,7 @@ export default function SalarySlipGenerator() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_v4_persisted');
+        const saved = localStorage.getItem('gr7_salary_slip_v5_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -150,7 +152,7 @@ export default function SalarySlipGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_v4_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_salary_slip_v5_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
@@ -222,14 +224,14 @@ export default function SalarySlipGenerator() {
 
     const handleClearAll = () => {
         setData({
-            company: { ...data.company },
+            company: { name: "", address: "", logo: null },
             employee: { name: "", empId: "", designation: "", department: "", doj: "", pan: "", uanNo: "", bankName: "", bankAccount: "", ifsc: "" },
-            payPeriod: { month: "AUGUST", year: "2024" },
-            calc: { basicRate: "", presentDays: "", totalDays: 30, overtimeHours: "", overtimeRate: "" },
+            payPeriod: { month: "", year: "" },
+            calc: { basicRate: "", presentDays: "", totalDays: "", overtimeHours: "", overtimeRate: "" },
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_v4_persisted');
+        localStorage.removeItem('gr7_salary_slip_v5_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -358,12 +360,22 @@ export default function SalarySlipGenerator() {
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Designation</Label><Input value={data.employee.designation} onChange={(e) => updateNested('employee', 'designation', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Department</Label><Input value={data.employee.department} onChange={(e) => updateNested('employee', 'department', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label><Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Date of Joining</Label><Input value={data.employee.doj} onChange={(e) => updateNested('employee', 'doj', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">UAN Number</Label><Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label><Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="col-span-2 space-y-1.5 pt-2"><Separator className="opacity-10"/></div>
                                 <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Bank Name</Label><Input value={data.employee.bankName} onChange={(e) => updateNested('employee', 'bankName', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Account No.</Label><Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label><Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                            </div>
+                        </div>
+
+                        {/* Pay Period Section */}
+                        <div className="space-y-6">
+                            <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Pay Period</Badge>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month</Label><Input value={data.payPeriod.month} onChange={(e) => updateNested('payPeriod', 'month', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. AUGUST" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Year</Label><Input value={data.payPeriod.year} onChange={(e) => updateNested('payPeriod', 'year', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. 2024" /></div>
                             </div>
                         </div>
 
@@ -416,7 +428,7 @@ export default function SalarySlipGenerator() {
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
-                        <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
+                        <Button onClick={() => handleExport('pdf')} disabled={isExporting} className="w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group border-4 border-primary">
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
                             EXPORT PAYSLIP PDF
                         </Button>
@@ -477,10 +489,12 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <Row label="Employee ID" value={data.employee.empId} />
                 <Row label="Designation" value={data.employee.designation} />
                 <Row label="Department" value={data.employee.department} />
-                <Row label="UAN Number" value={data.employee.uanNo} />
+                <Row label="Date of Joining" value={data.employee.doj} />
                 <Row label="PAN Card No." value={data.employee.pan} />
+                <Row label="UAN Number" value={data.employee.uanNo} />
                 <Row label="Bank Name" value={data.employee.bankName} />
                 <Row label="Bank Account" value={data.employee.bankAccount} />
+                <Row label="IFSC Code" value={data.employee.ifsc} />
                 <Row label="Total Days" value={String(data.calc.totalDays)} />
                 <Row label="Present Days" value={String(data.calc.presentDays)} />
                 <Row label="Pay Period" value={`${data.payPeriod.month} ${data.payPeriod.year}`} />
@@ -525,7 +539,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             <div className="mt-5 grid grid-cols-2 gap-10 items-end pb-8 overflow-visible">
                 <div className="p-6 border-l-8 border-primary bg-slate-50 rounded-r-[1.5rem] text-left">
                     <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-widest">Digital Notice</p>
-                    <p className="text-11px font-medium leading-relaxed italic text-slate-500">"This is a system-generated salary statement. It is digitally verified and does not require a physical seal."</p>
+                    <p className="text-[10px] font-medium leading-relaxed italic text-slate-500">"This is a system-generated salary statement. It is digitally verified and does not require a physical seal."</p>
                 </div>
                 <div className="flex flex-col items-center">
                     <div className="w-56 h-14 border-b-2 border-slate-200 mb-2" />
