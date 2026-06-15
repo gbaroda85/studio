@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -37,7 +36,8 @@ import {
     Maximize,
     ChevronRight,
     PenTool,
-    UploadCloud
+    UploadCloud,
+    FileDigit
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -361,7 +361,7 @@ export default function IdCardGenerator() {
                                             <Button variant="outline" className="h-11 rounded-xl border-2 border-dashed font-black text-[9px] uppercase" onClick={() => fileInputRef.current?.click()}><ImageIcon className="size-4 mr-2" /> CANDIDATE PHOTO</Button>
                                             <Button variant="outline" className="h-11 rounded-xl border-2 border-dashed font-black text-[9px] uppercase" onClick={() => signInputRef.current?.click()}><PenTool className="size-4 mr-2" /> SIGNATURE</Button>
                                             
-                                            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('personal', 'photo', e)} />
+                                            <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                                             <input ref={signInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('personal', 'signature', e)} />
                                         </div>
                                     </div>
