@@ -392,13 +392,20 @@ export default function SalarySlipGenerator() {
                                     <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Payroll Management</CardDescription>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-8 text-[9px] font-black uppercase text-rose-600 hover:bg-rose-50"><Eraser className="size-3 mr-1" /> Clear All</Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleClearAll} 
+                                className="h-8 text-[9px] font-black uppercase text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white dark:border-rose-900/30 dark:hover:bg-rose-500/20 transition-all duration-300"
+                            >
+                                <Eraser className="size-3 mr-1" /> Clear All
+                            </Button>
                         </div>
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-8">
                         
-                        {/* EMPLOYEE DATABASE DROPDOWN - INTEGRATED & THEMED */}
+                        {/* EMPLOYEE DATABASE DROPDOWN */}
                         <div className="space-y-4 bg-muted/30 p-5 rounded-[2rem] border-2 border-dashed border-foreground/10 animate-in slide-in-from-top-4">
                             <div className="flex items-center justify-between px-1">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
@@ -453,24 +460,23 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        {/* CALCULATION ENGINE */}
+                        {/* ATTENDANCE ENGINE */}
                         <div className="space-y-6 bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/20 shadow-inner">
                             <div className="flex items-center justify-between">
                                 <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Attendance Engine</Badge>
                                 <Zap className="size-4 text-primary animate-pulse" />
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Daily Rate</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-12 rounded-xl font-black border-2 border-primary/20 text-lg shadow-sm" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-12 rounded-xl font-black border-2 border-primary/40 text-2xl text-center bg-white dark:bg-slate-900" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5 col-span-2"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (per hour)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2 bg-muted/10" /></div>
                             </div>
                         </div>
 
                         {/* Rest of the form sections... */}
                         <div className="space-y-10 pt-4">
-                            {/* Business Section */}
                             <div className="space-y-6">
                                 <Badge className="bg-muted text-muted-foreground font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Branding</Badge>
                                 <div className="grid gap-4">
@@ -481,7 +487,6 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            {/* Employee Section */}
                             <div className="space-y-6 pt-6 border-t border-dashed">
                                 <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
                                 <div className="grid grid-cols-2 gap-4">
@@ -499,7 +504,6 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            {/* Pay Period Section */}
                             <div className="space-y-6 pt-6 border-t border-dashed">
                                 <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Pay Period</Badge>
                                 <div className="grid grid-cols-2 gap-4">
@@ -512,7 +516,14 @@ export default function SalarySlipGenerator() {
                             <div className="space-y-6 pt-6 border-t border-dashed">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
-                                    <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-emerald-600 hover:bg-emerald-50"><Plus className="size-3 mr-1" /> Add</Button>
+                                    <Button 
+                                        size="sm" 
+                                        variant="outline" 
+                                        onClick={() => handleAddDynamic('allowances')} 
+                                        className="h-7 text-[8px] font-black uppercase text-emerald-600 border-emerald-200 hover:bg-emerald-600 hover:text-white dark:border-emerald-900/30 dark:hover:bg-emerald-600/20 transition-all duration-300"
+                                    >
+                                        <Plus className="size-3 mr-1" /> Add
+                                    </Button>
                                 </div>
                                 <div className="space-y-3">
                                     {data.allowances.map((item) => (
@@ -530,7 +541,14 @@ export default function SalarySlipGenerator() {
                             <div className="space-y-6 pt-4 border-t border-dashed">
                                 <div className="flex justify-between items-center">
                                     <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
-                                    <Button size="sm" onClick={() => handleAddDynamic('deductions')} className="h-7 bg-rose-600 text-white font-black text-[8px] uppercase hover:bg-rose-700"><Plus className="size-3 mr-1" /> Add Deduction</Button>
+                                    <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => handleAddDynamic('deductions')} 
+                                        className="h-7 text-[8px] font-black uppercase text-rose-600 border-rose-200 hover:bg-rose-600 hover:text-white dark:border-rose-900/30 dark:hover:bg-rose-600/20 transition-all duration-300"
+                                    >
+                                        <Plus className="size-3 mr-1" /> Add
+                                    </Button>
                                 </div>
                                 <div className="space-y-3">
                                     {data.deductions.map((item) => (
