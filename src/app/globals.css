@@ -55,10 +55,12 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* CRITICAL FIX: Prevent page jumping by reserving scrollbar gutter */
+    scrollbar-gutter: stable;
   }
   
   html, body {
-    @apply h-full w-full m-0 p-0 overflow-x-hidden;
+    @apply h-full w-full m-0 p-0;
     background-color: hsl(var(--background));
     /* Hardware acceleration for scroll */
     -webkit-overflow-scrolling: touch;
