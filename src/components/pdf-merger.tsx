@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -209,6 +209,23 @@ export default function PdfMerger() {
                 const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
+
+            // CRITICAL FIX: Set Viewer Preferences to prevent "huge" display
+            const catalog = mergedPdf.catalog;
+            catalog.set(PDFName.of('ViewerPreferences'), mergedPdf.context.obj({
+                FitWindow: true,
+                CenterWindow: true,
+                DisplayDocTitle: true
+            }));
+            
+            // Force browser to fit to window on open
+            const allPages = mergedPdf.getPages();
+            if (allPages.length > 0) {
+                const firstPage = allPages[0];
+                const dest = mergedPdf.context.obj([firstPage.ref, PDFName.of('Fit')]);
+                catalog.set(PDFName.of('OpenAction'), dest);
+            }
+
             const mergedPdfBytes = await mergedPdf.save();
             const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
             
@@ -244,7 +261,7 @@ export default function PdfMerger() {
     }
     
     return (
-        <div ref={studioWorkspaceRef} className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20">
+        <div ref={studioWorkspaceRef} className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-500 pb-20 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Left Column: List */}
                 <div className="lg:col-span-7 flex flex-col">
