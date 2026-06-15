@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -8,7 +8,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings2, Eye, Smartphone, ShieldCheck, Zap, Sparkles, RefreshCcw, Eraser, Monitor } from 'lucide-react';
+import { 
+    Download, 
+    Loader2, 
+    FileText, 
+    Settings2, 
+    Eye, 
+    Smartphone, 
+    ShieldCheck, 
+    Zap, 
+    Sparkles, 
+    RefreshCcw, 
+    Eraser, 
+    Monitor 
+} from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from './ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,7 +59,6 @@ export default function TextToPdfConverter() {
 
         setIsGenerating(true);
         try {
-            // Give browser a tiny moment to stabilize
             await new Promise(r => setTimeout(r, 100));
 
             const doc = new jsPDF({
@@ -72,7 +84,7 @@ export default function TextToPdfConverter() {
                     cursorY = marginSize + (fontSize * 0.35);
                 }
                 doc.text(line, marginSize, cursorY);
-                cursorY += (fontSize * 0.6); // Standard line spacing
+                cursorY += (fontSize * 0.6); 
             });
             
             doc.save(`GR7-Text-Document-${Date.now()}.pdf`);
@@ -108,7 +120,6 @@ export default function TextToPdfConverter() {
     return (
         <div className="w-full max-w-7xl flex flex-col gap-8 px-4 animate-in fade-in duration-700 mx-auto pb-32">
             
-            {/* Header: Studio Controls */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -137,7 +148,6 @@ export default function TextToPdfConverter() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                {/* LEFT: EDITOR */}
                 <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6">
                         <div className="flex items-center justify-between">
@@ -196,9 +206,8 @@ export default function TextToPdfConverter() {
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT: VIRTUAL A4 PREVIEW (FIXED ALIGNMENT) */}
                 <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
-                    <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between">
+                    <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
@@ -207,7 +216,6 @@ export default function TextToPdfConverter() {
                     </CardHeader>
                     <CardContent className="flex-1 p-6 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
                         
-                        {/* THE VIRTUAL A4 PAGE (Strict Alignment Fix) */}
                         <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.85] xl:scale-0.95 origin-top transition-transform duration-500 flex justify-center w-full">
                             <div 
                                 ref={previewRef} 
@@ -221,6 +229,7 @@ export default function TextToPdfConverter() {
                                     color: '#000000',
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
                                     lineHeight: '1.4',
                                     boxSizing: 'border-box',
                                     textAlign: 'left',
@@ -231,7 +240,6 @@ export default function TextToPdfConverter() {
                             </div>
                         </div>
 
-                        {/* STATUS OVERLAY */}
                         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
                              <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
                         </div>
