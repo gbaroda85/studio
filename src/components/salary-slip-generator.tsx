@@ -485,7 +485,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-3 gap-x-10 mb-3 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 text-left overflow-visible">
+            <div className="grid grid-cols-2 gap-y-1.5 gap-x-10 mb-3 bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200 text-left overflow-visible">
                 <Row label="Employee Name" value={data.employee.name} />
                 <Row label="Employee ID" value={data.employee.empId} />
                 <Row label="Designation" value={data.employee.designation} />
