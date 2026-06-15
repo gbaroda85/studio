@@ -36,7 +36,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { PDFDocument, PDFName, rgb } from 'pdf-lib';
 import confetti from 'canvas-confetti';
 
 // --- TYPES ---
@@ -201,25 +201,39 @@ export default function GstInvoiceGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
-                const pdf = new jsPDF({ 
-                    orientation: 'portrait', 
-                    unit: 'pt', 
-                    format: 'a4'
-                });
+                const pdfDoc = await PDFDocument.create();
                 
-                // Standard A4 in points is 595 x 842
+                // Standard A4 in points (pt)
                 const pdfWidth = 595.28;
                 const pdfHeight = 841.89;
+                const page = pdfDoc.addPage([pdfWidth, pdfHeight]);
 
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-                
-                pdf.viewerPreferences({
-                    'FitWindow': true,
-                    'CenterWindow': true,
-                    'DisplayDocTitle': true
+                const imgBuffer = await fetch(dataUrl).then(res => res.arrayBuffer());
+                const embeddedImage = await pdfDoc.embedJpg(imgBuffer);
+
+                page.drawImage(embeddedImage, {
+                    x: 0,
+                    y: 0,
+                    width: pdfWidth,
+                    height: pdfHeight
                 });
 
-                pdf.save(`GST_Invoice_${data.invoice.no}.pdf`);
+                // Force browser to fit window on open
+                const catalog = pdfDoc.catalog;
+                catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+                    FitWindow: true,
+                    CenterWindow: true,
+                    DisplayDocTitle: true
+                }));
+                const dest = pdfDoc.context.obj([page.ref, PDFName.of('Fit')]);
+                catalog.set(PDFName.of('OpenAction'), dest);
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `GST_Invoice_${data.invoice.no}.pdf`;
+                link.click();
             } else {
                 const link = document.createElement('a');
                 link.href = dataUrl;

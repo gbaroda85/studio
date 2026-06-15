@@ -35,8 +35,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { PDFDocument, PDFName } from 'pdf-lib';
+import { PDFDocument, PDFName, rgb } from 'pdf-lib';
 import confetti from 'canvas-confetti';
 
 // --- TYPES ---
@@ -111,12 +110,12 @@ const INITIAL_DATA: SalaryData = {
         overtimeRate: 200
     },
     allowances: [
-        { id: 'allow-1', label: 'House Rent', type: 'percentage', value: 16 },
-        { id: 'allow-2', label: 'Washing Al', type: 'percentage', value: 3 }
+        { id: 'allow-initial-1', label: 'House Rent', type: 'percentage', value: 16 },
+        { id: 'allow-initial-2', label: 'Washing Al', type: 'percentage', value: 3 }
     ],
     deductions: [
-        { id: 'deduct-1', label: 'Provident', type: 'percentage', value: 12 },
-        { id: 'deduct-2', label: 'Professional Tax', type: 'fixed', value: 200 }
+        { id: 'deduct-initial-1', label: 'Provident', type: 'percentage', value: 12 },
+        { id: 'deduct-initial-2', label: 'Professional Tax', type: 'fixed', value: 200 }
     ]
 };
 
@@ -234,25 +233,39 @@ export default function SalarySlipGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
-                const pdf = new jsPDF({ 
-                    orientation: 'portrait', 
-                    unit: 'pt', 
-                    format: 'a4' 
-                });
+                const pdfDoc = await PDFDocument.create();
                 
-                // Standard A4 in points is 595 x 842
+                // Standard A4 in points (pt)
                 const pdfWidth = 595.28;
                 const pdfHeight = 841.89;
+                const page = pdfDoc.addPage([pdfWidth, pdfHeight]);
 
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-                
-                pdf.viewerPreferences({
-                    'FitWindow': true,
-                    'CenterWindow': true,
-                    'DisplayDocTitle': true
+                const imgBuffer = await fetch(dataUrl).then(res => res.arrayBuffer());
+                const embeddedImage = await pdfDoc.embedJpg(imgBuffer);
+
+                page.drawImage(embeddedImage, {
+                    x: 0,
+                    y: 0,
+                    width: pdfWidth,
+                    height: pdfHeight
                 });
 
-                pdf.save(`Salary_Slip_${data.employee.name || 'document'}.pdf`);
+                // Force browser to fit window on open
+                const catalog = pdfDoc.catalog;
+                catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+                    FitWindow: true,
+                    CenterWindow: true,
+                    DisplayDocTitle: true
+                }));
+                const dest = pdfDoc.context.obj([page.ref, PDFName.of('Fit')]);
+                catalog.set(PDFName.of('OpenAction'), dest);
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `Salary_Slip_${data.employee.name || 'document'}.pdf`;
+                link.click();
             } else {
                 const link = document.createElement('a');
                 link.href = dataUrl;
@@ -337,8 +350,8 @@ export default function SalarySlipGenerator() {
                              <div className="flex justify-between items-center"><Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Earnings/Deductions</Badge></div>
                              <div className="grid gap-3"><Button size="sm" variant="outline" onClick={() => handleAddDynamic('allowances')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-primary">ADD ALLOWANCE</Button><Button size="sm" variant="outline" onClick={() => handleAddDynamic('deductions')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-rose-50">ADD DEDUCTION</Button></div>
                              <div className="space-y-4">
-                                {data.allowances.concat(data.deductions).map((item) => (
-                                    <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
+                                {data.allowances.concat(data.deductions).map((item, index) => (
+                                    <div key={`${item.id}-${index}`} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
                                         <Input value={item.label} onChange={(e) => updateDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none" />
                                         <Input type="number" value={item.value} onChange={(e) => updateDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
                                         <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id)}><Trash2 className="size-3.5" /></Button>
@@ -454,7 +467,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             <div className="mt-5 grid grid-cols-2 gap-10 items-end pb-8 overflow-visible">
                 <div className="p-6 border-l-8 border-primary bg-slate-50 rounded-r-[1.5rem] text-left">
                     <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-widest">Digital Notice</p>
-                    <p className="text-[11px] font-medium leading-relaxed italic text-slate-500">"This is a system-generated salary statement. It is digitally verified and does not require a physical seal."</p>
+                    <p className="text-11px font-medium leading-relaxed italic text-slate-500">"This is a system-generated salary statement. It is digitally verified and does not require a physical seal."</p>
                 </div>
                 <div className="flex flex-col items-center">
                     <div className="w-56 h-14 border-b-2 border-slate-200 mb-2" />
