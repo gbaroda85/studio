@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -232,6 +233,19 @@ export default function IdCardGenerator() {
                 setData(prev => ({
                     ...prev,
                     [section]: { ...prev[section], [field]: ev.target?.result as string }
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleFileChange = (file: File | null) => {
+        if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setData(prev => ({
+                    ...prev,
+                    personal: { ...prev.personal, photo: ev.target?.result as string }
                 }));
             };
             reader.readAsDataURL(file);
