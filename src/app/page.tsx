@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -66,7 +67,8 @@ import {
   PenTool,
   CalendarDays,
   Banknote,
-  Palette
+  Palette,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,7 +80,7 @@ import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS (Limit 6 for Home Grid)
-  { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "featured" },
+  { icon: CreditCard, title: "ID CARD GENERATOR", description: "Design professional Employee & Student IDs with Bulk support.", href: "/id-card-generator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
@@ -102,6 +104,7 @@ const ALL_TOOLS = [
   { icon: Landmark, title: "TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
 
   // --- ALL OTHER TOOLS (Searchable only) ---
+  { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "image" },
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALC", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
