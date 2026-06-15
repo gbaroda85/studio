@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings2, Eye, Smartphone, ShieldCheck, Zap, Sparkles, RefreshCcw, Eraser } from 'lucide-react';
+import { Download, Loader2, FileText, Settings2, Eye, Smartphone, ShieldCheck, Zap, Sparkles, RefreshCcw, Eraser, Monitor } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from './ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
