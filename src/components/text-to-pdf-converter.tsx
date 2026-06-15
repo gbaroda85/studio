@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -84,7 +85,6 @@ export default function TextToPdfConverter() {
                     cursorY = marginSize + (fontSize * 0.35);
                 }
                 doc.text(line, marginSize, cursorY);
-                // Reduced line height to 0.5 (was 1.2) to match 1.2 in preview
                 cursorY += (fontSize * 0.5); 
             });
             
@@ -126,13 +126,13 @@ export default function TextToPdfConverter() {
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
                         <Settings2 className="size-5 md:size-6" />
                     </div>
-                    <div>
+                    <div className="text-left">
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Text <span className="text-primary">Studio</span></h2>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1 text-left">High-Performance Editor</p>
                     </div>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Settings
                     </Button>
                     <Button 
