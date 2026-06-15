@@ -72,7 +72,8 @@ import {
   PenTool,
   Banknote,
   CalendarDays,
-  Menu
+  Menu,
+  Palette
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -478,6 +479,14 @@ function ToolsPageContent() {
   ];
   
   const converterFeatures = [
+    {
+      href: '/color-picker',
+      labelKey: 'color_picker_label',
+      descriptionKey: 'color_picker_description',
+      icon: Palette,
+      color: 'bg-blue-600',
+      lightBg: 'bg-blue-50'
+    },
     {
       href: '/qr-code-generator',
       labelKey: 'qr_code_generator_label',
