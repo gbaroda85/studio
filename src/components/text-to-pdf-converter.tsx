@@ -85,7 +85,7 @@ export default function TextToPdfConverter() {
                     cursorY = marginSize + (fontSize * 0.35);
                 }
                 doc.text(line, marginSize, cursorY);
-                // Tightened PDF spacing to match 1.2 lineHeight
+                // Matches 1.2 lineHeight in preview
                 cursorY += (fontSize * 0.5); 
             });
             
@@ -165,7 +165,7 @@ export default function TextToPdfConverter() {
                             </Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-10">
+                    <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8">
                         <div className="flex-1 flex flex-col gap-3">
                             <div className="flex justify-between items-center px-1">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
@@ -175,7 +175,8 @@ export default function TextToPdfConverter() {
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
                                 placeholder="Start typing your document content here..."
-                                className="flex-1 min-h-[400px] text-base md:text-lg resize-none font-bold leading-normal border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-6 bg-muted/20 custom-scrollbar shadow-inner text-left"
+                                className="flex-1 min-h-[400px] text-base resize-none font-bold border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-5 bg-muted/20 custom-scrollbar shadow-inner text-left"
+                                style={{ lineHeight: '1.2' }}
                             />
                         </div>
 
@@ -234,7 +235,7 @@ export default function TextToPdfConverter() {
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
-                                    lineHeight: '1.2', // Reduced from 1.4 for tighter gaps
+                                    lineHeight: '1.2', 
                                     boxSizing: 'border-box',
                                     textAlign: 'left',
                                     display: 'block'
