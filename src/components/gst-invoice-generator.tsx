@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
     Plus, 
     Trash2, 
@@ -118,7 +118,7 @@ export default function GstInvoiceGenerator() {
     const exportRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_gst_invoice_data_persisted');
+        const saved = localStorage.getItem('gr7_gst_invoice_v2_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -127,7 +127,7 @@ export default function GstInvoiceGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_gst_invoice_data_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_gst_invoice_v2_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
@@ -168,7 +168,7 @@ export default function GstInvoiceGenerator() {
             invoice: { no: `INV-${Date.now().toString().slice(-6)}`, date: new Date().toISOString().split('T')[0], isInterState: false },
             items: [INITIAL_ITEM()]
         });
-        localStorage.removeItem('gr7_gst_invoice_data_persisted');
+        localStorage.removeItem('gr7_gst_invoice_v2_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -207,7 +207,17 @@ export default function GstInvoiceGenerator() {
                     unit: 'px', 
                     format: [794, 1123]
                 });
+                
+                // Add Image fitting strictly to page points
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
+                
+                // CRITICAL FIX: Set Viewer Preferences to prevent "huge" opening
+                pdf.viewerPreferences({
+                    'FitWindow': true,
+                    'CenterWindow': true,
+                    'DisplayDocTitle': true
+                });
+
                 pdf.save(`GST_Invoice_${data.invoice.no}.pdf`);
             } else {
                 const link = document.createElement('a');

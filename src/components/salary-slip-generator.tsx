@@ -20,7 +20,8 @@ import {
     ImageIcon,
     UploadCloud,
     X,
-    Eraser
+    Eraser,
+    ListFilter
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -140,7 +141,7 @@ export default function SalarySlipGenerator() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_data_persisted');
+        const saved = localStorage.getItem('gr7_salary_slip_data_v2_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -149,7 +150,7 @@ export default function SalarySlipGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_data_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_salary_slip_data_v2_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
@@ -199,7 +200,7 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_data_persisted');
+        localStorage.removeItem('gr7_salary_slip_data_v2_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -232,8 +233,22 @@ export default function SalarySlipGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
-                const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [794, 1123] });
+                const pdf = new jsPDF({ 
+                    orientation: 'portrait', 
+                    unit: 'px', 
+                    format: [794, 1123] 
+                });
+                
+                // Add Image fitting strictly to page points
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
+                
+                // CRITICAL FIX: Set Viewer Preferences to prevent "huge" opening
+                pdf.viewerPreferences({
+                    'FitWindow': true,
+                    'CenterWindow': true,
+                    'DisplayDocTitle': true
+                });
+
                 pdf.save(`Salary_Slip_${data.employee.name || 'document'}.pdf`);
             } else {
                 const link = document.createElement('a');
@@ -309,14 +324,15 @@ export default function SalarySlipGenerator() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
                             </div>
                         </div>
 
                         <div className="space-y-6">
                              <div className="flex justify-between items-center"><Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Earnings/Deductions</Badge></div>
-                             <div className="grid gap-3"><Button size="sm" variant="outline" onClick={() => handleAddDynamic('allowances')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-primary">ADD ALLOWANCE</Button><Button size="sm" variant="outline" onClick={() => handleAddDynamic('deductions')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-rose-500">ADD DEDUCTION</Button></div>
+                             <div className="grid gap-3"><Button size="sm" variant="outline" onClick={() => handleAddDynamic('allowances')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-primary">ADD ALLOWANCE</Button><Button size="sm" variant="outline" onClick={() => handleAddDynamic('deductions')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-rose-50">ADD DEDUCTION</Button></div>
                              <div className="space-y-4">
                                 {data.allowances.concat(data.deductions).map((item) => (
                                     <div key={item.id} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
@@ -340,6 +356,7 @@ export default function SalarySlipGenerator() {
                 </Card>
             </div>
 
+            {/* LIVE PREVIEW A4 */}
             <div className="lg:col-span-7 flex flex-col items-center w-full">
                 <div className="w-full flex items-center justify-between mb-4 px-4 no-print">
                     <div className="flex items-center gap-2"><Eye className="size-4 text-primary" /><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Live View</span></div>
@@ -466,3 +483,4 @@ function TableItem({ label, value, isDeduction }: { label: string, value: number
         </div>
     );
 }
+
