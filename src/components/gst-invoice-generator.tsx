@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
@@ -179,7 +178,7 @@ export default function GstInvoiceGenerator() {
         try {
             await document.fonts.ready;
             const canvas = await html2canvas(exportRef.current, {
-                scale: 3, // High-res capture
+                scale: 3, 
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
@@ -201,21 +200,17 @@ export default function GstInvoiceGenerator() {
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
-                // FIXED: Use standard point dimensions for A4 to prevent "huge" opening
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
                     unit: 'pt', 
                     format: 'a4'
                 });
                 
-                // Standard A4 dimensions in pt (at 72 DPI)
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
 
-                // Map high-res image to the physical page size
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
                 
-                // Force Fit-to-Window metadata
                 pdf.viewerPreferences({
                     'FitWindow': true,
                     'CenterWindow': true,
@@ -327,7 +322,7 @@ export default function GstInvoiceGenerator() {
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
                             GENERATE INVOICE PDF
                         </Button>
-                        <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-50 transition-all">
+                        <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all">
                             <ImageIcon className="mr-2 size-4" /> SAVE AS IMAGE (JPG)
                         </Button>
                     </CardFooter>
