@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -39,7 +40,8 @@ import {
     Dialog, 
     DialogContent, 
     DialogHeader, 
-    DialogTitle 
+    DialogTitle,
+    DialogFooter
 } from '@/components/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -150,14 +152,6 @@ export default function PdfMerger() {
         clearMergedFile();
         setIsPreviewOpen(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
-        
-        setTimeout(() => {
-            if (studioWorkspaceRef.current) {
-                studioWorkspaceRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }, 150);
     }
 
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
@@ -166,8 +160,7 @@ export default function PdfMerger() {
             const loadingTask = pdfjs.getDocument({ 
                 data: pdfBytes,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-                cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+                cMapPacked: true
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
@@ -210,7 +203,7 @@ export default function PdfMerger() {
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
 
-            // CRITICAL FIX: Set Viewer Preferences to prevent "huge" display
+            // STABLE METADATA: Set Viewer Preferences to prevent "huge" display
             const catalog = mergedPdf.catalog;
             catalog.set(PDFName.of('ViewerPreferences'), mergedPdf.context.obj({
                 FitWindow: true,
@@ -218,6 +211,9 @@ export default function PdfMerger() {
                 DisplayDocTitle: true
             }));
             
+            // Set PageMode to UseNone (prevents sidebar opening by default)
+            catalog.set(PDFName.of('PageMode'), PDFName.of('UseNone'));
+
             // Force browser to fit to window on open (OpenAction)
             const allPages = mergedPdf.getPages();
             if (allPages.length > 0) {
