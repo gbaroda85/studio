@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -21,7 +20,11 @@ import {
     Sparkles, 
     RefreshCcw, 
     Eraser, 
-    Monitor 
+    Monitor,
+    Bold,
+    Palette,
+    Baseline,
+    Move
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from './ui/badge';
@@ -47,10 +50,21 @@ export default function TextToPdfConverter() {
     const [text, setText] = useState("Hello, World!\n\nThis is a real-time live preview.\n\nEverything happens locally in your browser for 100% privacy.\n\nNow typing and deleting is extremely fast and smooth!");
     const [fontSize, setFontSize] = useState(14);
     const [font, setFont] = useState<Font>('helvetica');
+    const [isBold, setIsBold] = useState(true);
+    const [textColor, setTextColor] = useState("#000000");
     const [margin, setMargin] = useState(20);
     const [isGenerating, setIsGenerating] = useState(false);
     
     const previewRef = useRef<HTMLDivElement>(null);
+
+    const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+    };
 
     const handleDownload = async () => {
         if (!text.trim()) {
@@ -68,8 +82,11 @@ export default function TextToPdfConverter() {
                 format: "a4"
             });
             
-            doc.setFont(font, 'normal');
+            doc.setFont(font, isBold ? 'bold' : 'normal');
             doc.setFontSize(fontSize);
+            
+            const rgb = hexToRgb(textColor);
+            doc.setTextColor(rgb.r, rgb.g, rgb.b);
             
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
@@ -97,7 +114,7 @@ export default function TextToPdfConverter() {
                 colors: ['#1D61F2', '#8E5CF6', '#ffffff']
             });
             
-            toast({ title: 'Download Started', description: 'Your high-quality PDF is ready.' });
+            toast({ title: 'Download Started', description: 'Your professional PDF is ready.' });
         } catch (error) {
             console.error("PDF generation error:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate PDF.' });
@@ -115,6 +132,8 @@ export default function TextToPdfConverter() {
         setText("Hello, World!\n\nThis is a real-time live preview.");
         setFontSize(14);
         setFont('helvetica');
+        setIsBold(true);
+        setTextColor("#000000");
         setMargin(20);
     };
     
@@ -128,16 +147,16 @@ export default function TextToPdfConverter() {
                     </div>
                     <div className="text-left">
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Text <span className="text-primary">Studio</span></h2>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1 text-left">High-Performance Editor</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1 text-left">Advanced Document Editor</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
+                <div className="flex items-center gap-3 w-full md:w-auto h-12">
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-full border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Settings
                     </Button>
                     <Button 
                         size="lg" 
-                        className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                        className="magic-button magic-button-success flex-[2] md:flex-none h-full px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
                         onClick={handleDownload}
                         disabled={isGenerating || !text.trim()}
                     >
@@ -179,25 +198,43 @@ export default function TextToPdfConverter() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed">
+                        {/* ADVANCED CONTROLS GRID */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed items-start">
                              <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">Font Family</Label>
-                                 <Select value={font} onValueChange={(v) => setFont(v as Font)}>
-                                    <SelectTrigger className="h-11 font-black border-2 rounded-xl bg-background/50 shadow-sm"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                        <SelectItem value="helvetica" className="font-bold py-3">Helvetica (Sans)</SelectItem>
-                                        <SelectItem value="times" className="font-bold py-3">Times Roman (Serif)</SelectItem>
-                                        <SelectItem value="courier" className="font-bold py-3">Courier (Mono)</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Baseline className="size-3"/> Font & Style</Label>
+                                 <div className="flex gap-2">
+                                     <Select value={font} onValueChange={(v) => setFont(v as Font)}>
+                                        <SelectTrigger className="h-10 flex-1 font-black border-2 rounded-xl bg-background/50 shadow-sm text-[10px]"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                            <SelectItem value="helvetica" className="font-bold py-2 uppercase text-[10px]">Helvetica (Sans)</SelectItem>
+                                            <SelectItem value="times" className="font-bold py-2 uppercase text-[10px]">Times (Serif)</SelectItem>
+                                            <SelectItem value="courier" className="font-bold py-2 uppercase text-[10px]">Courier (Mono)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Button 
+                                        variant="outline" 
+                                        size="icon" 
+                                        className={cn("h-10 w-10 shrink-0 border-2 rounded-xl transition-all", isBold && "bg-primary text-white border-primary shadow-lg")}
+                                        onClick={() => setIsBold(!isBold)}
+                                    >
+                                        <Bold className="size-4" />
+                                    </Button>
+                                 </div>
                              </div>
+                             
                              <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground">Size (pt)</Label>
-                                 <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-11 font-black text-lg border-2 rounded-xl text-center bg-background/50 shadow-inner" />
+                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Palette className="size-3"/> Size & Color</Label>
+                                 <div className="flex gap-2">
+                                    <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 flex-1 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
+                                    <div className="h-10 w-12 rounded-xl border-2 p-1 bg-background/50 shadow-inner flex items-center justify-center group relative overflow-hidden">
+                                        <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent" />
+                                    </div>
+                                 </div>
                              </div>
+
                               <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground">Margin (mm)</Label>
-                                 <Input type="number" value={margin} onChange={(e) => setMargin(Math.max(0, Number(e.target.value)))} className="h-11 font-black text-lg border-2 rounded-xl text-center bg-background/50 shadow-inner" />
+                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Move className="size-3"/> Margin (mm)</Label>
+                                 <Input type="number" value={margin} onChange={(e) => setMargin(Math.max(0, Number(e.target.value)))} className="h-10 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
                              </div>
                         </div>
                     </CardContent>
@@ -230,7 +267,8 @@ export default function TextToPdfConverter() {
                                     padding: `${margin}mm`,
                                     fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
                                     fontSize: `${fontSize}pt`,
-                                    color: '#000000',
+                                    fontWeight: isBold ? 'bold' : 'normal',
+                                    color: textColor,
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
