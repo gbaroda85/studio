@@ -115,8 +115,8 @@ export default function TextToPdfConverter() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Text <span className="text-primary">Studio</span></h2>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">High-Performance Editor</p>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Text <span className="text-primary">Studio</span></h2>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1 text-left">High-Performance Editor</p>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -156,13 +156,13 @@ export default function TextToPdfConverter() {
                         <div className="flex-1 flex flex-col gap-3">
                             <div className="flex justify-between items-center px-1">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
-                                <Badge variant="outline" className="bg-primary/5 text-primary text-[8px] font-black border-primary/20">UTF-8 ENCODING</Badge>
+                                <Badge variant="outline" className="bg-primary/5 text-primary text-[8px] font-black border-primary/20 uppercase tracking-widest">Safe Input</Badge>
                             </div>
                             <Textarea
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
                                 placeholder="Start typing your document content here..."
-                                className="flex-1 min-h-[400px] text-base md:text-lg resize-none font-bold leading-relaxed border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-6 bg-muted/20 custom-scrollbar shadow-inner"
+                                className="flex-1 min-h-[400px] text-base md:text-lg resize-none font-bold leading-relaxed border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-6 bg-muted/20 custom-scrollbar shadow-inner text-left"
                             />
                         </div>
 
@@ -196,22 +196,22 @@ export default function TextToPdfConverter() {
                     </CardFooter>
                 </Card>
 
-                {/* RIGHT: VIRTUAL A4 PREVIEW (CSS-BASED, NO LAG) */}
+                {/* RIGHT: VIRTUAL A4 PREVIEW (FIXED ALIGNMENT) */}
                 <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
                         </div>
-                        <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">A4 LAYOUT</Badge>
+                        <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                     </CardHeader>
                     <CardContent className="flex-1 p-6 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
                         
-                        {/* THE VIRTUAL A4 PAGE (Scaled via CSS transform for performance) */}
-                        <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.85] xl:scale-[0.95] origin-top transition-transform duration-500">
+                        {/* THE VIRTUAL A4 PAGE (Strict Alignment Fix) */}
+                        <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.85] xl:scale-0.95 origin-top transition-transform duration-500 flex justify-center w-full">
                             <div 
                                 ref={previewRef} 
-                                className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none" 
+                                className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
                                 style={{ 
                                     width: '210mm',
                                     minHeight: '297mm',
@@ -222,10 +222,12 @@ export default function TextToPdfConverter() {
                                     whiteSpace: 'pre-wrap',
                                     wordBreak: 'break-word',
                                     lineHeight: '1.4',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    textAlign: 'left',
+                                    display: 'block'
                                 }}
                             >
-                                {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40">Start Typing...</span>}
+                                {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40 w-full">Start Typing...</span>}
                             </div>
                         </div>
 
