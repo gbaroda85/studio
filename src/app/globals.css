@@ -4,26 +4,27 @@
 
 @layer base {
   :root {
-    --background: 192 70% 95%;     /* Light Teal/Blue from image background */
-    --foreground: 222 47% 11%;     /* Deep Slate/Black text */
-    --card: 0 0% 100%;             /* Pure White cards as seen in image */
+    /* Colors extracted from the provided image */
+    --background: 227 100% 98%;    /* Very Light Cloud Blue/White from image bg */
+    --foreground: 222 47% 11%;     /* Deep Navy for text */
+    --card: 0 0% 100%;             /* Pure White for cards */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 192 90% 35%;        /* Professional Teal for CTAs/Links */
+    --primary: 218 89% 53%;        /* Vibrant Royal Blue from 'Upgrade' button */
     --primary-foreground: 0 0% 100%;
-    --secondary: 192 30% 90%;      /* Soft teal accent */
-    --secondary-foreground: 192 90% 20%;
-    --muted: 192 20% 92%;
-    --muted-foreground: 192 10% 40%;
-    --accent: 192 80% 50%;         /* Vibrant accent blue */
+    --secondary: 227 100% 94%;     /* Lighter blue for soft sections */
+    --secondary-foreground: 218 89% 30%;
+    --muted: 227 30% 95%;
+    --muted-foreground: 220 15% 45%;
+    --accent: 258 90% 66%;         /* Vibrant Purple/Indigo from profile header */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 192 30% 85%;
-    --input: 192 30% 88%;
-    --ring: 192 90% 35%;
-    --radius: 1.5rem;
+    --border: 227 100% 90%;
+    --input: 227 100% 92%;
+    --ring: 218 89% 53%;
+    --radius: 1.5rem;              /* Very rounded corners as seen in image cards */
   }
   
   .dark {
@@ -74,8 +75,8 @@
   body {
     @apply bg-background text-foreground selection:bg-primary/20 min-h-screen flex flex-col;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(192, 70%, 35%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(192, 70%, 35%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(218, 89%, 53%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(258, 90%, 66%, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
     /* Force GPU rendering for smoother experience */
     transform: translate3d(0, 0, 0);
@@ -122,11 +123,11 @@ section {
 }
 
 .text-gradient-hero {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-primary to-slate-900 dark:from-white dark:via-primary dark:to-white;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary;
 }
 
 .bg-gradient-button {
-  @apply bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-accent hover:opacity-90 text-white dark:text-black shadow-lg;
+  @apply bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg;
   transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
@@ -146,7 +147,7 @@ section {
 }
 .neon-border::before {
   content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-primary rounded-[inherit] blur opacity-10 -z-10 group-hover:opacity-30;
+  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-accent to-primary rounded-[inherit] blur opacity-10 -z-10 group-hover:opacity-30;
   transition: opacity 0.5s ease;
 }
 
@@ -377,7 +378,7 @@ section {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(135deg, hsl(var(--primary)), #0a4a8e);
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
   transform: translate(0%, 100%);
   z-index: 10;
   position: absolute;
