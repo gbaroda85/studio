@@ -171,7 +171,7 @@ export default function PdfMerger() {
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
-            const pagesToRender = pdf.numPages;
+            const pagesToRender = Math.min(pdf.numPages, 20); // Limit preview to first 20 pages for performance
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -233,8 +233,9 @@ export default function PdfMerger() {
             const url = URL.createObjectURL(blob);
             setMergedPdfUrl(url);
             
-            await generateVisualPreviews(mergedPdfBytes);
+            // Show preview automatically
             setIsPreviewOpen(true);
+            await generateVisualPreviews(mergedPdfBytes);
             
             confetti({
                 particleCount: 150,
@@ -405,7 +406,7 @@ export default function PdfMerger() {
                                 <div className="flex flex-col gap-4">
                                     {!mergedPdfUrl ? (
                                         <Button 
-                                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                                            className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                                             onClick={handleMergePdfs} 
                                             disabled={pdfFiles.length < 2 || isMerging}
                                         >
