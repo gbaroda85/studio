@@ -21,7 +21,7 @@ import {
     UploadCloud,
     X,
     Eraser,
-    ListFilter
+    Landmark
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ interface DynamicItem {
     id: string;
     label: string;
     type: 'fixed' | 'percentage';
-    value: number;
+    value: number | string; // Allow string for empty input handling
 }
 
 interface SalaryData {
@@ -70,11 +70,11 @@ interface SalaryData {
         year: string;
     };
     calc: {
-        basicRate: number;
-        presentDays: number;
-        totalDays: number;
-        overtimeHours: number;
-        overtimeRate: number;
+        basicRate: number | string;
+        presentDays: number | string;
+        totalDays: number | string;
+        overtimeHours: number | string;
+        overtimeRate: number | string;
     };
     allowances: DynamicItem[];
     deductions: DynamicItem[];
@@ -110,12 +110,12 @@ const INITIAL_DATA: SalaryData = {
         overtimeRate: 200
     },
     allowances: [
-        { id: 'allow-initial-1', label: 'House Rent', type: 'percentage', value: 16 },
-        { id: 'allow-initial-2', label: 'Washing Al', type: 'percentage', value: 3 }
+        { id: 'allow-1', label: 'House Rent', type: 'percentage', value: 16 },
+        { id: 'allow-2', label: 'Washing Al', type: 'percentage', value: 3 }
     ],
     deductions: [
-        { id: 'deduct-initial-1', label: 'Provident', type: 'percentage', value: 12 },
-        { id: 'deduct-initial-2', label: 'Professional Tax', type: 'fixed', value: 200 }
+        { id: 'deduct-1', label: 'Provident Fund', type: 'percentage', value: 12 },
+        { id: 'deduct-2', label: 'Professional Tax', type: 'fixed', value: 200 }
     ]
 };
 
@@ -141,7 +141,7 @@ export default function SalarySlipGenerator() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_data_v2_persisted');
+        const saved = localStorage.getItem('gr7_salary_slip_v3_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -150,18 +150,41 @@ export default function SalarySlipGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_data_v2_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_salary_slip_v3_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
     const results = useMemo(() => {
-        const basicAmt = (data.calc.basicRate || 0) * (data.calc.presentDays || 0);
-        const otAmt = (data.calc.overtimeHours || 0) * (data.calc.overtimeRate || 0);
-        const allowanceItems = data.allowances.map(a => ({ label: a.label, amount: a.type === 'fixed' ? a.value : (a.value / 100) * basicAmt }));
-        const deductionItems = data.deductions.map(d => ({ label: d.label, amount: d.type === 'fixed' ? d.value : (d.value / 100) * basicAmt }));
+        const basicRate = parseFloat(String(data.calc.basicRate)) || 0;
+        const presentDays = parseFloat(String(data.calc.presentDays)) || 0;
+        const otHours = parseFloat(String(data.calc.overtimeHours)) || 0;
+        const otRate = parseFloat(String(data.calc.overtimeRate)) || 0;
+
+        const basicAmt = basicRate * presentDays;
+        const otAmt = otHours * otRate;
+
+        const allowanceItems = data.allowances.map(a => {
+            const val = parseFloat(String(a.value)) || 0;
+            return { label: a.label, amount: a.type === 'fixed' ? val : (val / 100) * basicAmt };
+        });
+
+        const deductionItems = data.deductions.map(d => {
+            const val = parseFloat(String(d.value)) || 0;
+            return { label: d.label, amount: d.type === 'fixed' ? val : (val / 100) * basicAmt };
+        });
+
         const totalEarnings = basicAmt + otAmt + allowanceItems.reduce((acc, curr) => acc + curr.amount, 0);
         const totalDeductions = deductionItems.reduce((acc, curr) => acc + curr.amount, 0);
-        return { basicAmt, otAmt, allowanceItems, deductionItems, totalEarnings, totalDeductions, netSalary: totalEarnings - totalDeductions };
+        
+        return { 
+            basicAmt, 
+            otAmt, 
+            allowanceItems, 
+            deductionItems, 
+            totalEarnings, 
+            totalDeductions, 
+            netSalary: totalEarnings - totalDeductions 
+        };
     }, [data.calc, data.allowances, data.deductions]);
 
     const formatCurrency = (val: number) => 
@@ -181,11 +204,17 @@ export default function SalarySlipGenerator() {
     };
 
     const handleAddDynamic = (section: 'allowances' | 'deductions') => {
-        const newItem: DynamicItem = { id: Math.random().toString(36).substr(2, 9), label: section === 'allowances' ? "Allowance" : "Deduction", type: 'fixed', value: 0 };
+        const newItem: DynamicItem = { 
+            id: Math.random().toString(36).substr(2, 9), 
+            label: section === 'allowances' ? "Allowance" : "Deduction", 
+            type: 'fixed', 
+            value: "" 
+        };
         setData(prev => ({ ...prev, [section]: [...prev[section], newItem] }));
     };
 
-    const removeDynamic = (section: 'allowances' | 'deductions', id: string) => setData(prev => ({ ...prev, [section]: prev[section].filter(item => item.id !== id) }));
+    const removeDynamic = (section: 'allowances' | 'deductions', id: string) => 
+        setData(prev => ({ ...prev, [section]: prev[section].filter(item => item.id !== id) }));
     
     const updateDynamic = (section: 'allowances' | 'deductions', id: string, field: keyof DynamicItem, value: any) => {
         setData(prev => ({ ...prev, [section]: prev[section].map(item => item.id === id ? { ...item, [field]: value } : item) }));
@@ -196,11 +225,11 @@ export default function SalarySlipGenerator() {
             company: { ...data.company },
             employee: { name: "", empId: "", designation: "", department: "", doj: "", pan: "", uanNo: "", bankName: "", bankAccount: "", ifsc: "" },
             payPeriod: { month: "AUGUST", year: "2024" },
-            calc: { basicRate: 0, presentDays: 0, totalDays: 30, overtimeHours: 0, overtimeRate: 0 },
+            calc: { basicRate: "", presentDays: "", totalDays: 30, overtimeHours: "", overtimeRate: "" },
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_data_v2_persisted');
+        localStorage.removeItem('gr7_salary_slip_v3_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -234,8 +263,6 @@ export default function SalarySlipGenerator() {
 
             if (type === 'pdf') {
                 const pdfDoc = await PDFDocument.create();
-                
-                // Standard A4 in points (pt)
                 const pdfWidth = 595.28;
                 const pdfHeight = 841.89;
                 const page = pdfDoc.addPage([pdfWidth, pdfHeight]);
@@ -250,7 +277,6 @@ export default function SalarySlipGenerator() {
                     height: pdfHeight
                 });
 
-                // Force browser to fit window on open
                 const catalog = pdfDoc.catalog;
                 catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
                     FitWindow: true,
@@ -264,12 +290,12 @@ export default function SalarySlipGenerator() {
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `Salary_Slip_${data.employee.name || 'document'}.pdf`;
+                link.download = `Salary_Slip_${data.employee.name || 'Doc'}.pdf`;
                 link.click();
             } else {
                 const link = document.createElement('a');
                 link.href = dataUrl;
-                link.download = `Salary_Slip_${data.employee.name || 'document'}.jpg`;
+                link.download = `Salary_Slip_${data.employee.name || 'Doc'}.jpg`;
                 link.click();
             }
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
@@ -313,6 +339,7 @@ export default function SalarySlipGenerator() {
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
+                        {/* Company Section */}
                         <div className="space-y-6">
                             <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
                             <div className="grid gap-4">
@@ -323,6 +350,7 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
+                        {/* Employee Section */}
                         <div className="space-y-6">
                             <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
                             <div className="grid grid-cols-2 gap-4">
@@ -331,33 +359,60 @@ export default function SalarySlipGenerator() {
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Department</Label><Input value={data.employee.department} onChange={(e) => updateNested('employee', 'department', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Employee ID</Label><Input value={data.employee.empId} onChange={(e) => updateNested('employee', 'empId', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">UAN Number</Label><Input value={data.employee.uanNo} onChange={(e) => updateNested('employee', 'uanNo', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">PAN Card No.</Label><Input value={data.employee.pan} onChange={(e) => updateNested('employee', 'pan', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="col-span-2 space-y-1.5 pt-2"><Separator className="opacity-10"/></div>
+                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Bank Name</Label><Input value={data.employee.bankName} onChange={(e) => updateNested('employee', 'bankName', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Account No.</Label><Input value={data.employee.bankAccount} onChange={(e) => updateNested('employee', 'bankAccount', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">IFSC Code</Label><Input value={data.employee.ifsc} onChange={(e) => updateNested('employee', 'ifsc', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                             </div>
                         </div>
 
+                        {/* Calculation Engine Section */}
                         <div className="space-y-6">
                             <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', Number(e.target.value))} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Total Days in Month</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                             </div>
                         </div>
 
+                        {/* Allowances Section */}
                         <div className="space-y-6">
-                             <div className="flex justify-between items-center"><Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Earnings/Deductions</Badge></div>
-                             <div className="grid gap-3"><Button size="sm" variant="outline" onClick={() => handleAddDynamic('allowances')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-primary">ADD ALLOWANCE</Button><Button size="sm" variant="outline" onClick={() => handleAddDynamic('deductions')} className="h-10 rounded-xl border-dashed font-black text-[9px] uppercase text-rose-50">ADD DEDUCTION</Button></div>
-                             <div className="space-y-4">
-                                {data.allowances.concat(data.deductions).map((item, index) => (
-                                    <div key={`${item.id}-${index}`} className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2">
-                                        <Input value={item.label} onChange={(e) => updateDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[10px] font-bold border-none" />
-                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id, 'value', Number(e.target.value))} className="w-16 h-8 text-center font-black text-[10px]" />
-                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic(data.allowances.includes(item) ? 'allowances' : 'deductions', item.id)}><Trash2 className="size-3.5" /></Button>
+                            <div className="flex justify-between items-center">
+                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
+                                <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-emerald-600 hover:bg-emerald-50"><Plus className="size-3 mr-1" /> Add</Button>
+                            </div>
+                            <div className="space-y-3">
+                                {data.allowances.map((item, index) => (
+                                    <div key={item.id + index} className="flex items-center gap-2 p-3 bg-emerald-500/5 rounded-xl border-2 border-emerald-100 dark:border-emerald-900/20 shadow-sm animate-in slide-in-from-left-2">
+                                        <Input value={item.label} onChange={(e) => updateDynamic('allowances', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
+                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('allowances', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-emerald-200" />
+                                        <button onClick={() => updateDynamic('allowances', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
+                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('allowances', item.id)}><Trash2 className="size-3.5" /></Button>
                                     </div>
                                 ))}
-                             </div>
+                            </div>
+                        </div>
+
+                        {/* Deductions Section */}
+                        <div className="space-y-6 pt-4 border-t border-dashed">
+                             <div className="flex justify-between items-center">
+                                <Badge className="bg-rose-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Deductions</Badge>
+                                <Button size="sm" onClick={() => handleAddDynamic('deductions')} className="h-7 bg-rose-600 text-white font-black text-[8px] uppercase hover:bg-rose-700"><Plus className="size-3 mr-1" /> Add Deduction</Button>
+                            </div>
+                            <div className="space-y-3">
+                                {data.deductions.map((item, index) => (
+                                    <div key={item.id + index} className="flex items-center gap-2 p-3 bg-rose-500/5 rounded-xl border-2 border-rose-100 dark:border-rose-900/20 shadow-sm animate-in slide-in-from-right-2">
+                                        <Input value={item.label} onChange={(e) => updateDynamic('deductions', item.id, 'label', e.target.value)} className="flex-1 h-8 text-[11px] font-black uppercase border-none bg-transparent" />
+                                        <Input type="number" value={item.value} onChange={(e) => updateDynamic('deductions', item.id, 'value', e.target.value)} className="w-24 h-8 text-center font-black text-[11px] rounded-lg border-rose-200" />
+                                        <button onClick={() => updateDynamic('deductions', item.id, 'type', item.type === 'fixed' ? 'percentage' : 'fixed')} className="text-[8px] font-black w-8 h-8 rounded-lg bg-rose-100 text-rose-700 uppercase">{item.type === 'fixed' ? 'FIX' : '%'}</button>
+                                        <Button size="icon" variant="ghost" className="size-7 text-destructive" onClick={() => removeDynamic('deductions', item.id)}><Trash2 className="size-3.5" /></Button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
@@ -423,9 +478,11 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <Row label="Designation" value={data.employee.designation} />
                 <Row label="Department" value={data.employee.department} />
                 <Row label="UAN Number" value={data.employee.uanNo} />
+                <Row label="Bank Name" value={data.employee.bankName} />
                 <Row label="Bank Account" value={data.employee.bankAccount} />
                 <Row label="Total Days" value={String(data.calc.totalDays)} />
                 <Row label="Present Days" value={String(data.calc.presentDays)} />
+                <Row label="Pay Period" value={`${data.payPeriod.month} ${data.payPeriod.year}`} />
             </div>
 
             <div className="grid grid-cols-2 border-2 border-slate-900 min-h-[250px] overflow-visible">
