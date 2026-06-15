@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Landmark, Globe, RefreshCcw, ShieldCheck } from "lucide-react"
+import { Landmark, Globe, RefreshCcw, ShieldCheck, Zap } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -132,7 +132,7 @@ export default function LoanCalculator() {
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2 space-y-4">
                 <Label htmlFor="tenure" className="text-[10px] font-black uppercase opacity-60">Loan Tenure</Label>
-                <Input id="tenure" type="number" value={tenure} onChange={(e) => setTenure(e.target.value)} className="h-12 border-2 font-bold rounded-xl text-center text-lg" placeholder="e.g., 5" />
+                <Input id="tenure" type="number" value={tenure} onChange={(e) => setValue(e.target.value)} className="h-12 border-2 font-bold rounded-xl text-center text-lg" placeholder="e.g., 5" />
             </div>
             <div className="space-y-4">
                 <Label className="text-[10px] font-black uppercase opacity-60">Unit</Label>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -85,7 +84,6 @@ export default function PdfMerger() {
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const studioWorkspaceRef = useRef<HTMLDivElement>(null);
-    const renderIdRef = useRef(0);
 
     useEffect(() => {
         return () => {
