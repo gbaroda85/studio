@@ -183,11 +183,12 @@ export default function ColorPicker() {
             toast({ variant: 'destructive', title: "Not Supported", description: "Your browser doesn't support the Eyedropper API." });
             return;
         }
-        const dropper = new window.EyeDropper();
+        const dropper = new (window as any).EyeDropper();
         try {
             const result = await dropper.open();
-            setColor(result.sRGBHex.toUpperCase());
-            addToHistory(result.sRGBHex.toUpperCase());
+            const hex = result.sRGBHex.toUpperCase();
+            setColor(hex);
+            addToHistory(hex);
         } catch (e) {}
     };
 
@@ -253,7 +254,7 @@ export default function ColorPicker() {
                                     <FormatInput label="CMYK" value={`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`} onCopy={() => handleCopy(`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`, 'cmyk')} />
                                 </div>
                             </div>
-                        </ScrollArea>
+                        </CardContent>
                     </Card>
 
                     {/* History Strip */}
@@ -309,7 +310,7 @@ export default function ColorPicker() {
                                                 onChange={(e) => { setColor(e.target.value.toUpperCase()); addToHistory(e.target.value.toUpperCase()); }}
                                                 className="size-14 rounded-xl cursor-pointer border-none bg-transparent"
                                             />
-                                            <div className="flex-1">
+                                            <div className="flex-1 text-left">
                                                 <p className="text-[10px] font-black uppercase">Spectrum Wheel</p>
                                                 <p className="text-[8px] font-bold opacity-40 uppercase">Open native color system</p>
                                             </div>
@@ -324,7 +325,7 @@ export default function ColorPicker() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t border-dashed">
+                                <div className="space-y-4 pt-4 border-t border-dashed text-left">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                         <Contrast className="size-3" /> Accessibility Check
                                     </Label>
@@ -334,7 +335,7 @@ export default function ColorPicker() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t border-dashed">
+                                <div className="space-y-4 pt-4 border-t border-dashed text-left">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Tints & Shades</Label>
                                     <ScrollArea className="w-full whitespace-nowrap pb-2">
                                         <div className="flex gap-1.5">
@@ -352,7 +353,7 @@ export default function ColorPicker() {
                                     </ScrollArea>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t border-dashed">
+                                <div className="space-y-4 pt-4 border-t border-dashed text-left">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">AI Smart Palette</Label>
                                     <div className="grid gap-3">
                                         <PaletteRow label="Complementary" colors={[palette.complementary]} onPick={setColor} />
@@ -362,7 +363,7 @@ export default function ColorPicker() {
                                 </div>
                             </div>
 
-                            <div className="p-4 md:p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm">
+                            <div className="p-4 md:p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
                                 <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                                 <div>
                                     <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">WCAG 2.1 Compliant</p>
@@ -397,7 +398,7 @@ export default function ColorPicker() {
 
 function FormatInput({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) {
     return (
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 text-left">
             <Label className="text-[8px] font-black uppercase opacity-40 ml-1">{label}</Label>
             <div className="relative group">
                 <Input value={value} readOnly className="h-10 font-bold bg-white dark:bg-slate-900 border-2 rounded-xl pr-10 text-xs shadow-sm" />
