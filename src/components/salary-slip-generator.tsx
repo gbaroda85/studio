@@ -143,7 +143,7 @@ export default function SalarySlipGenerator() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_v5_persisted');
+        const saved = localStorage.getItem('gr7_salary_slip_v6_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -152,7 +152,7 @@ export default function SalarySlipGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_v5_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_salary_slip_v6_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
@@ -231,7 +231,7 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_v5_persisted');
+        localStorage.removeItem('gr7_salary_slip_v6_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -481,7 +481,9 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
             </header>
 
             <div className="text-center mb-3">
-                <h2 className="text-xl font-black uppercase tracking-widest inline-block border-y-2 border-slate-900 py-2 px-12">Pay Slip</h2>
+                <div className="flex justify-center">
+                    <h2 className="text-xl font-black uppercase tracking-widest border-y-2 border-slate-900 px-12 h-10 flex items-center justify-center">Pay Slip</h2>
+                </div>
                 <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">MONTHLY STATEMENT OF EARNINGS & DEDUCTIONS</p>
             </div>
 
