@@ -44,7 +44,7 @@ interface DynamicItem {
     id: string;
     label: string;
     type: 'fixed' | 'percentage';
-    value: number | string; // Allow string for empty input handling
+    value: number | string; 
 }
 
 interface SalaryData {
@@ -141,7 +141,7 @@ export default function SalarySlipGenerator() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_v3_persisted');
+        const saved = localStorage.getItem('gr7_salary_slip_v4_persisted');
         if (saved) {
             try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
@@ -150,7 +150,7 @@ export default function SalarySlipGenerator() {
 
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_salary_slip_v3_persisted', JSON.stringify(data));
+            localStorage.setItem('gr7_salary_slip_v4_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
@@ -229,7 +229,7 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        localStorage.removeItem('gr7_salary_slip_v3_persisted');
+        localStorage.removeItem('gr7_salary_slip_v4_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -478,6 +478,7 @@ function PayslipTemplate({ data, results, formatCurrency, isExport }: { data: Sa
                 <Row label="Designation" value={data.employee.designation} />
                 <Row label="Department" value={data.employee.department} />
                 <Row label="UAN Number" value={data.employee.uanNo} />
+                <Row label="PAN Card No." value={data.employee.pan} />
                 <Row label="Bank Name" value={data.employee.bankName} />
                 <Row label="Bank Account" value={data.employee.bankAccount} />
                 <Row label="Total Days" value={String(data.calc.totalDays)} />
