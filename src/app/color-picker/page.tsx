@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Palette, Sparkles, ShieldCheck, Zap, Layers, Smartphone, MonitorCheck, HelpCircle } from 'lucide-react';
+import { Palette, Sparkles, ShieldCheck, Zap, Layers, Smartphone, MonitorCheck, HelpCircle, Contrast } from 'lucide-react';
 import ColorPicker from '@/components/color-picker';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
