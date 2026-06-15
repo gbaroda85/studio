@@ -14,17 +14,15 @@ import {
     Sparkles, 
     Settings2,
     Building2,
-    User2,
-    Printer,
-    Monitor,
-    LayoutGrid,
     Receipt,
-    ListFilter,
     Loader2,
     ImageIcon,
     Eraser,
     Globe,
-    CreditCard
+    CreditCard,
+    LayoutGrid,
+    Printer,
+    ArrowLeftRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -35,9 +33,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import * as htmlToImage from 'html-to-image';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import confetti from 'canvas-confetti';
 
@@ -111,8 +109,6 @@ const StarIcons = () => (
     </>
 );
 
-// --- MAIN COMPONENT ---
-
 export default function GstInvoiceGenerator() {
     const { toast } = useToast();
     const [data, setData] = useState<InvoiceData>(INITIAL_DATA);
@@ -121,27 +117,20 @@ export default function GstInvoiceGenerator() {
     
     const exportRef = useRef<HTMLDivElement>(null);
 
-    // PERSISTENCE: Load from LocalStorage
     useEffect(() => {
-        const savedData = localStorage.getItem('gr7_gst_invoice_data');
-        if (savedData) {
-            try {
-                setData(JSON.parse(savedData));
-            } catch (e) {
-                console.error("Failed to parse saved invoice data", e);
-            }
+        const saved = localStorage.getItem('gr7_gst_invoice_data_persisted');
+        if (saved) {
+            try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
         }
         setIsHydrated(true);
     }, []);
 
-    // PERSISTENCE: Save to LocalStorage
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem('gr7_gst_invoice_data', JSON.stringify(data));
+            localStorage.setItem('gr7_gst_invoice_data_persisted', JSON.stringify(data));
         }
     }, [data, isHydrated]);
 
-    // Dynamic Totals
     const totals = useMemo(() => {
         return data.items.reduce((acc, item) => {
             const taxable = (item.qty || 0) * (item.rate || 0);
@@ -164,13 +153,7 @@ export default function GstInvoiceGenerator() {
     };
 
     const addItem = () => setData(prev => ({ ...prev, items: [...prev.items, INITIAL_ITEM()] }));
-    
-    const removeItem = (id: string) => {
-        if (data.items.length > 1) {
-            setData(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) }));
-        }
-    };
-
+    const removeItem = (id: string) => data.items.length > 1 && setData(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) }));
     const updateItem = (id: string, field: keyof InvoiceItem, value: any) => {
         setData(prev => ({
             ...prev,
@@ -179,14 +162,13 @@ export default function GstInvoiceGenerator() {
     };
 
     const handleClearAll = () => {
-        const clearedData: InvoiceData = {
+        setData({
             company: { ...data.company },
             customer: { name: "", gstin: "", address: "" },
             invoice: { no: `INV-${Date.now().toString().slice(-6)}`, date: new Date().toISOString().split('T')[0], isInterState: false },
             items: [INITIAL_ITEM()]
-        };
-        setData(clearedData);
-        localStorage.removeItem('gr7_gst_invoice_data');
+        });
+        localStorage.removeItem('gr7_gst_invoice_data_persisted');
         toast({ title: "Form Cleared" });
     };
 
@@ -197,29 +179,35 @@ export default function GstInvoiceGenerator() {
         try {
             await document.fonts.ready;
 
-            const captureOptions = {
-                quality: 1.0,
-                pixelRatio: 2.5,
+            const canvas = await html2canvas(exportRef.current, {
+                scale: 3,
+                useCORS: true,
                 backgroundColor: '#ffffff',
-                width: 794,
-                height: 1123,
-                style: {
-                    transform: 'none',
-                    letterSpacing: 'normal',
-                    overflow: 'visible'
+                logging: false,
+                onclone: (clonedDoc) => {
+                    const el = clonedDoc.querySelector('[data-export-container]');
+                    if (el) {
+                        (el as HTMLElement).style.transform = 'none';
+                        const all = el.getElementsByTagName('*');
+                        for (let i = 0; i < all.length; i++) {
+                            const node = all[i] as HTMLElement;
+                            node.style.letterSpacing = 'normal';
+                            node.style.wordSpacing = 'normal';
+                            node.style.fontVariantLigatures = 'none';
+                        }
+                    }
                 }
-            };
+            });
 
-            const dataUrl = await htmlToImage.toPng(exportRef.current, captureOptions);
+            const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
             if (type === 'pdf') {
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
                     unit: 'px', 
-                    format: [794, 1123],
-                    compress: false
+                    format: [794, 1123]
                 });
-                pdf.addImage(dataUrl, 'PNG', 0, 0, 794, 1123, undefined, 'FAST');
+                pdf.addImage(dataUrl, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST');
                 pdf.save(`GST_Invoice_${data.invoice.no}.pdf`);
             } else {
                 const link = document.createElement('a');
@@ -241,11 +229,11 @@ export default function GstInvoiceGenerator() {
     if (!isHydrated) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin size-10 text-primary opacity-20" /></div>;
 
     return (
-        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 items-start px-4 pb-32">
+        <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start px-4 pb-32">
             
             {/* HIDDEN EXPORT CANVAS */}
             <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
-                <div ref={exportRef} style={{ width: '794px', height: '1123px', background: 'white', position: 'relative', overflow: 'hidden' }}>
+                <div ref={exportRef} data-export-container style={{ width: '794px', height: '1123px', background: 'white', position: 'relative', overflow: 'hidden' }}>
                     <InvoiceTemplate data={data} totals={totals} formatCurrency={formatCurrency} isExport />
                 </div>
             </div>
@@ -253,7 +241,7 @@ export default function GstInvoiceGenerator() {
             {/* SIDEBAR EDITOR */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2 text-left">
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
-                    <CardHeader className="bg-primary/5 border-b p-6">
+                    <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 text-left">
                                 <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
@@ -270,7 +258,7 @@ export default function GstInvoiceGenerator() {
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
                         <div className="space-y-6">
-                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details (Seller)</Badge>
+                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label>
@@ -288,15 +276,11 @@ export default function GstInvoiceGenerator() {
                         </div>
 
                         <div className="space-y-6">
-                            <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Recipient Details (Buyer)</Badge>
+                            <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Recipient Details</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Customer Name</Label>
                                     <Input value={data.customer.name} onChange={(e) => updateNested('customer', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Customer GSTIN (Optional)</Label>
-                                    <Input value={data.customer.gstin} onChange={(e) => updateNested('customer', 'gstin', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[9px] font-black uppercase opacity-60">Address</Label>
@@ -306,65 +290,19 @@ export default function GstInvoiceGenerator() {
                         </div>
 
                         <div className="space-y-6">
-                            <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Document Settings</Badge>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Invoice No.</Label>
-                                    <Input value={data.invoice.no} onChange={(e) => updateNested('invoice', 'no', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[9px] font-black uppercase opacity-60">Date</Label>
-                                    <Input type="date" value={data.invoice.date} onChange={(e) => updateNested('invoice', 'date', e.target.value)} className="h-10 rounded-xl font-bold border-2" />
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border-2 border-dashed border-primary/10">
-                                <div className="flex items-center gap-3">
-                                    <LayoutGrid className="size-5 text-primary" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Taxation Type</span>
-                                </div>
-                                <Select value={data.invoice.isInterState ? "igst" : "cgst"} onValueChange={(v) => updateNested('invoice', 'isInterState', v === "igst")}>
-                                    <SelectTrigger className="w-40 h-10 border-2 font-black text-[10px] uppercase"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                        <SelectItem value="cgst" className="font-bold text-[10px] uppercase">CGST+SGST (Local)</SelectItem>
-                                        <SelectItem value="igst" className="font-bold text-[10px] uppercase">IGST (Interstate)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Items & Services</Badge>
+                             <div className="flex justify-between items-center">
+                                <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Line Items</Badge>
                                 <Button size="sm" variant="ghost" onClick={addItem} className="h-7 text-[8px] font-black uppercase text-primary"><Plus className="size-3 mr-1" /> Add Item</Button>
                             </div>
                             <div className="space-y-4">
                                 {data.items.map((item) => (
                                     <Card key={item.id} className="p-4 border-2 border-primary/10 rounded-2xl bg-muted/5 relative">
-                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 size-7 text-destructive hover:bg-destructive/10" onClick={() => removeItem(item.id)}><Trash2 className="size-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 size-7 text-destructive" onClick={() => removeItem(item.id)}><Trash2 className="size-4"/></Button>
                                         <div className="grid grid-cols-12 gap-3">
-                                            <div className="col-span-12 space-y-1">
-                                                <Label className="text-[8px] font-black uppercase opacity-40">Description</Label>
-                                                <Input value={item.description} onChange={(e) => updateItem(item.id, 'description', e.target.value)} className="h-9 font-bold" />
-                                            </div>
-                                            <div className="col-span-6 space-y-1">
-                                                <Label className="text-[8px] font-black uppercase opacity-40">HSN/SAC</Label>
-                                                <Input value={item.hsn} onChange={(e) => updateItem(item.id, 'hsn', e.target.value)} className="h-9 font-bold" />
-                                            </div>
-                                            <div className="col-span-3 space-y-1">
-                                                <Label className="text-[8px] font-black uppercase opacity-40">Qty</Label>
-                                                <Input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', Number(e.target.value))} className="h-9 font-bold" />
-                                            </div>
-                                            <div className="col-span-3 space-y-1">
-                                                <Label className="text-[8px] font-black uppercase opacity-40">Rate</Label>
-                                                <Input type="number" value={item.rate} onChange={(e) => updateItem(item.id, 'rate', Number(e.target.value))} className="h-9 font-bold" />
-                                            </div>
-                                            <div className="col-span-6 space-y-1">
-                                                <Label className="text-[8px] font-black uppercase opacity-40">GST Rate (%)</Label>
-                                                <Select value={String(item.gstRate)} onValueChange={(v) => updateItem(item.id, 'gstRate', Number(v))}>
-                                                    <SelectTrigger className="h-9 border-2 font-bold text-[10px]"><SelectValue /></SelectTrigger>
-                                                    <SelectContent>{[0, 5, 12, 18, 28].map(s => <SelectItem key={s} value={String(s)}>{s}% GST</SelectItem>)}</SelectContent>
-                                                </Select>
-                                            </div>
+                                            <div className="col-span-12 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Description</Label><Input value={item.description} onChange={(e) => updateItem(item.id, 'description', e.target.value)} className="h-9 font-bold" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Qty</Label><Input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Rate</Label><Input type="number" value={item.rate} onChange={(e) => updateItem(item.id, 'rate', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
+                                            <div className="col-span-4 space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">GST %</Label><Input type="number" value={item.gstRate} onChange={(e) => updateItem(item.id, 'gstRate', Number(e.target.value))} className="h-9 font-bold text-center" /></div>
                                         </div>
                                     </Card>
                                 ))}
@@ -376,7 +314,7 @@ export default function GstInvoiceGenerator() {
                             {isExporting ? <Loader2 className="animate-spin mr-3 size-8" /> : <Printer className="mr-3 size-8 group-hover:scale-110 transition-transform" />}
                             GENERATE INVOICE PDF
                         </Button>
-                        <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-700 transition-all">
+                        <Button onClick={() => handleExport('image')} disabled={isExporting} variant="outline" className="w-full h-12 text-xs font-black rounded-xl border-2 hover:bg-emerald-50 transition-all">
                             <ImageIcon className="mr-2 size-4" /> SAVE AS IMAGE (JPG)
                         </Button>
                     </CardFooter>
@@ -406,10 +344,6 @@ export default function GstInvoiceGenerator() {
                 </div>
             </div>
 
-            <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-            `}</style>
         </div>
     );
 }
@@ -419,19 +353,11 @@ export default function GstInvoiceGenerator() {
 function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: InvoiceData, totals: any, formatCurrency: (v: number) => string, isExport?: boolean }) {
     return (
         <div 
-            className={cn(
-                "bg-white flex flex-col text-slate-900",
-                !isExport && "shadow-none border-0"
-            )}
+            className={cn("bg-white flex flex-col text-slate-900", !isExport && "shadow-none border-0")}
             style={{ 
-                width: '794px', 
-                height: '1123px', 
-                padding: '50px 50px 70px 50px',
-                fontFamily: 'Arial, sans-serif',
-                position: 'relative',
-                boxSizing: 'border-box',
-                letterSpacing: 'normal',
-                overflow: 'hidden'
+                width: '794px', height: '1123px', padding: '50px 50px 70px 50px',
+                fontFamily: 'Arial, sans-serif', position: 'relative', boxSizing: 'border-box',
+                letterSpacing: 'normal', overflow: 'hidden'
             }}
         >
             <header className="flex justify-between items-start mb-6 pb-6 border-b-4 border-slate-900">
@@ -454,7 +380,6 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b pb-1">BILL TO (Customer)</p>
                     <div className="space-y-1">
                         <p className="text-sm font-black uppercase">{data.customer.name || "Customer Name"}</p>
-                        {data.customer.gstin && <p className="text-[10px] font-black text-blue-600">GSTIN: {data.customer.gstin}</p>}
                         <p className="text-[11px] font-bold text-slate-500 uppercase leading-relaxed whitespace-pre-line">{data.customer.address || "Address not provided"}</p>
                     </div>
                 </div>
@@ -477,7 +402,6 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                         <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
                             <th className="p-3 text-center w-12 border border-slate-900">SN</th>
                             <th className="p-3 text-left border border-slate-900">Description</th>
-                            <th className="p-3 text-center w-24 border border-slate-900">HSN</th>
                             <th className="p-3 text-center w-16 border border-slate-900">Qty</th>
                             <th className="p-3 text-right w-28 border border-slate-900">Rate</th>
                             <th className="p-3 text-center w-16 border border-slate-900">GST%</th>
@@ -489,7 +413,6 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                             <tr key={item.id} className="text-[11px] font-bold text-slate-700 border-b">
                                 <td className="p-3 text-center border">{i + 1}</td>
                                 <td className="p-3 border uppercase whitespace-normal leading-normal">{item.description || "---"}</td>
-                                <td className="p-3 text-center border uppercase">{item.hsn || "---"}</td>
                                 <td className="p-3 text-center border">{item.qty}</td>
                                 <td className="p-3 text-right border">{item.rate.toLocaleString()}</td>
                                 <td className="p-3 text-center border">{item.gstRate}%</td>
@@ -505,30 +428,19 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                     <div className="p-5 bg-slate-50 border rounded-2xl">
                         <p className="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest border-b pb-1">Tax Breakdown Analysis</p>
                         <div className="space-y-2">
-                            {data.invoice.isInterState ? (
-                                <div className="flex justify-between items-center text-[11px] font-bold">
-                                    <span className="uppercase">Integrated GST (IGST)</span>
-                                    <span className="font-black">{formatCurrency(totals.gst)}</span>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex justify-between items-center text-[11px] font-bold">
-                                        <span className="uppercase">Central GST (CGST)</span>
-                                        <span className="font-black">{formatCurrency(totals.gst / 2)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-[11px] font-bold">
-                                        <span className="uppercase">State GST (SGST)</span>
-                                        <span className="font-black">{formatCurrency(totals.gst / 2)}</span>
-                                    </div>
-                                </>
-                            )}
+                            <div className="flex justify-between items-center text-[11px] font-bold">
+                                <span className="uppercase">Central GST (CGST)</span>
+                                <span className="font-black">{formatCurrency(totals.gst / 2)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px] font-bold">
+                                <span className="uppercase">State GST (SGST)</span>
+                                <span className="font-black">{formatCurrency(totals.gst / 2)}</span>
+                            </div>
                         </div>
                     </div>
                     <div className="p-4 border-l-4 border-slate-900 bg-slate-50">
                          <p className="text-[9px] font-black uppercase text-slate-400">Declaration Notice</p>
-                         <p className="text-[10px] font-medium leading-relaxed italic text-slate-600 mt-1">
-                             This is a computer-generated tax invoice. All details are true and correct to the best of our knowledge.
-                         </p>
+                         <p className="text-[10px] font-medium leading-relaxed italic text-slate-600 mt-1">This is a computer-generated tax invoice. All details are true and correct.</p>
                     </div>
                 </div>
                 <div className="col-span-5 space-y-12">
@@ -537,7 +449,7 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
                          <span className="text-2xl font-black">{formatCurrency(totals.total)}</span>
                      </div>
                      <div className="flex flex-col items-center">
-                         <div className="w-56 h-14 border-b-2 border-slate-200 mb-2 relative" />
+                         <div className="w-56 h-14 border-b-2 border-slate-200 mb-2" />
                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authorized Personnel</p>
                      </div>
                 </div>
@@ -549,3 +461,4 @@ function InvoiceTemplate({ data, totals, formatCurrency, isExport }: { data: Inv
         </div>
     );
 }
+
