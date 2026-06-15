@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef } from 'react';
@@ -9,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Download, Loader2, FileText, Settings, Eye, Smartphone, ShieldCheck, Zap, Sparkles, RefreshCcw, Eraser } from 'lucide-react';
+import { Download, Loader2, FileText, Settings2, Eye, Smartphone, ShieldCheck, Zap, Sparkles, RefreshCcw, Eraser } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from './ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +36,6 @@ export default function TextToPdfConverter() {
     const [margin, setMargin] = useState(20);
     const [isGenerating, setIsGenerating] = useState(false);
     
-    // Decoupled preview logic: No more html2canvas in every keystroke
     const previewRef = useRef<HTMLDivElement>(null);
 
     const handleDownload = async () => {
@@ -170,7 +168,7 @@ export default function TextToPdfConverter() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed">
                              <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Settings className="size-3 text-primary"/> Font Family</Label>
+                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5">Font Family</Label>
                                  <Select value={font} onValueChange={(v) => setFont(v as Font)}>
                                     <SelectTrigger className="h-11 font-black border-2 rounded-xl bg-background/50 shadow-sm"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-xl border-2 shadow-2xl">
@@ -205,7 +203,7 @@ export default function TextToPdfConverter() {
                             <Eye className="size-4 text-primary" />
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
                         </div>
-                        <Badge variant="secondary" className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">A4 LAYOUT</Badge>
+                        <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">A4 LAYOUT</Badge>
                     </CardHeader>
                     <CardContent className="flex-1 p-6 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
                         
