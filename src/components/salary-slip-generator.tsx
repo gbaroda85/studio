@@ -23,7 +23,12 @@ import {
     Eraser,
     Landmark,
     Calendar,
-    Globe
+    Globe,
+    Users2,
+    Save,
+    UserPlus,
+    Database,
+    Search
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -136,17 +141,27 @@ const StarIcons = () => (
 export default function SalarySlipGenerator() {
     const { toast } = useToast();
     const [data, setData] = useState<SalaryData>(INITIAL_DATA);
+    const [savedProfiles, setSavedProfiles] = useState<SalaryData[]>([]);
     const [isExporting, setIsExporting] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
     
     const exportRef = useRef<HTMLDivElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
+    // --- HYDRATION & PERSISTENCE ---
     useEffect(() => {
-        const saved = localStorage.getItem('gr7_salary_slip_v6_persisted');
-        if (saved) {
-            try { setData(JSON.parse(saved)); } catch (e) { console.error(e); }
+        // Load current form state
+        const savedForm = localStorage.getItem('gr7_salary_slip_v6_persisted');
+        if (savedForm) {
+            try { setData(JSON.parse(savedForm)); } catch (e) { console.error(e); }
         }
+        
+        // Load all employee profiles
+        const savedDB = localStorage.getItem('gr7_employee_database');
+        if (savedDB) {
+            try { setSavedProfiles(JSON.parse(savedDB)); } catch (e) { console.error(e); }
+        }
+        
         setIsHydrated(true);
     }, []);
 
@@ -156,6 +171,52 @@ export default function SalarySlipGenerator() {
         }
     }, [data, isHydrated]);
 
+    useEffect(() => {
+        if (isHydrated) {
+            localStorage.setItem('gr7_employee_database', JSON.stringify(savedProfiles));
+        }
+    }, [savedProfiles, isHydrated]);
+
+    // --- PROFILE MANAGEMENT ---
+    const saveCurrentProfile = () => {
+        if (!data.employee.name) {
+            toast({ variant: 'destructive', title: "Missing Name", description: "Enter employee name to save profile." });
+            return;
+        }
+
+        setSavedProfiles(prev => {
+            // Check if profile exists by Emp ID or Name
+            const exists = prev.findIndex(p => p.employee.empId === data.employee.empId && p.employee.name === data.employee.name);
+            if (exists >= 0) {
+                const updated = [...prev];
+                updated[exists] = JSON.parse(JSON.stringify(data));
+                toast({ title: "Profile Updated", description: `Data for ${data.employee.name} saved successfully.` });
+                return updated;
+            }
+            toast({ title: "New Profile Created", description: `Added ${data.employee.name} to employee database.` });
+            return [...prev, JSON.parse(JSON.stringify(data))];
+        });
+        
+        confetti({ particleCount: 50, spread: 30, origin: { y: 0.8 }, colors: ['#0d5a71', '#ffffff'] });
+    };
+
+    const loadProfile = (id: string) => {
+        const profile = savedProfiles.find(p => p.employee.empId === id || p.id === id); // fallback to ID if needed
+        if (profile) {
+            // Merge profile data but preserve current Month/Year/Days if preferred
+            // Usually user wants to load the whole structure
+            setData(JSON.parse(JSON.stringify(profile)));
+            toast({ title: "Profile Loaded", description: `Switched to ${profile.employee.name}'s data.` });
+        }
+    };
+
+    const deleteProfile = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        setSavedProfiles(prev => prev.filter(p => p.employee.empId !== id));
+        toast({ title: "Profile Removed" });
+    };
+
+    // --- CALCULATIONS ---
     const results = useMemo(() => {
         const basicRate = parseFloat(String(data.calc.basicRate)) || 0;
         const presentDays = parseFloat(String(data.calc.presentDays)) || 0;
@@ -224,7 +285,7 @@ export default function SalarySlipGenerator() {
 
     const handleClearAll = () => {
         setData({
-            company: { name: "", address: "", logo: null },
+            company: { ...data.company },
             employee: { name: "", empId: "", designation: "", department: "", doj: "", pan: "", uanNo: "", bankName: "", bankAccount: "", ifsc: "" },
             payPeriod: { month: "", year: "" },
             calc: { basicRate: "", presentDays: "", totalDays: "", overtimeHours: "", overtimeRate: "" },
@@ -325,6 +386,59 @@ export default function SalarySlipGenerator() {
 
             {/* SIDEBAR EDITOR */}
             <div className="lg:col-span-5 space-y-6 no-print max-h-[90vh] overflow-y-auto custom-scrollbar pr-2 text-left">
+                
+                {/* ADVANCED DATABASE ACCESS */}
+                <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-900 text-white border-white/10 mb-4 animate-in slide-in-from-top-4 duration-500">
+                    <CardHeader className="bg-white/5 border-b border-white/10 p-5">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Database className="size-5 text-primary" />
+                                <CardTitle className="text-sm font-black uppercase tracking-widest">Employee Database</CardTitle>
+                            </div>
+                            <Badge className="bg-primary/20 text-primary border-primary/20 uppercase text-[8px] font-black">{savedProfiles.length} Saved</Badge>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-5">
+                        <div className="space-y-4">
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Select onValueChange={loadProfile}>
+                                        <SelectTrigger className="h-12 bg-white/5 border-white/10 font-bold rounded-xl text-xs">
+                                            <div className="flex items-center gap-2">
+                                                <Users2 className="size-4 opacity-40" />
+                                                <SelectValue placeholder="Quick Load Employee..." />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                            {savedProfiles.length === 0 ? (
+                                                <div className="p-4 text-center text-[10px] font-bold opacity-40 uppercase">No profiles saved yet</div>
+                                            ) : (
+                                                savedProfiles.map(p => (
+                                                    <SelectItem key={p.employee.empId} value={p.employee.empId} className="font-bold py-3">
+                                                        <div className="flex items-center justify-between w-full min-w-[200px]">
+                                                            <div className="flex flex-col">
+                                                                <span className="uppercase text-[11px]">{p.employee.name}</span>
+                                                                <span className="text-[8px] opacity-40">{p.employee.empId} | {p.employee.designation}</span>
+                                                            </div>
+                                                            <button onClick={(e) => deleteProfile(e, p.employee.empId)} className="ml-4 p-1 text-rose-400 hover:text-rose-600 transition-colors">
+                                                                <Trash2 className="size-3" />
+                                                            </button>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button onClick={saveCurrentProfile} className="h-12 px-6 bg-primary text-white font-black rounded-xl shadow-lg border-none hover:scale-105 active:scale-95 transition-all">
+                                    <Save className="size-5 mr-2" /> SAVE
+                                </Button>
+                            </div>
+                            <p className="text-[8px] text-white/30 font-bold uppercase tracking-widest text-center">Save profiles to avoid re-typing details every month.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center justify-between">
@@ -342,9 +456,25 @@ export default function SalarySlipGenerator() {
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-10">
+                        {/* CALCULATION ENGINE - NOW PROMINENT FOR QUICK EDITS */}
+                        <div className="space-y-6 bg-primary/5 p-6 rounded-[2rem] border-2 border-primary/10 shadow-inner animate-pulse-subtle">
+                            <div className="flex items-center justify-between">
+                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
+                                <Zap className="size-4 text-primary" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Daily Rate</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-11 rounded-xl font-black border-2 border-primary/20 text-lg shadow-sm" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-primary">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-11 rounded-xl font-black border-2 border-primary/30 text-2xl text-center bg-white" autoFocus /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month Total Days</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
+                            </div>
+                            <p className="text-[8px] text-primary/60 font-black uppercase tracking-widest text-center">Just update 'Days Present' for instant re-calculation.</p>
+                        </div>
+
                         {/* Company Section */}
-                        <div className="space-y-6">
-                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Details</Badge>
+                        <div className="space-y-6 pt-6 border-t border-dashed">
+                            <Badge className="bg-muted text-muted-foreground font-black text-[9px] px-3 py-1 uppercase tracking-widest">Business Branding</Badge>
                             <div className="grid gap-4">
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Company Name</Label><Input value={data.company.name} onChange={(e) => updateNested('company', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Address</Label><Textarea value={data.company.address} onChange={(e) => updateNested('company', 'address', e.target.value)} className="rounded-xl border-2 font-medium" /></div>
@@ -354,7 +484,7 @@ export default function SalarySlipGenerator() {
                         </div>
 
                         {/* Employee Section */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 pt-6 border-t border-dashed">
                             <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Employee Profile</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Full Name</Label><Input value={data.employee.name} onChange={(e) => updateNested('employee', 'name', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
@@ -372,7 +502,7 @@ export default function SalarySlipGenerator() {
                         </div>
 
                         {/* Pay Period Section */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 pt-6 border-t border-dashed">
                             <Badge className="bg-indigo-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Pay Period</Badge>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Month</Label><Input value={data.payPeriod.month} onChange={(e) => updateNested('payPeriod', 'month', e.target.value)} className="h-10 rounded-xl font-bold border-2" placeholder="e.g. AUGUST" /></div>
@@ -380,20 +510,8 @@ export default function SalarySlipGenerator() {
                             </div>
                         </div>
 
-                        {/* Calculation Engine Section */}
-                        <div className="space-y-6">
-                            <Badge className="bg-purple-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Calculation Engine</Badge>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Basic Rate (Daily)</Label><Input type="number" value={data.calc.basicRate} onChange={(e) => updateNested('calc', 'basicRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Days Present</Label><Input type="number" value={data.calc.presentDays} onChange={(e) => updateNested('calc', 'presentDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Total Days in Month</Label><Input type="number" value={data.calc.totalDays} onChange={(e) => updateNested('calc', 'totalDays', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Hours</Label><Input type="number" value={data.calc.overtimeHours} onChange={(e) => updateNested('calc', 'overtimeHours', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                                <div className="col-span-2 space-y-1.5"><Label className="text-[9px] font-black uppercase opacity-60">Overtime Rate (Hourly)</Label><Input type="number" value={data.calc.overtimeRate} onChange={(e) => updateNested('calc', 'overtimeRate', e.target.value)} className="h-10 rounded-xl font-bold border-2" /></div>
-                            </div>
-                        </div>
-
                         {/* Allowances Section */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 pt-6 border-t border-dashed">
                             <div className="flex justify-between items-center">
                                 <Badge className="bg-emerald-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Allowances (Earnings)</Badge>
                                 <Button size="sm" variant="ghost" onClick={() => handleAddDynamic('allowances')} className="h-7 text-[8px] font-black uppercase text-emerald-600 hover:bg-emerald-50"><Plus className="size-3 mr-1" /> Add</Button>
