@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -118,12 +119,14 @@ function SortablePage({
     page, 
     onDelete, 
     onRotate, 
-    onInsertBlank 
+    onInsertBlank,
+    onView
 }: { 
     page: PageItem; 
     onDelete: (id: string) => void;
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
+    onView: (page: PageItem) => void;
 }) {
     const {
         attributes,
@@ -170,27 +173,34 @@ function SortablePage({
                 </div>
             )}
 
-            <div className="absolute bottom-2 right-2 flex gap-1.5 transition-all z-40">
+            <div className="absolute bottom-2 right-2 flex gap-1 transition-all z-40">
                 <button 
-                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    onClick={(e) => { e.stopPropagation(); onView(page); }} 
+                    title="View Page"
+                >
+                    <Eye className="size-3.5" />
+                </button>
+                <button 
+                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
                     onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
                     title="Insert Blank After"
                 >
-                    <Plus className="size-4" />
+                    <Plus className="size-3.5" />
                 </button>
                 <button 
-                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
                     onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
                     title="Rotate 90"
                 >
-                    <RotateCw className="size-4" />
+                    <RotateCw className="size-3.5" />
                 </button>
                 <button 
-                    className="h-8 w-8 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600" 
+                    className="h-7 w-7 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600" 
                     onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
                     title="Delete Page"
                 >
-                    <Trash2 className="size-4" />
+                    <Trash2 className="size-3.5" />
                 </button>
             </div>
         </div>
@@ -215,6 +225,7 @@ export default function PdfOrganizer() {
     const [resultPdfUrl, setResultPdfUrl] = useState<string | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isRestoreOpen, setIsRestoreOpen] = useState(false);
+    const [zoomPage, setZoomPage] = useState<PageItem | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const studioWorkspaceRef = useRef<HTMLDivElement>(null);
@@ -478,7 +489,7 @@ export default function PdfOrganizer() {
                             "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none h-full flex flex-col",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
-                            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={onDrop}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <CardHeader className="bg-muted/30 border-b p-6 text-center">
@@ -548,6 +559,7 @@ export default function PdfOrganizer() {
                                                             onDelete={deletePage}
                                                             onRotate={rotatePage}
                                                             onInsertBlank={addBlankPage}
+                                                            onView={(page) => setZoomPage(page)}
                                                         />
                                                     ))}
                                                 </div>
@@ -695,6 +707,34 @@ export default function PdfOrganizer() {
                     </Card>
                 </div>
             </div>
+
+            {/* PAGE VIEW MODAL */}
+            <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
+                <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[200]">
+                    <DialogHeader className="bg-primary/5 p-4 border-b">
+                        <DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">
+                            Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-auto p-4 md:p-12 flex items-center justify-center bg-slate-100 dark:bg-slate-900 shadow-inner">
+                        {zoomPage?.type === 'blank' ? (
+                            <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 rounded-sm animate-in zoom-in-95">
+                                <FilePlus2 className="size-20 text-muted-foreground opacity-10" />
+                                <span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span>
+                            </div>
+                        ) : (
+                            <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] md:border-[16px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px]">
+                                <img src={zoomPage?.previewSrc} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" />
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center">
+                        <Button variant="ghost" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-11 border-2 rounded-xl">
+                            <X className="mr-2 size-4" /> Close Studio View
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
