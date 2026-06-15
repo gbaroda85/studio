@@ -163,7 +163,7 @@ export default function PdfMerger() {
             });
             const pdf = await loadingTask.promise;
             const imgs: string[] = [];
-            const pagesToRender = Math.min(pdf.numPages, 20); 
+            const pagesToRender = pdf.numPages; // Shows all pages
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -210,10 +210,8 @@ export default function PdfMerger() {
                 DisplayDocTitle: true
             }));
             
-            // Set PageMode to UseNone (prevents sidebar opening by default)
             catalog.set(PDFName.of('PageMode'), PDFName.of('UseNone'));
 
-            // Force browser to fit to window on open (OpenAction)
             const allPages = mergedPdf.getPages();
             if (allPages.length > 0) {
                 const firstPage = allPages[0];
@@ -228,7 +226,6 @@ export default function PdfMerger() {
             const url = URL.createObjectURL(blob);
             setMergedPdfUrl(url);
             
-            // Show preview automatically
             setIsPreviewOpen(true);
             await generateVisualPreviews(mergedPdfBytes);
             
@@ -348,7 +345,7 @@ export default function PdfMerger() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-10 flex-1 flex flex-col">
-                            <div className="space-y-6">
+                            <div className="space-y-6 text-left">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 mb-2">
                                     <ArrowUpDown className="size-3" /> Quick Sorting Studio
                                 </Label>
