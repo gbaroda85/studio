@@ -82,6 +82,7 @@ export default function PdfLocker() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -258,7 +259,7 @@ export default function PdfLocker() {
                             </div>
                         </div>
                     ) : isProcessing ? (
-                        <div className="w-full max-w-sm space-y-6 md:space-y-8 text-center">
+                        <div className="w-full max-sm space-y-6 md:space-y-8 text-center">
                             <div className="relative inline-block">
                                 <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                 <Lock className="absolute inset-0 m-auto h-8 w-8 md:h-12 md:w-12 text-primary animate-pulse" />
@@ -305,13 +306,13 @@ export default function PdfLocker() {
         <div className="lg:col-span-5 space-y-6">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-5 md:p-8">
-                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter">
+                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
                         <Settings2 className="size-4 md:size-5 text-primary" /> Security Panel
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
                     <div className="space-y-6">
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-left">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Set Document Password</Label>
                             <div className="relative group">
                                 <Input 
@@ -332,11 +333,11 @@ export default function PdfLocker() {
                             </div>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-left">
                             <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Confirm Password</Label>
                             <div className="relative group">
                                 <Input 
-                                    type={showPassword ? "text" : "password"} 
+                                    type={showConfirmPassword ? "text" : "password"} 
                                     placeholder="Repeat password..." 
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -345,21 +346,21 @@ export default function PdfLocker() {
                                 />
                                 <button 
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                                 >
-                                    {showPassword ? <EyeOff className="size-4 md:size-5" /> : <Eye className="size-4 md:size-5" />}
+                                    {showConfirmPassword ? <EyeOff className="size-4 md:size-5" /> : <Eye className="size-4 md:size-5" />}
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-xl md:rounded-2xl border-2 border-blue-500/10 flex gap-3 md:gap-4 shadow-sm">
+                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-xl md:rounded-2xl border-2 border-blue-500/10 flex gap-3 md:gap-4 shadow-sm text-left">
                         <AlertCircle className="size-4 md:size-6 text-blue-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[10px] md:text-[11px] font-black text-blue-700 uppercase tracking-tight">Sanitization Protocol</p>
                             <p className="text-[8px] md:text-[10px] text-blue-600/80 font-medium leading-tight mt-1 uppercase">
-                                We automatically rebuild the PDF structure to ensure encryption is applied deeply.
+                                We automatically rebuild the PDF structure to ensure encryption is applied deeply and content remains visible.
                             </p>
                         </div>
                     </div>

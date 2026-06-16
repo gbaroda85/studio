@@ -356,7 +356,7 @@ export default function PdfUnlocker() {
                         <Card className="shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50">
                             <CardHeader className="bg-muted/30 border-b p-6">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3 truncate pr-4">
+                                    <div className="flex items-center gap-3 truncate pr-4 text-left">
                                         <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                             {isProtected ? <Lock className="size-5" /> : <CheckCircle2 className="size-5 text-green-500" />}
                                         </div>
@@ -385,7 +385,7 @@ export default function PdfUnlocker() {
                                     </div>
                                 ) : isProtected === true && !unlockedPdfUrl ? (
                                     <div className="space-y-6">
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 text-left">
                                             <Label htmlFor="pass" className="text-[10px] font-black uppercase text-primary tracking-widest">Enter Current Password</Label>
                                             <div className="relative group">
                                                 <input 
@@ -405,7 +405,7 @@ export default function PdfUnlocker() {
                                         </div>
 
                                         {isAadhaarFile && (
-                                            <Alert className="bg-blue-50 border-2 border-blue-100 rounded-2xl animate-in slide-in-from-left">
+                                            <Alert className="bg-blue-50 border-2 border-blue-100 rounded-2xl text-left">
                                                 <Info className="size-5 text-blue-500" />
                                                 <AlertTitle className="text-[10px] font-black uppercase text-blue-700">Aadhaar Format Tip</AlertTitle>
                                                 <AlertDescription className="text-[11px] font-bold text-blue-600 leading-tight">
@@ -428,7 +428,7 @@ export default function PdfUnlocker() {
                                         )}
 
                                         {errorDetails && (
-                                            <Alert variant="destructive" className="rounded-xl border-2">
+                                            <Alert variant="destructive" className="rounded-xl border-2 text-left">
                                                 <ShieldAlert className="size-4" />
                                                 <AlertTitle className="text-[10px] font-black uppercase">Unlock Failed</AlertTitle>
                                                 <AlertDescription className="text-xs font-bold">{errorDetails}</AlertDescription>
@@ -476,9 +476,14 @@ export default function PdfUnlocker() {
                                         <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
                                     </Button>
                                 )}
-                                <Button variant="ghost" onClick={resetState} className="w-full h-10 text-[10px] font-black uppercase text-muted-foreground/40 hover:text-destructive">
-                                    <RefreshCcw className="size-3.5 mr-2" /> Start Over
-                                </Button>
+                                <div className="flex items-center justify-between w-full mt-2">
+                                    <Button variant="ghost" onClick={resetState} className="h-10 text-[10px] font-black uppercase text-muted-foreground/40 hover:text-destructive">
+                                        <RefreshCcw className="size-3.5 mr-2" /> Start Over
+                                    </Button>
+                                    <div className="flex items-center gap-1.5 text-muted-foreground/30 text-[8px] font-black uppercase">
+                                        <ShieldCheck className="size-3 text-green-500" /> SECURE RAM
+                                    </div>
+                                </div>
                             </CardFooter>
                         </Card>
                     </motion.div>

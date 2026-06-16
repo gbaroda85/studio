@@ -412,7 +412,7 @@ export default function AadhaarPrinter() {
             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
         >
             <CardHeader className="pt-12 relative">
-                <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase"><ArrowLeft className="mr-1 size-3" /> Back</Button>
+                <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase text-left"><ArrowLeft className="mr-1 size-3" /> Back</Button>
                 <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary"><UploadCloud className="size-10" /></div>
                 <CardTitle className="text-3xl font-black uppercase">e-Aadhaar Upload</CardTitle>
             </CardHeader>
@@ -507,7 +507,7 @@ export default function AadhaarPrinter() {
             <CardHeader className="bg-primary/5 p-6 border-b text-center"><CardTitle className="text-xl font-black uppercase flex items-center justify-center gap-3"><Lock className="size-5 text-primary" /> Aadhaar Password</CardTitle></CardHeader>
             <CardContent className="p-8 space-y-6">
                 <Label className="text-[10px] font-black uppercase opacity-50">Enter PDF Open Password</Label>
-                <div className="relative group">
+                <div className="relative group text-left">
                     <Input 
                         type={showPassword ? "text" : "password"} 
                         value={password} 
@@ -524,7 +524,7 @@ export default function AadhaarPrinter() {
                         {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                     </button>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 font-bold leading-tight">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-left"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
             </CardContent>
             <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-14 bg-primary font-black rounded-xl text-lg shadow-xl">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
         </Card>
@@ -593,9 +593,14 @@ export default function AadhaarPrinter() {
       {stage === 'preview' && frontFinal && backFinal && (
         <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 no-print">
-                <div className="flex items-center gap-4">
-                    <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><CheckCircle2 className="size-7" /></div>
-                    <div><h3 className="text-xl font-black uppercase tracking-tighter">Print Ready</h3><p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest">A4 ID-1 ALIGNMENT</p></div>
+                <div className="flex items-center gap-4 text-left">
+                    <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20">
+                        <CheckCircle2 className="size-7" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black uppercase tracking-tighter">Print Ready</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest leading-none">A4 ID-1 ALIGNMENT</p>
+                    </div>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2"><Square className="size-3 text-muted-foreground" /><span className="text-[10px] font-black uppercase">Border</span><Switch checked={showBorder} onCheckedChange={setShowBorder} /></div>
