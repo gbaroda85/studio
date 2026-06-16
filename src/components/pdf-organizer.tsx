@@ -86,7 +86,7 @@ interface PageItem {
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i}`}>
+            <div key={i} className={`star-${i} pointer-events-none`}>
                 <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
@@ -143,49 +143,53 @@ function SortablePage({
                 isDragging && "scale-95"
             )}
         >
-            <div className="absolute top-1.5 left-1.5 size-7 md:size-9 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
+            {/* Page Index Label */}
+            <div className="absolute top-1.5 left-1.5 size-7 md:size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
             
+            {/* Drag Handle Area */}
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center">
                 <Grip className="size-10 md:size-12 text-primary opacity-0 group-hover:opacity-20 transition-opacity" />
             </div>
 
+            {/* Page Content */}
             {page.type === 'blank' ? (
                 <div className="size-full flex flex-col items-center justify-center bg-white dark:bg-slate-900 text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
                     <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                 </div>
             ) : (
-                <div className="size-full flex items-center justify-center p-2.5 transition-transform duration-300 pointer-events-none backface-hidden transform-gpu" style={{ transform: `rotate(${page.rotation}deg)` }}>
+                <div className="size-full flex items-center justify-center p-2 transition-transform duration-300 pointer-events-none backface-hidden transform-gpu" style={{ transform: `rotate(${page.rotation}deg)` }}>
                     <img src={page.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
                 </div>
             )}
 
-            <div className="absolute bottom-1.5 right-1.5 flex gap-1 transition-all z-40 md:opacity-0 md:group-hover:opacity-100">
+            {/* Actions Row - Optimized Alignment */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 transition-all z-40 md:opacity-0 md:group-hover:opacity-100 px-2">
                 <button 
-                    className="h-9 w-9 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onView(page); }} 
                 >
-                    <Eye className="size-4" />
+                    <Eye className="size-3.5" />
                 </button>
                 <button 
-                    className="h-9 w-9 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
                 >
-                    <Plus className="size-4" />
+                    <Plus className="size-3.5" />
                 </button>
                 <button 
-                    className="h-9 w-9 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
                 >
-                    <RotateCw className="size-4" />
+                    <RotateCw className="size-3.5" />
                 </button>
                 <button 
-                    className="h-9 w-9 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600 active:scale-90" 
+                    className="h-8 flex-1 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600 active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
                 >
-                    <Trash2 className="size-4" />
+                    <Trash2 className="size-3.5" />
                 </button>
             </div>
         </div>
@@ -212,7 +216,7 @@ export default function PdfOrganizer() {
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
@@ -235,11 +239,11 @@ export default function PdfOrganizer() {
 
     const handleFileChange = async (file: File | null) => {
         if (file && file.type === 'application/pdf') {
+            setIsRendering(true);
             setPdfFile(file);
             setPages([]);
             setDeletedPages([]);
             setResultPdfUrl(null);
-            setIsRendering(true);
             setProgress(0);
 
             try {
@@ -255,7 +259,7 @@ export default function PdfOrganizer() {
                 const newPages: PageItem[] = [];
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 0.8 });
+                    const viewport = page.getViewport({ scale: 1.0 });
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -270,7 +274,7 @@ export default function PdfOrganizer() {
                             index: i,
                             rotation: 0,
                             isDeleted: false,
-                            previewSrc: canvas.toDataURL('image/jpeg', 0.7),
+                            previewSrc: canvas.toDataURL('image/jpeg', 0.8),
                             type: 'original'
                         });
                     }
@@ -414,8 +418,8 @@ export default function PdfOrganizer() {
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div className="w-full max-w-7xl px-2 md:px-4 flex flex-col gap-6 pb-20">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-280px)]">
+        <div className="w-full max-w-7xl px-2 md:px-4 flex flex-col gap-6 pb-20 overflow-visible">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-280px)] overflow-visible">
                 <div className="lg:col-span-8 h-full flex flex-col min-h-[450px]">
                     {!pdfFile ? (
                         <Card className={cn(
@@ -450,7 +454,7 @@ export default function PdfOrganizer() {
                                     <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Visual Document Map</CardTitle>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full">{pages.length} PAGES</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">{pages.length} PAGES</Badge>
                                     <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive rounded-lg px-3"><RefreshCcw className="mr-1.5 size-3" /> Change</Button>
                                 </div>
                             </CardHeader>
@@ -502,7 +506,7 @@ export default function PdfOrganizer() {
                         <CardContent className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                             <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner">
                                 <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><Zap className="size-5 text-yellow-500 animate-pulse" /></div>
-                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">Rotation and reordering are applied as metadata changes.</p>
+                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">Changes are applied as PDF metadata. Quality is preserved.</p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10 text-left">
@@ -513,13 +517,18 @@ export default function PdfOrganizer() {
                                     <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14" data-label="ADD BLANK PAGE" />
                                     <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14" data-label="ROTATE ALL 90°" />
                                     <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ROTATIONS" />
-                                    <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-14 relative" data-label="RESTORE BIN">
-                                        {deletedPages.length > 0 && <span className="absolute -top-2 -right-1 size-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-lg border border-white">{deletedPages.length}</span>}
-                                    </button>
+                                    <div className="relative">
+                                        <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-14 w-full" data-label="RESTORE BIN" />
+                                        {deletedPages.length > 0 && (
+                                            <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white z-[60] animate-in zoom-in-50">
+                                                {deletedPages.length}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mt-auto">
+                            <div className="space-y-4 mt-auto pt-6">
                                 {!resultPdfUrl ? (
                                     <Button className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" onClick={handleSavePdf} disabled={isSaving || isRendering || pages.length === 0}>
                                         <StarIcons />
@@ -539,7 +548,7 @@ export default function PdfOrganizer() {
             </div>
 
             <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
-                <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
+                <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col z-[1000] top-[50%]">
                     <DialogHeader className="p-8 border-b bg-primary/5">
                         <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3"><History className="size-6 text-primary" /> Trash Recovery</DialogTitle>
                     </DialogHeader>
@@ -561,7 +570,7 @@ export default function PdfOrganizer() {
             </Dialog>
 
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
-                <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[200]">
+                <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] z-[2000]">
                     <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
                     <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar">
                         {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
