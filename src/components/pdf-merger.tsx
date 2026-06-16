@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -51,6 +50,13 @@ import confetti from 'canvas-confetti';
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+}
+
+interface PageItem {
+    id: string;
+    index: number;
+    rotation: number;
+    previewSrc: string;
 }
 
 const StarIcons = () => (
@@ -395,14 +401,14 @@ export default function PdfMerger() {
                                         <>
                                             <Button 
                                                 variant="outline" 
-                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-primary/10 text-primary border-primary bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95"
+                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-primary/10 text-primary hover:text-primary border-primary bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95 transition-all duration-300"
                                                 onClick={() => setIsPreviewOpen(true)}
                                             >
                                                 <Eye className="mr-2 size-4 text-primary" /> VIEW PREVIEW
                                             </Button>
                                             <Button 
                                                 variant="outline"
-                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-500/10 text-emerald-600 border-emerald-600 bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95"
+                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-500/10 text-emerald-600 hover:text-emerald-700 border-emerald-600 bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95 transition-all duration-300"
                                                 onClick={handleDownload}
                                             >
                                                 <Download className="mr-2 size-4 text-emerald-600" /> DOWNLOAD PDF
