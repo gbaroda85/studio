@@ -181,7 +181,7 @@ export default function PassportDateNameMaker() {
         }
     };
 
-    const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragOver(false);
         const file = e.dataTransfer.files?.[0];
@@ -221,7 +221,7 @@ export default function PassportDateNameMaker() {
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700 mx-auto">
             {/* Left: Input Panel */}
             <div className="lg:col-span-5 space-y-6">
-                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+                <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                     <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
                         <div className="flex items-center gap-4">
                             <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
@@ -235,7 +235,41 @@ export default function PassportDateNameMaker() {
                     </CardHeader>
                     
                     <CardContent className="p-6 md:p-8 space-y-8">
-                        <div className="space-y-6">
+                        {/* 1. UPLOAD PHOTO (Shifted to Top) */}
+                        {!imageSrc ? (
+                            <div 
+                                className={cn(
+                                    "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group",
+                                    isDragOver && "border-primary bg-primary/5"
+                                )}
+                                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                                onDragLeave={() => setIsDragOver(false)}
+                                onDrop={onDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+                                <div className="text-center">
+                                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Your Photo</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">JPG or PNG supported</p>
+                                </div>
+                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+                            </div>
+                        ) : (
+                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95 shadow-sm">
+                                <div className="flex items-center gap-4 truncate">
+                                    <div className="size-12 rounded-xl overflow-hidden border-2 border-white shrink-0 bg-white relative shadow-md">
+                                        <img src={imageSrc} className="size-full object-cover" alt="thumb" />
+                                    </div>
+                                    <div className="truncate text-left">
+                                        <p className="text-[10px] font-black uppercase truncate">IMAGE LOADED</p>
+                                        <Badge variant="outline" className="text-[8px] font-black">LOCAL BUFFER</Badge>
+                                    </div>
+                                </div>
+                                <Button size="icon" variant="ghost" className="rounded-full text-destructive hover:bg-destructive/10 h-8 w-8" onClick={handleReset}><X className="size-4" /></Button>
+                             </div>
+                        )}
+
+                        <div className="space-y-6 pt-4 border-t border-dashed">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Type className="size-3" /> Candidate Name
@@ -260,7 +294,7 @@ export default function PassportDateNameMaker() {
                                     />
                                     <div className="flex flex-col items-center justify-center gap-1 px-3 bg-muted/30 rounded-xl border-2">
                                         <span className="text-[7px] font-black uppercase opacity-40">Prefix</span>
-                                        <Switch checked={showDopPrefix} onCheckedChange={setShowDopPrefix} size="sm" />
+                                        <Switch checked={showDopPrefix} onCheckedChange={setShowDopPrefix} />
                                     </div>
                                 </div>
                                 <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Tip: Toggle switch to hide "D.O.P:" label.</p>
@@ -315,7 +349,7 @@ export default function PassportDateNameMaker() {
                                             type="number" 
                                             value={targetKB} 
                                             onChange={(e) => setTargetKB(e.target.value)} 
-                                            className="h-14 border-2 rounded-2xl font-black text-3xl text-center text-primary bg-primary/5 shadow-inner"
+                                            className="h-14 border-2 rounded-2xl font-black text-3xl text-center text-primary bg-primary/5 shadow-inner focus:ring-4 focus:ring-primary/20 transition-all"
                                         />
                                         <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg uppercase">KB Limit</Badge>
                                     </div>
@@ -323,39 +357,6 @@ export default function PassportDateNameMaker() {
                                 </div>
                             </div>
                         </div>
-
-                        {!imageSrc ? (
-                            <div 
-                                className={cn(
-                                    "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-primary/5 transition-all group",
-                                    isDragOver && "border-primary bg-primary/5"
-                                )}
-                                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                                onDragLeave={() => setIsDragOver(false)}
-                                onDrop={onDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
-                                <div className="text-center">
-                                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Your Photo</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">JPG or PNG supported</p>
-                                </div>
-                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
-                            </div>
-                        ) : (
-                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95 shadow-sm">
-                                <div className="flex items-center gap-4 truncate">
-                                    <div className="size-12 rounded-xl overflow-hidden border-2 border-white shrink-0 bg-white relative shadow-md">
-                                        <img src={imageSrc} className="size-full object-cover" alt="thumb" />
-                                    </div>
-                                    <div className="truncate text-left">
-                                        <p className="text-[10px] font-black uppercase truncate">IMAGE LOADED</p>
-                                        <Badge variant="outline" className="text-[8px] font-black">LOCAL BUFFER</Badge>
-                                    </div>
-                                </div>
-                                <Button size="icon" variant="ghost" className="rounded-full text-destructive hover:bg-destructive/10 h-8 w-8" onClick={handleReset}><X className="size-4" /></Button>
-                             </div>
-                        )}
                     </CardContent>
                     
                     <CardFooter className="p-6 md:p-8 bg-muted/10 border-t flex flex-col gap-3">
