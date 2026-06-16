@@ -485,7 +485,7 @@ export default function PdfToImageConverter() {
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative group", 
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                             selectedPage?.vAlign === 'top' && "active-uiverse"
                                         )} 
                                         data-label="      Top"
@@ -495,7 +495,7 @@ export default function PdfToImageConverter() {
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative group", 
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                             selectedPage?.vAlign === 'center' && "active-uiverse"
                                         )} 
                                         data-label="      Center"
@@ -505,7 +505,7 @@ export default function PdfToImageConverter() {
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative group", 
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                             selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
                                         data-label="      Bottom"
