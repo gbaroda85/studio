@@ -390,7 +390,7 @@ export default function ImageCompressor() {
                             <div className="space-y-3 pt-4 border-t border-dashed text-left">
                                 <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground">Custom Size Limit</Label>
                                 <div className="flex gap-2">
-                                    <Input type="number" value={targetSizeValue} onChange={(e) => setTargetSizeValue(e.target.value)} className="h-12 text-lg font-black border-2 rounded-xl flex-1 bg-background shadow-inner" />
+                                    <Input type="number" value={targetSizeValue} onChange={(e) => setTargetSizeValue(e.target.value)} className="h-12 text-lg font-black border-2 rounded-xl bg-background shadow-inner flex-1" />
                                     <Select value={targetUnit} onValueChange={(v) => setTargetUnit(v as TargetUnit)}><SelectTrigger className="w-20 md:w-24 h-12 font-black border-2 rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl font-black"><SelectItem value="kb">KB</SelectItem><SelectItem value="mb">MB</SelectItem></SelectContent></Select>
                                 </div>
                             </div>
@@ -422,16 +422,16 @@ export default function ImageCompressor() {
       </div>
 
       <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
-          <DialogContent className="max-w-5xl max-h-[82vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[52%] translate-y-[-50%] z-[2000]">
+          <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] translate-y-[-50%] z-[2000]">
               <DialogHeader className="bg-white dark:bg-slate-900 p-6 border-b shrink-0">
                   <DialogTitle className="font-black uppercase tracking-tighter text-xl text-slate-800 dark:text-white flex items-center gap-3">
                        <ArrowLeftRight className="size-6 text-primary" /> PRECISION ANALYSIS
                   </DialogTitle>
               </DialogHeader>
               
-              <div className="flex-1 p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-hidden">
-                  <div className="grid md:grid-cols-2 gap-10 w-full h-full">
-                      <div className="space-y-6 flex flex-col h-full">
+              <div className="flex-1 p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-hidden min-h-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full h-full min-h-0">
+                      <div className="space-y-4 flex flex-col h-full min-h-0">
                           <div className="flex justify-between items-center px-2 shrink-0">
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">ORIGINAL</span>
                               <Badge variant="outline" className="bg-white/50 text-[10px] font-black uppercase border-2 h-7 px-4 shadow-sm">{viewItem ? formatBytes(viewItem.originalSize) : '-'}</Badge>
@@ -441,7 +441,7 @@ export default function ImageCompressor() {
                           </div>
                       </div>
 
-                      <div className="space-y-6 flex flex-col h-full">
+                      <div className="space-y-4 flex flex-col h-full min-h-0">
                           <div className="flex justify-between items-center px-2 shrink-0">
                               <Badge className="bg-green-500 text-white text-[10px] font-black uppercase h-7 px-5 rounded-lg shadow-md border-2 border-white/20">Optimized</Badge>
                               <span className="text-[10px] font-black uppercase text-green-600 tracking-widest">{viewItem && viewItem.newSize > 0 ? formatBytes(viewItem.newSize) : 'Processing...'}</span>
