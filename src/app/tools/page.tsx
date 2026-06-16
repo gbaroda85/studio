@@ -339,14 +339,6 @@ function ToolsPageContent() {
 
   const fileFeatures = [
     {
-      href: '/id-card-generator',
-      labelKey: 'id_card_generator_label',
-      descriptionKey: 'id_card_generator_description',
-      icon: CreditCard,
-      color: 'bg-primary',
-      lightBg: 'bg-primary/5'
-    },
-    {
       href: '/aadhaar-printer',
       labelKey: 'aadhaar_printer_label',
       descriptionKey: 'aadhaar_printer_description',

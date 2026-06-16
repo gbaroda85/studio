@@ -1,4 +1,3 @@
-
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -8,7 +7,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const highPriorityTools = [
     '/image-compress',
     '/image-resize',
-    '/id-card-generator',
     '/signature-resizer',
     '/marriage-biodata',
     '/passport-photo',
