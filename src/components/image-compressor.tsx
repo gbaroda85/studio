@@ -22,7 +22,8 @@ import {
   ArrowLeftRight,
   Plus,
   ChevronRight,
-  RefreshCcw
+  RefreshCcw,
+  Monitor
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,8 +44,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogTrigger,
+    DialogFooter 
+} from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import confetti from 'canvas-confetti';
 
 type CompressionResult = {
   id: string;
@@ -94,6 +103,7 @@ export default function ImageCompressor() {
   const [quality, setQuality] = useState<number[]>([75]);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
+  const [viewItem, setViewItem] = useState<CompressionResult | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -164,14 +174,13 @@ export default function ImageCompressor() {
                 for (const scale of scalesToTry) {
                     let low = 0.2, high = 0.95; 
                     let stepBestUrl = "";
-                    let stepBestSize = 0;
                     for (let i = 0; i < 6; i++) {
                         const mid = (low + high) / 2;
                         const testUrl = renderToCanvas(mid, scale);
                         const testBlob = await (await fetch(testUrl)).blob();
                         if (testBlob.size <= targetBytes) {
                             stepBestUrl = testUrl;
-                            stepBestSize = testBlob.size;
+                            bestSize = testBlob.size;
                             low = mid; 
                         } else {
                             high = mid; 
@@ -179,7 +188,6 @@ export default function ImageCompressor() {
                     }
                     if (stepBestUrl) {
                         bestUrl = stepBestUrl;
-                        bestSize = bestSize;
                         break; 
                     }
                 }
@@ -278,9 +286,23 @@ export default function ImageCompressor() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
-                                                {res.isProcessing ? <Loader2 className="size-4 animate-spin text-primary" /> : res.newSize > 0 ? (
-                                                    <div className="flex items-center gap-1.5"><Badge className="bg-green-500 text-white text-[7px] font-black">-{res.savings.toFixed(0)}%</Badge><Button size="icon" variant="outline" className="size-7 rounded-lg border-2" onClick={() => downloadFile(res)}><Download className="size-3.5" /></Button></div>
-                                                ) : null}
+                                                {res.isProcessing ? (
+                                                  <Loader2 className="size-4 animate-spin text-primary" />
+                                                ) : (
+                                                  <div className="flex items-center gap-1.5">
+                                                      {res.newSize > 0 && <Badge className="bg-green-500 text-white text-[7px] font-black">-{res.savings.toFixed(0)}%</Badge>}
+                                                      
+                                                      <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-primary/5 text-primary" onClick={() => setViewItem(res)}>
+                                                          <Eye className="size-3.5" />
+                                                      </Button>
+
+                                                      {res.newSize > 0 && (
+                                                          <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-green-50 text-green-600" onClick={() => downloadFile(res)}>
+                                                              <Download className="size-3.5" />
+                                                          </Button>
+                                                      )}
+                                                  </div>
+                                                )}
                                                 <Button variant="ghost" size="icon" className="size-7 rounded-full" onClick={() => removeFile(res.id)}><X className="size-3" /></Button>
                                             </div>
                                         </div>
@@ -371,6 +393,42 @@ export default function ImageCompressor() {
             </Card>
         </div>
       </div>
+
+      {/* VIEW MODAL */}
+      <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
+          <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[2000]">
+              <DialogHeader className="bg-primary/5 p-4 border-b shrink-0">
+                  <DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground flex items-center justify-center gap-2">
+                       <Eye className="size-4 text-primary" /> Visual Studio Preview
+                  </DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
+                  <div className="flex flex-col items-center gap-6 w-full">
+                      <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] md:border-[12px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden w-full max-w-[650px] mt-4 mb-4 transform-gpu">
+                          <img 
+                              src={viewItem?.dataUrl || viewItem?.originalDataUrl} 
+                              className="w-full h-auto block" 
+                              alt="preview" 
+                          />
+                          <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
+                              <Badge variant="outline" className="text-[8px] font-black uppercase border-black">
+                                {viewItem?.newSize && viewItem.newSize > 0 ? 'COMPRESSED' : 'ORIGINAL'}
+                              </Badge>
+                          </div>
+                      </div>
+                      <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 mb-10">
+                          <Sparkles className="size-4 text-primary animate-pulse" /> High-Fidelity Rendering Ready
+                      </div>
+                  </div>
+              </div>
+              <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0">
+                  <Button variant="outline" onClick={() => setViewItem(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-12 border-2 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
+                      <X className="mr-2 size-4" /> Close Studio View
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
