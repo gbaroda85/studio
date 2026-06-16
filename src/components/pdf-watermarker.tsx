@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -223,13 +224,18 @@ export default function PdfWatermarker() {
         let embeddedImage: any;
         let imageDims = { width: 0, height: 0 };
         if (wType === 'image' && imageWatermarkSrc) {
-            const imgBuffer = await fetch(imageWatermarkSrc).then(r => r.arrayBuffer());
-            embeddedImage = imageWatermarkSrc.startsWith('data:image/png') ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
+            const base64 = imageWatermarkSrc.split(',')[1];
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            
+            embeddedImage = imageWatermarkSrc.startsWith('data:image/png') 
+                ? await pdfDoc.embedPng(bytes.buffer) 
+                : await pdfDoc.embedJpg(bytes.buffer);
             imageDims = { width: embeddedImage.width, height: embeddedImage.height };
         }
 
         const rgbColor = hexToRgb(textColor);
-        // FIX: Counter-clockwise in UI (-45) is CCW. pdf-lib uses positive for CCW.
         const rotDeg = rotation[0]; 
         const op = opacity[0] / 100;
         const curMargin = margin[0];
@@ -239,7 +245,6 @@ export default function PdfWatermarker() {
             const { width, height } = page.getSize();
             const pageRot = page.getRotation().angle;
             
-            // Normalize dimensions for landscape vs portrait
             const isSideways = pageRot === 90 || pageRot === 270;
             const vw = isSideways ? height : width;
             const vh = isSideways ? width : height;
@@ -254,7 +259,6 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // 1. Calculate the visual coordinates in a virtual viewport (Origin: Top-Left)
             let vcx, vcy;
             switch (position) {
                 case 'top-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
@@ -269,21 +273,11 @@ export default function PdfWatermarker() {
                 default: vcx = vw/2; vcy = vh/2;
             }
 
-            // 2. Transform the coordinates to the native PDF system (Origin: Bottom-Left of UNROTATED page)
             let finalX = 0, finalY = 0;
-            if (pageRot === 0) { 
-                finalX = vcx; 
-                finalY = vh - vcy; 
-            } else if (pageRot === 90) { 
-                finalX = vcy; 
-                finalY = vcx; 
-            } else if (pageRot === 180) { 
-                finalX = vw - vcx; 
-                finalY = vcy; 
-            } else if (pageRot === 270) { 
-                finalX = vh - vcy; 
-                finalY = vw - vcx; 
-            }
+            if (pageRot === 0) { finalX = vcx; finalY = vh - vcy; } 
+            else if (pageRot === 90) { finalX = vcy; finalY = vcx; } 
+            else if (pageRot === 180) { finalX = vw - vcx; finalY = vcy; } 
+            else if (pageRot === 270) { finalX = vh - vcy; finalY = vw - vcx; }
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
@@ -306,6 +300,13 @@ export default function PdfWatermarker() {
                 });
             }
         }
+
+        const catalog = pdfDoc.catalog;
+        catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+            FitWindow: true,
+            CenterWindow: true,
+            DisplayDocTitle: true
+        }));
 
         const finalPdfBytes = await pdfDoc.save();
         const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
@@ -502,7 +503,8 @@ export default function PdfWatermarker() {
                                             onClick={() => setPosition(pos)}
                                             className={cn(
                                                 "size-8 rounded-md border-2 transition-all flex items-center justify-center relative",
-                                                position === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40"
+                                                position === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40",
+                                                "!ring-[3px] !ring-slate-950 dark:!ring-white"
                                             )}
                                             title={pos}
                                         >
@@ -655,7 +657,7 @@ export default function PdfWatermarker() {
                         </ScrollArea>
                         
                         {previewPages.length > 0 && (
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
                                 <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Studio Mapping Active
                             </div>
                         )}
