@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -10,6 +9,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragOverlay,
@@ -149,17 +149,17 @@ function SortablePage({
             ref={setNodeRef} 
             style={style} 
             className={cn(
-                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all",
+                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all transform-gpu",
                 "hover:border-primary/40 border-transparent shadow-primary/5",
                 isDragging && "opacity-0"
             )}
         >
-            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10 pointer-events-none">
+            <div className="absolute top-1.5 left-1.5 size-8 md:size-9 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[11px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
             
-            <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Grip className="size-12 text-primary opacity-20" />
+            <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <Grip className="size-10 md:size-12 text-primary opacity-20" />
             </div>
 
             {page.type === 'blank' ? (
@@ -168,39 +168,39 @@ function SortablePage({
                     <span className="text-[8px] font-black uppercase opacity-40">Blank Page</span>
                 </div>
             ) : (
-                <div className="size-full flex items-center justify-center p-3 transition-transform duration-300 pointer-events-none" style={{ transform: `rotate(${page.rotation}deg)` }}>
+                <div className="size-full flex items-center justify-center p-2.5 transition-transform duration-300 pointer-events-none backface-hidden" style={{ transform: `rotate(${page.rotation}deg)` }}>
                     <img src={page.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
                 </div>
             )}
 
-            <div className="absolute bottom-2 right-2 flex gap-1 transition-all z-40">
+            <div className="absolute bottom-1.5 right-1.5 flex gap-1 transition-all z-40 md:opacity-0 md:group-hover:opacity-100">
                 <button 
-                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onView(page); }} 
                     title="View Page"
                 >
-                    <Eye className="size-3.5" />
+                    <Eye className="size-4" />
                 </button>
                 <button 
-                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
                     title="Insert Blank After"
                 >
-                    <Plus className="size-3.5" />
+                    <Plus className="size-4" />
                 </button>
                 <button 
-                    className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all" 
+                    className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
                     title="Rotate 90"
                 >
-                    <RotateCw className="size-3.5" />
+                    <RotateCw className="size-4" />
                 </button>
                 <button 
-                    className="h-7 w-7 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600" 
+                    className="h-8 w-8 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600 active:scale-90" 
                     onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
                     title="Delete Page"
                 >
-                    <Trash2 className="size-3.5" />
+                    <Trash2 className="size-4" />
                 </button>
             </div>
         </div>
@@ -228,12 +228,12 @@ export default function PdfOrganizer() {
     const [zoomPage, setZoomPage] = useState<PageItem | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const studioWorkspaceRef = useRef<HTMLDivElement>(null);
     const renderIdRef = useRef(0);
 
-    // DnD Sensors
+    // DnD Sensors - specifically added TouchSensor with delay for mobile
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
@@ -436,7 +436,6 @@ export default function PdfOrganizer() {
                 }
             }
 
-            // Set Viewer Preferences to prevent "huge" display
             const catalog = newPdfDoc.catalog;
             catalog.set(PDFName.of('ViewerPreferences'), newPdfDoc.context.obj({
                 FitWindow: true,
@@ -469,7 +468,7 @@ export default function PdfOrganizer() {
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mb-8 md:mb-12">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-2 md:px-4 flex flex-col gap-6 mb-8 md:mb-12">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 no-print">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -510,7 +509,7 @@ export default function PdfOrganizer() {
                             </CardContent>
                         </Card>
                     ) : (
-                        <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                        <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem] transform-gpu">
                             <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
                                 <div className="flex items-center gap-2">
                                     <LayoutGrid className="h-4 w-4 text-primary" />
@@ -537,7 +536,7 @@ export default function PdfOrganizer() {
                                             <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                             <Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
                                         </div>
-                                        <div className="space-y-3 w-full max-w-xs text-center">
+                                        <div className="space-y-3 w-full max-w-xs text-center px-4">
                                             <p className="font-black text-sm text-primary uppercase tracking-widest animate-pulse">Rendering Pages...</p>
                                             <Progress value={progress} className="h-1.5 shadow-inner" />
                                         </div>
@@ -551,7 +550,7 @@ export default function PdfOrganizer() {
                                             onDragEnd={handleDragEnd}
                                         >
                                             <SortableContext items={pages} strategy={rectSortingStrategy}>
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 p-6 pb-24">
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 p-4 md:p-6 pb-24">
                                                     {pages.map((p) => (
                                                         <SortablePage 
                                                             key={p.id} 
@@ -571,14 +570,14 @@ export default function PdfOrganizer() {
                                                 }),
                                             }}>
                                                 {activeId && activePage ? (
-                                                    <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none">
-                                                        <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">
+                                                    <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] opacity-80 scale-105 transition-transform cursor-grabbing z-[9999] pointer-events-none transform-gpu">
+                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20">
                                                             {activePage.type === 'blank' ? 'B' : activePage.index}
                                                         </div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
-                                                            <div className="size-full flex items-center justify-center p-3" style={{ transform: `rotate(${activePage.rotation}deg)` }}>
+                                                            <div className="size-full flex items-center justify-center p-3 transition-transform duration-300 transform-gpu" style={{ transform: `rotate(${activePage.rotation}deg)` }}>
                                                                 <img src={activePage.previewSrc} className="max-w-full max-h-full object-contain" alt="drag" />
                                                             </div>
                                                         )}
@@ -590,7 +589,7 @@ export default function PdfOrganizer() {
                                     </ScrollArea>
                                 )}
                             </CardContent>
-                            <CardFooter className="bg-white dark:bg-slate-950 p-4 flex justify-center items-center relative shrink-0">
+                            <CardFooter className="bg-white dark:bg-slate-950 p-4 flex justify-center items-center relative shrink-0 no-print">
                                  <div className="inline-flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40">
                                     <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Drag tiles to reorder pages
                                 </div>
@@ -655,11 +654,11 @@ export default function PdfOrganizer() {
                                                 ) : (
                                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                                         {deletedPages.map((p) => (
-                                                            <div key={p.id} className="relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 bg-white shadow-lg group">
+                                                            <div key={p.id} className="relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 bg-white shadow-lg group transform-gpu">
                                                                 <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100">
                                                                     <img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="trash" />
                                                                 </div>
-                                                                <div className="absolute top-2 left-2 size-6 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white">{p.index === -1 ? 'B' : p.index}</div>
+                                                                <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white">{p.index === -1 ? 'B' : p.index}</div>
                                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                                     <Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg" onClick={() => restorePage(p.id)}>RESTORE</Button>
                                                                 </div>
@@ -697,9 +696,7 @@ export default function PdfOrganizer() {
                                         <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-20 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 flex items-center justify-center gap-4 px-10 animate-in zoom-in-95">
                                             <StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span>
                                         </Button>
-                                        <Button variant="outline" onClick={handleReset} className="btn-uiverse-secondary w-full h-11">
-                                            <RefreshCcw className="mr-2 h-4 w-4" /> Start New
-                                        </Button>
+                                        <Button variant="outline" onClick={handleReset} className="btn-pos-uiverse w-full h-11 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5" data-label="START NEW" />
                                     </div>
                                 )}
                             </div>
@@ -711,24 +708,24 @@ export default function PdfOrganizer() {
             {/* PAGE VIEW MODAL */}
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
                 <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[200]">
-                    <DialogHeader className="bg-primary/5 p-4 border-b">
+                    <DialogHeader className="bg-primary/5 p-4 border-b shrink-0">
                         <DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">
                             Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="flex-1 overflow-auto p-4 md:p-12 flex items-center justify-center bg-slate-100 dark:bg-slate-900 shadow-inner">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar">
                         {zoomPage?.type === 'blank' ? (
-                            <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 rounded-sm animate-in zoom-in-95">
+                            <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 rounded-sm animate-in zoom-in-95 mt-4">
                                 <FilePlus2 className="size-20 text-muted-foreground opacity-10" />
                                 <span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span>
                             </div>
                         ) : (
-                            <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] md:border-[16px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px]">
+                            <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] md:border-[16px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px] mt-4 mb-10 transform-gpu">
                                 <img src={zoomPage?.previewSrc} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" />
                             </div>
                         )}
                     </div>
-                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center">
+                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0">
                         <Button variant="ghost" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-11 border-2 rounded-xl">
                             <X className="mr-2 size-4" /> Close Studio View
                         </Button>
