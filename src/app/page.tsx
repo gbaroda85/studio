@@ -145,8 +145,8 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
   <Link href={href} className="group block h-full">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col">
       <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
-        <div className={cn(`size-11 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
-          <Icon className="size-6" />
+        <div className={cn(`size-10 md:size-11 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shadow-lg shrink-0`, colorClass)}>
+          <Icon className="size-5 md:size-6" />
         </div>
         <div className="flex-1 flex flex-col">
           <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
@@ -180,10 +180,8 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // Tracking logic remains for owner but UI is removed
     const visits = parseInt(localStorage.getItem('gr7_visits') || '0') + 1;
     localStorage.setItem('gr7_visits', visits.toString());
-    console.log(`[Owner Access] Total Studio Visits: ${visits}`);
   }, []);
 
   const filteredTools = useMemo(() => {
@@ -223,8 +221,8 @@ export default function Page() {
           <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
-        <div className="w-full px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up shadow-sm">
+        <div className="w-full px-6 md:px-8 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
@@ -237,7 +235,7 @@ export default function Page() {
             Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-6 mb-8 animate-fade-in-up">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mb-8 animate-fade-in-up">
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner">
@@ -278,13 +276,13 @@ export default function Page() {
       </section>
 
       <section className="pt-8 pb-12 bg-background w-full flex justify-center">
-        <div className="w-full px-8 md:px-16">
+        <div className="w-full px-6 md:px-16">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-12 font-body">
                   <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                     {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
                 </div>
                 {filteredTools.length === 0 && (
@@ -298,53 +296,53 @@ export default function Page() {
             <>
                 {/* IMAGE SOLUTION - LIMIT 6 */}
                 <div className="mb-12">
-                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
+                    <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
+                        <div className="w-12 h-1.5 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                        <h2 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
                         <Link href="/tools?tab=all" className="hidden sm:flex">
                           <button className="learn-more">
                             <span className="font-black tracking-widest uppercase">Explore All</span>
                           </button>
                         </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
                 {/* PDF TOOLKIT - LIMIT 6 */}
                 <div className="mb-12">
-                    <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
+                    <div className="flex items-center gap-2 text-rose-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
+                        <div className="w-12 h-1.5 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <h2 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
                 {/* FINANCE CENTER - LIMIT 6 */}
                 <div className="mb-24">
-                    <div className="flex items-center gap-2 text-indigo-500 font-bold text-xs uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE CENTER</span>
+                    <div className="flex items-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
+                        <div className="w-12 h-1.5 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE CENTER</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">Smart Calculators</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <h2 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">Smart Calculators</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 6).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                <div className="mb-32 py-16 px-8 bg-[#fdf8f9] dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/20 dark:border-white/10 shadow-inner overflow-hidden relative">
+                <div className="mb-32 py-16 px-6 md:px-8 bg-[#fdf8f9] dark:bg-slate-900/40 rounded-[3rem] border-2 border-primary/20 dark:border-white/10 shadow-inner overflow-hidden relative">
                     <div className="absolute top-0 right-0 size-64 bg-primary/10 blur-3xl rounded-full" />
                     <div className="absolute bottom-0 left-0 size-64 bg-accent/10 blur-3xl rounded-full" />
                     
                     <div className="relative z-10 text-center space-y-16">
                         <div className="space-y-4">
                             <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm font-body">CORE PRINCIPLES</Badge>
-                            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter font-body">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
-                            <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80 font-body">The only professional studio built entirely on privacy-first architecture.</p>
+                            <h2 className="text-2xl md:text-5xl font-bold tracking-tighter font-body">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
+                            <p className="text-xs md:text-base text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80 font-body">The only professional studio built entirely on privacy-first architecture.</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8 md:gap-12">

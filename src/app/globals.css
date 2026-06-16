@@ -56,7 +56,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
     scrollbar-gutter: stable;
-    /* Prevent text size adjustment on orientation change which causes jitter */
     -webkit-text-size-adjust: 100%;
   }
   
@@ -75,13 +74,11 @@
   body {
     @apply bg-background text-foreground selection:bg-primary/20 min-h-screen flex flex-col;
     background-attachment: fixed;
-    /* Hardware acceleration for the entire body to stabilize layers */
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
   }
 
-  /* Stabilized background layer to prevent lag during zoom */
   body::before {
     content: "";
     position: fixed;
@@ -108,14 +105,12 @@
   }
 }
 
-/* Rendering Optimizations - The secret to smoothness */
 .glass-card, .btn-pos-uiverse, .magic-button, header, footer {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform;
 }
 
-/* Prevent blinking on state changes */
 .animate-in {
   animation-fill-mode: both;
   backface-visibility: hidden;
@@ -158,15 +153,6 @@ section {
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
-}
-
-.neon-border {
-  @apply relative;
-}
-.neon-border::before {
-  content: "";
-  @apply absolute -inset-0.5 bg-gradient-to-r from-primary via-accent to-primary rounded-[inherit] blur opacity-10 -z-10 group-hover:opacity-30;
-  transition: opacity 0.5s ease;
 }
 
 .magic-button {
@@ -305,7 +291,6 @@ section {
   @apply text-primary;
 }
 
-/* From Uiverse.io by Madflows - 3D LEARN MORE BUTTON */
 .learn-more {
  position: relative;
  display: inline-block;
@@ -581,15 +566,15 @@ section {
   color: #000;
   padding: 0 15px;
   border-radius: 10px;
-  width: 110px;
+  width: auto;
+  min-width: 38px;
   height: 38px;
   font-size: 13px;
   font-weight: 900;
   text-transform: uppercase;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), background 0.3s ease;
@@ -619,32 +604,16 @@ section {
   z-index: 100;
 }
 
-.support-uiverse .uiverse-tooltip::before {
-  position: absolute;
-  content: "";
-  height: 8px;
-  width: 8px;
-  background: inherit;
-  top: -3px;
-  left: 50%;
-  transform: translate(-50%) rotate(45deg);
-}
-
 .support-uiverse:hover .uiverse-tooltip {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
 }
 
-.support-uiverse:hover,
-.support-uiverse:hover .uiverse-tooltip,
-.support-uiverse:hover .uiverse-tooltip::before {
+.support-uiverse:hover {
   background: linear-gradient(320deg, #043873, #0d4a96);
   color: #ffffff;
-  border-color: transparent;
 }
 
-/* From Uiverse.io by Galahhad - THEME SWITCH */
 .theme-switch {
   --toggle-size: 14px;
   --container-width: 5.625em;
@@ -768,20 +737,6 @@ section {
   box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
 }
 
-.theme-switch__spot:nth-of-type(2) {
-  width: 0.375em;
-  height: 0.375em;
-  top: 0.937em;
-  left: 1.375em;
-}
-
-.theme-switch__spot:nth-last-of-type(3) {
-  width: 0.25em;
-  height: 0.25em;
-  top: 0.312em;
-  left: 0.812em;
-}
-
 .theme-switch__clouds {
   width: 1.25em;
   height: 1.25em;
@@ -809,21 +764,12 @@ section {
   transition: var(--transition);
 }
 
-/* actions */
 .theme-switch__checkbox:checked + .theme-switch__container {
   background-color: var(--container-night-bg);
 }
 
 .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
   left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
-  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)
-}
-
-.theme-switch__circle-container:hover {
-  left: calc(var(--circle-container-offset) + 0.187em);
 }
 
 .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {

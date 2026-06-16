@@ -175,8 +175,8 @@ const CATEGORIES = [
 function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
-      <div className="relative size-10 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-1">
+      <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
+        <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
           <text 
             x="4" 
             y="70" 
@@ -203,7 +203,7 @@ function GR7Logo({ className }: { className?: string }) {
           </text>
         </svg>
       </div>
-      <span className="font-headline font-black text-lg md:text-xl tracking-tighter text-slate-800 dark:text-white uppercase">
+      <span className="font-headline font-black text-base md:text-xl tracking-tighter text-slate-800 dark:text-white uppercase">
         Tools
       </span>
     </div>
@@ -361,11 +361,11 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
-      <div className="w-full h-full flex items-center justify-between px-4 md:px-8 lg:px-12">
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+    <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
+      <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <MobileNav />
-            <Link href="/" className="flex items-center group mr-2">
+            <Link href="/" className="flex items-center group mr-1 md:mr-2">
               <GR7Logo />
             </Link>
             
@@ -394,10 +394,10 @@ function AppHeader() {
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
             <div className="flex items-center gap-1">
-                <a href="mailto:grs.business29@gmail.com" className="support-uiverse hidden sm:flex">
-                    <span className="uiverse-tooltip">grs.business29@gmail.com</span>
-                    <Mail className="size-4 mr-2" />
-                    <span>Support</span>
+                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4">
+                    <span className="uiverse-tooltip hidden md:block">grs.business29@gmail.com</span>
+                    <Mail className="size-4 md:mr-2" />
+                    <span className="hidden md:inline">Support</span>
                 </a>
                 
                 <SettingsMenu />
@@ -412,10 +412,10 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-16 w-full flex justify-center shrink-0">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0">
       <div className="w-full px-4 md:px-12 lg:px-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="md:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
+            <div className="md:col-span-2 space-y-4 md:space-y-6">
             <Link href="/" className="flex items-center gap-2">
                 <GR7Logo />
             </Link>
@@ -423,18 +423,18 @@ export function AppFooter() {
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
             <div className="flex items-center gap-4 pt-4">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
                     <ShieldCheck className="size-3" /> 100% Client-Side
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
+                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
                     <Zap className="size-3" /> No Server Storage
                 </div>
             </div>
             </div>
             
             <div>
-            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Quick Links</h4>
-            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Quick Links</h4>
+            <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
                 <li><Link href="/" className="hover:text-primary transition-colors">{t('home')}</Link></li>
                 <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
                 <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
@@ -443,15 +443,15 @@ export function AppFooter() {
             </div>
 
             <div>
-            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-6">Connect</h4>
-            <ul className="space-y-4 text-sm font-bold text-muted-foreground">
+            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Connect</h4>
+            <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
                 <li><a href="mailto:grs.business29@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
                 <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
             </ul>
             </div>
         </div>
-        <div className="w-full mt-12 pt-8 border-t border-border/50 text-center">
-            <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">
+        <div className="w-full mt-10 md:mt-12 pt-8 border-t border-border/50 text-center">
+            <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
                 © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
             </p>
         </div>
@@ -470,7 +470,6 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     setIsMounted(true);
   }, []);
 
-  // SNAPPY NAVIGATION TRANSITION: Trigger loader only on Home <-> Tool transitions
   useEffect(() => {
     if (!isMounted) return;
     
@@ -484,8 +483,6 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     
     if (shouldShowLoader) {
         setIsNavigating(true);
-        
-        // Reduced to 400ms for a snappier, more high-performance feel
         const timer = setTimeout(() => {
           setIsNavigating(false);
         }, 400);
@@ -500,10 +497,9 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-20">
+    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-16 md:pt-20">
       <AppHeader />
       
-      {/* Global Page Transition Loader with hardware acceleration */}
       <AnimatePresence mode="wait">
         {isNavigating && (
           <motion.div 
@@ -520,8 +516,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
-         {/* Optimized Background is handled via globals.css body::before for 0 repaint cost */}
-         <div className="w-full flex-1 flex flex-col items-center px-4 md:px-8 p-0 m-0">
+         <div className="w-full flex-1 flex flex-col items-center px-0 md:px-8 p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
               {children}
             </div>
