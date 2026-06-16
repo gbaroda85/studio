@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -56,13 +55,10 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import * as XLSX from 'xlsx';
-import JsBarcode from 'jsbarcode';
 import QRCodeStyling from 'qr-code-styling';
-import { toPng, toJpeg, toSvg } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import jsPDF from 'jspdf';
-import JSZip from 'jszip';
 import confetti from 'canvas-confetti';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // --- TYPES ---
 
@@ -96,7 +92,6 @@ interface IdCardData {
         accentColor: string;
         textColor: string;
         showQr: boolean;
-        showBarcode: boolean;
         borderRadius: number;
     };
 }
@@ -128,7 +123,6 @@ const INITIAL_DATA: IdCardData = {
         accentColor: '#4F9CF9',
         textColor: '#FFFFFF',
         showQr: true,
-        showBarcode: true,
         borderRadius: 20
     }
 };
@@ -174,7 +168,6 @@ export default function IdCardGenerator() {
     const [activeStage, setActiveSection] = useState<'info' | 'style' | 'bulk'>('info');
 
     const cardRef = useRef<HTMLDivElement>(null);
-    const barcodeRef = useRef<SVGSVGElement>(null);
     const qrRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
@@ -196,22 +189,7 @@ export default function IdCardGenerator() {
         }
     }, [data, isHydrated]);
 
-    // --- BARCODE & QR UPDATE ---
-    useEffect(() => {
-        if (data.config.showBarcode && barcodeRef.current) {
-            try {
-                JsBarcode(barcodeRef.current, data.personal.id || "0000", {
-                    format: "CODE128",
-                    width: 1.5,
-                    height: 35,
-                    displayValue: false,
-                    margin: 0,
-                    lineColor: "#000000"
-                });
-            } catch (e) {}
-        }
-    }, [data.personal.id, data.config.showBarcode, data.config.orientation]);
-
+    // --- QR UPDATE ---
     useEffect(() => {
         if (data.config.showQr && qrRef.current) {
             qrRef.current.innerHTML = "";
@@ -345,7 +323,6 @@ export default function IdCardGenerator() {
 
                             <ScrollArea className="h-[600px] p-6 md:p-8">
                                 <TabsContent value="info" className="space-y-10 m-0 animate-in slide-in-from-left duration-300">
-                                    {/* Organization Section */}
                                     <div className="space-y-6">
                                         <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Organization Details</Badge>
                                         <div className="grid gap-4">
@@ -360,7 +337,6 @@ export default function IdCardGenerator() {
                                         </div>
                                     </div>
 
-                                    {/* Personal Info Section */}
                                     <div className="space-y-6 pt-6 border-t border-dashed">
                                         <Badge className="bg-blue-600 text-white font-black text-[9px] px-3 py-1 uppercase tracking-widest">Candidate Identity</Badge>
                                         <div className="grid grid-cols-2 gap-4">
@@ -439,10 +415,6 @@ export default function IdCardGenerator() {
                                                 <div className="flex items-center gap-3"><Scan className="size-4 text-primary" /><Label className="text-[10px] font-black uppercase opacity-60">Identity QR Code</Label></div>
                                                 <Switch checked={data.config.showQr} onCheckedChange={(v) => updateNested('config', 'showQr', v)} />
                                             </div>
-                                            <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-dashed">
-                                                <div className="flex items-center gap-3"><FileDigit className="size-4 text-primary" /><Label className="text-[10px] font-black uppercase opacity-60">Card Barcode</Label></div>
-                                                <Switch checked={data.config.showBarcode} onCheckedChange={(v) => updateNested('config', 'showBarcode', v)} />
-                                            </div>
                                         </div>
                                     </div>
                                 </TabsContent>
@@ -494,7 +466,7 @@ export default function IdCardGenerator() {
 
                 <div className="w-full flex justify-center bg-slate-300/30 dark:bg-slate-950/50 rounded-[3rem] p-4 md:p-20 shadow-inner border-[6px] border-white/5 transition-all overflow-visible min-h-[900px]">
                     <div className="relative transform-gpu scale-[0.6] sm:scale-[0.8] lg:scale-[1.0] xl:scale-[1.1] origin-top h-auto shadow-[0_60px_120px_-20px_rgba(0,0,0,0.6)]">
-                         <IdCardTemplate data={data} barcodeRef={barcodeRef} qrRef={qrRef} cardRef={cardRef} />
+                         <IdCardTemplate data={data} qrRef={qrRef} cardRef={cardRef} />
                     </div>
                 </div>
 
@@ -511,7 +483,7 @@ export default function IdCardGenerator() {
 
 // --- ID CARD VISUAL TEMPLATE ---
 
-function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData, barcodeRef: any, qrRef: any, cardRef: any }) {
+function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any, cardRef: any }) {
     const isVertical = data.config.orientation === 'vertical';
     const primary = data.config.primaryColor;
     const theme = data.config.theme;
@@ -527,8 +499,6 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
                 fontFamily: 'Inter, sans-serif'
             }}
         >
-            {/* THEME SPECIFIC LAYOUTS */}
-            
             {/* HEADER AREA */}
             <div 
                 className={cn(
@@ -615,7 +585,7 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
 
                 {/* FOOTER COMPONENTS */}
                 <div className={cn(
-                    "mt-auto w-full flex items-end justify-between gap-4",
+                    "mt-auto w-full flex items-end justify-between gap-4 pb-4",
                     !isVertical && "hidden"
                 )}>
                     {data.config.showQr && (
@@ -638,13 +608,6 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
                     )}
                 </div>
             </div>
-
-            {/* BARCODE AT BOTTOM */}
-            {data.config.showBarcode && (
-                <div className="h-10 bg-slate-50 border-t flex items-center justify-center p-1 mt-auto">
-                    <svg ref={barcodeRef} className="w-full h-full" />
-                </div>
-            )}
 
             {theme === 'security' && (
                 <div className="absolute top-0 left-0 w-full h-2 bg-yellow-400 z-50 overflow-hidden">
