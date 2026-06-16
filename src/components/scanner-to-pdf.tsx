@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useRef, useEffect, type ChangeEvent } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import * as pdfjs from 'pdfjs-dist';
@@ -101,6 +100,8 @@ export default function ScannerToPdf() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  const selectedPage = pages.find(p => p.id === selectedId);
+
   const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
@@ -108,7 +109,7 @@ export default function ScannerToPdf() {
     setIsProcessing(true);
     setPreviewImages([]);
     
-    // FILTER IMAGES ONLY - PDF logic removed as requested
+    // Filter strictly for images
     const newFilesArray = Array.from(filesList).filter(file => file.type.startsWith('image/'));
     
     if (newFilesArray.length === 0) {
@@ -174,7 +175,6 @@ export default function ScannerToPdf() {
             return;
         }
         
-        // Rotate 90 degrees logic
         canvas.width = img.height;
         canvas.height = img.width;
         ctx.translate(canvas.width / 2, canvas.height / 2);
@@ -187,7 +187,7 @@ export default function ScannerToPdf() {
     };
     img.onerror = () => {
         setIsProcessing(false);
-        toast({ variant: 'destructive', title: "Rotate Error", description: "Could not process image pixels." });
+        toast({ variant: 'destructive', title: "Rotate Error" });
     };
     img.src = item.src;
   };
@@ -209,19 +209,7 @@ export default function ScannerToPdf() {
   const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
       return new Promise((resolve, reject) => {
           const img = new window.Image();
-          img.crossOrigin = "anonymous";
-          img.onload = async () => {
-              if (img.decode) {
-                  try {
-                      await img.decode();
-                      resolve(img);
-                  } catch (e) {
-                      resolve(img); 
-                  }
-              } else {
-                  resolve(img);
-              }
-          };
+          img.onload = () => resolve(img);
           img.onerror = reject;
           img.src = src;
       });
@@ -339,7 +327,6 @@ export default function ScannerToPdf() {
               if (i > 0) pdf.addPage();
               const pData = pages[i];
               const img = await ensureImageLoaded(pData.src);
-              const margin = 10;
               const ratio = Math.min((pageWidth - 20) / img.naturalWidth, (pageHeight - 20) / img.naturalHeight);
               const fw = img.naturalWidth * ratio;
               const fh = img.naturalHeight * ratio;
@@ -355,7 +342,7 @@ export default function ScannerToPdf() {
           await navigator.share({ 
               files: [file], 
               title: "Scanned Document", 
-              text: "Sent via GR7 Tools - https://www.gr7imagepdf.com/" 
+              text: "Sent via GR7 Tools" 
           });
       } catch (e) { console.error(e); } finally { setIsSharing(false); }
   };
