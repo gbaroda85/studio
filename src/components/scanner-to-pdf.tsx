@@ -107,9 +107,17 @@ export default function ScannerToPdf() {
 
     setIsProcessing(true);
     setPreviewImages([]);
-    const newFilesArray = Array.from(filesList);
-    let loadedCount = 0;
+    
+    // FILTER IMAGES ONLY - PDF logic removed as requested
+    const newFilesArray = Array.from(filesList).filter(file => file.type.startsWith('image/'));
+    
+    if (newFilesArray.length === 0) {
+        setIsProcessing(false);
+        toast({ variant: "destructive", title: "Invalid Files", description: "Please upload image files (JPG/PNG/WEBP)." });
+        return;
+    }
 
+    let loadedCount = 0;
     newFilesArray.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -133,10 +141,6 @@ export default function ScannerToPdf() {
                 toast({ title: "Images Added", description: `Successfully loaded ${newFilesArray.length} photos.` });
             }
         };
-        reader.onerror = () => {
-            setIsProcessing(false);
-            toast({ variant: "destructive", title: "Error", description: "Failed to read some images." });
-        };
         reader.readAsDataURL(file);
     });
 
@@ -147,9 +151,12 @@ export default function ScannerToPdf() {
     setPreviewImages([]);
     setPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
-        if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
+        if (selectedId === id) {
+            setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
+        }
         return filtered;
     });
+    toast({ title: "Page Removed" });
   };
 
   const handleRotate = (id: string) => {
@@ -157,12 +164,17 @@ export default function ScannerToPdf() {
     const item = pages.find(p => p.id === id);
     if (!item) return;
 
+    setIsProcessing(true);
     const img = new window.Image();
-    img.src = item.src;
     img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if (!ctx) {
+            setIsProcessing(false);
+            return;
+        }
+        
+        // Rotate 90 degrees logic
         canvas.width = img.height;
         canvas.height = img.width;
         ctx.translate(canvas.width / 2, canvas.height / 2);
@@ -171,7 +183,13 @@ export default function ScannerToPdf() {
         
         const rotatedSrc = canvas.toDataURL('image/jpeg', 0.95);
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
+        setIsProcessing(false);
     };
+    img.onerror = () => {
+        setIsProcessing(false);
+        toast({ variant: 'destructive', title: "Rotate Error", description: "Could not process image pixels." });
+    };
+    img.src = item.src;
   };
 
   const updateAlignment = (vAlign: VAlign) => {
@@ -185,7 +203,7 @@ export default function ScannerToPdf() {
       if (!selected) return;
       setPreviewImages([]);
       setPages(prev => prev.map(p => ({ ...p, vAlign: selected.vAlign })));
-      toast({ title: "Applied to All", description: `All pages synchronized.` });
+      toast({ title: "Applied to All", description: `Alignment synchronized.` });
   };
 
   const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
@@ -349,8 +367,6 @@ export default function ScannerToPdf() {
       if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const selectedPage = pages.find(p => p.id === selectedId);
-
   return (
     <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
         <div className="grid lg:grid-cols-12 gap-8 items-start mt-8">
@@ -373,7 +389,14 @@ export default function ScannerToPdf() {
                              )}
                          </div>
                     </CardHeader>
-                    <CardContent className="p-6 md:p-8">
+                    <CardContent className="p-6 md:p-8 relative">
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-white/70 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-50 rounded-b-[2rem]">
+                                <Loader2 className="animate-spin size-10 text-primary stroke-[3]" />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Processing Pixels...</p>
+                            </div>
+                        )}
+
                         {pages.length === 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div 
@@ -424,10 +447,10 @@ export default function ScannerToPdf() {
                                                 <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
-                                                    <Button size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/95 hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
+                                                    <Button type="button" size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/95 hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
                                                         <RotateCw className="size-3.5" />
                                                     </Button>
-                                                    <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg border-2 border-white/20" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
+                                                    <Button type="button" size="icon" variant="destructive" className="h-7 w-7 rounded-lg shadow-lg border-2 border-white/20" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}>
                                                         <Trash2 className="size-3.5" />
                                                     </Button>
                                                 </div>
