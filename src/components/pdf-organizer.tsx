@@ -135,6 +135,11 @@ function SortablePage({
         opacity: isDragging ? 0.3 : 1,
     };
 
+    // Helper for buttons to stop DnD jitter
+    const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
+        e.stopPropagation();
+    };
+
     return (
         <div 
             ref={setNodeRef} 
@@ -168,11 +173,12 @@ function SortablePage({
                 </div>
             )}
 
-            {/* Action Bar - ALWAYS VISIBLE PER USER REQUEST */}
+            {/* Action Bar - Symmetric and Always Visible */}
             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 md:gap-1.5 z-40 px-2">
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    onPointerDown={stopPropagation}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onView(page); }} 
                 >
                     <Eye className="size-3.5" />
@@ -180,6 +186,7 @@ function SortablePage({
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    onPointerDown={stopPropagation}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onInsertBlank(page.id); }} 
                 >
                     <Plus className="size-3.5" />
@@ -187,6 +194,7 @@ function SortablePage({
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                    onPointerDown={stopPropagation}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRotate(page.id); }} 
                 >
                     <RotateCw className="size-3.5" />
@@ -194,6 +202,7 @@ function SortablePage({
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600 active:scale-90" 
+                    onPointerDown={stopPropagation}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(page.id); }} 
                 >
                     <Trash2 className="size-3.5" />
@@ -228,7 +237,7 @@ export default function PdfOrganizer() {
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { 
             activationConstraint: { 
-                delay: 200, 
+                delay: 250, 
                 tolerance: 8 
             } 
         }),
@@ -486,7 +495,7 @@ export default function PdfOrganizer() {
                     ) : (
                         <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                             <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 text-left">
                                     <LayoutGrid className="h-4 w-4 text-primary" />
                                     <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Map</CardTitle>
                                 </div>
@@ -529,7 +538,7 @@ export default function PdfOrganizer() {
                                             <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
                                                 {activeId && activePage ? (
                                                     <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-3xl opacity-80 scale-105 transition-transform z-[9999] pointer-events-none transform-gpu">
-                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.type === 'blank' ? 'B' : activePage.index}</div>
+                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.type === 'blank' ? 'B' : activePage.index}</div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
@@ -556,7 +565,7 @@ export default function PdfOrganizer() {
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary"><Settings2 className="size-4 md:size-5 text-primary" /> Studio Actions</CardTitle>
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left"><Settings2 className="size-4 md:size-5 text-primary" /> Studio Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                             <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner">
@@ -636,7 +645,7 @@ export default function PdfOrganizer() {
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
                 <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] z-[2000]">
                     <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
-                    <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
                         {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
                             <div className="relative shadow-3xl border-[8px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc || undefined} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" /></div>
                         }
