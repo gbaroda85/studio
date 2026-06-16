@@ -194,7 +194,7 @@ export default function IdCardGenerator() {
         if (data.config.showQr && qrRef.current) {
             qrRef.current.innerHTML = "";
             const qrCode = new QRCodeStyling({
-                width: 80, // Reduced to match container
+                width: 80,
                 height: 80,
                 data: `ID: ${data.personal.id}\nName: ${data.personal.name}\nOrg: ${data.organization.name}`,
                 dotsOptions: { color: data.config.primaryColor, type: "rounded" },
@@ -269,7 +269,7 @@ export default function IdCardGenerator() {
                 const pdf = new jsPDF({ 
                     orientation: data.config.orientation === 'vertical' ? 'p' : 'l',
                     unit: 'mm',
-                    format: [85.6, 53.98]
+                    format: [53.98, 85.6]
                 });
                 pdf.addImage(dataUrl, 'JPEG', 0, 0, 53.98, 85.6);
                 pdf.save(`ID_Card_${data.personal.name}.pdf`);
@@ -376,6 +376,7 @@ export default function IdCardGenerator() {
                                                         )}
                                                     >
                                                         <p className="font-black text-[10px] uppercase tracking-wider">{t.name}</p>
+                                                        <p className="text-[8px] text-muted-foreground font-bold mt-1 uppercase">Layout Variant</p>
                                                     </button>
                                                 ))}
                                             </div>
@@ -470,7 +471,7 @@ export default function IdCardGenerator() {
                     </div>
                 </div>
 
-                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl no-print">
+                <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-xl no-print">
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => exportSingleCard('pdf')}><Printer className="size-4 mr-2" /> PDF Print</Button>
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => exportSingleCard('png')}><ImageIcon className="size-4 mr-2" /> PNG High</Button>
                      <Button variant="outline" className="h-14 border-2 rounded-2xl font-black text-[10px] uppercase shadow-md hover:bg-primary/5" onClick={() => { setData(prev => ({ ...prev, config: { ...prev.config, orientation: prev.config.orientation === 'vertical' ? 'horizontal' : 'vertical' } })) }}><ArrowLeftRight className="size-4 mr-2" /> Flip Axis</Button>
@@ -491,7 +492,7 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
     return (
         <div 
             ref={cardRef}
-            className="bg-white relative overflow-hidden flex flex-col shadow-none select-none"
+            className="bg-white relative overflow-hidden flex flex-col shadow-none select-none text-left"
             style={{ 
                 width: isVertical ? '324px' : '514px', 
                 height: isVertical ? '514px' : '324px',
@@ -502,9 +503,11 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
             {/* HEADER AREA */}
             <div 
                 className={cn(
-                    "relative z-10 w-full flex flex-col items-center pt-5 pb-3 px-4 text-center transition-all duration-500",
+                    "relative z-10 w-full flex flex-col items-center py-5 px-4 text-center transition-all duration-500",
                     theme === 'minimal' ? "bg-white pt-8" : "",
-                    theme === 'security' ? "border-b-8 border-yellow-400" : ""
+                    theme === 'security' ? "border-b-8 border-yellow-400" : "",
+                    theme === 'corporate' ? "pb-8" : "",
+                    theme === 'classic' ? "border-b-4 border-white/20" : ""
                 )} 
                 style={{ backgroundColor: theme === 'minimal' ? 'transparent' : primary }}
             >
@@ -513,7 +516,8 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
                 {/* LOGO */}
                 <div className={cn(
                     "size-10 bg-white rounded-lg p-1.5 shadow-xl flex items-center justify-center mb-2",
-                    theme === 'hospital' ? "rounded-full" : ""
+                    theme === 'hospital' || theme === 'classic' ? "rounded-full" : "",
+                    theme === 'corporate' ? "rounded-sm" : ""
                 )}>
                     {data.organization.logo ? <img src={data.organization.logo} className="size-full object-contain" /> : <Building2 className="size-6" style={{ color: primary }} />}
                 </div>
@@ -531,51 +535,59 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
                     {data.organization.address}
                 </p>
 
+                {/* THEME SPECIFIC OVERLAYS */}
                 {theme === 'hospital' && <div className="absolute top-4 right-4"><Heart className="size-4 text-white/40" /></div>}
                 {theme === 'security' && <div className="absolute top-4 right-4"><Shield className="size-4 text-white/40" /></div>}
+                {theme === 'corporate' && (
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20" />
+                )}
             </div>
 
-            {/* THEME DIVIDERS */}
+            {/* THEME DIVIDERS / ACCENTS */}
             {theme !== 'minimal' && (
                 <div className="h-4 w-full relative z-0" style={{ backgroundColor: primary }}>
                      <div className={cn(
                          "absolute inset-0 bg-white",
                          theme === 'modern' ? "rounded-t-[3rem]" : "",
-                         theme === 'corporate' ? "clip-path-slant" : ""
+                         theme === 'corporate' ? "clip-path-slant" : "",
+                         theme === 'classic' ? "rounded-full scale-y-[0.5] translate-y-2" : ""
                      )} />
                 </div>
             )}
 
             {/* MAIN BODY */}
             <div className={cn(
-                "flex-1 bg-white relative flex flex-col items-center px-6 pb-6 overflow-hidden",
-                isVertical ? "pt-4" : "flex-row justify-between items-start pt-10"
+                "flex-1 bg-white relative flex flex-col items-center px-6 pb-4 overflow-hidden",
+                isVertical ? "pt-2" : "flex-row justify-between items-start pt-10"
             )}>
                 
                 <div className={cn("flex flex-col items-center", !isVertical && "w-1/3")}>
                     {/* PHOTO FRAME */}
-                    <div className="relative mb-4 group">
+                    <div className="relative mb-3 group">
                         <div className={cn(
-                            "size-28 border-4 bg-slate-50 overflow-hidden shadow-2xl relative z-10 transition-all",
-                            theme === 'hospital' ? "rounded-full" : "rounded-2xl",
-                            theme === 'security' ? "border-slate-900" : ""
-                        )} style={{ borderColor: primary }}>
+                            "size-24 md:size-28 border-4 bg-slate-50 overflow-hidden shadow-2xl relative z-10 transition-all",
+                            theme === 'hospital' || theme === 'classic' ? "rounded-full" : "rounded-2xl",
+                            theme === 'security' ? "border-slate-900" : "border-white"
+                        )} style={{ borderColor: theme === 'security' ? '#000' : (theme === 'classic' ? primary : '#fff'), borderWidth: theme === 'classic' ? '4px' : '6px' }}>
                             {data.personal.photo ? <img src={data.personal.photo} className="size-full object-cover" /> : <UserCircle className="size-full p-4 opacity-10" />}
                         </div>
                         <div className="absolute -inset-2 bg-gradient-to-br from-primary/10 to-transparent blur-xl opacity-50" />
                     </div>
 
                     {/* NAME & TITLE */}
-                    <div className="text-center space-y-1 mb-6">
-                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">{data.personal.name || "CANDIDATE NAME"}</h2>
-                        <p className="text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full inline-block" style={{ backgroundColor: `${primary}15`, color: primary }}>{data.personal.designation || "DESIGNATION"}</p>
+                    <div className="text-center space-y-1 mb-4">
+                        <h2 className={cn(
+                            "text-lg md:text-xl font-black text-slate-900 uppercase tracking-tighter leading-none",
+                            theme === 'classic' ? "font-serif italic capitalize" : ""
+                        )}>{data.personal.name || "CANDIDATE NAME"}</h2>
+                        <p className="text-[9px] font-black uppercase tracking-widest py-0.5 px-3 rounded-full inline-block" style={{ backgroundColor: `${primary}15`, color: primary }}>{data.personal.designation || "DESIGNATION"}</p>
                     </div>
                 </div>
 
                 {/* INFO GRID */}
                 <div className={cn(
-                    "grid grid-cols-1 gap-y-1.5 text-left mb-4",
-                    isVertical ? "w-full" : "w-1/2 pt-4"
+                    "grid grid-cols-1 gap-y-1 text-left mb-4",
+                    isVertical ? "w-full px-2" : "w-1/2 pt-4"
                 )}>
                     <InfoRow label="ID NUMBER" value={data.personal.id} />
                     <InfoRow label="DEPARTMENT" value={data.personal.department} />
@@ -585,8 +597,9 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
 
                 {/* FOOTER COMPONENTS */}
                 <div className={cn(
-                    "mt-auto w-full flex items-end justify-between gap-4 pb-4",
-                    !isVertical && "hidden"
+                    "mt-auto w-full flex items-end justify-between gap-4 pb-4 border-t pt-4",
+                    !isVertical && "hidden",
+                    theme === 'classic' ? "border-primary/10 bg-primary/[0.02] -mx-6 px-6" : "border-slate-100"
                 )}>
                     {data.config.showQr && (
                         <div ref={qrRef} className="size-20 p-1 bg-white border-2 rounded-xl shadow-lg border-slate-100 flex items-center justify-center shrink-0 overflow-hidden" />
@@ -598,30 +611,43 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
                         ) : (
                             <div className="h-8 w-24 border-b border-dashed border-slate-300 mb-1" />
                         )}
-                        <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Authorized Signatory</span>
+                        <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest text-center">Authorized Signatory</span>
                     </div>
 
                     {data.organization.seal && (
-                        <div className="size-12 opacity-40 shrink-0">
+                        <div className="size-12 opacity-30 shrink-0">
                             <img src={data.organization.seal} className="size-full object-contain" />
                         </div>
                     )}
                 </div>
             </div>
 
+            {/* THEME DECORATIONS */}
             {theme === 'security' && (
                 <div className="absolute top-0 left-0 w-full h-2 bg-yellow-400 z-50 overflow-hidden">
                     <div className="w-full h-full opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #000, #000 10px, transparent 10px, transparent 20px)' }} />
                 </div>
             )}
+            {theme === 'classic' && (
+                <div className="absolute bottom-0 left-0 w-full h-2" style={{ backgroundColor: primary, opacity: 0.8 }} />
+            )}
+            {theme === 'corporate' && (
+                <div className="absolute bottom-4 right-[-20px] size-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+            )}
+
+            <style jsx>{`
+                .clip-path-slant {
+                    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 40%);
+                }
+            `}</style>
         </div>
     );
 }
 
 function InfoRow({ label, value }: { label: string, value: string }) {
     return (
-        <div className="flex items-center gap-3 text-[10px]">
-            <span className="w-20 font-black uppercase text-slate-300 text-[8px] tracking-tight">{label}</span>
+        <div className="flex items-center gap-3 text-[10px] min-h-[14px]">
+            <span className="w-20 font-black uppercase text-slate-300 text-[7px] tracking-tight shrink-0">{label}</span>
             <span className="font-bold text-slate-700 flex-1 truncate">{value || "---"}</span>
         </div>
     );
