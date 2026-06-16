@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
@@ -192,10 +191,15 @@ export default function SalarySlipGenerator() {
                 updated[existsIndex] = profileToSave;
                 return updated;
             });
-            toast({ title: "Profile Updated", description: `Data for ${currentName} saved successfully.` });
+            // FIXED: Move toast to a safe execution context to prevent React state update loop errors
+            setTimeout(() => {
+                toast({ title: "Profile Updated", description: `Data for ${currentName} saved successfully.` });
+            }, 10);
         } else {
             setSavedProfiles(prev => [...prev, profileToSave]);
-            toast({ title: "New Profile Created", description: `Added ${currentName} to employee database.` });
+            setTimeout(() => {
+                toast({ title: "New Profile Created", description: `Added ${currentName} to employee database.` });
+            }, 10);
         }
         
         confetti({ particleCount: 50, spread: 30, origin: { y: 0.8 }, colors: ['#0d5a71', '#ffffff'] });
@@ -205,14 +209,18 @@ export default function SalarySlipGenerator() {
         const profile = savedProfiles.find(p => p.employee.empId === id);
         if (profile) {
             setData(JSON.parse(JSON.stringify(profile)));
-            toast({ title: "Profile Loaded", description: `Switched to ${profile.employee.name}'s data.` });
+            setTimeout(() => {
+                toast({ title: "Profile Loaded", description: `Switched to ${profile.employee.name}'s data.` });
+            }, 10);
         }
     };
 
     const deleteProfile = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         setSavedProfiles(prev => prev.filter(p => p.employee.empId !== id));
-        toast({ title: "Profile Removed" });
+        setTimeout(() => {
+            toast({ title: "Profile Removed" });
+        }, 10);
     };
 
     // --- CALCULATIONS ---
@@ -291,7 +299,9 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        toast({ title: "Form Cleared" });
+        setTimeout(() => {
+            toast({ title: "Form Cleared" });
+        }, 10);
     };
 
     const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
