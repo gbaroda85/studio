@@ -3,7 +3,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { create } from 'zustand';
 import { useToast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { 
@@ -39,7 +38,6 @@ import {
     Maximize,
     Undo2,
     Redo2,
-    History,
     Save,
     Camera,
     Globe,
@@ -64,56 +62,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 
 /**
- * ZUSTAND STATE MANAGEMENT
- */
-interface EditorState {
-    history: string[];
-    historyIndex: number;
-    addToHistory: (url: string) => void;
-    undo: () => string | null;
-    redo: () => string | null;
-    resetHistory: () => void;
-}
-
-const useEditorStore = create<EditorState>((set, get) => ({
-    history: [],
-    historyIndex: -1,
-    addToHistory: (url) => {
-        const { history, historyIndex } = get();
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(url);
-        if (newHistory.length > 20) newHistory.shift();
-        set({ history: newHistory, historyIndex: newHistory.length - 1 });
-    },
-    undo: () => {
-        const { history, historyIndex } = get();
-        if (historyIndex > 0) {
-            const newIndex = historyIndex - 1;
-            set({ historyIndex: newIndex });
-            return history[newIndex];
-        }
-        return null;
-    },
-    redo: () => {
-        const { history, historyIndex } = get();
-        if (historyIndex < history.length - 1) {
-            const newIndex = historyIndex + 1;
-            set({ historyIndex: newIndex });
-            return history[newIndex];
-        }
-        return null;
-    },
-    resetHistory: () => set({ history: [], historyIndex: -1 })
-}));
-
-/**
  * CONSTANTS & PRESETS
  */
 const PRESETS = [
     { id: 'free', label: "Free Hand Crop (Manual)", width: 0, height: 0, unit: 'px' },
     { id: 'in_p', label: "India Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
     { id: 'aadhaar', label: "Aadhaar Card (86x54mm)", width: 86, height: 54, unit: 'mm' },
-    { id: 'pan', label: "PAN Card (85x55mm)", width: 85, height: 55, unit: 'mm' },
+    { id: 'pan', label: "PAN Card (25x35mm)", width: 25, height: 35, unit: 'mm' },
     { id: 'us_v', label: "USA Visa / Passport (2x2in)", width: 2, height: 2, unit: 'inch' },
     { id: 'uk_p', label: "UK Passport (35x45mm)", width: 35, height: 45, unit: 'mm' },
     { id: 'ca_p', label: "Canada Passport (5x7cm)", width: 50, height: 70, unit: 'mm' },
@@ -138,9 +93,22 @@ const PRINT_SHEETS = [
 
 const DPI = 300; 
 
+type Stage = 'setup' | 'crop' | 'studio' | 'print';
+
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
+
 export default function PassportPhotoMaker() {
     const { toast } = useToast();
-    const store = useEditorStore();
 
     const [imgSrc, setImgSrc] = useState<string | null>(null);
     const [stage, setStage] = useState<Stage>('setup');
@@ -260,7 +228,6 @@ export default function PassportPhotoMaker() {
 
             const url = URL.createObjectURL(blob);
             setSubjectImageSrc(url);
-            store.addToHistory(url);
             
             const img = new window.Image();
             img.src = url;
@@ -375,40 +342,13 @@ export default function PassportPhotoMaker() {
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#5cbdb9', '#fbe3e8', '#ffffff']
+            colors: ['#3b82f6', '#ffffff']
         });
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/jpeg', 1.0);
-        // Updated filename logic
-        link.download = `GR7-Tools-Passport-Photo-${Date.now()}.jpg`;
+        link.download = `Passport-Photo-${Date.now()}.jpg`;
         link.click();
-    };
-
-    const handleUndo = () => {
-        const prev = store.undo();
-        if (prev) {
-            setSubjectImageSrc(prev);
-            const img = new window.Image();
-            img.src = prev;
-            img.onload = () => {
-                faceImgRef.current = img;
-                renderPhoto();
-            };
-        }
-    };
-
-    const handleRedo = () => {
-        const next = store.redo();
-        if (next) {
-            setSubjectImageSrc(next);
-            const img = new window.Image();
-            img.src = next;
-            img.onload = () => {
-                faceImgRef.current = img;
-                renderPhoto();
-            };
-        }
     };
 
     const handleReset = () => {
@@ -418,7 +358,6 @@ export default function PassportPhotoMaker() {
         setSubjectImageSrc(null);
         faceImgRef.current = null;
         setPrintSheetSrc(null);
-        store.resetHistory();
         resetToDefaults();
     };
 
@@ -441,18 +380,16 @@ export default function PassportPhotoMaker() {
         const photoW_px = (pw_mm / 25.4) * DPI;
         const photoH_px = (ph_mm / 25.4) * DPI;
 
-        // Paper dimensions in pixels (6x4 inch is 1800x1200 at 300DPI)
         const pW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
         const pH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
 
-        // Try orientations to maximize fit
         const orientations = [
             { w: pW, h: pH },
             { w: pH, h: pW }
         ];
 
         let bestFit = { w: pW, h: pH, cols: 0, rows: 0, total: -1 };
-        const gap = (2 / 25.4) * DPI; // Small 2mm gap between photos
+        const gap = (2 / 25.4) * DPI; 
 
         orientations.forEach(o => {
             const c = Math.floor((o.w - gap) / (photoW_px + gap));
@@ -477,7 +414,6 @@ export default function PassportPhotoMaker() {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, bestFit.w, bestFit.h);
 
-        // Center the grid on the sheet
         const gridW = bestFit.cols * photoW_px + (bestFit.cols - 1) * gap;
         const gridH = bestFit.rows * photoH_px + (bestFit.rows - 1) * gap;
         const startX = (bestFit.w - gridW) / 2;
@@ -504,8 +440,8 @@ export default function PassportPhotoMaker() {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
                         <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                             <UserCircle className="size-8" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-3" />
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                <Sparkles className="size-2.5" />
                             </div>
                         </div>
                         <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
@@ -628,10 +564,6 @@ export default function PassportPhotoMaker() {
                                      <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-2">
                                         <Settings2 className="size-4 md:size-5 text-primary" /> Adjustments
                                     </CardTitle>
-                                    <div className="flex gap-1.5 md:gap-2">
-                                        <Button variant="ghost" size="icon" className="size-7 md:size-8 rounded-full" onClick={handleUndo}><Undo2 className="size-3.5 md:size-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="size-7 md:size-8 rounded-full" onClick={handleRedo}><Redo2 className="size-3.5 md:size-4"/></Button>
-                                    </div>
                                 </div>
                                 <div className="space-y-3">
                                     <Button 
@@ -775,7 +707,6 @@ export default function PassportPhotoMaker() {
                                     <Button variant="outline" onClick={() => setStage('studio')} className="h-12 md:h-16 flex-1 rounded-xl md:rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
                                     <Button className="h-12 md:h-16 flex-[2] rounded-xl md:rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-lg" onClick={() => {
                                         const link = document.createElement('a'); link.href = printSheetSrc; 
-                                        // Updated filename logic
                                         link.download = `GR7-Tools-Print-Sheet-${Date.now()}.jpg`; link.click();
                                     }}>DOWNLOAD SHEET</Button>
                                 </div>
