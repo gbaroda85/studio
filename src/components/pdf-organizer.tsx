@@ -559,21 +559,21 @@ export default function PdfOrganizer() {
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left"><Settings2 className="size-4 md:size-5 text-primary" /> Studio Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
-                            <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner">
+                            <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner text-left">
                                 <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><Zap className="size-5 text-yellow-500 animate-pulse" /></div>
-                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">Quality is preserved as PDF metadata. Safe for submission.</p>
+                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase">Quality is preserved as PDF metadata. Safe for submission.</p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10 text-left">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="SORT 1 → N" />
-                                    <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="SORT N → 1" />
-                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="ADD BLANK" />
-                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="ROTATE ALL" />
-                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="RESET ALL" />
+                                    <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="SORT 1 → N" />
+                                    <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="SORT N → 1" />
+                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="ADD BLANK" />
+                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="ROTATE ALL" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="RESET ALL" />
                                     <div className="relative">
-                                        <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/20 transition-all shadow-sm" data-label="RECOVER BIN" />
+                                        <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-12 !border-2 !border-slate-300 dark:!border-white/10 transition-all shadow-sm" data-label="RECOVER BIN" />
                                         {deletedPages.length > 0 && (
                                             <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white z-[60] animate-in zoom-in-50 pointer-events-none">
                                                 {deletedPages.length}
