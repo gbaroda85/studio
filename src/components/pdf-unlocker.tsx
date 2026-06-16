@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -234,7 +235,7 @@ export default function PdfUnlocker() {
 
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(pdfBlob);
+            const url = URL.createObjectURL(blob);
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Success!");
@@ -308,7 +309,7 @@ export default function PdfUnlocker() {
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
-                            <CardFooter className="justify-center gap-4 md:gap-6 text-[7px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-6 md:pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
+                            <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> HD DECODE</div>
                                 <div className="flex items-center gap-1.5"><Info className="size-3 text-blue-500" /> AADHAAR OK</div>
@@ -420,13 +421,13 @@ export default function PdfUnlocker() {
                                     <Button 
                                         onClick={handleUnlockProcess} 
                                         disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
-                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-primary/90 rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 border-none shadow-xl"
+                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
                                     >
                                         <StarIcons />
                                         {isUnlocking ? "DECODING..." : (
                                             <div className="flex items-center gap-3">
                                                 {isProtected ? <Unlock className="size-5 md:size-6" /> : <Zap className="size-5 md:size-6" />}
-                                                <span className="uppercase tracking-tighter">PROCESS DOCUMENT</span>
+                                                <span className="uppercase tracking-tighter">UNLOCK PDF</span>
                                             </div>
                                         )}
                                     </Button>
