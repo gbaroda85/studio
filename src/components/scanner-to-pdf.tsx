@@ -443,7 +443,7 @@ export default function ScannerToPdf() {
                                         <UploadCloud className="size-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-base font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Photo Gallery</p>
+                                        <p className="text-base font-black uppercase tracking-tighter text-slate-800 dark:text-white">Photo Gallery</p>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple images</p>
                                     </div>
                                 </div>
@@ -573,33 +573,33 @@ export default function ScannerToPdf() {
                                     <div className="grid grid-cols-1 gap-2">
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-14 relative", 
+                                                "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                                 selectedPage?.vAlign === 'top' && "active-uiverse"
                                             )} 
                                             data-label="      Top"
                                             onClick={() => updateAlignment('top')}
                                         >
-                                            <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                            <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                         </button>
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-14 relative", 
+                                                "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                                 selectedPage?.vAlign === 'center' && "active-uiverse"
                                             )} 
                                             data-label="      Center"
                                             onClick={() => updateAlignment('center')}
                                         >
-                                            <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                            <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                         </button>
                                         <button 
                                             className={cn(
-                                                "btn-pos-uiverse h-14 relative", 
+                                                "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                                 selectedPage?.vAlign === 'bottom' && "active-uiverse"
                                             )} 
                                             data-label="      Bottom"
                                             onClick={() => updateAlignment('bottom')}
                                         >
-                                            <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white" />
+                                            <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                         </button>
                                     </div>
                                 </div>
