@@ -159,7 +159,7 @@ export default function PdfMerger() {
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
         setIsGeneratingPreview(true);
         setRenderingProgress(0);
-        setPreviewImages([]); // Clear existing previews for incremental load
+        setPreviewImages([]); 
         try {
             const loadingTask = pdfjs.getDocument({ 
                 data: pdfBytes,
@@ -171,10 +171,8 @@ export default function PdfMerger() {
             const totalPages = pdf.numPages;
             setTotalPagesPreview(totalPages);
             
-            // Loop through pages and render incrementally
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
-                // REDUCED SCALE (0.8x) FOR MUCH FASTER PREVIEW RENDERING
                 const viewport = page.getViewport({ scale: 0.8 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
@@ -185,11 +183,7 @@ export default function PdfMerger() {
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
-                    // SLIGHTLY LOWER JPEG QUALITY (0.7) FOR FASTER ENCODING
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    
-                    // INCREMENTAL UPDATE: Show pages as they are ready
                     setPreviewImages(prev => [...prev, dataUrl]);
                 }
                 setRenderingProgress(Math.round((i / totalPages) * 100));
@@ -217,7 +211,6 @@ export default function PdfMerger() {
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
 
-            // STABLE METADATA: Set Viewer Preferences
             const catalog = mergedPdf.catalog;
             catalog.set(PDFName.of('ViewerPreferences'), mergedPdf.context.obj({
                 FitWindow: true,
@@ -232,7 +225,6 @@ export default function PdfMerger() {
             const url = URL.createObjectURL(blob);
             setMergedPdfUrl(url);
             
-            // Open the dialog first so user sees progress
             setIsPreviewOpen(true);
             await generateVisualPreviews(mergedPdfBytes);
             
@@ -398,6 +390,15 @@ export default function PdfMerger() {
                                 </div>
 
                                 <div className="flex flex-col gap-4">
+                                    {mergedPdfUrl && (
+                                        <Button 
+                                            variant="outline" 
+                                            className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-primary/5 text-primary border-primary/20 animate-in zoom-in-95"
+                                            onClick={() => setIsPreviewOpen(true)}
+                                        >
+                                            <Eye className="mr-2 size-4" /> VIEW PREVIEW
+                                        </Button>
+                                    )}
                                     <Button 
                                         className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                                         onClick={handleMergePdfs} 
