@@ -159,36 +159,41 @@ export default function PdfMerger() {
     const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
         setIsGeneratingPreview(true);
         setRenderingProgress(0);
+        setPreviewImages([]); // Clear existing previews for incremental load
         try {
             const loadingTask = pdfjs.getDocument({ 
                 data: pdfBytes,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-                cMapPacked: true
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
             setTotalPagesPreview(totalPages);
             
-            const imgs: string[] = [];
-            // USER WANTS ALL PAGES: Show the complete document
-            const pagesToRender = totalPages; 
-
-            for (let i = 1; i <= pagesToRender; i++) {
+            // Loop through pages and render incrementally
+            for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
+                // REDUCED SCALE (0.8x) FOR MUCH FASTER PREVIEW RENDERING
+                const viewport = page.getViewport({ scale: 0.8 });
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+                const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
                 if (context) {
                     canvas.height = Math.floor(viewport.height);
                     canvas.width = Math.floor(viewport.width);
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
+                    
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    imgs.push(canvas.toDataURL('image/jpeg', 0.85));
+                    
+                    // SLIGHTLY LOWER JPEG QUALITY (0.7) FOR FASTER ENCODING
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    // INCREMENTAL UPDATE: Show pages as they are ready
+                    setPreviewImages(prev => [...prev, dataUrl]);
                 }
-                setRenderingProgress(Math.round((i / pagesToRender) * 100));
+                setRenderingProgress(Math.round((i / totalPages) * 100));
             }
-            setPreviewImages(imgs);
         } catch (e) {
             console.error("Preview generation failed", e);
             toast({ variant: 'destructive', title: "Preview Error", description: "Failed to render visual map." });
@@ -429,7 +434,7 @@ export default function PdfMerger() {
                     <CardContent className="p-0 flex-1 bg-slate-200 dark:bg-slate-900/50 shadow-inner relative flex flex-col overflow-hidden">
                         <div className="flex-1 w-full overflow-y-auto custom-scrollbar p-6 md:p-12">
                             <div className="flex flex-col items-center gap-8 pb-10">
-                                {isGeneratingPreview ? (
+                                {isGeneratingPreview && previewImages.length === 0 ? (
                                     <div className="flex flex-col items-center gap-6 text-center py-40">
                                         <div className="relative">
                                             <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
@@ -442,6 +447,17 @@ export default function PdfMerger() {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center gap-8 w-full">
+                                        {/* Status indicator while rendering continues incrementally */}
+                                        {isGeneratingPreview && (
+                                            <div className="w-full max-w-[550px] p-4 bg-primary/5 border-2 border-dashed rounded-xl flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <Loader2 className="size-4 animate-spin text-primary" />
+                                                    <span className="text-[10px] font-black uppercase text-primary">Generating HD Visuals...</span>
+                                                </div>
+                                                <Badge className="bg-primary text-white text-[9px] font-black">{renderingProgress}%</Badge>
+                                            </div>
+                                        )}
+
                                         {previewImages.map((img, i) => (
                                             <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white w-full max-w-[550px] animate-in slide-in-from-bottom-4 duration-500">
                                                 <img src={img} alt={`Page ${i+1}`} className="w-full h-auto block" />
