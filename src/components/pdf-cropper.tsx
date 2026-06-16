@@ -396,11 +396,11 @@ export default function PdfCropper() {
   }
 
   return (
-    <div className="w-full max-w-7xl px-4 animate-in fade-in duration-500 flex flex-col gap-8 pb-20">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
+    <div className="w-full max-w-7xl px-2 md:px-4 animate-in fade-in duration-500 flex flex-col gap-8 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-8 space-y-6">
-                <Card className="border-2 shadow-3xl overflow-hidden rounded-[2.5rem] bg-card/50">
-                    <CardHeader className="bg-muted/30 border-b flex flex-col sm:flex-row items-center justify-between p-6 gap-4">
+                <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                    <CardHeader className="bg-muted/30 border-b flex flex-col sm:flex-row items-center justify-between p-6 gap-4 shrink-0">
                         <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
                             <TabsList className="h-9">
                                 <TabsTrigger value="rectangular" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3.5 mr-1.5" /> RECT</TabsTrigger>
@@ -413,18 +413,21 @@ export default function PdfCropper() {
                             <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={() => setCurrentPage(p => Math.min(numPages, p+1))} disabled={currentPage === numPages}><ChevronRight className="size-5" /></Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-0 flex items-center justify-center min-h-[300px] md:min-h-[400px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner" onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                    <CardContent 
+                        className="p-0 flex flex-col items-center justify-center min-h-[600px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner flex-1" 
+                        onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}
+                    >
                         {isProcessing ? (
                             <div className="flex flex-col items-center gap-4 py-32"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-primary animate-pulse">Rendering Page...</p></div>
                         ) : pageImage && (
                             <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]">
                                 {cropMode === 'rectangular' ? (
                                     <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)}>
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[45vh] w-auto block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
                                     <div className="relative">
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[45vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.6] dash-array-[5,5]" />
                                         </svg>
@@ -444,10 +447,14 @@ export default function PdfCropper() {
                                 )}
                             </div>
                         )}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-40 whitespace-nowrap">
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 whitespace-nowrap">
                             <Move className="size-3.5 text-primary animate-pulse" /> {cropMode === 'rectangular' ? "Position Crop Box" : "Drag 4 corners to fit edges"}
                         </div>
                     </CardContent>
+                    <CardFooter className="bg-white dark:bg-slate-950 p-4 border-t shrink-0 flex justify-center gap-8 text-[9px] font-black text-muted-foreground/30 uppercase tracking-widest">
+                         <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                         <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT SYNC</div>
+                    </CardFooter>
                 </Card>
 
                 {/* CROP PREVIEW STRIP */}
