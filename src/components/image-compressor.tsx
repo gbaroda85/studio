@@ -291,22 +291,22 @@ export default function ImageCompressor() {
                                                   <div className="flex items-center gap-1.5">
                                                       {res.newSize > 0 && <Badge className="bg-green-500 text-white text-[7px] font-black">-{res.savings.toFixed(0)}%</Badge>}
                                                       
-                                                      <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-primary/5 text-primary" onClick={(e) => { e.stopPropagation(); setViewItem(res); }}>
-                                                          <Eye className="size-3.5" />
+                                                      <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); setViewItem(res); }}>
+                                                          <Eye className="size-4" />
                                                       </Button>
 
                                                       {res.newSize > 0 && (
-                                                          <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-green-50 text-green-600" onClick={(e) => { e.stopPropagation(); downloadFile(res); }}>
-                                                              <Download className="size-3.5" />
+                                                          <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 border-green-500/30 text-green-600 dark:text-green-400 hover:bg-green-600 hover:text-white transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); downloadFile(res); }}>
+                                                              <Download className="size-4" />
                                                           </Button>
                                                       )}
                                                   </div>
                                                 )}
-                                                <Button variant="ghost" size="icon" className="size-7 rounded-full" onClick={(e) => { e.stopPropagation(); removeFile(res.id); }}><X className="size-3" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-8 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); removeFile(res.id); }}><X className="size-4" /></Button>
                                             </div>
                                         </div>
                                     ))}
-                                    <Button variant="outline" className="w-full border-2 border-dashed h-10 rounded-xl mt-2 font-black text-[9px] uppercase text-primary border-primary/20 hover:bg-primary/5" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}><Plus className="size-3 mr-2" /> ADD MORE</Button>
+                                    <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}><Plus className="size-4 mr-2" /> ADD MORE IMAGES</Button>
                                 </div>
                             </ScrollArea>
                         </div>
@@ -357,7 +357,7 @@ export default function ImageCompressor() {
                                                 "btn-pos-uiverse h-10 transition-all !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                                 targetSizeValue === size && targetUnit === 'kb' && "active-uiverse"
                                             )} 
-                                            data-label={`${size}K`} 
+                                            data-label={size === "1024" ? "1MB" : `${size}K`} 
                                         />
                                     ))}
                                 </div>
