@@ -285,7 +285,7 @@ export default function ImageToPdfConverter() {
             if (context) {
                 context.fillStyle = '#FFFFFF';
                 context.fillRect(0, 0, canvas.width, canvas.height);
-                await page.render({ canvasContext: context, viewport }).promise;
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
                 imgs.push(canvas.toDataURL('image/jpeg', 0.9));
             }
             setRenderingProgress(Math.round((i / pagesToRender) * 100));
@@ -365,7 +365,7 @@ export default function ImageToPdfConverter() {
   const selectedImage = images.find(img => img.id === selectedId);
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6">
       <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
         
         <div className="lg:col-span-8 space-y-6">
@@ -405,7 +405,7 @@ export default function ImageToPdfConverter() {
                                 onClick={() => setSelectedId(img.id)}
                                 className={cn(
                                     "relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col shadow-lg",
-                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/20" : "border-slate-100 hover:border-primary/40"
+                                    selectedId === img.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "border-slate-100 hover:border-primary/40"
                                 )}
                             >
                                 <div className={cn(
@@ -446,7 +446,7 @@ export default function ImageToPdfConverter() {
                     </div>
 
                     <Button 
-                        className="magic-button w-full sm:w-auto h-16 md:h-18 px-10 bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 rounded-full" 
+                        className="magic-button w-full sm:w-auto h-16 md:h-18 px-10 bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 rounded-full" 
                         disabled={images.length === 0 || isConverting}
                         onClick={handleConvertToPdf}
                     >
@@ -529,7 +529,7 @@ export default function ImageToPdfConverter() {
         {/* Sidebar: Settings Panel */}
         <div className="lg:col-span-4 space-y-6">
             <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all hover:border-primary/30">
-                <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
+                <CardHeader className="bg-primary/5 border-b p-6 md:p-8 text-left">
                     <CardTitle className="text-xl md:text-2xl flex items-center gap-3 font-black uppercase tracking-tighter">
                         <Settings2 className="size-6 text-primary" /> STUDIO CONTROL
                     </CardTitle>
@@ -549,33 +549,33 @@ export default function ImageToPdfConverter() {
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white",
                                             selectedImage?.vAlign === 'top' && "active-uiverse"
                                         )} 
                                         data-label="      Top"
                                         onClick={() => updateSelectedImage({ vAlign: 'top' })}
                                     >
-                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white",
                                             selectedImage?.vAlign === 'center' && "active-uiverse"
                                         )} 
                                         data-label="      Center"
                                         onClick={() => updateSelectedImage({ vAlign: 'center' })}
                                     >
-                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                     <button 
                                         className={cn(
-                                            "btn-pos-uiverse h-14 relative",
+                                            "btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white",
                                             selectedImage?.vAlign === 'bottom' && "active-uiverse"
                                         )} 
                                         data-label="      Bottom"
                                         onClick={() => updateSelectedImage({ vAlign: 'bottom' })}
                                     >
-                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-white" />
+                                        <AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" />
                                     </button>
                                 </div>
                             </div>
@@ -632,3 +632,4 @@ export default function ImageToPdfConverter() {
     </div>
   );
 }
+
