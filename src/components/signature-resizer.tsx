@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, useCallback, useEffect } from "react";
@@ -230,8 +229,40 @@ export default function SignatureResizer() {
                     </CardHeader>
                     
                     <CardContent className="p-8 space-y-8">
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">1. Dimension System</Label>
+                        {/* 1. UPLOAD SIGNATURE (Shifted to Top) */}
+                        {!imageSrc ? (
+                            <div 
+                                className={cn(
+                                    "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-orange-500/5 transition-all group",
+                                    isDragOver && "border-orange-500 bg-orange-500/5"
+                                )}
+                                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-orange-500 transition-colors duration-300" />
+                                <div className="text-center">
+                                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Signature</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">Local processing</p>
+                                </div>
+                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+                            </div>
+                        ) : (
+                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95 shadow-sm">
+                                <div className="flex items-center gap-4 truncate">
+                                    <div className="size-12 rounded-xl overflow-hidden border-2 border-white shrink-0 bg-white relative shadow-md">
+                                        <img src={imageSrc} className="size-full object-contain p-1" alt="thumb" />
+                                    </div>
+                                    <div className="truncate text-left">
+                                        <p className="text-[10px] font-black uppercase truncate max-w-[150px]">{fileName}</p>
+                                        <p className="text-[8px] font-mono opacity-40">{formatBytes(originalFileSize)}</p>
+                                    </div>
+                                </div>
+                                <Button size="icon" variant="ghost" className="rounded-full text-destructive hover:bg-destructive/10 h-8 w-8" onClick={handleReset}><X className="size-4" /></Button>
+                             </div>
+                        )}
+
+                        <div className="space-y-4 pt-4 border-t border-dashed">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">2. Dimension System</Label>
                             <RadioGroup value={unit} onValueChange={(v) => handleUnitChange(v as Unit)} className="flex gap-4">
                                 <div className={cn("flex-1 flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm", unit === 'cm' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => handleUnitChange('cm')}>
                                     <RadioGroupItem value="cm" id="cm" className="sr-only" />
@@ -269,37 +300,6 @@ export default function SignatureResizer() {
                                 <Badge className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[10px] py-1 shadow-lg uppercase">KB LIMIT</Badge>
                             </div>
                         </div>
-
-                        {!imageSrc ? (
-                            <div 
-                                className={cn(
-                                    "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-orange-500/5 transition-all group",
-                                    isDragOver && "border-orange-500 bg-orange-500/5"
-                                )}
-                                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <UploadCloud className="size-14 text-muted-foreground group-hover:text-orange-500 transition-colors duration-300" />
-                                <div className="text-center">
-                                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Upload Signature</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">Local processing</p>
-                                </div>
-                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-                            </div>
-                        ) : (
-                             <div className="p-4 bg-muted/20 rounded-2xl border-2 border-dashed flex items-center justify-between animate-in zoom-in-95 shadow-sm">
-                                <div className="flex items-center gap-4 truncate">
-                                    <div className="size-12 rounded-xl overflow-hidden border-2 border-white shrink-0 bg-white relative shadow-md">
-                                        <img src={imageSrc} className="size-full object-contain p-1" alt="thumb" />
-                                    </div>
-                                    <div className="truncate text-left">
-                                        <p className="text-[10px] font-black uppercase truncate max-w-[150px]">{fileName}</p>
-                                        <p className="text-[8px] font-mono opacity-40">{formatBytes(originalFileSize)}</p>
-                                    </div>
-                                </div>
-                                <Button size="icon" variant="ghost" className="rounded-full text-destructive hover:bg-destructive/10 h-8 w-8" onClick={handleReset}><X className="size-4" /></Button>
-                             </div>
-                        )}
                     </CardContent>
                     
                     <CardFooter className="p-6 md:p-8 bg-muted/10 border-t flex flex-col gap-3">

@@ -408,7 +408,10 @@ export default function ImageCompressor() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
-                    <Button className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-primary/90 text-white rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 border-none shadow-2xl" disabled={results.length === 0 || isBulkProcessing} onClick={startBulkCompression}>
+                    <Button 
+                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 shadow-2xl" 
+                        disabled={results.length === 0 || isBulkProcessing} onClick={startBulkCompression}
+                    >
                         <StarIcons />
                         {isBulkProcessing ? <Loader2 className="size-7 md:size-8 animate-spin" /> : <Zap className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />}
                         <span className="uppercase tracking-tighter text-sm md:text-lg">{isBulkProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}</span>
