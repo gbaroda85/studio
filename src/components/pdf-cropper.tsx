@@ -413,18 +413,18 @@ export default function PdfCropper() {
                             <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={() => setCurrentPage(p => Math.min(numPages, p+1))} disabled={currentPage === numPages}><ChevronRight className="size-5" /></Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-0 flex items-center justify-center min-h-[400px] md:min-h-[500px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner" onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                    <CardContent className="p-0 flex items-center justify-center min-h-[300px] md:min-h-[400px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner" onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         {isProcessing ? (
                             <div className="flex flex-col items-center gap-4 py-32"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-primary animate-pulse">Rendering Page...</p></div>
                         ) : pageImage && (
                             <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]">
                                 {cropMode === 'rectangular' ? (
                                     <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)}>
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[45vh] w-auto block" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
                                     <div className="relative">
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[55vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[45vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.6] dash-array-[5,5]" />
                                         </svg>
