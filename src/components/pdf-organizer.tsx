@@ -23,7 +23,7 @@ import {
     sortableKeyboardCoordinates,
     rectSortingStrategy,
     useSortable,
-} from '@radix-ui/react-sortable'
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -495,7 +495,7 @@ export default function PdfOrganizer() {
                                     <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
                                         {pages.length} / {isRendering ? '...' : pages.length + deletedPages.length} PAGES
                                     </Badge>
-                                    <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive rounded-lg px-3"><RefreshCcw className="mr-1.5 size-3" /> Change</Button>
+                                    <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive rounded-lg px-3"><RefreshCcw className="size-3" /> Change</Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative border-b">
