@@ -51,7 +51,7 @@ if (typeof window !== 'undefined') {
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i}`}>
+            <div key={i} className={`star-${i} pointer-events-none`}>
                 <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
@@ -111,7 +111,8 @@ export default function PdfUnlocker() {
                 data: new Uint8Array(bufferCopy),
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
+                isEvalSupported: false
             });
             await loadingTask.promise;
             setIsProtected(false);
@@ -184,7 +185,8 @@ export default function PdfUnlocker() {
                 password: password,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
+                isEvalSupported: false
             });
             
             const pdf = await loadingTask.promise;
@@ -192,7 +194,7 @@ export default function PdfUnlocker() {
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Decrypting Page ${i}/${totalPages}...`);
+                setStatusText(`Decrypting P${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 const renderScale = 2.5; 
@@ -235,17 +237,18 @@ export default function PdfUnlocker() {
 
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(pdfBlob);
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Success!");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
             toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
         } catch (error: any) {
+            console.error('[Unlock Engine Error]:', error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
-                setErrorDetails("Encryption mismatch. Please ensure you are using a standard PDF password.");
+                setErrorDetails("Engine Error: Document structure may be non-standard or highly restricted.");
             }
         } finally {
             setIsUnlocking(false);
@@ -273,7 +276,7 @@ export default function PdfUnlocker() {
                         <div className="text-center space-y-2 mb-4">
                             <div className="mx-auto mb-2 grid size-14 md:size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                                 <Unlock className="size-7 md:size-8" />
-                                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
                                     <Sparkles className="size-2.5 md:size-3" />
                                 </div>
                             </div>
@@ -304,7 +307,7 @@ export default function PdfUnlocker() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
-                                        <p className="text-[9px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -432,7 +435,7 @@ export default function PdfUnlocker() {
                                         )}
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-green-700 text-white rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
+                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
                                         <StarIcons />
                                         <Download className="size-6 md:size-7" /> 
                                         <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
@@ -454,3 +457,4 @@ export default function PdfUnlocker() {
         </div>
     );
 }
+
