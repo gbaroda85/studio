@@ -56,11 +56,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
-    /* CRITICAL FIX FOR LAYOUT JUMPING - FORCE STABLE GUTTER */
+    /* CRITICAL FIX FOR LAYOUT JUMPING */
     scrollbar-gutter: stable !important;
     overflow-y: scroll !important;
     overflow-x: hidden !important;
-    width: 100% !important;
   }
   
   body {

@@ -82,6 +82,7 @@ export default function PdfMerger() {
     const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [renderingProgress, setRenderingProgress] = useState(0);
+    const [totalPagesPreview, setTotalPagesPreview] = useState(0);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,6 +101,7 @@ export default function PdfMerger() {
         }
         setPreviewImages([]);
         setIsPreviewOpen(false);
+        setTotalPagesPreview(0);
     }
 
     const handleFilesChange = (files: FileList | null) => {
@@ -163,9 +165,11 @@ export default function PdfMerger() {
                 cMapPacked: true
             });
             const pdf = await loadingTask.promise;
+            const totalPages = pdf.numPages;
+            setTotalPagesPreview(totalPages);
+            
             const imgs: string[] = [];
             // Optimize: Limit preview to first 12 pages to prevent memory hang
-            const totalPages = pdf.numPages;
             const pagesToRender = Math.min(totalPages, 12); 
 
             for (let i = 1; i <= pagesToRender; i++) {
@@ -173,9 +177,9 @@ export default function PdfMerger() {
                 const viewport = page.getViewport({ scale: 1.0 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.height = Math.floor(viewport.height);
-                canvas.width = Math.floor(viewport.width);
                 if (context) {
+                    canvas.height = Math.floor(viewport.height);
+                    canvas.width = Math.floor(viewport.width);
                     context.fillStyle = '#FFFFFF';
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
@@ -430,7 +434,7 @@ export default function PdfMerger() {
                                             <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
                                             <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
                                         </div>
-                                        <div className="space-y-3 w-full max-w-[200px]">
+                                        <div className="space-y-3 w-full max-w-[280px]">
                                             <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest text-center">Rendering {renderingProgress}%</p>
                                             <Progress value={renderingProgress} className="h-1" />
                                         </div>

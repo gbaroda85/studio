@@ -191,15 +191,15 @@ export default function SalarySlipGenerator() {
                 updated[existsIndex] = profileToSave;
                 return updated;
             });
-            // FIXED: Move toast to a safe execution context to prevent React state update loop errors
+            // Execute toast after render cycle
             setTimeout(() => {
                 toast({ title: "Profile Updated", description: `Data for ${currentName} saved successfully.` });
-            }, 10);
+            }, 0);
         } else {
             setSavedProfiles(prev => [...prev, profileToSave]);
             setTimeout(() => {
                 toast({ title: "New Profile Created", description: `Added ${currentName} to employee database.` });
-            }, 10);
+            }, 0);
         }
         
         confetti({ particleCount: 50, spread: 30, origin: { y: 0.8 }, colors: ['#0d5a71', '#ffffff'] });
@@ -211,7 +211,7 @@ export default function SalarySlipGenerator() {
             setData(JSON.parse(JSON.stringify(profile)));
             setTimeout(() => {
                 toast({ title: "Profile Loaded", description: `Switched to ${profile.employee.name}'s data.` });
-            }, 10);
+            }, 0);
         }
     };
 
@@ -220,7 +220,7 @@ export default function SalarySlipGenerator() {
         setSavedProfiles(prev => prev.filter(p => p.employee.empId !== id));
         setTimeout(() => {
             toast({ title: "Profile Removed" });
-        }, 10);
+        }, 0);
     };
 
     // --- CALCULATIONS ---
@@ -299,9 +299,7 @@ export default function SalarySlipGenerator() {
             allowances: [],
             deductions: []
         });
-        setTimeout(() => {
-            toast({ title: "Form Cleared" });
-        }, 10);
+        toast({ title: "Form Cleared" });
     };
 
     const handleExport = async (type: 'pdf' | 'image' = 'pdf') => {
@@ -557,7 +555,7 @@ export default function SalarySlipGenerator() {
                                         size="sm" 
                                         variant="outline"
                                         onClick={() => handleAddDynamic('deductions')} 
-                                        className="h-7 text-[8px] font-black uppercase text-rose-600 border-rose-200 hover:bg-rose-600 hover:text-white dark:border-rose-900/30 dark:hover:bg-rose-600/20 transition-all duration-300"
+                                        className="h-7 text-[8px] font-black uppercase text-rose-600 border-rose-200 hover:bg-rose-600 hover:text-white dark:border-rose-900/30 dark:hover:bg-rose-500/20 transition-all duration-300"
                                     >
                                         <Plus className="size-3 mr-1" /> Add
                                     </Button>

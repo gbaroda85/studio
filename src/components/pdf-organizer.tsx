@@ -615,7 +615,9 @@ export default function PdfOrganizer() {
                                         {p.type === 'blank' ? (
                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 opacity-50"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                         ) : (
-                                            <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100"><img src={p.previewSrc || undefined} className="max-w-full max-h-full object-contain" alt="trash" /></div>
+                                            <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100">
+                                                <img src={p.previewSrc || undefined} className="max-w-full max-h-full object-contain" alt="trash" />
+                                            </div>
                                         )}
                                         <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white shadow-lg">{p.index === -1 ? 'B' : p.index}</div>
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg shadow-xl" onClick={() => restorePage(p.id)}>RESTORE</Button></div>
@@ -645,3 +647,4 @@ export default function PdfOrganizer() {
         </div>
     );
 }
+
