@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
@@ -41,7 +42,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -397,7 +398,7 @@ export default function ScannerToPdf() {
                                     </div>
                                     <div className="text-center">
                                         <p className="text-base font-black uppercase tracking-tighter text-slate-800 dark:text-slate-200">Photo Gallery</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple files</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Select multiple images</p>
                                     </div>
                                 </div>
                             </div>
@@ -439,7 +440,7 @@ export default function ScannerToPdf() {
                                             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                                 <Plus className="size-5" />
                                             </div>
-                                            <span>Add Scan</span>
+                                            <span>Add Image</span>
                                         </button>
                                     </div>
                                     <ScrollBar />
@@ -516,7 +517,7 @@ export default function ScannerToPdf() {
                         {!selectedId ? (
                             <div className="py-12 text-center space-y-4 opacity-40 flex flex-col items-center">
                                  <MousePointer2 className="size-12 text-muted-foreground animate-bounce" />
-                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px] text-slate-800 dark:text-slate-100">Select a page to<br/>unlock alignment</p>
+                                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed max-w-[200px] text-slate-800 dark:text-slate-100">Select an image to<br/>unlock alignment</p>
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
@@ -559,7 +560,7 @@ export default function ScannerToPdf() {
                                 </div>
 
                                 <Button variant="outline" className="w-full h-11 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-white border-primary/20 rounded-xl transition-all" onClick={applyAlignmentToAll}>
-                                    <Layers className="size-3 mr-2" /> Apply to All Pages
+                                    <Layers className="size-3 mr-2" /> Apply to All Images
                                 </Button>
                             </div>
                         )}
@@ -568,7 +569,7 @@ export default function ScannerToPdf() {
                             <Zap className="size-6 text-yellow-500 shrink-0 mt-0.5" />
                             <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">
                                 <span className="font-black block mb-1 text-primary">A4 SYNC:</span>
-                                Final PDF is generated at 300DPI with deep buffer decoding to prevent blank pages.
+                                Final PDF is generated at 300DPI with deep buffer decoding to prevent quality loss.
                             </p>
                         </div>
                     </CardContent>
@@ -597,7 +598,7 @@ export default function ScannerToPdf() {
         </div>
         
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf" multiple onChange={handleFilesUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
     </div>
   );
 }
