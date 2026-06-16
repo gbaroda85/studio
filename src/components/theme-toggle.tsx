@@ -17,7 +17,7 @@ export function ThemeToggle() {
   const isDark = theme === 'dark';
 
   return (
-    <label className="theme-switch" title="Toggle theme">
+    <label className="theme-switch scale-75 md:scale-100" title="Toggle theme">
       <input 
         type="checkbox" 
         className="theme-switch__checkbox" 
