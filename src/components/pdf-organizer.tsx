@@ -23,7 +23,7 @@ import {
     sortableKeyboardCoordinates,
     rectSortingStrategy,
     useSortable,
-} from '@dnd-kit/sortable';
+} from '@radix-ui/react-sortable'
 import { CSS } from '@dnd-kit/utilities';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -567,13 +567,13 @@ export default function PdfOrganizer() {
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10 text-left">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Global Commands</Label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-14" data-label="SORT 1 → N" />
-                                    <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14" data-label="SORT N → 1" />
-                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14" data-label="ADD BLANK PAGE" />
-                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14" data-label="ROTATE ALL 90°" />
-                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ALL" />
+                                    <button onClick={() => sortPages('asc')} className="btn-pos-uiverse h-14 border border-foreground/10 dark:border-white/10" data-label="SORT 1 → N" />
+                                    <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14 border border-foreground/10 dark:border-white/10" data-label="SORT N → 1" />
+                                    <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14 border border-foreground/10 dark:border-white/10" data-label="ADD BLANK PAGE" />
+                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14 border border-foreground/10 dark:border-white/10" data-label="ROTATE ALL 90°" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14 border border-foreground/10 dark:border-white/10" data-label="RESET ALL" />
                                     <div className="relative">
-                                        <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-14 w-full" data-label="RESTORE BIN" />
+                                        <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-14 w-full border border-foreground/10 dark:border-white/10" data-label="RESTORE BIN" />
                                         {deletedPages.length > 0 && (
                                             <span className="absolute -top-2 -right-1 size-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white z-[60] animate-in zoom-in-50">
                                                 {deletedPages.length}
@@ -647,4 +647,3 @@ export default function PdfOrganizer() {
         </div>
     );
 }
-
