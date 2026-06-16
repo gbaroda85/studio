@@ -396,10 +396,10 @@ export default function PdfRotator() {
                             <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Bulk Rotation</Label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-12" data-label="90° RIGHT" />
-                                    <button onClick={() => rotateAll(180)} className="btn-pos-uiverse h-12" data-label="180° FLIP" />
-                                    <button onClick={() => rotateAll(270)} className="btn-pos-uiverse h-12" data-label="90° LEFT" />
-                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-12" data-label="RESET ALL" />
+                                    <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-12 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all" data-label="90° RIGHT" />
+                                    <button onClick={() => rotateAll(180)} className="btn-pos-uiverse h-12 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all" data-label="180° FLIP" />
+                                    <button onClick={() => rotateAll(270)} className="btn-pos-uiverse h-12 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all" data-label="90° LEFT" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-12 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all" data-label="RESET ALL" />
                                 </div>
                             </div>
 
