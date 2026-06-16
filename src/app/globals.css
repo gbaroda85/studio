@@ -4,27 +4,26 @@
 
 @layer base {
   :root {
-    /* Colors extracted from the provided image */
-    --background: 227 100% 98%;    /* Very Light Cloud Blue/White from image bg */
-    --foreground: 222 47% 11%;     /* Deep Navy for text */
-    --card: 0 0% 100%;             /* Pure White for cards */
+    --background: 227 100% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 218 89% 53%;        /* Vibrant Royal Blue from 'Upgrade' button */
+    --primary: 218 89% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 227 100% 94%;     /* Lighter blue for soft sections */
+    --secondary: 227 100% 94%;
     --secondary-foreground: 218 89% 30%;
     --muted: 227 30% 95%;
     --muted-foreground: 220 15% 45%;
-    --accent: 258 90% 66%;         /* Vibrant Purple/Indigo from profile header */
+    --accent: 258 90% 66%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 227 100% 90%;
     --input: 227 100% 92%;
     --ring: 218 89% 53%;
-    --radius: 1.5rem;              /* Very rounded corners as seen in image cards */
+    --radius: 1.5rem;
   }
   
   .dark {
@@ -53,18 +52,19 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizeSpeed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
-    /* CRITICAL FIX: Prevent page jumping by reserving scrollbar gutter */
     scrollbar-gutter: stable;
+    /* Prevent text size adjustment on orientation change which causes jitter */
+    -webkit-text-size-adjust: 100%;
   }
   
   html, body {
     @apply h-full w-full m-0 p-0;
     background-color: hsl(var(--background));
-    /* Hardware acceleration for scroll */
     -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
   }
 
   * {
@@ -74,37 +74,54 @@
 
   body {
     @apply bg-background text-foreground selection:bg-primary/20 min-h-screen flex flex-col;
+    background-attachment: fixed;
+    /* Hardware acceleration for the entire body to stabilize layers */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Stabilized background layer to prevent lag during zoom */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -20;
     background-image: 
       radial-gradient(at 0% 0%, hsla(218, 89%, 53%, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(258, 90%, 66%, 0.03) 0px, transparent 50%);
-    background-attachment: fixed;
-    /* Force GPU rendering for smoother experience */
-    transform: translate3d(0, 0, 0);
+    pointer-events: none;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .dark body::before {
+    background-image: 
+      radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.1) 0px, transparent 70%),
+      radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.1) 0px, transparent 70%);
   }
 
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
     cursor: pointer !important;
     touch-action: manipulation;
   }
-
-  .dark body {
-    background-image: 
-      radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.1) 0px, transparent 70%),
-      radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.1) 0px, transparent 70%);
-    background-attachment: fixed;
-  }
 }
 
-/* Rendering Optimizations */
-.glass-card, .btn-pos-uiverse, .magic-button {
+/* Rendering Optimizations - The secret to smoothness */
+.glass-card, .btn-pos-uiverse, .magic-button, header, footer {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  will-change: transform, opacity;
-  contain: content;
+  will-change: transform;
+  /* contain: layout style; - removed paint as it can cause issues with dropdowns */
 }
 
-/* Optimization for long lists: Browser will only render when visible */
+/* Prevent blinking on state changes */
+.animate-in {
+  animation-fill-mode: both;
+  backface-visibility: hidden;
+}
+
 section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 500px;

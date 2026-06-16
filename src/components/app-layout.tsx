@@ -520,10 +520,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
-         {/* OPTIMIZED BLUR CIRCLES: Forced to separate GPU layer with static opacity to prevent continuous paints */}
-         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full pointer-events-none transform-gpu opacity-40" style={{ willChange: 'transform', backfaceVisibility: 'hidden' }} />
-         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full pointer-events-none transform-gpu opacity-40" style={{ willChange: 'transform', backfaceVisibility: 'hidden' }} />
-         
+         {/* Optimized Background is handled via globals.css body::before for 0 repaint cost */}
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
               {children}
