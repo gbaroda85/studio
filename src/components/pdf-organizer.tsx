@@ -636,13 +636,42 @@ export default function PdfOrganizer() {
 
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
                 <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[2000]">
-                    <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
+                    <DialogHeader className="bg-primary/5 p-4 border-b shrink-0">
+                        <DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground flex items-center justify-center gap-2">
+                             <Eye className="size-4 text-primary" /> Visual Studio Preview
+                        </DialogTitle>
+                    </DialogHeader>
                     <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
-                        {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[600px] shadow-2xl flex flex-col items-center justify-center border-[12px] border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
-                            <div className="relative shadow-3xl border-[12px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden w-full max-w-[700px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc || undefined} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)`, transition: 'transform 0.3s ease' }} alt="zoom" /></div>
-                        }
+                        {zoomPage?.type === 'blank' ? (
+                            <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-3xl flex flex-col items-center justify-center border-[12px] border-white gap-4 mt-4 animate-in zoom-in-95 duration-500">
+                                <FilePlus2 className="size-20 text-muted-foreground opacity-10" />
+                                <span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span>
+                                <Badge variant="outline" className="text-[10px] border-slate-200 text-slate-400">A4 FORMAT</Badge>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center gap-6 w-full">
+                                <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[12px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden w-full max-w-[650px] mt-4 mb-4 transform-gpu">
+                                    <img 
+                                        src={zoomPage?.previewSrc || undefined} 
+                                        className="w-full h-auto block" 
+                                        style={{ transform: `rotate(${zoomPage?.rotation}deg)`, transition: 'transform 0.3s ease' }} 
+                                        alt="zoom" 
+                                    />
+                                    <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
+                                        <Badge variant="outline" className="text-[8px] font-black uppercase border-black">PAGE {zoomPage?.index}</Badge>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 mb-10">
+                                    <Sparkles className="size-4 text-primary animate-pulse" /> High-Density Page Map Ready
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0"><Button variant="outline" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-12 border-2 rounded-xl"><X className="mr-2 size-4" /> Close Studio View</Button></DialogFooter>
+                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0">
+                        <Button variant="outline" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-12 border-2 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
+                            <X className="mr-2 size-4" /> Close Studio View
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
