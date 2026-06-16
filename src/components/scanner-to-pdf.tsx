@@ -102,14 +102,45 @@ export default function ScannerToPdf() {
 
   const selectedPage = pages.find(p => p.id === selectedId);
 
-  const handleFilesUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const resizeAndCompress = (src: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.src = src;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        // Return 80% quality JPEG to keep size low
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+    });
+  };
+
+  const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
 
     setIsProcessing(true);
     setPreviewImages([]);
     
-    // Filter strictly for images
     const newFilesArray = Array.from(filesList).filter(file => file.type.startsWith('image/'));
     
     if (newFilesArray.length === 0) {
@@ -118,38 +149,39 @@ export default function ScannerToPdf() {
         return;
     }
 
-    let loadedCount = 0;
-    newFilesArray.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const id = Math.random().toString(36).substr(2, 9);
-            const base64Src = event.target?.result as string;
-            
-            setPages(prev => {
-                const updated = [...prev, {
-                    id,
-                    src: base64Src,
-                    name: file.name || `Scan-${Date.now()}.jpg`,
-                    vAlign: 'center'
-                }];
-                if (!selectedId) setSelectedId(id);
-                return updated;
-            });
+    const newPages: ScannedPage[] = [];
 
-            loadedCount++;
-            if (loadedCount === newFilesArray.length) {
-                setIsProcessing(false);
-                toast({ title: "Images Added", description: `Successfully loaded ${newFilesArray.length} photos.` });
-            }
-        };
-        reader.readAsDataURL(file);
+    for (let i = 0; i < newFilesArray.length; i++) {
+        const file = newFilesArray[i];
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((resolve) => {
+            reader.onload = (event) => resolve(event.target?.result as string);
+            reader.readAsDataURL(file);
+        });
+
+        // Smart Resize and Compress immediately
+        const compressedSrc = await resizeAndCompress(dataUrl);
+        const id = Math.random().toString(36).substr(2, 9);
+        newPages.push({
+            id,
+            src: compressedSrc,
+            name: file.name || `Scan-${Date.now()}.jpg`,
+            vAlign: 'center'
+        });
+    }
+
+    setPages(prev => {
+        const updated = [...prev, ...newPages];
+        if (!selectedId && updated.length > 0) setSelectedId(updated[0].id);
+        return updated;
     });
 
+    setIsProcessing(false);
+    toast({ title: "Images Optimized", description: `Successfully processed ${newFilesArray.length} photos.` });
     e.target.value = "";
   };
 
   const handleRemovePage = (id: string) => {
-    setPreviewImages([]);
     setPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
         if (selectedId === id) {
@@ -157,11 +189,11 @@ export default function ScannerToPdf() {
         }
         return filtered;
     });
+    setPreviewImages([]); 
     toast({ title: "Page Removed" });
   };
 
   const handleRotate = (id: string) => {
-    setPreviewImages([]);
     const item = pages.find(p => p.id === id);
     if (!item) return;
 
@@ -181,8 +213,9 @@ export default function ScannerToPdf() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         
-        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.95);
+        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.85);
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
+        setPreviewImages([]);
         setIsProcessing(false);
     };
     img.onerror = () => {
@@ -193,16 +226,16 @@ export default function ScannerToPdf() {
   };
 
   const updateAlignment = (vAlign: VAlign) => {
-      setPreviewImages([]);
       if (!selectedId) return;
       setPages(prev => prev.map(p => p.id === selectedId ? { ...p, vAlign } : p));
+      setPreviewImages([]);
   };
 
   const applyAlignmentToAll = () => {
       const selected = pages.find(p => p.id === selectedId);
       if (!selected) return;
-      setPreviewImages([]);
       setPages(prev => prev.map(p => ({ ...p, vAlign: selected.vAlign })));
+      setPreviewImages([]);
       toast({ title: "Applied to All", description: `Alignment synchronized.` });
   };
 
@@ -355,7 +388,7 @@ export default function ScannerToPdf() {
   };
 
   return (
-    <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 pb-20 px-4 mx-auto">
+    <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4 overflow-x-hidden">
         <div className="grid lg:grid-cols-12 gap-8 items-start mt-8">
             
             {/* LEFT: WORKSPACE */}
