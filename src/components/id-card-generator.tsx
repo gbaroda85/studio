@@ -51,7 +51,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
@@ -641,7 +641,7 @@ function IdCardTemplate({ data, barcodeRef, qrRef, cardRef }: { data: IdCardData
 
             {/* BARCODE AT BOTTOM */}
             {data.config.showBarcode && (
-                <div className="h-12 bg-slate-50 border-t flex items-center justify-center p-2 mt-auto">
+                <div className="h-10 bg-slate-50 border-t flex items-center justify-center p-1 mt-auto">
                     <svg ref={barcodeRef} className="w-full h-full" />
                 </div>
             )}
