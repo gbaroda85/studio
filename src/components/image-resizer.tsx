@@ -26,12 +26,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
+  Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 
 type OutputFormat = 'jpeg' | 'png' | 'webp';
@@ -521,7 +517,7 @@ export default function ImageResizer() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6 space-y-4 md:space-y-5">
-                    {/* QUICK PRESETS (Moved from bottom Card to Top of this CardContent) */}
+                    {/* QUICK PRESETS */}
                     <div className="space-y-3">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                             <Briefcase className="size-3" /> Quick Presets
@@ -575,7 +571,7 @@ export default function ImageResizer() {
                         <Label htmlFor="aspect-ratio" className="text-[9px] font-black cursor-pointer uppercase opacity-60 tracking-widest">Lock Aspect Ratio</Label>
                     </div>
 
-                    <div className="p-3 md:p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-3 shadow-sm text-left">
+                    <div className="p-3 md:p-4 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 shadow-sm text-left">
                         <ShieldCheck className="size-4 md:size-5 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
