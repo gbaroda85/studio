@@ -26,6 +26,7 @@ import {
     CheckCircle2,
     Lock,
     Eye,
+    EyeOff,
     ShieldCheck,
     SearchCode,
     FileText,
@@ -95,6 +96,7 @@ export default function PdfUnlocker() {
     const { sharedFile, setSharedFile } = useFileStore();
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
     const [isProtected, setIsProtected] = useState<boolean | null>(null);
@@ -210,14 +212,12 @@ export default function PdfUnlocker() {
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
             
-            // 1. Create a fresh PDF document with pdf-lib to ensure no "huge zoom" metadata persists
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Decoding Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Render at 2.0x scale for high quality prints
                 const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
@@ -230,13 +230,10 @@ export default function PdfUnlocker() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     
-                    // Embed into fresh PDF
                     const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     const imgBuffer = await fetch(imgData).then(r => r.arrayBuffer());
                     const embeddedImg = await finalPdfDoc.embedJpg(imgBuffer);
                     
-                    // CRITICAL FIX: Map back to standard point dimensions (1/72 inch)
-                    // Original points = pixels / scale
                     const pWidth = embeddedImg.width / renderScale;
                     const pHeight = embeddedImg.height / renderScale;
                     const newPage = finalPdfDoc.addPage([pWidth, pHeight]);
@@ -251,17 +248,14 @@ export default function PdfUnlocker() {
                 setProgress(10 + Math.round((i / totalPages) * 85));
             }
 
-            // CRITICAL FIX: Set Viewer Preferences AND OpenAction to prevent "huge" zoom
             const catalog = finalPdfDoc.catalog;
             
-            // 1. Set ViewerPreferences (Supported by most desktop/browser viewers)
             catalog.set(PDFName.of('ViewerPreferences'), finalPdfDoc.context.obj({
                 FitWindow: true,
                 CenterWindow: true,
                 DisplayDocTitle: true
             }));
 
-            // 2. Set OpenAction to "Fit" (Forces browser to fit the page to window on load)
             const pdfPages = finalPdfDoc.getPages();
             if (pdfPages.length > 0) {
                 const firstPage = pdfPages[0];
@@ -271,7 +265,7 @@ export default function PdfUnlocker() {
 
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(pdfBlob);
+            const url = URL.createObjectURL(blob);
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Unlocked Successfully!");
@@ -393,12 +387,21 @@ export default function PdfUnlocker() {
                                     <div className="space-y-6">
                                         <div className="space-y-3">
                                             <Label htmlFor="pass" className="text-[10px] font-black uppercase text-primary tracking-widest">Enter Current Password</Label>
-                                            <input 
-                                                id="pass" type="password" value={password} 
-                                                onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
-                                                className="flex h-14 w-full rounded-xl border-2 bg-background px-4 py-2 text-2xl font-black tracking-[0.3em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
-                                                placeholder="••••••••" autoFocus disabled={isUnlocking}
-                                            />
+                                            <div className="relative group">
+                                                <input 
+                                                    id="pass" type={showPassword ? "text" : "password"} value={password} 
+                                                    onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
+                                                    className="flex h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-2xl font-black tracking-[0.3em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
+                                                    placeholder="••••••••" autoFocus disabled={isUnlocking}
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {isAadhaarFile && (

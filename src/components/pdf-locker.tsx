@@ -334,14 +334,23 @@ export default function PdfLocker() {
 
                         <div className="space-y-3">
                             <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Confirm Password</Label>
-                            <Input 
-                                type="password" 
-                                placeholder="Repeat password..." 
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="h-12 md:h-14 font-black text-base md:text-lg border-2 rounded-xl pl-4 md:pl-6 focus-visible:ring-primary/20 bg-background/50 shadow-inner"
-                                disabled={!!protectedBlob || isProcessing}
-                            />
+                            <div className="relative group">
+                                <Input 
+                                    type={showPassword ? "text" : "password"} 
+                                    placeholder="Repeat password..." 
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="h-12 md:h-14 font-black text-base md:text-lg border-2 rounded-xl pl-4 md:pl-6 pr-12 md:pr-14 focus-visible:ring-primary/20 bg-background/50 shadow-inner"
+                                    disabled={!!protectedBlob || isProcessing}
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="size-4 md:size-5" /> : <Eye className="size-4 md:size-5" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
