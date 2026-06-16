@@ -404,7 +404,7 @@ export default function ImageCompressor() {
                     </Tabs>
                     <div className="space-y-3 pt-4 border-t border-dashed text-left">
                         <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground opacity-60">Output Format</Label>
-                        <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}><SelectTrigger className="h-11 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal)</SelectItem><SelectItem value="webp" className="font-bold py-2">WEBP (Modern HD)</SelectItem><SelectItem value="png" className="font-bold py-2">PNG (Lossless)</SelectItem></SelectContent></Select>
+                        <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setResults(prev => prev.map(r => ({ ...r, newSize: 0 }))); }}><SelectTrigger className="h-11 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal)</SelectItem><SelectItem value="webp" className="font-bold py-2">WEBP (Modern HD)</SelectItem><SelectItem value="png" className="font-bold py-2">PNG (Lossless)</SelectItem></SelectContent></Select>
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
@@ -426,24 +426,24 @@ export default function ImageCompressor() {
                   </DialogTitle>
               </DialogHeader>
               
-              <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner custom-scrollbar">
-                  <div className="grid md:grid-cols-2 gap-10 w-full">
-                      <div className="space-y-6 flex flex-col">
-                          <div className="flex justify-between items-center px-2">
+              <div className="flex-1 p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-hidden">
+                  <div className="grid md:grid-cols-2 gap-10 w-full h-full">
+                      <div className="space-y-6 flex flex-col h-full">
+                          <div className="flex justify-between items-center px-2 shrink-0">
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">ORIGINAL</span>
                               <Badge variant="outline" className="bg-white/50 text-[10px] font-black uppercase border-2 h-7 px-4 shadow-sm">{viewItem ? formatBytes(viewItem.originalSize) : '-'}</Badge>
                           </div>
-                          <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20">
+                          <div className="relative flex-1 bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20 min-h-0">
                               {viewItem?.originalDataUrl && <img src={viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block transition-transform duration-500 group-hover:scale-105" alt="original" />}
                           </div>
                       </div>
 
-                      <div className="space-y-6 flex flex-col">
-                          <div className="flex justify-between items-center px-2">
+                      <div className="space-y-6 flex flex-col h-full">
+                          <div className="flex justify-between items-center px-2 shrink-0">
                               <Badge className="bg-green-500 text-white text-[10px] font-black uppercase h-7 px-5 rounded-lg shadow-md border-2 border-white/20">Optimized</Badge>
                               <span className="text-[10px] font-black uppercase text-green-600 tracking-widest">{viewItem && viewItem.newSize > 0 ? formatBytes(viewItem.newSize) : 'Processing...'}</span>
                           </div>
-                          <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40">
+                          <div className="relative flex-1 bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40 min-h-0">
                               {viewItem && <img src={viewItem.newSize > 0 ? viewItem.dataUrl : viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block drop-shadow-2xl transition-transform duration-500 group-hover:scale-105" alt="optimized" />}
                               {viewItem && viewItem.newSize > 0 && (
                                   <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
