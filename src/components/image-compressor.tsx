@@ -21,7 +21,6 @@ import {
   Eye,
   ArrowLeftRight,
   Plus,
-  ChevronRight,
   RefreshCcw,
   Monitor
 } from "lucide-react";
@@ -49,7 +48,6 @@ import {
     DialogContent, 
     DialogHeader, 
     DialogTitle, 
-    DialogTrigger,
     DialogFooter 
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
@@ -106,6 +104,7 @@ export default function ImageCompressor() {
   const [viewItem, setViewItem] = useState<CompressionResult | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -292,18 +291,18 @@ export default function ImageCompressor() {
                                                   <div className="flex items-center gap-1.5">
                                                       {res.newSize > 0 && <Badge className="bg-green-500 text-white text-[7px] font-black">-{res.savings.toFixed(0)}%</Badge>}
                                                       
-                                                      <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-primary/5 text-primary" onClick={() => setViewItem(res)}>
+                                                      <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-primary/5 text-primary" onClick={(e) => { e.stopPropagation(); setViewItem(res); }}>
                                                           <Eye className="size-3.5" />
                                                       </Button>
 
                                                       {res.newSize > 0 && (
-                                                          <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-green-50 text-green-600" onClick={() => downloadFile(res)}>
+                                                          <Button size="icon" variant="outline" className="size-7 rounded-lg border-2 hover:bg-green-50 text-green-600" onClick={(e) => { e.stopPropagation(); downloadFile(res); }}>
                                                               <Download className="size-3.5" />
                                                           </Button>
                                                       )}
                                                   </div>
                                                 )}
-                                                <Button variant="ghost" size="icon" className="size-7 rounded-full" onClick={() => removeFile(res.id)}><X className="size-3" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-7 rounded-full" onClick={(e) => { e.stopPropagation(); removeFile(res.id); }}><X className="size-3" /></Button>
                                             </div>
                                         </div>
                                     ))}
