@@ -35,6 +35,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { 
     Dialog, 
     DialogContent, 
@@ -429,7 +430,7 @@ export default function PdfMerger() {
                         <div className="flex-1 w-full overflow-y-auto custom-scrollbar p-6 md:p-12">
                             <div className="flex flex-col items-center gap-8 pb-10">
                                 {isGeneratingPreview ? (
-                                    <div className="flex flex-col items-center gap-6 py-20 text-center">
+                                    <div className="flex flex-col items-center gap-6 text-center py-40">
                                         <div className="relative">
                                             <Loader2 className="h-12 w-12 animate-spin text-primary stroke-[3]" />
                                             <Monitor className="absolute inset-0 m-auto h-5 w-5 text-primary/20" />
