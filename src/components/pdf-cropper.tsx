@@ -3,7 +3,7 @@
 import 'react-image-crop/dist/ReactCrop.css';
 import React, { useState, useRef, type SyntheticEvent, useCallback, useEffect, type ChangeEvent, type DragEvent } from 'react';
 import * as pdfjs from 'pdfjs-dist';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, degrees, PDFName } from 'pdf-lib';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -43,10 +43,11 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
-type CropMode = 'rectangular' | 'perspective';
-type Stage = 'upload' | 'edit';
 interface Point { x: number; y: number; }
 interface PageState { mode: CropMode; crop?: CropType; completedCrop?: PixelCrop; points: Point[]; result: string | null; }
+
+type CropMode = 'rectangular' | 'perspective';
+type Stage = 'upload' | 'edit';
 
 const StarIcons = () => (
     <>
@@ -412,18 +413,18 @@ export default function PdfCropper() {
                             <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={() => setCurrentPage(p => Math.min(numPages, p+1))} disabled={currentPage === numPages}><ChevronRight className="size-5" /></Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-0 flex items-center justify-center min-h-[500px] md:min-h-[650px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner" onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                    <CardContent className="p-0 flex items-center justify-center min-h-[400px] md:min-h-[500px] bg-slate-200 dark:bg-slate-900 relative overflow-hidden select-none shadow-inner" onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         {isProcessing ? (
                             <div className="flex flex-col items-center gap-4 py-32"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-primary animate-pulse">Rendering Page...</p></div>
                         ) : pageImage && (
                             <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]">
                                 {cropMode === 'rectangular' ? (
                                     <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)}>
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[70vh] w-auto block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} />
                                     </ReactCrop>
                                 ) : (
                                     <div className="relative">
-                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[70vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
+                                        <img ref={imgRef} src={pageImage} alt="pdf" className="max-h-[55vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.6] dash-array-[5,5]" />
                                         </svg>
@@ -520,8 +521,6 @@ export default function PdfCropper() {
                                     for(const [_,s] of croppedEntries){
                                         const b = await fetch(s.result!).then(r=>r.arrayBuffer());
                                         const ei = await finalPdf.embedJpg(b);
-                                        // Fix scaling: Map pixel dimensions back to standard points
-                                        // Original render was 2.2x, so divisor 2.2 gives original points
                                         const pWidth = ei.width / 2.2;
                                         const pHeight = ei.height / 2.2;
                                         const p = finalPdf.addPage([pWidth, pHeight]);
