@@ -432,11 +432,11 @@ export default function PassportPhotoMaker() {
     };
 
     return (
-        <div className="w-full max-w-[1800px] mx-auto p-2 md:p-4 flex flex-col gap-4 animate-in fade-in duration-700">
+        <div className="w-full max-w-[1800px] mx-auto p-2 md:p-4 flex flex-col gap-4">
             
             {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
-                <div className="flex flex-col items-center justify-start gap-2 pt-2">
+                <div className="flex flex-col items-center justify-start gap-2 pt-2 animate-in fade-in duration-700">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
                         <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                             <UserCircle className="size-8" />
@@ -455,7 +455,7 @@ export default function PassportPhotoMaker() {
                     <Card className="w-full max-w-3xl glass-card overflow-hidden neon-border">
                         <CardContent className="p-3 md:p-6">
                             <div 
-                                className="border-4 border-dashed border-primary/20 rounded-[1.5rem] md:rounded-[2.5rem] p-8 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group relative"
+                                className="border-4 border-dashed border-primary/20 rounded-[1.5rem] md:rounded-[2.5rem] p-8 md:p-24 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-primary/5 transition-all group relative"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
@@ -481,7 +481,7 @@ export default function PassportPhotoMaker() {
 
             {/* 2. CROP STAGE: SIZE SELECT + CROP */}
             {stage === 'crop' && imgSrc && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-start py-2">
+                <div className="flex flex-col items-center justify-start py-2 animate-in fade-in duration-500">
                     <Card className="w-full max-w-5xl glass-card shadow-2xl overflow-hidden">
                         <CardHeader className="border-b glass-panel p-4 md:p-6 md:px-8">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
@@ -551,13 +551,13 @@ export default function PassportPhotoMaker() {
                             </Button>
                         </CardFooter>
                     </Card>
-                </motion.div>
+                </div>
             )}
 
             {/* 3. STUDIO STAGE */}
             {stage === 'studio' && (
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start h-full">
-                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-4 md:space-y-6">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start h-full animate-in fade-in duration-500">
+                    <div className="lg:col-span-3 space-y-4 md:space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                             <CardHeader className="border-b border-white/10 p-4 md:p-6 bg-primary/5">
                                 <div className="flex items-center justify-between mb-4">
@@ -642,9 +642,9 @@ export default function PassportPhotoMaker() {
                                 </Tabs>
                             </CardContent>
                         </Card>
-                    </motion.div>
+                    </div>
 
-                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="lg:col-span-6 flex flex-col items-center gap-6 md:gap-8">
+                    <div className="lg:col-span-6 flex flex-col items-center gap-6 md:gap-8">
                         <div className="relative group w-full max-w-[500px]">
                             <Card className="relative bg-white shadow-2xl border-[6px] md:border-[12px] border-white rounded-[1.5rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center">
                                 <canvas ref={mainCanvasRef} className="max-w-full h-auto object-contain" />
@@ -675,9 +675,9 @@ export default function PassportPhotoMaker() {
                              <Button variant="outline" onClick={handleReset} className="flex-1 h-12 md:h-16 rounded-xl md:rounded-[1.5rem] border-2 font-black uppercase text-[10px] md:text-xs tracking-widest">Start Over</Button>
                             <Button className="flex-[2] h-12 md:h-16 rounded-xl md:rounded-[1.5rem] bg-primary text-base md:text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-2 md:mr-3 size-5 md:size-6" /> SAVE JPG</Button>
                         </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="lg:col-span-3 space-y-4 md:space-y-6">
+                    <div className="lg:col-span-3 space-y-4 md:space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10">
                                 <CardTitle className="text-base md:text-lg font-black uppercase flex items-center gap-2"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
@@ -691,33 +691,40 @@ export default function PassportPhotoMaker() {
                                 ))}
                             </CardContent>
                         </Card>
-                    </motion.div>
+                    </div>
                 </div>
             )}
 
             {/* 4. PRINT PREVIEW MODAL */}
             <AnimatePresence>
                 {stage === 'print' && printSheetSrc && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-4 md:p-8 flex items-center justify-center overflow-y-auto">
-                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-6 md:gap-12 items-center">
-                            <div className="flex-1 space-y-4 md:space-y-8 text-white text-center md:text-left">
-                                <h2 className="text-2xl md:text-5xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <span className="text-primary">Master Sheet</span></h2>
-                                <p className="text-slate-400 text-sm md:text-lg">Industrial 300 DPI standards for ultra-sharp glossy prints.</p>
-                                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-12 md:h-16 flex-1 rounded-xl md:rounded-2xl border-white/30 text-white font-black uppercase bg-transparent">CANCEL</Button>
-                                    <Button className="h-12 md:h-16 flex-[2] rounded-xl md:rounded-2xl bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-lg" onClick={() => {
+                    <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        exit={{ opacity: 0 }} 
+                        className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-3xl p-4 md:p-12 flex flex-col items-center justify-center overflow-y-auto"
+                    >
+                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-16 items-center">
+                            <div className="flex-1 space-y-6 md:space-y-12 text-white text-center md:text-left">
+                                <div className="space-y-3">
+                                    <h2 className="text-3xl md:text-6xl font-black font-headline uppercase tracking-tighter leading-none">Print-Ready <br/><span className="text-primary">Master Sheet</span></h2>
+                                    <p className="text-slate-400 text-sm md:text-xl font-medium leading-relaxed">Industrial 300 DPI standards for ultra-sharp glossy prints. Perfect for bulk physical printing.</p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
+                                    <Button variant="outline" onClick={() => setStage('studio')} className="h-14 md:h-20 flex-1 rounded-2xl md:rounded-[2rem] border-white/20 text-white font-black uppercase bg-white/5 hover:bg-white/10">CANCEL</Button>
+                                    <Button className="h-14 md:h-20 flex-[2] rounded-2xl md:rounded-[2rem] bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-xl" onClick={() => {
                                         const link = document.createElement('a'); link.href = printSheetSrc; 
                                         link.download = `GR7-Tools-Print-Sheet-${Date.now()}.jpg`; link.click();
-                                    }}>DOWNLOAD SHEET</Button>
+                                    }}><Download className="size-6 mr-3"/> DOWNLOAD SHEET</Button>
                                 </div>
                             </div>
-                            <div className="flex-[1.2] relative flex justify-center animate-in zoom-in-95 duration-500 max-w-full">
-                                <div className="shadow-2xl border-[6px] md:border-[12px] border-white rounded-sm overflow-hidden bg-white max-w-full">
+                            <div className="flex-[1.3] relative flex justify-center animate-in zoom-in-95 duration-500 max-w-full">
+                                <div className="shadow-[0_80px_160px_-20px_rgba(0,0,0,0.8)] border-[8px] md:border-[16px] border-white rounded-sm overflow-hidden bg-white max-w-full">
                                     <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[55vh] md:max-h-[70vh] block" />
                                 </div>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="absolute top-4 right-4 md:top-8 md:right-8 size-10 md:size-12 text-white" onClick={() => setStage('studio')}><X className="size-6 md:size-8" /></Button>
+                        <Button variant="ghost" size="icon" className="absolute top-4 right-4 md:top-10 md:right-10 size-12 md:size-16 text-white/40 hover:text-white hover:bg-white/10 rounded-full" onClick={() => setStage('studio')}><X className="size-8 md:size-10" /></Button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -726,3 +733,4 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
+
