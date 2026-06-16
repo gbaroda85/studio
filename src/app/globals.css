@@ -55,15 +55,19 @@
     text-rendering: optimizeSpeed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
-    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
+    /* CRITICAL FIX FOR LAYOUT JUMPING */
+    scrollbar-gutter: stable;
+    overflow-x: hidden !important;
   }
   
   html, body {
     @apply h-full w-full m-0 p-0;
     background-color: hsl(var(--background));
     -webkit-overflow-scrolling: touch;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
   }
 
   * {
@@ -77,6 +81,8 @@
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
+    /* Prevent horizontal shifts */
+    width: 100vw !important;
   }
 
   body::before {

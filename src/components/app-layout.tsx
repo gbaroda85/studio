@@ -361,7 +361,7 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
+    <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center transform-gpu">
       <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
         <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <MobileNav />
@@ -412,7 +412,7 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0 transform-gpu">
       <div className="w-full px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
             <div className="md:col-span-2 space-y-4 md:space-y-6">
@@ -515,7 +515,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
         )}
       </AnimatePresence>
 
-      <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
+      <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden transform-gpu">
          <div className="w-full flex-1 flex flex-col items-center px-0 md:px-8 p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
               {children}
