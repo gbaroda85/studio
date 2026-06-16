@@ -324,7 +324,7 @@ export default function ImageCompressor() {
                                     ))}
                                     <Button 
                                         variant="ghost" 
-                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-slate-900 dark:text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
+                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-slate-900 dark:text-primary border-primary/40 hover:bg-primary/10 hover:text-primary hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
                                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                     >
                                         <Plus className="size-4 mr-2" /> ADD MORE IMAGES
