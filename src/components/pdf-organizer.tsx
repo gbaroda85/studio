@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -109,13 +110,15 @@ function SortablePage({
     onDelete, 
     onRotate, 
     onInsertBlank,
-    onView
+    onView,
+    isRestored
 }: { 
     page: PageItem; 
     onDelete: (id: string) => void;
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
     onView: (page: PageItem) => void;
+    isRestored: boolean;
 }) {
     const {
         attributes,
@@ -140,7 +143,8 @@ function SortablePage({
             className={cn(
                 "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all transform-gpu will-change-transform",
                 "hover:border-primary/40 border-transparent shadow-primary/5",
-                isDragging && "scale-95 shadow-2xl"
+                isDragging && "scale-95 shadow-2xl",
+                isRestored && "ring-4 ring-green-500 animate-pulse"
             )}
         >
             <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
@@ -211,13 +215,19 @@ export default function PdfOrganizer() {
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isRestoreOpen, setIsRestoreOpen] = useState(false);
     const [zoomPage, setZoomPage] = useState<PageItem | null>(null);
+    const [restoredId, setRestoredId] = useState<string | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+        useSensor(TouchSensor, { 
+            activationConstraint: { 
+                delay: 250, 
+                tolerance: 5 
+            } 
+        }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
@@ -234,6 +244,7 @@ export default function PdfOrganizer() {
         setResultPdfUrl(null);
         setIsRendering(false);
         setIsSaving(false);
+        setProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -256,7 +267,6 @@ export default function PdfOrganizer() {
                 pdfDocRef.current = pdf;
                 const totalPages = pdf.numPages;
 
-                const newPages: PageItem[] = [];
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
                     const viewport = page.getViewport({ scale: 1.0 });
@@ -269,19 +279,21 @@ export default function PdfOrganizer() {
                         context.fillStyle = '#FFFFFF';
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: context, viewport }).promise;
-                        newPages.push({
+                        
+                        const newPage: PageItem = {
                             id: `p-${i}-${Date.now()}-${Math.random()}`, 
                             index: i,
                             rotation: 0,
                             isDeleted: false,
                             previewSrc: canvas.toDataURL('image/jpeg', 0.8),
                             type: 'original'
-                        });
+                        };
+                        
+                        setPages(prev => [...prev, newPage]);
                     }
                     setProgress(Math.round((i / totalPages) * 100));
                 }
-                setPages(newPages);
-                toast({ title: 'PDF Loaded', description: `Visual map of ${newPages.length} pages ready.` });
+                toast({ title: 'PDF Loaded', description: `Visual map of ${totalPages} pages ready.` });
             } catch (e) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
             } finally {
@@ -304,15 +316,35 @@ export default function PdfOrganizer() {
     const restorePage = (id: string) => {
         const pageToRestore = deletedPages.find(p => p.id === id);
         if (!pageToRestore) return;
+        
         setDeletedPages(prev => prev.filter(p => p.id !== id));
-        setPages(prev => [...prev, { ...pageToRestore, isDeleted: false }]);
+        setPages(prev => {
+            const next = [...prev, { ...pageToRestore, isDeleted: false }];
+            // Sort by original index so it returns to its relative original place
+            return next.sort((a, b) => {
+                if (a.index === -1) return 1; // Blanks go after
+                if (b.index === -1) return -1;
+                return a.index - b.index;
+            });
+        });
+        
+        setRestoredId(id);
+        setTimeout(() => setRestoredId(null), 2000);
+        
         setResultPdfUrl(null);
-        toast({ title: "Page Restored" });
+        toast({ title: "Page Restored to original position" });
     };
 
     const restoreAll = () => {
         if (deletedPages.length === 0) return;
-        setPages(prev => [...prev, ...deletedPages.map(p => ({ ...p, isDeleted: false }))]);
+        setPages(prev => {
+            const next = [...prev, ...deletedPages.map(p => ({ ...p, isDeleted: false }))];
+            return next.sort((a, b) => {
+                if (a.index === -1) return 1;
+                if (b.index === -1) return -1;
+                return a.index - b.index;
+            });
+        });
         setDeletedPages([]);
         setResultPdfUrl(null);
         setIsRestoreOpen(false);
@@ -454,24 +486,45 @@ export default function PdfOrganizer() {
                                     <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Visual Document Map</CardTitle>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">{pages.length} PAGES</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
+                                        {pages.length} / {isRendering ? '...' : pages.length + deletedPages.length} PAGES
+                                    </Badge>
                                     <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-[9px] font-black uppercase border-2 border-primary/10 hover:bg-destructive/5 hover:text-destructive rounded-lg px-3"><RefreshCcw className="mr-1.5 size-3" /> Change</Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative border-b">
-                                {isRendering ? (
-                                    <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
-                                        <div className="relative"><Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" /><Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" /></div>
-                                        <div className="space-y-3 w-full max-w-xs text-center px-4"><p className="font-black text-sm text-primary uppercase tracking-widest animate-pulse">Rendering Pages...</p><Progress value={progress} className="h-1.5 shadow-inner" /></div>
-                                    </div>
-                                ) : (
-                                    <ScrollArea className="h-full w-full">
+                                <ScrollArea className="h-full w-full">
+                                    {isRendering && pages.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
+                                            <div className="relative">
+                                                <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" /><Monitor className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                                            </div>
+                                            <div className="space-y-3 w-full max-w-xs text-center px-4">
+                                                <p className="font-black text-sm text-primary uppercase tracking-widest animate-pulse">Rendering Pages...</p>
+                                                <Progress value={progress} className="h-1.5 shadow-inner" />
+                                            </div>
+                                        </div>
+                                    ) : (
                                         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                                             <SortableContext items={pages} strategy={rectSortingStrategy}>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 p-4 md:p-6 pb-24">
                                                     {pages.map((p) => (
-                                                        <SortablePage key={p.id} page={p} onDelete={deletePage} onRotate={rotatePage} onInsertBlank={addBlankPage} onView={(page) => setZoomPage(page)} />
+                                                        <SortablePage 
+                                                            key={p.id} 
+                                                            page={p} 
+                                                            onDelete={deletePage} 
+                                                            onRotate={rotatePage} 
+                                                            onInsertBlank={addBlankPage} 
+                                                            onView={(page) => setZoomPage(page)}
+                                                            isRestored={restoredId === p.id}
+                                                        />
                                                     ))}
+                                                    {isRendering && (
+                                                        <div className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-3 bg-white/50 animate-pulse">
+                                                            <Loader2 className="h-6 w-6 animate-spin text-primary opacity-20" />
+                                                            <span className="text-[7px] font-black uppercase opacity-40">Loading...</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </SortableContext>
                                             <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
@@ -489,9 +542,9 @@ export default function PdfOrganizer() {
                                                 ) : null}
                                             </DragOverlay>
                                         </DndContext>
-                                        <ScrollBar />
-                                    </ScrollArea>
-                                )}
+                                    )}
+                                    <ScrollBar />
+                                </ScrollArea>
                             </CardContent>
                             <CardFooter className="bg-white dark:bg-slate-950 p-4 flex justify-center items-center relative shrink-0">
                                  <div className="inline-flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40"><MousePointer2 className="size-3.5 text-primary animate-pulse" /> Drag tiles to reorder pages</div>
@@ -589,3 +642,4 @@ export default function PdfOrganizer() {
         </div>
     );
 }
+
