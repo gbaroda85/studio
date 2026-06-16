@@ -171,6 +171,7 @@ export default function ImageCompressor() {
                 let bestSize = 0;
                 const scalesToTry = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
                 for (const scale of scalesToTry) {
+                    if (bestUrl) break;
                     let low = 0.2, high = 0.95; 
                     let stepBestUrl = "";
                     for (let i = 0; i < 6; i++) {
@@ -187,16 +188,15 @@ export default function ImageCompressor() {
                     }
                     if (stepBestUrl) {
                         bestUrl = stepBestUrl;
-                        break; 
+                        finalSize = bestSize;
                     }
                 }
                 if (!bestUrl) {
                    bestUrl = renderToCanvas(0.1, 0.1); 
                    const fb = await (await fetch(bestUrl)).blob();
-                   bestSize = fb.size;
+                   finalSize = fb.size;
                 }
                 finalUrl = bestUrl;
-                finalSize = bestSize;
             }
             resolve({
                 ...item,
@@ -395,7 +395,7 @@ export default function ImageCompressor() {
 
       {/* PRECISION ANALYSIS DIALOG */}
       <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
-          <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] translate-y-[-50%] z-[2000]">
+          <DialogContent className="max-w-5xl max-h-[82vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[52%] translate-y-[-50%] z-[2000]">
               <DialogHeader className="bg-white dark:bg-slate-900 p-6 border-b shrink-0">
                   <DialogTitle className="font-black uppercase tracking-tighter text-xl text-slate-800 dark:text-white flex items-center gap-3">
                        <ArrowLeftRight className="size-6 text-primary" /> PRECISION ANALYSIS
