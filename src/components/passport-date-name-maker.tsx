@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -74,14 +75,13 @@ export default function PassportDateNameMaker() {
     const [targetKB, setTargetKB] = useState<string>("50"); // Target file size in KB
     
     const [isProcessing, setIsProcessing] = useState(false);
-    const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [resultSize, setResultSize] = useState<number>(0);
     const [isDragOver, setIsDragOver] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const renderPhoto = useCallback(async () => {
+    const renderPhoto = useCallback(async (isExport: boolean = false) => {
         if (!imageSrc) return;
         
         const canvas = canvasRef.current;
@@ -139,43 +139,47 @@ export default function PassportDateNameMaker() {
                 ctx.strokeRect(0, 0, targetW, targetH);
             }
 
-            // 6. STRICT KB TARGET OPTIMIZATION LOOP
-            const targetBytes = (parseFloat(targetKB) || 50) * 1024 * 0.98; // 2% safety buffer
-            let low = 0.1, high = 1.0;
-            let bestBlob: Blob | null = null;
+            // 6. STRICT KB TARGET OPTIMIZATION LOOP (Only if needed for size estimate)
+            if (isExport) {
+                const targetBytes = (parseFloat(targetKB) || 50) * 1024 * 0.98;
+                let low = 0.1, high = 1.0;
+                let bestBlob: Blob | null = null;
 
-            // Binary search for optimal quality
-            for (let i = 0; i < 15; i++) {
-                const mid = (low + high) / 2;
-                const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
-                if (blob.size <= targetBytes) {
-                    bestBlob = blob;
-                    low = mid;
-                } else {
-                    high = mid;
+                for (let i = 0; i < 15; i++) {
+                    const mid = (low + high) / 2;
+                    const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
+                    if (blob.size <= targetBytes) {
+                        bestBlob = blob;
+                        low = mid;
+                    } else {
+                        high = mid;
+                    }
                 }
+                const finalBlob = bestBlob || await new Promise<Blob>(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
+                setResultSize(finalBlob.size);
             }
-
-            let finalBlob: Blob = bestBlob || await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
-            
-            if (resultUrl) URL.revokeObjectURL(resultUrl);
-            const url = URL.createObjectURL(finalBlob);
-            setResultUrl(url);
-            setResultSize(finalBlob.size);
         };
     }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth, targetKB, showDopPrefix]);
 
     useEffect(() => {
-        const timer = setTimeout(renderPhoto, 300);
-        return () => clearTimeout(timer);
-    }, [renderPhoto]);
+        if (imageSrc) {
+            renderPhoto(true); // Initial high-res render for stats
+        }
+    }, [imageSrc, renderPhoto]);
+
+    // Fast preview render without expensive Blob creation to avoid flickering
+    useEffect(() => {
+        if (imageSrc) {
+            const timer = setTimeout(() => renderPhoto(false), 10);
+            return () => clearTimeout(timer);
+        }
+    }, [imageSrc, name, date, nameSize, dateSize, stripHeightFactor, borderWidth, showDopPrefix, renderPhoto]);
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 setImageSrc(e.target?.result as string);
-                setResultUrl(null);
             };
             reader.readAsDataURL(file);
         }
@@ -188,13 +192,37 @@ export default function PassportDateNameMaker() {
         handleFileChange(file);
     };
 
-    const handleDownload = () => {
-        if (!resultUrl) return;
+    const handleDownload = async () => {
+        if (!imageSrc || !canvasRef.current) return;
+        setIsProcessing(true);
+        
+        // Final strict optimization pass for the actual file
+        const canvas = canvasRef.current;
+        const targetBytes = (parseFloat(targetKB) || 50) * 1024 * 0.98;
+        let low = 0.1, high = 1.0;
+        let bestBlob: Blob | null = null;
+
+        for (let i = 0; i < 15; i++) {
+            const mid = (low + high) / 2;
+            const blob: Blob = await new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', mid));
+            if (blob.size <= targetBytes) {
+                bestBlob = blob;
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+        
+        const finalBlob = bestBlob || await new Promise<Blob>(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.1));
+        const url = URL.createObjectURL(finalBlob);
+        
         const link = document.createElement('a');
-        link.href = resultUrl;
+        link.href = url;
         link.download = `Passport-${name.replace(/\s+/g, '-')}.jpg`;
         link.click();
-        
+        URL.revokeObjectURL(url);
+        setIsProcessing(false);
+
         confetti({
             particleCount: 150,
             spread: 70,
@@ -205,7 +233,6 @@ export default function PassportDateNameMaker() {
 
     const handleReset = () => {
         setImageSrc(null);
-        setResultUrl(null);
         setName("YOUR NAME HERE");
         setDate(new Date().toLocaleDateString('en-GB').split('/').join('-'));
         setShowDopPrefix(true);
@@ -383,27 +410,22 @@ export default function PassportDateNameMaker() {
                             </div>
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">Live Studio View</CardTitle>
                         </div>
-                        {resultUrl && <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase tracking-wider">RENDER READY</Badge>}
+                        {imageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase tracking-wider">RENDER READY</Badge>}
                     </CardHeader>
                     <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden">
                         <AnimatePresence mode="wait">
                             {imageSrc ? (
                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-8 w-full">
                                     <div className="relative group overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[12px] border-white bg-white">
-                                        {/* Result preview uses a canvas behind the scenes for optimization search */}
-                                        <canvas ref={canvasRef} className="hidden" />
-                                        {resultUrl ? (
-                                            <img src={resultUrl} alt="Passport result" className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500 shadow-inner" style={{ maxWidth: '350px' }} />
-                                        ) : (
-                                            <div className="size-[350px] flex items-center justify-center bg-muted/20 animate-pulse"><Loader2 className="size-10 animate-spin text-primary opacity-20" /></div>
-                                        )}
+                                        {/* FLICKER FIX: Use direct canvas display instead of a constantly changing resultUrl image */}
+                                        <canvas ref={canvasRef} className="max-w-full h-auto object-contain block transition-transform group-hover:scale-105 duration-500 shadow-inner" style={{ maxWidth: '350px' }} />
                                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     </div>
                                     
                                     <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                                         <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 text-center shadow-lg">
-                                            <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-1">Optimized Size</p>
-                                            <p className="text-lg font-black text-green-600">{formatBytes(resultSize)}</p>
+                                            <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-1">Target Limit</p>
+                                            <p className="text-lg font-black text-green-600">{targetKB} KB</p>
                                         </div>
                                         <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 text-center shadow-lg">
                                             <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-1">Resolution</p>

@@ -82,7 +82,6 @@ export default function PhotoEnhancer() {
   const { toast } = useToast();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
-  const [resultImageSrc, setResultImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -97,6 +96,7 @@ export default function PhotoEnhancer() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const displayCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -106,7 +106,6 @@ export default function PhotoEnhancer() {
       reader.onload = (e) => {
         const src = e.target?.result as string;
         setOriginalImageSrc(src);
-        setResultImageSrc(src);
         resetAdjustments();
       };
       reader.readAsDataURL(file);
@@ -131,17 +130,18 @@ export default function PhotoEnhancer() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  const applyAdjustments = async () => {
+  const applyAdjustments = async (isExport: boolean = false) => {
     if (!originalImageSrc) return;
 
     const img = new window.Image();
     img.src = originalImageSrc;
     img.onload = () => {
-        const canvas = canvasRef.current;
+        const canvas = isExport ? canvasRef.current : displayCanvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         if (!ctx) return;
 
+        // Use natural dimensions for export, but match CSS for display
         canvas.width = img.width;
         canvas.height = img.height;
         
@@ -191,17 +191,17 @@ export default function PhotoEnhancer() {
             ctx.putImageData(output, 0, 0);
         }
 
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-        setResultImageSrc(dataUrl);
-        setEnhancedFileSize(Math.round((dataUrl.length - 23) * 0.75));
+        if (isExport) {
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+            setEnhancedFileSize(Math.round((dataUrl.length - 23) * 0.75));
+        }
     };
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-        applyAdjustments();
-    }, 50);
-    return () => clearTimeout(timer);
+    if (originalImageSrc) {
+        applyAdjustments(false);
+    }
   }, [brightness, contrast, saturation, sharpness, originalImageSrc]);
 
   const handleAutoEnhance = async () => {
@@ -227,21 +227,69 @@ export default function PhotoEnhancer() {
   };
 
   const handleDownload = () => {
-    if (!resultImageSrc || !imageFile) return;
-    const link = document.createElement("a");
-    link.href = resultImageSrc;
-    const nameParts = imageFile.name.split(".");
-    const name = nameParts.slice(0, -1).join(".");
-    link.download = `GR7-Tools-${name}-enhanced.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!originalImageSrc || !imageFile) return;
+    
+    // Perform one final high-res render to the hidden export canvas before downloading
+    const img = new window.Image();
+    img.src = originalImageSrc;
+    img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`;
+        ctx.drawImage(img, 0, 0);
+        ctx.filter = 'none';
+
+        if (sharpness[0] > 0) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const factor = sharpness[0] / 10; 
+            const kernel = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
+            const output = ctx.createImageData(canvas.width, canvas.height);
+            const dst = output.data;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const i = (y * canvas.width + x) * 4;
+                    let r = 0, g = 0, b = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const scy = Math.min(canvas.height - 1, Math.max(0, y + ky));
+                            const scx = Math.min(canvas.width - 1, Math.max(0, x + kx));
+                            const srcOff = (scy * canvas.width + scx) * 4;
+                            const wt = kernel[(ky + 1) * 3 + (kx + 1)];
+                            r += data[srcOff] * wt;
+                            g += data[srcOff + 1] * wt;
+                            b += data[srcOff + 2] * wt;
+                        }
+                    }
+                    dst[i] = r; dst[i+1] = g; dst[i+2] = b; dst[i+3] = data[i+3];
+                }
+            }
+            ctx.putImageData(output, 0, 0);
+        }
+
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        const nameParts = imageFile.name.split(".");
+        const name = nameParts.slice(0, -1).join(".");
+        link.download = `GR7-Tools-${name}-enhanced.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
   };
 
   const handleReset = () => {
     setImageFile(null);
     setOriginalImageSrc(null);
-    setResultImageSrc(null);
     setIsProcessing(false);
     setProgress(0);
     resetAdjustments();
@@ -288,7 +336,7 @@ export default function PhotoEnhancer() {
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE LOCAL</div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE LOCAL</div>
                 <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT RENDER</div>
                 <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD OUTPUT</div>
             </CardFooter>
@@ -316,7 +364,7 @@ export default function PhotoEnhancer() {
                 size="lg" 
                 className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-3" 
                 onClick={handleDownload} 
-                disabled={isProcessing || !resultImageSrc}
+                disabled={isProcessing || !originalImageSrc}
             >
                 <StarIcons />
                 <Download className="size-7 group-hover:translate-y-1 transition-transform" />
@@ -335,7 +383,7 @@ export default function PhotoEnhancer() {
                         <ArrowLeftRight className="h-4 w-4 text-primary" />
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Before & After Comparison</CardTitle>
                     </div>
-                    {resultImageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">ENHANCED</Badge>}
+                    {originalImageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">REAL-TIME</Badge>}
                 </CardHeader>
                 <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[400px]">
                     <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
@@ -353,7 +401,7 @@ export default function PhotoEnhancer() {
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
-                                {resultImageSrc && <span className="text-[9px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
+                                {enhancedFileSize > 0 && <span className="text-[9px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
                             </div>
                             <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
                                 <AnimatePresence mode="wait">
@@ -363,12 +411,13 @@ export default function PhotoEnhancer() {
                                             <Progress value={progress} className="h-1 w-32" />
                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p>
                                         </motion.div>
-                                    ) : resultImageSrc ? (
-                                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative size-full p-2">
-                                            <Image src={resultImageSrc} alt="Result" fill className="object-contain p-4 md:p-6 drop-shadow-2xl" />
+                                    ) : (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative size-full p-2 flex items-center justify-center">
+                                            {/* FLICKER FIX: Show persistent canvas directly instead of a frequently changing DataURL image */}
+                                            <canvas ref={displayCanvasRef} className="max-w-[90%] max-h-[90%] object-contain drop-shadow-2xl" />
                                             <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white"><CheckCircle2 className="size-5" /></div></div>
                                         </motion.div>
-                                    ) : null}
+                                    )}
                                 </AnimatePresence>
                                 <div className="absolute top-4 left-4"><Badge className="text-[8px] bg-primary text-primary-foreground uppercase border-none">AFTER</Badge></div>
                             </div>
@@ -377,9 +426,9 @@ export default function PhotoEnhancer() {
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE LOCAL RAM</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT PREVIEW</div>
-                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD RE-SAMPLING</div>
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE LOCAL RAM</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD RE-SAMPLING</div>
                     </div>
                 </CardFooter>
             </Card>
@@ -464,6 +513,7 @@ export default function PhotoEnhancer() {
         </div>
       </div>
       
+      {/* HIDDEN CANVAS FOR EXPORT */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
