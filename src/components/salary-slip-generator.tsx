@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
@@ -137,15 +138,6 @@ const StarIcons = () => (
     </>
 );
 
-function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-}
-
 export default function SalarySlipGenerator() {
     const { toast } = useToast();
     const [data, setData] = useState<SalaryData>(INITIAL_DATA);
@@ -188,17 +180,23 @@ export default function SalarySlipGenerator() {
             return;
         }
 
-        setSavedProfiles(prev => {
-            const exists = prev.findIndex(p => p.employee.empId === data.employee.empId && p.employee.name === data.employee.name);
-            if (exists >= 0) {
+        const currentId = data.employee.empId;
+        const currentName = data.employee.name;
+        const profileToSave = JSON.parse(JSON.stringify(data));
+
+        const existsIndex = savedProfiles.findIndex(p => p.employee.empId === currentId && p.employee.name === currentName);
+        
+        if (existsIndex >= 0) {
+            setSavedProfiles(prev => {
                 const updated = [...prev];
-                updated[exists] = JSON.parse(JSON.stringify(data));
-                toast({ title: "Profile Updated", description: `Data for ${data.employee.name} saved successfully.` });
+                updated[existsIndex] = profileToSave;
                 return updated;
-            }
-            toast({ title: "New Profile Created", description: `Added ${data.employee.name} to employee database.` });
-            return [...prev, JSON.parse(JSON.stringify(data))];
-        });
+            });
+            toast({ title: "Profile Updated", description: `Data for ${currentName} saved successfully.` });
+        } else {
+            setSavedProfiles(prev => [...prev, profileToSave]);
+            toast({ title: "New Profile Created", description: `Added ${currentName} to employee database.` });
+        }
         
         confetti({ particleCount: 50, spread: 30, origin: { y: 0.8 }, colors: ['#0d5a71', '#ffffff'] });
     };
@@ -714,4 +712,3 @@ function TableItem({ label, value, isDeduction }: { label: string, value: number
         </div>
     );
 }
-
