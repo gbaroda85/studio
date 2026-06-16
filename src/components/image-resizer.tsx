@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from "react";
@@ -445,7 +444,7 @@ export default function ImageResizer() {
                                     </ScrollArea>
                                     <div className="p-6 md:p-8 border-t bg-muted/10 mt-auto">
                                         <Button 
-                                            className="magic-button magic-button-success w-full h-16 md:h-18 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" 
+                                            className="magic-button magic-button-success w-full max-w-xl h-18 md:h-20 rounded-[1.8rem] bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black transition-all active:scale-95 group flex items-center justify-center gap-4" 
                                             onClick={handleDownload}
                                         >
                                             <StarIcons />
@@ -506,11 +505,9 @@ export default function ImageResizer() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
-                    <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                        <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                        <Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8 text-[9px] font-black text-muted-foreground/30 uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                    <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT RENDER</div>
                 </CardFooter>
             </Card>
         </div>
@@ -520,92 +517,94 @@ export default function ImageResizer() {
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
                     <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
-                        <Settings2 className="size-4 md:size-5 text-primary" /> Settings
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Configuration
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
-                    <div className="space-y-6">
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
-                                    <button
-                                        key={u}
-                                        onClick={() => handleUnitChange(u)}
-                                        className={cn(
-                                            "btn-pos-uiverse h-10",
-                                            unit === u && "active-uiverse"
-                                        )}
-                                        data-label={u.toUpperCase()}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                            <div className="space-y-2">
-                                <Label htmlFor="width" className="text-[10px] font-black uppercase opacity-60">Width ({unit})</Label>
-                                <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="height" className="text-[10px] font-black uppercase opacity-60">Height ({unit})</Label>
-                                <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-12 text-lg font-black border-2 rounded-xl bg-muted/20" />
-                            </div>
-                        </div>
-                        <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border">
-                            <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-4" />
-                            <Label htmlFor="aspect-ratio" className="text-[10px] font-black cursor-pointer uppercase opacity-60">Lock Aspect Ratio</Label>
+                <CardContent className="p-4 md:p-6 space-y-4 md:space-y-5">
+                    {/* QUICK PRESETS (Moved from bottom Card to Top of this CardContent) */}
+                    <div className="space-y-3">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                            <Briefcase className="size-3" /> Quick Presets
+                        </Label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {GOVT_PRESETS.map((p) => (
+                                <button key={p.label} onClick={() => applyPreset(p)} className="flex items-center gap-2 p-2 rounded-xl border-2 border-transparent bg-white/5 hover:bg-primary/5 hover:border-primary/20 transition-all text-left group">
+                                    <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><p.icon className="size-3.5" /></div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[9px] font-black uppercase truncate leading-none mb-0.5">{p.label}</p>
+                                        <p className="text-[7px] font-bold opacity-50 uppercase">{p.width}x{p.height} PX</p>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm">
-                        <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
+                    <Separator className="opacity-10" />
+
+                    {/* SELECT UNIT SECTION */}
+                    <div className="space-y-3">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
+                                <button
+                                    key={u}
+                                    onClick={() => handleUnitChange(u)}
+                                    className={cn(
+                                        "btn-pos-uiverse h-9 !ring-[3px] !ring-slate-950 dark:!ring-white",
+                                        unit === u && "active-uiverse"
+                                    )}
+                                    data-label={u.toUpperCase()}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 items-center">
+                        <div className="space-y-1.5 text-left">
+                            <Label htmlFor="width" className="text-[9px] font-black uppercase opacity-60">Width ({unit})</Label>
+                            <Input id="width" name="width" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.width} onChange={handleDimensionChange} disabled={isProcessing} className="h-10 text-base font-black border-2 rounded-xl bg-muted/20" />
+                        </div>
+                        <div className="space-y-1.5 text-left">
+                            <Label htmlFor="height" className="text-[9px] font-black uppercase opacity-60">Height ({unit})</Label>
+                            <Input id="height" name="height" type="number" step={unit === 'px' ? '1' : '0.1'} value={newDimensions.height} onChange={handleDimensionChange} disabled={isProcessing} className="h-10 text-base font-black border-2 rounded-xl bg-muted/20" />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 bg-muted/30 p-2.5 rounded-xl border border-dashed text-left">
+                        <Checkbox id="aspect-ratio" checked={maintainAspectRatio} onCheckedChange={(checked) => setMaintainAspectRatio(Boolean(checked))} className="size-3.5" />
+                        <Label htmlFor="aspect-ratio" className="text-[9px] font-black cursor-pointer uppercase opacity-60 tracking-widest">Lock Aspect Ratio</Label>
+                    </div>
+
+                    <div className="p-3 md:p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-3 shadow-sm text-left">
+                        <ShieldCheck className="size-4 md:size-5 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
-                            <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                            <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
+                            <p className="text-[7px] md:text-[8px] text-green-600/80 font-medium leading-tight mt-0.5 uppercase">
                                 Optimized for government application forms with strict pixel requirements.
                             </p>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
+                <CardFooter className="bg-muted/10 p-5 md:p-6 border-t border-white/10">
                     <Button 
-                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-3" 
                         onClick={handleResize}
                         disabled={isProcessing}
                     >
                         <StarIcons />
                         {isProcessing ? (
                             <div className="flex items-center gap-3">
-                                <Loader2 className="size-6 md:size-7 animate-spin" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">RESIZING...</span>
+                                <Loader2 className="size-5 md:size-6 animate-spin" />
+                                <span className="uppercase text-xs md:text-sm font-black tracking-tighter">RESIZING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 md:gap-3">
-                                <Maximize className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">RESIZE NOW</span>
+                                <Maximize className="size-5 md:size-6 text-white group-hover:scale-125 transition-transform" />
+                                <span className="uppercase tracking-tighter text-sm md:text-lg font-black">RESIZE NOW</span>
                             </div>
                         )}
                     </Button>
                 </CardFooter>
-            </Card>
-
-            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
-                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                        <Briefcase className="size-3" /> Quick Presets
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 grid grid-cols-2 gap-2">
-                    {GOVT_PRESETS.map((p) => (
-                        <button key={p.label} onClick={() => applyPreset(p)} className="flex items-center gap-3 p-3 rounded-xl border-2 border-transparent bg-white/5 hover:bg-primary/5 hover:border-primary/20 transition-all text-left group">
-                            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><p.icon className="size-4" /></div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-black uppercase truncate leading-none mb-1">{p.label}</p>
-                                <p className="text-[8px] font-bold opacity-50">{p.width}x{p.height} PX</p>
-                            </div>
-                        </button>
-                    ))}
-                </CardContent>
             </Card>
         </div>
       </div>
