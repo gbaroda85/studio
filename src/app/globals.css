@@ -55,7 +55,7 @@
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -moz-osx-smoothing: grayscale;
     /* CRITICAL FIX: Prevent page jumping by reserving scrollbar gutter */
     scrollbar-gutter: stable;
   }
@@ -84,6 +84,7 @@
 
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
     cursor: pointer !important;
+    touch-action: manipulation;
   }
 
   .dark body {
@@ -103,9 +104,10 @@
   contain: content;
 }
 
+/* Optimization for long lists: Browser will only render when visible */
 section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 1000px;
+  contain-intrinsic-size: 1px 500px;
 }
 
 .font-headline {

@@ -485,10 +485,10 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     if (shouldShowLoader) {
         setIsNavigating(true);
         
-        // Reduced to 600ms for a snappier, more high-performance feel
+        // Reduced to 400ms for a snappier, more high-performance feel
         const timer = setTimeout(() => {
           setIsNavigating(false);
-        }, 600);
+        }, 400);
         
         prevPathRef.current = toPath;
         return () => clearTimeout(timer);
@@ -511,7 +511,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
             className="fixed inset-0 z-[9999] pointer-events-auto transform-gpu"
           >
             <Loading />
@@ -520,9 +520,9 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
-         {/* OPTIMIZED BLUR CIRCLES: Forced to separate GPU layer with will-change */}
-         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }} />
-         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full animate-pulse pointer-events-none transform-gpu" style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden', animationDelay: '2s' }} />
+         {/* OPTIMIZED BLUR CIRCLES: Forced to separate GPU layer with static opacity to prevent continuous paints */}
+         <div className="fixed top-0 right-0 size-[600px] bg-primary/5 blur-[150px] -z-10 rounded-full pointer-events-none transform-gpu opacity-40" style={{ willChange: 'transform', backfaceVisibility: 'hidden' }} />
+         <div className="fixed bottom-0 left-0 size-[600px] bg-accent/5 blur-[150px] -z-10 rounded-full pointer-events-none transform-gpu opacity-40" style={{ willChange: 'transform', backfaceVisibility: 'hidden' }} />
          
          <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
