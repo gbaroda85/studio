@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
 import Image from "next/image";
 import JSZip from "jszip";
 import {
@@ -98,7 +98,7 @@ export default function ImageCompressor() {
   const [compressionMode, setCompressionMode] = useState<CompressionMode>('target');
   const [targetSizeValue, setTargetSizeValue] = useState<string>("50");
   const [targetUnit, setTargetUnit] = useState<TargetUnit>('kb');
-  const [quality, setQuality] = useState<number[]>([75]);
+  const [quality, setQuality] = useState<number[]>([85]);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg');
   const [isDragOver, setIsDragOver] = useState(false);
   const [viewItem, setViewItem] = useState<CompressionResult | null>(null);
@@ -393,40 +393,66 @@ export default function ImageCompressor() {
         </div>
       </div>
 
-      {/* VIEW MODAL */}
+      {/* PRECISION ANALYSIS DIALOG */}
       <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[2000]">
-              <DialogHeader className="bg-primary/5 p-4 border-b shrink-0">
-                  <DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground flex items-center justify-center gap-2">
-                       <Eye className="size-4 text-primary" /> Visual Studio Preview
+          <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] translate-y-[-50%] z-[2000]">
+              <DialogHeader className="bg-white dark:bg-slate-900 p-6 border-b shrink-0">
+                  <DialogTitle className="font-black uppercase tracking-tighter text-xl text-slate-800 dark:text-white flex items-center gap-3">
+                       <ArrowLeftRight className="size-6 text-primary" /> PRECISION ANALYSIS
                   </DialogTitle>
               </DialogHeader>
-              <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
-                  <div className="flex flex-col items-center gap-6 w-full">
-                      <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] md:border-[12px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden w-full max-w-[650px] mt-4 mb-4 transform-gpu">
-                          <img 
-                              src={viewItem?.dataUrl || viewItem?.originalDataUrl} 
-                              className="w-full h-auto block" 
-                              alt="preview" 
-                          />
-                          <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
-                              <Badge variant="outline" className="text-[8px] font-black uppercase border-black">
-                                {viewItem?.newSize && viewItem.newSize > 0 ? 'COMPRESSED' : 'ORIGINAL'}
-                              </Badge>
+              
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner custom-scrollbar">
+                  <div className="grid md:grid-cols-2 gap-10 w-full">
+                      {/* ORIGINAL VIEW */}
+                      <div className="space-y-6 flex flex-col">
+                          <div className="flex justify-between items-center px-2">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">ORIGINAL</span>
+                              <Badge variant="outline" className="bg-white/50 text-[10px] font-black uppercase border-2 h-7 px-4 shadow-sm">{viewItem ? formatBytes(viewItem.originalSize) : '-'}</Badge>
+                          </div>
+                          <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20">
+                              <img 
+                                  src={viewItem?.originalDataUrl} 
+                                  className="max-w-full max-h-full object-contain block transition-transform duration-500 group-hover:scale-105" 
+                                  alt="original" 
+                              />
                           </div>
                       </div>
-                      <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 mb-10">
-                          <Sparkles className="size-4 text-primary animate-pulse" /> High-Fidelity Rendering Ready
+
+                      {/* OPTIMIZED VIEW */}
+                      <div className="space-y-6 flex flex-col">
+                          <div className="flex justify-between items-center px-2">
+                              <Badge className="bg-green-500 text-white text-[10px] font-black uppercase h-7 px-5 rounded-lg shadow-md border-2 border-white/20">Optimized</Badge>
+                              <span className="text-[10px] font-black uppercase text-green-600 tracking-widest">{viewItem && viewItem.newSize > 0 ? formatBytes(viewItem.newSize) : 'Processing...'}</span>
+                          </div>
+                          <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40">
+                              <img 
+                                  src={viewItem?.dataUrl || viewItem?.originalDataUrl} 
+                                  className="max-w-full max-h-full object-contain block drop-shadow-2xl transition-transform duration-500 group-hover:scale-105" 
+                                  alt="optimized" 
+                              />
+                              {viewItem && viewItem.newSize > 0 && (
+                                  <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-2 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
+                              )}
+                          </div>
                       </div>
                   </div>
               </div>
-              <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0">
-                  <Button variant="outline" onClick={() => setViewItem(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-12 border-2 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
-                      <X className="mr-2 size-4" /> Close Studio View
+              
+              <DialogFooter className="p-8 bg-white dark:bg-slate-900 border-t flex justify-center shrink-0">
+                  <Button 
+                    className="magic-button magic-button-success w-full max-w-xl h-18 md:h-20 rounded-[1.8rem] bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black transition-all active:scale-95 group flex items-center justify-center gap-4 text-xl"
+                    onClick={() => viewItem && downloadFile(viewItem)}
+                    disabled={!viewItem || viewItem.newSize === 0}
+                  >
+                      <StarIcons />
+                      <Download className="size-8 group-hover:translate-y-1 transition-transform" />
+                      <span className="uppercase tracking-tighter">DOWNLOAD OPTIMIZED</span>
                   </Button>
               </DialogFooter>
           </DialogContent>
       </Dialog>
+      
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
