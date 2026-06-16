@@ -194,8 +194,8 @@ export default function IdCardGenerator() {
         if (data.config.showQr && qrRef.current) {
             qrRef.current.innerHTML = "";
             const qrCode = new QRCodeStyling({
-                width: 120,
-                height: 120,
+                width: 80, // Reduced to match container
+                height: 80,
                 data: `ID: ${data.personal.id}\nName: ${data.personal.name}\nOrg: ${data.organization.name}`,
                 dotsOptions: { color: data.config.primaryColor, type: "rounded" },
                 cornersSquareOptions: { type: "extra-rounded", color: data.config.primaryColor },
@@ -574,7 +574,7 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
 
                 {/* INFO GRID */}
                 <div className={cn(
-                    "grid grid-cols-1 gap-y-1.5 text-left",
+                    "grid grid-cols-1 gap-y-1.5 text-left mb-4",
                     isVertical ? "w-full" : "w-1/2 pt-4"
                 )}>
                     <InfoRow label="ID NUMBER" value={data.personal.id} />
@@ -589,7 +589,7 @@ function IdCardTemplate({ data, qrRef, cardRef }: { data: IdCardData, qrRef: any
                     !isVertical && "hidden"
                 )}>
                     {data.config.showQr && (
-                        <div ref={qrRef} className="size-16 p-1 bg-white border-2 rounded-xl shadow-lg border-slate-100 flex items-center justify-center shrink-0" />
+                        <div ref={qrRef} className="size-20 p-1 bg-white border-2 rounded-xl shadow-lg border-slate-100 flex items-center justify-center shrink-0 overflow-hidden" />
                     )}
                     
                     <div className="flex-1 flex flex-col items-center justify-end pb-1">
