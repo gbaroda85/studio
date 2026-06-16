@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -391,13 +392,22 @@ export default function PdfMerger() {
 
                                 <div className="flex flex-col gap-4">
                                     {mergedPdfUrl && (
-                                        <Button 
-                                            variant="outline" 
-                                            className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-primary/5 text-primary border-primary/20 animate-in zoom-in-95"
-                                            onClick={() => setIsPreviewOpen(true)}
-                                        >
-                                            <Eye className="mr-2 size-4" /> VIEW PREVIEW
-                                        </Button>
+                                        <>
+                                            <Button 
+                                                variant="outline" 
+                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-primary/10 text-primary border-primary bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95"
+                                                onClick={() => setIsPreviewOpen(true)}
+                                            >
+                                                <Eye className="mr-2 size-4 text-primary" /> VIEW PREVIEW
+                                            </Button>
+                                            <Button 
+                                                variant="outline"
+                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-500/10 text-emerald-600 border-emerald-600 bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95"
+                                                onClick={handleDownload}
+                                            >
+                                                <Download className="mr-2 size-4 text-emerald-600" /> DOWNLOAD PDF
+                                            </Button>
+                                        </>
                                     )}
                                     <Button 
                                         className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
