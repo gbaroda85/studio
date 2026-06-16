@@ -63,7 +63,7 @@ type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CompressionMode = 'manual' | 'target';
 type TargetUnit = 'kb' | 'mb';
 
-const QUICK_SIZES = ["100", "200", "500", "1024"];
+const QUICK_SIZES = ["20", "50", "100", "500"];
 
 const StarIcons = () => (
     <>
@@ -230,7 +230,6 @@ export default function ImageCompressor() {
         results.forEach((res, index) => {
             if (res.newSize > 0) {
                 const base64Data = res.dataUrl.split(",")[1];
-                // Ensure unique filenames to prevent overwrite in ZIP
                 const safeName = res.name.split('.')[0].replace(/[^a-z0-9]/gi, '_');
                 zip.file(`Optimized-${index + 1}-${safeName}.${ext}`, base64Data, { base64: true });
             }
@@ -239,7 +238,7 @@ export default function ImageCompressor() {
         const content = await zip.generateAsync({ type: "blob" });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = `Optimized-Batch-${Date.now()}.zip`;
+        link.download = `GR7-Optimized-Batch-${Date.now()}.zip`;
         link.click();
         toast({ title: "ZIP Created", description: "All files bundled successfully." });
     } catch (e) {
@@ -325,7 +324,7 @@ export default function ImageCompressor() {
                                     ))}
                                     <Button 
                                         variant="ghost" 
-                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-slate-800 dark:text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
+                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-slate-900 dark:text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
                                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                     >
                                         <Plus className="size-4 mr-2" /> ADD MORE IMAGES
@@ -383,7 +382,7 @@ export default function ImageCompressor() {
                                                 "btn-pos-uiverse h-10 transition-all !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                                 targetSizeValue === size && targetUnit === 'kb' && "active-uiverse"
                                             )} 
-                                            data-label={size === "1024" ? "1MB" : `${size}K`} 
+                                            data-label={`${size}K`} 
                                         />
                                     ))}
                                 </div>
@@ -419,7 +418,6 @@ export default function ImageCompressor() {
         </div>
       </div>
 
-      {/* PRECISION ANALYSIS DIALOG */}
       <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
           <DialogContent className="max-w-5xl max-h-[82vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[52%] translate-y-[-50%] z-[2000]">
               <DialogHeader className="bg-white dark:bg-slate-900 p-6 border-b shrink-0">
@@ -430,33 +428,23 @@ export default function ImageCompressor() {
               
               <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner custom-scrollbar">
                   <div className="grid md:grid-cols-2 gap-10 w-full">
-                      {/* ORIGINAL VIEW */}
                       <div className="space-y-6 flex flex-col">
                           <div className="flex justify-between items-center px-2">
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">ORIGINAL</span>
                               <Badge variant="outline" className="bg-white/50 text-[10px] font-black uppercase border-2 h-7 px-4 shadow-sm">{viewItem ? formatBytes(viewItem.originalSize) : '-'}</Badge>
                           </div>
                           <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20">
-                              <img 
-                                  src={viewItem?.originalDataUrl} 
-                                  className="max-w-full max-h-full object-contain block transition-transform duration-500 group-hover:scale-105" 
-                                  alt="original" 
-                              />
+                              {viewItem?.originalDataUrl && <img src={viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block transition-transform duration-500 group-hover:scale-105" alt="original" />}
                           </div>
                       </div>
 
-                      {/* OPTIMIZED VIEW */}
                       <div className="space-y-6 flex flex-col">
                           <div className="flex justify-between items-center px-2">
                               <Badge className="bg-green-500 text-white text-[10px] font-black uppercase h-7 px-5 rounded-lg shadow-md border-2 border-white/20">Optimized</Badge>
                               <span className="text-[10px] font-black uppercase text-green-600 tracking-widest">{viewItem && viewItem.newSize > 0 ? formatBytes(viewItem.newSize) : 'Processing...'}</span>
                           </div>
                           <div className="relative flex-1 aspect-[4/5] bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40">
-                              <img 
-                                  src={viewItem?.dataUrl || viewItem?.originalDataUrl} 
-                                  className="max-w-full max-h-full object-contain block drop-shadow-2xl transition-transform duration-500 group-hover:scale-105" 
-                                  alt="optimized" 
-                              />
+                              {viewItem && <img src={viewItem.newSize > 0 ? viewItem.dataUrl : viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block drop-shadow-2xl transition-transform duration-500 group-hover:scale-105" alt="optimized" />}
                               {viewItem && viewItem.newSize > 0 && (
                                   <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
                               )}
