@@ -27,12 +27,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
+  Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter,
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -166,35 +161,32 @@ export default function ImageCompressor() {
             } else {
                 const multiplier = targetUnit === 'mb' ? 1024 * 1024 : 1024;
                 const targetBytes = parseFloat(targetSizeValue) * multiplier;
-                let currentScale = 1.0;
                 let bestUrl = "";
                 let bestSize = 0;
+                
                 const scalesToTry = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
                 for (const scale of scalesToTry) {
                     if (bestUrl) break;
-                    let low = 0.2, high = 0.95; 
-                    let stepBestUrl = "";
-                    for (let i = 0; i < 6; i++) {
+                    let low = 0.1, high = 0.98; 
+                    for (let i = 0; i < 8; i++) {
                         const mid = (low + high) / 2;
                         const testUrl = renderToCanvas(mid, scale);
                         const testBlob = await (await fetch(testUrl)).blob();
                         if (testBlob.size <= targetBytes) {
-                            stepBestUrl = testUrl;
+                            bestUrl = testUrl;
                             bestSize = testBlob.size;
                             low = mid; 
                         } else {
                             high = mid; 
                         }
                     }
-                    if (stepBestUrl) {
-                        bestUrl = stepBestUrl;
-                        finalSize = bestSize;
-                    }
                 }
                 if (!bestUrl) {
                    bestUrl = renderToCanvas(0.1, 0.1); 
                    const fb = await (await fetch(bestUrl)).blob();
                    finalSize = fb.size;
+                } else {
+                    finalSize = bestSize;
                 }
                 finalUrl = bestUrl;
             }
@@ -230,19 +222,31 @@ export default function ImageCompressor() {
   };
 
   const downloadAllAsZip = async () => {
-    const zip = new JSZip();
-    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
-    results.forEach(res => {
-        if (res.newSize > 0) {
-            const base64Data = res.dataUrl.split(",")[1];
-            zip.file(`Optimized-${res.name.split('.')[0]}.${ext}`, base64Data, { base64: true });
-        }
-    });
-    const content = await zip.generateAsync({ type: "blob" });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(content);
-    link.download = "Optimized-Batch.zip";
-    link.click();
+    setIsBulkProcessing(true);
+    try {
+        const zip = new JSZip();
+        const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+        
+        results.forEach((res, index) => {
+            if (res.newSize > 0) {
+                const base64Data = res.dataUrl.split(",")[1];
+                // Ensure unique filenames to prevent overwrite in ZIP
+                const safeName = res.name.split('.')[0].replace(/[^a-z0-9]/gi, '_');
+                zip.file(`Optimized-${index + 1}-${safeName}.${ext}`, base64Data, { base64: true });
+            }
+        });
+
+        const content = await zip.generateAsync({ type: "blob" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `Optimized-Batch-${Date.now()}.zip`;
+        link.click();
+        toast({ title: "ZIP Created", description: "All files bundled successfully." });
+    } catch (e) {
+        toast({ variant: 'destructive', title: "ZIP Error" });
+    } finally {
+        setIsBulkProcessing(false);
+    }
   };
 
   const removeFile = (id: string) => {
@@ -257,7 +261,7 @@ export default function ImageCompressor() {
             <Card className={cn("glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 select-none h-full flex flex-col", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                 <CardHeader className="bg-muted/30 border-b p-4 md:p-6 text-center shrink-0">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                        <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground text-left">STUDIO WORKSPACE</CardTitle>
                         {results.length > 0 && <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full">{results.length} FILES</Badge>}
                     </div>
                 </CardHeader>
@@ -281,7 +285,10 @@ export default function ImageCompressor() {
                                                 <div className="size-10 md:size-12 rounded-lg overflow-hidden bg-muted border shrink-0 relative"><Image src={res.originalDataUrl} alt="prev" fill className="object-cover" /></div>
                                                 <div className="truncate text-left">
                                                     <p className="text-[10px] md:text-xs font-black truncate max-w-[120px] md:max-w-[250px] uppercase">{res.name}</p>
-                                                    <div className="flex items-center gap-2 mt-0.5"><span className="text-[7px] md:text-[8px] opacity-40 font-mono">{formatBytes(res.originalSize)}</span>{res.newSize > 0 && <><span className="text-muted-foreground text-[8px]">→</span><span className="text-[7px] md:text-[8px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span></>}</div>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[7px] md:text-[8px] opacity-40 font-mono">{formatBytes(res.originalSize)}</span>
+                                                        {res.newSize > 0 && <><span className="text-muted-foreground text-[8px]">→</span><span className="text-[7px] md:text-[8px] font-black text-green-600 font-mono">{formatBytes(res.newSize)}</span></>}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
@@ -289,15 +296,25 @@ export default function ImageCompressor() {
                                                   <Loader2 className="size-4 animate-spin text-primary" />
                                                 ) : (
                                                   <div className="flex items-center gap-1.5">
-                                                      {res.newSize > 0 && <Badge className="bg-green-500 text-white text-[7px] font-black">-{res.savings.toFixed(0)}%</Badge>}
+                                                      {res.newSize > 0 && <Badge className="bg-green-500 text-white text-[7px] font-black hidden sm:flex">-{res.savings.toFixed(0)}%</Badge>}
                                                       
-                                                      <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); setViewItem(res); }}>
-                                                          <Eye className="size-4" />
+                                                      <Button 
+                                                        size="icon" 
+                                                        variant="outline" 
+                                                        className="size-8 md:size-9 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
+                                                        onClick={(e) => { e.stopPropagation(); setViewItem(res); }}
+                                                      >
+                                                          <Eye className="size-4 md:size-5" />
                                                       </Button>
 
                                                       {res.newSize > 0 && (
-                                                          <Button size="icon" variant="outline" className="size-8 rounded-lg border-2 border-green-500/30 text-green-600 dark:text-green-400 hover:bg-green-600 hover:text-white transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); downloadFile(res); }}>
-                                                              <Download className="size-4" />
+                                                          <Button 
+                                                            size="icon" 
+                                                            variant="outline" 
+                                                            className="size-8 md:size-9 rounded-xl border-2 border-green-600 text-green-600 dark:text-green-400 hover:bg-green-600 hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
+                                                            onClick={(e) => { e.stopPropagation(); downloadFile(res); }}
+                                                          >
+                                                              <Download className="size-4 md:size-5" />
                                                           </Button>
                                                       )}
                                                   </div>
@@ -306,7 +323,13 @@ export default function ImageCompressor() {
                                             </div>
                                         </div>
                                     ))}
-                                    <Button variant="outline" className="w-full border-2 border-dashed h-12 rounded-xl mt-4 font-black text-[10px] uppercase text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}><Plus className="size-4 mr-2" /> ADD MORE IMAGES</Button>
+                                    <Button 
+                                        variant="outline" 
+                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
+                                        onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                    >
+                                        <Plus className="size-4 mr-2" /> ADD MORE IMAGES
+                                    </Button>
                                 </div>
                             </ScrollArea>
                         </div>
@@ -324,7 +347,10 @@ export default function ImageCompressor() {
                     <CardContent className="p-5 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                         <div className="flex items-center gap-4">
                             <div className="size-12 md:size-16 rounded-2xl bg-green-500 text-white flex items-center justify-center shadow-xl shrink-0"><CheckCircle2 className="size-8 md:size-10" /></div>
-                            <div><p className="text-xl md:text-2xl font-black text-green-900 uppercase tracking-tighter">Ready!</p><p className="text-[9px] md:text-xs text-green-700 font-bold uppercase">Bundle available for download</p></div>
+                            <div className="text-left">
+                                <p className="text-xl md:text-2xl font-black text-green-900 uppercase tracking-tighter">Ready!</p>
+                                <p className="text-[9px] md:text-xs text-green-700 font-bold uppercase">Bundle available for download</p>
+                            </div>
                         </div>
                         <Button className="magic-button magic-button-success w-full md:w-auto h-12 md:h-14 px-8 bg-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-3 border-none shadow-2xl text-white" onClick={downloadAllAsZip}>
                             <StarIcons /><Download className="size-5" /><span className="uppercase tracking-tighter text-xs font-black">SAVE ALL ZIP</span>
@@ -432,7 +458,7 @@ export default function ImageCompressor() {
                                   alt="optimized" 
                               />
                               {viewItem && viewItem.newSize > 0 && (
-                                  <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-2 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
+                                  <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
                               )}
                           </div>
                       </div>
