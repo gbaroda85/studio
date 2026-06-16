@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -135,7 +134,6 @@ function SortablePage({
         opacity: isDragging ? 0.3 : 1,
     };
 
-    // Helper for buttons to stop DnD jitter
     const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
         e.stopPropagation();
     };
@@ -151,17 +149,14 @@ function SortablePage({
                 isRestored && "ring-4 ring-green-500 animate-pulse"
             )}
         >
-            {/* Page Number Badge */}
             <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
             
-            {/* Drag Handle Area */}
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center">
                 <Grip className="size-10 md:size-12 text-primary opacity-0 group-hover:opacity-20 transition-opacity" />
             </div>
 
-            {/* Thumbnail */}
             {page.type === 'blank' ? (
                 <div className="size-full flex flex-col items-center justify-center bg-white dark:bg-slate-900 text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
@@ -173,7 +168,6 @@ function SortablePage({
                 </div>
             )}
 
-            {/* Action Bar - Symmetric and Always Visible */}
             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 md:gap-1.5 z-40 px-2">
                 <button 
                     type="button"
@@ -232,7 +226,6 @@ export default function PdfOrganizer() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
-    // Optimized Sensors for both Desktop and Mobile
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { 
@@ -465,7 +458,6 @@ export default function PdfOrganizer() {
         <div className="w-full max-w-7xl px-2 md:px-4 flex flex-col gap-6 pb-20">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto">
                 
-                {/* Workspace Grid */}
                 <div className="lg:col-span-8 h-full flex flex-col min-h-[450px]">
                     {!pdfFile ? (
                         <Card className={cn(
@@ -561,7 +553,6 @@ export default function PdfOrganizer() {
                     )}
                 </div>
 
-                {/* Studio Controls */}
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
@@ -580,7 +571,7 @@ export default function PdfOrganizer() {
                                     <button onClick={() => sortPages('desc')} className="btn-pos-uiverse h-14" data-label="SORT N → 1" />
                                     <button onClick={() => addBlankPage()} className="btn-pos-uiverse h-14" data-label="ADD BLANK PAGE" />
                                     <button onClick={() => rotateAll(90)} className="btn-pos-uiverse h-14" data-label="ROTATE ALL 90°" />
-                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ROTATIONS" />
+                                    <button onClick={() => rotateAll(0)} className="btn-pos-uiverse h-14" data-label="RESET ALL" />
                                     <div className="relative">
                                         <button onClick={() => setIsRestoreOpen(true)} className="btn-pos-uiverse h-14 w-full" data-label="RESTORE BIN" />
                                         {deletedPages.length > 0 && (
@@ -611,7 +602,6 @@ export default function PdfOrganizer() {
                 </div>
             </div>
 
-            {/* Trash Recovery Dialog */}
             <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
                 <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col z-[1000] top-[50%]">
                     <DialogHeader className="p-8 border-b bg-primary/5">
@@ -641,19 +631,17 @@ export default function PdfOrganizer() {
                 </DialogContent>
             </Dialog>
 
-            {/* Zoom Preview Dialog */}
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
-                <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] z-[2000]">
+                <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[54%] z-[2000]">
                     <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
-                    <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
-                        {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
-                            <div className="relative shadow-3xl border-[8px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc || undefined} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" /></div>
+                    <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar text-center">
+                        {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[600px] shadow-2xl flex flex-col items-center justify-center border-[12px] border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
+                            <div className="relative shadow-3xl border-[12px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden w-full max-w-[700px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc || undefined} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)`, transition: 'transform 0.3s ease' }} alt="zoom" /></div>
                         }
                     </div>
-                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0"><Button variant="ghost" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-11 border-2 rounded-xl"><X className="mr-2 size-4" /> Close Studio View</Button></DialogFooter>
+                    <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0"><Button variant="outline" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-12 border-2 rounded-xl"><X className="mr-2 size-4" /> Close Studio View</Button></DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
     );
 }
-
