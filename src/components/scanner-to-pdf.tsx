@@ -109,8 +109,8 @@ export default function ScannerToPdf() {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 1600;
+        const MAX_WIDTH = 1000; 
+        const MAX_HEIGHT = 1400; 
         let width = img.width;
         let height = img.height;
 
@@ -127,9 +127,12 @@ export default function ScannerToPdf() {
         }
         canvas.width = width;
         canvas.height = height;
-        ctx?.drawImage(img, 0, 0, width, height);
-        // Return 80% quality JPEG to keep size low
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
+        if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+        }
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
       };
     });
   };
@@ -159,7 +162,6 @@ export default function ScannerToPdf() {
             reader.readAsDataURL(file);
         });
 
-        // Smart Resize and Compress immediately
         const compressedSrc = await resizeAndCompress(dataUrl);
         const id = Math.random().toString(36).substr(2, 9);
         newPages.push({
@@ -177,11 +179,11 @@ export default function ScannerToPdf() {
     });
 
     setIsProcessing(false);
-    toast({ title: "Images Optimized", description: `Successfully processed ${newFilesArray.length} photos.` });
+    toast({ title: "Images Optimized", description: `Processed ${newFilesArray.length} photos.` });
     e.target.value = "";
   };
 
-  const handleRemovePage = (id: string) => {
+  const handleRemovePage = useCallback((id: string) => {
     setPages(prev => {
         const filtered = prev.filter(p => p.id !== id);
         if (selectedId === id) {
@@ -191,9 +193,9 @@ export default function ScannerToPdf() {
     });
     setPreviewImages([]); 
     toast({ title: "Page Removed" });
-  };
+  }, [selectedId, toast]);
 
-  const handleRotate = (id: string) => {
+  const handleRotate = useCallback((id: string) => {
     const item = pages.find(p => p.id === id);
     if (!item) return;
 
@@ -213,17 +215,18 @@ export default function ScannerToPdf() {
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         
-        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.85);
+        const rotatedSrc = canvas.toDataURL('image/jpeg', 0.75);
         setPages(prev => prev.map(p => p.id === id ? { ...p, src: rotatedSrc } : p));
         setPreviewImages([]);
         setIsProcessing(false);
+        toast({ title: "Rotated" });
     };
     img.onerror = () => {
         setIsProcessing(false);
         toast({ variant: 'destructive', title: "Rotate Error" });
     };
     img.src = item.src;
-  };
+  }, [pages, toast]);
 
   const updateAlignment = (vAlign: VAlign) => {
       if (!selectedId) return;
@@ -236,7 +239,7 @@ export default function ScannerToPdf() {
       if (!selected) return;
       setPages(prev => prev.map(p => ({ ...p, vAlign: selected.vAlign })));
       setPreviewImages([]);
-      toast({ title: "Applied to All", description: `Alignment synchronized.` });
+      toast({ title: "Applied to All" });
   };
 
   const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
@@ -297,7 +300,7 @@ export default function ScannerToPdf() {
                   canvas.height = vp.height; canvas.width = vp.width;
                   ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                   await pg.render({ canvasContext: ctx, viewport: vp }).promise;
-                  imgs.push(canvas.toDataURL('image/jpeg', 0.85));
+                  imgs.push(canvas.toDataURL('image/jpeg', 0.8));
               }
           }
           setPreviewImages(imgs);
@@ -399,7 +402,7 @@ export default function ScannerToPdf() {
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
                                 <FileStack className="size-6" /> BUNDLE STUDIO
                             </CardTitle>
-                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">High-fidelity local RAM processing.</CardDescription>
+                            <CardDescription className="text-[10px] font-bold uppercase opacity-60">100% Private local RAM processing.</CardDescription>
                          </div>
                          <div className="flex gap-2">
                              {pages.length > 0 && (
@@ -448,7 +451,7 @@ export default function ScannerToPdf() {
                         ) : (
                             <div className="space-y-6">
                                 <ScrollArea className="h-[450px] pr-2 custom-scrollbar">
-                                    <div className="grid grid-cols-2 gap-4 p-1">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-1">
                                         {pages.map((p, i) => (
                                             <div 
                                                 key={p.id} 
@@ -459,12 +462,11 @@ export default function ScannerToPdf() {
                                                 )}
                                             >
                                                 <div className={cn(
-                                                    "absolute inset-0 flex flex-col w-full h-full p-1 transition-all duration-300",
-                                                    p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                    "absolute inset-0 flex flex-col w-full h-full p-2 transition-all duration-300 justify-center"
                                                 )}>
-                                                    <img src={p.src} className="max-w-full max-h-[90%] object-contain mx-auto block" alt="thumb" />
+                                                    <img src={p.src} className="max-w-full max-h-[80%] object-contain mx-auto block" alt="thumb" />
                                                 </div>
-                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
+                                                <div className="absolute top-2 left-2 size-6 md:size-7 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-[9px] font-black text-white z-20 border border-white/10">P{i + 1}</div>
                                                 
                                                 <div className="absolute bottom-2 right-2 z-20 flex gap-1 animate-in fade-in duration-300">
                                                     <Button type="button" size="icon" variant="secondary" className="h-7 w-7 rounded-lg shadow-lg bg-white/95 hover:bg-primary hover:text-white text-primary border-2 border-primary/20 transition-all" onClick={(e) => { e.stopPropagation(); handleRotate(p.id); }}>
