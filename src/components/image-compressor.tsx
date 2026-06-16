@@ -63,7 +63,7 @@ type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CompressionMode = 'manual' | 'target';
 type TargetUnit = 'kb' | 'mb';
 
-const QUICK_SIZES = ["20", "50", "100", "500"];
+const QUICK_SIZES = ["100", "200", "500", "1024"];
 
 const StarIcons = () => (
     <>
@@ -125,7 +125,7 @@ export default function ImageCompressor() {
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files?.[0] || null); };
 
   const compressSingleFile = async (item: CompressionResult): Promise<CompressionResult> => {
     return new Promise((resolve) => {
@@ -300,8 +300,8 @@ export default function ImageCompressor() {
                                                       
                                                       <Button 
                                                         size="icon" 
-                                                        variant="outline" 
-                                                        className="size-8 md:size-9 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
+                                                        variant="ghost" 
+                                                        className="size-8 md:size-9 rounded-xl border-2 border-primary text-slate-900 dark:text-primary hover:bg-primary hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
                                                         onClick={(e) => { e.stopPropagation(); setViewItem(res); }}
                                                       >
                                                           <Eye className="size-4 md:size-5" />
@@ -310,8 +310,8 @@ export default function ImageCompressor() {
                                                       {res.newSize > 0 && (
                                                           <Button 
                                                             size="icon" 
-                                                            variant="outline" 
-                                                            className="size-8 md:size-9 rounded-xl border-2 border-green-600 text-green-600 dark:text-green-400 hover:bg-green-600 hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
+                                                            variant="ghost" 
+                                                            className="size-8 md:size-9 rounded-xl border-2 border-green-600 text-green-700 dark:text-green-400 hover:bg-green-600 hover:text-white transition-all shadow-md bg-white dark:bg-slate-800" 
                                                             onClick={(e) => { e.stopPropagation(); downloadFile(res); }}
                                                           >
                                                               <Download className="size-4 md:size-5" />
@@ -324,8 +324,8 @@ export default function ImageCompressor() {
                                         </div>
                                     ))}
                                     <Button 
-                                        variant="outline" 
-                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
+                                        variant="ghost" 
+                                        className="w-full border-2 border-dashed h-12 rounded-2xl mt-4 font-black text-[10px] uppercase text-slate-800 dark:text-primary border-primary/40 hover:bg-primary/10 hover:border-primary transition-all shadow-sm flex items-center justify-center bg-white dark:bg-slate-900" 
                                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                     >
                                         <Plus className="size-4 mr-2" /> ADD MORE IMAGES
