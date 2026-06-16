@@ -66,7 +66,6 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import confetti from 'canvas-confetti';
 
@@ -141,20 +140,23 @@ function SortablePage({
             ref={setNodeRef} 
             style={style} 
             className={cn(
-                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all transform-gpu will-change-transform",
+                "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all transform-gpu will-change-transform touch-none",
                 "hover:border-primary/40 border-transparent shadow-primary/5",
                 isDragging && "scale-95 shadow-2xl",
                 isRestored && "ring-4 ring-green-500 animate-pulse"
             )}
         >
-            <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
+            {/* Page Number Badge */}
+            <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
             
+            {/* Drag Handle Area */}
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center">
                 <Grip className="size-10 md:size-12 text-primary opacity-0 group-hover:opacity-20 transition-opacity" />
             </div>
 
+            {/* Thumbnail */}
             {page.type === 'blank' ? (
                 <div className="size-full flex flex-col items-center justify-center bg-white dark:bg-slate-900 text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
@@ -166,7 +168,8 @@ function SortablePage({
                 </div>
             )}
 
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 md:gap-1.5 transition-all z-40 md:opacity-0 md:group-hover:opacity-100 px-2">
+            {/* Action Bar - ALWAYS VISIBLE PER USER REQUEST */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 md:gap-1.5 z-40 px-2">
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
@@ -220,12 +223,13 @@ export default function PdfOrganizer() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
+    // Optimized Sensors for both Desktop and Mobile
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { 
             activationConstraint: { 
-                delay: 250, 
-                tolerance: 5 
+                delay: 200, 
+                tolerance: 8 
             } 
         }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -320,9 +324,8 @@ export default function PdfOrganizer() {
         setDeletedPages(prev => prev.filter(p => p.id !== id));
         setPages(prev => {
             const next = [...prev, { ...pageToRestore, isDeleted: false }];
-            // Sort by original index so it returns to its relative original place
             return next.sort((a, b) => {
-                if (a.index === -1) return 1; // Blanks go after
+                if (a.index === -1) return 1; 
                 if (b.index === -1) return -1;
                 return a.index - b.index;
             });
@@ -332,7 +335,7 @@ export default function PdfOrganizer() {
         setTimeout(() => setRestoredId(null), 2000);
         
         setResultPdfUrl(null);
-        toast({ title: "Page Restored to original position" });
+        toast({ title: "Restored to position" });
     };
 
     const restoreAll = () => {
@@ -450,12 +453,14 @@ export default function PdfOrganizer() {
     const activePage = pages.find(p => p.id === activeId);
 
     return (
-        <div className="w-full max-w-7xl px-2 md:px-4 flex flex-col gap-6 pb-20 overflow-visible">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto lg:h-[calc(100vh-280px)] overflow-visible">
+        <div className="w-full max-w-7xl px-2 md:px-4 flex flex-col gap-6 pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-auto">
+                
+                {/* Workspace Grid */}
                 <div className="lg:col-span-8 h-full flex flex-col min-h-[450px]">
                     {!pdfFile ? (
                         <Card className={cn(
-                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer h-full flex flex-col",
+                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer h-[500px] flex flex-col",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
@@ -483,7 +488,7 @@ export default function PdfOrganizer() {
                             <CardHeader className="bg-muted/30 border-b py-3 px-4 md:px-6 flex flex-row items-center justify-between shrink-0">
                                 <div className="flex items-center gap-2">
                                     <LayoutGrid className="h-4 w-4 text-primary" />
-                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Visual Document Map</CardTitle>
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Document Map</CardTitle>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] md:text-[9px] px-3 py-1 rounded-full border-none">
@@ -493,7 +498,7 @@ export default function PdfOrganizer() {
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative border-b">
-                                <ScrollArea className="h-full w-full">
+                                <ScrollArea className="h-[600px] md:h-[800px] w-full">
                                     {isRendering && pages.length === 0 ? (
                                         <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
                                             <div className="relative">
@@ -519,12 +524,6 @@ export default function PdfOrganizer() {
                                                             isRestored={restoredId === p.id}
                                                         />
                                                     ))}
-                                                    {isRendering && (
-                                                        <div className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-2xl flex flex-col items-center justify-center gap-3 bg-white/50 animate-pulse">
-                                                            <Loader2 className="h-6 w-6 animate-spin text-primary opacity-20" />
-                                                            <span className="text-[7px] font-black uppercase opacity-40">Loading...</span>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </SortableContext>
                                             <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
@@ -553,6 +552,7 @@ export default function PdfOrganizer() {
                     )}
                 </div>
 
+                {/* Studio Controls */}
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
@@ -561,7 +561,7 @@ export default function PdfOrganizer() {
                         <CardContent className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                             <div className="p-5 bg-primary/5 rounded-3xl border-2 border-primary/10 flex gap-4 shadow-inner">
                                 <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><Zap className="size-5 text-yellow-500 animate-pulse" /></div>
-                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">Changes are applied as PDF metadata. Quality is preserved.</p>
+                                <p className="text-[10px] text-primary/80 font-bold leading-relaxed uppercase text-left">Quality is preserved as PDF metadata. Safe for submission.</p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t-2 border-dashed border-white/10 text-left">
@@ -602,6 +602,7 @@ export default function PdfOrganizer() {
                 </div>
             </div>
 
+            {/* Trash Recovery Dialog */}
             <Dialog open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
                 <DialogContent className="max-w-4xl max-h-[85vh] p-0 rounded-[3rem] overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col z-[1000] top-[50%]">
                     <DialogHeader className="p-8 border-b bg-primary/5">
@@ -624,10 +625,14 @@ export default function PdfOrganizer() {
                             </div>
                         }
                     </ScrollArea>
-                    <DialogFooter className="p-8 border-t bg-muted/10 gap-4"><Button variant="ghost" onClick={() => setIsRestoreOpen(false)} className="font-black uppercase text-[10px] tracking-widest px-8">CLOSE BIN</Button><Button disabled={deletedPages.length === 0} onClick={restoreAll} className="bg-primary text-white font-black text-xs uppercase px-10 h-12 rounded-xl shadow-xl">RESTORE ALL</Button></DialogFooter>
+                    <DialogFooter className="p-8 border-t bg-muted/10 gap-4">
+                        <Button variant="ghost" onClick={() => setIsRestoreOpen(false)} className="font-black uppercase text-[10px] tracking-widest px-8">CLOSE BIN</Button>
+                        <Button disabled={deletedPages.length === 0} onClick={restoreAll} className="bg-primary text-white font-black text-xs uppercase px-10 h-12 rounded-xl shadow-xl">RESTORE ALL</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
+            {/* Zoom Preview Dialog */}
             <Dialog open={!!zoomPage} onOpenChange={(open) => !open && setZoomPage(null)}>
                 <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] z-[2000]">
                     <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
