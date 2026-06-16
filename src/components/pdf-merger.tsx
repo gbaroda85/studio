@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
-import { PDFDocument, PDFName, degrees } from 'pdf-lib';
+import { PDFDocument, PDFName } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -170,8 +170,8 @@ export default function PdfMerger() {
             setTotalPagesPreview(totalPages);
             
             const imgs: string[] = [];
-            // Optimize: Limit preview to first 12 pages to prevent memory hang
-            const pagesToRender = Math.min(totalPages, 12); 
+            // USER WANTS ALL PAGES: Show the complete document
+            const pagesToRender = totalPages; 
 
             for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
@@ -445,14 +445,9 @@ export default function PdfMerger() {
                                         {previewImages.map((img, i) => (
                                             <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white w-full max-w-[550px] animate-in slide-in-from-bottom-4 duration-500">
                                                 <img src={img} alt={`Page ${i+1}`} className="w-full h-auto block" />
-                                                <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Sample Page {i+1}</div>
+                                                <div className="bg-muted text-[8px] font-black py-2 text-center uppercase text-muted-foreground border-t">A4 Optimized Page {i+1} of {totalPagesPreview}</div>
                                             </div>
                                         ))}
-                                        {totalPagesPreview > 12 && (
-                                            <div className="p-4 bg-muted/30 rounded-xl text-center">
-                                                <p className="text-[10px] font-black uppercase text-muted-foreground">Showing first 12 pages of {totalPagesPreview}</p>
-                                            </div>
-                                        )}
                                     </div>
                                 )}
                             </div>
