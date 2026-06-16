@@ -113,7 +113,6 @@
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform;
-  /* contain: layout style; - removed paint as it can cause issues with dropdowns */
 }
 
 /* Prevent blinking on state changes */

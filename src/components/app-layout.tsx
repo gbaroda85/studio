@@ -521,7 +521,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)]">
          {/* Optimized Background is handled via globals.css body::before for 0 repaint cost */}
-         <div className="w-full flex-1 flex flex-col items-center p-0 m-0">
+         <div className="w-full flex-1 flex flex-col items-center px-4 md:px-8 p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
               {children}
             </div>

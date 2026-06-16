@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -302,7 +301,7 @@ export default function PdfUnlocker() {
                             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-8 md:p-12">
+                            <CardContent className="p-5 md:p-12">
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                                     <div className="relative">
                                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -346,7 +345,7 @@ export default function PdfUnlocker() {
                                 </div>
                             </CardHeader>
 
-                            <CardContent className="p-6 md:p-8 space-y-6">
+                            <CardContent className="p-5 md:p-8 space-y-6">
                                 {isChecking ? (
                                     <div className="py-12 flex flex-col items-center justify-center gap-4">
                                         <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
@@ -411,7 +410,7 @@ export default function PdfUnlocker() {
                                         )}
                                     </div>
                                 ) : unlockedPdfUrl ? (
-                                    <div className="p-10 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2.5rem] flex flex-col items-center gap-6 text-center animate-in zoom-in-95">
+                                    <div className="p-5 md:p-10 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2.5rem] flex flex-col items-center gap-6 text-center animate-in zoom-in-95">
                                         <div className="size-20 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                             <CheckCircle2 className="size-10" />
                                             <div className="absolute -top-2 -right-2"><Sparkles className="text-yellow-400 size-6" /></div>
@@ -424,7 +423,7 @@ export default function PdfUnlocker() {
                                 ) : null}
                             </CardContent>
 
-                            <CardFooter className="flex flex-col gap-3 p-6 bg-muted/10 border-t">
+                            <CardFooter className="flex flex-col gap-3 p-5 md:p-6 bg-muted/10 border-t">
                                 {!unlockedPdfUrl ? (
                                     <Button 
                                         onClick={handleUnlockProcess} 
@@ -440,10 +439,11 @@ export default function PdfUnlocker() {
                                         )}
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-green-700 text-white rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
+                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-green-700 text-white rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl" 
+                                            style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
                                         <StarIcons />
-                                        <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                        <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
+                                        <Download className="mr-2 md:mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
+                                        <span className="uppercase tracking-tighter text-sm md:text-lg">SAVE UNLOCKED PDF</span>
                                     </Button>
                                 )}
                                 <div className="flex items-center justify-between w-full mt-2">

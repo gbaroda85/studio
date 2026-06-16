@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -175,7 +174,7 @@ export default function PdfLocker() {
             <CardHeader className="bg-muted/30 border-b p-6 text-center">
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
-            <CardContent className="p-8 md:p-12">
+            <CardContent className="p-5 md:p-12">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -214,14 +213,16 @@ export default function PdfLocker() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
         <div className="lg:col-span-7">
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
-                <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
-                    <div className="flex items-center gap-3 truncate pr-4 text-left">
-                        <FileText className="size-4 text-primary shrink-0" />
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
+                <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 truncate pr-4 text-left">
+                            <FileText className="size-4 text-primary shrink-0" />
+                            <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
+                        </div>
+                        <Badge className="font-mono text-[9px]">{formatBytes(pdfFile.size)}</Badge>
                     </div>
-                    <Badge className="font-mono text-[9px]">{formatBytes(pdfFile.size)}</Badge>
                 </CardHeader>
-                <CardContent className="p-6 md:p-12 flex-1 flex flex-col items-center justify-center min-h-[450px] bg-slate-50 dark:bg-slate-900/50 shadow-inner">
+                <CardContent className="p-5 md:p-12 flex-1 flex flex-col items-center justify-center min-h-[450px] bg-slate-50 dark:bg-slate-900/50 shadow-inner">
                     {protectedBlob ? (
                         <div className="text-center space-y-6 md:space-y-8 animate-in zoom-in-95 duration-500 w-full">
                              <div className="size-20 md:size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-green-500/40 relative">
@@ -255,7 +256,7 @@ export default function PdfLocker() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                         <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto h-12 md:h-14 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
                             <RefreshCcw className="mr-2 size-4" /> Change File
@@ -266,6 +267,7 @@ export default function PdfLocker() {
                                 size="lg" 
                                 className="magic-button magic-button-success w-full sm:w-auto h-12 md:h-14 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-xl transition-all active:scale-95 group flex items-center justify-center gap-3" 
                                 onClick={handleDownload}
+                                style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
                             >
                                 <StarIcons />
                                 <Download className="mr-1.5 size-5 group-hover:translate-y-1 transition-transform" /> 
@@ -284,7 +286,7 @@ export default function PdfLocker() {
                         <Settings2 className="size-4 md:size-5 text-primary" /> Security Config
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-6 md:space-y-8">
+                <CardContent className="p-5 md:p-8 space-y-6 md:space-y-8">
                     <div className="space-y-6">
                         <div className="space-y-3 text-left">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Set Password</Label>
@@ -341,7 +343,7 @@ export default function PdfLocker() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
                     <Button 
-                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10"
+                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
                         onClick={handleProtect}
                         disabled={!password || !confirmPassword || isProcessing || !!protectedBlob}
                     >
@@ -349,12 +351,12 @@ export default function PdfLocker() {
                         {isProcessing ? (
                             <div className="flex items-center gap-3">
                                 <Loader2 className="size-6 md:size-7 animate-spin" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">ENCRYPTING...</span>
+                                <span className="uppercase text-xs md:text-sm tracking-tighter">ENCRYPTING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-3">
                                 <Lock className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">{protectedBlob ? "SEALED" : "LOCK DOCUMENT"}</span>
+                                <span className="uppercase tracking-tighter text-sm md:text-2xl">{protectedBlob ? "SEALED" : "LOCK DOCUMENT"}</span>
                             </div>
                         )}
                     </Button>
