@@ -144,7 +144,7 @@ export default function ImageCompressor() {
                 ctx.clearRect(0, 0, tw, th);
                 if (outputFormat === 'jpeg') {
                     ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, tw, th);
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
                 ctx.drawImage(img, 0, 0, tw, th);
                 return canvas.toDataURL(mimeType, q);
@@ -179,7 +179,7 @@ export default function ImageCompressor() {
                     }
                     if (stepBestUrl) {
                         bestUrl = stepBestUrl;
-                        bestSize = stepBestSize;
+                        bestSize = bestSize;
                         break; 
                     }
                 }
@@ -266,8 +266,8 @@ export default function ImageCompressor() {
                                 <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">Processing Queue</p>
                                 <Button variant="ghost" size="sm" onClick={() => setResults([])} className="h-7 text-rose-500 font-black text-[9px] uppercase"><Trash2 className="size-3 mr-1"/> Clear</Button>
                             </div>
-                            <ScrollArea className="flex-1 h-[300px] md:h-[450px] pr-2 custom-scrollbar">
-                                <div className="grid gap-2">
+                            <ScrollArea className="flex-1 h-[300px] md:h-[450px] pr-2 custom-scrollbar border rounded-2xl bg-muted/5">
+                                <div className="grid gap-2 p-3">
                                     {results.map((res) => (
                                         <div key={res.id} className="flex items-center justify-between p-2 md:p-3 rounded-xl md:rounded-2xl border-2 border-transparent bg-white dark:bg-slate-900 shadow-sm animate-in slide-in-from-bottom-2">
                                             <div className="flex items-center gap-3 truncate">
@@ -329,11 +329,19 @@ export default function ImageCompressor() {
                                 <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2"><Zap className="size-3 text-yellow-500" /> Presets</Label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {QUICK_SIZES.map((size) => (
-                                        <button key={size} onClick={() => { setTargetSizeValue(size); setTargetUnit('kb'); }} className={cn("btn-pos-uiverse h-10 transition-all", targetSizeValue === size && targetUnit === 'kb' && "active-uiverse")} data-label={`${size}K`} />
+                                        <button 
+                                            key={size} 
+                                            onClick={() => { setTargetSizeValue(size); setTargetUnit('kb'); }} 
+                                            className={cn(
+                                                "btn-pos-uiverse h-10 transition-all !ring-[3px] !ring-slate-950 dark:!ring-white", 
+                                                targetSizeValue === size && targetUnit === 'kb' && "active-uiverse"
+                                            )} 
+                                            data-label={`${size}K`} 
+                                        />
                                     ))}
                                 </div>
                             </div>
-                            <div className="space-y-3 pt-4 border-t border-dashed">
+                            <div className="space-y-3 pt-4 border-t border-dashed text-left">
                                 <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground">Custom Size Limit</Label>
                                 <div className="flex gap-2">
                                     <Input type="number" value={targetSizeValue} onChange={(e) => setTargetSizeValue(e.target.value)} className="h-12 text-lg font-black border-2 rounded-xl flex-1 bg-background shadow-inner" />
