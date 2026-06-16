@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -49,36 +50,13 @@ if (typeof window !== 'undefined') {
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -128,6 +106,7 @@ export default function PdfUnlocker() {
     const checkEncryption = async (arrayBuffer: ArrayBuffer) => {
         setIsChecking(true);
         try {
+            // Using PDF.js for more accurate password detection
             const bufferCopy = arrayBuffer.slice(0);
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(bufferCopy),
@@ -142,7 +121,7 @@ export default function PdfUnlocker() {
                 setIsProtected(true);
             } else {
                 setIsProtected(null);
-                toast({ variant: 'destructive', title: 'Check Error', description: 'Could not verify document security.' });
+                console.error("PDF Check failed:", error);
             }
         } finally {
             setIsChecking(false);
@@ -171,7 +150,7 @@ export default function PdfUnlocker() {
         if (sharedFile) {
             handleFileChange(sharedFile);
             setSharedFile(null);
-            toast({ title: "File Received", description: "Document imported from Optimizer." });
+            toast({ title: "File Received", description: "Document imported for unlocking." });
         }
     }, [sharedFile, handleFileChange, setSharedFile, toast]);
 
@@ -198,8 +177,9 @@ export default function PdfUnlocker() {
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Analyzing Security...");
+        setStatusText("Opening Secure Vault...");
         setProgress(5);
+
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
             const loadingTask = pdfjs.getDocument({ 
@@ -209,16 +189,17 @@ export default function PdfUnlocker() {
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
+            
             const pdf = await loadingTask.promise;
             const totalPages = pdf.numPages;
-            
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Decoding Page ${i}/${totalPages}...`);
+                setStatusText(`Decrypting Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                const renderScale = 2.0; 
+                // HIGH QUALITY RENDER: 2.5x scale ensures small text (signatures, Aadhaar details) are razor sharp
+                const renderScale = 2.5; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
                 const canvas = document.createElement('canvas');
@@ -228,9 +209,10 @@ export default function PdfUnlocker() {
                     canvas.width = Math.floor(renderViewport.width);
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    await page.render({ canvasContext: ctx, viewport: renderViewport, intent: 'print' }).promise;
                     
-                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                    await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
                     const imgBuffer = await fetch(imgData).then(r => r.arrayBuffer());
                     const embeddedImg = await finalPdfDoc.embedJpg(imgBuffer);
                     
@@ -245,38 +227,31 @@ export default function PdfUnlocker() {
                         height: pHeight
                     });
                 }
-                setProgress(10 + Math.round((i / totalPages) * 85));
+                setProgress(10 + Math.round((i / totalPages) * 90));
             }
 
+            // SET VIEWER PREFERENCES: Fixes the "opening at 500% zoom" issue common in protected PDFs
             const catalog = finalPdfDoc.catalog;
-            
             catalog.set(PDFName.of('ViewerPreferences'), finalPdfDoc.context.obj({
                 FitWindow: true,
                 CenterWindow: true,
                 DisplayDocTitle: true
             }));
 
-            const pdfPages = finalPdfDoc.getPages();
-            if (pdfPages.length > 0) {
-                const firstPage = pdfPages[0];
-                const dest = finalPdfDoc.context.obj([firstPage.ref, PDFName.of('Fit')]);
-                catalog.set(PDFName.of('OpenAction'), dest);
-            }
-
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(pdfBlob);
             setUnlockedPdfUrl(url);
             setProgress(100);
-            setStatusText("Unlocked Successfully!");
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#48a9a4', '#fce7eb', '#ffffff'] });
-            toast({ title: 'Success!', description: 'File unlocked and zoom-optimized.' });
+            setStatusText("Success!");
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
+            toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
         } catch (error: any) {
-            console.error(error);
+            console.error("Unlock Error:", error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
-                setErrorDetails("Incorrect Password. Please double check.");
+                setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
-                setErrorDetails("Unlock failed. The document might be corrupted.");
+                setErrorDetails("Encryption mismatch. Please ensure you are using a standard PDF password.");
             }
         } finally {
             setIsUnlocking(false);
@@ -288,7 +263,7 @@ export default function PdfUnlocker() {
         const link = document.createElement('a');
         link.href = unlockedPdfUrl;
         const originalName = pdfFile.name.replace('.pdf', '');
-        link.download = `GR7-Tools-unlocked-${originalName}.pdf`;
+        link.download = `GR7-Unlocked-${originalName}.pdf`;
         link.click();
     }
 
@@ -386,7 +361,7 @@ export default function PdfUnlocker() {
                                 ) : isProtected === true && !unlockedPdfUrl ? (
                                     <div className="space-y-6">
                                         <div className="space-y-3 text-left">
-                                            <Label htmlFor="pass" className="text-[10px] font-black uppercase text-primary tracking-widest">Enter Current Password</Label>
+                                            <Label htmlFor="pass" className="text-[10px] font-black uppercase text-primary tracking-widest">Enter PDF Open Password</Label>
                                             <div className="relative group">
                                                 <input 
                                                     id="pass" type={showPassword ? "text" : "password"} value={password} 
@@ -407,7 +382,7 @@ export default function PdfUnlocker() {
                                         {isAadhaarFile && (
                                             <Alert className="bg-blue-50 border-2 border-blue-100 rounded-2xl text-left">
                                                 <Info className="size-5 text-blue-500" />
-                                                <AlertTitle className="text-[10px] font-black uppercase text-blue-700">Aadhaar Format Tip</AlertTitle>
+                                                <AlertTitle className="text-[10px] font-black uppercase text-blue-700">Aadhaar Password Help</AlertTitle>
                                                 <AlertDescription className="text-[11px] font-bold text-blue-600 leading-tight">
                                                     First 4 letters of NAME (CAPS) + Year of Birth.
                                                 </AlertDescription>
@@ -443,15 +418,10 @@ export default function PdfUnlocker() {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xl font-black text-green-800 uppercase tracking-tighter">SUCCESSFULLY UNLOCKED!</p>
-                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving with 'Fit to Screen' optimization</p>
+                                            <p className="text-[10px] text-green-600 font-bold uppercase opacity-60">Ready for saving with high-density optimization</p>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="py-12 flex flex-col items-center justify-center gap-4 opacity-40">
-                                        <SearchCode className="h-12 w-12 text-primary animate-pulse" />
-                                        <p className="text-[10px] font-black uppercase tracking-widest">Detecting Security Layers...</p>
-                                    </div>
-                                )}
+                                ) : null}
                             </CardContent>
 
                             <CardFooter className="flex flex-col gap-3 p-6 bg-muted/10 border-t">
