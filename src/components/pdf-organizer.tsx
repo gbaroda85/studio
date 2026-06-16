@@ -130,7 +130,7 @@ function SortablePage({
         transform: CSS.Translate.toString(transform),
         transition,
         zIndex: isDragging ? 999 : undefined,
-        opacity: isDragging ? 0.2 : 1,
+        opacity: isDragging ? 0.3 : 1,
     };
 
     return (
@@ -140,20 +140,17 @@ function SortablePage({
             className={cn(
                 "group relative aspect-[1/1.414] rounded-2xl overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl transition-all transform-gpu will-change-transform",
                 "hover:border-primary/40 border-transparent shadow-primary/5",
-                isDragging && "scale-95"
+                isDragging && "scale-95 shadow-2xl"
             )}
         >
-            {/* Page Index Label */}
-            <div className="absolute top-1.5 left-1.5 size-7 md:size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
+            <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
                 {page.type === 'blank' ? 'B' : page.index}
             </div>
             
-            {/* Drag Handle Area */}
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center">
                 <Grip className="size-10 md:size-12 text-primary opacity-0 group-hover:opacity-20 transition-opacity" />
             </div>
 
-            {/* Page Content */}
             {page.type === 'blank' ? (
                 <div className="size-full flex flex-col items-center justify-center bg-white dark:bg-slate-900 text-muted-foreground gap-2 p-4 pointer-events-none border">
                     <FilePlus2 className="size-8 opacity-20" />
@@ -161,33 +158,36 @@ function SortablePage({
                 </div>
             ) : (
                 <div className="size-full flex items-center justify-center p-2 transition-transform duration-300 pointer-events-none backface-hidden transform-gpu" style={{ transform: `rotate(${page.rotation}deg)` }}>
-                    <img src={page.previewSrc} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
+                    <img src={page.previewSrc || undefined} className="max-w-full max-h-full object-contain pointer-events-none" alt="p" />
                 </div>
             )}
 
-            {/* Actions Row - Optimized Alignment */}
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 transition-all z-40 md:opacity-0 md:group-hover:opacity-100 px-2">
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 md:gap-1.5 transition-all z-40 md:opacity-0 md:group-hover:opacity-100 px-2">
                 <button 
+                    type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
-                    onClick={(e) => { e.stopPropagation(); onView(page); }} 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onView(page); }} 
                 >
                     <Eye className="size-3.5" />
                 </button>
                 <button 
+                    type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
-                    onClick={(e) => { e.stopPropagation(); onInsertBlank(page.id); }} 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onInsertBlank(page.id); }} 
                 >
                     <Plus className="size-3.5" />
                 </button>
                 <button 
+                    type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
-                    onClick={(e) => { e.stopPropagation(); onRotate(page.id); }} 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRotate(page.id); }} 
                 >
                     <RotateCw className="size-3.5" />
                 </button>
                 <button 
+                    type="button"
                     className="h-8 flex-1 rounded-lg shadow-xl transition-all flex items-center justify-center bg-rose-500 text-white hover:bg-rose-600 active:scale-90" 
-                    onClick={(e) => { e.stopPropagation(); onDelete(page.id); }} 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(page.id); }} 
                 >
                     <Trash2 className="size-3.5" />
                 </button>
@@ -217,7 +217,7 @@ export default function PdfOrganizer() {
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
@@ -474,14 +474,16 @@ export default function PdfOrganizer() {
                                                     ))}
                                                 </div>
                                             </SortableContext>
-                                            <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.2' } } }) }}>
+                                            <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
                                                 {activeId && activePage ? (
                                                     <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-3xl opacity-80 scale-105 transition-transform z-[9999] pointer-events-none transform-gpu">
-                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20">{activePage.type === 'blank' ? 'B' : activePage.index}</div>
+                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.type === 'blank' ? 'B' : activePage.index}</div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
-                                                            <div className="size-full flex items-center justify-center p-3 transition-transform transform-gpu" style={{ transform: `rotate(${activePage.rotation}deg)` }}><img src={activePage.previewSrc} className="max-w-full max-h-full object-contain" alt="drag" /></div>
+                                                            <div className="size-full flex items-center justify-center p-3 transition-transform transform-gpu" style={{ transform: `rotate(${activePage.rotation}deg)` }}>
+                                                                <img src={activePage.previewSrc || undefined} className="max-w-full max-h-full object-contain" alt="drag" />
+                                                            </div>
                                                         )}
                                                     </div>
                                                 ) : null}
@@ -538,7 +540,7 @@ export default function PdfOrganizer() {
                                 ) : (
                                     <div className="space-y-3">
                                         <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 group flex items-center justify-center gap-4 px-10 animate-in zoom-in-95"><StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span></Button>
-                                        <Button variant="outline" onClick={handleReset} className="h-11 w-full border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5"><RefreshCcw className="size-3.5 mr-2" /> Start New</Button>
+                                        <Button variant="outline" onClick={handleReset} className="h-11 w-full border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3.5 mr-2" /> Start New</Button>
                                     </div>
                                 )}
                             </div>
@@ -557,9 +559,13 @@ export default function PdfOrganizer() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                 {deletedPages.map((p) => (
                                     <div key={p.id} className="relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 bg-white shadow-lg group">
-                                        <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100"><img src={p.previewSrc} className="max-w-full max-h-full object-contain" alt="trash" /></div>
-                                        <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white">{p.index === -1 ? 'B' : p.index}</div>
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg" onClick={() => restorePage(p.id)}>RESTORE</Button></div>
+                                        {p.type === 'blank' ? (
+                                            <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4 opacity-50"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
+                                        ) : (
+                                            <div className="size-full flex items-center justify-center p-2 opacity-50 grayscale transition-all group-hover:grayscale-0 group-hover:opacity-100"><img src={p.previewSrc || undefined} className="max-w-full max-h-full object-contain" alt="trash" /></div>
+                                        )}
+                                        <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white shadow-lg">{p.index === -1 ? 'B' : p.index}</div>
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg shadow-xl" onClick={() => restorePage(p.id)}>RESTORE</Button></div>
                                     </div>
                                 ))}
                             </div>
@@ -574,7 +580,7 @@ export default function PdfOrganizer() {
                     <DialogHeader className="bg-primary/5 p-4 border-b shrink-0"><DialogTitle className="text-center font-black uppercase tracking-widest text-[10px] text-muted-foreground">Page {zoomPage?.index === -1 ? 'Blank' : zoomPage?.index} Visual Preview</DialogTitle></DialogHeader>
                     <div className="flex-1 overflow-y-auto p-4 md:p-12 flex flex-col items-center bg-slate-100 dark:bg-slate-900 shadow-inner custom-scrollbar">
                         {zoomPage?.type === 'blank' ? <div className="bg-white aspect-[1/1.414] w-full max-w-[500px] shadow-2xl flex flex-col items-center justify-center border-8 border-white gap-4 mt-4"><FilePlus2 className="size-20 text-muted-foreground opacity-10" /><span className="text-muted-foreground uppercase font-black text-xl opacity-20">Blank Canvas</span></div> : 
-                            <div className="relative shadow-3xl border-[8px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" /></div>
+                            <div className="relative shadow-3xl border-[8px] border-white bg-white rounded-sm animate-in zoom-in-95 duration-500 overflow-hidden max-w-[550px] mt-4 mb-10 transform-gpu"><img src={zoomPage?.previewSrc || undefined} className="w-full h-auto block" style={{ transform: `rotate(${zoomPage?.rotation}deg)` }} alt="zoom" /></div>
                         }
                     </div>
                     <DialogFooter className="p-5 bg-muted/10 border-t flex justify-center shrink-0"><Button variant="ghost" onClick={() => setZoomPage(null)} className="font-black text-[10px] uppercase tracking-widest px-10 h-11 border-2 rounded-xl"><X className="mr-2 size-4" /> Close Studio View</Button></DialogFooter>
