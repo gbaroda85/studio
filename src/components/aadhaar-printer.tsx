@@ -655,7 +655,7 @@ export default function AadhaarPrinter() {
                 </Card>
             </div>
 
-            {/* REAL PRINT TARGET - ABSOLUTE ALIGNMENT FIX */}
+            {/* REAL PRINT TARGET */}
             <div id="printable-area" className={cn(
                 vAlign === 'top' && "print-top",
                 vAlign === 'center' && "print-center",
@@ -663,82 +663,81 @@ export default function AadhaarPrinter() {
             )}>
                 <div className="print-content-wrapper">
                     {[frontFinal, backFinal].map((src, i) => (
-                        <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm', margin: '4mm 0' }}>
+                        <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden card-wrapper-print", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm', margin: '4mm 0' }}>
                             <img src={src} className="max-w-full max-h-full object-contain" alt="print" />
                         </div>
                     ))}
                 </div>
             </div>
         </div>
-      )}
 
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4 portrait;
-            margin: 0;
-          }
-          /* 1. Reset everything and lock to 1 page */
-          html, body { 
-            background: white !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            height: 297mm !important; 
-            max-height: 297mm !important;
-            width: 210mm !important;
-            overflow: hidden !important; 
-            display: block !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          /* 2. Absolute Isolation Strategy */
-          body * {
-            visibility: hidden !important;
-          }
+        <style jsx>{`
+            @media print {
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    height: 100% !important;
+                    max-height: 100vh !important;
+                    overflow: hidden !important;
+                    box-sizing: border-box !important;
+                    background: white !important;
+                    display: block !important; /* Force block to bypass centering from globals.css */
+                }
 
-          /* 3. Main print wrapper */
-          #printable-area, #printable-area * { 
-            visibility: visible !important;
-          }
+                #printable-area {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 210mm !important;
+                    height: 297mm !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    box-sizing: border-box !important;
+                    background: white !important;
+                    z-index: 99999 !important;
+                    visibility: visible !important;
+                }
 
-          #printable-area {
-            display: flex !important;
-            flex-direction: column !important;
-            position: absolute !important; 
-            left: 0 !important; 
-            top: 0 !important; 
-            width: 210mm !important; 
-            height: 297mm !important; 
-            z-index: 9999999 !important; 
-            background: white !important;
-            box-sizing: border-box !important;
-          }
+                /* Body logic to hide everything else but keep structure */
+                body {
+                    visibility: hidden !important;
+                }
 
-          /* 4. Use classes for vertical positioning with strict units */
-          #printable-area.print-top { 
-            justify-content: flex-start !important; 
-            padding-top: 20mm !important; 
-          }
-          #printable-area.print-center { 
-            justify-content: center !important; 
-          }
-          #printable-area.print-bottom { 
-            justify-content: flex-end !important; 
-            padding-bottom: 20mm !important; 
-          }
+                .print-content-wrapper {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    box-sizing: border-box !important;
+                }
 
-          .print-content-wrapper {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-        }
-      `}</style>
+                /* State-driven alignment logic */
+                #printable-area.print-top .print-content-wrapper {
+                    justify-content: flex-start !important;
+                    padding-top: 20mm !important;
+                }
+
+                #printable-area.print-center .print-content-wrapper {
+                    justify-content: center !important;
+                }
+
+                #printable-area.print-bottom .print-content-wrapper {
+                    justify-content: flex-end !important;
+                    padding-bottom: 20mm !important;
+                }
+
+                .card-wrapper-print {
+                    margin: 4mm 0 !important;
+                    page-break-inside: avoid !important;
+                }
+
+                .no-print {
+                    display: none !important;
+                }
+            }
+        `}</style>
       <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
     </div>
   );
 }
-
