@@ -64,7 +64,8 @@ import {
     Clock,
     Hourglass,
     Timer,
-    RotateCcw
+    RotateCcw,
+    MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -191,7 +192,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
             >
                 {/* Speech Bubble Card Container */}
                 <div className={cn(
-                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-10 lg:pl-14 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
+                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
                     shouldCenter && "md:max-w-[calc(50%-1rem)] w-full",
                     "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
