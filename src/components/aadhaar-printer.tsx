@@ -31,7 +31,8 @@ import {
     Square,
     Sparkles,
     Trash2,
-    Monitor
+    Monitor,
+    AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -550,7 +551,7 @@ export default function AadhaarPrinter() {
                           {s.final ? (
                               <div className="relative group/preview w-full flex flex-col items-center gap-6 animate-in zoom-in-95">
                                   <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-full max-w-[320px] aspect-[85.6/54] transform transition-transform group-hover/preview:scale-[1.02]", showBorder && "border-2 border-black")}>
-                                      <img src={s.final} alt={s.side} className="w-full h-full object-cover" />
+                                      <img src={s.final || undefined} alt={s.side} className="w-full h-full object-cover" />
                                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                                           <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4 h-9 rounded-lg shadow-xl" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
                                           <Button size="icon" variant="destructive" className="h-9 w-9 rounded-lg shadow-xl" onClick={() => { s.setFinal(null); s.setRaw(null); }}><Trash2 className="size-4" /></Button>
@@ -606,11 +607,11 @@ export default function AadhaarPrinter() {
                   <div ref={containerRef} className="relative cursor-crosshair shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
-                            {originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="crop" className="max-h-[70vh] w-auto object-contain" /> : null}
+                            {(originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw)) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="crop" className="max-h-[70vh] w-auto object-contain" /> : null}
                         </ReactCrop>
                     ) : (
                         <div className="relative">
-                            {originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" /> : null}
+                            {(originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw)) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" /> : null}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.5]" /></svg>
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
@@ -683,14 +684,14 @@ export default function AadhaarPrinter() {
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">FRONT</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
-                                  <img src={frontFinal} alt="front" className="size-full object-contain" />
+                                  <img src={frontFinal || undefined} alt="front" className="size-full object-contain" />
                               </div>
                           </div>
 
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">BACK</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
-                                  <img src={backFinal} alt="back" className="size-full object-contain" />
+                                  <img src={backFinal || undefined} alt="back" className="size-full object-contain" />
                               </div>
                           </div>
                       </div>
@@ -714,3 +715,4 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
+
