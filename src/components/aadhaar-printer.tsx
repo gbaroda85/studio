@@ -51,7 +51,6 @@ import * as pdfjs from 'pdfjs-dist';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
-// Initialize PDF.js worker
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
@@ -392,7 +391,7 @@ export default function AadhaarPrinter() {
                     <p className="font-black uppercase text-lg">Drop Original PDF here</p>
                     <Badge variant="outline">AUTO-DECRYPT ACTIVE</Badge>
                 </div>
-                <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
             </CardContent>
         </Card>
       )}
@@ -438,7 +437,7 @@ export default function AadhaarPrinter() {
                           ) : (
                               <div className="flex flex-col items-center gap-6 text-center cursor-pointer" onClick={() => s.inputRef.current?.click()}>
                                   <div className="size-20 rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 transition-colors shadow-inner"><UploadCloud className="size-10" /></div>
-                                  <input ref={s.inputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0], s.side)} />
+                                  <input ref={s.inputRef} type="file" className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f, s.side); }} />
                               </div>
                           )}
                       </CardContent>
@@ -571,47 +570,54 @@ export default function AadhaarPrinter() {
                 </div>
             </div>
         </div>
+      )}
 
-        <style jsx>{`
-            #printable-area { display: none; }
-            @media print {
-                html, body {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    height: 100% !important;
-                    max-height: 100vh !important;
-                    overflow: hidden !important;
-                    box-sizing: border-box !important;
-                    background: white !important;
-                    display: block !important;
-                }
-                body > *:not(#printable-area) { display: none !important; }
-                #printable-area {
-                    display: flex !important;
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 210mm !important;
-                    height: 297mm !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    background: white !important;
-                    z-index: 999999 !important;
-                }
-                .print-content-wrapper {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                }
-                .print-top { justify-content: flex-start !important; padding-top: 20mm !important; }
-                .print-center { justify-content: center !important; }
-                .print-bottom { justify-content: flex-end !important; padding-bottom: 20mm !important; }
-                .card-wrapper-print { page-break-inside: avoid !important; }
+      <style dangerouslySetInnerHTML={{ __html: `
+        #printable-area { display: none; }
+        @media print {
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: 100% !important;
+                max-height: 100vh !important;
+                overflow: hidden !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                display: block !important;
             }
-        `}</style>
-      <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+            /* Hide non-print UI */
+            body > *:not(#printable-area) {
+                display: none !important;
+            }
+            #printable-area {
+                display: flex !important;
+                visibility: visible !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                z-index: 9999999 !important;
+            }
+            .print-content-wrapper {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            .print-top { justify-content: flex-start !important; padding-top: 20mm !important; }
+            .print-center { justify-content: center !important; }
+            .print-bottom { justify-content: flex-end !important; padding-bottom: 20mm !important; }
+            .card-wrapper-print { page-break-inside: avoid !important; }
+        }
+      ` }} />
+      <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
     </div>
   );
 }
