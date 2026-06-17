@@ -97,7 +97,7 @@ export default function AadhaarPrinter() {
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
 
-  // 8-Dot Scanner States (Indices: 0=TL, 1=TC, 2=TR, 3=RC, 4=BR, 5=BC, 6=BL, 7=LC)
+  // 8-Dot Scanner States
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 }, 
     { x: 85, y: 50 }, { x: 85, y: 85 },                   
@@ -243,19 +243,12 @@ export default function AadhaarPrinter() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
-        // Use ONLY the 4 corner points for matrix (TL:0, TR:2, BR:4, BL:6)
         const srcPoints = [points[0], points[2], points[4], points[6]].map(p => ({ 
             x: p.x * (image.naturalWidth / 100), 
             y: p.y * (image.naturalHeight / 100) 
         }));
-        const dstPoints = [
-          { x: 0, y: 0 }, 
-          { x: canvas.width, y: 0 }, 
-          { x: canvas.width, y: canvas.height }, 
-          { x: 0, y: canvas.height }
-        ];
+        const dstPoints = [{ x: 0, y: 0 }, { x: canvas.width, y: 0 }, { x: canvas.width, y: canvas.height }, { x: 0, y: canvas.height }];
 
-        // PERSPECTIVE CORRECTION: Destination back to Source mapping
         const h = solvePerspective(dstPoints, srcPoints);
         const imgData = ctx.createImageData(canvas.width, canvas.height);
         
@@ -319,7 +312,6 @@ export default function AadhaarPrinter() {
 
   const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
-    
     if (e.cancelable) e.preventDefault();
     const rect = containerRef.current.getBoundingClientRect();
     let cx, cy;
@@ -334,24 +326,17 @@ export default function AadhaarPrinter() {
         const next = [...prev];
         const idx = draggingPoint;
         if (idx === null || !next[idx]) return prev;
-
-        // Move target points (Corners: 0, 2, 4, 6)
-        if ([0, 2, 4, 6].includes(idx)) {
-            next[idx] = { x, y };
-        } else {
-            // Midpoint Handles Logic (1, 3, 5, 7): Move adjacent corners synchronously
+        if ([0, 2, 4, 6].includes(idx)) next[idx] = { x, y };
+        else {
             if (idx === 1) { next[0].y = y; next[2].y = y; } 
             else if (idx === 3) { next[2].x = x; next[4].x = x; } 
             else if (idx === 5) { next[6].y = y; next[4].y = y; } 
             else if (idx === 7) { next[0].x = x; next[6].x = x; } 
         }
-
-        // Recalculate midpoints to keep them centered and avoid sticking
         next[1] = { x: (next[0].x + next[2].x) / 2, y: (next[0].y + next[2].y) / 2 };
         next[3] = { x: (next[2].x + next[4].x) / 2, y: (next[2].y + next[4].y) / 2 };
         next[5] = { x: (next[4].x + next[6].x) / 2, y: (next[4].y + next[6].y) / 2 };
         next[7] = { x: (next[6].x + next[0].x) / 2, y: (next[6].y + next[0].y) / 2 };
-
         return next;
     });
   }, [draggingPoint, points]);
@@ -494,11 +479,6 @@ export default function AadhaarPrinter() {
                     </Card>
                   ))}
               </div>
-              
-              <div className="flex items-center justify-center gap-8 text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] py-4">
-                   <div className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-green-500" /> Secure Local Processing</div>
-                   <div className="flex items-center gap-2"><Zap className="size-3.5 text-yellow-500" /> Perspective Homography</div>
-              </div>
           </div>
       )}
 
@@ -604,9 +584,40 @@ export default function AadhaarPrinter() {
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2"><Square className="size-3 text-muted-foreground" /><span className="text-[10px] font-black uppercase">Border</span><Switch checked={showBorder} onCheckedChange={setShowBorder} /></div>
-                    <Tabs value={vAlign} onValueChange={(v) => setVAlign(v as VAlign)} className="bg-muted p-1 rounded-xl border-2">
-                        <TabsList className="h-9"><TabsTrigger value="top"><AlignVerticalJustifyStart className="size-4"/></TabsTrigger><TabsTrigger value="center"><AlignVerticalJustifyCenter className="size-4"/></TabsTrigger><TabsTrigger value="bottom"><AlignVerticalJustifyEnd className="size-4"/></TabsTrigger></TabsList>
-                    </Tabs>
+                    
+                    <div className="flex bg-muted p-1 rounded-xl border-2">
+                        <button 
+                            onClick={() => setVAlign('top')} 
+                            className={cn(
+                                "p-2 rounded-lg transition-all", 
+                                vAlign === 'top' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                            )}
+                            title="Top Align"
+                        >
+                            <AlignVerticalJustifyStart className="size-4"/>
+                        </button>
+                        <button 
+                            onClick={() => setVAlign('center')} 
+                            className={cn(
+                                "p-2 rounded-lg transition-all mx-1", 
+                                vAlign === 'center' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                            )}
+                            title="Center Align"
+                        >
+                            <AlignVerticalJustifyCenter className="size-4"/>
+                        </button>
+                        <button 
+                            onClick={() => setVAlign('bottom')} 
+                            className={cn(
+                                "p-2 rounded-lg transition-all", 
+                                vAlign === 'bottom' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                            )}
+                            title="Bottom Align"
+                        >
+                            <AlignVerticalJustifyEnd className="size-4"/>
+                        </button>
+                    </div>
+
                     <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl"><RefreshCcw className="mr-2 size-3" /> Re-align</Button>
                     <Button onClick={handlePrint} className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl"><Printer className="mr-2 size-4" /> PRINT NOW</Button>
                 </div>
@@ -615,20 +626,25 @@ export default function AadhaarPrinter() {
             <div className="no-print">
                 <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
                     <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span></CardHeader>
-                    <CardContent className="p-12 flex flex-col md:flex-row items-center justify-center gap-12">
-                        {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
-                            <div key={side.label} className="space-y-4">
-                                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">{side.label}</span>
-                                <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-[320px] h-[202px]", showBorder ? "border-2 border-black" : "border-8 border-white")}>
-                                    <img src={side.src} alt={side.label} className="w-full h-full object-contain" />
+                    <CardContent className={cn(
+                        "p-12 flex flex-col items-center min-h-[500px] transition-all duration-500",
+                        vAlign === 'top' ? 'justify-start' : vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                    )}>
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+                            {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
+                                <div key={side.label} className="space-y-4">
+                                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">{side.label}</span>
+                                    <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-[320px] h-[202px]", showBorder ? "border-2 border-black" : "border-8 border-white")}>
+                                        <img src={side.src} alt={side.label} className="w-full h-full object-contain" />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <div className={cn("hidden print:flex flex-col items-center w-full min-h-[297mm] bg-white", vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center')} id="printable-area">
+            <div id="printable-area">
                 <div className="flex flex-col items-center gap-12">
                     {[frontFinal, backFinal].map((src, i) => (
                         <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm' }}>
@@ -642,14 +658,45 @@ export default function AadhaarPrinter() {
 
       <style jsx global>{`
         @media print {
-          html, body { background: white !important; margin: 0 !important; padding: 0 !important; height: 297mm !important; width: 210mm !important; overflow: hidden !important; }
-          body * { visibility: hidden !important; margin: 0 !important; }
-          #printable-area, #printable-area * { visibility: visible !important; }
-          #printable-area { position: fixed !important; left: 0 !important; top: 0 !important; width: 210mm !important; height: 297mm !important; display: flex !important; flex-direction: column !important; align-items: center !important; z-index: 9999999 !important; }
-          @page { size: A4 portrait; margin: 0; }
+          html, body { 
+            background: white !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            height: 100% !important; 
+            width: 100% !important; 
+            overflow: hidden !important; 
+          }
+          body * { 
+            visibility: hidden !important; 
+            margin: 0 !important; 
+          }
+          #printable-area, #printable-area * { 
+            visibility: visible !important; 
+          }
+          #printable-area { 
+            display: flex !important;
+            flex-direction: column !important;
+            position: absolute !important; 
+            left: 0 !important; 
+            top: 0 !important; 
+            width: 210mm !important; 
+            height: 297mm !important; 
+            align-items: center !important; 
+            justify-content: ${vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center'} !important;
+            padding-top: ${vAlign === 'top' ? '20mm' : '0'} !important;
+            padding-bottom: ${vAlign === 'bottom' ? '20mm' : '0'} !important;
+            z-index: 9999999 !important; 
+            background: white !important;
+            box-sizing: border-box !important;
+          }
+          @page { 
+            size: A4 portrait; 
+            margin: 0; 
+          }
         }
       `}</style>
       <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
     </div>
   );
 }
+
