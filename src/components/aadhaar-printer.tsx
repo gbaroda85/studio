@@ -104,6 +104,7 @@ export default function AadhaarPrinter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [printSnapshot, setPrintSnapshot] = useState<string | null>(null);
   
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
@@ -381,6 +382,7 @@ export default function AadhaarPrinter() {
   const handleReset = () => {
     setWorkflow(null); setStage('selection'); setOriginalA4Src(null); setFrontRaw(null); setBackRaw(null);
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
+    setPrintSnapshot(null);
   };
 
   const executeFinalPrint = async () => {
@@ -397,37 +399,10 @@ export default function AadhaarPrinter() {
           });
 
           const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-          const printWindow = window.open('', '_blank');
-          if (!printWindow) throw new Error("Popup blocked");
-
-          printWindow.document.write(`
-            <html>
-                <head>
-                    <title>GR7 Print Studio</title>
-                    <style>
-                        @page { size: A4; margin: 0; }
-                        body { margin: 0; padding: 0; background: white; display: flex; align-items: flex-start; justify-content: center; }
-                        img { width: 210mm; height: 297mm; object-fit: contain; display: block; }
-                    </style>
-                </head>
-                <body>
-                    <img src="${dataUrl}" id="print-img" />
-                    <script>
-                        const img = document.getElementById('print-img');
-                        img.onload = () => {
-                            setTimeout(() => {
-                                window.focus();
-                                window.print();
-                            }, 500);
-                        };
-                    </script>
-                </body>
-            </html>
-          `);
-          printWindow.document.close();
+          setPrintSnapshot(dataUrl);
+          // Actual print dialog is triggered by the img.onLoad in the print-layer
       } catch (err) {
           toast({ variant: 'destructive', title: "Print Failed" });
-      } finally {
           setIsExporting(false);
       }
   };
@@ -453,7 +428,39 @@ export default function AadhaarPrinter() {
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
       
-      {/* HIDDEN PRINT TARGET */}
+      {/* SAME-PAGE PRINT ENGINE LAYER (STRICTLY HIDDEN ON SCREEN, VISIBLE ON PRINT) */}
+      <style jsx global>{`
+          @media print {
+              body > *:not(.print-exclusive-layer) { display: none !important; }
+              .print-exclusive-layer { 
+                  display: block !important; 
+                  position: fixed !important; 
+                  top: 0; left: 0; width: 100%; height: 100%; 
+                  background: white; z-index: 999999;
+              }
+              html, body { height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
+              @page { size: A4 portrait; margin: 0; }
+          }
+      `}</style>
+      
+      {printSnapshot && (
+          <div className="print-exclusive-layer hidden">
+              <img 
+                src={printSnapshot} 
+                className="w-full h-full object-contain" 
+                alt="print-spool" 
+                onLoad={() => {
+                    setTimeout(() => {
+                        window.print();
+                        setPrintSnapshot(null);
+                        setIsExporting(false);
+                    }, 500);
+                }}
+              />
+          </div>
+      )}
+
+      {/* HIDDEN RENDER TARGET FOR COORDINATE MAPPING */}
       <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
           <div ref={studioPrintRef} style={{ width: `${A4_WIDTH_MM}mm`, height: `${A4_HEIGHT_MM}mm`, background: 'white', position: 'relative' }}>
                 <div 
@@ -551,7 +558,7 @@ export default function AadhaarPrinter() {
                           {s.final ? (
                               <div className="relative group/preview w-full flex flex-col items-center gap-6 animate-in zoom-in-95">
                                   <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-full max-w-[320px] aspect-[85.6/54] transform transition-transform group-hover/preview:scale-[1.02]", showBorder && "border-2 border-black")}>
-                                      <img src={s.final || undefined} alt={s.side} className="w-full h-full object-cover" />
+                                      <img src={s.final || undefined} alt={s.side} className="w-full h-full object-contain" />
                                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                                           <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4 h-9 rounded-lg shadow-xl" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
                                           <Button size="icon" variant="destructive" className="h-9 w-9 rounded-lg shadow-xl" onClick={() => { s.setFinal(null); s.setRaw(null); }}><Trash2 className="size-4" /></Button>
@@ -574,7 +581,7 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'password' && (
-        <Card className="w-full max-w-sm shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
+        <Card className="w-full max-w-sm shadow-2xl rounded-[2rem] overflow-hidden bg-card/50 border-2">
             <CardHeader className="bg-primary/5 p-4 border-b text-center">
                 <CardTitle className="text-lg font-black uppercase flex items-center justify-center gap-2">
                     <Lock className="size-4 text-primary" /> Password
@@ -586,7 +593,7 @@ export default function AadhaarPrinter() {
                     <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 text-xl font-black tracking-[0.1em] text-center border-2 rounded-xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-2 text-left shadow-inner">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner">
                     <AlertCircle className="size-4 text-blue-500 shrink-0" />
                     <p className="text-[9px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p>
                 </div>
@@ -677,9 +684,10 @@ export default function AadhaarPrinter() {
                           <RefreshCcw className="mr-2 size-4" /> RE-ALIGN
                       </Button>
 
-                      <Button onClick={executeFinalPrint} className="magic-button h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all border-none">
+                      <Button onClick={executeFinalPrint} disabled={isExporting} className="magic-button h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all border-none">
                           <StarIcons />
-                          <Printer className="mr-2 size-5" /> PRINT NOW
+                          {isExporting ? <Loader2 className="mr-2 size-5 animate-spin" /> : <Printer className="mr-2 size-5" />} 
+                          PRINT NOW
                       </Button>
                   </div>
               </div>
