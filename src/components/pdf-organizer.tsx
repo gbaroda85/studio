@@ -53,6 +53,7 @@ import {
     FilePlus2,
     Grip,
     History,
+    ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,12 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -74,13 +81,15 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
+type PageType = 'original' | 'blank' | 'image';
+
 interface PageItem {
     id: string;
     index: number;       
     rotation: number;    
     previewSrc: string;
     isDeleted: boolean;
-    type: 'original' | 'blank';
+    type: PageType;
 }
 
 const StarIcons = () => (
@@ -109,6 +118,7 @@ function SortablePage({
     onDelete, 
     onRotate, 
     onInsertBlank,
+    onInsertImage,
     onView,
     isRestored
 }: { 
@@ -116,6 +126,7 @@ function SortablePage({
     onDelete: (id: string) => void;
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
+    onInsertImage: (id: string) => void;
     onView: (page: PageItem) => void;
     isRestored: boolean;
 }) {
@@ -150,8 +161,8 @@ function SortablePage({
                 isRestored && "ring-4 ring-green-500 animate-pulse"
             )}
         >
-            <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/20 pointer-events-none shadow-lg">
-                {page.type === 'blank' ? 'B' : page.index}
+            <div className="absolute top-2 left-2 size-7 md:size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[10px] md:text-xs font-black text-white z-20 border border-white/10 pointer-events-none shadow-lg">
+                {page.type === 'original' ? page.index : page.type === 'blank' ? 'B' : 'IMG'}
             </div>
             
             <div {...attributes} {...listeners} className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing flex items-center justify-center">
@@ -178,14 +189,27 @@ function SortablePage({
                 >
                     <Eye className="size-3.5" />
                 </button>
-                <button 
-                    type="button"
-                    className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
-                    onPointerDown={stopPropagation}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onInsertBlank(page.id); }} 
-                >
-                    <Plus className="size-3.5" />
-                </button>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button 
+                            type="button"
+                            className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
+                            onPointerDown={stopPropagation}
+                        >
+                            <Plus className="size-3.5" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="z-[1000] rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900">
+                        <DropdownMenuItem onClick={() => onInsertBlank(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
+                            <Plus className="size-3.5 mr-2 text-primary" /> Add Blank Page
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onInsertImage(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
+                            <ImageIcon className="size-3.5 mr-2 text-blue-500" /> Upload Image
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 <button 
                     type="button"
                     className="h-8 flex-1 rounded-lg bg-white dark:bg-slate-800 shadow-xl border-2 dark:border-white/20 flex items-center justify-center hover:text-primary dark:text-white transition-all active:scale-90" 
@@ -224,7 +248,10 @@ export default function PdfOrganizer() {
     const [zoomPage, setZoomPage] = useState<PageItem | null>(null);
     const [restoredId, setRestoredId] = useState<string | null>(null);
     
+    const [insertAfterId, setInsertAfterId] = useState<string | null>(null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const insertImgInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
     const sensors = useSensors(
@@ -375,6 +402,40 @@ export default function PdfOrganizer() {
         toast({ title: "Blank Page Inserted" });
     };
 
+    const onInsertImageClick = (afterId: string) => {
+        setInsertAfterId(afterId);
+        insertImgInputRef.current?.click();
+    };
+
+    const handleInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !insertAfterId) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const src = ev.target?.result as string;
+            const imgId = `img-${Math.random().toString(36).substr(2, 9)}`;
+            const imgPage: PageItem = { 
+                id: imgId, 
+                index: -1, 
+                rotation: 0, 
+                isDeleted: false, 
+                previewSrc: src, 
+                type: 'image' 
+            };
+            
+            setPages(prev => {
+                const index = prev.findIndex(p => p.id === insertAfterId);
+                const next = [...prev];
+                next.splice(index + 1, 0, imgPage);
+                return next;
+            });
+            setInsertAfterId(null);
+            toast({ title: "Image Inserted as Page" });
+        };
+        reader.readAsDataURL(file);
+    };
+
     const rotateAll = (deg: number) => {
         setPages(prev => prev.map(p => ({ ...p, rotation: deg === 0 ? 0 : (p.rotation + deg) % 360 })));
         setResultPdfUrl(null);
@@ -383,8 +444,8 @@ export default function PdfOrganizer() {
 
     const sortPages = (direction: 'asc' | 'desc') => {
         setPages(prev => [...prev].sort((a, b) => {
-            if (a.type === 'blank' && b.type !== 'blank') return 1;
-            if (a.type !== 'blank' && b.type === 'blank') return -1;
+            if (a.index === -1 && b.index !== -1) return 1;
+            if (a.index !== -1 && b.index === -1) return -1;
             return direction === 'asc' ? a.index - b.index : b.index - a.index;
         }));
         setResultPdfUrl(null);
@@ -417,6 +478,12 @@ export default function PdfOrganizer() {
             for (const p of pages) {
                 if (p.type === 'blank') {
                     newPdfDoc.addPage([595.28, 841.89]); 
+                } else if (p.type === 'image') {
+                    const imgBuffer = await fetch(p.previewSrc).then(res => res.arrayBuffer());
+                    const isPng = p.previewSrc.startsWith('data:image/png');
+                    const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
+                    const page = newPdfDoc.addPage([embeddedImg.width, embeddedImg.height]);
+                    page.drawImage(embeddedImg, { x: 0, y: 0, width: embeddedImg.width, height: embeddedImg.height, rotate: degrees(-p.rotation) });
                 } else {
                     const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [p.index - 1]);
                     const currentRot = copiedPage.getRotation().angle;
@@ -522,6 +589,7 @@ export default function PdfOrganizer() {
                                                             onDelete={deletePage} 
                                                             onRotate={rotatePage} 
                                                             onInsertBlank={addBlankPage} 
+                                                            onInsertImage={onInsertImageClick}
                                                             onView={(page) => setZoomPage(page)}
                                                             isRestored={restoredId === p.id}
                                                         />
@@ -531,7 +599,7 @@ export default function PdfOrganizer() {
                                             <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
                                                 {activeId && activePage ? (
                                                     <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-3xl opacity-80 scale-105 transition-transform z-[9999] pointer-events-none transform-gpu">
-                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.type === 'blank' ? 'B' : activePage.index}</div>
+                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.index === -1 ? (activePage.type === 'blank' ? 'B' : 'IMG') : activePage.index}</div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
@@ -620,7 +688,7 @@ export default function PdfOrganizer() {
                                                 <img src={p.previewSrc || undefined} className="max-w-full max-h-full object-contain" alt="trash" />
                                             </div>
                                         )}
-                                        <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white shadow-lg">{p.index === -1 ? 'B' : p.index}</div>
+                                        <div className="absolute top-2 left-2 size-7 rounded-md bg-black/60 flex items-center justify-center text-[9px] font-black text-white shadow-lg">{p.index === -1 ? (p.type === 'blank' ? 'B' : 'IMG') : p.index}</div>
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><Button size="sm" className="bg-primary text-white font-black text-[9px] uppercase px-4 h-8 rounded-lg shadow-xl" onClick={() => restorePage(p.id)}>RESTORE</Button></div>
                                     </div>
                                 ))}
@@ -658,7 +726,7 @@ export default function PdfOrganizer() {
                                         alt="zoom" 
                                     />
                                     <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
-                                        <Badge variant="outline" className="text-[8px] font-black uppercase border-black">PAGE {zoomPage?.index}</Badge>
+                                        <Badge variant="outline" className="text-[8px] font-black uppercase border-black">{zoomPage?.type === 'image' ? 'IMAGE PAGE' : `PAGE ${zoomPage?.index}`}</Badge>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 mb-10">
@@ -674,6 +742,8 @@ export default function PdfOrganizer() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleInsertImageChange} />
         </div>
     );
 }
