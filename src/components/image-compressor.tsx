@@ -369,8 +369,9 @@ export default function ImageCompressor() {
                         >
                             <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
                             <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">SAVE ALL ZIP</span>
-                            <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                            <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                 <Download className="size-6 group-hover:scale-110 transition-transform" />
+                                <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                             </div>
                         </Button>
                     </CardContent>
@@ -385,9 +386,9 @@ export default function ImageCompressor() {
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-background p-1 rounded-xl border-2">
-                            <TabsTrigger value="target" className="font-black text-[9px] uppercase">Strict Limit</TabsTrigger>
-                            <TabsTrigger value="manual" className="font-black text-[9px] uppercase">Manual Scale</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-background p-1.5 rounded-xl border-2">
+                            <TabsTrigger value="target" className="font-black text-[9px] uppercase tracking-widest">Strict Limit</TabsTrigger>
+                            <TabsTrigger value="manual" className="font-black text-[9px] uppercase tracking-widest">Manual Scale</TabsTrigger>
                         </TabsList>
                         <TabsContent value="target" className="space-y-6 animate-in fade-in duration-300 text-left">
                              <div className="space-y-3">
@@ -492,8 +493,9 @@ export default function ImageCompressor() {
                   >
                       <div className="absolute left-4 w-0.5 h-8 bg-white/40 rounded-full" />
                       <span className="flex-1 px-10 text-center tracking-widest text-sm uppercase">DOWNLOAD OPTIMIZED</span>
-                      <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                      <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
                           <Download className="size-8 group-hover:scale-110 transition-transform" />
+                          <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                       </div>
                   </Button>
               </DialogFooter>

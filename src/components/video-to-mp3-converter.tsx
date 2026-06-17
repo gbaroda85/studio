@@ -301,12 +301,16 @@ export default function VideoToMp3Converter() {
                                     </Button>
                                 ) : (
                                     <Button 
-                                        className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 transition-all active:scale-95 group flex items-center justify-center gap-4 rounded-full" 
+                                        className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 shadow-3xl" 
                                         onClick={handleDownload}
                                     >
                                         <StarIcons />
                                         <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                        <span className="uppercase tracking-tighter">SAVE AUDIO FILE</span>
+                                        <span className="uppercase tracking-tighter text-lg">SAVE AUDIO FILE</span>
+                                        <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#22c55e] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                            <Download className="size-6 group-hover:scale-110 transition-transform" />
+                                            <div className="absolute right-3 w-0.5 h-6 bg-[#22c55e]/20 rounded-full" />
+                                        </div>
                                     </Button>
                                 )}
                                 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type DragEvent, type ChangeEvent, useCallback } from "react";
@@ -232,14 +233,14 @@ export default function SignatureRemover() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-10">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Signature here</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase">Extraction happens 100% locally.</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Extraction happens 100% locally.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -271,13 +272,16 @@ export default function SignatureRemover() {
             </Button>
             <Button 
                 size="lg" 
-                className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                 onClick={handleDownload} 
                 disabled={isProcessing || !resultImageSrc}
             >
-                <StarIcons />
-                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
-                <span className="text-[10px] md:text-xs uppercase tracking-widest">DOWNLOAD PNG</span>
+                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                <span className="flex-1 px-10 text-center tracking-widest text-xs uppercase">DOWNLOAD PNG</span>
+                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                    <Download className="size-6 group-hover:scale-110 transition-transform" />
+                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                </div>
             </Button>
         </div>
       </div>
@@ -329,7 +333,7 @@ export default function SignatureRemover() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
                     <Button 
                         size="lg" 
                         className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 

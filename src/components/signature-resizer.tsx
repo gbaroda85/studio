@@ -376,8 +376,9 @@ export default function SignatureResizer() {
                             >
                                 <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                 <span className="flex-1 px-10 text-center tracking-widest text-xs uppercase">SAVE JPG</span>
-                                <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                     <Download className="size-6 group-hover:scale-110 transition-transform" />
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                 </div>
                             </Button>
                         )}

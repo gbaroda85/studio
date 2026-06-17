@@ -372,8 +372,9 @@ export default function ImageResizer() {
                 >
                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                     <span className="flex-1 px-10 text-center tracking-widest text-[10px] md:text-xs uppercase">DOWNLOAD HD</span>
-                    <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                        <Download className="size-6 md:size-7 group-hover:translate-y-1 transition-transform" />
+                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                        <Download className="size-6 group-hover:scale-110 transition-transform" />
+                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                     </div>
                 </Button>
             )}
@@ -429,8 +430,9 @@ export default function ImageResizer() {
                                         >
                                             <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
                                             <span className="flex-1 px-12 text-center tracking-widest text-lg md:text-xl uppercase">SAVE SHARP IMAGE</span>
-                                            <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                            <div className="bg-white h-full pl-10 pr-12 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-11 group-hover:pr-13 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
                                                 <Download className="size-8 group-hover:scale-110 transition-transform" />
+                                                <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
                                             </div>
                                         </Button>
                                     </div>
@@ -558,7 +560,7 @@ export default function ImageResizer() {
                     </div>
 
                     <div className="p-3 md:p-4 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 shadow-sm text-left">
-                        <ShieldCheck className="size-4 md:size-5 text-green-600 shrink-0 mt-0.5" />
+                        <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
                             <p className="text-[7px] md:text-[8px] text-green-600/80 font-medium leading-tight mt-0.5 uppercase">

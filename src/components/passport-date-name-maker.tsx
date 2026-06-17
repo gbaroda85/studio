@@ -396,8 +396,9 @@ export default function PassportDateNameMaker() {
                             <span className="flex-1 px-12 text-center tracking-widest text-lg font-black uppercase">
                                 {isProcessing ? "PROCESSING..." : "DOWNLOAD PHOTO"}
                             </span>
-                            <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
-                                {isProcessing ? <Loader2 className="size-8 animate-spin" /> : <Download className="size-8 group-hover:translate-y-1 transition-transform" />}
+                            <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                {isProcessing ? <Loader2 className="size-8 animate-spin" /> : <Download className="size-8 group-hover:scale-110 transition-transform" />}
+                                <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
                             </div>
                         </Button>
                     </CardFooter>
@@ -414,7 +415,7 @@ export default function PassportDateNameMaker() {
                             </div>
                             <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">Live Studio View</CardTitle>
                         </div>
-                        {imageSrc && <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase tracking-wider">RENDER READY</Badge>}
+                        {imageSrc && <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase tracking-wider">RENDER READY</Badge>}
                     </CardHeader>
                     <CardContent className="flex-1 p-8 md:p-12 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden">
                         <AnimatePresence mode="wait">
