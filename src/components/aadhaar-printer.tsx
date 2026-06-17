@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -36,7 +37,9 @@ import {
     Sparkles,
     RotateCw,
     ImageIcon,
-    Trash2
+    Trash2,
+    Monitor,
+    Bug
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -50,20 +53,27 @@ import { Switch } from "@/components/ui/switch";
 import * as pdfjs from 'pdfjs-dist';
 import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
 }
+
+// --- PHYSICAL CONSTANTS (MM) ---
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+const CARD_WIDTH_MM = 85.6;
+const CARD_HEIGHT_MM = 54;
+const GAP_MM = 4;
+const PRINT_MARGIN_MM = 20;
 
 type Workflow = 'a4' | 'separate';
 type Stage = 'selection' | 'upload' | 'password' | 'refine' | 'preview';
 type CropMode = 'rect' | 'scanner';
 type VAlign = 'top' | 'center' | 'bottom';
 
-interface Point {
-    x: number;
-    y: number;
-}
+interface Point { x: number; y: number; }
 
 export default function AadhaarPrinter() {
   const { toast } = useToast();
@@ -72,6 +82,7 @@ export default function AadhaarPrinter() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
   const [showBorder, setShowBorder] = useState(true);
+  const [showDebug, setShowDebug] = useState(false);
   
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
   const [password, setPassword] = useState("");
@@ -86,6 +97,7 @@ export default function AadhaarPrinter() {
   const [backFinal, setBackFinal] = useState<string | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
   const [rectCrop, setRectCrop] = useState<CropType>();
@@ -105,6 +117,30 @@ export default function AadhaarPrinter() {
   const backInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const studioPreviewRef = useRef<HTMLDivElement>(null);
+
+  // --- UNIFIED POSITIONING ENGINE ---
+  const calculateA4Positions = useCallback((alignment: VAlign) => {
+      const totalContentH = (CARD_HEIGHT_MM * 2) + GAP_MM;
+      const x = (A4_WIDTH_MM - CARD_WIDTH_MM) / 2;
+      let y = 0;
+
+      if (alignment === 'top') {
+          y = PRINT_MARGIN_MM;
+      } else if (alignment === 'bottom') {
+          y = A4_HEIGHT_MM - totalContentH - PRINT_MARGIN_MM;
+      } else {
+          y = (A4_HEIGHT_MM - totalContentH) / 2;
+      }
+
+      return {
+          front: { x, y },
+          back: { x, y: y + CARD_HEIGHT_MM + GAP_MM },
+          page: { w: A4_WIDTH_MM, h: A4_HEIGHT_MM }
+      };
+  }, []);
+
+  const pos = useMemo(() => calculateA4Positions(vAlign), [vAlign, calculateA4Positions]);
 
   const handleSelection = (mode: Workflow) => {
     setWorkflow(mode);
@@ -122,7 +158,7 @@ export default function AadhaarPrinter() {
         
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.2 }); 
+        const viewport = page.getViewport({ scale: 3.0 }); // High res render
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) throw new Error("Canvas init failed");
@@ -133,12 +169,13 @@ export default function AadhaarPrinter() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         await page.render({ canvasContext: ctx, viewport }).promise;
-        setOriginalA4Src(canvas.toDataURL('image/jpeg', 0.95));
+        setOriginalA4Src(canvas.toDataURL('image/jpeg', 0.98));
         setStage('refine');
         resetPoints();
     } catch (error: any) {
         if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
             setStage('password');
+            toast({ title: "Locked PDF", description: "Password required for decryption." });
         } else {
             toast({ variant: 'destructive', title: 'Processing Failed' });
         }
@@ -340,7 +377,89 @@ export default function AadhaarPrinter() {
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
   };
 
-  const handlePrint = () => window.print();
+  // --- UNIFIED PRINT PIPELINE ---
+  const executeFinalPrint = async () => {
+      if (!studioPreviewRef.current) return;
+      setIsExporting(true);
+      
+      try {
+          // 1. Capture the EXACT rendered container
+          const canvas = await html2canvas(studioPreviewRef.current, {
+              scale: 4, // Ultra HD for tiny text
+              useCORS: true,
+              backgroundColor: '#ffffff',
+              imageTimeout: 0,
+              logging: false,
+              onclone: (clonedDoc) => {
+                  // Ensure transforms don't mess up print capture
+                  const el = clonedDoc.querySelector('.a4-sheet-render');
+                  if (el) (el as HTMLElement).style.transform = 'none';
+              }
+          });
+
+          const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+          
+          // 2. Open high-res print window (Works on Android)
+          const printWindow = window.open('', '_blank');
+          if (!printWindow) throw new Error("Popup blocked");
+
+          printWindow.document.write(`
+            <html>
+                <head>
+                    <title>GR7 Print Studio</title>
+                    <style>
+                        @page { size: A4; margin: 0; }
+                        body { margin: 0; padding: 0; background: white; display: flex; align-items: flex-start; justify-content: center; }
+                        img { width: 210mm; height: 297mm; object-fit: contain; }
+                    </style>
+                </head>
+                <body>
+                    <img src="${dataUrl}" />
+                    <script>
+                        window.onload = () => {
+                            setTimeout(() => {
+                                window.focus();
+                                window.print();
+                                window.close();
+                            }, 500);
+                        };
+                    </script>
+                </body>
+            </html>
+          `);
+          printWindow.document.close();
+          toast({ title: "Print Driver Ready", description: "Dialog opened successfully." });
+      } catch (err) {
+          toast({ variant: 'destructive', title: "Print Failed", description: "Browser permission error." });
+      } finally {
+          setIsExporting(false);
+      }
+  };
+
+  const executePdfExport = async () => {
+      if (!studioPreviewRef.current) return;
+      setIsExporting(true);
+      try {
+          const canvas = await html2canvas(studioPreviewRef.current, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          
+          const pdf = new jsPDF({
+              orientation: 'p',
+              unit: 'mm',
+              format: 'a4'
+          });
+
+          pdf.addImage(imgData, 'JPEG', 0, 0, A4_WIDTH_MM, A4_HEIGHT_MM);
+          pdf.save(`ID_Card_${Date.now()}.pdf`);
+          
+          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+          toast({ title: "PDF Ready", description: "Download started." });
+      } catch (err) {
+          toast({ variant: 'destructive', title: "Export Error" });
+      } finally {
+          setIsExporting(false);
+      }
+  };
 
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
@@ -509,11 +628,11 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'preview' && frontFinal && backFinal && (
-        <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
+        <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-6xl">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 no-print">
                 <div className="flex items-center gap-4 text-left">
                     <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20"><CheckCircle2 className="size-7" /></div>
-                    <div><h3 className="text-xl font-black uppercase tracking-tighter">Print Ready</h3><p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest leading-none">A4 ID-1 ALIGNMENT</p></div>
+                    <div><h3 className="text-xl font-black uppercase tracking-tighter leading-none">Print Ready</h3><p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest mt-1">INDUSTRIAL ENGINE ACTIVE</p></div>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3 bg-white/40 dark:bg-slate-900/40 p-4 rounded-3xl border shadow-xl">
                     <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2 shadow-inner"><Square className="size-3 text-muted-foreground" /><span className="text-[10px] font-black uppercase opacity-60">Border</span><Switch checked={showBorder} onCheckedChange={setShowBorder} /></div>
@@ -524,94 +643,81 @@ export default function AadhaarPrinter() {
                         <button type="button" onClick={() => setVAlign('bottom')} className={cn("p-2 rounded-lg transition-all", vAlign === 'bottom' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60")}><AlignVerticalJustifyEnd className="size-4"/></button>
                     </div>
 
-                    <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl shadow-sm"><RefreshCcw className="mr-2 size-3" /> Re-align</Button>
-                    <Button onClick={handlePrint} className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl active:scale-95 transition-all"><Printer className="mr-2 size-4" /> PRINT NOW</Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => setShowDebug(!showDebug)} className={cn("rounded-xl border-2", showDebug && "bg-primary/10 border-primary text-primary")}><Bug className="size-4"/></Button>
+                        <Button variant="outline" onClick={executePdfExport} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl shadow-sm hover:bg-primary/5">{isExporting ? <Loader2 className="animate-spin size-3" /> : <Download className="mr-2 size-3" />} SAVE PDF</Button>
+                        <Button onClick={executeFinalPrint} className="magic-button h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl active:scale-95 transition-all border-none">
+                            <StarIcons />
+                            <Printer className="mr-2 size-4" /> PRINT NOW
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="no-print">
-                <Card className="border-none shadow-3xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
-                    <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span>
-                            <Badge variant="outline" className="text-[8px] uppercase border-primary/20 text-primary">{vAlign.toUpperCase()} ALIGNMENT ACTIVE</Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent className={cn(
-                        "p-12 flex flex-col items-center min-h-[600px] transition-all duration-500 bg-white relative shadow-inner",
-                        vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
-                    )}>
-                        <div className="absolute inset-0 border-[20px] border-slate-100 dark:border-slate-800 pointer-events-none z-0" />
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-12 z-10 animate-in zoom-in-95 duration-500">
-                            {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
-                                <div key={side.label} className="space-y-4">
-                                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-40">{side.label}</span>
-                                    <div className={cn("relative shadow-3xl rounded-xl overflow-hidden bg-white w-[320px] h-[202px] transition-all duration-300", showBorder ? "border-2 border-black" : "border-8 border-white")}>
-                                        <img src={side.src || undefined} alt={side.label} className="w-full h-full object-contain" />
+            <div className="no-print w-full flex justify-center">
+                <Card className="border-none shadow-3xl bg-slate-300 dark:bg-slate-950 rounded-[3rem] p-6 md:p-12 overflow-visible relative group">
+                    <div className="absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity"><Badge variant="outline" className="bg-white/90 text-[8px] font-black uppercase">Studio Direct Map</Badge></div>
+                    
+                    {/* STUDIO SCALE PREVIEW - CLONED FOR CAPTURE */}
+                    <div className="relative transform-gpu scale-[0.4] sm:scale-[0.6] md:scale-[0.8] lg:scale-[1.0] origin-top transition-transform duration-500 shadow-2xl">
+                        <div 
+                            ref={studioPreviewRef}
+                            className="a4-sheet-render bg-white relative overflow-hidden" 
+                            style={{ width: `${A4_WIDTH_MM}mm`, height: `${A4_HEIGHT_MM}mm`, boxSizing: 'border-box' }}
+                        >
+                            <div className="absolute inset-0 z-10 pointer-events-none opacity-5"><div className="w-full h-full border-[10mm] border-slate-100" /></div>
+
+                            {/* FRONT CARD */}
+                            <div 
+                                className={cn("absolute bg-white overflow-hidden shadow-sm flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
+                                style={{ 
+                                    width: `${CARD_WIDTH_MM}mm`, 
+                                    height: `${CARD_HEIGHT_MM}mm`, 
+                                    left: `${pos.front.x}mm`, 
+                                    top: `${pos.front.y}mm`,
+                                    transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                }}
+                            >
+                                <img src={frontFinal!} className="w-full h-full object-contain" alt="front" />
+                            </div>
+
+                            {/* BACK CARD */}
+                            <div 
+                                className={cn("absolute bg-white overflow-hidden shadow-sm flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
+                                style={{ 
+                                    width: `${CARD_WIDTH_MM}mm`, 
+                                    height: `${CARD_HEIGHT_MM}mm`, 
+                                    left: `${pos.back.x}mm`, 
+                                    top: `${pos.back.y}mm`,
+                                    transition: 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                }}
+                            >
+                                <img src={backFinal!} className="w-full h-full object-contain" alt="back" />
+                            </div>
+
+                            {/* DEBUG INFO OVERLAY */}
+                            {showDebug && (
+                                <div className="absolute inset-0 z-[100] pointer-events-none border-2 border-red-500/20 p-8 font-mono text-[8px] space-y-4">
+                                    <div className="bg-red-500 text-white p-2 rounded w-fit">DEBUG: ABSOLUTE COORDINATES ACTIVE</div>
+                                    <div className="space-y-1 bg-black/80 text-white p-4 rounded-xl w-fit border border-white/20">
+                                        <p>PAGE: {A4_WIDTH_MM}mm x {A4_HEIGHT_MM}mm</p>
+                                        <p>ALIGN: {vAlign.toUpperCase()}</p>
+                                        <p>F_POS: {pos.front.x.toFixed(1)}mm, {pos.front.y.toFixed(1)}mm</p>
+                                        <p>B_POS: {pos.back.x.toFixed(1)}mm, {pos.back.y.toFixed(1)}mm</p>
+                                        <p>SCALE: 300DPI (Rendered)</p>
                                     </div>
                                 </div>
-                            ))}
+                            )}
                         </div>
-                    </CardContent>
+                    </div>
                 </Card>
             </div>
 
-            <div id="printable-area" className={cn(
-                vAlign === 'top' && "print-top",
-                vAlign === 'center' && "print-center",
-                vAlign === 'bottom' && "print-bottom"
-            )}>
-                <div className="print-content-wrapper">
-                    {[frontFinal, backFinal].map((src, i) => (
-                        <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden card-wrapper-print", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm', margin: '4mm 0' }}>
-                            <img src={src || undefined} className="max-w-full max-h-full object-contain" alt="print" />
-                        </div>
-                    ))}
-                </div>
+            <div className="flex items-center justify-center gap-8 no-print pt-4 text-muted-foreground/30 text-[9px] font-black uppercase tracking-[0.3em]">
+                <div className="flex items-center gap-1.5"><Monitor className="size-3" /> WYSIWYG</div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> HD RENDER</div>
             </div>
-            
-            <style>{`
-                #printable-area { display: none; }
-                @media print {
-                    html, body {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        height: 100% !important;
-                        max-height: 100vh !important;
-                        overflow: hidden !important;
-                        box-sizing: border-box !important;
-                        background: white !important;
-                        display: block !important;
-                    }
-                    body > *:not(#printable-area) {
-                        display: none !important;
-                    }
-                    #printable-area {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        width: 100vw !important;
-                        height: 100vh !important;
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        background: white !important;
-                        z-index: 9999999 !important;
-                        box-sizing: border-box !important;
-                    }
-                    .print-content-wrapper {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        align-items: center !important;
-                        width: 100% !important;
-                        height: 100% !important;
-                        box-sizing: border-box !important;
-                    }
-                    .print-top { justify-content: flex-start !important; padding-top: 20mm !important; }
-                    .print-center { justify-content: center !important; }
-                    .print-bottom { justify-content: flex-end !important; padding-bottom: 20mm !important; }
-                    .card-wrapper-print { page-break-inside: avoid !important; }
-                }
-            `}</style>
         </div>
       )}
 
@@ -619,3 +725,4 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
+
