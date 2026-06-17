@@ -192,7 +192,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
             >
                 {/* Cleaned Card Container - Reduced Height and Removed Triangle Pointer */}
                 <div className={cn(
-                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] py-4 md:py-5 px-6 md:px-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
+                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] py-2 md:py-3 px-6 md:px-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
                     shouldCenter && "md:max-w-[650px] w-full"
                 )}>
@@ -207,14 +207,14 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                     </div>
 
                     {/* Content Section */}
-                    <div className="space-y-4 text-left">
-                        <div className="space-y-2">
-                            <h3 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight text-white font-jakarta">
+                    <div className="space-y-1.5 text-left">
+                        <div className="space-y-1">
+                            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white font-jakarta">
                                 {titleText}
                             </h3>
                             <div className={cn("h-1 w-20 md:w-32 rounded-full opacity-80 shadow-sm", colorSet.line)} />
                         </div>
-                        <p className="text-xs md:sm text-white/80 font-bold leading-relaxed uppercase tracking-wider">
+                        <p className="text-[10px] md:text-xs text-white/80 font-bold leading-relaxed uppercase tracking-wider">
                             {descText}
                         </p>
                     </div>
