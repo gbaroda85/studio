@@ -54,8 +54,7 @@ import {
     ArrowLeftRight, 
     Wand2,
     Pipette,
-    Contrast,
-    ArrowRightLeft
+    Contrast
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -67,7 +66,7 @@ const ICON_MAP: Record<string, any> = {
   Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
   Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck,
   Scissors, Printer, Merge, Lock, Heart, FileStack, Scan,
-  Key, Unlock, Palette, ArrowLeftRight, Wand2, Pipette, Contrast, ArrowRightLeft
+  Key, Unlock, Palette, ArrowLeftRight, Wand2, Pipette, Contrast
 };
 
 const STEP_COLORS = [
@@ -90,8 +89,8 @@ type HowToGuideProps = {
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
   return (
-    <div className="w-full max-w-5xl mx-auto mt-12 mb-16 px-4 no-print">
-      <div className="flex flex-col items-start text-left mb-12 space-y-1">
+    <div className="w-full max-w-[1200px] mx-auto mt-12 mb-16 px-4 no-print">
+      <div className="flex flex-col items-start text-left mb-16 space-y-1">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-sm mb-2">
             <Sparkles className="size-2.5" /> MASTER GUIDE
         </div>
@@ -104,7 +103,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         </p>
       </div>
 
-      <div className="flex flex-col gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16 lg:gap-x-24">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
           
@@ -133,10 +132,10 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
           const colorSet = STEP_COLORS[index % STEP_COLORS.length];
 
           return (
-            <div key={index} className="relative w-full max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={index} className="relative w-full animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
                 {/* Speech Bubble Card Container */}
                 <div className={cn(
-                    "relative ml-10 md:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-12 lg:pl-16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1",
+                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-10 lg:pl-14 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
                     "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
                     index % STEP_COLORS.length === 0 ? "after:border-r-[#0d9488]" : 
@@ -147,16 +146,16 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                     
                     {/* Left Icon Area with Deep Shadow */}
                     <div className={cn(
-                        "absolute -left-10 md:-left-16 top-1/2 -translate-y-1/2 size-20 md:size-28 rounded-full flex items-center justify-center shadow-[10px_10px_30px_rgba(0,0,0,0.4)] border-4 border-white/20 transition-transform duration-500 hover:scale-110",
+                        "absolute -left-10 md:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 size-20 md:size-24 lg:size-28 rounded-full flex items-center justify-center shadow-[10px_10px_30px_rgba(0,0,0,0.4)] border-4 border-white/20 transition-transform duration-500 hover:scale-110",
                         colorSet.iconBg
                     )}>
-                        <Icon className="size-8 md:size-12 text-white drop-shadow-[4px_4px_2px_rgba(0,0,0,0.5)]" />
+                        <Icon className="size-8 md:size-10 lg:size-12 text-white drop-shadow-[4px_4px_2px_rgba(0,0,0,0.5)]" />
                     </div>
 
                     {/* Content Section */}
                     <div className="space-y-4 text-left">
                         <div className="space-y-2">
-                            <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight text-white font-jakarta">
+                            <h3 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight text-white font-jakarta">
                                 {titleText}
                             </h3>
                             <div className={cn("h-1 w-20 md:w-32 rounded-full opacity-80 shadow-sm", colorSet.line)} />
@@ -176,10 +175,10 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         })}
       </div>
 
-      <div className="mt-20 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-8 bg-muted/20 border-2 border-dashed rounded-[3rem] text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 shadow-inner">
+      <div className="mt-24 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-8 bg-muted/20 border-2 border-dashed rounded-[3rem] text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 shadow-inner">
         <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
         <div className="flex items-center gap-2.5"><Zap className="size-4 text-yellow-500" /> WASM SPEED</div>
-        <div className="flex items-center gap-2.5"><Sparkles className="size-4 text-primary" /> HD RENDER</div>
+        <div className="flex items-center gap-1.5"><Sparkles className="size-4 text-primary" /> HD RENDER</div>
       </div>
     </div>
   );
