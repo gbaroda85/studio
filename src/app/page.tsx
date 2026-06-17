@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -151,9 +150,9 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         </div>
         <div className="flex-1 flex flex-col">
           <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed mb-4 uppercase opacity-60 tracking-tight">{description}</p>
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 tracking-tight">{description}</p>
           
-          <div className="flex flex-wrap gap-2 mt-auto">
+          <div className="flex flex-wrap gap-2 mt-auto pt-4">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest">Professional</Badge>
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest">Local RAM</Badge>
           </div>
