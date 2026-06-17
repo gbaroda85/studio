@@ -54,7 +54,17 @@ import {
     ArrowLeftRight, 
     Wand2,
     Pipette,
-    Contrast
+    Contrast,
+    RotateCw,
+    Plus,
+    Building2,
+    User2,
+    ListFilter,
+    Gift,
+    Clock,
+    Hourglass,
+    Timer,
+    RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -66,7 +76,8 @@ const ICON_MAP: Record<string, any> = {
   Hash, PenTool, Type, Eye, Landmark, Map, Gauge, AreaChart, 
   Fuel, Waves, Activity, Target, Sparkles, Zap, ShieldCheck,
   Scissors, Printer, Merge, Lock, Heart, FileStack, Scan,
-  Key, Unlock, Palette, ArrowLeftRight, Wand2, Pipette, Contrast
+  Key, Unlock, Palette, ArrowLeftRight, Wand2, Pipette, Contrast,
+  RotateCw, Plus, Building2, User2, ListFilter, Gift, Clock, Hourglass, Timer, RotateCcw
 };
 
 const STEP_COLORS = [
@@ -88,6 +99,8 @@ type HowToGuideProps = {
 };
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
+  const isOddCount = steps.length % 2 !== 0;
+
   return (
     <div className="w-full max-w-[1200px] mx-auto mt-12 mb-16 px-4 no-print">
       <div className="flex flex-col items-start text-left mb-16 space-y-1">
@@ -106,6 +119,8 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16 lg:gap-x-24">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
+          const isLastItem = index === steps.length - 1;
+          const shouldCenter = isLastItem && isOddCount;
           
           let titleText = "";
           let descText = "";
@@ -128,15 +143,30 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
             }
           }
           
-          const Icon = (iconName && ICON_MAP[iconName]) || CheckCircle2;
+          // Logic to find "real icon" based on provided name or keywords in title
+          const Icon = (iconName && ICON_MAP[iconName]) || 
+                       (titleText.toLowerCase().includes('upload') ? UploadCloud : 
+                        titleText.toLowerCase().includes('select') ? MousePointer2 :
+                        titleText.toLowerCase().includes('format') ? Layers :
+                        titleText.toLowerCase().includes('save') || titleText.toLowerCase().includes('download') ? Download :
+                        CheckCircle2);
+
           const colorSet = STEP_COLORS[index % STEP_COLORS.length];
 
           return (
-            <div key={index} className="relative w-full animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+            <div 
+                key={index} 
+                className={cn(
+                    "relative w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
+                    shouldCenter && "md:col-span-2 flex justify-center"
+                )} 
+                style={{ animationDelay: `${index * 100}ms` }}
+            >
                 {/* Speech Bubble Card Container */}
                 <div className={cn(
                     "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-10 lg:pl-14 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
+                    shouldCenter && "md:max-w-[calc(50%-1rem)] w-full",
                     "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
                     index % STEP_COLORS.length === 0 ? "after:border-r-[#0d9488]" : 
                     index % STEP_COLORS.length === 1 ? "after:border-r-[#7c3aed]" : 
