@@ -70,6 +70,13 @@ const ICON_MAP: Record<string, any> = {
   Key, Unlock, Palette, ArrowLeftRight, Wand2, Pipette, Contrast, ArrowRightLeft
 };
 
+const STEP_COLORS = [
+    { bg: "bg-[#0d9488]", border: "border-[#0d9488]", text: "text-white", line: "bg-[#2dd4bf]", iconBg: "bg-[#115e59]" }, // Teal
+    { bg: "bg-[#7c3aed]", border: "border-[#7c3aed]", text: "text-white", line: "bg-[#a78bfa]", iconBg: "bg-[#5b21b6]" }, // Purple
+    { bg: "bg-[#ea580c]", border: "border-[#ea580c]", text: "text-white", line: "bg-[#fb923c]", iconBg: "bg-[#9a3412]" }, // Orange
+    { bg: "bg-[#2563eb]", border: "border-[#2563eb]", text: "text-white", line: "bg-[#60a5fa]", iconBg: "bg-[#1e40af]" }, // Blue
+];
+
 type StepDetail = {
   title: string;
   description: string;
@@ -83,8 +90,8 @@ type HowToGuideProps = {
 
 export function HowToGuide({ title, steps }: HowToGuideProps) {
   return (
-    <div className="w-full max-w-6xl mx-auto mt-12 mb-16 px-4 no-print">
-      <div className="flex flex-col items-start text-left mb-10 space-y-1">
+    <div className="w-full max-w-5xl mx-auto mt-12 mb-16 px-4 no-print">
+      <div className="flex flex-col items-start text-left mb-12 space-y-1">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-sm mb-2">
             <Sparkles className="size-2.5" /> MASTER GUIDE
         </div>
@@ -97,7 +104,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
+      <div className="flex flex-col gap-10">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
           
@@ -123,35 +130,56 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
           }
           
           const Icon = (iconName && ICON_MAP[iconName]) || CheckCircle2;
+          const colorSet = STEP_COLORS[index % STEP_COLORS.length];
 
           return (
-            <Card key={index} className="group relative overflow-hidden border-2 border-border/40 hover:border-primary/40 transition-all duration-300 rounded-[1.8rem] bg-card hover:-translate-y-0.5 shadow-lg hover:shadow-primary/5">
-              <CardContent className="p-5 md:p-6">
-                <div className="flex gap-4 md:gap-6 items-start">
-                    <div className="flex flex-col items-center gap-1.5 shrink-0">
-                        <div className="size-10 md:size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-primary/10">
-                            <Icon className="size-5 md:size-7" />
-                        </div>
-                        <span className="text-[7px] font-black text-primary/40 uppercase tracking-widest">0{index + 1}</span>
-                    </div>
+            <div key={index} className="relative w-full max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+                {/* Speech Bubble Card Container */}
+                <div className={cn(
+                    "relative ml-10 md:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-12 lg:pl-16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1",
+                    colorSet.bg,
+                    "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
+                    index % STEP_COLORS.length === 0 ? "after:border-r-[#0d9488]" : 
+                    index % STEP_COLORS.length === 1 ? "after:border-r-[#7c3aed]" : 
+                    index % STEP_COLORS.length === 2 ? "after:border-r-[#ea580c]" : 
+                    "after:border-r-[#2563eb]"
+                )}>
                     
-                    <div className="space-y-1 flex-1 pt-0.5">
-                        <h3 className="text-base md:text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors font-jakarta">{titleText}</h3>
-                        <p className="text-[10px] md:text-xi text-muted-foreground leading-relaxed font-bold uppercase opacity-70 tracking-tight">
+                    {/* Left Icon Area with Deep Shadow */}
+                    <div className={cn(
+                        "absolute -left-10 md:-left-16 top-1/2 -translate-y-1/2 size-20 md:size-28 rounded-full flex items-center justify-center shadow-[10px_10px_30px_rgba(0,0,0,0.4)] border-4 border-white/20 transition-transform duration-500 hover:scale-110",
+                        colorSet.iconBg
+                    )}>
+                        <Icon className="size-8 md:size-12 text-white drop-shadow-[4px_4px_2px_rgba(0,0,0,0.5)]" />
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="space-y-4 text-left">
+                        <div className="space-y-2">
+                            <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight text-white font-jakarta">
+                                {titleText}
+                            </h3>
+                            <div className={cn("h-1 w-20 md:w-32 rounded-full opacity-80 shadow-sm", colorSet.line)} />
+                        </div>
+                        <p className="text-xs md:text-sm text-white/80 font-bold leading-relaxed uppercase tracking-wider">
                             {descText}
                         </p>
                     </div>
+
+                    {/* Step Counter Label */}
+                    <div className="absolute -top-3 -right-2 bg-white/20 backdrop-blur-md px-4 py-1 rounded-full border border-white/30">
+                         <span className="text-[10px] font-black text-white/60 tracking-widest">STEP 0{index + 1}</span>
+                    </div>
                 </div>
-              </CardContent>
-            </Card>
+            </div>
           );
         })}
       </div>
 
-      <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-6 bg-muted/20 border-2 border-dashed rounded-[2rem] text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 shadow-inner">
-        <div className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-        <div className="flex items-center gap-2"><Zap className="size-3.5 text-yellow-500" /> WASM SPEED</div>
-        <div className="flex items-center gap-2"><Sparkles className="size-3.5 text-primary" /> HD RENDER</div>
+      <div className="mt-20 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-8 bg-muted/20 border-2 border-dashed rounded-[3rem] text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 shadow-inner">
+        <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+        <div className="flex items-center gap-2.5"><Zap className="size-4 text-yellow-500" /> WASM SPEED</div>
+        <div className="flex items-center gap-2.5"><Sparkles className="size-4 text-primary" /> HD RENDER</div>
       </div>
     </div>
   );
