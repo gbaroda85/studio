@@ -625,12 +625,20 @@ export default function AadhaarPrinter() {
 
             <div className="no-print">
                 <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
-                    <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center"><span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span></CardHeader>
+                    <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span>
+                            <Badge variant="outline" className="text-[8px] uppercase">{vAlign.toUpperCase()} ALIGNMENT ACTIVE</Badge>
+                        </div>
+                    </CardHeader>
                     <CardContent className={cn(
-                        "p-12 flex flex-col items-center min-h-[500px] transition-all duration-500",
-                        vAlign === 'top' ? 'justify-start' : vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                        "p-12 flex flex-col items-center min-h-[600px] transition-all duration-500 bg-white relative",
+                        vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
                     )}>
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+                         {/* A4 Visual Frame Guide */}
+                        <div className="absolute inset-0 border-[20px] border-slate-100 dark:border-slate-800 pointer-events-none z-0" />
+                        
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-12 z-10">
                             {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
                                 <div key={side.label} className="space-y-4">
                                     <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">{side.label}</span>
@@ -644,10 +652,11 @@ export default function AadhaarPrinter() {
                 </Card>
             </div>
 
+            {/* REAL PRINT TARGET */}
             <div id="printable-area">
-                <div className="flex flex-col items-center gap-12">
+                <div className="print-content-wrapper">
                     {[frontFinal, backFinal].map((src, i) => (
-                        <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm' }}>
+                        <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm', margin: '4mm 0' }}>
                             <img src={src} className="max-w-full max-h-full object-contain" alt="print" />
                         </div>
                     ))}
@@ -658,37 +667,50 @@ export default function AadhaarPrinter() {
 
       <style jsx global>{`
         @media print {
+          /* Strict single page configuration */
           html, body { 
             background: white !important; 
             margin: 0 !important; 
             padding: 0 !important; 
-            height: 100% !important; 
-            width: 100% !important; 
+            height: 297mm !important; 
+            width: 210mm !important; 
+            max-height: 297mm !important;
             overflow: hidden !important; 
+            display: block !important;
           }
-          body * { 
-            visibility: hidden !important; 
-            margin: 0 !important; 
+          
+          body > *:not(#printable-area) { 
+            display: none !important; 
           }
-          #printable-area, #printable-area * { 
-            visibility: visible !important; 
-          }
+
           #printable-area { 
-            display: flex !important;
-            flex-direction: column !important;
+            display: block !important;
             position: absolute !important; 
             left: 0 !important; 
             top: 0 !important; 
             width: 210mm !important; 
             height: 297mm !important; 
-            align-items: center !important; 
-            justify-content: ${vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center'} !important;
-            padding-top: ${vAlign === 'top' ? '20mm' : '0'} !important;
-            padding-bottom: ${vAlign === 'bottom' ? '20mm' : '0'} !important;
             z-index: 9999999 !important; 
             background: white !important;
             box-sizing: border-box !important;
+            visibility: visible !important;
           }
+
+          .print-content-wrapper {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            height: 100% !important;
+            align-items: center !important;
+            justify-content: ${vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center'} !important;
+            padding: ${vAlign === 'top' ? '20mm 0' : vAlign === 'bottom' ? '0 0 20mm 0' : '0'} !important;
+            box-sizing: border-box !important;
+          }
+
+          #printable-area * {
+            visibility: visible !important;
+          }
+
           @page { 
             size: A4 portrait; 
             margin: 0; 
@@ -699,4 +721,3 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
-
