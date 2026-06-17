@@ -190,16 +190,11 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 )} 
                 style={{ animationDelay: `${index * 100}ms` }}
             >
-                {/* Speech Bubble Card Container */}
+                {/* Cleaned Card Container - Reduced Height and Removed Triangle Pointer */}
                 <div className={cn(
-                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
+                    "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] py-4 md:py-5 px-6 md:px-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
-                    shouldCenter && "md:max-w-[650px] w-full",
-                    "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
-                    index % STEP_COLORS.length === 0 ? "after:border-r-[#0d9488]" : 
-                    index % STEP_COLORS.length === 1 ? "after:border-r-[#7c3aed]" : 
-                    index % STEP_COLORS.length === 2 ? "after:border-r-[#ea580c]" : 
-                    "after:border-r-[#2563eb]"
+                    shouldCenter && "md:max-w-[650px] w-full"
                 )}>
                     
                     {/* Left Icon Area with Premium 3D Look */}
