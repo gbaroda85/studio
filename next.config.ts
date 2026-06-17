@@ -42,13 +42,13 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  webpack: (config) => {
-    config.experiments = {
-      ...config.experiments,
-      topLevelAwait: true,
-    };
-    return config;
-  },
+  experimental: {
+    allowedDevOrigins: [
+      '*.cloudworkstations.dev',
+      '*.idx.google.com',
+      'localhost:9002'
+    ]
+  }
 };
 
 export default nextConfig;

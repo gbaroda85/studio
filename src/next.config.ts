@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -10,6 +11,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   experimental: {
     serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers'],
+    allowedDevOrigins: [
+      '*.cloudworkstations.dev',
+      '*.idx.google.com',
+      'localhost:9002'
+    ]
   },
   images: {
     remotePatterns: [
