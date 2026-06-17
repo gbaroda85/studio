@@ -569,54 +569,52 @@ export default function AadhaarPrinter() {
                     ))}
                 </div>
             </div>
+            
+            <style>{`
+                #printable-area { display: none; }
+                @media print {
+                    html, body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: 100% !important;
+                        max-height: 100vh !important;
+                        overflow: hidden !important;
+                        box-sizing: border-box !important;
+                        background: white !important;
+                        display: block !important;
+                    }
+                    body > *:not(#printable-area) {
+                        display: none !important;
+                    }
+                    #printable-area {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        background: white !important;
+                        z-index: 9999999 !important;
+                        box-sizing: border-box !important;
+                    }
+                    .print-content-wrapper {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .print-top { justify-content: flex-start !important; padding-top: 20mm !important; }
+                    .print-center { justify-content: center !important; }
+                    .print-bottom { justify-content: flex-end !important; padding-bottom: 20mm !important; }
+                    .card-wrapper-print { page-break-inside: avoid !important; }
+                }
+            `}</style>
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        #printable-area { display: none; }
-        @media print {
-            html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                height: 100% !important;
-                max-height: 100vh !important;
-                overflow: hidden !important;
-                box-sizing: border-box !important;
-                background: white !important;
-                display: block !important;
-            }
-            /* Hide non-print UI */
-            body > *:not(#printable-area) {
-                display: none !important;
-            }
-            #printable-area {
-                display: flex !important;
-                visibility: visible !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                z-index: 9999999 !important;
-            }
-            .print-content-wrapper {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                width: 100% !important;
-                height: 100% !important;
-            }
-            .print-top { justify-content: flex-start !important; padding-top: 20mm !important; }
-            .print-center { justify-content: center !important; }
-            .print-bottom { justify-content: flex-end !important; padding-bottom: 20mm !important; }
-            .card-wrapper-print { page-break-inside: avoid !important; }
-        }
-      ` }} />
       <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
     </div>
   );
