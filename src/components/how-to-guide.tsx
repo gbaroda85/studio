@@ -81,10 +81,38 @@ const ICON_MAP: Record<string, any> = {
 };
 
 const STEP_COLORS = [
-    { bg: "bg-[#0d9488]", border: "border-[#0d9488]", text: "text-white", line: "bg-[#2dd4bf]", iconBg: "bg-[#115e59]" }, // Teal
-    { bg: "bg-[#7c3aed]", border: "border-[#7c3aed]", text: "text-white", line: "bg-[#a78bfa]", iconBg: "bg-[#5b21b6]" }, // Purple
-    { bg: "bg-[#ea580c]", border: "border-[#ea580c]", text: "text-white", line: "bg-[#fb923c]", iconBg: "bg-[#9a3412]" }, // Orange
-    { bg: "bg-[#2563eb]", border: "border-[#2563eb]", text: "text-white", line: "bg-[#60a5fa]", iconBg: "bg-[#1e40af]" }, // Blue
+    { 
+      bg: "bg-[#0d9488]", 
+      border: "border-[#0d9488]", 
+      text: "text-white", 
+      line: "bg-[#2dd4bf]", 
+      iconGradient: "bg-gradient-to-br from-[#14b8a6] to-[#0d9488]",
+      innerShadow: "shadow-[inset_4px_4px_8px_rgba(255,255,255,0.3),inset_-4px_-4px_8px_rgba(0,0,0,0.2),0_15px_35px_rgba(0,0,0,0.3)]"
+    },
+    { 
+      bg: "bg-[#7c3aed]", 
+      border: "border-[#7c3aed]", 
+      text: "text-white", 
+      line: "bg-[#a78bfa]", 
+      iconGradient: "bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed]",
+      innerShadow: "shadow-[inset_4px_4px_8px_rgba(255,255,255,0.3),inset_-4px_-4px_8px_rgba(0,0,0,0.2),0_15px_35px_rgba(0,0,0,0.3)]"
+    },
+    { 
+      bg: "bg-[#ea580c]", 
+      border: "border-[#ea580c]", 
+      text: "text-white", 
+      line: "bg-[#fb923c]", 
+      iconGradient: "bg-gradient-to-br from-[#f97316] to-[#ea580c]",
+      innerShadow: "shadow-[inset_4px_4px_8px_rgba(255,255,255,0.3),inset_-4px_-4px_8px_rgba(0,0,0,0.2),0_15px_35px_rgba(0,0,0,0.3)]"
+    },
+    { 
+      bg: "bg-[#2563eb]", 
+      border: "border-[#2563eb]", 
+      text: "text-white", 
+      line: "bg-[#60a5fa]", 
+      iconGradient: "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]",
+      innerShadow: "shadow-[inset_4px_4px_8px_rgba(255,255,255,0.3),inset_-4px_-4px_8px_rgba(0,0,0,0.2),0_15px_35px_rgba(0,0,0,0.3)]"
+    },
 ];
 
 type StepDetail = {
@@ -143,7 +171,6 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
             }
           }
           
-          // Logic to find "real icon" based on provided name or keywords in title
           const Icon = (iconName && ICON_MAP[iconName]) || 
                        (titleText.toLowerCase().includes('upload') ? UploadCloud : 
                         titleText.toLowerCase().includes('select') ? MousePointer2 :
@@ -174,12 +201,13 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                     "after:border-r-[#2563eb]"
                 )}>
                     
-                    {/* Left Icon Area with Deep Shadow */}
+                    {/* Left Icon Area with Premium 3D Look */}
                     <div className={cn(
-                        "absolute -left-10 md:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 size-20 md:size-24 lg:size-28 rounded-full flex items-center justify-center shadow-[10px_10px_30px_rgba(0,0,0,0.4)] border-4 border-white/20 transition-transform duration-500 hover:scale-110",
-                        colorSet.iconBg
+                        "absolute -left-10 md:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 size-20 md:size-24 lg:size-28 rounded-[2rem] flex items-center justify-center border-[6px] border-white/20 transition-transform duration-500 hover:scale-110 transform-gpu",
+                        colorSet.iconGradient,
+                        colorSet.innerShadow
                     )}>
-                        <Icon className="size-8 md:size-10 lg:size-12 text-white drop-shadow-[4px_4px_2px_rgba(0,0,0,0.5)]" />
+                        <Icon className="size-8 md:size-10 lg:size-12 text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
                     </div>
 
                     {/* Content Section */}
@@ -190,7 +218,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                             </h3>
                             <div className={cn("h-1 w-20 md:w-32 rounded-full opacity-80 shadow-sm", colorSet.line)} />
                         </div>
-                        <p className="text-xs md:text-sm text-white/80 font-bold leading-relaxed uppercase tracking-wider">
+                        <p className="text-xs md:sm text-white/80 font-bold leading-relaxed uppercase tracking-wider">
                             {descText}
                         </p>
                     </div>
