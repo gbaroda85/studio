@@ -184,7 +184,7 @@ export default function PdfLocker() {
                                     <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Seal</p>
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Seal</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
                                 </div>
                             </div>
@@ -203,13 +203,6 @@ export default function PdfLocker() {
                                 <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Config</span></h2>
                             </div>
                         </div>
-                        <Button 
-                            variant="outline" 
-                            onClick={handleReset} 
-                            className="w-full md:w-auto h-11 px-6 border-2 font-black text-[10px] md:text-[11px] uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
-                        >
-                            <RefreshCcw className="mr-1.5 size-3.5" /> Start Over
-                        </Button>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -226,7 +219,7 @@ export default function PdfLocker() {
                                 </CardHeader>
                                 <CardContent className="p-8 md:p-12 flex-1 flex flex-col items-center justify-center min-h-[400px] bg-slate-100 dark:bg-slate-900/50 shadow-inner">
                                     {protectedBlob ? (
-                                        <div className="text-center space-y-6 animate-in zoom-in-95 duration-500 w-full">
+                                        <div className="text-center space-y-8 animate-in zoom-in-95 duration-500 w-full">
                                             <div className="size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl relative">
                                                 <CheckCircle2 className="size-12" />
                                                 <div className="absolute -top-2 -right-2 text-yellow-400 size-8"><Sparkles className="size-full" /></div>
@@ -235,15 +228,26 @@ export default function PdfLocker() {
                                                 <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
                                                 <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60">Your document is sealed with AES encryption.</p>
                                             </div>
-                                            <Button 
-                                                size="lg" 
-                                                className="magic-button magic-button-success h-16 md:h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg" 
-                                                onClick={handleDownload}
-                                            >
-                                                <StarIcons />
-                                                <Download className="size-8 group-hover:translate-y-1 transition-transform" /> 
-                                                <span className="uppercase tracking-tighter">DOWNLOAD SECURE PDF</span>
-                                            </Button>
+                                            
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                                <Button 
+                                                    variant="outline" 
+                                                    onClick={handleReset} 
+                                                    className="w-full sm:w-auto h-16 md:h-20 px-8 border-2 font-black text-[11px] md:text-xs uppercase rounded-full bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                                >
+                                                    <RefreshCcw className="mr-1.5 size-5" /> Start Over
+                                                </Button>
+                                                
+                                                <Button 
+                                                    size="lg" 
+                                                    className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg" 
+                                                    onClick={handleDownload}
+                                                >
+                                                    <StarIcons />
+                                                    <Download className="size-8 group-hover:translate-y-1 transition-transform" /> 
+                                                    <span className="uppercase tracking-tighter">SAVE PDF</span>
+                                                </Button>
+                                            </div>
                                         </div>
                                     ) : isProcessing ? (
                                         <div className="w-full space-y-8 text-center">
@@ -330,19 +334,31 @@ export default function PdfLocker() {
                                     </div>
                                 </CardContent>
                                 <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10">
-                                    <Button 
-                                        className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
-                                        onClick={handleProtect}
-                                        disabled={!password || !confirmPassword || isProcessing || !!protectedBlob}
-                                    >
-                                        <StarIcons />
-                                        {isProcessing ? "ENCRYPTING..." : (
-                                            <div className="flex items-center gap-3">
-                                                <Lock className="size-6 md:size-8" />
-                                                <span className="uppercase tracking-tighter text-xl font-black">{protectedBlob ? "SEALED" : "LOCK PDF"}</span>
-                                            </div>
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <Button 
+                                            className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
+                                            onClick={handleProtect}
+                                            disabled={!password || !confirmPassword || isProcessing || !!protectedBlob}
+                                        >
+                                            <StarIcons />
+                                            {isProcessing ? "ENCRYPTING..." : (
+                                                <div className="flex items-center gap-3">
+                                                    <Lock className="size-6 md:size-8" />
+                                                    <span className="uppercase tracking-tighter text-xl font-black">{protectedBlob ? "SEALED" : "LOCK PDF"}</span>
+                                                </div>
+                                            )}
+                                        </Button>
+
+                                        {!protectedBlob && (
+                                            <Button 
+                                                variant="outline" 
+                                                onClick={handleReset} 
+                                                className="w-full h-11 border-2 font-black text-[10px] md:text-[11px] uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                            >
+                                                <RefreshCcw className="mr-1.5 size-3.5" /> Start Over
+                                            </Button>
                                         )}
-                                    </Button>
+                                    </div>
                                 </CardFooter>
                             </Card>
                         </div>
@@ -353,4 +369,3 @@ export default function PdfLocker() {
     </div>
   );
 }
-
