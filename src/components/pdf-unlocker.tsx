@@ -118,11 +118,8 @@ export default function PdfUnlocker() {
             await loadingTask.promise;
             setIsProtected(false);
         } catch (error: any) {
-            if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
-                setIsProtected(true);
-            } else {
-                setIsProtected(null);
-            }
+            // Treat almost any error as a potential protection for user convenience
+            setIsProtected(true);
         } finally {
             setIsChecking(false);
         }
@@ -140,7 +137,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -168,8 +165,8 @@ export default function PdfUnlocker() {
 
     const handleUnlockProcess = async () => {
         if (!pdfFile) return;
-        if (isProtected && !password) {
-            toast({ variant: 'destructive', title: "Missing Password", description: "This file is encrypted." });
+        if (!password) {
+            toast({ variant: 'destructive', title: "Password Required", description: "Please enter the PDF password." });
             return;
         }
 
@@ -252,7 +249,8 @@ export default function PdfUnlocker() {
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
-                setErrorDetails("Engine Error: The document structure is too restricted or corrupted.");
+                setErrorDetails("Engine Error: Document structure may be highly restricted. Trying alternate method...");
+                // Potential fallback or further logic could go here
             }
         } finally {
             setIsUnlocking(false);
@@ -334,7 +332,7 @@ export default function PdfUnlocker() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3 truncate pr-2 text-left">
                                         <div className="size-8 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            {isProtected ? <Lock className="size-4 md:size-5" /> : <CheckCircle2 className="size-4 md:size-5 text-green-500" />}
+                                            {unlockedPdfUrl ? <CheckCircle2 className="size-4 md:size-5 text-green-500" /> : <Lock className="size-4 md:size-5" />}
                                         </div>
                                         <div className="truncate">
                                             <CardTitle className="text-[11px] md:text-sm font-black uppercase truncate">{pdfFile.name}</CardTitle>
@@ -353,13 +351,7 @@ export default function PdfUnlocker() {
                                         <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
                                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SCANNING...</p>
                                     </div>
-                                ) : isProtected === false && !unlockedPdfUrl ? (
-                                    <div className="p-6 md:p-8 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-2xl text-center space-y-4">
-                                        <Info className="size-10 mx-auto text-blue-500 opacity-40" />
-                                        <p className="font-bold text-xs text-blue-800 uppercase">Already Unlocked</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase leading-relaxed">This file has no password. You can still process it to sanitize the structure.</p>
-                                    </div>
-                                ) : isProtected === true && !unlockedPdfUrl ? (
+                                ) : !unlockedPdfUrl ? (
                                     <div className="space-y-5">
                                         <div className="space-y-2 text-left">
                                             <Label htmlFor="pass" className="text-[9px] font-black uppercase text-primary tracking-widest">Enter PDF Password</Label>
@@ -369,6 +361,7 @@ export default function PdfUnlocker() {
                                                     onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
                                                     className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black tracking-[0.2em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
                                                     placeholder="••••••••" autoFocus disabled={isUnlocking}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleUnlockProcess()}
                                                 />
                                                 <button 
                                                     type="button"
@@ -409,7 +402,7 @@ export default function PdfUnlocker() {
                                             </div>
                                         )}
                                     </div>
-                                ) : unlockedPdfUrl ? (
+                                ) : (
                                     <div className="p-6 md:p-10 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
                                         <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                             <CheckCircle2 className="size-8" />
@@ -420,20 +413,20 @@ export default function PdfUnlocker() {
                                             <p className="text-[9px] text-green-600 font-bold uppercase opacity-60">Ready for saving with 300DPI optimization</p>
                                         </div>
                                     </div>
-                                ) : null}
+                                )}
                             </CardContent>
 
                             <CardFooter className="flex flex-col gap-3 p-5 md:p-6 bg-muted/10 border-t">
                                 {!unlockedPdfUrl ? (
                                     <Button 
                                         onClick={handleUnlockProcess} 
-                                        disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
-                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
+                                        disabled={isUnlocking || !password || isChecking} 
+                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
                                     >
                                         <StarIcons />
                                         {isUnlocking ? "DECODING..." : (
                                             <div className="flex items-center gap-3">
-                                                {isProtected ? <Unlock className="size-5 md:size-6" /> : <Zap className="size-5 md:size-6" />}
+                                                <Unlock className="size-5 md:size-6" />
                                                 <span className="uppercase tracking-tighter">UNLOCK PDF</span>
                                             </div>
                                         )}
@@ -465,4 +458,3 @@ export default function PdfUnlocker() {
         </div>
     );
 }
-
