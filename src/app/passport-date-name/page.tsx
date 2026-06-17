@@ -43,7 +43,7 @@ export default function PassportDateNamePage() {
                 <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Sparkles className="size-2.5" /> RECRUITMENT STUDIO
                 </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
                     Add Name & <span className="text-gradient-hero">Date to Photo</span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
