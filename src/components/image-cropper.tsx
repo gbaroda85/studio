@@ -489,7 +489,7 @@ export default function ImageCropper() {
                                     <button 
                                         key={r.label} 
                                         className={cn(
-                                            "btn-pos-uiverse h-10", 
+                                            "btn-pos-uiverse h-10 border-2 border-primary/20", 
                                             (aspect === r.value || (r.value === 0 && aspect === undefined)) && "active-uiverse"
                                         )}
                                         onClick={() => handleAspectChange(r.value)}
