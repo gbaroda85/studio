@@ -489,7 +489,7 @@ export default function ImageCropper() {
                                     <button 
                                         key={r.label} 
                                         className={cn(
-                                            "btn-pos-uiverse h-10 border-2 border-primary/20", 
+                                            "btn-pos-uiverse h-10 border-2 border-primary/20 !ring-[3px] !ring-slate-950 dark:!ring-white", 
                                             (aspect === r.value || (r.value === 0 && aspect === undefined)) && "active-uiverse"
                                         )}
                                         onClick={() => handleAspectChange(r.value)}
@@ -541,20 +541,20 @@ export default function ImageCropper() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
                     <Button 
-                        className="magic-button w-full h-16 md:h-18 text-lg md:text-xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
                         onClick={handleApplyCrop}
                         disabled={isProcessing || !!croppedImageSrc}
                     >
                         <StarIcons />
                         {isProcessing ? (
                             <div className="flex items-center gap-3">
-                                <Loader2 className="size-6 md:size-7 animate-spin" />
-                                <span className="uppercase text-sm md:text-base tracking-tighter">CROPING...</span>
+                                <Loader2 className="size-5 md:size-6 animate-spin" />
+                                <span className="uppercase text-xs md:text-sm font-black tracking-tighter">CROPING...</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 md:gap-3">
                                 <CropIcon className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
-                                <span className="uppercase tracking-tighter text-lg md:text-2xl">APPLY CROP</span>
+                                <span className="uppercase tracking-tighter text-sm md:text-2xl">APPLY CROP</span>
                             </div>
                         )}
                     </Button>
