@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -63,7 +64,7 @@ type OutputFormat = 'jpeg' | 'png' | 'webp';
 type CompressionMode = 'manual' | 'target';
 type TargetUnit = 'kb' | 'mb';
 
-const QUICK_SIZES = ["20", "50", "100", "500"];
+const QUICK_SIZES = ["100", "200", "500", "1024"];
 
 const StarIcons = () => (
     <>
@@ -83,7 +84,7 @@ function formatBytes(bytes: number, decimals = 2): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 export default function ImageCompressor() {
@@ -422,21 +423,21 @@ export default function ImageCompressor() {
       </div>
 
       <Dialog open={!!viewItem} onOpenChange={(o) => !o && setViewItem(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] translate-y-[-50%] z-[2000]">
-              <DialogHeader className="bg-white dark:bg-slate-900 p-6 border-b shrink-0">
-                  <DialogTitle className="font-black uppercase tracking-tighter text-xl text-slate-800 dark:text-white flex items-center gap-3">
-                       <ArrowLeftRight className="size-6 text-primary" /> PRECISION ANALYSIS
+          <DialogContent className="max-w-5xl max-h-[82vh] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col top-[50%] translate-y-[-50%] z-[2000]">
+              <DialogHeader className="bg-white dark:bg-slate-900 p-4 md:p-6 border-b shrink-0">
+                  <DialogTitle className="font-black uppercase tracking-tighter text-lg md:text-xl text-slate-800 dark:text-white flex items-center gap-3 text-left">
+                       <ArrowLeftRight className="size-5 md:size-6 text-primary" /> PRECISION ANALYSIS
                   </DialogTitle>
               </DialogHeader>
               
-              <div className="flex-1 p-6 md:p-10 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-hidden min-h-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full h-full min-h-0">
+              <div className="flex-1 p-4 md:p-6 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-y-auto min-h-0 custom-scrollbar">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full h-full min-h-0">
                       <div className="space-y-4 flex flex-col h-full min-h-0">
                           <div className="flex justify-between items-center px-2 shrink-0">
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">ORIGINAL</span>
                               <Badge variant="outline" className="bg-white/50 text-[10px] font-black uppercase border-2 h-7 px-4 shadow-sm">{viewItem ? formatBytes(viewItem.originalSize) : '-'}</Badge>
                           </div>
-                          <div className="relative flex-1 bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20 min-h-0">
+                          <div className="relative flex-1 bg-white rounded-[2rem] border-2 shadow-xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-primary/20 min-h-[250px]">
                               {viewItem?.originalDataUrl && <img src={viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block transition-transform duration-500 group-hover:scale-105" alt="original" />}
                           </div>
                       </div>
@@ -446,7 +447,7 @@ export default function ImageCompressor() {
                               <Badge className="bg-green-500 text-white text-[10px] font-black uppercase h-7 px-5 rounded-lg shadow-md border-2 border-white/20">Optimized</Badge>
                               <span className="text-[10px] font-black uppercase text-green-600 tracking-widest">{viewItem && viewItem.newSize > 0 ? formatBytes(viewItem.newSize) : 'Processing...'}</span>
                           </div>
-                          <div className="relative flex-1 bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40 min-h-0">
+                          <div className="relative flex-1 bg-white rounded-[2rem] border-[4px] border-green-500/20 shadow-2xl flex items-center justify-center overflow-hidden p-6 group transition-all hover:border-green-500/40 min-h-[250px]">
                               {viewItem && <img src={viewItem.newSize > 0 ? viewItem.dataUrl : viewItem.originalDataUrl} className="max-w-full max-h-full object-contain block drop-shadow-2xl transition-transform duration-500 group-hover:scale-105" alt="optimized" />}
                               {viewItem && viewItem.newSize > 0 && (
                                   <div className="absolute top-4 right-4"><div className="bg-green-500 text-white rounded-full p-1.5 shadow-xl ring-4 ring-white animate-in zoom-in-50"><CheckCircle2 className="size-6" /></div></div>
@@ -456,14 +457,14 @@ export default function ImageCompressor() {
                   </div>
               </div>
               
-              <DialogFooter className="p-8 bg-white dark:bg-slate-900 border-t flex justify-center shrink-0">
+              <DialogFooter className="p-6 md:p-8 bg-white dark:bg-slate-900 border-t flex justify-center shrink-0">
                   <Button 
-                    className="magic-button magic-button-success w-full max-w-xl h-18 md:h-20 rounded-[1.8rem] bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black transition-all active:scale-95 group flex items-center justify-center gap-4 text-xl"
+                    className="magic-button magic-button-success w-full max-w-xl h-14 md:h-18 rounded-[1.5rem] bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg"
                     onClick={() => viewItem && downloadFile(viewItem)}
                     disabled={!viewItem || viewItem.newSize === 0}
                   >
                       <StarIcons />
-                      <Download className="size-8 group-hover:translate-y-1 transition-transform" />
+                      <Download className="size-6 md:size-8 group-hover:translate-y-1 transition-transform" />
                       <span className="uppercase tracking-tighter">DOWNLOAD OPTIMIZED</span>
                   </Button>
               </DialogFooter>
