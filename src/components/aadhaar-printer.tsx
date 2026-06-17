@@ -674,40 +674,48 @@ export default function AadhaarPrinter() {
 
       <style jsx global>{`
         @media print {
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
           /* 1. Reset everything and lock to 1 page */
           html, body { 
             background: white !important; 
             margin: 0 !important; 
             padding: 0 !important; 
-            height: 100% !important; 
-            max-height: 100vh !important;
-            width: 100% !important;
+            height: 297mm !important; 
+            max-height: 297mm !important;
+            width: 210mm !important;
             overflow: hidden !important; 
             display: block !important;
             -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           
-          /* 2. Hide poori website */
-          body > *:not(#printable-area) { 
-            display: none !important; 
+          /* 2. Absolute Isolation Strategy */
+          body * {
+            visibility: hidden !important;
           }
 
           /* 3. Main print wrapper */
-          #printable-area { 
+          #printable-area, #printable-area * { 
+            visibility: visible !important;
+          }
+
+          #printable-area {
             display: flex !important;
             flex-direction: column !important;
             position: absolute !important; 
             left: 0 !important; 
             top: 0 !important; 
             width: 210mm !important; 
-            height: 100vh !important; 
+            height: 297mm !important; 
             z-index: 9999999 !important; 
             background: white !important;
             box-sizing: border-box !important;
-            visibility: visible !important;
           }
 
-          /* 4. Use classes for vertical positioning */
+          /* 4. Use classes for vertical positioning with strict units */
           #printable-area.print-top { 
             justify-content: flex-start !important; 
             padding-top: 20mm !important; 
@@ -727,18 +735,10 @@ export default function AadhaarPrinter() {
             width: 100% !important;
             box-sizing: border-box !important;
           }
-
-          #printable-area * {
-            visibility: visible !important;
-          }
-
-          @page { 
-            size: A4 portrait; 
-            margin: 0; 
-          }
         }
       `}</style>
       <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
     </div>
   );
 }
+
