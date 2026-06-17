@@ -104,7 +104,6 @@ export default function AadhaarPrinter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [printSnapshot, setPrintSnapshot] = useState<string | null>(null);
   
   const [rectCrop, setRectCrop] = useState<CropType>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
@@ -382,9 +381,9 @@ export default function AadhaarPrinter() {
   const handleReset = () => {
     setWorkflow(null); setStage('selection'); setOriginalA4Src(null); setFrontRaw(null); setBackRaw(null);
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
-    setPrintSnapshot(null);
   };
 
+  // --- BULLETPROOF SAME-PAGE PRINT ENGINE ---
   const executeFinalPrint = async () => {
       if (!studioPrintRef.current) return;
       setIsExporting(true);
@@ -399,8 +398,43 @@ export default function AadhaarPrinter() {
           });
 
           const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-          setPrintSnapshot(dataUrl);
-          // Actual print dialog is triggered by the img.onLoad in the print-layer
+          
+          // CRITICAL: Use hidden iframe for same-page isolated print driver handshake
+          const iframe = document.createElement('iframe');
+          iframe.style.position = 'fixed';
+          iframe.style.right = '0';
+          iframe.style.bottom = '0';
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          iframe.style.border = '0';
+          document.body.appendChild(iframe);
+
+          const doc = iframe.contentWindow?.document;
+          if (doc) {
+              doc.open();
+              doc.write(`
+                  <html>
+                  <head>
+                      <style>
+                          @page { size: A4 portrait; margin: 0; }
+                          body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; }
+                          img { width: 100%; height: auto; display: block; }
+                      </style>
+                  </head>
+                  <body>
+                      <img src="${dataUrl}" onload="setTimeout(() => { window.print(); }, 200);">
+                  </body>
+                  </html>
+              `);
+              doc.close();
+          }
+
+          // Cleanup
+          setTimeout(() => {
+              document.body.removeChild(iframe);
+              setIsExporting(false);
+          }, 2000);
+
       } catch (err) {
           toast({ variant: 'destructive', title: "Print Failed" });
           setIsExporting(false);
@@ -428,52 +462,20 @@ export default function AadhaarPrinter() {
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
       
-      {/* SAME-PAGE PRINT ENGINE LAYER (STRICTLY HIDDEN ON SCREEN, VISIBLE ON PRINT) */}
-      <style jsx global>{`
-          @media print {
-              body > *:not(.print-exclusive-layer) { display: none !important; }
-              .print-exclusive-layer { 
-                  display: block !important; 
-                  position: fixed !important; 
-                  top: 0; left: 0; width: 100%; height: 100%; 
-                  background: white; z-index: 999999;
-              }
-              html, body { height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
-              @page { size: A4 portrait; margin: 0; }
-          }
-      `}</style>
-      
-      {printSnapshot && (
-          <div className="print-exclusive-layer hidden">
-              <img 
-                src={printSnapshot} 
-                className="w-full h-full object-contain" 
-                alt="print-spool" 
-                onLoad={() => {
-                    setTimeout(() => {
-                        window.print();
-                        setPrintSnapshot(null);
-                        setIsExporting(false);
-                    }, 500);
-                }}
-              />
-          </div>
-      )}
-
-      {/* HIDDEN RENDER TARGET FOR COORDINATE MAPPING */}
+      {/* HIDDEN RENDER TARGET FOR COORDINATE MAPPING (A4 SCALE) */}
       <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
           <div ref={studioPrintRef} style={{ width: `${A4_WIDTH_MM}mm`, height: `${A4_HEIGHT_MM}mm`, background: 'white', position: 'relative' }}>
                 <div 
                     className={cn("absolute bg-white overflow-hidden flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
                     style={{ width: `${CARD_WIDTH_MM}mm`, height: `${CARD_HEIGHT_MM}mm`, left: `${pos.front.x}mm`, top: `${pos.front.y}mm` }}
                 >
-                    {frontFinal && <img src={frontFinal} className="w-full h-full object-contain" alt="front" />}
+                    {frontFinal && <img src={frontFinal || undefined} className="w-full h-full object-contain" alt="front" />}
                 </div>
                 <div 
                     className={cn("absolute bg-white overflow-hidden flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
                     style={{ width: `${CARD_WIDTH_MM}mm`, height: `${CARD_HEIGHT_MM}mm`, left: `${pos.back.x}mm`, top: `${pos.back.y}mm` }}
                 >
-                    {backFinal && <img src={backFinal} className="w-full h-full object-contain" alt="back" />}
+                    {backFinal && <img src={backFinal || undefined} className="w-full h-full object-contain" alt="back" />}
                 </div>
           </div>
       </div>
@@ -513,7 +515,7 @@ export default function AadhaarPrinter() {
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
         >
-            <CardHeader className="pt-12 relative">
+            <CardHeader className="pt-12 relative text-center">
                 <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase text-left"><ArrowLeft className="mr-1 size-3" /> Back</Button>
                 <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl"><UploadCloud className="size-10" /></div>
                 <CardTitle className="text-3xl font-black uppercase">e-Aadhaar Upload</CardTitle>
@@ -521,7 +523,7 @@ export default function AadhaarPrinter() {
             <CardContent className="pb-12 px-6">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative" onClick={() => fileInputRef.current?.click()}>
                     <Zap className="size-8 text-yellow-500 animate-pulse" />
-                    <p className="font-black uppercase text-lg">Drop Original PDF here</p>
+                    <p className="font-black uppercase text-lg text-slate-800 dark:text-slate-100">Drop Original PDF here</p>
                     <Badge variant="outline">AUTO-DECRYPT ACTIVE</Badge>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
@@ -588,14 +590,14 @@ export default function AadhaarPrinter() {
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-4 text-left">
-                <Label className="text-[9px] font-black uppercase tracking-widest opacity-50 ml-1">Enter PDF Password</Label>
+                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-50 ml-1">Enter PDF Password</Label>
                 <div className="relative group text-left">
                     <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 text-xl font-black tracking-[0.1em] text-center border-2 rounded-xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}</button>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner">
-                    <AlertCircle className="size-4 text-blue-500 shrink-0" />
-                    <p className="text-[9px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner">
+                    <AlertCircle className="size-5 text-blue-500 shrink-0" />
+                    <p className="text-[10px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p>
                 </div>
             </CardContent>
             <CardFooter className="p-4 bg-muted/5 border-t">
