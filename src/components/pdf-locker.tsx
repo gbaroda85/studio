@@ -200,7 +200,7 @@ export default function PdfLocker() {
                                 <Settings2 className="size-5 md:size-6" />
                             </div>
                             <div>
-                                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Config</span></h2>
+                                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Studio <span className="text-primary">Config</span></h2>
                             </div>
                         </div>
                     </div>
@@ -226,26 +226,29 @@ export default function PdfLocker() {
                                             </div>
                                             <div className="space-y-1">
                                                 <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
-                                                <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60">Your document is sealed with AES encryption.</p>
+                                                <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60 text-center">Your document is sealed with AES encryption.</p>
                                             </div>
                                             
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xl mx-auto">
                                                 <Button 
                                                     variant="outline" 
                                                     onClick={handleReset} 
-                                                    className="w-full sm:w-auto h-16 md:h-20 px-8 border-2 font-black text-[11px] md:text-xs uppercase rounded-full bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                                    className="w-full sm:w-auto h-16 md:h-18 px-8 border-2 font-black text-[11px] md:text-xs uppercase rounded-full bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
                                                 >
                                                     <RefreshCcw className="mr-1.5 size-5" /> Start Over
                                                 </Button>
                                                 
                                                 <Button 
                                                     size="lg" 
-                                                    className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg" 
+                                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none flex-[2]" 
                                                     onClick={handleDownload}
                                                 >
-                                                    <StarIcons />
-                                                    <Download className="size-8 group-hover:translate-y-1 transition-transform" /> 
-                                                    <span className="uppercase tracking-tighter">SAVE PDF</span>
+                                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
+                                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                        <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                                    </div>
                                                 </Button>
                                             </div>
                                         </div>
@@ -256,7 +259,7 @@ export default function PdfLocker() {
                                                 <Lock className="absolute inset-0 m-auto h-8 w-8 md:h-10 md:w-10 text-primary animate-pulse" />
                                             </div>
                                             <div className="space-y-2">
-                                                <p className="font-black text-lg md:text-2xl text-primary uppercase tracking-tighter animate-pulse">Encoding AES...</p>
+                                                <p className="font-black text-lg md:text-2xl text-primary uppercase tracking-tighter animate-pulse text-center">Encoding AES...</p>
                                                 <Progress value={progress} className="h-1.5 shadow-inner" />
                                             </div>
                                         </div>
@@ -276,7 +279,7 @@ export default function PdfLocker() {
                         <div className="lg:col-span-5 space-y-6">
                             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                                 <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
-                                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                         <Key className="size-4 md:size-5 text-primary" /> Security Credentials
                                     </CardTitle>
                                 </CardHeader>

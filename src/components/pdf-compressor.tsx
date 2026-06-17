@@ -282,7 +282,7 @@ export default function PdfCompressor() {
 
     if (!pdfFile) {
         return (
-            <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+            <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="text-center space-y-2 mb-4">
                     <div className="mx-auto mb-2 grid size-14 md:size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
                         <FileArchive className="size-7 md:size-8" />
@@ -338,7 +338,7 @@ export default function PdfCompressor() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Engine</span></h2>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Studio <span className="text-primary">Engine</span></h2>
                     </div>
                 </div>
             </div>
@@ -355,14 +355,14 @@ export default function PdfCompressor() {
                         </CardHeader>
                         <CardContent className="p-6 md:p-12 flex-1 bg-slate-50 dark:bg-slate-900/50 shadow-inner min-h-[400px] flex flex-col items-center justify-center relative">
                             {isChecking ? (
-                                <div className="flex flex-col items-center gap-3">
+                                <div className="flex flex-col items-center justify-center gap-3">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SCANNING...</p>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground text-center">SCANNING...</p>
                                 </div>
                             ) : isProtected ? (
                                 <div className="w-full max-w-sm space-y-6 text-center animate-in zoom-in-95">
                                     <div className="size-16 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 mx-auto border-2 border-rose-200"><Lock className="size-6" /></div>
-                                    <p className="text-xs font-bold text-rose-800 uppercase leading-relaxed">Protected Document. <br/>Unlock it first.</p>
+                                    <p className="text-xs font-bold text-rose-800 uppercase leading-relaxed text-center">Protected Document. <br/>Unlock it first.</p>
                                     <Button asChild variant="outline" className="h-10 border-2 rounded-xl text-[9px] font-black uppercase"><Link href="/unlock-pdf">GO TO UNLOCKER</Link></Button>
                                 </div>
                             ) : isProcessing ? (
@@ -372,7 +372,7 @@ export default function PdfCompressor() {
                                         <Zap className="absolute inset-0 m-auto h-7 w-7 text-primary animate-pulse" />
                                     </div>
                                     <div className="space-y-3">
-                                        <p className="font-black text-sm md:text-xl text-primary uppercase tracking-tighter animate-pulse leading-none">{statusText}</p>
+                                        <p className="font-black text-sm md:text-xl text-primary uppercase tracking-tighter animate-pulse leading-none text-center">{statusText}</p>
                                         <Progress value={progress} className="h-1" />
                                     </div>
                                 </div>
@@ -396,7 +396,7 @@ export default function PdfCompressor() {
                             ) : (
                                 <div className="flex flex-col items-center gap-6 text-center opacity-30">
                                      <div className="size-24 rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl flex items-center justify-center border-2 border-dashed border-primary/20"><FileArchive className="size-12" /></div>
-                                     <div className="space-y-1">
+                                     <div className="space-y-1 text-center">
                                         <p className="text-lg font-black uppercase tracking-tighter text-slate-800 dark:text-white">Ready for Optimize</p>
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase">Local buffer initialized.</p>
                                      </div>
@@ -424,11 +424,16 @@ export default function PdfCompressor() {
                                     </Button>
                                 ) : (
                                     <Button 
-                                        onClick={handleDownload} 
-                                        className="magic-button magic-button-success w-full sm:w-auto h-16 md:h-18 text-sm md:text-lg font-black bg-green-600 hover:bg-green-700 text-white rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10 border-none shadow-2xl"
+                                        size="lg" 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[200px]" 
+                                        onClick={handleDownload}
                                     >
-                                        <StarIcons />
-                                        <Download className="mr-2 md:mr-3 size-6" /> SAVE PDF
+                                        <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                        <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
+                                        <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                            <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                            <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                        </div>
                                     </Button>
                                 )}
                             </div>

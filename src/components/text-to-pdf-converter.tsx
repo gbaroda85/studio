@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -38,7 +39,7 @@ type Font = 'helvetica' | 'times' | 'courier';
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i}`}>
+            <div key={i} className={`star-${i} pointer-events-none`}>
                 <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
@@ -152,147 +153,158 @@ export default function TextToPdfConverter() {
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1 text-left">Advanced Document Editor</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto h-12">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-full border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
-                        <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Settings
-                    </Button>
-                    <Button 
-                        size="lg" 
-                        className="magic-button magic-button-success flex-[2] md:flex-none h-full px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
-                        onClick={handleDownload}
-                        disabled={isGenerating || !text.trim()}
-                    >
-                        <StarIcons />
-                        {isGenerating ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 group-hover:translate-y-1 transition-transform" />}
-                        <span className="text-xs uppercase tracking-widest">DOWNLOAD PDF</span>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 transition-all">
+                        <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset
                     </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 {/* LEFT: SOURCE EDITOR */}
-                <Card className="lg:col-span-5 flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
-                    <CardHeader className="bg-primary/5 border-b p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
-                                    <FileText className="size-5" />
-                                </div>
-                                <CardTitle className="text-xl font-black uppercase tracking-tighter">Source Editor</CardTitle>
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={handleClear} className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5">
-                                <Eraser className="size-4" />
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8">
-                        <div className="flex-1 flex flex-col gap-3">
-                            <div className="flex justify-between items-center px-1">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
-                                <Badge variant="outline" className="bg-primary/5 text-primary text-[8px] font-black border-primary/20 uppercase tracking-widest">Safe Input</Badge>
-                            </div>
-                            <Textarea
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                placeholder="Start typing your document content here..."
-                                className="flex-1 min-h-[400px] text-base resize-none font-bold border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-5 bg-muted/20 custom-scrollbar shadow-inner text-left"
-                                style={{ lineHeight: '1.2' }}
-                            />
-                        </div>
-
-                        {/* ADVANCED CONTROLS GRID */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed items-start">
-                             <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Baseline className="size-3"/> Font & Style</Label>
-                                 <div className="flex gap-2">
-                                     <Select value={font} onValueChange={(v) => setFont(v as Font)}>
-                                        <SelectTrigger className="h-10 flex-1 font-black border-2 rounded-xl bg-background/50 shadow-sm text-[10px]"><SelectValue /></SelectTrigger>
-                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                            <SelectItem value="helvetica" className="font-bold py-2 uppercase text-[10px]">Helvetica (Sans)</SelectItem>
-                                            <SelectItem value="times" className="font-bold py-2 uppercase text-[10px]">Times (Serif)</SelectItem>
-                                            <SelectItem value="courier" className="font-bold py-2 uppercase text-[10px]">Courier (Mono)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Button 
-                                        variant="outline" 
-                                        size="icon" 
-                                        className={cn("h-10 w-10 shrink-0 border-2 rounded-xl transition-all", isBold && "bg-primary text-white border-primary shadow-lg")}
-                                        onClick={() => setIsBold(!isBold)}
-                                    >
-                                        <Bold className="size-4" />
-                                    </Button>
-                                 </div>
-                             </div>
-                             
-                             <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Palette className="size-3"/> Size & Color</Label>
-                                 <div className="flex gap-2">
-                                    <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 flex-1 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
-                                    <div className="h-10 w-12 rounded-xl border-2 p-1 bg-background/50 shadow-inner flex items-center justify-center group relative overflow-hidden">
-                                        <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent" />
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 flex-1">
+                        <CardHeader className="bg-primary/5 border-b p-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
+                                        <FileText className="size-5" />
                                     </div>
-                                 </div>
-                             </div>
+                                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Source Editor</CardTitle>
+                                </div>
+                                <Button variant="ghost" size="icon" onClick={handleClear} className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5">
+                                    <Eraser className="size-4" />
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8">
+                            <div className="flex-1 flex flex-col gap-3">
+                                <div className="flex justify-between items-center px-1">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
+                                    <Badge variant="outline" className="bg-primary/5 text-primary text-[8px] font-black border-primary/20 uppercase tracking-widest">Safe Input</Badge>
+                                </div>
+                                <Textarea
+                                    value={text}
+                                    onChange={(e) => setText(e.target.value)}
+                                    placeholder="Start typing your document content here..."
+                                    className="flex-1 min-h-[400px] text-base resize-none font-bold border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-5 bg-muted/20 custom-scrollbar shadow-inner text-left"
+                                    style={{ lineHeight: '1.2' }}
+                                />
+                            </div>
 
-                              <div className="space-y-2">
-                                 <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Move className="size-3"/> Margin (mm)</Label>
-                                 <Input type="number" value={margin} onChange={(e) => setMargin(Math.max(0, Number(e.target.value)))} className="h-10 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
-                             </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="bg-muted/10 p-6 border-t flex justify-center">
-                        <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
-                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT PERFORMANCE</div>
-                        </div>
-                    </CardFooter>
-                </Card>
+                            {/* ADVANCED CONTROLS GRID */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed items-start">
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Baseline className="size-3"/> Font & Style</Label>
+                                    <div className="flex gap-2">
+                                        <Select value={font} onValueChange={(v) => setFont(v as Font)}>
+                                            <SelectTrigger className="h-10 flex-1 font-black border-2 rounded-xl bg-background/50 shadow-sm text-[10px]"><SelectValue /></SelectTrigger>
+                                            <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                <SelectItem value="helvetica" className="font-bold py-2 uppercase text-[10px]">Helvetica (Sans)</SelectItem>
+                                                <SelectItem value="times" className="font-bold py-2 uppercase text-[10px]">Times (Serif)</SelectItem>
+                                                <SelectItem value="courier" className="font-bold py-2 uppercase text-[10px]">Courier (Mono)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className={cn("h-10 w-10 shrink-0 border-2 rounded-xl transition-all", isBold && "bg-primary text-white border-primary shadow-lg")}
+                                            onClick={() => setIsBold(!isBold)}
+                                        >
+                                            <Bold className="size-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Palette className="size-3"/> Size & Color</Label>
+                                    <div className="flex gap-2">
+                                        <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-10 flex-1 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
+                                        <div className="h-10 w-12 rounded-xl border-2 p-1 bg-background/50 shadow-inner flex items-center justify-center group relative overflow-hidden text-center">
+                                            <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 text-left">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Move className="size-3"/> Margin (mm)</Label>
+                                    <Input type="number" value={margin} onChange={(e) => setMargin(Math.max(0, Number(e.target.value)))} className="h-10 font-black text-sm border-2 rounded-xl text-center bg-background/50 shadow-inner" />
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-center">
+                            <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT PERFORMANCE</div>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </div>
 
                 {/* RIGHT: HD VIEWPORT */}
-                <Card className="lg:col-span-7 flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10">
-                    <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2">
-                            <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
-                        </div>
-                        <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
-                    </CardHeader>
-                    <CardContent className="flex-1 p-4 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
-                        
-                        <div className="relative transform-gpu scale-[0.6] sm:scale-[0.8] md:scale-[0.9] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
-                            <div 
-                                ref={previewRef} 
-                                className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
-                                style={{ 
-                                    width: '210mm',
-                                    minHeight: '297mm',
-                                    padding: `${margin}mm`,
-                                    fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
-                                    fontSize: `${fontSize}pt`,
-                                    fontWeight: isBold ? 'bold' : 'normal',
-                                    color: textColor,
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    lineHeight: '1.2', 
-                                    boxSizing: 'border-box',
-                                    textAlign: 'left',
-                                    display: 'block'
-                                }}
-                            >
-                                {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40 w-full">Start Typing...</span>}
+                <div className="lg:col-span-7 flex flex-col gap-6 h-full">
+                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 min-h-[700px]">
+                        <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
+                            <div className="flex items-center gap-2">
+                                <Eye className="size-4 text-primary" />
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
                             </div>
-                        </div>
+                            <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
+                        </CardHeader>
+                        <CardContent className="flex-1 p-4 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
+                            
+                            <div className="relative transform-gpu scale-[0.55] sm:scale-[0.8] md:scale-[0.9] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
+                                <div 
+                                    ref={previewRef} 
+                                    className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
+                                    style={{ 
+                                        width: '210mm',
+                                        minHeight: '297mm',
+                                        padding: `${margin}mm`,
+                                        fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
+                                        fontSize: `${fontSize}pt`,
+                                        fontWeight: isBold ? 'bold' : 'normal',
+                                        color: textColor,
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                        lineHeight: '1.2', 
+                                        boxSizing: 'border-box',
+                                        textAlign: 'left',
+                                        display: 'block'
+                                    }}
+                                >
+                                    {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40 w-full">Start Typing...</span>}
+                                </div>
+                            </div>
 
-                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
-                             <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
-                        </div>
-                    </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
-                         <div className="flex items-center gap-2"><Smartphone className="size-4" /> MOBILE OPTIMIZED</div>
-                        <div className="flex items-center gap-2"><Monitor className="size-4" /> 300 DPI RENDER</div>
-                    </CardFooter>
-                </Card>
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
+                                <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center">
+                            <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={handleDownload}
+                                disabled={isGenerating || !text.trim()}
+                            >
+                                <div className="absolute left-4 w-0.5 h-10 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">
+                                    {isGenerating ? "GENERATING..." : "DOWNLOAD PROFESSIONAL PDF"}
+                                </span>
+                                <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                    <Download className="size-8 group-hover:scale-110 transition-transform" />
+                                    <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
+                                </div>
+                            </Button>
+                            <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground/30 text-[8px] font-black uppercase tracking-widest shrink-0">
+                                <div className="flex items-center gap-1.5"><Smartphone className="size-3 text-primary" /> MOBILE SYNC</div>
+                                <div className="flex items-center gap-1.5"><Monitor className="size-3 text-yellow-500" /> 300 DPI RENDER</div>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </div>
             </div>
         </div>
     );

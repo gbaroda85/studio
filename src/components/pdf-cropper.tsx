@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -11,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { 
     UploadCloud, 
     Download, 
-    Loader2, 
     ChevronLeft, 
     ChevronRight, 
     X, 
@@ -29,7 +29,8 @@ import {
     Sparkles,
     FileArchive,
     Settings2,
-    Crop
+    Crop,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -51,36 +52,13 @@ type Stage = 'upload' | 'edit';
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -505,7 +483,7 @@ export default function PdfCropper() {
                                 <CheckCircle2 className="size-6 mr-2 group-hover:scale-110 transition-transform" /> APPLY FOR PAGE {currentPage}
                             </Button>
 
-                            <div className="bg-green-500/5 border-2 border-green-500/10 rounded-[1.5rem] p-5 flex items-start gap-4">
+                            <div className="bg-green-500/5 border-2 border-green-500/10 rounded-[1.5rem] p-5 flex items-start gap-4 text-left">
                                 <div className="size-10 rounded-full bg-green-500/10 border-2 border-green-500/20 flex items-center justify-center shrink-0">
                                     <ShieldCheck className="size-5 text-green-600" />
                                 </div>
@@ -521,32 +499,41 @@ export default function PdfCropper() {
                         <Separator className="opacity-10" />
 
                         <div className="space-y-4">
-                            <Button disabled={croppedEntries.length === 0 || isBuildingPdf} className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow-xl uppercase transition-all active:scale-95" onClick={async () => {
-                                setIsBuildingPdf(true);
-                                try {
-                                    const finalPdf = await PDFDocument.create();
-                                    for(const [_,s] of croppedEntries){
-                                        const b = await fetch(s.result!).then(r=>r.arrayBuffer());
-                                        const ei = await finalPdf.embedJpg(b);
-                                        const pWidth = ei.width / 2.2;
-                                        const pHeight = ei.height / 2.2;
-                                        const p = finalPdf.addPage([pWidth, pHeight]);
-                                        p.drawImage(ei, { x: 0, y: 0, width: p.getWidth(), height: p.getHeight() });
+                            <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#22c55e] hover:bg-[#16a34a] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(34,197,94,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                disabled={croppedEntries.length === 0 || isBuildingPdf}
+                                onClick={async () => {
+                                    setIsBuildingPdf(true);
+                                    try {
+                                        const finalPdf = await PDFDocument.create();
+                                        for(const [_,s] of croppedEntries){
+                                            const b = await fetch(s.result!).then(r=>r.arrayBuffer());
+                                            const ei = await finalPdf.embedJpg(b);
+                                            const pWidth = ei.width / 2.2;
+                                            const pHeight = ei.height / 2.2;
+                                            const p = finalPdf.addPage([pWidth, pHeight]);
+                                            p.drawImage(ei, { x: 0, y: 0, width: p.getWidth(), height: p.getHeight() });
+                                        }
+                                        const bytes = await finalPdf.save();
+                                        const link = document.createElement('a'); 
+                                        link.href = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'})); 
+                                        link.download=`GR7-Cropped-Bundle-${Date.now()}.pdf`; 
+                                        link.click();
+                                        toast({ title: "Bundle Exported", description: "All cropped pages combined." });
+                                    } catch (e) {
+                                        toast({ variant: 'destructive', title: 'Export Error' });
+                                    } finally {
+                                        setIsBuildingPdf(false);
                                     }
-                                    const bytes = await finalPdf.save();
-                                    const link = document.createElement('a'); 
-                                    link.href = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'})); 
-                                    link.download=`GR7-Cropped-Bundle-${Date.now()}.pdf`; 
-                                    link.click();
-                                    toast({ title: "Bundle Exported", description: "All cropped pages combined." });
-                                } catch (e) {
-                                    toast({ variant: 'destructive', title: 'Export Error' });
-                                } finally {
-                                    setIsBuildingPdf(false);
-                                }
-                            }}>
-                                {isBuildingPdf ? <Loader2 className="animate-spin mr-2" /> : <Download className="mr-2" />}
-                                DOWNLOAD {croppedEntries.length} PAGE BUNDLE
+                                }}
+                            >
+                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-sm uppercase">SAVE {croppedEntries.length} PAGE BUNDLE</span>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#22c55e] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    {isBuildingPdf ? <Loader2 className="size-6 md:size-8 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#22c55e]/20 rounded-full" />
+                                </div>
                             </Button>
                             <Button variant="ghost" onClick={resetState} className="w-full h-10 font-black uppercase text-[10px] tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive">
                                 <RefreshCcw className="size-3 mr-2" /> Start Over

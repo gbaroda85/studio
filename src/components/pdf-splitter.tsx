@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -336,7 +337,7 @@ export default function PdfSplitter() {
 
     if (previews.length === 0 && !isRendering) {
         return (
-            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+            <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
                     <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
                         <Scissors className="size-8" />
@@ -353,7 +354,7 @@ export default function PdfSplitter() {
                 </motion.div>
 
                 <Card className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                 )}
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -417,14 +418,14 @@ export default function PdfSplitter() {
                                     placeholder="e.g. 1-3, 5, 8"
                                     className="h-14 text-xl font-black border-2 rounded-2xl bg-background shadow-inner text-center focus-visible:ring-primary/20"
                                 />
-                                <p className="text-[9px] text-muted-foreground font-bold uppercase opacity-60 leading-relaxed">
+                                <p className="text-[9px] text-muted-foreground font-bold uppercase opacity-60 leading-relaxed text-left">
                                     Type ranges or click thumbnails on the right to select pages.
                                 </p>
                              </div>
 
                              <AnimatePresence>
                                 {selectedIndices.length > 0 && (
-                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4">
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 text-left">
                                         <CheckCircle2 className="size-6 text-green-600 shrink-0 mt-0.5" />
                                         <div>
                                             <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Bundle Ready</p>
@@ -440,7 +441,7 @@ export default function PdfSplitter() {
                         <div className="pt-6 border-t-2 border-dashed flex flex-col gap-3">
                              {!splitPdfUrl ? (
                                 <Button 
-                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
+                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10 shadow-xl" 
                                     onClick={handleSplitPdf} 
                                     disabled={selectedIndices.length === 0 || isProcessing}
                                 >
@@ -458,10 +459,17 @@ export default function PdfSplitter() {
                                     )}
                                 </Button>
                              ) : (
-                                <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 px-10">
-                                    <StarIcons />
-                                    <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                    <span className="uppercase tracking-tighter">SAVE NEW PDF</span>
+                                <Button 
+                                    size="lg" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
+                                    onClick={handleDownload}
+                                >
+                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE NEW PDF</span>
+                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                        <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                    </div>
                                 </Button>
                              )}
                              
@@ -470,11 +478,11 @@ export default function PdfSplitter() {
                              </Button>
                         </div>
                         
-                        <Button variant="ghost" onClick={resetState} className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-muted-foreground/60 hover:text-destructive hover:bg-destructive/5 rounded-xl">
+                        <Button variant="ghost" onClick={resetState} className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-muted-foreground/60 hover:text-destructive hover:bg-destructive/5 rounded-xl transition-all">
                             <RefreshCcw className="size-3.5 mr-2" /> Start New Bundle
                         </Button>
 
-                        <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4">
+                        <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-4 text-left">
                             <ShieldCheck className="size-5 text-primary shrink-0" />
                             <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
                                 <span className="font-black block mb-0.5 text-primary">SECURE RAM:</span>
@@ -528,13 +536,13 @@ export default function PdfSplitter() {
                                 )}
 
                                 <button 
-                                    className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 transition-all text-primary font-black uppercase text-[10px] group shadow-inner"
+                                    className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all aspect-[1/1.414] shadow-inner group"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <div className="size-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Plus className="size-6" />
                                     </div>
-                                    <span>Add More</span>
+                                    <span className="text-[10px] font-black uppercase text-primary/60">Add More</span>
                                 </button>
                             </div>
                             <ScrollBar />

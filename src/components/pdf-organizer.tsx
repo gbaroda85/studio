@@ -654,14 +654,26 @@ export default function PdfOrganizer() {
 
                             <div className="space-y-4 mt-auto pt-6">
                                 {!resultPdfUrl ? (
-                                    <Button className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" onClick={handleSavePdf} disabled={isSaving || isRendering || pages.length === 0}>
+                                    <Button 
+                                        className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" onClick={handleSavePdf} disabled={isSaving || isRendering || pages.length === 0}>
                                         <StarIcons />
                                         {isSaving ? <Loader2 className="size-6 md:size-7 animate-spin" /> : <FileDigit className="size-6 md:size-7 text-white/50 group-hover:scale-125 transition-transform" />}
                                         <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE CHANGES</span>
                                     </Button>
                                 ) : (
                                     <div className="space-y-3">
-                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-16 md:h-18 text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-[1.5rem] transition-all active:scale-95 group flex items-center justify-center gap-4 px-10 animate-in zoom-in-95"><StarIcons /><Download className="mr-3 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /><span className="uppercase tracking-tighter">DOWNLOAD PDF</span></Button>
+                                        <Button 
+                                            size="lg" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                            onClick={handleDownload}
+                                        >
+                                            <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
+                                            <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                            </div>
+                                        </Button>
                                         <Button variant="outline" onClick={handleReset} className="h-11 w-full border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3.5 mr-2" /> Start New</Button>
                                     </div>
                                 )}

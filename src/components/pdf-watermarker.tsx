@@ -384,18 +384,18 @@ export default function PdfWatermarker() {
 
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
-      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4 no-print">
+      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4 no-print mx-auto">
           <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
               <Copyright className="size-8" />
               <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
                   <Sparkles className="size-2.5" />
               </div>
           </div>
-          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
               PDF <span className="text-gradient-hero">Watermark Studio</span>
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Secure documents with professional text or image overlays. <br/>100% Private local RAM mapping.
+          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
+              Secure documents with professional text or image overlays.
           </p>
       </div>
 
@@ -435,7 +435,7 @@ export default function PdfWatermarker() {
             {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
-                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
+                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6 text-left">
                         <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
                             <Palette className="size-5 text-primary" /> Configuration
                         </CardTitle>
@@ -447,7 +447,7 @@ export default function PdfWatermarker() {
                                 <TabsTrigger value="image" className="font-bold text-[9px] uppercase"><ImageIcon className="size-3 mr-1.5" /> Image</TabsTrigger>
                             </TabsList>
                             
-                            <TabsContent value="text" className="space-y-6 m-0 animate-in fade-in duration-300">
+                            <TabsContent value="text" className="space-y-6 m-0 animate-in fade-in duration-300 text-left">
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Watermark Text</Label>
                                     <Input value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} className="h-12 text-lg font-bold border-2 rounded-xl bg-muted/20" placeholder="CONFIDENTIAL" />
@@ -470,7 +470,7 @@ export default function PdfWatermarker() {
                                 </div>
                             </TabsContent>
 
-                            <TabsContent value="image" className="space-y-4 m-0 animate-in fade-in duration-300">
+                            <TabsContent value="image" className="space-y-4 m-0 animate-in fade-in duration-300 text-left">
                                 <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Watermark Image</Label>
                                     {!imageWatermarkSrc ? (
@@ -483,7 +483,12 @@ export default function PdfWatermarker() {
                                             <div className="aspect-video bg-muted/30 rounded-2xl border-2 flex items-center justify-center p-4 shadow-inner">
                                                 <img src={imageWatermarkSrc} alt="watermark" className="max-h-full object-contain" />
                                             </div>
-                                            <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" onClick={() => setImageWatermarkSrc(null)}><Trash2 className="size-3.5"/></Button>
+                                            <button 
+                                                className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-destructive text-white flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity" 
+                                                onClick={() => setImageWatermarkSrc(null)}
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </button>
                                         </div>
                                     )}
                                     <input ref={imageWatermarkInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageWatermarkUpload} />
@@ -491,9 +496,9 @@ export default function PdfWatermarker() {
                             </TabsContent>
                         </Tabs>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t-2 border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t-2 border-dashed text-left">
                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
                                     <LayoutGrid className="size-3" /> Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-1 p-2 bg-muted/20 border-2 border-dashed rounded-xl w-fit mx-auto">
@@ -525,7 +530,7 @@ export default function PdfWatermarker() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t-2 border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t-2 border-dashed text-left">
                              <div className="space-y-2">
                                 <div className="flex justify-between items-center mb-2">
                                     <Label className="text-[10px] font-black uppercase opacity-60">{wType === 'text' ? 'Font Size' : 'Scale %'}</Label>
@@ -549,11 +554,11 @@ export default function PdfWatermarker() {
                             </div>
                         </div>
 
-                        <div className="p-4 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm mt-4">
+                        <div className="p-4 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm mt-4 text-left">
                             <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                             <div>
                                 <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Industrial Secure</p>
-                                <p className="text-[8px] font-medium text-muted-foreground leading-relaxed mt-0.5 uppercase">Watermarks are hard-encoded into the PDF structure.</p>
+                                <p className="text-[8px] font-medium text-muted-foreground leading-relaxed mt-0.5 uppercase text-left">Watermarks are hard-encoded into the PDF structure.</p>
                             </div>
                         </div>
 
@@ -580,12 +585,19 @@ export default function PdfWatermarker() {
                             </Button>
                         ) : (
                             <div className="space-y-3 w-full animate-in zoom-in-95">
-                                <Button size="lg" className="magic-button magic-button-success w-full h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
-                                    <StarIcons />
-                                    <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> 
-                                    <span className="uppercase tracking-tighter">SAVE WATERMARKED PDF</span>
+                                <Button 
+                                    size="lg" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                    onClick={handleDownload}
+                                >
+                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE WATERMARKED PDF</span>
+                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                        <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                    </div>
                                 </Button>
-                                <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
+                                <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
                             </div>
                         )}
                     </CardFooter>
@@ -601,7 +613,7 @@ export default function PdfWatermarker() {
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Viewport</CardTitle>
                         </div>
                         {watermarkedPdfUrl && (
-                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
+                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
                         )}
                     </CardHeader>
                     <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1 flex flex-col">
@@ -611,7 +623,7 @@ export default function PdfWatermarker() {
                                     <div className="flex flex-col items-center gap-6 text-center py-40">
                                         <div className="relative">
                                             <Loader2 className="size-20 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
-                                            <Monitor className="absolute inset-0 m-auto h-10 w-10 text-primary/40 animate-pulse" />
+                                            <Monitor className="absolute inset-0 m-auto h-10 text-primary/40 animate-pulse" />
                                         </div>
                                         <div className="space-y-3 w-full max-w-[280px]">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page Samples...</p>
@@ -623,7 +635,6 @@ export default function PdfWatermarker() {
                                         <div key={i} className="relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] border-white bg-white rounded-sm animate-in slide-in-from-bottom-6 duration-700 overflow-hidden">
                                             <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
                                             
-                                            {/* LIVE OVERLAY PREVIEW */}
                                             <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-1">
                                                 <div style={getPreviewStyle()}>
                                                     {wType === 'text' ? (

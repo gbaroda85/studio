@@ -63,36 +63,13 @@ type Stage = 'setup' | 'editor';
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -128,8 +105,6 @@ export default function HtmlToPdfConverter() {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             setPreviewImage(imgData);
 
-            // Calculate dimensions in points (pt) for standard size opening
-            // points = pixels / scale
             const pdfWidth = canvas.width / scale;
             const pdfHeight = canvas.height / scale;
 
@@ -141,7 +116,6 @@ export default function HtmlToPdfConverter() {
 
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
             
-            // Set Viewer Preferences to prevent "huge" display and fit to window
             pdf.viewerPreferences({
                 'FitWindow': true,
                 'CenterWindow': true,
@@ -227,8 +201,8 @@ export default function HtmlToPdfConverter() {
                                 <Sparkles className="size-3" />
                             </div>
                         </div>
-                        <CardTitle className="text-2xl md:text-4xl font-black uppercase tracking-tighter">HTML to <span className="text-gradient-hero">PDF Studio</span></CardTitle>
-                        <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60 mt-1">Transform raw code or local files into professional documents.</CardDescription>
+                        <CardTitle className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-center">HTML to <span className="text-gradient-hero">PDF Studio</span></CardTitle>
+                        <CardDescription className="text-[10px] md:text-sm uppercase font-bold opacity-60 mt-1 text-center">Transform raw code or local files into professional documents.</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 md:p-12">
                         <div
@@ -240,7 +214,7 @@ export default function HtmlToPdfConverter() {
                                 <Zap className="absolute -top-1 -right-1 h-6 md:h-8 w-6 md:w-8 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center px-4">
-                                <p className="text-lg md:text-2xl font-black uppercase tracking-tighter">Click to Start Editor</p>
+                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Click to Start Editor</p>
                                 <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Or drop an .html file here.</p>
                             </div>
                         </div>
@@ -258,7 +232,6 @@ export default function HtmlToPdfConverter() {
     
     return (
         <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 px-4 max-w-[1800px] mx-auto pb-20">
-            {/* Hidden Sandbox for Rendering */}
             <div className="fixed top-0 -left-[5000px] -z-10 opacity-0 pointer-events-none">
                 <div 
                     ref={previewRef} 
@@ -274,25 +247,17 @@ export default function HtmlToPdfConverter() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter text-left">Studio <span className="text-primary">Panel</span></h2>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                     <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-9 md:h-10 border-2 font-black text-[8px] md:text-[9px] uppercase px-4 rounded-lg">
-                        <RefreshCcw className="mr-1.5 size-3" /> Reset
+                     <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 transition-all">
+                        <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset
                     </Button>
-                    {pdfBlob && (
-                        <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownload}>
-                            <StarIcons />
-                            <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                            <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD PDF</span>
-                        </Button>
-                    )}
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-                {/* Editor Section */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
                     <Card className="flex flex-col border-2 shadow-2xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950 flex-1 border-primary/10">
                         <CardHeader className="bg-primary/5 border-b p-4 md:p-6 flex flex-row items-center justify-between">
@@ -319,7 +284,7 @@ export default function HtmlToPdfConverter() {
                                 value={htmlContent}
                                 onChange={(e) => setHtmlContent(e.target.value)}
                                 placeholder="Paste your HTML code here..."
-                                className="min-h-[500px] md:min-h-[650px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-2xl p-6 bg-slate-900 text-slate-100 custom-scrollbar shadow-inner"
+                                className="min-h-[500px] md:min-h-[650px] font-mono text-[10px] md:text-xs leading-relaxed border-2 focus-visible:ring-primary rounded-2xl p-6 bg-slate-900 text-slate-100 custom-scrollbar shadow-inner text-left"
                             />
                         </CardContent>
                         <CardFooter className="p-4 md:p-6 bg-muted/20 border-t flex flex-col gap-3">
@@ -333,19 +298,8 @@ export default function HtmlToPdfConverter() {
                             <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm" onChange={handleFileUpload} />
                         </CardFooter>
                     </Card>
-                    
-                    <div className="p-5 md:p-6 bg-green-500/5 border-2 border-green-500/10 rounded-[2rem] flex gap-4 items-center shadow-sm">
-                        <div className="size-10 md:size-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0 shadow-inner">
-                            <ShieldCheck className="size-5 md:size-6 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Industrial Safe Guard</p>
-                            <p className="text-[8px] md:text-[9px] text-muted-foreground font-bold leading-tight uppercase mt-0.5">Your code and data stays 100% in local RAM. Zero cloud leaks.</p>
-                        </div>
-                    </div>
                 </div>
 
-                {/* PDF Live Result */}
                 <Card className="lg:col-span-7 flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 min-h-[600px] md:h-full">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -357,7 +311,7 @@ export default function HtmlToPdfConverter() {
                             <Badge className="bg-primary text-white font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full border-2 border-white shadow-md">A4 CANVAS</Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 p-4 md:p-12 relative min-h-[500px] md:min-h-[700px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden">
+                    <CardContent className="p-4 md:p-12 relative min-h-[500px] md:min-h-[700px] flex flex-col bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden">
                         <ScrollArea className="flex-1 w-full h-full">
                             <div className="flex justify-center p-2 md:p-4">
                                 <AnimatePresence mode="wait">
@@ -368,7 +322,7 @@ export default function HtmlToPdfConverter() {
                                             className="relative w-full max-w-[550px] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.5)] border-[8px] border-white bg-white rounded-sm overflow-hidden"
                                         >
                                             <img src={previewImage} alt="Live PDF Preview" className="w-full h-auto block" />
-                                            <div className="absolute top-2 right-2 p-1.5 opacity-20 pointer-events-none">
+                                            <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
                                                 <Badge variant="outline" className="text-[7px] font-black uppercase border-black">HD DPI</Badge>
                                             </div>
                                         </motion.div>
@@ -378,7 +332,7 @@ export default function HtmlToPdfConverter() {
                                                 <Loader2 className="size-20 md:size-24 text-primary animate-spin stroke-[3]" />
                                                 <Monitor className="absolute inset-0 m-auto size-8 md:size-10 text-primary animate-pulse" />
                                             </div>
-                                            <p className="text-sm md:text-base font-black text-muted-foreground uppercase tracking-[0.3em] animate-pulse">Rendering Code View...</p>
+                                            <p className="text-sm md:text-base font-black text-muted-foreground uppercase tracking-[0.3em] animate-pulse text-center">Rendering Code View...</p>
                                         </div>
                                     )}
                                 </AnimatePresence>
@@ -392,13 +346,17 @@ export default function HtmlToPdfConverter() {
                     </CardContent>
                     <CardFooter className="p-6 md:p-10 bg-white dark:bg-slate-950 border-t flex flex-col sm:flex-row gap-4 items-center">
                         <Button 
+                            size="lg" 
+                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                             onClick={handleDownload} 
-                            disabled={!pdfBlob || isGenerating} 
-                            className="magic-button w-full h-16 md:h-20 text-lg md:text-2xl font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 flex items-center justify-center gap-4"
+                            disabled={!pdfBlob || isGenerating}
                         >
-                            <StarIcons />
-                            <Download className="mr-3 size-8 md:size-10 group-hover:translate-y-1 transition-transform" /> 
-                            <span className="uppercase tracking-tighter">DOWNLOAD PROFESSIONAL PDF</span>
+                            <div className="absolute left-4 w-0.5 h-10 bg-white/40 rounded-full" />
+                            <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD PROFESSIONAL PDF</span>
+                            <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                <Download className="size-8 group-hover:scale-110 transition-transform" />
+                                <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
+                            </div>
                         </Button>
                         <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground/30 text-[8px] font-black uppercase tracking-widest shrink-0">
                             <div className="flex items-center gap-1.5"><Smartphone className="size-3 text-primary" /> MOBILE SYNC</div>

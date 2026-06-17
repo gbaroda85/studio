@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -10,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { 
     UploadCloud, 
     Download, 
-    Loader2, 
     Hash, 
     Layout, 
     RefreshCcw, 
@@ -28,7 +28,8 @@ import {
     Layers,
     Bold,
     Italic,
-    Move
+    Move,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -75,21 +76,13 @@ const POSITIONS: PageNumberPosition[] = [
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -188,6 +181,7 @@ export default function PdfPageNumberer() {
   const [numberedPdfUrl, setNumberedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
   const [totalPagesPreview, setTotalPagesPreview] = useState(0);
+  const [pageSize, setPageSize] = useState({ width: 595, height: 842 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -216,6 +210,12 @@ export default function PdfPageNumberer() {
         const pdf = await loadingTask.promise;
         const count = pdf.numPages;
         setTotalPagesPreview(count);
+
+        if (count > 0) {
+            const firstPage = await pdf.getPage(1);
+            const viewport = firstPage.getViewport({ scale: 1 });
+            setPageSize({ width: viewport.width, height: viewport.height });
+        }
         
         const imgs: string[] = [];
         const pagesToRender = Math.min(count, 10); 
@@ -238,13 +238,12 @@ export default function PdfPageNumberer() {
         }
         setPreviewPages(imgs);
       } catch (e) {
-        console.error(e);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF for preview.' });
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load PDF.' });
       } finally {
         setIsGeneratingPreview(false);
       }
     } else if (file) {
-      toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF file.' });
+      toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a PDF.' });
     }
   };
 
@@ -261,7 +260,6 @@ export default function PdfPageNumberer() {
         const existingPdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
         
-        // Map Font Style
         let fontVariant = StandardFonts.Helvetica;
         if (isBold && isItalic) fontVariant = StandardFonts.HelveticaBoldOblique;
         else if (isBold) fontVariant = StandardFonts.HelveticaBold;
@@ -327,7 +325,6 @@ export default function PdfPageNumberer() {
             });
         }
 
-        // FIXED: Force Viewer Preference for normal display size
         const catalog = pdfDoc.catalog;
         catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
             FitWindow: true,
@@ -378,12 +375,15 @@ export default function PdfPageNumberer() {
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  const getPreviewStyle = () => {
+  const getPreviewStyle = (): React.CSSProperties => {
+      const containerWidth = 550; 
+      const scale = containerWidth / pageSize.width;
+      
       const styles: React.CSSProperties = {
           position: 'absolute',
           pointerEvents: 'none',
           color: textColor,
-          fontSize: `${fontSize * 0.75}px`,
+          fontSize: `${fontSize * scale}px`,
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
           textAlign: 'center',
@@ -393,7 +393,7 @@ export default function PdfPageNumberer() {
           padding: '2px'
       };
 
-      const m = `${(margin[0] / 595) * 100}%`; 
+      const m = `${(margin[0] / pageSize.width) * 100}%`; 
       
       switch (position) {
           case 'top-left': styles.top = m; styles.left = m; break;
@@ -416,18 +416,18 @@ export default function PdfPageNumberer() {
   
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
-      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4 no-print">
+      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4 no-print mx-auto">
           <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
               <Hash className="size-8" />
               <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
                   <Sparkles className="size-2.5" />
               </div>
           </div>
-          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
               Add Page <span className="text-gradient-hero">Numbers Pro</span>
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-              Professional positioning at the absolute edge. <br/>100% Private local RAM mapping.
+          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
+              Professional positioning at the absolute edge.
           </p>
       </div>
 
@@ -444,7 +444,7 @@ export default function PdfPageNumberer() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-10 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -466,16 +466,15 @@ export default function PdfPageNumberer() {
         <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
-                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full">
-                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6">
-                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3">
+                <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
+                    <CardHeader className="bg-primary/5 border-b p-4 md:p-6 text-left">
+                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
                             <Palette className="size-5 text-primary" /> Configuration
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-4 md:p-6 space-y-6">
+                    <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                         
-                        {/* Compact Position and Style Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Layout className="size-3" /> Position
@@ -487,7 +486,8 @@ export default function PdfPageNumberer() {
                                             onClick={() => setPosition(pos)}
                                             className={cn(
                                                 "size-8 rounded-md border-2 transition-all flex items-center justify-center relative",
-                                                position === pos ? "bg-primary border-primary text-white shadow-md" : "bg-white/50 border-border hover:border-primary/40"
+                                                position === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40",
+                                                "!ring-[3px] !ring-slate-950 dark:!ring-white"
                                             )}
                                             title={pos}
                                         >
@@ -514,8 +514,7 @@ export default function PdfPageNumberer() {
                             </div>
                         </div>
 
-                        {/* Formatting Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Type className="size-3" /> System</Label>
                                 <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
@@ -529,7 +528,7 @@ export default function PdfPageNumberer() {
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Layers className="size-3" /> Format</Label>
-                                <Select value={format} onValueChange={setFormat}>
+                                <Select value={format} onValueChange={(v) => setFormat(v)}>
                                     <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-lg border-2 shadow-2xl">
                                         {QUICK_FORMATS.map(f => (
@@ -540,11 +539,10 @@ export default function PdfPageNumberer() {
                             </div>
                         </div>
 
-                        {/* Range and Size Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
                              <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Range</Label>
-                                <Select value={pageRange} onValueChange={setPageRange}>
+                                <Select value={pageRange} onValueChange={(v) => setPageRange(v)}>
                                     <SelectTrigger className="h-9 border-2 font-bold rounded-lg text-[10px]"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-lg border-2">
                                         <SelectItem value="all" className="font-bold text-[10px]">All Pages</SelectItem>
@@ -554,28 +552,31 @@ export default function PdfPageNumberer() {
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Size (pt)</Label>
-                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-9 border-2 font-bold rounded-lg text-[10px]" />
+                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-9 border-2 font-bold rounded-lg text-[10px] text-center" />
                             </div>
                         </div>
 
                         {pageRange === 'custom' && (
-                            <div className="space-y-1.5 animate-in slide-in-from-top-2">
-                                <Label className="text-[8px] font-black uppercase opacity-40 tracking-widest">Example: 1, 3-5, 8</Label>
-                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="Enter range..." className="h-9 border-2 font-bold rounded-lg text-[10px]" />
+                            <div className="space-y-1.5 animate-in slide-in-from-top-2 text-left">
+                                <Label className="text-[8px] font-black uppercase opacity-40 tracking-widest ml-1">Example: 1, 3-5, 8</Label>
+                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="Enter range..." className="h-9 border-2 font-bold rounded-lg text-[10px] text-center" />
                             </div>
                         )}
 
-                        {/* Margin Control */}
-                        <div className="space-y-4 pt-4 border-t border-dashed">
+                        <div className="space-y-4 pt-4 border-t border-dashed text-left">
                             <div className="flex justify-between items-center px-1">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
                                     <Move className="size-3" /> Margins
                                 </Label>
                                 <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
                             </div>
-                            <Slider value={margin} min={10} max={100} step={1} onValueChange={setMargin} />
+                            <Slider value={margin} min={10} max={100} step={1} onValueChange={(v) => setMargin(v)} />
                         </div>
 
+                        <div className="p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-4 text-left">
+                            <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
+                            <p className="text-[9px] text-green-700 font-bold uppercase leading-tight">Numbers are hard-encoded into the PDF structure.</p>
+                        </div>
                     </CardContent>
                     <CardFooter className="p-4 md:p-6 border-t flex flex-col gap-3">
                         {!numberedPdfUrl ? (
@@ -599,10 +600,17 @@ export default function PdfPageNumberer() {
                             </Button>
                         ) : (
                             <div className="space-y-3 w-full">
-                                <Button size="lg" className="magic-button magic-button-success w-full h-14 md:h-16 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 text-sm md:text-lg font-black rounded-xl shadow-2xl active:scale-95 transition-all group" onClick={handleDownload}>
-                                    <StarIcons />
-                                    <Download className="mr-3 size-6 group-hover:translate-y-1 transition-transform" /> 
-                                    <span className="uppercase tracking-tighter">SAVE PDF</span>
+                                <Button 
+                                    size="lg" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                    onClick={handleDownload}
+                                >
+                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE NUMBERED PDF</span>
+                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                        <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                    </div>
                                 </Button>
                                 <Button variant="outline" onClick={resetState} className="w-full h-10 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3" /> Start Over</Button>
                             </div>
@@ -620,7 +628,7 @@ export default function PdfPageNumberer() {
                             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Studio View</CardTitle>
                         </div>
                         {numberedPdfUrl && (
-                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse">PROCESSED</Badge>
+                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">PROCESSED</Badge>
                         )}
                     </CardHeader>
                     <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1 flex flex-col">
@@ -642,7 +650,6 @@ export default function PdfPageNumberer() {
                                         <div key={i} className="relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] border-white bg-white rounded-sm animate-in slide-in-from-bottom-6 duration-700 overflow-hidden">
                                             <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
                                             
-                                            {/* FLOATING PAGE NUMBER PREVIEW OVERLAY */}
                                             <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-1">
                                                 <div style={getPreviewStyle()}>
                                                     {format

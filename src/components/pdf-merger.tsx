@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -182,7 +183,7 @@ export default function PdfMerger() {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 0.8 });
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
+                const context = canvas.getContext('2d');
                 if (context) {
                     canvas.height = Math.floor(viewport.height);
                     canvas.width = Math.floor(viewport.width);
@@ -352,38 +353,26 @@ export default function PdfMerger() {
                                 </Label>
                                 
                                 <div className="flex flex-col gap-4">
-                                    <Button 
-                                        className="h-16 rounded-full bg-gradient-to-r from-[#1a5f6e] to-[#0d9488] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                    <button 
+                                        className="btn-pos-uiverse h-14 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all shadow-sm"
                                         onClick={() => sortFiles('asc')}
                                         disabled={pdfFiles.length < 2}
-                                    >
-                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                            <ArrowDownAz className="size-6 text-white" />
-                                        </div>
-                                        <span className="text-sm font-black tracking-widest uppercase">Sort Name A → Z</span>
-                                    </Button>
+                                        data-label="SORT NAME A → Z"
+                                    />
 
-                                    <Button 
-                                        className="h-16 rounded-full bg-gradient-to-r from-[#1e40af] to-[#312e81] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                    <button 
+                                        className="btn-pos-uiverse h-14 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all shadow-sm"
                                         onClick={() => sortFiles('desc')}
                                         disabled={pdfFiles.length < 2}
-                                    >
-                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-110 transition-transform">
-                                            <ArrowUpAz className="size-6 text-white" />
-                                        </div>
-                                        <span className="text-sm font-black tracking-widest uppercase">Sort Name Z → A</span>
-                                    </Button>
+                                        data-label="SORT NAME Z → A"
+                                    />
 
-                                    <Button 
-                                        className="h-16 rounded-full bg-gradient-to-r from-[#065f46] to-[#064e3b] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)] text-white hover:brightness-110 transition-all active:scale-95 group justify-start px-6 gap-5"
+                                    <button 
+                                        className="btn-pos-uiverse h-14 !ring-[3px] !ring-slate-950 dark:!ring-white transition-all shadow-sm"
                                         onClick={() => sortFiles('reverse')}
                                         disabled={pdfFiles.length < 2}
-                                    >
-                                        <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner group-hover:rotate-180 duration-500 transition-transform">
-                                            <Repeat className="size-6 text-white" />
-                                        </div>
-                                        <span className="text-sm font-black tracking-widest uppercase">Reverse Order</span>
-                                    </Button>
+                                        data-label="REVERSE STACK"
+                                    />
                                 </div>
                             </div>
 
@@ -407,11 +396,16 @@ export default function PdfMerger() {
                                                 <Eye className="mr-2 size-4 text-primary" /> VIEW PREVIEW
                                             </Button>
                                             <Button 
-                                                variant="outline"
-                                                className="w-full h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-500/10 text-emerald-600 hover:text-emerald-700 border-emerald-600 bg-white dark:bg-slate-900 shadow-sm animate-in zoom-in-95 transition-all duration-300"
+                                                size="lg" 
+                                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
                                                 onClick={handleDownload}
                                             >
-                                                <Download className="mr-2 size-4 text-emerald-600" /> DOWNLOAD PDF
+                                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
+                                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                    <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                                </div>
                                             </Button>
                                         </>
                                     )}
@@ -464,7 +458,6 @@ export default function PdfMerger() {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center gap-8 w-full">
-                                        {/* Status indicator while rendering continues incrementally */}
                                         {isGeneratingPreview && (
                                             <div className="w-full max-w-[550px] p-4 bg-primary/5 border-2 border-dashed rounded-xl flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
@@ -474,7 +467,6 @@ export default function PdfMerger() {
                                                 <Badge className="bg-primary text-white text-[9px] font-black">{renderingProgress}%</Badge>
                                             </div>
                                         )}
-
                                         {previewImages.map((img, i) => (
                                             <div key={i} className="shadow-2xl border-[8px] border-white rounded-sm overflow-hidden bg-white w-full max-w-[550px] animate-in slide-in-from-bottom-4 duration-500">
                                                 <img src={img} alt={`Page ${i+1}`} className="w-full h-auto block" />
@@ -501,12 +493,19 @@ export default function PdfMerger() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="h-14 md:h-16 px-6 border-2 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-slate-900 hover:text-white transition-all">
-                                <X className="mr-2 size-4" /> CLOSE PREVIEW
+                                <X className="mr-2 size-4" /> CLOSE
                             </Button>
-                            <Button size="lg" className="magic-button magic-button-success h-14 md:h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4" onClick={handleDownload}>
-                                <StarIcons />
-                                <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
-                                <span className="uppercase tracking-tighter text-lg">SAVE COMBINED PDF</span>
+                            <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#22c55e] hover:bg-[#16a34a] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(34,197,94,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={handleDownload}
+                            >
+                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-sm md:text-lg uppercase">SAVE BUNDLE</span>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#22c55e] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#22c55e]/20 rounded-full" />
+                                </div>
                             </Button>
                         </div>
                     </CardFooter>

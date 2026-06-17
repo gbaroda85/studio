@@ -383,7 +383,6 @@ export default function AadhaarPrinter() {
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
   };
 
-  // --- BULLETPROOF SAME-PAGE PRINT ENGINE ---
   const executeFinalPrint = async () => {
       if (!studioPrintRef.current) return;
       setIsExporting(true);
@@ -516,7 +515,7 @@ export default function AadhaarPrinter() {
             <CardHeader className="pt-12 relative text-center">
                 <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase text-left"><ArrowLeft className="mr-1 size-3" /> Back</Button>
                 <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl"><UploadCloud className="size-10" /></div>
-                <CardTitle className="text-3xl font-black uppercase">e-Aadhaar Upload</CardTitle>
+                <CardTitle className="text-3xl font-black uppercase text-center">e-Aadhaar Upload</CardTitle>
             </CardHeader>
             <CardContent className="pb-12 px-6">
                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative" onClick={() => fileInputRef.current?.click()}>
@@ -719,7 +718,19 @@ export default function AadhaarPrinter() {
                       </div>
 
                       <div className="absolute top-6 right-8 flex flex-col gap-2">
-                           <Button size="sm" variant="outline" className="h-9 px-4 rounded-xl border-2 font-black text-[9px] uppercase bg-white/80" onClick={executePdfExport}><Download className="size-3.5 mr-1.5 text-primary" /> Export PDF</Button>
+                           <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-12 shadow-xl border-none" 
+                                onClick={executePdfExport}
+                                disabled={isExporting}
+                            >
+                                <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-8 text-center tracking-widest text-[10px] uppercase">SAVE PDF</span>
+                                <div className="bg-white h-full pl-5 pr-7 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-6 group-hover:pr-8 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    <Download className="size-5 group-hover:scale-110 transition-transform" />
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                </div>
+                            </Button>
                       </div>
                   </Card>
               </div>

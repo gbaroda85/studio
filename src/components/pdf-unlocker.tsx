@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -339,7 +340,7 @@ export default function PdfUnlocker() {
                         className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4"
                     >
                         <div className="text-center space-y-2 mb-4">
-                            <div className="mx-auto mb-2 grid size-14 md:size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
+                            <div className="mx-auto mb-2 grid size-14 md:size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative border-2 border-primary/20">
                                 <Unlock className="size-7 md:size-8" />
                                 <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
                                     <Sparkles className="size-2.5 md:size-3" />
@@ -413,7 +414,7 @@ export default function PdfUnlocker() {
                                     {isChecking ? (
                                         <div className="py-10 flex flex-col items-center justify-center gap-3">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SCANNING...</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground text-center">SCANNING...</p>
                                         </div>
                                     ) : !unlockedPdfUrl ? (
                                         <div className="space-y-5">
@@ -453,14 +454,14 @@ export default function PdfUnlocker() {
                                                         <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <p className="text-[9px] font-black text-primary uppercase animate-pulse">{statusText}</p>
+                                                        <p className="text-[9px] font-black text-primary uppercase animate-pulse text-center">{statusText}</p>
                                                         <Progress value={progress} className="h-1" />
                                                     </div>
                                                 </div>
                                             )}
 
                                             {errorDetails && (
-                                                <div className="bg-rose-50 border-2 border-rose-100 rounded-xl p-3 text-left flex gap-3 animate-in shake">
+                                                <div className="bg-rose-50 border-2 border-rose-100 rounded-xl p-3 text-left flex gap-3 animate-in shake shadow-sm">
                                                     <ShieldAlert className="size-4 text-rose-500 shrink-0" />
                                                     <p className="text-[9px] font-bold text-rose-700 uppercase">{errorDetails}</p>
                                                 </div>
@@ -470,11 +471,11 @@ export default function PdfUnlocker() {
                                         <div className="p-6 md:p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
                                             <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                                 <CheckCircle2 className="size-8" />
-                                                <div className="absolute -top-1 -right-1"><Sparkles className="text-yellow-400 size-5" /></div>
+                                                <div className="absolute -top-1 -right-1 text-yellow-400 size-6"><Sparkles className="size-full" /></div>
                                             </div>
                                             <div className="space-y-1">
-                                                <p className="text-lg font-black text-green-800 uppercase tracking-tighter">UNLOCKED!</p>
-                                                <p className="text-[9px] text-green-600 font-bold uppercase opacity-60">Metadata cleaned • Size Optimized</p>
+                                                <p className="text-lg font-black text-green-800 uppercase tracking-tighter text-center">UNLOCKED!</p>
+                                                <p className="text-[9px] text-green-600 font-bold uppercase opacity-60 text-center">Metadata cleaned • Size Optimized</p>
                                             </div>
                                         </div>
                                     )}
@@ -496,10 +497,17 @@ export default function PdfUnlocker() {
                                             )}
                                         </Button>
                                     ) : (
-                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 border-none shadow-2xl">
-                                            <StarIcons />
-                                            <Download className="size-6 md:size-7" /> 
-                                            <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
+                                        <Button 
+                                            size="lg" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
+                                            onClick={handleDownload}
+                                        >
+                                            <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
+                                            <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                            </div>
                                         </Button>
                                     )}
                                     <div className="flex items-center justify-between w-full mt-2">
@@ -537,14 +545,14 @@ export default function PdfUnlocker() {
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center py-32 text-center opacity-10 gap-4">
                                                     <Monitor className="size-20" />
-                                                    <p className="text-xl font-black uppercase tracking-widest">Awaiting Unlock</p>
+                                                    <p className="text-xl font-black uppercase tracking-widest text-center">Awaiting Unlock</p>
                                                 </div>
                                             )}
                                         </div>
                                         <ScrollBar />
                                     </ScrollArea>
                                     <div className="p-4 bg-muted/20 border-t flex justify-center">
-                                        <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30">GR7 Tools HD Sandbox Rendering</p>
+                                        <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center">GR7 Tools HD Sandbox Rendering</p>
                                     </div>
                                 </CardContent>
                             </Card>
