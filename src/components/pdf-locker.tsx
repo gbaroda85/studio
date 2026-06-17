@@ -19,7 +19,8 @@ import {
     FileText,
     Sparkles,
     FileDigit,
-    Settings2
+    Settings2,
+    Key
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,7 @@ const StarIcons = () => (
         {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`star-${i}`}>
                 <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                    <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
             </div>
         ))}
@@ -74,6 +75,8 @@ export default function PdfLocker() {
       setPdfFile(file);
       setProtectedBlob(null);
       setProgress(0);
+      setPassword("");
+      setConfirmPassword("");
     } else if (file) {
       toast({ variant: "destructive", title: "Invalid File", description: "Please upload a valid PDF document." });
     }
@@ -146,208 +149,208 @@ export default function PdfLocker() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  if (!pdfFile) {
-    return (
-      <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="text-center space-y-2 mb-4">
-            <div className="mx-auto mb-2 grid size-14 md:size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-                <Lock className="size-7 md:size-10" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <Sparkles className="size-2.5" />
-                </div>
-            </div>
-            <h1 className="text-xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                Vault <span className="text-gradient-hero">PDF Locker</span>
-            </h1>
-            <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
-                Secure IDs with standard AES encryption.
-            </p>
-        </motion.div>
-
-        <Card
-            className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
-                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-            )}
-            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-            onClick={() => fileInputRef.current?.click()}
-        >
-            <CardHeader className="bg-muted/30 border-b p-4 md:p-6 text-center">
-                <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-8 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
-                    <div className="relative">
-                        <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
-                    </div>
-                    <div className="text-center px-4">
-                        <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Seal</p>
-                        <p className="text-[9px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local engine.</p>
-                    </div>
-                </div>
-                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-            </CardContent>
-            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
-                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> AES-128 ENCRYPT</div>
-                <div className="flex items-center gap-1.5"><FileDigit className="size-3 text-primary" /> HD COMPATIBLE</div>
-                <div className="flex items-center gap-1.5"><ShieldAlert className="size-3 text-rose-500" /> 100% OFFLINE</div>
-            </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-2 md:px-4 flex flex-col gap-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
-        <div className="lg:col-span-7">
-            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2rem] md:rounded-[2.5rem]">
-                <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 truncate pr-4 text-left">
-                            <FileText className="size-4 text-primary shrink-0" />
-                            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
-                        </div>
-                        <Badge className="font-mono text-[8px] md:text-[9px]">{formatBytes(pdfFile.size)}</Badge>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6 md:p-12 flex-1 flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900/50 shadow-inner">
-                    {protectedBlob ? (
-                        <div className="text-center space-y-6 animate-in zoom-in-95 duration-500 w-full">
-                             <div className="size-20 md:size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-green-500/40 relative">
-                                <CheckCircle2 className="size-10 md:size-12" />
-                                <Sparkles className="absolute -top-2 -right-2 text-yellow-400 size-6" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
-                                <p className="text-[10px] md:text-sm text-muted-foreground font-bold uppercase">Your document is sealed with AES encryption.</p>
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col items-center gap-6 pb-20 mx-auto">
+        <AnimatePresence mode="wait">
+            {!pdfFile ? (
+                <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-2xl py-10 flex flex-col items-center">
+                    <div className="text-center space-y-2 mb-8">
+                        <div className="mx-auto mb-4 grid size-20 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-xl relative border-2 border-primary/20">
+                            <Lock className="size-10" />
+                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                <Sparkles className="size-3" />
                             </div>
                         </div>
-                    ) : isProcessing ? (
-                        <div className="w-full space-y-8 text-center">
-                            <div className="relative inline-block">
-                                <Loader2 className="h-12 w-12 md:h-16 md:h-16 animate-spin text-primary opacity-20 stroke-[3]" />
-                                <Lock className="absolute inset-0 m-auto h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse" />
-                            </div>
-                            <div className="space-y-2">
-                                <p className="font-black text-sm md:text-xl text-primary uppercase tracking-tighter animate-pulse">Encoding AES...</p>
-                                <Progress value={progress} className="h-1.5 shadow-inner" />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-6 text-center opacity-40">
-                             <ShieldCheck className="size-24 md:size-32 text-primary/20" />
-                             <div className="space-y-1">
-                                <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Ready for Locking</p>
-                                <p className="text-[10px] md:text-xs font-bold uppercase">Enter passwords to seal your document.</p>
-                             </div>
-                        </div>
-                    )}
-                </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <Button 
-                          variant="outline" 
-                          onClick={handleReset} 
-                          className="w-full sm:w-auto h-12 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
-                        >
-                            <RefreshCcw className="mr-2 size-4" /> Start Over
-                        </Button>
-                        
-                        {protectedBlob && (
-                            <Button 
-                                size="lg" 
-                                className="magic-button magic-button-success w-full sm:w-auto h-12 md:h-14 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
-                                onClick={handleDownload}
-                            >
-                                <StarIcons />
-                                <Download className="mr-1.5 size-5 group-hover:translate-y-1 transition-transform" /> 
-                                <span className="uppercase tracking-tighter text-[11px] md:text-xs font-black">SAVE SECURE PDF</span>
-                            </Button>
-                        )}
-                    </div>
-                </CardFooter>
-            </Card>
-        </div>
-
-        <div className="lg:col-span-5 space-y-6">
-            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2rem] md:rounded-[2.5rem]">
-                <CardHeader className="bg-primary/5 border-b border-white/10 p-5 md:p-8">
-                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                        <Settings2 className="size-4 md:size-5 text-primary" /> Security Config
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8">
-                    <div className="space-y-6">
-                        <div className="space-y-3 text-left">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Set Password</Label>
-                            <div className="relative group">
-                                <input 
-                                    type={showPassword ? "text" : "password"} 
-                                    placeholder="Create password..." 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl font-black text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
-                                    disabled={!!protectedBlob || isProcessing}
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3 text-left">
-                            <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Repeat Password</Label>
-                            <div className="relative group">
-                                <input 
-                                    type={showConfirmPassword ? "text" : "password"} 
-                                    placeholder="Confirm password..." 
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl font-black text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
-                                    disabled={!!protectedBlob || isProcessing}
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                    {showConfirmPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4 text-left">
-                        <AlertCircle className="size-5 md:size-6 text-blue-600 shrink-0 mt-0.5" />
-                        <p className="text-[9px] md:text-[10px] text-blue-600/80 font-medium leading-tight uppercase">
-                            Uses AES-128 Encryption. Your password stays in your browser memory and is never stored online.
+                        <h1 className="text-3xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
+                            Vault <span className="text-gradient-hero">PDF Locker</span>
+                        </h1>
+                        <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60">
+                            Secure IDs with standard AES-128 encryption.
                         </p>
                     </div>
-                </CardContent>
-                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
-                    <Button 
-                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
-                        onClick={handleProtect}
-                        disabled={!password || !confirmPassword || isProcessing || !!protectedBlob}
-                    >
-                        <StarIcons />
-                        {isProcessing ? "ENCRYPTING..." : (
-                            <div className="flex items-center gap-3">
-                                <Lock className="size-5 md:size-6" />
-                                <span className="uppercase tracking-tighter text-sm md:text-base font-black">{protectedBlob ? "SEALED" : "LOCK DOCUMENT"}</span>
-                            </div>
+
+                    <Card
+                        className={cn(
+                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer",
+                            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
-                    </Button>
-                </CardFooter>
-            </Card>
-        </div>
-      </div>
+                        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <CardContent className="p-12 md:p-20">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
+                                <div className="relative">
+                                    <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">Drop PDF to Seal</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
+                                </div>
+                            </div>
+                            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            ) : (
+                <motion.div key="editor" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full flex flex-col gap-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
+                                <Settings2 className="size-5 md:size-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Config</span></h2>
+                            </div>
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            onClick={handleReset} 
+                            className="w-full md:w-auto h-11 px-6 border-2 font-black text-[10px] md:text-[11px] uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                        >
+                            <RefreshCcw className="mr-1.5 size-3.5" /> Start Over
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                        <div className="lg:col-span-7">
+                            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                                <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 truncate pr-4 text-left">
+                                            <FileText className="size-5 text-primary shrink-0" />
+                                            <CardTitle className="text-xs md:text-sm font-black uppercase tracking-widest truncate">{pdfFile.name}</CardTitle>
+                                        </div>
+                                        <Badge className="font-mono text-[9px] bg-white border-primary/10 text-primary">{formatBytes(pdfFile.size)}</Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-8 md:p-12 flex-1 flex flex-col items-center justify-center min-h-[400px] bg-slate-100 dark:bg-slate-900/50 shadow-inner">
+                                    {protectedBlob ? (
+                                        <div className="text-center space-y-6 animate-in zoom-in-95 duration-500 w-full">
+                                            <div className="size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl relative">
+                                                <CheckCircle2 className="size-12" />
+                                                <div className="absolute -top-2 -right-2 text-yellow-400 size-8"><Sparkles className="size-full" /></div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-green-700">Protected!</h3>
+                                                <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60">Your document is sealed with AES encryption.</p>
+                                            </div>
+                                            <Button 
+                                                size="lg" 
+                                                className="magic-button magic-button-success h-16 md:h-20 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg" 
+                                                onClick={handleDownload}
+                                            >
+                                                <StarIcons />
+                                                <Download className="size-8 group-hover:translate-y-1 transition-transform" /> 
+                                                <span className="uppercase tracking-tighter">DOWNLOAD SECURE PDF</span>
+                                            </Button>
+                                        </div>
+                                    ) : isProcessing ? (
+                                        <div className="w-full space-y-8 text-center">
+                                            <div className="relative inline-block">
+                                                <Loader2 className="h-16 w-16 md:h-20 md:h-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                                <Lock className="absolute inset-0 m-auto h-8 w-8 md:h-10 md:w-10 text-primary animate-pulse" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="font-black text-lg md:text-2xl text-primary uppercase tracking-tighter animate-pulse">Encoding AES...</p>
+                                                <Progress value={progress} className="h-1.5 shadow-inner" />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-6 text-center opacity-30">
+                                            <ShieldCheck className="size-24 md:size-32 text-primary/20" />
+                                            <div className="space-y-1 text-center">
+                                                <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Ready for Locking</p>
+                                                <p className="text-[10px] md:text-sm font-bold uppercase">Enter passwords on the right to seal.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <div className="lg:col-span-5 space-y-6">
+                            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
+                                <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
+                                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                                        <Key className="size-4 md:size-5 text-primary" /> Security Credentials
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6 md:p-8 space-y-8">
+                                    <div className="space-y-6">
+                                        <div className="space-y-3 text-left">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Set Password</Label>
+                                            <div className="relative group">
+                                                <input 
+                                                    type={showPassword ? "text" : "password"} 
+                                                    placeholder="Create password..." 
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
+                                                    disabled={!!protectedBlob || isProcessing}
+                                                    autoFocus
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3 text-left">
+                                            <Label className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Repeat Password</Label>
+                                            <div className="relative group">
+                                                <input 
+                                                    type={showConfirmPassword ? "text" : "password"} 
+                                                    placeholder="Confirm password..." 
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
+                                                    disabled={!!protectedBlob || isProcessing}
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {showConfirmPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 md:p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4 text-left">
+                                        <AlertCircle className="size-5 md:size-6 text-blue-600 shrink-0 mt-0.5" />
+                                        <p className="text-[9px] md:text-[10px] text-blue-600/80 font-medium leading-tight uppercase">
+                                            AES-128 Protocol. Your passwords are processed 100% locally in your device RAM.
+                                        </p>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10">
+                                    <Button 
+                                        className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
+                                        onClick={handleProtect}
+                                        disabled={!password || !confirmPassword || isProcessing || !!protectedBlob}
+                                    >
+                                        <StarIcons />
+                                        {isProcessing ? "ENCRYPTING..." : (
+                                            <div className="flex items-center gap-3">
+                                                <Lock className="size-6 md:size-8" />
+                                                <span className="uppercase tracking-tighter text-xl font-black">{protectedBlob ? "SEALED" : "LOCK PDF"}</span>
+                                            </div>
+                                        )}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     </div>
   );
 }
+
