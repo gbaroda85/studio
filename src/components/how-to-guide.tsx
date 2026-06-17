@@ -131,7 +131,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
   const isOddCount = steps.length % 2 !== 0;
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto mt-12 mb-16 px-4 no-print">
+    <div className="w-full max-w-[1400px] mx-auto mt-12 mb-16 px-4 no-print">
       <div className="flex flex-col items-start text-left mb-16 space-y-1">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-sm mb-2">
             <Sparkles className="size-2.5" /> MASTER GUIDE
@@ -145,7 +145,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16 lg:gap-x-24">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
         {steps.map((step, index) => {
           const isObject = typeof step !== 'string';
           const isLastItem = index === steps.length - 1;
@@ -194,7 +194,7 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
                 <div className={cn(
                     "relative ml-10 md:ml-12 lg:ml-16 rounded-[2.5rem] p-6 md:p-8 md:pl-20 lg:pl-24 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 h-full flex flex-col justify-center",
                     colorSet.bg,
-                    shouldCenter && "md:max-w-[calc(50%-1rem)] w-full",
+                    shouldCenter && "md:max-w-[650px] w-full",
                     "after:content-[''] after:absolute after:top-1/2 after:-left-4 after:-translate-y-1/2 after:border-y-[15px] after:border-y-transparent after:border-r-[16px]",
                     index % STEP_COLORS.length === 0 ? "after:border-r-[#0d9488]" : 
                     index % STEP_COLORS.length === 1 ? "after:border-r-[#7c3aed]" : 
