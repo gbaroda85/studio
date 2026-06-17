@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
@@ -39,6 +38,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useFileStore } from '@/lib/file-store';
@@ -267,7 +267,6 @@ export default function PdfUnlocker() {
                 setStatusText(`Sanitizing P${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                // Optimized for size: 2.0 scale + 0.75 quality is usually plenty for readable text
                 const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
@@ -497,7 +496,7 @@ export default function PdfUnlocker() {
                                             )}
                                         </Button>
                                     ) : (
-                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
+                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 border-none shadow-2xl">
                                             <StarIcons />
                                             <Download className="size-6 md:size-7" /> 
                                             <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
