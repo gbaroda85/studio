@@ -205,7 +205,7 @@ export default function SignatureResizer() {
     };
 
     return (
-        <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700 mx-auto">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 animate-in fade-in duration-700 mx-auto">
             {/* Left: Input Panel */}
             <div className="lg:col-span-5 space-y-4">
                 <Card className="border-2 shadow-2xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
@@ -221,7 +221,7 @@ export default function SignatureResizer() {
                         </div>
                     </CardHeader>
                     
-                    <CardContent className="p-5 md:p-6 space-y-6">
+                    <CardContent className="p-4 md:p-5 space-y-6">
                         {/* 1. UPLOAD SIGNATURE */}
                         {!imageSrc ? (
                             <div 
@@ -268,26 +268,26 @@ export default function SignatureResizer() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-dashed">
-                             <div className="space-y-1.5">
+                             <div className="space-y-1.5 text-left">
                                 <Label className="text-[9px] font-black uppercase opacity-60">Width ({unit})</Label>
                                 <Input type="number" step="0.1" value={width} onChange={(e) => setWidth(e.target.value)} className="h-10 border-2 rounded-xl font-black text-sm text-center bg-muted/10 shadow-inner" />
                             </div>
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 text-left">
                                 <Label className="text-[9px] font-black uppercase opacity-60">Height ({unit})</Label>
                                 <Input type="number" step="0.1" value={height} onChange={(e) => setHeight(e.target.value)} className="h-10 border-2 rounded-xl font-black text-sm text-center bg-muted/10 shadow-inner" />
                             </div>
-                            <div className="col-span-full space-y-1.5">
+                            <div className="col-span-full space-y-1.5 text-left">
                                 <Label className="text-[9px] font-black uppercase opacity-60">DPI Control</Label>
                                 <Input type="number" value={dpi} onChange={(e) => setDpi(e.target.value)} className="h-10 border-2 rounded-xl font-black text-center bg-muted/30 shadow-inner text-primary text-xs" />
                             </div>
                         </div>
 
-                        <div className="space-y-3 pt-2 border-t border-dashed">
+                        <div className="space-y-3 pt-2 border-t border-dashed text-left">
                             <Label className="text-[9px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
                                 <Maximize className="size-3" /> Target Size Limit (KB)
                             </Label>
                             <div className="relative group">
-                                <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-12 border-2 rounded-xl font-black text-2xl text-center text-primary bg-primary/5 shadow-inner focus:ring-4 focus:ring-primary/20 transition-all" />
+                                <Input type="number" value={targetSize} onChange={(e) => setTargetSize(e.target.value)} className="h-11 border-2 rounded-xl font-black text-xl text-center text-primary bg-primary/5 shadow-inner focus:ring-4 focus:ring-primary/20 transition-all" />
                                 <Badge className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-white font-black text-[8px] py-0.5 shadow-lg uppercase">KB LIMIT</Badge>
                             </div>
                         </div>
@@ -306,7 +306,7 @@ export default function SignatureResizer() {
                     </CardFooter>
                 </Card>
 
-                <div className="p-3 bg-primary/5 rounded-[1rem] border-2 border-primary/10 flex gap-3">
+                <div className="p-3 bg-primary/5 rounded-[1rem] border-2 border-primary/10 flex gap-3 text-left">
                     <ShieldCheck className="size-5 text-primary shrink-0 mt-0.5" />
                     <p className="text-[9px] text-primary/80 font-bold leading-relaxed uppercase">
                         Our algorithm ensures the file hits target size strictly.
@@ -326,7 +326,7 @@ export default function SignatureResizer() {
                         </div>
                         {resultUrl && <Badge className="bg-green-600 text-white font-black text-[8px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase tracking-wider">RENDER READY</Badge>}
                     </CardHeader>
-                    <CardContent className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden">
+                    <CardContent className="flex-1 p-5 md:p-8 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 shadow-inner relative overflow-hidden min-h-[300px]">
                         <AnimatePresence mode="wait">
                             {resultUrl ? (
                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6 w-full">
@@ -335,11 +335,11 @@ export default function SignatureResizer() {
                                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
-                                        <div className="p-4 bg-white dark:bg-slate-950 rounded-2xl border-2 text-center shadow-md">
+                                        <div className="p-3 bg-white dark:bg-slate-950 rounded-2xl border-2 text-center shadow-md">
                                             <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-0.5">Result Size</p>
                                             <p className="text-base font-black text-green-600 tracking-tight">{formatBytes(resultSize)}</p>
                                         </div>
-                                        <div className="p-4 bg-white dark:bg-slate-950 rounded-2xl border-2 text-center shadow-md">
+                                        <div className="p-3 bg-white dark:bg-slate-950 rounded-2xl border-2 text-center shadow-md">
                                             <p className="text-[8px] font-black text-muted-foreground uppercase opacity-40 mb-0.5">Grid</p>
                                             <p className="text-base font-black text-primary tracking-tight">{width}x{height}</p>
                                         </div>
@@ -355,19 +355,19 @@ export default function SignatureResizer() {
                                 </motion.div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center gap-6 opacity-10 py-10">
-                                    <Scaling className="size-24" />
-                                    <p className="text-xl font-black uppercase tracking-widest">Workspace Empty</p>
+                                    <Scaling className="size-20" />
+                                    <p className="text-xl font-black uppercase tracking-widest text-center">Workspace Empty</p>
                                 </div>
                             )}
                         </AnimatePresence>
                     </CardContent>
-                    <CardFooter className="p-4 md:p-6 border-t bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-4 justify-between items-center shrink-0">
+                    <CardFooter className="p-4 md:p-5 border-t bg-white dark:bg-slate-950 flex flex-col sm:flex-row gap-4 justify-between items-center shrink-0">
                         <div className="flex items-center gap-4 text-muted-foreground/40 text-[8px] font-black uppercase tracking-[0.2em]">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
                             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> STRICT KB</div>
                         </div>
                         {resultUrl && (
-                            <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-12 md:h-14 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3 shadow-2xl" onClick={handleDownload}>
+                            <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3 shadow-2xl" onClick={handleDownload}>
                                 <StarIcons />
                                 <Download className="size-6 group-hover:translate-y-1 transition-transform" />
                                 <span className="uppercase tracking-tighter text-xs">SAVE JPG</span>

@@ -38,15 +38,15 @@ export default function SignatureResizerPage() {
     <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-600 text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full max-w-5xl text-center mb-8 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-600 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-sm">
                     <Sparkles className="size-2.5" /> OFFICIAL PORTAL READY
                 </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
                     Signature <span className="text-gradient-hero">Resizer Pro</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-[10px] md:text-xs">
                     Resize to exact CM or Pixel dimensions with 20KB limit for SSC, UPSC and IBPS forms. 100% Private.
                 </p>
             </div>
@@ -56,7 +56,7 @@ export default function SignatureResizerPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-[1600px] mx-auto space-y-16 px-4 md:px-12 pb-20">
             <HowToGuide title="Signature Resizer" steps={steps} />
 
             <section className="space-y-10 py-10 border-t">
