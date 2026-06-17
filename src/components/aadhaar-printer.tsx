@@ -396,23 +396,22 @@ export default function AadhaarPrinter() {
       setIsExporting(true);
       
       try {
-          // 1. Capture the EXACT rendered container
+          // 1. Capture the EXACT rendered container with Optimized Scale for Android (3 instead of 4 to save RAM)
           const canvas = await html2canvas(studioPreviewRef.current, {
-              scale: 4, // Ultra HD for tiny text
+              scale: 3, 
               useCORS: true,
               backgroundColor: '#ffffff',
               imageTimeout: 0,
               logging: false,
               onclone: (clonedDoc) => {
-                  // Ensure transforms don't mess up print capture
                   const el = clonedDoc.querySelector('.a4-sheet-render');
                   if (el) (el as HTMLElement).style.transform = 'none';
               }
           });
 
-          const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
           
-          // 2. Open high-res print window (Works on Android)
+          // 2. Open high-res print window (Optimized for Android Stability)
           const printWindow = window.open('', '_blank');
           if (!printWindow) throw new Error("Popup blocked");
 
@@ -420,22 +419,26 @@ export default function AadhaarPrinter() {
             <html>
                 <head>
                     <title>GR7 Print Studio</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
                         @page { size: A4; margin: 0; }
-                        body { margin: 0; padding: 0; background: white; display: flex; align-items: flex-start; justify-content: center; }
-                        img { width: 210mm; height: 297mm; object-fit: contain; }
+                        body { margin: 0; padding: 0; background: white; display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; overflow: hidden; }
+                        img { width: 210mm; height: 297mm; object-fit: contain; display: block; }
                     </style>
                 </head>
                 <body>
-                    <img src="${dataUrl}" />
+                    <img src="${dataUrl}" id="print-img" />
                     <script>
-                        window.onload = () => {
+                        const img = document.getElementById('print-img');
+                        const triggerPrint = () => {
                             setTimeout(() => {
                                 window.focus();
                                 window.print();
-                                window.close();
+                                // DO NOT CLOSE window immediately on Android as it breaks print spooler
                             }, 500);
                         };
+                        if (img.complete) triggerPrint();
+                        else img.onload = triggerPrint;
                     </script>
                 </body>
             </html>
@@ -443,7 +446,7 @@ export default function AadhaarPrinter() {
           printWindow.document.close();
           toast({ title: "Print Driver Ready", description: "Dialog opened successfully." });
       } catch (err) {
-          toast({ variant: 'destructive', title: "Print Failed", description: "Browser permission error." });
+          toast({ variant: 'destructive', title: "Print Failed", description: "Browser permission error or memory limit." });
       } finally {
           setIsExporting(false);
       }
