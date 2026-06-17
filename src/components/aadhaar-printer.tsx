@@ -38,8 +38,7 @@ import {
     RotateCw,
     ImageIcon,
     Trash2,
-    Monitor,
-    Bug
+    Monitor
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -95,7 +94,6 @@ export default function AadhaarPrinter() {
   const [cropMode, setCropMode] = useState<CropMode>('scanner');
   const [vAlign, setVAlign] = useState<VAlign>('center');
   const [showBorder, setShowBorder] = useState(true);
-  const [showDebug, setShowDebug] = useState(false);
   
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
   const [password, setPassword] = useState("");
@@ -171,7 +169,7 @@ export default function AadhaarPrinter() {
         
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 3.0 }); // High res render
+        const viewport = page.getViewport({ scale: 3.0 }); 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) throw new Error("Canvas init failed");
@@ -396,7 +394,7 @@ export default function AadhaarPrinter() {
       setIsExporting(true);
       
       try {
-          // 1. Capture the EXACT rendered container with Optimized Scale for Android (3 instead of 4 to save RAM)
+          // 1. Capture the EXACT rendered container with Optimized Scale for Android
           const canvas = await html2canvas(studioPreviewRef.current, {
               scale: 3, 
               useCORS: true,
@@ -434,7 +432,6 @@ export default function AadhaarPrinter() {
                             setTimeout(() => {
                                 window.focus();
                                 window.print();
-                                // DO NOT CLOSE window immediately on Android as it breaks print spooler
                             }, 500);
                         };
                         if (img.complete) triggerPrint();
@@ -588,7 +585,7 @@ export default function AadhaarPrinter() {
             <CardContent className="p-8 space-y-6 text-left">
                 <Label className="text-[10px] font-black uppercase opacity-50 ml-1">Enter PDF Open Password</Label>
                 <div className="relative group text-left">
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 text-2xl font-black tracking-[0.3em] text-center border-2 rounded-2xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 text-2xl font-black tracking-[0.2em] text-center border-2 rounded-2xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}</button>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
@@ -660,7 +657,6 @@ export default function AadhaarPrinter() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setShowDebug(!showDebug)} className={cn("rounded-xl border-2", showDebug && "bg-primary/10 border-primary text-primary")}><Bug className="size-4"/></Button>
                         <Button variant="outline" onClick={executePdfExport} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl shadow-sm hover:bg-primary/5">{isExporting ? <Loader2 className="animate-spin size-3" /> : <Download className="mr-2 size-3" />} SAVE PDF</Button>
                         <Button onClick={executeFinalPrint} className="magic-button h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl active:scale-95 transition-all border-none">
                             <StarIcons />
@@ -674,7 +670,6 @@ export default function AadhaarPrinter() {
                 <Card className="border-none shadow-3xl bg-slate-300 dark:bg-slate-950 rounded-[3rem] p-6 md:p-12 overflow-visible relative group">
                     <div className="absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity"><Badge variant="outline" className="bg-white/90 text-[8px] font-black uppercase">Studio Direct Map</Badge></div>
                     
-                    {/* STUDIO SCALE PREVIEW - CLONED FOR CAPTURE */}
                     <div className="relative transform-gpu scale-[0.4] sm:scale-[0.6] md:scale-[0.8] lg:scale-[1.0] origin-top transition-transform duration-500 shadow-2xl">
                         <div 
                             ref={studioPreviewRef}
@@ -710,20 +705,6 @@ export default function AadhaarPrinter() {
                             >
                                 <img src={backFinal!} className="w-full h-full object-contain" alt="back" />
                             </div>
-
-                            {/* DEBUG INFO OVERLAY */}
-                            {showDebug && (
-                                <div className="absolute inset-0 z-[100] pointer-events-none border-2 border-red-500/20 p-8 font-mono text-[8px] space-y-4">
-                                    <div className="bg-red-500 text-white p-2 rounded w-fit">DEBUG: ABSOLUTE COORDINATES ACTIVE</div>
-                                    <div className="space-y-1 bg-black/80 text-white p-4 rounded-xl w-fit border border-white/20">
-                                        <p>PAGE: {A4_WIDTH_MM}mm x {A4_HEIGHT_MM}mm</p>
-                                        <p>ALIGN: {vAlign.toUpperCase()}</p>
-                                        <p>F_POS: {pos.front.x.toFixed(1)}mm, {pos.front.y.toFixed(1)}mm</p>
-                                        <p>B_POS: {pos.back.x.toFixed(1)}mm, {pos.back.y.toFixed(1)}mm</p>
-                                        <p>SCALE: 300DPI (Rendered)</p>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </Card>
