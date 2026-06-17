@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useCallback, useEffect } from "react";
@@ -71,6 +72,7 @@ export default function SignatureResizer() {
     const [isDragOver, setIsDragOver] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const handleUnitChange = (val: Unit) => {
         setUnit(val);
@@ -209,7 +211,7 @@ export default function SignatureResizer() {
             {/* Left: Input Panel */}
             <div className="lg:col-span-5 space-y-4">
                 <Card className="border-2 shadow-2xl rounded-[2rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
-                    <CardHeader className="bg-primary/5 border-b p-4 md:p-5">
+                    <CardHeader className="bg-primary/5 border-b p-4 md:p-5 text-left">
                         <div className="flex items-center gap-4">
                             <div className="size-10 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600 shadow-inner border border-orange-500/20">
                                 <PenTool className="size-6" />
@@ -253,7 +255,7 @@ export default function SignatureResizer() {
                              </div>
                         )}
 
-                        <div className="space-y-3 pt-2 border-t border-dashed">
+                        <div className="space-y-3 pt-2 border-t border-dashed text-left">
                             <Label className="text-[9px] font-black uppercase tracking-widest opacity-60">2. Dimension System</Label>
                             <RadioGroup value={unit} onValueChange={(v) => handleUnitChange(v as Unit)} className="flex gap-3">
                                 <div className={cn("flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 transition-all cursor-pointer shadow-sm", unit === 'cm' ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted bg-muted/5")} onClick={() => handleUnitChange('cm')}>
@@ -367,10 +369,16 @@ export default function SignatureResizer() {
                             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> STRICT KB</div>
                         </div>
                         {resultUrl && (
-                            <Button size="lg" className="magic-button magic-button-success w-full sm:w-auto h-11 md:h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3 shadow-2xl" onClick={handleDownload}>
-                                <StarIcons />
-                                <Download className="size-6 group-hover:translate-y-1 transition-transform" />
-                                <span className="uppercase tracking-tighter text-xs">SAVE JPG</span>
+                            <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 w-full sm:w-auto shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={handleDownload}
+                            >
+                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-xs uppercase">SAVE JPG</span>
+                                <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    <Download className="size-6 group-hover:scale-110 transition-transform" />
+                                </div>
                             </Button>
                         )}
                     </CardFooter>

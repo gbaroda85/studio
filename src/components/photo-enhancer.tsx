@@ -36,36 +36,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -309,7 +286,7 @@ export default function PhotoEnhancer() {
             <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
                 AI PHOTO <span className="text-gradient-hero">ENHANCER</span>
             </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
+            <p className="text-xs md:text-sm text-muted-foreground font-bold max-xl mx-auto">
                 Step 1: Upload photo to restore quality. <br/>100% Private local RAM processing.
             </p>
         </motion.div>
@@ -323,7 +300,7 @@ export default function PhotoEnhancer() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-10">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -353,7 +330,7 @@ export default function PhotoEnhancer() {
                 <Settings2 className="size-5 md:size-6" />
             </div>
             <div>
-                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter text-left">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -362,13 +339,15 @@ export default function PhotoEnhancer() {
             </Button>
             <Button 
                 size="lg" 
-                className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-3" 
+                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                 onClick={handleDownload} 
                 disabled={isProcessing || !originalImageSrc}
             >
-                <StarIcons />
-                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
-                <span className="text-xs uppercase tracking-widest">DOWNLOAD HD</span>
+                <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                <span className="flex-1 px-10 text-center tracking-widest text-xs uppercase">DOWNLOAD HD</span>
+                <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                    <Download className="size-7 group-hover:scale-110 transition-transform" />
+                </div>
             </Button>
         </div>
       </div>
@@ -403,7 +382,7 @@ export default function PhotoEnhancer() {
                                 <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
                                 {enhancedFileSize > 0 && <span className="text-[9px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
                             </div>
-                            <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden">
+                            <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden text-center">
                                 <AnimatePresence mode="wait">
                                     {isProcessing ? (
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4 text-center p-12">
@@ -427,8 +406,8 @@ export default function PhotoEnhancer() {
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
                         <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE LOCAL RAM</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT PREVIEW</div>
-                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD RE-SAMPLING</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD OUTPUT</div>
                     </div>
                 </CardFooter>
             </Card>
@@ -437,7 +416,7 @@ export default function PhotoEnhancer() {
         {/* Sidebar: Controls */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
-                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4 text-left">
                     <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
                         <Settings2 className="size-4 text-primary" /> Adjustment Panel
                     </CardTitle>
@@ -453,7 +432,7 @@ export default function PhotoEnhancer() {
                         <span className="text-[10px] md:text-xs uppercase tracking-widest">SMART AUTO-ENHANCE</span>
                     </Button>
 
-                    <div className="space-y-6 md:space-y-8">
+                    <div className="space-y-6 md:space-y-8 text-left">
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase flex items-center gap-1.5 text-muted-foreground">
@@ -495,7 +474,7 @@ export default function PhotoEnhancer() {
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4">
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 text-left">
                         <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Studio Quality</p>

@@ -306,13 +306,15 @@ export default function AiUpscaler() {
                             </Button>
                             <Button 
                                 size="lg" 
-                                className="magic-button magic-button-success flex-[2] md:flex-none h-12 px-10 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50" 
                                 onClick={handleDownload} 
                                 disabled={isProcessing || !upscaledImageSrc}
                             >
-                                <StarIcons />
-                                <Download className="size-7 group-hover:translate-y-1 transition-transform" />
-                                <span className="text-xs uppercase tracking-widest">DOWNLOAD HD</span>
+                                <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">DOWNLOAD HD</span>
+                                <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    <Download className="size-6 group-hover:scale-110 transition-transform" />
+                                </div>
                             </Button>
                         </div>
                     </div>
@@ -441,7 +443,7 @@ export default function AiUpscaler() {
                                         </div>
                                     </div>
 
-                                    <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 shadow-inner">
+                                    <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 shadow-sm">
                                         <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0 border border-green-500/20">
                                              <Zap className="size-5 text-yellow-500 animate-pulse" />
                                         </div>

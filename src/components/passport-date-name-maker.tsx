@@ -255,8 +255,8 @@ export default function PassportDateNameMaker() {
                                 <Camera className="size-7" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Add Name & Date</CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">SSC, UPSC & IBPS Compliant</CardDescription>
+                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Add Name & Date</CardTitle>
+                                <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1 text-left">SSC, UPSC & IBPS Compliant</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
@@ -297,7 +297,7 @@ export default function PassportDateNameMaker() {
                         )}
 
                         <div className="space-y-6 pt-4 border-t border-dashed">
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Type className="size-3" /> Candidate Name
                                 </Label>
@@ -308,7 +308,7 @@ export default function PassportDateNameMaker() {
                                     className="h-12 border-2 rounded-xl font-bold uppercase"
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                     <Calendar className="size-3" /> Date of Photo (DOP)
                                 </Label>
@@ -329,7 +329,7 @@ export default function PassportDateNameMaker() {
                         </div>
 
                         {/* STUDIO CONTROLS */}
-                        <div className="space-y-6 pt-6 border-t border-dashed">
+                        <div className="space-y-6 pt-6 border-t border-dashed text-left">
                              <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
                                 <Settings2 className="size-3" /> Studio Refinement
                             </Label>
@@ -388,13 +388,17 @@ export default function PassportDateNameMaker() {
                     
                     <CardFooter className="p-6 md:p-8 bg-muted/10 border-t flex flex-col gap-3">
                         <Button 
-                            className="magic-button w-full h-18 bg-primary text-primary-foreground font-black text-xl rounded-2xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all group border-4 border-primary hover:bg-transparent hover:text-primary"
+                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50 border-none"
                             onClick={handleDownload}
                             disabled={!imageSrc || isProcessing}
                         >
-                            <StarIcons />
-                            {isProcessing ? <Loader2 className="size-7 animate-spin mr-2" /> : <Download className="size-7 mr-2 group-hover:translate-y-1 transition-transform" />}
-                            <span className="uppercase tracking-tighter">DOWNLOAD PHOTO</span>
+                            <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
+                            <span className="flex-1 px-12 text-center tracking-widest text-lg font-black uppercase">
+                                {isProcessing ? "PROCESSING..." : "DOWNLOAD PHOTO"}
+                            </span>
+                            <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                {isProcessing ? <Loader2 className="size-8 animate-spin" /> : <Download className="size-8 group-hover:translate-y-1 transition-transform" />}
+                            </div>
                         </Button>
                     </CardFooter>
                 </Card>

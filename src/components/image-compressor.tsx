@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -70,7 +71,7 @@ const StarIcons = () => (
         {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`star-${i}`}>
                 <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                    <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
             </div>
         ))}
@@ -362,8 +363,15 @@ export default function ImageCompressor() {
                                 <p className="text-[9px] md:text-xs text-green-700 font-bold uppercase">Bundle available for download</p>
                             </div>
                         </div>
-                        <Button className="magic-button magic-button-success w-full md:w-auto h-12 md:h-14 px-8 bg-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-3 border-none shadow-2xl text-white" onClick={downloadAllAsZip}>
-                            <StarIcons /><Download className="size-5" /><span className="uppercase tracking-tighter text-xs font-black">SAVE ALL ZIP</span>
+                        <Button 
+                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 w-full md:w-auto shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                            onClick={downloadAllAsZip}
+                        >
+                            <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">SAVE ALL ZIP</span>
+                            <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                <Download className="size-6 group-hover:scale-110 transition-transform" />
+                            </div>
                         </Button>
                     </CardContent>
                 </Card>
@@ -449,7 +457,7 @@ export default function ImageCompressor() {
                   </DialogTitle>
               </DialogHeader>
               
-              <div className="flex-1 p-4 md:p-6 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-y-auto min-h-0 custom-scrollbar">
+              <div className="flex-1 p-4 md:p-6 bg-slate-50 dark:bg-slate-950/50 shadow-inner overflow-y-auto min-h-0 custom-scrollbar flex flex-col">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full h-full min-h-0">
                       <div className="space-y-4 flex flex-col h-full min-h-0">
                           <div className="flex justify-between items-center px-2 shrink-0">
@@ -478,13 +486,15 @@ export default function ImageCompressor() {
               
               <DialogFooter className="p-6 md:p-8 bg-white dark:bg-slate-900 border-t flex justify-center shrink-0">
                   <Button 
-                    className="magic-button magic-button-success w-full max-w-xl h-14 md:h-18 rounded-[1.5rem] bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black transition-all active:scale-95 group flex items-center justify-center gap-4 text-lg"
+                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 w-full max-w-xl shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                     onClick={() => viewItem && downloadFile(viewItem)}
                     disabled={!viewItem || viewItem.newSize === 0}
                   >
-                      <StarIcons />
-                      <Download className="size-6 md:size-8 group-hover:translate-y-1 transition-transform" />
-                      <span className="uppercase tracking-tighter">DOWNLOAD OPTIMIZED</span>
+                      <div className="absolute left-4 w-0.5 h-8 bg-white/40 rounded-full" />
+                      <span className="flex-1 px-10 text-center tracking-widest text-sm uppercase">DOWNLOAD OPTIMIZED</span>
+                      <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                          <Download className="size-8 group-hover:scale-110 transition-transform" />
+                      </div>
                   </Button>
               </DialogFooter>
           </DialogContent>

@@ -459,7 +459,7 @@ export default function PassportPhotoMaker() {
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
-                                    <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
                                     <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </motion.div>
                                 <div className="text-center">
@@ -644,7 +644,7 @@ export default function PassportPhotoMaker() {
                         </Card>
                     </div>
 
-                    <div className="lg:col-span-6 flex flex-col items-center gap-6 md:gap-8">
+                    <div className="lg:col-span-6 flex flex-col items-center gap-6 md:gap-8 text-center">
                         <div className="relative group w-full max-w-[500px]">
                             <Card className="relative bg-white shadow-2xl border-[6px] md:border-[12px] border-white rounded-[1.5rem] md:rounded-[3rem] overflow-hidden flex items-center justify-center">
                                 <canvas ref={mainCanvasRef} className="max-w-full h-auto object-contain" />
@@ -673,13 +673,23 @@ export default function PassportPhotoMaker() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-[500px] mt-12 md:mt-16">
                              <Button variant="outline" onClick={handleReset} className="flex-1 h-12 md:h-16 rounded-xl md:rounded-[1.5rem] border-2 font-black uppercase text-[10px] md:text-xs tracking-widest">Start Over</Button>
-                            <Button className="flex-[2] h-12 md:h-16 rounded-xl md:rounded-[1.5rem] bg-primary text-base md:text-lg font-black shadow-2xl" onClick={handleDownload}><Download className="mr-2 md:mr-3 size-5 md:size-6" /> SAVE JPG</Button>
+                            <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 flex-[2] shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={handleDownload}
+                            >
+                                <div className="absolute left-6 w-0.5 h-8 md:h-10 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-12 text-center tracking-widest text-sm md:text-lg uppercase">SAVE JPG</span>
+                                <div className="bg-white h-full px-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-10" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                    <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                </div>
+                            </Button>
                         </div>
                     </div>
 
                     <div className="lg:col-span-3 space-y-4 md:space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
-                            <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10">
+                            <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10 text-left">
                                 <CardTitle className="text-base md:text-lg font-black uppercase flex items-center gap-2"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
@@ -712,10 +722,19 @@ export default function PassportPhotoMaker() {
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                                     <Button variant="outline" onClick={() => setStage('studio')} className="h-14 md:h-20 flex-1 rounded-2xl md:rounded-[2rem] border-white/20 text-white font-black uppercase bg-white/5 hover:bg-white/10">CANCEL</Button>
-                                    <Button className="h-14 md:h-20 flex-[2] rounded-2xl md:rounded-[2rem] bg-green-600 hover:bg-green-700 shadow-2xl font-black text-sm md:text-xl" onClick={() => {
-                                        const link = document.createElement('a'); link.href = printSheetSrc; 
-                                        link.download = `GR7-Tools-Print-Sheet-${Date.now()}.jpg`; link.click();
-                                    }}><Download className="size-6 mr-3"/> DOWNLOAD SHEET</Button>
+                                    <Button 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-[2rem] transition-all duration-300 group h-16 md:h-20 flex-[2] shadow-[0_15px_30px_-10px_rgba(0,174,239,0.6)] border-none" 
+                                        onClick={() => {
+                                            const link = document.createElement('a'); link.href = printSheetSrc; 
+                                            link.download = `GR7-Tools-Print-Sheet-${Date.now()}.jpg`; link.click();
+                                        }}
+                                    >
+                                        <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
+                                        <span className="flex-1 px-12 text-center tracking-widest text-sm md:text-xl uppercase">DOWNLOAD SHEET</span>
+                                        <div className="bg-white h-full px-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-12" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-25px' }}>
+                                            <Download className="size-8 group-hover:scale-110 transition-transform" />
+                                        </div>
+                                    </Button>
                                 </div>
                             </div>
                             <div className="flex-[1.3] relative flex justify-center animate-in zoom-in-95 duration-500 max-w-full">
@@ -733,4 +752,3 @@ export default function PassportPhotoMaker() {
         </div>
     );
 }
-
