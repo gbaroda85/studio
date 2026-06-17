@@ -11,23 +11,18 @@ import {
     Zap, 
     RotateCcw,
     CheckCircle2,
-    Crop,
-    AlertCircle,
     FileText,
     ChevronRight,
     Lock,
     Eye,
     EyeOff,
     LayoutGrid,
-    CreditCard,
     Smartphone,
-    ArrowRightLeft,
     RefreshCcw,
     ArrowLeft,
     Move,
     Scan,
     Maximize,
-    Grid3X3,
     Settings2,
     Download,
     AlignVerticalJustifyStart,
@@ -35,8 +30,6 @@ import {
     AlignVerticalJustifyEnd,
     Square,
     Sparkles,
-    RotateCw,
-    ImageIcon,
     Trash2,
     Monitor
 } from "lucide-react";
@@ -466,13 +459,13 @@ export default function AadhaarPrinter() {
                     className={cn("absolute bg-white overflow-hidden flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
                     style={{ width: `${CARD_WIDTH_MM}mm`, height: `${CARD_HEIGHT_MM}mm`, left: `${pos.front.x}mm`, top: `${pos.front.y}mm` }}
                 >
-                    <img src={frontFinal || ""} className="w-full h-full object-contain" alt="front" />
+                    {frontFinal && <img src={frontFinal} className="w-full h-full object-contain" alt="front" />}
                 </div>
                 <div 
                     className={cn("absolute bg-white overflow-hidden flex items-center justify-center", showBorder && "border-[0.25mm] border-black")}
                     style={{ width: `${CARD_WIDTH_MM}mm`, height: `${CARD_HEIGHT_MM}mm`, left: `${pos.back.x}mm`, top: `${pos.back.y}mm` }}
                 >
-                    <img src={backFinal || ""} className="w-full h-full object-contain" alt="back" />
+                    {backFinal && <img src={backFinal} className="w-full h-full object-contain" alt="back" />}
                 </div>
           </div>
       </div>
@@ -580,7 +573,7 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'password' && (
-        <Card className="w-full max-w-md shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
+        <Card className="w-full max-md shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
             <CardHeader className="bg-primary/5 p-6 border-b text-center"><CardTitle className="text-xl font-black uppercase flex items-center justify-center gap-3"><Lock className="size-5 text-primary" /> Aadhaar Password</CardTitle></CardHeader>
             <CardContent className="p-8 space-y-6 text-left">
                 <Label className="text-[10px] font-black uppercase opacity-50 ml-1">Enter PDF Open Password</Label>
@@ -613,11 +606,11 @@ export default function AadhaarPrinter() {
                   <div ref={containerRef} className="relative cursor-crosshair shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
-                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="crop" className="max-h-[70vh] w-auto object-contain" />
+                            {originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="crop" className="max-h-[70vh] w-auto object-contain" /> : null}
                         </ReactCrop>
                     ) : (
                         <div className="relative">
-                            <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" />
+                            {originalA4Src || (refiningSide === 'front' ? frontRaw : backRaw) ? <img ref={imgRef} src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="scanner" className="max-h-[70vh] w-auto object-contain pointer-events-none" /> : null}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.5]" /></svg>
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
@@ -625,7 +618,7 @@ export default function AadhaarPrinter() {
                             ))}
                             {draggingPoint !== null && (
                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
-                                    <img src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="mag" className="absolute max-w-none origin-top-left"
+                                    <img src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="mag" className="absolute max-w-none origin-top-left"
                                         style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
                                 </div>
                             )}
@@ -690,14 +683,14 @@ export default function AadhaarPrinter() {
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">FRONT</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
-                                  <img src={frontFinal!} alt="front" className="size-full object-contain" />
+                                  <img src={frontFinal} alt="front" className="size-full object-contain" />
                               </div>
                           </div>
 
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">BACK</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
-                                  <img src={backFinal!} alt="back" className="size-full object-contain" />
+                                  <img src={backFinal} alt="back" className="size-full object-contain" />
                               </div>
                           </div>
                       </div>
