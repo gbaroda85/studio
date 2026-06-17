@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -39,7 +40,7 @@ import { useFileStore } from '@/lib/file-store';
 import { motion, AnimatePresence } from "framer-motion";
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
 const StarIcons = () => (
@@ -167,7 +168,8 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.98;
+                // We target 95% of requested size to account for PDF metadata overhead
+                targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.95;
             }
 
             const newPdf = new jsPDF({
@@ -177,8 +179,9 @@ export default function PdfCompressor() {
             });
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Packing P${i}...`);
+                setStatusText(`Scanning P${i}...`);
                 const page = await pdf.getPage(i);
+                // Budget per page for iterative search
                 const targetBytesPerPage = mode === 'target' ? (targetBytes) / totalPages : Infinity;
                 
                 let finalDataUrl = "";
@@ -199,23 +202,31 @@ export default function PdfCompressor() {
                 };
 
                 if (mode === 'target') {
-                    const scalesToTry = [1.5, 1.0];
-                    let bestFound = false;
-                    for (const scale of scalesToTry) {
-                        if (bestFound) break;
-                        const midUrl = await getPageDataUrl(scale, 0.75);
-                        const midSize = Math.round((midUrl.length - 22) * 0.75);
-                        if (midSize <= targetBytesPerPage) {
-                            finalDataUrl = midUrl;
-                            bestFound = true;
-                        } else {
-                            const floorUrl = await getPageDataUrl(scale, 0.55);
-                            finalDataUrl = floorUrl;
-                            bestFound = true;
+                    // Start with high resolution and iterate down
+                    const scalesToTry = [2.5, 2.0, 1.5, 1.0, 0.75, 0.5];
+                    let bestUrlFound = "";
+                    
+                    for (const s of scalesToTry) {
+                        if (bestUrlFound) break;
+                        
+                        let low = 0.1, high = 0.98;
+                        // Binary search for highest quality that fits per-page budget
+                        for (let j = 0; j < 6; j++) {
+                            const mid = (low + high) / 2;
+                            const testUrl = await getPageDataUrl(s, mid);
+                            const testSize = Math.round((testUrl.length - 22) * 0.75); // base64 to binary estimate
+                            
+                            if (testSize <= targetBytesPerPage) {
+                                bestUrlFound = testUrl;
+                                low = mid; // Try higher quality
+                            } else {
+                                high = mid; // Try lower quality
+                            }
                         }
                     }
+                    finalDataUrl = bestUrlFound || await getPageDataUrl(0.5, 0.1); 
                 } else {
-                    finalDataUrl = await getPageDataUrl(2.0, quality[0] / 100);
+                    finalDataUrl = await getPageDataUrl(2.5, quality[0] / 100);
                 }
 
                 const viewport = page.getViewport({ scale: 1.0 });
@@ -235,7 +246,7 @@ export default function PdfCompressor() {
             setCompressedPdfUrl(URL.createObjectURL(pdfBlob));
             setStatusText("Success");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            toast({ title: 'PDF Compressed!' });
+            toast({ title: 'PDF Optimized!' });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error' });
         } finally {
@@ -386,7 +397,11 @@ export default function PdfCompressor() {
                         </CardContent>
                         <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                             <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                                <Button variant="outline" onClick={resetState} className="w-full sm:w-auto h-12 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl hover:bg-destructive/5">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={resetState} 
+                                    className="w-full sm:w-auto h-12 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                >
                                     <RefreshCcw className="mr-1.5 size-4" /> Start Over
                                 </Button>
                                 
@@ -468,9 +483,9 @@ export default function PdfCompressor() {
                             <div className="p-4 md:p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 text-left">
                                 <AlertCircle className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Sharp-Text Engine</p>
+                                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Iterative Search Engine</p>
                                     <p className="text-[8px] md:text-[10px] text-green-700/60 font-medium leading-relaxed uppercase mt-1">
-                                        Optimized kernels ensure fonts stay readable at small file sizes.
+                                        New Binary-Search logic accurately targets your requested size limit.
                                     </p>
                                 </div>
                             </div>

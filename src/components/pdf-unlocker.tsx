@@ -52,7 +52,7 @@ const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`star-${i} pointer-events-none`}>
-                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
             </div>
@@ -237,7 +237,7 @@ export default function PdfUnlocker() {
 
             const finalPdfBytes = await finalPdfDoc.save();
             const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(pdfBlob);
+            const url = URL.createObjectURL(blob);
             setUnlockedPdfUrl(url);
             setProgress(100);
             setStatusText("Success!");
@@ -307,7 +307,7 @@ export default function PdfUnlocker() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
+                                        <p className="text-[10px] text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
@@ -442,8 +442,12 @@ export default function PdfUnlocker() {
                                     </Button>
                                 )}
                                 <div className="flex items-center justify-between w-full mt-2">
-                                    <Button variant="ghost" onClick={resetState} className="h-9 text-[9px] font-black uppercase text-muted-foreground/40 hover:text-destructive px-2">
-                                        <RefreshCcw className="size-3 mr-1.5" /> Start Over
+                                    <Button 
+                                        variant="outline" 
+                                        onClick={resetState} 
+                                        className="w-full sm:w-auto h-12 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                    >
+                                        <RefreshCcw className="mr-1.5 size-3" /> Start Over
                                     </Button>
                                     <div className="flex items-center gap-1.5 text-muted-foreground/30 text-[7px] md:text-[8px] font-black uppercase">
                                         <ShieldCheck className="size-3 text-green-500" /> LOCAL RAM
@@ -457,4 +461,3 @@ export default function PdfUnlocker() {
         </div>
     );
 }
-

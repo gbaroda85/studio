@@ -367,7 +367,7 @@ export default function ImageCompressor() {
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6 h-11 bg-background p-1 rounded-xl border-2">
+                        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-background p-1 rounded-xl border-2">
                             <TabsTrigger value="target" className="font-black text-[9px] uppercase">Strict Limit</TabsTrigger>
                             <TabsTrigger value="manual" className="font-black text-[9px] uppercase">Manual Scale</TabsTrigger>
                         </TabsList>
@@ -409,14 +409,23 @@ export default function ImageCompressor() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
-                    <Button 
-                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 shadow-2xl" 
-                        disabled={results.length === 0 || isBulkProcessing} onClick={startBulkCompression}
-                    >
-                        <StarIcons />
-                        {isBulkProcessing ? <Loader2 className="size-7 md:size-8 animate-spin" /> : <Zap className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />}
-                        <span className="uppercase tracking-tighter text-sm md:text-lg">{isBulkProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}</span>
-                    </Button>
+                    <div className="flex flex-col gap-3 w-full">
+                        <Button 
+                            className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 shadow-2xl" 
+                            disabled={results.length === 0 || isBulkProcessing} onClick={startBulkCompression}
+                        >
+                            <StarIcons />
+                            {isBulkProcessing ? <Loader2 className="size-7 md:size-8 animate-spin" /> : <Zap className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />}
+                            <span className="uppercase tracking-tighter text-sm md:text-lg">{isBulkProcessing ? "PROCESSING..." : "OPTIMIZE NOW"}</span>
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            onClick={handleReset} 
+                            className="w-full h-11 border-2 font-black text-[9px] md:text-[10px] uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                        >
+                            <RefreshCcw className="mr-1.5 size-3" /> Start Over
+                        </Button>
+                    </div>
                 </CardFooter>
             </Card>
         </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -187,7 +188,7 @@ export default function PdfLocker() {
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
             </CardContent>
-            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-6 md:pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> AES-128 ENCRYPT</div>
                 <div className="flex items-center gap-1.5"><FileDigit className="size-3 text-primary" /> HD COMPATIBLE</div>
                 <div className="flex items-center gap-1.5"><ShieldAlert className="size-3 text-rose-500" /> 100% OFFLINE</div>
@@ -246,8 +247,12 @@ export default function PdfLocker() {
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 md:p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto h-12 md:h-14 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl hover:bg-destructive/5">
-                            <RefreshCcw className="mr-2 size-4" /> Change File
+                        <Button 
+                          variant="outline" 
+                          onClick={handleReset} 
+                          className="w-full sm:w-auto h-12 px-6 border-2 font-black text-[11px] md:text-xs uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                        >
+                            <RefreshCcw className="mr-2 size-4" /> Start Over
                         </Button>
                         
                         {protectedBlob && (
