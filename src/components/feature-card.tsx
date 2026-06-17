@@ -31,15 +31,15 @@ export function FeatureCard({
     <Link href={href} className="group block h-full">
       <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col transform-gpu">
         <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
-          {/* Icon container with 3D look-effect matching user image */}
+          {/* ENHANCED 3D ICON CONTAINER WITH DEEP SHADOWS */}
           <div className={cn(
-            "grid size-12 place-items-center rounded-2xl transition-transform duration-200 group-hover:scale-110 shadow-lg shrink-0 transform-gpu",
-            "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_10px_20px_rgba(0,0,0,0.15)]",
+            "grid size-16 place-items-center rounded-[1.5rem] transition-transform duration-200 group-hover:scale-110 shrink-0 transform-gpu",
+            "shadow-[inset_3px_3px_6px_rgba(255,255,255,0.5),inset_-3px_-3px_6px_rgba(0,0,0,0.3),0_15px_30px_-5px_rgba(0,0,0,0.3)]",
             color
           )}>
-            <Icon className="h-7 w-7 text-white drop-shadow-[1px_1px_2px_rgba(0,0,0,0.3)]" />
+            <Icon className="h-8 w-8 text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
           </div>
-          <div className="flex-1 flex flex-col mt-4">
+          <div className="flex-1 flex flex-col mt-6">
             <CardTitle className="text-lg md:text-xl font-bold mb-1.5 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors duration-200 uppercase font-body tracking-tight">
               {title}
             </CardTitle>

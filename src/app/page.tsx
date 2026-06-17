@@ -122,8 +122,8 @@ const ALL_TOOLS = [
   { icon: Maximize, title: "IMAGE RESIZER", description: "Change image dimensions for official forms.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "image" },
   { icon: PenLine, title: "SIGNATURE REMOVER", description: "Extract clean signatures from paper photos.", href: "/remove-signature", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
-  { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "image" },
-  { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
+  { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
+  { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -145,13 +145,13 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
   <Link href={href} className="group block h-full">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-lg hover:shadow-2xl dark:hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.4)] transition-all duration-300 hover:-translate-y-1.5 border-2 border-slate-100/50 dark:border-primary/20 flex flex-col transform-gpu">
       <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5", lightBg, "dark:bg-[#0a040d]/60")}>
-        {/* Updated icon container with 3D look-effect matching user image */}
+        {/* ENHANCED 3D ICON CONTAINER */}
         <div className={cn(
-          `size-10 md:size-11 rounded-2xl flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
-          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_8px_16px_rgba(0,0,0,0.15)]",
+          `size-14 md:size-16 rounded-[1.5rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          "shadow-[inset_3px_3px_6px_rgba(255,255,255,0.5),inset_-3px_-3px_6px_rgba(0,0,0,0.3),0_15px_30px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
-          <Icon className="size-5 md:size-6 drop-shadow-[1px_1px_2px_rgba(0,0,0,0.3)]" />
+          <Icon className="size-7 md:size-8 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
         </div>
         <div className="flex-1 flex flex-col">
           <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
