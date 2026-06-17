@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -516,7 +517,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       </AnimatePresence>
 
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden">
-         <div className="w-full flex-1 flex flex-col items-center px-0 md:px-8 p-0 m-0">
+         <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0">
             <div className="w-full flex-1 flex flex-col">
               {children}
             </div>
