@@ -399,7 +399,6 @@ export default function AadhaarPrinter() {
 
           const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
           
-          // CRITICAL: Use hidden iframe for same-page isolated print driver handshake
           const iframe = document.createElement('iframe');
           iframe.style.position = 'fixed';
           iframe.style.right = '0';
@@ -429,7 +428,6 @@ export default function AadhaarPrinter() {
               doc.close();
           }
 
-          // Cleanup
           setTimeout(() => {
               document.body.removeChild(iframe);
               setIsExporting(false);
@@ -556,7 +554,7 @@ export default function AadhaarPrinter() {
                            {s.side === 'front' ? 'FRONT SIDE VIEW' : 'BACK SIDE VIEW'}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-8 md:p-12 flex flex-col items-center gap-6 min-h-[350px] justify-center">
+                      <CardContent className="p-8 md:p-12 flex flex-col items-center justify-center min-h-[350px] gap-6">
                           {s.final ? (
                               <div className="relative group/preview w-full flex flex-col items-center gap-6 animate-in zoom-in-95">
                                   <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-full max-w-[320px] aspect-[85.6/54] transform transition-transform group-hover/preview:scale-[1.02]", showBorder && "border-2 border-black")}>
@@ -641,6 +639,11 @@ export default function AadhaarPrinter() {
                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                                     <img src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="mag" className="absolute max-w-none origin-top-left"
                                         style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
+                                    {/* CROSSHAIR ADDED HERE */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div className="w-full h-0.5 bg-green-500/50 absolute" />
+                                        <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -657,8 +660,7 @@ export default function AadhaarPrinter() {
       {stage === 'preview' && frontFinal && backFinal && (
           <div className="w-full max-w-6xl space-y-10 animate-in slide-in-from-bottom-4 duration-500 px-4">
               
-              {/* HEADER ACTION BAR */}
-              <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 no-print bg-white/40 dark:bg-slate-900/40 p-6 rounded-[2.5rem] border shadow-2xl backdrop-blur-xl">
+              <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 no-print bg-white/40 dark:bg-slate-900/40 p-6 rounded-[2.5rem] border shadow-2xl backdrop-blur-xl text-left">
                   <div className="flex items-center gap-4">
                       <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-md border border-green-500/20">
                           <CheckCircle2 className="size-7" />
@@ -694,7 +696,6 @@ export default function AadhaarPrinter() {
                   </div>
               </div>
 
-              {/* HORIZONTAL PREVIEW CONTAINER */}
               <div className="no-print w-full">
                   <Card className="border-none shadow-3xl bg-slate-300/30 dark:bg-slate-900/40 rounded-[3rem] p-6 md:p-14 overflow-hidden relative group backdrop-blur-sm">
                       <div className="absolute top-6 left-1/2 -translate-x-1/2">
@@ -723,7 +724,6 @@ export default function AadhaarPrinter() {
                   </Card>
               </div>
 
-              {/* STATUS BADGES */}
               <div className="flex items-center justify-center gap-8 no-print pt-4 text-muted-foreground/30 text-[9px] font-black uppercase tracking-[0.3em]">
                   <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                   <div className="flex items-center gap-1.5"><Monitor className="size-3.5" /> WYSIWYG</div>
