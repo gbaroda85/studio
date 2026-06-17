@@ -574,17 +574,28 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'password' && (
-        <Card className="w-full max-md shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
-            <CardHeader className="bg-primary/5 p-6 border-b text-center"><CardTitle className="text-xl font-black uppercase flex items-center justify-center gap-3"><Lock className="size-5 text-primary" /> Aadhaar Password</CardTitle></CardHeader>
-            <CardContent className="p-8 space-y-6 text-left">
-                <Label className="text-[10px] font-black uppercase opacity-50 ml-1">Enter PDF Open Password</Label>
+        <Card className="w-full max-w-sm shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
+            <CardHeader className="bg-primary/5 p-4 border-b text-center">
+                <CardTitle className="text-lg font-black uppercase flex items-center justify-center gap-2">
+                    <Lock className="size-4 text-primary" /> Password
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4 text-left">
+                <Label className="text-[9px] font-black uppercase tracking-widest opacity-50 ml-1">Enter PDF Password</Label>
                 <div className="relative group text-left">
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 text-2xl font-black tracking-[0.2em] text-center border-2 rounded-2xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}</button>
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 text-xl font-black tracking-[0.1em] text-center border-2 rounded-xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-2 text-left shadow-inner">
+                    <AlertCircle className="size-4 text-blue-500 shrink-0" />
+                    <p className="text-[9px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p>
+                </div>
             </CardContent>
-            <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-14 bg-primary text-white font-black rounded-xl text-lg shadow-xl hover:scale-[1.02] transition-all">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
+            <CardFooter className="p-4 bg-muted/5 border-t">
+                <Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-11 bg-primary text-white font-black rounded-xl text-sm shadow-xl hover:scale-[1.02] transition-all">
+                    {isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-4 w-4 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER
+                </Button>
+            </CardFooter>
         </Card>
       )}
 
@@ -715,4 +726,3 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
-
