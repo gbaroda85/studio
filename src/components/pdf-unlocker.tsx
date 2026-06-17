@@ -112,7 +112,8 @@ export default function PdfUnlocker() {
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: false
+                isEvalSupported: true, // Required for some complex PDFs
+                stopAtErrors: false
             });
             await loadingTask.promise;
             setIsProtected(false);
@@ -175,7 +176,7 @@ export default function PdfUnlocker() {
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Opening Secure Vault...");
+        setStatusText("Scanning Security Layer...");
         setProgress(5);
 
         try {
@@ -186,7 +187,10 @@ export default function PdfUnlocker() {
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: false
+                isEvalSupported: true,
+                stopAtErrors: false, // Don't crash on non-standard objects
+                disableAutoFetch: true, // Process entire buffer
+                disableStream: true
             });
             
             const pdf = await loadingTask.promise;
@@ -194,7 +198,7 @@ export default function PdfUnlocker() {
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Decrypting P${i}/${totalPages}...`);
+                setStatusText(`Sanitizing P${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 const renderScale = 2.5; 
@@ -236,19 +240,19 @@ export default function PdfUnlocker() {
             }));
 
             const finalPdfBytes = await finalPdfDoc.save();
-            const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
+            const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             setUnlockedPdfUrl(url);
             setProgress(100);
-            setStatusText("Success!");
+            setStatusText("Sanitization Complete");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
             toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
         } catch (error: any) {
-            console.error('[Unlock Engine Error]:', error);
+            console.error('[Unlock Engine Fatal Error]:', error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
-                setErrorDetails("Engine Error: Document structure may be non-standard or highly restricted.");
+                setErrorDetails("Engine Error: The document structure is too restricted or corrupted.");
             }
         } finally {
             setIsUnlocking(false);
