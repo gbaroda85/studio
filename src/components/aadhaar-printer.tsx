@@ -392,17 +392,17 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'upload' && workflow === 'a4' && (
-        <Card className={cn("w-full max-w-2xl border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl mx-4", isDragOver && "border-primary bg-primary/5")}
+        <Card className={cn("w-full max-w-2xl border-2 border-dashed bg-card/50 text-center rounded-[2.5rem] overflow-hidden shadow-xl mx-4", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
         >
             <CardHeader className="pt-12 relative">
                 <Button variant="ghost" size="sm" onClick={handleReset} className="absolute top-6 left-6 font-black text-[10px] uppercase text-left"><ArrowLeft className="mr-1 size-3" /> Back</Button>
-                <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary"><UploadCloud className="size-10" /></div>
+                <div className="mx-auto mb-6 grid size-20 place-items-center rounded-3xl bg-primary/10 text-primary shadow-xl"><UploadCloud className="size-10" /></div>
                 <CardTitle className="text-3xl font-black uppercase">e-Aadhaar Upload</CardTitle>
             </CardHeader>
             <CardContent className="pb-12 px-6">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all" onClick={() => fileInputRef.current?.click()}>
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-20 flex flex-col items-center justify-center space-y-4 cursor-pointer hover:bg-muted/30 transition-all group relative" onClick={() => fileInputRef.current?.click()}>
                     <Zap className="size-8 text-yellow-500 animate-pulse" />
                     <p className="font-black uppercase text-lg">Drop Original PDF here</p>
                     <Badge variant="outline">AUTO-DECRYPT ACTIVE</Badge>
@@ -415,7 +415,7 @@ export default function AadhaarPrinter() {
       {stage === 'upload' && workflow === 'separate' && (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 px-4 w-full max-w-5xl">
               <div className="flex flex-col sm:flex-row items-center justify-between no-print gap-4">
-                   <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center bg-white/50 dark:bg-slate-900/50 rounded-full border shadow-sm px-6 h-10"><ArrowLeft className="mr-1 size-3" /> Back to Selection</Button>
+                   <Button variant="ghost" onClick={handleReset} className="font-black text-[10px] uppercase tracking-widest self-start md:self-center bg-white/50 dark:bg-slate-900/50 rounded-full border shadow-sm px-6 h-10 transition-all hover:bg-destructive/5 hover:text-destructive"><ArrowLeft className="mr-1 size-3" /> Back to Selection</Button>
                    <div className="flex items-center gap-3">
                         {frontFinal && backFinal && (
                             <Button onClick={() => setStage('preview')} className="bg-primary text-primary-foreground font-black uppercase text-xs h-11 px-10 rounded-2xl shadow-xl animate-bounce border-none">GENERATE PRINT SHEET <ChevronRight className="ml-1 size-4" /></Button>
@@ -443,7 +443,7 @@ export default function AadhaarPrinter() {
                                   <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-full max-w-[320px] aspect-[85.6/54] transform transition-transform group-hover/preview:scale-[1.02]", showBorder && "border-2 border-black")}>
                                       <img src={s.final} alt={s.side} className="w-full h-full object-cover" />
                                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
-                                          <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4 h-9 rounded-lg" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
+                                          <Button size="sm" variant="secondary" className="font-black text-[9px] uppercase px-4 h-9 rounded-lg shadow-xl" onClick={() => { setRefiningSide(s.side); resetPoints(); setStage('refine'); }}><Scan className="size-3 mr-1.5" /> Adjust</Button>
                                           <Button size="icon" variant="destructive" className="h-9 w-9 rounded-lg shadow-xl" onClick={() => { s.setFinal(null); s.setRaw(null); }}><Trash2 className="size-4" /></Button>
                                       </div>
                                   </div>
@@ -455,7 +455,7 @@ export default function AadhaarPrinter() {
                           ) : s.raw ? (
                               <div className="flex flex-col items-center gap-6 text-center animate-in slide-in-from-bottom-2">
                                   <div className="relative">
-                                     <div className="size-24 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner border-2 border-dashed border-primary/20"><Scan className="size-12 animate-pulse" /></div>
+                                     <div className="size-24 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner border-2 border-dashed border-primary/20 shadow-xl"><Scan className="size-12 animate-pulse" /></div>
                                      <div className="absolute -top-2 -right-2 bg-yellow-400 text-black font-black text-[8px] px-2 py-0.5 rounded-full shadow-md uppercase">Processing</div>
                                   </div>
                                   <div className="space-y-4">
@@ -465,7 +465,7 @@ export default function AadhaarPrinter() {
                               </div>
                           ) : (
                               <div className="flex flex-col items-center gap-6 text-center cursor-pointer transition-all hover:scale-105" onClick={() => s.inputRef.current?.click()}>
-                                  <div className="size-20 rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                  <div className="size-20 rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shadow-inner">
                                       <UploadCloud className="size-10" />
                                   </div>
                                   <div className="space-y-1">
@@ -483,16 +483,16 @@ export default function AadhaarPrinter() {
       )}
 
       {stage === 'password' && (
-        <Card className="w-full max-w-md shadow-2xl rounded-[2.5rem] overflow-hidden">
+        <Card className="w-full max-w-md shadow-2xl rounded-[2.5rem] overflow-hidden bg-card/50 border-2">
             <CardHeader className="bg-primary/5 p-6 border-b text-center"><CardTitle className="text-xl font-black uppercase flex items-center justify-center gap-3"><Lock className="size-5 text-primary" /> Aadhaar Password</CardTitle></CardHeader>
-            <CardContent className="p-8 space-y-6">
-                <Label className="text-[10px] font-black uppercase opacity-50">Enter PDF Open Password</Label>
+            <CardContent className="p-8 space-y-6 text-left">
+                <Label className="text-[10px] font-black uppercase opacity-50 ml-1">Enter PDF Open Password</Label>
                 <div className="relative group text-left">
                     <Input 
                         type={showPassword ? "text" : "password"} 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
-                        className="h-14 text-2xl font-black tracking-[0.3em] text-center border-2 rounded-2xl pr-12" 
+                        className="h-14 text-2xl font-black tracking-[0.3em] text-center border-2 rounded-2xl pr-12 bg-background shadow-inner" 
                         placeholder="••••••••" 
                         autoFocus 
                     />
@@ -504,31 +504,31 @@ export default function AadhaarPrinter() {
                         {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                     </button>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-left"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner"><AlertCircle className="size-5 text-blue-500 shrink-0" /><p className="text-[10px] text-blue-700 dark:text-blue-300 font-bold leading-tight uppercase">Format: FIRST 4 Letters of NAME (CAPS) + Year of Birth.</p></div>
             </CardContent>
-            <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-14 bg-primary font-black rounded-xl text-lg shadow-xl">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
+            <CardFooter className="p-6 bg-muted/5 border-t"><Button onClick={() => processPdfWithPassword(pdfBuffer!, password)} disabled={isProcessing || !password} className="w-full h-14 bg-primary text-white font-black rounded-xl text-lg shadow-xl hover:scale-[1.02] transition-all">{isProcessing ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} UNLOCK & RENDER</Button></CardFooter>
         </Card>
       )}
 
       {stage === 'refine' && (
-          <Card className="w-full max-w-5xl mx-4 shadow-2xl rounded-[2.5rem] overflow-hidden">
+          <Card className="w-full max-w-5xl mx-4 shadow-3xl rounded-[2.5rem] overflow-hidden bg-card border-none">
               <CardHeader className="bg-muted/30 border-b p-6">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2"><Settings2 className="size-5 text-primary" /> Adjustment Studio</CardTitle>
                     <div className="flex items-center gap-3">
-                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border">
+                        <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as CropMode)} className="bg-background/50 p-1 rounded-lg border shadow-sm">
                             <TabsList className="h-9"><TabsTrigger value="rect" className="text-[10px] font-black uppercase px-4"><Maximize className="size-3 mr-1.5" /> Rect</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase px-4"><Scan className="size-3 mr-1.5" /> Scanner</TabsTrigger></TabsList>
                         </Tabs>
-                        <Button variant="ghost" size="icon" onClick={() => setStage('upload')} className="text-destructive"><X /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => setStage('upload')} className="text-destructive h-9 w-9 rounded-lg hover:bg-destructive/5"><X /></Button>
                     </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden select-none"
+              <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden select-none shadow-inner"
                            onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                   
                   {isProcessing && <div className="absolute inset-0 z-40 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4"><Loader2 className="h-12 w-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase">Processing Pixels...</p></div>}
 
-                  <div ref={containerRef} className="relative cursor-crosshair shadow-2xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
+                  <div ref={containerRef} className="relative cursor-crosshair shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                     {cropMode === 'rect' ? (
                         <ReactCrop crop={rectCrop} onChange={c => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)} className="max-h-[70vh]">
                             <img ref={imgRef} src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="crop" className="max-h-[70vh] w-auto object-contain" />
@@ -540,14 +540,14 @@ export default function AadhaarPrinter() {
                                 <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.5]" />
                             </svg>
                             {points.map((p, i) => (
-                                <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
+                                <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-white shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center transition-transform", draggingPoint === i ? "bg-primary scale-125" : "bg-primary/80")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }}
                                     onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}>
                                     <div className="size-2.5 bg-white rounded-full" />
                                 </div>
                             ))}
                             {draggingPoint !== null && (
-                                <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
                                     <img src={workflow === 'a4' ? originalA4Src! : (refiningSide === 'front' ? frontRaw! : backRaw!)} alt="mag" className="absolute max-w-none origin-top-left"
                                         style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} 
                                     />
@@ -557,15 +557,15 @@ export default function AadhaarPrinter() {
                         </div>
                     )}
                   </div>
-                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10">
-                       <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl">
+                  <div className="w-full py-6 flex justify-center bg-slate-100 dark:bg-slate-950 border-t relative z-10 shadow-inner">
+                       <div className="inline-flex items-center gap-3 px-8 py-3 bg-black/70 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
                           <Move className="h-4 w-4 text-primary animate-pulse" /> {cropMode === 'rect' ? "Position box" : "Drag dots to corners"}
                       </div>
                   </div>
               </CardContent>
               <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex justify-between gap-4">
-                  <Button variant="ghost" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2">CANCEL</Button>
-                  <Button className="h-14 px-12 bg-primary font-black rounded-xl shadow-xl text-base" onClick={handleFinalizeCrop}>CONFIRM ADJUSTMENT</Button>
+                  <Button variant="ghost" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2 transition-all hover:bg-destructive/5 hover:text-destructive">CANCEL</Button>
+                  <Button className="h-14 px-12 bg-primary text-white font-black rounded-xl shadow-xl text-base hover:scale-[1.02] transition-all" onClick={handleFinalizeCrop}>CONFIRM ADJUSTMENT</Button>
               </CardFooter>
           </Card>
       )}
@@ -582,35 +582,38 @@ export default function AadhaarPrinter() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 tracking-widest leading-none">A4 ID-1 ALIGNMENT</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                    <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2"><Square className="size-3 text-muted-foreground" /><span className="text-[10px] font-black uppercase">Border</span><Switch checked={showBorder} onCheckedChange={setShowBorder} /></div>
+                <div className="flex flex-wrap items-center justify-center gap-3 bg-white/40 dark:bg-slate-900/40 p-4 rounded-3xl border shadow-xl">
+                    <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-xl border-2 shadow-inner"><Square className="size-3 text-muted-foreground" /><span className="text-[10px] font-black uppercase opacity-60">Border</span><Switch checked={showBorder} onCheckedChange={setShowBorder} /></div>
                     
-                    <div className="flex bg-muted p-1 rounded-xl border-2">
+                    <div className="flex bg-muted p-1 rounded-xl border-2 shadow-inner">
                         <button 
+                            type="button"
                             onClick={() => setVAlign('top')} 
                             className={cn(
                                 "p-2 rounded-lg transition-all", 
-                                vAlign === 'top' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                                vAlign === 'top' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60"
                             )}
                             title="Top Align"
                         >
                             <AlignVerticalJustifyStart className="size-4"/>
                         </button>
                         <button 
+                            type="button"
                             onClick={() => setVAlign('center')} 
                             className={cn(
                                 "p-2 rounded-lg transition-all mx-1", 
-                                vAlign === 'center' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                                vAlign === 'center' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60"
                             )}
                             title="Center Align"
                         >
                             <AlignVerticalJustifyCenter className="size-4"/>
                         </button>
                         <button 
+                            type="button"
                             onClick={() => setVAlign('bottom')} 
                             className={cn(
                                 "p-2 rounded-lg transition-all", 
-                                vAlign === 'bottom' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-sm" : "opacity-50"
+                                vAlign === 'bottom' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60"
                             )}
                             title="Bottom Align"
                         >
@@ -618,31 +621,31 @@ export default function AadhaarPrinter() {
                         </button>
                     </div>
 
-                    <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl"><RefreshCcw className="mr-2 size-3" /> Re-align</Button>
-                    <Button onClick={handlePrint} className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl"><Printer className="mr-2 size-4" /> PRINT NOW</Button>
+                    <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-xl transition-all shadow-sm"><RefreshCcw className="mr-2 size-3" /> Re-align</Button>
+                    <Button onClick={handlePrint} className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-2xl active:scale-95 transition-all"><Printer className="mr-2 size-4" /> PRINT NOW</Button>
                 </div>
             </div>
 
             <div className="no-print">
-                <Card className="border-2 shadow-2xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
+                <Card className="border-none shadow-3xl bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
                     <CardHeader className="bg-white/5 dark:bg-black/20 border-b p-4 text-center">
                         <div className="flex flex-col items-center gap-1">
                             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">STUDIO RENDER PREVIEW</span>
-                            <Badge variant="outline" className="text-[8px] uppercase">{vAlign.toUpperCase()} ALIGNMENT ACTIVE</Badge>
+                            <Badge variant="outline" className="text-[8px] uppercase border-primary/20 text-primary">{vAlign.toUpperCase()} ALIGNMENT ACTIVE</Badge>
                         </div>
                     </CardHeader>
                     <CardContent className={cn(
-                        "p-12 flex flex-col items-center min-h-[600px] transition-all duration-500 bg-white relative",
+                        "p-12 flex flex-col items-center min-h-[600px] transition-all duration-500 bg-white relative shadow-inner",
                         vAlign === 'top' ? 'justify-start pt-10' : vAlign === 'bottom' ? 'justify-end pb-10' : 'justify-center'
                     )}>
                          {/* A4 Visual Frame Guide */}
                         <div className="absolute inset-0 border-[20px] border-slate-100 dark:border-slate-800 pointer-events-none z-0" />
                         
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-12 z-10">
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-12 z-10 animate-in zoom-in-95 duration-500">
                             {[{ src: frontFinal, label: 'FRONT' }, { src: backFinal, label: 'BACK' }].map(side => (
                                 <div key={side.label} className="space-y-4">
-                                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-60">{side.label}</span>
-                                    <div className={cn("relative shadow-2xl rounded-xl overflow-hidden bg-white w-[320px] h-[202px]", showBorder ? "border-2 border-black" : "border-8 border-white")}>
+                                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block text-center opacity-40">{side.label}</span>
+                                    <div className={cn("relative shadow-3xl rounded-xl overflow-hidden bg-white w-[320px] h-[202px] transition-all duration-300", showBorder ? "border-2 border-black" : "border-8 border-white")}>
                                         <img src={side.src} alt={side.label} className="w-full h-full object-contain" />
                                     </div>
                                 </div>
@@ -652,8 +655,12 @@ export default function AadhaarPrinter() {
                 </Card>
             </div>
 
-            {/* REAL PRINT TARGET */}
-            <div id="printable-area">
+            {/* REAL PRINT TARGET - ABSOLUTE ALIGNMENT FIX */}
+            <div id="printable-area" className={cn(
+                vAlign === 'top' && "print-top",
+                vAlign === 'center' && "print-center",
+                vAlign === 'bottom' && "print-bottom"
+            )}>
                 <div className="print-content-wrapper">
                     {[frontFinal, backFinal].map((src, i) => (
                         <div key={i} className={cn("bg-white flex items-center justify-center overflow-hidden", showBorder && "border-[0.5pt] border-black")} style={{ width: '85.6mm', height: '54mm', margin: '4mm 0' }}>
@@ -667,43 +674,57 @@ export default function AadhaarPrinter() {
 
       <style jsx global>{`
         @media print {
-          /* Strict single page configuration */
+          /* 1. Reset everything and lock to 1 page */
           html, body { 
             background: white !important; 
             margin: 0 !important; 
             padding: 0 !important; 
-            height: 297mm !important; 
-            width: 210mm !important; 
-            max-height: 297mm !important;
+            height: 100% !important; 
+            max-height: 100vh !important;
+            width: 100% !important;
             overflow: hidden !important; 
             display: block !important;
+            -webkit-print-color-adjust: exact !important;
           }
           
+          /* 2. Hide poori website */
           body > *:not(#printable-area) { 
             display: none !important; 
           }
 
+          /* 3. Main print wrapper */
           #printable-area { 
-            display: block !important;
+            display: flex !important;
+            flex-direction: column !important;
             position: absolute !important; 
             left: 0 !important; 
             top: 0 !important; 
             width: 210mm !important; 
-            height: 297mm !important; 
+            height: 100vh !important; 
             z-index: 9999999 !important; 
             background: white !important;
             box-sizing: border-box !important;
             visibility: visible !important;
           }
 
+          /* 4. Use classes for vertical positioning */
+          #printable-area.print-top { 
+            justify-content: flex-start !important; 
+            padding-top: 20mm !important; 
+          }
+          #printable-area.print-center { 
+            justify-content: center !important; 
+          }
+          #printable-area.print-bottom { 
+            justify-content: flex-end !important; 
+            padding-bottom: 20mm !important; 
+          }
+
           .print-content-wrapper {
             display: flex !important;
             flex-direction: column !important;
-            width: 100% !important;
-            height: 100% !important;
             align-items: center !important;
-            justify-content: ${vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center'} !important;
-            padding: ${vAlign === 'top' ? '20mm 0' : vAlign === 'bottom' ? '0 0 20mm 0' : '0'} !important;
+            width: 100% !important;
             box-sizing: border-box !important;
           }
 
