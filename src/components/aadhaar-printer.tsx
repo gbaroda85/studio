@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
+import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect, useMemo } from "react";
 import { 
     UploadCloud, 
     Printer, 
@@ -55,6 +55,7 @@ import ReactCrop, { type Crop as CropType, type PixelCrop, centerCrop, makeAspec
 import 'react-image-crop/dist/ReactCrop.css';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import confetti from 'canvas-confetti';
 
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs`;
@@ -74,6 +75,18 @@ type CropMode = 'rect' | 'scanner';
 type VAlign = 'top' | 'center' | 'bottom';
 
 interface Point { x: number; y: number; }
+
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
 
 export default function AadhaarPrinter() {
   const { toast } = useToast();
@@ -725,4 +738,3 @@ export default function AadhaarPrinter() {
     </div>
   );
 }
-
