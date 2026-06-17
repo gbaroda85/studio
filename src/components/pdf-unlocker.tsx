@@ -96,6 +96,19 @@ export default function PdfUnlocker() {
         }
     }, [unlockedPdfUrl]);
     
+    const resetState = () => {
+        if (unlockedPdfUrl) URL.revokeObjectURL(unlockedPdfUrl);
+        setPdfFile(null);
+        setPreviewPages([]);
+        setUnlockedPdfUrl(null);
+        setErrorDetails(null);
+        setProgress(0);
+        setStatusText("");
+        setPassword("");
+        setIsProtected(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
     const clearUnlockedFile = () => {
         if (unlockedPdfUrl) {
             URL.revokeObjectURL(unlockedPdfUrl);
@@ -343,7 +356,7 @@ export default function PdfUnlocker() {
 
                         <Card
                             className={cn(
-                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
                                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                             )}
                             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -367,7 +380,7 @@ export default function PdfUnlocker() {
                             </CardContent>
                             <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> HD DECODE</div>
+                                <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> INDEX SCAN</div>
                                 <div className="flex items-center gap-1.5"><Info className="size-3 text-blue-500" /> AADHAAR OK</div>
                             </CardFooter>
                         </Card>
@@ -484,7 +497,7 @@ export default function PdfUnlocker() {
                                             )}
                                         </Button>
                                     ) : (
-                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
+                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
                                             <StarIcons />
                                             <Download className="size-6 md:size-7" /> 
                                             <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
