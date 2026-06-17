@@ -78,21 +78,25 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
-  // FEATURED / VISUAL PROCESSORS (Limit 6 for Home Grid)
+  // FEATURED / VISUAL PROCESSORS (Set to 8 for Home Grid)
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "featured" },
   { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-emerald-500", lightBg: "bg-emerald-50", category: "featured" },
+  { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-[#fefce8]", category: "featured" },
+  { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "featured" },
   
-  // PDF TOOLKIT (Limit 6 for Home Grid)
+  // PDF TOOLKIT (Set to 8 for Home Grid)
   { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf-kit" },
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "pdf-kit" },
   { icon: RotateCw, title: "ROTATE PDF", description: "Rotate PDF pages permanently and save.", href: "/rotate-pdf", colorClass: "bg-blue-500", lightBg: "bg-blue-50", category: "pdf-kit" },
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
   { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf-kit" },
+  { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf-kit" },
+  { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
   // FINANCE CENTER (Limit 6 for Home Grid)
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
@@ -111,8 +115,6 @@ const ALL_TOOLS = [
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALC", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
-  { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-emerald-500", lightBg: "bg-[#fefce8]", category: "image" },
-  { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "image" },
   { icon: PlayCircle, title: "INSTAGRAM DOWNLOADER", description: "Download Reels and Videos from Instagram privately.", href: "/instagram-downloader", colorClass: "bg-pink-600", lightBg: "bg-pink-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "video" },
   { icon: UserCircle, title: "PASSPORT PHOTO", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
@@ -122,8 +124,6 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-sky-50", category: "image" },
-  { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf" },
-  { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-cyan-600", lightBg: "bg-cyan-50", category: "pdf" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -294,7 +294,7 @@ export default function Page() {
             </div>
           ) : (
             <>
-                {/* IMAGE SOLUTION - LIMIT 6 */}
+                {/* IMAGE SOLUTION - STRICT 8 TOOLS */}
                 <div className="mb-12">
                     <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
                         <div className="w-12 h-1.5 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
@@ -308,18 +308,18 @@ export default function Page() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                {/* PDF TOOLKIT - LIMIT 6 */}
+                {/* PDF TOOLKIT - STRICT 8 TOOLS */}
                 <div className="mb-12">
                     <div className="flex items-center gap-2 text-rose-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
                         <div className="w-12 h-1.5 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
                     </div>
                     <h2 className="text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
-                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                        {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 

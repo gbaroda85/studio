@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
@@ -33,11 +32,13 @@ import {
     FileText,
     X,
     Loader2,
-    Download
+    Download,
+    Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useFileStore } from '@/lib/file-store';
@@ -52,7 +53,7 @@ const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`star-${i} pointer-events-none`}>
-                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
             </div>
@@ -83,6 +84,8 @@ export default function PdfUnlocker() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [unlockedPdfUrl, setUnlockedPdfUrl] = useState<string | null>(null);
     const [errorDetails, setErrorDetails] = useState<string | null>(null);
+    const [previewPages, setPreviewPages] = useState<string[]>([]);
+    const [renderingProgress, setRenderingProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const isAadhaarFile = pdfFile?.name.toLowerCase().includes('aadhaar') || pdfFile?.name.toLowerCase().includes('eaadhaar');
@@ -93,6 +96,19 @@ export default function PdfUnlocker() {
         }
     }, [unlockedPdfUrl]);
     
+    const resetState = () => {
+        if (unlockedPdfUrl) URL.revokeObjectURL(unlockedPdfUrl);
+        setPdfFile(null);
+        setPreviewPages([]);
+        setUnlockedPdfUrl(null);
+        setErrorDetails(null);
+        setProgress(0);
+        setStatusText("");
+        setPassword("");
+        setIsProtected(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
     const clearUnlockedFile = () => {
         if (unlockedPdfUrl) {
             URL.revokeObjectURL(unlockedPdfUrl);
@@ -101,6 +117,7 @@ export default function PdfUnlocker() {
         setErrorDetails(null);
         setProgress(0);
         setStatusText("");
+        setPreviewPages([]);
     }
 
     const checkEncryption = async (arrayBuffer: ArrayBuffer) => {
@@ -112,16 +129,13 @@ export default function PdfUnlocker() {
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: false
+                isEvalSupported: true, 
+                stopAtErrors: false
             });
             await loadingTask.promise;
             setIsProtected(false);
         } catch (error: any) {
-            if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
-                setIsProtected(true);
-            } else {
-                setIsProtected(null);
-            }
+            setIsProtected(true);
         } finally {
             setIsChecking(false);
         }
@@ -157,36 +171,92 @@ export default function PdfUnlocker() {
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-    const resetState = () => {
-        setPdfFile(null);
-        setPassword('');
-        setIsProtected(null);
-        clearUnlockedFile();
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    const generateVisualPreviews = async (pdfBytes: Uint8Array) => {
+        setRenderingProgress(0);
+        try {
+            const loadingTask = pdfjs.getDocument({ 
+                data: pdfBytes,
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                cMapPacked: true
+            });
+            const pdf = await loadingTask.promise;
+            const imgs: string[] = [];
+            const pagesToRender = Math.min(pdf.numPages, 3); 
+
+            for (let i = 1; i <= pagesToRender; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 0.8 });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    imgs.push(canvas.toDataURL('image/jpeg', 0.8));
+                }
+            }
+            setPreviewPages(imgs);
+        } catch (e) { console.error(e); }
+    };
 
     const handleUnlockProcess = async () => {
         if (!pdfFile) return;
-        if (isProtected && !password) {
-            toast({ variant: 'destructive', title: "Missing Password", description: "This file is encrypted." });
+        if (!password) {
+            toast({ variant: 'destructive', title: "Password Required", description: "Please enter the PDF password." });
             return;
         }
 
         setIsUnlocking(true);
         setErrorDetails(null);
         clearUnlockedFile();
-        setStatusText("Opening Secure Vault...");
+        setStatusText("Opening Security Vault...");
         setProgress(5);
 
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
+
+            // --- METHOD A: DIRECT VECTOR UNLOCK (SIZE PRESERVATION) ---
+            try {
+                const pdfDoc = await PDFDocument.load(pdfBuffer, { 
+                    password: password,
+                    ignoreEncryption: false 
+                });
+                
+                setStatusText("Decrypting Streams...");
+                setProgress(50);
+
+                const catalog = pdfDoc.catalog;
+                catalog.set(PDFName.of('ViewerPreferences'), pdfDoc.context.obj({
+                    FitWindow: true,
+                    CenterWindow: true,
+                    DisplayDocTitle: true
+                }));
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                setUnlockedPdfUrl(URL.createObjectURL(blob));
+                
+                await generateVisualPreviews(pdfBytes);
+                
+                setProgress(100);
+                setStatusText("Success (Original Size)");
+                toast({ title: 'Success!', description: 'File unlocked (Size Preserved).' });
+                setIsUnlocking(false);
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
+                return;
+            } catch (libError) {
+                console.warn("pdf-lib direct unlock failed, falling back to sanitization.");
+            }
+
+            // --- METHOD B: SANITIZATION FALLBACK (IMAGE RENDER) ---
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(pdfBuffer),
                 password: password,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: false
+                isEvalSupported: true,
+                stopAtErrors: false
             });
             
             const pdf = await loadingTask.promise;
@@ -194,10 +264,10 @@ export default function PdfUnlocker() {
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Decrypting P${i}/${totalPages}...`);
+                setStatusText(`Sanitizing P${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
-                const renderScale = 2.5; 
+                const renderScale = 2.0; 
                 const renderViewport = page.getViewport({ scale: renderScale }); 
                 
                 const canvas = document.createElement('canvas');
@@ -207,10 +277,9 @@ export default function PdfUnlocker() {
                     canvas.width = Math.floor(renderViewport.width);
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
                     await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
                     
-                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.75); 
                     const imgBuffer = await fetch(imgData).then(r => r.arrayBuffer());
                     const embeddedImg = await finalPdfDoc.embedJpg(imgBuffer);
                     
@@ -218,12 +287,7 @@ export default function PdfUnlocker() {
                     const pHeight = embeddedImg.height / renderScale;
                     const newPage = finalPdfDoc.addPage([pWidth, pHeight]);
                     
-                    newPage.drawImage(embeddedImg, {
-                        x: 0,
-                        y: 0,
-                        width: pWidth,
-                        height: pHeight
-                    });
+                    newPage.drawImage(embeddedImg, { x: 0, y: 0, width: pWidth, height: pHeight });
                 }
                 setProgress(10 + Math.round((i / totalPages) * 90));
             }
@@ -236,19 +300,20 @@ export default function PdfUnlocker() {
             }));
 
             const finalPdfBytes = await finalPdfDoc.save();
-            const pdfBlob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(pdfBlob);
-            setUnlockedPdfUrl(url);
+            const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
+            setUnlockedPdfUrl(URL.createObjectURL(blob));
+            
+            await generateVisualPreviews(finalPdfBytes);
+            
             setProgress(100);
-            setStatusText("Success!");
+            setStatusText("Sanitization Complete");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
             toast({ title: 'Success!', description: 'File unlocked and sanitized.' });
         } catch (error: any) {
-            console.error('[Unlock Engine Error]:', error);
             if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
                 setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
-                setErrorDetails("Engine Error: Document structure may be non-standard or highly restricted.");
+                setErrorDetails("Failed to unlock this specific document type.");
             }
         } finally {
             setIsUnlocking(false);
@@ -280,7 +345,7 @@ export default function PdfUnlocker() {
                                     <Sparkles className="size-2.5 md:size-3" />
                                 </div>
                             </div>
-                            <h1 className="text-xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
+                            <h1 className="text-xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
                                 PDF <span className="text-gradient-hero">Unlocker Studio</span>
                             </h1>
                             <p className="text-[10px] md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
@@ -290,7 +355,7 @@ export default function PdfUnlocker() {
 
                         <Card
                             className={cn(
-                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
                                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                             )}
                             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -307,14 +372,14 @@ export default function PdfUnlocker() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
+                                        <p className="text-[10px] text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
                             <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> HD DECODE</div>
+                                <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> INDEX SCAN</div>
                                 <div className="flex items-center gap-1.5"><Info className="size-3 text-blue-500" /> AADHAAR OK</div>
                             </CardFooter>
                         </Card>
@@ -323,138 +388,170 @@ export default function PdfUnlocker() {
                     <motion.div 
                         key="editor"
                         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                        className="w-full max-w-2xl px-2 md:px-4"
+                        className="w-full max-w-4xl px-2 md:px-4"
                     >
-                        <Card className="shadow-2xl border-primary/10 overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-card/50">
-                            <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3 truncate pr-2 text-left">
-                                        <div className="size-8 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            {isProtected ? <Lock className="size-4 md:size-5" /> : <CheckCircle2 className="size-4 md:size-5 text-green-500" />}
-                                        </div>
-                                        <div className="truncate">
-                                            <CardTitle className="text-[11px] md:text-sm font-black uppercase truncate">{pdfFile.name}</CardTitle>
-                                            <CardDescription className="text-[8px] md:text-[9px] font-mono">{formatBytes(pdfFile.size)}</CardDescription>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                                        <X size={16}/>
-                                    </Button>
-                                </div>
-                            </CardHeader>
-
-                            <CardContent className="p-5 md:p-8 space-y-6">
-                                {isChecking ? (
-                                    <div className="py-10 flex flex-col items-center justify-center gap-3">
-                                        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SCANNING...</p>
-                                    </div>
-                                ) : isProtected === false && !unlockedPdfUrl ? (
-                                    <div className="p-6 md:p-8 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-2xl text-center space-y-4">
-                                        <Info className="size-10 mx-auto text-blue-500 opacity-40" />
-                                        <p className="font-bold text-xs text-blue-800 uppercase">Already Unlocked</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase leading-relaxed">This file has no password. You can still process it to sanitize the structure.</p>
-                                    </div>
-                                ) : isProtected === true && !unlockedPdfUrl ? (
-                                    <div className="space-y-5">
-                                        <div className="space-y-2 text-left">
-                                            <Label htmlFor="pass" className="text-[9px] font-black uppercase text-primary tracking-widest">Enter PDF Password</Label>
-                                            <div className="relative group">
-                                                <input 
-                                                    id="pass" type={showPassword ? "text" : "password"} value={password} 
-                                                    onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
-                                                    className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black tracking-[0.2em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
-                                                    placeholder="••••••••" autoFocus disabled={isUnlocking}
-                                                />
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-                                                >
-                                                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                                                </button>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            <Card className="lg:col-span-5 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50 flex flex-col">
+                                <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 truncate pr-2 text-left">
+                                            <div className="size-8 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                                {unlockedPdfUrl ? <CheckCircle2 className="size-4 md:size-5 text-green-500" /> : <Lock className="size-4 md:size-5" />}
+                                            </div>
+                                            <div className="truncate">
+                                                <CardTitle className="text-[11px] md:text-sm font-black uppercase truncate">{pdfFile.name}</CardTitle>
+                                                <CardDescription className="text-[8px] md:text-[9px] font-mono">{formatBytes(pdfFile.size)}</CardDescription>
                                             </div>
                                         </div>
+                                        <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                                            <X size={16}/>
+                                        </Button>
+                                    </div>
+                                </CardHeader>
 
-                                        {isAadhaarFile && (
-                                            <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-3 text-left flex gap-3">
-                                                <Info className="size-4 text-blue-500 shrink-0" />
-                                                <p className="text-[9px] font-bold text-blue-600 leading-tight uppercase">
-                                                    Aadhaar Password: First 4 letters of NAME (CAPS) + Year of Birth.
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {isUnlocking && (
-                                            <div className="space-y-4 text-center py-2">
-                                                <div className="relative inline-block">
-                                                    <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20 stroke-[3]" />
-                                                    <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-[9px] font-black text-primary uppercase animate-pulse">{statusText}</p>
-                                                    <Progress value={progress} className="h-1" />
+                                <CardContent className="p-5 md:p-8 space-y-6">
+                                    {isChecking ? (
+                                        <div className="py-10 flex flex-col items-center justify-center gap-3">
+                                            <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SCANNING...</p>
+                                        </div>
+                                    ) : !unlockedPdfUrl ? (
+                                        <div className="space-y-5">
+                                            <div className="space-y-2 text-left">
+                                                <Label htmlFor="pass" className="text-[9px] font-black uppercase text-primary tracking-widest">Enter PDF Password</Label>
+                                                <div className="relative group">
+                                                    <input 
+                                                        id="pass" type={showPassword ? "text" : "password"} value={password} 
+                                                        onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
+                                                        className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black tracking-[0.2em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
+                                                        placeholder="••••••••" autoFocus disabled={isUnlocking}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleUnlockProcess()}
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                                                    >
+                                                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                                                    </button>
                                                 </div>
                                             </div>
-                                        )}
 
-                                        {errorDetails && (
-                                            <div className="bg-rose-50 border-2 border-rose-100 rounded-xl p-3 text-left flex gap-3 animate-in shake">
-                                                <ShieldAlert className="size-4 text-rose-500 shrink-0" />
-                                                <p className="text-[9px] font-bold text-rose-700 uppercase">{errorDetails}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : unlockedPdfUrl ? (
-                                    <div className="p-6 md:p-10 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
-                                        <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
-                                            <CheckCircle2 className="size-8" />
-                                            <div className="absolute -top-1 -right-1"><Sparkles className="text-yellow-400 size-5" /></div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-lg font-black text-green-800 uppercase tracking-tighter">UNLOCKED!</p>
-                                            <p className="text-[9px] text-green-600 font-bold uppercase opacity-60">Ready for saving with 300DPI optimization</p>
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </CardContent>
+                                            {isAadhaarFile && (
+                                                <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-3 text-left flex gap-3 shadow-sm">
+                                                    <Info className="size-4 text-blue-500 shrink-0" />
+                                                    <p className="text-[9px] font-bold text-blue-600 leading-tight uppercase">
+                                                        Aadhaar Password: First 4 letters of NAME (CAPS) + Year of Birth.
+                                                    </p>
+                                                </div>
+                                            )}
 
-                            <CardFooter className="flex flex-col gap-3 p-5 md:p-6 bg-muted/10 border-t">
-                                {!unlockedPdfUrl ? (
-                                    <Button 
-                                        onClick={handleUnlockProcess} 
-                                        disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
-                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
-                                    >
-                                        <StarIcons />
-                                        {isUnlocking ? "DECODING..." : (
-                                            <div className="flex items-center gap-3">
-                                                {isProtected ? <Unlock className="size-5 md:size-6" /> : <Zap className="size-5 md:size-6" />}
-                                                <span className="uppercase tracking-tighter">UNLOCK PDF</span>
+                                            {isUnlocking && (
+                                                <div className="space-y-4 text-center py-2">
+                                                    <div className="relative inline-block">
+                                                        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20 stroke-[3]" />
+                                                        <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[9px] font-black text-primary uppercase animate-pulse">{statusText}</p>
+                                                        <Progress value={progress} className="h-1" />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {errorDetails && (
+                                                <div className="bg-rose-50 border-2 border-rose-100 rounded-xl p-3 text-left flex gap-3 animate-in shake">
+                                                    <ShieldAlert className="size-4 text-rose-500 shrink-0" />
+                                                    <p className="text-[9px] font-bold text-rose-700 uppercase">{errorDetails}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="p-6 md:p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
+                                            <div className="size-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
+                                                <CheckCircle2 className="size-8" />
+                                                <div className="absolute -top-1 -right-1"><Sparkles className="text-yellow-400 size-5" /></div>
                                             </div>
-                                        )}
-                                    </Button>
-                                ) : (
-                                    <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 border-none shadow-2xl">
-                                        <StarIcons />
-                                        <Download className="size-6 md:size-7" /> 
-                                        <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
-                                    </Button>
-                                )}
-                                <div className="flex items-center justify-between w-full mt-2">
-                                    <Button variant="ghost" onClick={resetState} className="h-9 text-[9px] font-black uppercase text-muted-foreground/40 hover:text-destructive px-2">
-                                        <RefreshCcw className="size-3 mr-1.5" /> Start Over
-                                    </Button>
-                                    <div className="flex items-center gap-1.5 text-muted-foreground/30 text-[7px] md:text-[8px] font-black uppercase">
-                                        <ShieldCheck className="size-3 text-green-500" /> LOCAL RAM
+                                            <div className="space-y-1">
+                                                <p className="text-lg font-black text-green-800 uppercase tracking-tighter">UNLOCKED!</p>
+                                                <p className="text-[9px] text-green-600 font-bold uppercase opacity-60">Metadata cleaned • Size Optimized</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+
+                                <CardFooter className="flex flex-col gap-3 p-5 md:p-6 bg-muted/10 border-t mt-auto">
+                                    {!unlockedPdfUrl ? (
+                                        <Button 
+                                            onClick={handleUnlockProcess} 
+                                            disabled={isUnlocking || !password || isChecking} 
+                                            className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
+                                        >
+                                            <StarIcons />
+                                            {isUnlocking ? "DECODING..." : (
+                                                <div className="flex items-center gap-3">
+                                                    <Unlock className="size-5 md:size-6" />
+                                                    <span className="uppercase tracking-tighter">UNLOCK PDF</span>
+                                                </div>
+                                            )}
+                                        </Button>
+                                    ) : (
+                                        <Button onClick={handleDownload} className="magic-button magic-button-success w-full h-14 md:h-16 text-sm md:text-lg font-black bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-4 border-none shadow-2xl">
+                                            <StarIcons />
+                                            <Download className="size-6 md:size-7" /> 
+                                            <span className="uppercase tracking-tighter">SAVE UNLOCKED PDF</span>
+                                        </Button>
+                                    )}
+                                    <div className="flex items-center justify-between w-full mt-2">
+                                        <Button 
+                                            variant="outline" 
+                                            onClick={resetState} 
+                                            className="h-10 px-6 border-2 font-black text-[10px] uppercase rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+                                        >
+                                            <RefreshCcw className="mr-1.5 size-3.5" /> Start Over
+                                        </Button>
+                                        <div className="flex items-center gap-1.5 text-muted-foreground/30 text-[7px] md:text-[8px] font-black uppercase">
+                                            <ShieldCheck className="size-3 text-green-500" /> LOCAL RAM
+                                        </div>
                                     </div>
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                </CardFooter>
+                            </Card>
+
+                            {/* RIGHT: PREVIEW AREA */}
+                            <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10">
+                                <CardHeader className="bg-muted/30 border-b p-4 text-center">
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-40 flex items-center justify-center gap-2">
+                                        <Eye className="size-3.5" /> Visual Feedback
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0 flex flex-col h-[500px]">
+                                    <ScrollArea className="flex-1 w-full p-8">
+                                        <div className="flex flex-col items-center gap-10">
+                                            {previewPages.length > 0 ? (
+                                                previewPages.map((src, i) => (
+                                                    <div key={i} className="shadow-2xl border-[6px] border-white rounded-sm overflow-hidden bg-white max-w-[350px] animate-in slide-in-from-bottom-4">
+                                                        <img src={src} className="w-full h-auto block" alt="p" />
+                                                        <div className="bg-muted text-[7px] font-black py-1.5 text-center uppercase tracking-widest text-muted-foreground border-t">Sample P{i+1}</div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center py-32 text-center opacity-10 gap-4">
+                                                    <Monitor className="size-20" />
+                                                    <p className="text-xl font-black uppercase tracking-widest">Awaiting Unlock</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <ScrollBar />
+                                    </ScrollArea>
+                                    <div className="p-4 bg-muted/20 border-t flex justify-center">
+                                        <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30">GR7 Tools HD Sandbox Rendering</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
 }
-

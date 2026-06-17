@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
@@ -211,8 +212,12 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
             </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
-             <Button variant="outline" onClick={() => { setImageSrc(null); setConvertedSrc(null); }} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
+             <Button 
+                variant="outline" 
+                onClick={() => { setImageSrc(null); setConvertedSrc(null); }} 
+                className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl bg-white dark:bg-slate-900 !text-slate-900 dark:!text-white border-slate-300 dark:border-white/20 hover:bg-destructive/5 hover:!text-destructive transition-all duration-300 shadow-sm"
+             >
+                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Start Over
             </Button>
         </div>
       </div>
@@ -298,7 +303,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
                         </Select>
                     </div>
 
-                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm">
+                    <div className="p-4 md:p-5 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 md:gap-4 shadow-sm text-left">
                         <CheckCircle2 className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[9px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Conversion</p>
