@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -127,6 +126,17 @@ export default function ImageCompressor() {
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files?.[0] || null); };
+
+  const handleReset = () => {
+    setResults([]);
+    setCompressionMode('target');
+    setTargetSizeValue("50");
+    setTargetUnit('kb');
+    setQuality([85]);
+    setOutputFormat('jpeg');
+    setIsBulkProcessing(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const compressSingleFile = async (item: CompressionResult): Promise<CompressionResult> => {
     return new Promise((resolve) => {
@@ -363,7 +373,7 @@ export default function ImageCompressor() {
         <div className="lg:col-span-5 space-y-4">
             <Card className="border-2 shadow-xl border-primary/10 overflow-hidden sticky top-24 rounded-[2rem] md:rounded-[2.5rem] bg-card/50">
                 <CardHeader className="bg-primary/5 border-b p-5 md:p-8 text-left">
-                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter"><Settings2 className="size-5 md:size-6 text-primary" /> Configuration</CardTitle>
+                    <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter"><Settings2 className="size-4 md:size-5 text-primary" /> Configuration</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8">
                     <Tabs value={compressionMode} onValueChange={(v) => setCompressionMode(v as CompressionMode)} className="w-full">
@@ -408,10 +418,10 @@ export default function ImageCompressor() {
                         <Select value={outputFormat} onValueChange={(v) => { setOutputFormat(v as OutputFormat); setResults(prev => prev.map(r => ({ ...r, newSize: 0 }))); }}><SelectTrigger className="h-11 font-black text-xs border-2 rounded-xl bg-background"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="jpeg" className="font-bold py-2">JPEG (Universal)</SelectItem><SelectItem value="webp" className="font-bold py-2">WEBP (Modern HD)</SelectItem><SelectItem value="png" className="font-bold py-2">PNG (Lossless)</SelectItem></SelectContent></Select>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-dashed">
+                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10">
                     <div className="flex flex-col gap-3 w-full">
                         <Button 
-                            className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 shadow-2xl" 
+                            className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-10 shadow-2xl" 
                             disabled={results.length === 0 || isBulkProcessing} onClick={startBulkCompression}
                         >
                             <StarIcons />

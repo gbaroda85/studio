@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -25,7 +24,8 @@ import {
     X,
     Eye,
     Lock,
-    AlertCircle
+    AlertCircle,
+    Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -39,6 +39,7 @@ import confetti from 'canvas-confetti';
 import { useFileStore } from '@/lib/file-store';
 import { motion, AnimatePresence } from "framer-motion";
 
+const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
@@ -168,7 +169,6 @@ export default function PdfCompressor() {
             let targetBytes = 0;
             if (mode === 'target') {
                 const val = parseFloat(targetValue);
-                // We target 95% of requested size to account for PDF metadata overhead
                 targetBytes = (targetUnit === 'kb' ? val * 1024 : val * 1024 * 1024) * 0.95;
             }
 
@@ -181,7 +181,6 @@ export default function PdfCompressor() {
             for (let i = 1; i <= totalPages; i++) {
                 setStatusText(`Scanning P${i}...`);
                 const page = await pdf.getPage(i);
-                // Budget per page for iterative search
                 const targetBytesPerPage = mode === 'target' ? (targetBytes) / totalPages : Infinity;
                 
                 let finalDataUrl = "";
@@ -202,7 +201,6 @@ export default function PdfCompressor() {
                 };
 
                 if (mode === 'target') {
-                    // Start with high resolution and iterate down
                     const scalesToTry = [2.5, 2.0, 1.5, 1.0, 0.75, 0.5];
                     let bestUrlFound = "";
                     
@@ -210,17 +208,16 @@ export default function PdfCompressor() {
                         if (bestUrlFound) break;
                         
                         let low = 0.1, high = 0.98;
-                        // Binary search for highest quality that fits per-page budget
                         for (let j = 0; j < 6; j++) {
                             const mid = (low + high) / 2;
                             const testUrl = await getPageDataUrl(s, mid);
-                            const testSize = Math.round((testUrl.length - 22) * 0.75); // base64 to binary estimate
+                            const testSize = Math.round((testUrl.length - 22) * 0.75); 
                             
                             if (testSize <= targetBytesPerPage) {
                                 bestUrlFound = testUrl;
-                                low = mid; // Try higher quality
+                                low = mid; 
                             } else {
-                                high = mid; // Try lower quality
+                                high = mid; 
                             }
                         }
                     }
@@ -313,7 +310,7 @@ export default function PdfCompressor() {
                         </div>
                         <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                     </CardContent>
-                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-6 md:pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
+                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                         <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                         <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT CROP</div>
                     </CardFooter>

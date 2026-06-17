@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -112,7 +111,7 @@ export default function PdfUnlocker() {
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: true, // Required for some complex PDFs
+                isEvalSupported: true, 
                 stopAtErrors: false
             });
             await loadingTask.promise;
@@ -140,7 +139,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -188,8 +187,8 @@ export default function PdfUnlocker() {
                 cMapPacked: true,
                 standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
                 isEvalSupported: true,
-                stopAtErrors: false, // Don't crash on non-standard objects
-                disableAutoFetch: true, // Process entire buffer
+                stopAtErrors: false, 
+                disableAutoFetch: true, 
                 disableStream: true
             });
             
@@ -428,7 +427,7 @@ export default function PdfUnlocker() {
                                     <Button 
                                         onClick={handleUnlockProcess} 
                                         disabled={isUnlocking || (isProtected === true && !password) || isChecking} 
-                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
+                                        className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
                                     >
                                         <StarIcons />
                                         {isUnlocking ? "DECODING..." : (
