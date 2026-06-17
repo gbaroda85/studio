@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  // Next.js 15: serverExternalPackages must be at the root level
   serverExternalPackages: [
     '@imgly/background-removal', 
     '@huggingface/transformers', 
@@ -46,7 +45,8 @@ const nextConfig: NextConfig = {
     allowedDevOrigins: [
       '*.cloudworkstations.dev',
       '*.idx.google.com',
-      'localhost:9002'
+      'localhost:9002',
+      '*.cluster-*.cloudworkstations.dev'
     ]
   }
 };

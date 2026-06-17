@@ -130,7 +130,6 @@ export default function AadhaarPrinter() {
   const containerRef = useRef<HTMLDivElement>(null);
   const studioPrintRef = useRef<HTMLDivElement>(null);
 
-  // --- SHARED COORDINATES ENGINE ---
   const calculateA4Positions = useCallback((alignment: VAlign) => {
       const totalContentH = (CARD_HEIGHT_MM * 2) + GAP_MM;
       const x = (A4_WIDTH_MM - CARD_WIDTH_MM) / 2;
@@ -390,7 +389,6 @@ export default function AadhaarPrinter() {
     setFrontFinal(null); setBackFinal(null); setRefiningSide(null); setPdfBuffer(null); setPassword("");
   };
 
-  // --- FINAL PRINT ENGINE ---
   const executeFinalPrint = async () => {
       if (!studioPrintRef.current) return;
       setIsExporting(true);
@@ -461,7 +459,7 @@ export default function AadhaarPrinter() {
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in duration-500 pb-24 overflow-x-hidden relative">
       
-      {/* HIDDEN PRINT TARGET (Always vertical A4) */}
+      {/* HIDDEN PRINT TARGET */}
       <div className="fixed top-0 -left-[5000px] z-[-1] pointer-events-none">
           <div ref={studioPrintRef} style={{ width: `${A4_WIDTH_MM}mm`, height: `${A4_HEIGHT_MM}mm`, background: 'white', position: 'relative' }}>
                 <div 
@@ -636,7 +634,7 @@ export default function AadhaarPrinter() {
                   </div>
               </CardContent>
               <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t flex justify-between gap-4">
-                  <Button variant="ghost" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2">CANCEL</Button>
+                  <Button variant="outline" onClick={() => setStage('upload')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl border-2">CANCEL</Button>
                   <Button className="h-14 px-12 bg-primary text-white font-black rounded-xl shadow-xl text-base hover:scale-[1.02] transition-all" onClick={handleFinalizeCrop}>CONFIRM ADJUSTMENT</Button>
               </CardFooter>
           </Card>
@@ -658,26 +656,22 @@ export default function AadhaarPrinter() {
                   </div>
 
                   <div className="flex flex-wrap items-center justify-center gap-3">
-                      {/* BORDER TOGGLE */}
                       <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-2xl border-2 shadow-inner">
                           <Square className="size-4 text-muted-foreground" />
                           <span className="text-[10px] font-black uppercase opacity-60">Border</span>
                           <Switch checked={showBorder} onCheckedChange={setShowBorder} />
                       </div>
                       
-                      {/* ALIGNMENT CONTROLS */}
                       <div className="flex bg-muted p-1 rounded-2xl border-2 shadow-inner">
                           <button type="button" onClick={() => setVAlign('top')} className={cn("p-2.5 rounded-xl transition-all", vAlign === 'top' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60")}><AlignVerticalJustifyStart className="size-4"/></button>
                           <button type="button" onClick={() => setVAlign('center')} className={cn("p-2.5 rounded-xl transition-all mx-1", vAlign === 'center' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60")}><AlignVerticalJustifyCenter className="size-4"/></button>
                           <button type="button" onClick={() => setVAlign('bottom')} className={cn("p-2.5 rounded-xl transition-all", vAlign === 'bottom' ? "!ring-[3px] !ring-slate-950 dark:!ring-white bg-background shadow-lg" : "opacity-30 hover:opacity-60")}><AlignVerticalJustifyEnd className="size-4"/></button>
                       </div>
 
-                      {/* RE-ALIGN BUTTON */}
                       <Button variant="outline" onClick={() => setStage('upload')} className="h-12 border-2 px-6 font-black text-[10px] uppercase rounded-2xl shadow-sm hover:bg-primary/5">
                           <RefreshCcw className="mr-2 size-4" /> RE-ALIGN
                       </Button>
 
-                      {/* PRINT NOW BUTTON */}
                       <Button onClick={executeFinalPrint} className="magic-button h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all border-none">
                           <StarIcons />
                           <Printer className="mr-2 size-5" /> PRINT NOW
@@ -693,7 +687,6 @@ export default function AadhaarPrinter() {
                       </div>
                       
                       <div className="flex flex-col md:flex-row items-center justify-center gap-12 pt-10">
-                          {/* FRONT PREVIEW */}
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">FRONT</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
@@ -701,7 +694,6 @@ export default function AadhaarPrinter() {
                               </div>
                           </div>
 
-                          {/* BACK PREVIEW */}
                           <div className="flex flex-col items-center gap-6">
                               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">BACK</p>
                               <div className={cn("relative shadow-2xl rounded-2xl overflow-hidden bg-white w-full max-w-[350px] aspect-[85.6/54] transition-all hover:scale-105 duration-500", showBorder && "ring-2 ring-black")}>
@@ -710,7 +702,6 @@ export default function AadhaarPrinter() {
                           </div>
                       </div>
 
-                      {/* SIDE ACTIONS */}
                       <div className="absolute top-6 right-8 flex flex-col gap-2">
                            <Button size="sm" variant="outline" className="h-9 px-4 rounded-xl border-2 font-black text-[9px] uppercase bg-white/80" onClick={executePdfExport}><Download className="size-3.5 mr-1.5 text-primary" /> Export PDF</Button>
                       </div>
