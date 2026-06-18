@@ -39,7 +39,7 @@ export default function SignatureResizerPage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
-            <div className="w-full max-w-5xl text-center mb-8 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="w-full text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
                 {/* PREMIUM CAPSULE HEADER */}
                 <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
                     <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
@@ -52,9 +52,15 @@ export default function SignatureResizerPage() {
                     <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
 
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
-                    Signature <span className="text-gradient-hero">Resizer Pro</span>
-                </h1>
+                {/* 3D TITLE BAR */}
+                <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
+                        <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
+                            Signature <span className="text-gradient-hero">Resizer Pro</span>
+                        </h1>
+                    </div>
+                </div>
+
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-[10px] md:text-xs">
                     Resize to exact CM or Pixel dimensions with 20KB limit for SSC, UPSC and IBPS forms. 100% Private.
                 </p>
@@ -73,7 +79,7 @@ export default function SignatureResizerPage() {
                     <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-800 dark:text-white">
                         Standard Portal Compliance
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Government job applications require strict adherence to dimensions and file sizes. Our <strong>Signature Studio</strong> ensures your file never gets rejected due to "Invalid Dimensions" or "Size Exceeded".
                     </p>
                 </div>
