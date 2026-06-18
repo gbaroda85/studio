@@ -25,7 +25,7 @@ export default function AddPageNumbersPage() {
             <PdfPageNumbererClient />
         </div>
 
-        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="PDF Page Numberer" steps={[
                 "Upload: Select the PDF document you want to number.",
                 "Position: Choose from Top/Bottom and Left/Center/Right options.",

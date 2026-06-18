@@ -46,7 +46,7 @@ export default function EditPdfPage() {
 
         <div className="w-full flex flex-col items-center mb-2 px-4">
             <div className="w-full max-w-5xl text-center mb-8 space-y-2 no-print animate-in fade-in slide-in-from-top-4 duration-500">
-                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                     <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
                         PDF Editor Studio
                     </span>
@@ -88,7 +88,7 @@ export default function EditPdfPage() {
                         <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
                             <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
                                 <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
-                                    <Layout className="text-cyan-500 size-6" />
+                                    <Layout className="text-indigo-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Content Eraser</h3>
                                 <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Use the Whiteout tool to hide unwanted text, dates, or logos. It works like a digital correction tape.</p>

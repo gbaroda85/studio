@@ -23,7 +23,7 @@ export default function FuelConverterPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                     <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
                         Fuel Converter
                     </span>
@@ -36,7 +36,7 @@ export default function FuelConverterPage() {
             <FuelConverter />
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 pb-20 mx-auto">
             <HowToGuide title="Fuel Consumption Converter" steps={[
                 "Input: Enter the efficiency number from your vehicle's display.",
                 "From Unit: Select the current format (e.g., L/100km).",

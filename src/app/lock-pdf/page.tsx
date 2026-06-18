@@ -25,7 +25,7 @@ export default function LockPdfPage() {
             <PdfLocker />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 mx-auto">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto">
             <HowToGuide title="Vault PDF Locker" steps={[
                 "Upload PDF: Drag and drop your sensitive document into the locker workspace.",
                 "Set Password: Enter a secure password and confirm it carefully.",
@@ -110,35 +110,6 @@ export default function LockPdfPage() {
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Security FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is this encryption really secure?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes. We use the **PDF Standard Encryption** algorithm. Unlike "fake" tools that just hide the file, our tool encrypts the internal components. This means the file cannot be previewed or indexed by search engines or bots without the correct password.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Will my password be saved on your server?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            **Never.** At GR7 Tools, privacy is our architecture. The encryption happens 100% inside your browser's temporary memory (RAM). Your password never even travels over the internet.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I remove the password later?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes, but you will need our **"Unlock PDF"** tool and the original password. If you lose the password, the document is permanently sealed to protect your data.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

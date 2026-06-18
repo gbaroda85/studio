@@ -40,12 +40,11 @@ export default function PassportDateNamePage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
             <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
-                {/* UPDATED TITLE: UNIFIED CURSIVE STYLE & INCREASED SIZE TO MAX */}
-                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                     <span className="font-['Dancing_Script'] font-bold text-primary normal-case">Add Name & Date to Photo</span>
                 </h1>
 
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
                     Create passport photos with Name & Date (DOP) for SSC, UPSC and Banking portals. 100% Private.
                 </p>
             </div>
@@ -85,7 +84,7 @@ export default function PassportDateNamePage() {
                                     <User className="text-cyan-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">STRICT 3.5x4.5CM</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Automatic aspect ratio lock ensures your photo is never stretched and fits official forms.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Automatic aspect ratio lock ensures your photo is never stretched and fits official forms.</p>
                             </div>
                         </div>
 
@@ -95,7 +94,7 @@ export default function PassportDateNamePage() {
                                     <Calendar className="text-indigo-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">DATE OF PHOTO</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Easily add the photo date. Our engine renders it in a clean, legible font for official scanners.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Easily add the photo date. Our engine renders it in a clean, legible font for official scanners.</p>
                             </div>
                         </div>
 
@@ -105,7 +104,7 @@ export default function PassportDateNamePage() {
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">ZERO SERVER RISK</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your identity is sensitive. We process everything in your local device RAM for total security.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Your identity is sensitive. We process everything in your local device RAM for total security.</p>
                             </div>
                         </div>
                     </div>

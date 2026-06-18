@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import { TrendingUp, Trophy, HelpCircle, ShieldCheck } from 'lucide-react';
 import SipCalculator from '@/components/sip-calculator';
@@ -24,11 +23,10 @@ export default function SipCalculatorPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> WEALTH STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    SIP <span className="text-gradient-hero">Calculator</span>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        SIP Calculator
+                    </span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Estimate your future wealth by calculating compound returns on your monthly investments.
@@ -38,7 +36,7 @@ export default function SipCalculatorPage() {
             <SipCalculator />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 pb-20 mx-auto">
             <HowToGuide title="SIP Return Calculator" steps={[
                 "Monthly Amount: Use the slider to set your monthly SIP investment.",
                 "Expected Rate: Input the annual return percentage you expect (e.g., 12%).",

@@ -25,7 +25,7 @@ export default function SplitPdfPage() {
             <PdfSplitter />
         </div>
 
-        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="Visual PDF Splitter" steps={[
                 "Upload: Select a multi-page PDF from your device.",
                 "Visual Grid: Every page will be rendered as a preview in the grid.",
@@ -87,35 +87,6 @@ export default function SplitPdfPage() {
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">PDF Splitter FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I extract just one page from a huge PDF?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes! Just click that specific page in our visual grid and hit "Extract". A new single-page PDF will be generated instantly for download.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Does the split PDF lose quality?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            No. We use **High-Fidelity Re-encoding**. We preserve the original vector data and internal resources of the PDF, ensuring the extracted pages look identical to the original.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for legal or bank documents?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            This is the safest method available online. Because we use **Client-Side JS**, your files are processed in your computer's RAM and never uploaded to any server. Your data stays on your device.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

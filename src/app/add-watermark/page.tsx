@@ -25,7 +25,7 @@ export default function AddWatermarkPage() {
             <PdfWatermarker />
         </div>
 
-        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="PDF Watermark Studio" steps={[
                 "Upload: Select the PDF document you want to protect.",
                 "Text: Enter your watermark text (e.g., 'DRAFT', 'CONFIDENTIAL').",

@@ -21,11 +21,25 @@ export default function CreateZipPage() {
     <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=file" label="Back to Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <ZipCreator />
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Create Zip Archive
+                    </span>
+                </h1>
+
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
+                    Bundle and compress multiple files into a single ZIP archive instantly.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <ZipCreator />
+            </div>
         </div>
         
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4">
             <HowToGuide title="Zip Creator" steps={[
                 "Add Files: Select or drop multiple files to bundle.",
                 "Review: Check the file list for accuracy.",

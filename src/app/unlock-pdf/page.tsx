@@ -50,7 +50,7 @@ export default function UnlockPdfPage() {
             <PdfUnlocker />
         </div>
 
-        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="PDF Unlocker Studio" steps={deepSteps} />
 
             <section className="bg-muted/30 p-10 rounded-[3rem] border-2 border-dashed relative overflow-hidden">

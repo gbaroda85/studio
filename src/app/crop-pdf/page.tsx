@@ -33,7 +33,7 @@ export default function CropPdfPage() {
             <PdfCropperClient />
         </div>
 
-        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="Professional PDF Cropper & Scanner" steps={steps} />
 
             {/* AdSense Deep Content Section */}

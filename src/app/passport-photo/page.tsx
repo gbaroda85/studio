@@ -46,7 +46,7 @@ export default function PassportPhotoPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
             <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
-                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                     <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
                         Passport Photo Maker
                     </span>
