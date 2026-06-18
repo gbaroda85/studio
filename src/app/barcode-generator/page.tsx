@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Barcode, ShieldCheck, HelpCircle, LayoutGrid, Scan, Maximize, Printer, Sparkles, Download, Zap, X, ChevronDown } from 'lucide-react';
+import { Barcode, ShieldCheck, HelpCircle, LayoutGrid, Scan, Maximize, Printer, Sparkles, Download, Zap, X, ChevronDown, Monitor } from 'lucide-react';
 import BarcodeGenerator from '@/components/barcode-generator';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -65,13 +65,13 @@ export default function BarcodeGeneratorPage() {
         <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Barcode Generator" steps={deepSteps} />
 
-            <section className="space-y-12 py-10 border-t">
+            <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
-                        Industrial Grade Scannable Output
+                    <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                        Professional Barcode Studio
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
-                        Our <strong>Professional Barcode Studio</strong> uses precise vector mapping to ensure your generated codes are 100% compliant with international standards.
+                    <p className="text-muted-foreground max-w-3xl mx-auto leading-relaxed text-base md:text-lg font-medium">
+                        Our <strong>Professional Studio</strong> uses precise vector mapping to ensure your generated codes are 100% compliant with international standards.
                     </p>
                 </div>
                 
@@ -89,20 +89,20 @@ export default function BarcodeGeneratorPage() {
                         <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
                             <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
                                 <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
-                                    <Barcode className="text-cyan-500 size-6" />
+                                    <Zap className="text-cyan-500 size-6" />
                                 </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">10+ FORMATS</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Full support for CODE128, EAN, UPC, ITF, and specialized formats like Pharmacode and Codabar.</p>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">BATCH READY</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Need 100 barcodes? Just paste your list and download the entire stack as a clean ZIP archive instantly.</p>
                             </div>
                         </div>
 
                         <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
                             <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
                                 <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
-                                    <Zap className="text-indigo-500 size-6" />
+                                    <Monitor className="text-indigo-500 size-6" />
                                 </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">BATCH READY</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Need 100 barcodes? Just paste your list and download the entire stack as a clean ZIP archive instantly.</p>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">SCANNABLE HD</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Our studio uses industrial-grade rendering to ensure your barcodes are sharp and readable at any size.</p>
                             </div>
                         </div>
 
@@ -111,7 +111,7 @@ export default function BarcodeGeneratorPage() {
                                 <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">ZERO SERVER LEAK</h3>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% PRIVATE</h3>
                                 <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">All encoding logic runs locally on your CPU. Your product codes and inventory lists never leave your device.</p>
                             </div>
                         </div>
@@ -126,22 +126,22 @@ export default function BarcodeGeneratorPage() {
                     <h2 className="text-3xl font-black uppercase tracking-tight">Barcode FAQs</h2>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
+                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
+                    <AccordionItem value="item-1" className="border-b-2 py-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Which format should I use for retail?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">
                             For standard retail products in India, Europe, or UK, use **EAN-13**. For the USA and Canada, use **UPC-A**. If you are managing internal inventory or logistics, **CODE128** is the most flexible choice.
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
+                    <AccordionItem value="item-2" className="border-b-2 py-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Will the barcodes be sharp enough for printing?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">
                             Yes. We recommend downloading in **SVG format** for professional packaging or **PDF** for label printing. These are vector formats that remain perfectly sharp at any size. Our PNG export is also high-density (300DPI equivalent).
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
+                    <AccordionItem value="item-3" className="border-b-2 py-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Is it safe for private inventory lists?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">
                             Absolutely. Unlike other "Barcode APIs", **GR7 Tools** is a client-side utility. Everything happens in your browser's RAM. We do not have a database and we never see your data.
                         </AccordionContent>
                     </AccordionItem>
