@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -64,38 +65,24 @@ interface PageItem {
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
 
 function parsePageRanges(ranges: string, maxPage: number): number[] {
     const result = new Set<number>();
@@ -292,11 +279,13 @@ export default function PdfToImageConverter() {
         if (pages.length === 0) return;
         setIsProcessing(true);
         setProgress(0);
-        const updatedPages: PageItem[] = [];
         
-        // CRITICAL FIX: Sequential processing to prevent memory crash (Aw Snap!)
-        for (let i = 0; i < pages.length; i++) {
-            const p = pages[i];
+        //micro-delay to let UI show the loader immediately
+        await new Promise(r => setTimeout(r, 100));
+
+        const currentPages = [...pages];
+        for (let i = 0; i < currentPages.length; i++) {
+            const p = currentPages[i];
             const newItem = await new Promise<PageItem>((resolve) => {
                 const img = new window.Image();
                 img.src = p.originalSrc;
@@ -314,13 +303,17 @@ export default function PdfToImageConverter() {
                     resolve({ ...p, originalSrc: rotatedOriginal, finalSrc: newFinal });
                 };
             });
-            updatedPages.push(newItem);
-            setProgress(Math.round(((i + 1) / pages.length) * 100));
+            
+            // INCREMENTAL UPDATE: Update state page by page for immediate visual feedback
+            setPages(prev => prev.map(prevP => prevP.id === p.id ? newItem : prevP));
+            setProgress(Math.round(((i + 1) / currentPages.length) * 100));
+            
+            // Allow UI thread to breathe
+            if (i % 2 === 0) await new Promise(r => setTimeout(r, 0));
         }
 
-        setPages(updatedPages);
         setIsProcessing(false);
-        toast({ title: "Global Rotation", description: "All pages rotated sequentially to save memory." });
+        toast({ title: "Global Rotation", description: "All pages rotated successfully." });
     };
 
     const applyToAll = async () => {
@@ -328,17 +321,24 @@ export default function PdfToImageConverter() {
         if (!selected) return;
         setIsProcessing(true);
         setProgress(0);
-        const updatedPages: PageItem[] = [];
+        
+        //micro-delay to let UI show the loader immediately
+        await new Promise(r => setTimeout(r, 100));
 
-        // CRITICAL FIX: Sequential processing to prevent memory crash (Aw Snap!)
-        for (let i = 0; i < pages.length; i++) {
-            const p = pages[i];
+        const currentPages = [...pages];
+        for (let i = 0; i < currentPages.length; i++) {
+            const p = currentPages[i];
             const final = await renderProcessedImage(p.originalSrc, selected.vAlign, selected.fitMode);
-            updatedPages.push({ ...p, vAlign: selected.vAlign, fitMode: selected.fitMode, finalSrc: final });
-            setProgress(Math.round(((i + 1) / pages.length) * 100));
+            const newItem = { ...p, vAlign: selected.vAlign, fitMode: selected.fitMode, finalSrc: final };
+            
+            // INCREMENTAL UPDATE: Update state page by page for immediate visual feedback
+            setPages(prev => prev.map(prevP => prevP.id === p.id ? newItem : prevP));
+            setProgress(Math.round(((i + 1) / currentPages.length) * 100));
+            
+            // Allow UI thread to breathe
+            if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
         }
 
-        setPages(updatedPages);
         setIsProcessing(false);
         toast({ title: "Global Sync Complete" });
     };
@@ -449,7 +449,7 @@ export default function PdfToImageConverter() {
                          </div>
 
                          <div className={cn("space-y-4 pt-4 border-t-2 border-dashed transition-all", selectedPage?.fitMode === 'fit' ? "opacity-20 pointer-events-none grayscale" : "opacity-100")}>
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
+                            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
                                 <AlignVerticalJustifyCenter className="size-3" /> Absolute Alignment
                             </Label>
                             <div className="grid grid-cols-1 gap-2">
@@ -648,3 +648,4 @@ export default function PdfToImageConverter() {
         </div>
     );
 }
+
