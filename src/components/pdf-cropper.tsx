@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -322,21 +321,6 @@ export default function PdfCropper() {
   if (stage === 'upload') {
     return (
         <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-            <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
-                <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                    <Maximize className="size-8" />
-                    <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                        <Sparkles className="size-2.5" />
-                    </div>
-                </div>
-                <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                    PDF <span className="text-gradient-hero">Cropper Studio</span>
-                </h1>
-                <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                    Trim PDF margins or fix perspective with 8-dot scanner. <br/>100% Private local browser mapping.
-                </p>
-            </div>
-
             <Card className={cn(
                 "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
@@ -470,7 +454,7 @@ export default function PdfCropper() {
 
             <div className="lg:col-span-4 flex flex-col gap-6">
                 <Card className="border-2 shadow-2xl overflow-hidden rounded-[2.5rem] bg-card/50 border-primary/10">
-                    <CardHeader className="bg-primary/5 border-b p-6">
+                    <CardHeader className="bg-primary/5 border-b p-6 text-left">
                         <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-2"><Settings2 className="size-5 text-primary" /> Studio Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-8">
@@ -479,7 +463,7 @@ export default function PdfCropper() {
                                 <p className="text-[11px] font-bold text-muted-foreground leading-tight">Trim margins for a clean digital doc.</p>
                             </div>
 
-                            <Button className="w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-xl rounded-2xl group transition-all active:scale-95" onClick={handleApplyCrop} disabled={isProcessing || !pageImage}>
+                            <Button className="w-full h-16 text-lg font-black bg-primary text-white hover:bg-primary/90 shadow-xl rounded-2xl group transition-all active:scale-95" onClick={handleApplyCrop} disabled={isProcessing || !pageImage}>
                                 <CheckCircle2 className="size-6 mr-2 group-hover:scale-110 transition-transform" /> APPLY FOR PAGE {currentPage}
                             </Button>
 
