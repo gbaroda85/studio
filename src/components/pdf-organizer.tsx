@@ -90,7 +90,7 @@ interface PageItem {
     previewSrc: string;
     isDeleted: boolean;
     type: PageType;
-    sourceFile?: File; // Store reference to original file for multi-pdf support
+    sourceFile?: File; 
 }
 
 const StarIcons = () => (
@@ -255,11 +255,10 @@ export default function PdfOrganizer() {
     const [restoredId, setRestoredId] = useState<string | null>(null);
     
     const [insertAfterId, setInsertAfterId] = useState<string | null>(null);
-    const [insertType, setInsertType] = useState<'image' | 'pdf' | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const insertPdfInputRef = useRef<HTMLInputElement>(null);
     const insertImgInputRef = useRef<HTMLInputElement>(null);
-    const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
     const renderIdRef = useRef(0);
 
     const sensors = useSensors(
@@ -331,7 +330,7 @@ export default function PdfOrganizer() {
                             isDeleted: false,
                             previewSrc: canvas.toDataURL('image/jpeg', 0.8),
                             type: 'original',
-                            sourceFile: file // Keep track of which file this page belongs to
+                            sourceFile: file 
                         };
                         
                         newPagesBatch.push(newPage);
@@ -356,15 +355,48 @@ export default function PdfOrganizer() {
         }
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const onMainFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        handleFileChange(e.target.files?.[0] || null);
+        e.target.value = "";
+    };
+
+    const onInsertPdfChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-        if (insertType === 'pdf' && insertAfterId) {
+        if (file && insertAfterId) {
             handleFileChange(file, insertAfterId);
-            setInsertAfterId(null);
-            setInsertType(null);
-        } else {
-            handleFileChange(file);
         }
+        setInsertAfterId(null);
+        e.target.value = "";
+    };
+
+    const onInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !insertAfterId) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const src = ev.target?.result as string;
+            const imgId = `img-${Math.random().toString(36).substr(2, 9)}`;
+            const imgPage: PageItem = { 
+                id: imgId, 
+                index: -1, 
+                rotation: 0, 
+                isDeleted: false, 
+                previewSrc: src, 
+                type: 'image' 
+            };
+            
+            setPages(prev => {
+                const index = prev.findIndex(p => p.id === insertAfterId);
+                const next = [...prev];
+                next.splice(index + 1, 0, imgPage);
+                return next;
+            });
+            setInsertAfterId(null);
+            toast({ title: "Image Inserted as Page" });
+        };
+        reader.readAsDataURL(file);
+        e.target.value = "";
     };
 
     const deletePage = (id: string) => {
@@ -431,44 +463,14 @@ export default function PdfOrganizer() {
         toast({ title: "Blank Page Inserted" });
     };
 
+    const onInsertPdfClick = (afterId: string) => {
+        setInsertAfterId(afterId);
+        insertPdfInputRef.current?.click();
+    };
+
     const onInsertImageClick = (afterId: string) => {
         setInsertAfterId(afterId);
         insertImgInputRef.current?.click();
-    };
-
-    const onInsertPdfClick = (afterId: string) => {
-        setInsertAfterId(afterId);
-        setInsertType('pdf');
-        fileInputRef.current?.click();
-    };
-
-    const handleInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !insertAfterId) return;
-
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const src = ev.target?.result as string;
-            const imgId = `img-${Math.random().toString(36).substr(2, 9)}`;
-            const imgPage: PageItem = { 
-                id: imgId, 
-                index: -1, 
-                rotation: 0, 
-                isDeleted: false, 
-                previewSrc: src, 
-                type: 'image' 
-            };
-            
-            setPages(prev => {
-                const index = prev.findIndex(p => p.id === insertAfterId);
-                const next = [...prev];
-                next.splice(index + 1, 0, imgPage);
-                return next;
-            });
-            setInsertAfterId(null);
-            toast({ title: "Image Inserted as Page" });
-        };
-        reader.readAsDataURL(file);
     };
 
     const rotateAll = (deg: number) => {
@@ -583,14 +585,14 @@ export default function PdfOrganizer() {
                                 <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-6 bg-muted/30 group">
                                     <div className="relative">
                                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                                        <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Organize</p>
                                         <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">Delete, re-order, rotate or insert blank pages.</p>
                                     </div>
                                 </div>
-                                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+                                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onMainFileChange} />
                             </CardContent>
                         </Card>
                     ) : (
@@ -780,7 +782,7 @@ export default function PdfOrganizer() {
                                         alt="zoom" 
                                     />
                                     <div className="absolute top-2 right-2 opacity-20 pointer-events-none">
-                                        <Badge variant="outline" className="text-[8px] font-black uppercase border-black">{zoomPage?.type === 'image' ? 'IMAGE PAGE' : `PAGE ${zoomPage?.index}`}</Badge>
+                                        <Badge variant="outline" className="text-[7px] font-black uppercase border-black">{zoomPage?.type === 'image' ? 'IMAGE PAGE' : `PAGE ${zoomPage?.index}`}</Badge>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 mb-10">
@@ -797,7 +799,9 @@ export default function PdfOrganizer() {
                 </DialogContent>
             </Dialog>
 
-            <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleInsertImageChange} />
+            {/* HIDDEN INPUTS FOR INSERTION */}
+            <input ref={insertPdfInputRef} type="file" className="hidden" accept="application/pdf" onChange={onInsertPdfChange} />
+            <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={onInsertImageChange} />
         </div>
     );
 }
