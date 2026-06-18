@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Sparkles, Zap, ShieldCheck, MonitorCheck, ScanLine, HelpCircle } from 'lucide-react';
+import { Sparkles, Zap, ShieldCheck, MonitorCheck, ScanLine, HelpCircle, Smartphone, FileStack, Download } from 'lucide-react';
 import { DocumentScannerClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -41,7 +41,7 @@ export default function DocumentScanPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center min-h-screen w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center min-h-screen w-full pt-16 md:pt-28 text-left">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
@@ -64,13 +64,12 @@ export default function DocumentScanPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 pb-24 no-print">
+        <div className="w-full max-w-7xl space-y-16 px-4 pb-24 no-print mx-auto">
             <HowToGuide title="Document Scanner" steps={deepSteps} />
 
-            {/* Deep SEO Content */}
-            <section className="space-y-10 py-10 border-t">
+            <section className="space-y-12 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <ScanLine className="text-primary size-8" />
                         Professional Extraction Engine
                     </h2>
@@ -79,21 +78,46 @@ export default function DocumentScanPage() {
                     </p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
-                        <Zap className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">BW PRO Mode</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-medium">Intelligently sharpens text while preserving natural details of embedded photos and signatures for official forms.</p>
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <MonitorCheck className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Magic Color</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-medium">Brightens paper to studio white while keeping ink colors and stamps vibrant and authentic for legal paperwork.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
-                        <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">100% Offline</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed font-medium">Everything happens in your browser RAM. Your sensitive documents, bank statements, and ID cards never leave your device.</p>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <Zap className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">BW PRO MODE</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Intelligently sharpens text while preserving natural details of embedded photos and signatures for official forms.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <MonitorCheck className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">MAGIC COLOR</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Brightens paper to studio white while keeping ink colors and stamps vibrant and authentic for legal paperwork.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <ShieldCheck className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% OFFLINE</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Everything happens in your browser RAM. Your sensitive documents, bank statements, and ID cards never leave your device.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

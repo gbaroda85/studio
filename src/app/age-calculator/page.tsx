@@ -18,11 +18,10 @@ export const metadata: Metadata = {
 
 export default function AgeCalculatorPage() {
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28 text-left">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
-            {/* Restored Hero Header Section */}
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
                     <Sparkles className="size-2.5" /> LIFE ANALYTICS
@@ -40,7 +39,7 @@ export default function AgeCalculatorPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 pb-20">
+        <div className="w-full max-w-4xl space-y-16 px-4 pb-20 mx-auto">
             <HowToGuide title="Advanced Age Calculator" steps={[
                 "Select Date: Use our smart year/month dropdown for fast selection.",
                 "Calculate: Hit the button to process your lifetime metrics.",
@@ -49,31 +48,56 @@ export default function AgeCalculatorPage() {
                 "Life Analytics: Explore total weeks, hours, and seconds lived so far."
             ]} />
 
-            <section className="space-y-10 py-10 border-t">
+            <section className="space-y-12 py-10 border-t">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         Beyond Just a Number
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
-                        Every day lived is a milestone. Our <strong>Professional Age Studio</strong> uses high-precision date arithmetic to give you a complete perspective of your time.
+                        Every day lived is a milestone. Our <strong>Professional Age Studio</strong> uses high-precision date arithmetic to give you a complete perspective.
                     </p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
-                        <Gift className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Birthday Sync</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Instantly find out the day of the week for your next birthday to plan your celebrations better.</p>
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <Sparkles className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Life Analytics</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">See your age expressed in total weeks and minutes—a fascinating look at your progress in life.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
-                        <Clock className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Precision Math</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Our engine handles leap years and variable month lengths with 100% mathematical accuracy.</p>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <Gift className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">BIRTHDAY SYNC</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Instantly find out the day of the week for your next birthday to plan your celebrations better.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <Sparkles className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">LIFE ANALYTICS</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">See your age expressed in total weeks and minutes—a fascinating look at your progress in life.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <Clock className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">PRECISION MATH</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Our engine handles leap years and variable month lengths with 100% mathematical accuracy.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
