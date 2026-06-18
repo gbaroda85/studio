@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -338,21 +337,6 @@ export default function PdfSplitter() {
     if (previews.length === 0 && !isRendering) {
         return (
             <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                        <Scissors className="size-8" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        SPLIT PDF <span className="text-gradient-hero">STUDIO</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Extract specific pages or combine multiple documents. <br/>100% Private high-fidelity local mapping.
-                    </p>
-                </motion.div>
-
                 <Card className={cn(
                     "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
@@ -366,7 +350,7 @@ export default function PdfSplitter() {
                     <CardContent className="p-8 md:p-12">
                         <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                             <div className="relative">
-                                <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                 <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                             </div>
                             <div className="text-center px-4">
@@ -390,9 +374,7 @@ export default function PdfSplitter() {
         <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem]">
             <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20">
-                        <Settings2 className="size-5" />
-                    </div>
+                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-5" /></div>
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">SPLIT PDF STUDIO</CardTitle>
                 </div>
                 <div className="flex items-center gap-4">
@@ -441,7 +423,7 @@ export default function PdfSplitter() {
                         <div className="pt-6 border-t-2 border-dashed flex flex-col gap-3">
                              {!splitPdfUrl ? (
                                 <Button 
-                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10 shadow-xl" 
+                                    className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 px-10 shadow-xl" 
                                     onClick={handleSplitPdf} 
                                     disabled={selectedIndices.length === 0 || isProcessing}
                                 >
