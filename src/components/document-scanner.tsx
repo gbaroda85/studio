@@ -218,8 +218,8 @@ export default function DocumentScanner() {
   };
 
   const resetAdjustments = () => {
-      setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]);
-      setActiveFilter('document');
+      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
+      setActiveFilter('original');
   };
 
   const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -354,13 +354,17 @@ export default function DocumentScanner() {
         for (let i = 0; i < pixels.length; i += 4) {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-            if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
-            else if (activeFilter === 'document') { r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma; }
-            else if (activeFilter === 'gray') r = g = b = luma;
-            else if (activeFilter === 'magic' || activeFilter === 'ai_enhance') { 
-                r = Math.min(255, r * 1.15); 
-                g = Math.min(255, g * 1.15); 
-                b = Math.min(255, b * 1.15); 
+            if (activeFilter === 'bw') {
+                r = g = b = luma > 128 ? 255 : 0;
+            } else if (activeFilter === 'document') {
+                r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
+            } else if (activeFilter === 'gray') {
+                r = g = b = luma;
+            } else if (activeFilter === 'magic' || activeFilter === 'ai_enhance') {
+                const boost = activeFilter === 'ai_enhance' ? 1.2 : 1.15;
+                r = Math.min(255, r * boost); 
+                g = Math.min(255, g * boost); 
+                b = Math.min(255, b * boost); 
             }
             if (activeFilter !== 'bw' && activeFilter !== 'gray') { 
                 r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; 
@@ -764,18 +768,22 @@ export default function DocumentScanner() {
                     </CardContent>
                     <CardFooter className="p-4 md:p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
                         <div className="w-full space-y-4">
-                            <div className="flex items-center justify-between"><Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label></div>
-                            <div className="grid grid-cols-6 gap-1 w-full">
-                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
-                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
-                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
-                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); }} />
-                                <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label>
+                                <Button size="sm" variant="ghost" className="h-7 text-[8px] font-black uppercase text-primary bg-primary/5 hover:bg-primary/10 rounded-full" onClick={() => { setActiveFilter('ai_enhance'); setBrightness([125]); setContrast([130]); setSaturation([120]); setSharpness([4.0]); }}><Wand2 className="size-3 mr-1" /> SMART ENHANCE</Button>
+                            </div>
+                            <div className="grid grid-cols-7 gap-1 w-full">
+                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} />
+                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([3.0]); }} />
+                                <FilterBtn active={activeFilter === 'ai_enhance'} label="AI Pro" icon={Wand2} onClick={() => { setActiveFilter('ai_enhance'); setBrightness([125]); setContrast([130]); setSaturation([120]); setSharpness([4.0]); }} />
+                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); setSaturation([0]); setSharpness([4.0]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([108]); setContrast([112]); setSaturation([115]); setSharpness([1.5]); }} />
+                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); setSaturation([0]); setSharpness([2.0]); }} />
+                                <FilterBtn active={activeFilter === 'original'} label="None" icon={RefreshCcw} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
                             </div>
                         </div>
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-left">
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Exposure</span><span>{brightness[0]}%</span></div><Slider min={50} max={250} step={1} value={brightness} onValueChange={setBrightness} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Saturation</span><span>{saturation[0]}%</span></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Sharpness</span><span>{sharpness[0]}x</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
@@ -799,8 +807,9 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-10 w-10 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-5"/></Button>
+            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-9 w-9 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-4 md:size-5"/></Button>
             <span className="text-[7px] font-black uppercase text-muted-foreground">{label}</span>
         </div>
     );
 }
+
