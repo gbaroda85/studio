@@ -37,30 +37,55 @@ export default function ScanToPdfPage() {
             {/* AdSense Ready Content */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <ScanLine className="text-primary size-8" />
                         Portable Office in your Browser
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         No need for a bulky flatbed scanner or paid mobile apps. Our <strong>Scan-to-PDF Studio</strong> uses your device's high-res camera to capture and digitize paperwork instantly with full privacy.
                     </p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
-                        <Smartphone className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Mobile Optimized</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Specifically designed to trigger the back camera on Android and iPhone for the best document quality.</p>
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <MonitorCheck className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Edge Cropping</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Built-in cropping tool allows you to isolate the document from the background, making it look professional.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-green-500/50 transition-all">
-                        <ShieldCheck className="text-green-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Local Privacy</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Your camera feed and captured images stay 100% on your device. We never see what you scan.</p>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <Smartphone className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Mobile Optimized</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Specifically designed to trigger the back camera on Android and iPhone for the best document quality.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <MonitorCheck className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">Edge Cropping</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Built-in cropping tool allows you to isolate the document from the background, making it look professional.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <ShieldCheck className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">Local Privacy</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your camera feed and captured images stay 100% on your device. We never see what you scan.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
