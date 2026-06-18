@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -177,21 +176,6 @@ export default function VideoToMp3Converter() {
                         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
                         className="w-full max-w-2xl px-4"
                     >
-                        <div className="text-center space-y-4 mb-8">
-                            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-indigo-500/10 text-indigo-600 shadow-xl relative">
-                                <Music className="size-8" />
-                                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                    <Sparkles className="size-3" />
-                                </div>
-                            </div>
-                            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                                Video to <span className="text-gradient-hero">MP3 Studio</span>
-                            </h1>
-                            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                                Extract high-fidelity audio from any video instantly. <br/>100% Private local RAM extraction.
-                            </p>
-                        </div>
-
                         <Card className={cn(
                             "glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 cursor-pointer select-none",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
@@ -237,7 +221,6 @@ export default function VideoToMp3Converter() {
                                 <Badge className="font-mono text-[9px]">{formatBytes(videoFile.size)}</Badge>
                             </CardHeader>
                             <CardContent className="p-6 md:p-10 flex flex-col gap-8 bg-slate-100 dark:bg-black/20 shadow-inner min-h-[400px]">
-                                {/* Always Visible Video Player with Native Controls */}
                                 <div className="w-full relative group">
                                     <video 
                                         src={videoUrl!} 
@@ -255,7 +238,6 @@ export default function VideoToMp3Converter() {
                                     )}
                                 </div>
 
-                                {/* Audio Result Section - Appears below video when ready */}
                                 <AnimatePresence>
                                     {audioUrl && (
                                         <motion.div 
@@ -292,7 +274,7 @@ export default function VideoToMp3Converter() {
                             <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col gap-4">
                                 {!audioUrl ? (
                                     <Button 
-                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10" 
+                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10 shadow-xl" 
                                         onClick={extractAudio}
                                         disabled={isProcessing}
                                     >
@@ -307,10 +289,6 @@ export default function VideoToMp3Converter() {
                                         <StarIcons />
                                         <Download className="mr-3 size-8 group-hover:translate-y-1 transition-transform" /> 
                                         <span className="uppercase tracking-tighter text-lg">SAVE AUDIO FILE</span>
-                                        <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#22c55e] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                            <Download className="size-6 group-hover:scale-110 transition-transform" />
-                                            <div className="absolute right-3 w-0.5 h-6 bg-[#22c55e]/20 rounded-full" />
-                                        </div>
                                     </Button>
                                 )}
                                 
