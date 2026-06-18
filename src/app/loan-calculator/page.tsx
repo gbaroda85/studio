@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Landmark, TrendingUp, PieChart, HelpCircle, Calculator, Wallet, Trophy } from 'lucide-react';
+import { Landmark, TrendingUp, PieChart, HelpCircle, Calculator, Wallet, Trophy, ShieldCheck, Zap } from 'lucide-react';
 import LoanCalculator from '@/components/loan-calculator';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -44,21 +44,57 @@ export default function LoanCalculatorPage() {
                 "Review: Instantly see your EMI and total interest payable."
             ]} />
 
-            <section className="grid md:grid-cols-3 gap-6">
-                <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-colors">
-                    <TrendingUp className="text-primary size-10" />
-                    <h3 className="font-black uppercase text-sm tracking-widest">Financial Planning</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Plan your monthly budget by knowing exactly how much you need to pay for your dream home or car.</p>
+            <section className="space-y-12 py-10 border-t">
+                <div className="text-center space-y-4">
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                        Professional Loan Analysis
+                    </h2>
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                        Planning your finances shouldn't be guesswork. Our <strong>Professional Loan Studio</strong> uses standard amortization logic to give you 100% accurate results.
+                    </p>
                 </div>
-                <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-emerald-500/50 transition-colors">
-                    <PieChart className="text-emerald-500 size-10" />
-                    <h3 className="font-black uppercase text-sm tracking-widest">Interest Breakdown</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">See the difference between your principal amount and the total interest the bank will charge.</p>
-                </div>
-                <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-rose-500/50 transition-colors">
-                    <Landmark className="text-rose-500 size-10" />
-                    <h3 className="font-black uppercase text-sm tracking-widest">Bank Ready</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Standard formulas used by major Indian banks like SBI, HDFC, and ICICI for EMI calculation.</p>
+                
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <TrendingUp className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Financial Focus</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Plan your monthly budget by knowing exactly how much you need to pay for your dream home or car.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <PieChart className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">Visual Insights</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">See the difference between your principal amount and the total interest the bank will charge visually.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <ShieldCheck className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">Zero Data Log</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your financial plans stay on your device. We do not store or track your numeric loan queries.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
