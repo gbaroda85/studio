@@ -33,36 +33,61 @@ export default function CropPdfPage() {
             <PdfCropperClient />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="Professional PDF Cropper & Scanner" steps={steps} />
 
             {/* AdSense Deep Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <Grid3X3 className="text-primary size-8" />
                         Next-Gen Document Alignment
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Standard PDF readers only let you view. Our <strong>Professional PDF Crop Studio</strong> features a built-in <strong>Homography Matrix Engine</strong>. Whether you need to trim white margins for a clean presentation or "scan" a tilted phone photo of a bill, we provide pixel-perfect accuracy.
                     </p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-primary/50 transition-all">
-                        <Scan className="text-primary size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Scanner Mode</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Fix perspective on document photos. Drag 4 independent dots to the corners of the paper to flatten it instantly.</p>
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <Maximize className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">Margin Trimmer</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Use Rectangular mode to cut unwanted white space from research papers, bank statements, and invoices.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
-                        <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest">100% Private</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Processing happens in your browser RAM. Your sensitive legal and financial docs never leave your device.</p>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <Scan className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Scanner Mode</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Fix perspective on document photos. Drag 4 independent dots to the corners of the paper to flatten it instantly.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <Maximize className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">Margin Trimmer</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Use Rectangular mode to cut unwanted white space from research papers, bank statements, and invoices.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <ShieldCheck className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% Private</h3>
+                                <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Processing happens in your browser RAM. Your sensitive legal and financial docs never leave your device.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -75,7 +100,7 @@ export default function CropPdfPage() {
                     </div>
                     <div className="space-y-4">
                         <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Why choose our Cropper?</h2>
-                        <p className="text-muted-foreground leading-relaxed text-sm">
+                        <p className="text-muted-foreground leading-relaxed text-sm font-medium uppercase opacity-70">
                             Unlike basic converters that rasterize every page to low quality, our **Rect Mode** preserves the original internal PDF vectors whenever possible. For **Scanner Mode**, we use high-density (300 DPI equivalent) rendering to ensure that even after perspective correction, the text remains crisp and readable for OCR and official submissions.
                         </p>
                     </div>
@@ -87,10 +112,9 @@ export default function CropPdfPage() {
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-12 text-primary mb-4" />
                     <h2 className="text-3xl font-black uppercase tracking-tight">Cropping & Scanning FAQs</h2>
-                    <p className="text-muted-foreground font-medium italic">Everything you need to know about local PDF editing.</p>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">When should I use "Scanner Mode"?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
