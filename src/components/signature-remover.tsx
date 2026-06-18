@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type DragEvent, type ChangeEvent, useCallback } from "react";
@@ -209,21 +208,6 @@ export default function SignatureRemover() {
   if (!originalImageSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                <PenLine className="size-8" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <Sparkles className="size-2.5" />
-                </div>
-            </div>
-            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                Signature <span className="text-gradient-hero">BG Remover</span>
-            </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                Step 1: Upload signature photo to extract ink. <br/>100% Private local RAM processing.
-            </p>
-        </motion.div>
-
         <Card
             className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -268,7 +252,7 @@ export default function SignatureRemover() {
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RotateCcw className="mr-1.5 size-3" /> Change Signature
+                <RefreshCcw className="mr-1.5 size-3" /> Change Signature
             </Button>
             <Button 
                 size="lg" 

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Scan, Grid3X3, Maximize, Sparkles } from 'lucide-react';
 import ImageCropper from '@/components/image-cropper';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -18,14 +18,28 @@ export const metadata: Metadata = {
 
 export default function CropImagePage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-10 md:pt-16">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <ImageCropper />
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Image Cropper Studio
+                    </span>
+                </h1>
+
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                    Precision cropping with 8-dot smart scanner. 100% Private local mapping.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <ImageCropper />
+            </div>
         </div>
 
-        <div className="w-full max-w-4xl mx-auto space-y-16 px-4">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-24">
             <HowToGuide title="Smart Image Cropper" steps={[
                 "Upload Photo: Select any photo or document from your device.",
                 "Choose Mode: Use 'Rect' for standard crop or 'Scanner' for tilted photos.",
@@ -60,57 +74,6 @@ export default function CropImagePage() {
                         <p className="text-xs text-muted-foreground leading-relaxed">Your sensitive documents never leave your device. All cropping math happens in your browser RAM.</p>
                     </div>
                 </div>
-            </section>
-
-            {/* Educational Section */}
-            <section className="bg-primary/5 p-10 rounded-[3rem] border-2 border-dashed border-primary/20">
-                <div className="flex flex-col md:flex-row gap-8 items-center">
-                    <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Maximize className="size-10 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Why Use Perspective Cropping?</h2>
-                        <p className="text-muted-foreground leading-relaxed">
-                            When you take a photo of a book page or a certificate, it often looks "crooked." A standard crop can't fix this. By using our <strong>Scanner Mode</strong>, you can drag 4 corner dots to the physical corners of the paper. Our engine then uses a mathematical homography matrix to "flatten" the image, making it look like a professional flatbed scan.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Cropping & Scanner FAQs</h2>
-                    <p className="text-muted-foreground font-medium">Everything you need to know about our local editing tech.</p>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Does cropping reduce my image quality?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            No. Unlike social media apps that compress photos, our tool performs <strong>lossless coordinate mapping</strong>. We render the final crop using the original resolution of your file, ensuring maximum clarity for printing.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">What is the difference between "Rect" and "Scanner" mode?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            <strong>Rect mode</strong> is for standard 4-sided cropping (cutting the edges). <strong>Scanner mode</strong> is for fixing perspective; it allows you to drag all 4 corners independently to fix tilted or angled photos of documents.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I crop photos for SSC or UPSC applications?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes! Use the aspect ratio presets to select 1:1 or 4:3. For exact pixel sizing (like 200x230px), we recommend using our <strong>"Smart Resize"</strong> tool after you finish cropping here.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-4" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is it safe for upload my Aadhaar card or PAN card here?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. We use <strong>Client-Side Processing</strong>. This means your images are processed entirely inside your browser's temporary memory (RAM) and are <strong>never uploaded</strong> to any server. Your data stays on your device.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

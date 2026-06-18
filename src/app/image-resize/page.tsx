@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import ImageResizer from '@/components/image-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
+import { Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Smart Image Resizer - Resize for SSC, UPSC, IBPS Application Forms Online',
@@ -19,14 +20,28 @@ export default function ImageResizePage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <ImageResizer />
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Image Resizer Studio
+                    </span>
+                </h1>
+
+                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                    Exact pixel and mm resizing for government job forms. 100% Private.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <ImageResizer />
+            </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Professional Image Resizer" steps={steps} />
 
             <section className="space-y-10 py-10 border-t">

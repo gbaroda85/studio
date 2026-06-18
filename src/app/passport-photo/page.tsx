@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize, Zap, Settings2, X, ChevronDown } from 'lucide-react';
+import { UserCircle, ShieldCheck, HelpCircle, FileCheck, Printer, Maximize, Zap, Settings2, X, ChevronDown, Sparkles } from 'lucide-react';
 import { PassportPhotoMakerClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -42,34 +42,18 @@ export default function PassportPhotoPage() {
 
   return (
     <main className="flex-1 flex flex-col items-center pt-16 md:pt-28 text-left">
-        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" className="mb-2" />
+        <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
             <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
-                {/* PREMIUM CAPSULE HEADER */}
-                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 group transition-all hover:scale-105">
-                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
-                        <X className="size-4 md:size-5 stroke-[4]" />
-                    </div>
-                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
-                        PASSPORT MAKER
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Passport Photo Maker
                     </span>
-                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
-                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
-                </div>
-
-                {/* 3D TITLE BAR */}
-                <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-2xl md:text-4xl lg:text-5xl tracking-tighter leading-none flex flex-col items-center">
-                            <span className="font-['Dancing_Script'] text-primary normal-case text-2xl md:text-4xl lg:text-5xl block mb-[-10px]">Professional</span>
-                            <span className="font-jakarta font-black uppercase text-gradient-hero">Passport Maker</span>
-                        </h1>
-                    </div>
-                </div>
+                </h1>
 
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
-                    Create official passport-sized photos for India, USA and UK instantly.
+                    Create official passport-sized photos for India, USA and UK instantly. 100% Private.
                 </p>
             </div>
 
@@ -78,7 +62,7 @@ export default function PassportPhotoPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Professional Passport Maker" steps={deepSteps} />
 
             {/* Deep Value Section */}
@@ -132,42 +116,6 @@ export default function PassportPhotoPage() {
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Passport Photo FAQs</h2>
-                    <p className="text-muted-foreground font-medium">Everything you need to know about official ID photos.</p>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Which background color is required for Indian Passports?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            For **Indian Passport and Visa** applications, a **Pure White** background is mandatory. Use our 'Auto Remove' tool and then select the White color preset in the Studio stage.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">How do I fix a photo that is slightly tilted?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            We have added a **Rotate Slider** in the Studio mode. Simply move the slider to straighten your face horizontally. Ensure that your eyes are at the same level for a professional look.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I wear glasses in my passport photo?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            It is recommended to **remove glasses** to avoid glare and reflections. Most countries like the USA explicitly forbid glasses in visa and passport photos unless medically necessary.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-4" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">What is the best way to print these photos?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            After downloading the HD photo, you can use any standard 4x6 inch photo paper. A 4x6 sheet can usually fit **8 passport-sized (3.5x4.5cm) photos**. Ensure your printer settings are set to 'High Quality' and 'Actual Size'.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

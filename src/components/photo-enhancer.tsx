@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from "react";
@@ -276,17 +275,6 @@ export default function PhotoEnhancer() {
   if (!originalImageSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
-                <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
-                    Photo Enhancer
-                </span>
-            </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                Step 1: Upload photo to restore quality. <br/>100% Private local RAM processing.
-            </p>
-        </motion.div>
-
         <Card
             className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -331,7 +319,7 @@ export default function PhotoEnhancer() {
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
-                <RotateCcw className="mr-1.5 size-4" /> Change Image
+                <RefreshCcw className="mr-1.5 size-4" /> Change Image
             </Button>
             <Button 
                 size="lg" 
@@ -364,8 +352,8 @@ export default function PhotoEnhancer() {
                     <div className="grid md:grid-cols-2 gap-6 md:gap-8 h-full items-center">
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
-                                <span className="text-[9px] font-mono opacity-40">{formatBytes(originalFileSize)}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Photo</span>
+                                <span className="text-[10px] font-mono opacity-40">{formatBytes(originalFileSize)}</span>
                             </div>
                             <div className="relative aspect-square bg-white rounded-[2rem] border-2 shadow-inner flex items-center justify-center overflow-hidden group">
                                 <Image src={originalImageSrc!} alt="Original" fill className="object-contain p-4 md:p-6 transition-all group-hover:scale-105" />
@@ -375,8 +363,8 @@ export default function PhotoEnhancer() {
 
                         <div className="space-y-3 flex flex-col h-full justify-center">
                             <div className="flex justify-between items-center px-1">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
-                                {enhancedFileSize > 0 && <span className="text-[9px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5"><Sparkles className="size-3"/> Target Render</span>
+                                {enhancedFileSize > 0 && <span className="text-[10px] font-mono font-black text-primary">{formatBytes(enhancedFileSize)}</span>}
                             </div>
                             <div className="relative aspect-square bg-white rounded-[2rem] border-4 border-primary/20 shadow-2xl flex items-center justify-center overflow-hidden text-center">
                                 <AnimatePresence mode="wait">
@@ -401,9 +389,9 @@ export default function PhotoEnhancer() {
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8">
                     <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
-                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE LOCAL RAM</div>
-                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
-                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD OUTPUT</div>
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4" /> SECURE LOCAL RAM</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4" /> INSTANT RENDER</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4" /> HD OUTPUT</div>
                     </div>
                 </CardFooter>
             </Card>

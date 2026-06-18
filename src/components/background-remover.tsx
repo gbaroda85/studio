@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -267,18 +266,10 @@ export default function BackgroundRemover() {
   if (stage === 'upload') {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
-                <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
-                    Background Remover
-                </span>
-            </h1>
-            <p className="text-xs md:sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local RAM processing.</p>
-        </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
             <CardHeader className="bg-muted/30 border-b p-6 text-center"><CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle></CardHeader>
             <CardContent className="p-8 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 cursor-pointer bg-muted/30 group relative">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative"><UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" /></div>
                     <div className="text-center px-4"><p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p><p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Unlimited local extractions.</p></div>
                 </div>
@@ -304,7 +295,7 @@ export default function BackgroundRemover() {
                     <div className="flex gap-3 flex-1 justify-end">
                         <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-11 rounded-xl text-[10px] uppercase px-4 hover:bg-primary/5" onClick={() => setStage('crop')}><CropIcon className="mr-1.5 size-4" /> Area</Button>
                         <Button 
-                            className="magic-button h-11 px-8 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
+                            className="magic-button h-11 px-8 rounded-full bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
                             onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}
                         >
                             <StarIcons />
@@ -360,7 +351,7 @@ export default function BackgroundRemover() {
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Change Image</Button>
             <Button 
                 size="lg" 
-                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50" 
+                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50 border-none" 
                 onClick={handleDownload} 
                 disabled={isProcessing || !previewImageSrc}
             >

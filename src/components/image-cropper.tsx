@@ -150,7 +150,7 @@ export default function ImageCropper() {
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
 
   const handleAspectChange = (value: number) => {
       setAspect(value === 0 ? undefined : value);
@@ -318,23 +318,8 @@ export default function ImageCropper() {
   if (!imgSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                <Maximize className="size-8" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <Sparkles className="size-2.5" />
-                </div>
-            </div>
-            <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                Image <span className="text-gradient-hero">Cropper Studio</span>
-            </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                Precision cropping with 8-dot smart scanner. <br/>100% Private local mapping.
-            </p>
-        </motion.div>
-
         <Card className={cn(
-            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -344,11 +329,7 @@ export default function ImageCropper() {
                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-12">
-                <div 
-                    className={cn(
-                        "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative"
-                    )}
-                >
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                     <div className="relative">
                         <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                         <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
@@ -371,7 +352,7 @@ export default function ImageCropper() {
   }
 
   return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20">
+    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
         <div className="flex items-center gap-3">
             <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
@@ -417,7 +398,7 @@ export default function ImageCropper() {
                             <img src={croppedImageSrc} alt="result" className="max-h-[55vh] w-auto block" />
                         </motion.div>
                     ) : (
-                        <div ref={containerRef} className="relative shadow-2xl border-4 border-white transform-gpu bg-white max-w-full">
+                        <div ref={containerRef} className="relative shadow-2xl border-4 border-white transform-gpu bg-white max-full">
                             {cropMode === 'rectangular' ? (
                                 <ReactCrop crop={crop} onChange={(_, p) => setCrop(p)} onComplete={c => setCompletedCrop(c)} aspect={aspect}>
                                     <img ref={imgRef} src={imgSrc!} alt="rect" className="max-h-[55vh] w-auto block" onLoad={onImageLoad} 
@@ -461,7 +442,7 @@ export default function ImageCropper() {
                         )}
                     </AnimatePresence>
                 </CardContent>
-                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
+                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                         <ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                     <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">

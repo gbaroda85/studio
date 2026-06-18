@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -167,17 +166,6 @@ export default function ImageToTextConverter() {
   if (!originalImageSrc) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
-                <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
-                    Image to Text (OCR)
-                </span>
-            </h1>
-            <p className="text-xs md:text-sm text-muted-foreground font-bold max-xl mx-auto">
-                Step 1: Upload photo for high-accuracy extraction. <br/>100% Private local RAM processing.
-            </p>
-        </motion.div>
-
         <Card
             className={cn(
                 "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
@@ -225,7 +213,7 @@ export default function ImageToTextConverter() {
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 md:h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
-                <RotateCcw className="mr-1.5 size-3 md:size-4" /> Change Image
+                <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
             <Button 
                 size="lg" 
@@ -263,7 +251,7 @@ export default function ImageToTextConverter() {
                                     className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 flex flex-col items-center justify-center gap-4 z-20 backdrop-blur-sm p-8 text-center"
                                 >
                                     <div className="relative">
-                                        <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin text-primary stroke-[3]" />
+                                        <Loader2 className="h-12 w-12 md:h-16 md:u16 animate-spin text-primary stroke-[3]" />
                                         <BrainCircuit className="absolute inset-0 m-auto h-5 w-5 md:h-6 md:w-6 text-primary animate-pulse" />
                                     </div>
                                     <div className="space-y-3 w-full max-w-[200px] md:max-w-xs">
