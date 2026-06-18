@@ -56,13 +56,13 @@ type FitMode = 'fit' | 'original';
 
 interface PageItem {
     id: string;
-    previewSrc: string;   // Low-res for fast UI
-    originalFile: File;   // Reference for high-res render on export
-    pageIndex: number;    // 0-based index
+    previewSrc: string;   
+    originalFile: File;   
+    pageIndex: number;    
     vAlign: VAlign;
     fitMode: FitMode;
     rotation: number;
-    globalIndex: number;  // For display only
+    globalIndex: number;  
 }
 
 const StarIcons = () => (
@@ -157,7 +157,6 @@ export default function PdfToImageConverter() {
 
                 for (let i = 1; i <= totalFilePages; i++) {
                     const page = await pdf.getPage(i);
-                    // PERFORMANCE BOOST: Scale 0.8 is enough for UI map. Extremely fast.
                     const viewport = page.getViewport({ scale: 0.8 }); 
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
@@ -169,7 +168,7 @@ export default function PdfToImageConverter() {
                         context.fillRect(0, 0, canvas.width, canvas.height);
                         await page.render({ canvasContext: context, viewport: viewport }).promise;
                         
-                        const src = canvas.toDataURL('image/jpeg', 0.6); // Low quality for speed
+                        const src = canvas.toDataURL('image/jpeg', 0.6); 
                         const id = Math.random().toString(36).substr(2, 9);
                         
                         const newItem: PageItem = {
@@ -205,6 +204,14 @@ export default function PdfToImageConverter() {
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
     const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handlePdfToImage(e.dataTransfer.files); };
 
+    const handleRemovePage = (id: string) => {
+        setPages(prev => {
+            const filtered = prev.filter(p => p.id !== id);
+            if (selectedId === id) setSelectedId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
+            return filtered;
+        });
+    };
+
     const updateSelectedPage = (updates: Partial<Pick<PageItem, 'vAlign' | 'fitMode'>>) => {
         if (!selectedId) return;
         setPages(prev => prev.map(p => p.id === selectedId ? { ...p, ...updates } : p));
@@ -213,7 +220,20 @@ export default function PdfToImageConverter() {
     const rotateSelectedPage = () => {
         if (!selectedId) return;
         setPages(prev => prev.map(p => p.id === selectedId ? { ...p, rotation: (p.rotation + 90) % 360 } : p));
-        toast({ title: "Rotation Set" });
+    };
+
+    const rotateAllPages = async () => {
+        if (pages.length === 0) return;
+        setIsProcessing(true);
+        for (let i = 0; i < pages.length; i++) {
+            const id = pages[i].id;
+            setPages(prev => prev.map(p => p.id === id ? { ...p, rotation: (p.rotation + 90) % 360 } : p));
+            setProgress(Math.round(((i + 1) / pages.length) * 100));
+            // Small delay to allow UI update
+            await new Promise(r => setTimeout(r, 10));
+        }
+        setIsProcessing(false);
+        toast({ title: "Rotated All Pages" });
     };
 
     const applyToAll = () => {
@@ -223,7 +243,6 @@ export default function PdfToImageConverter() {
         toast({ title: "Global Sync Complete" });
     };
 
-    // --- HIGH-RES RENDERING FOR EXPORT ---
     const renderHighResPage = async (item: PageItem): Promise<string> => {
         const arrayBuffer = await item.originalFile.arrayBuffer();
         const pdf = await pdfjs.getDocument({ 
@@ -233,7 +252,7 @@ export default function PdfToImageConverter() {
         }).promise;
         
         const page = await pdf.getPage(item.pageIndex + 1);
-        const scale = 2.5; // Industrial 300DPI equivalent
+        const scale = 2.5; 
         const viewport = page.getViewport({ scale, rotation: item.rotation });
         
         const canvas = document.createElement('canvas');
@@ -241,7 +260,6 @@ export default function PdfToImageConverter() {
         if (!ctx) return item.previewSrc;
 
         if (item.fitMode === 'original') {
-            // A4 Aspect Ratio Frame Logic
             const targetW = Math.floor(viewport.width);
             const targetH = Math.round(targetW * 1.414);
             canvas.width = targetW;
@@ -262,7 +280,6 @@ export default function PdfToImageConverter() {
             ctx.imageSmoothingQuality = 'high';
             await page.render({ canvasContext: ctx, viewport: page.getViewport({ scale: scale * scaleFactor, rotation: item.rotation }), transform: [1, 0, 0, 1, dx, dy] }).promise;
         } else {
-            // Raw fit
             canvas.width = Math.floor(viewport.width);
             canvas.height = Math.floor(viewport.height);
             ctx.fillStyle = '#FFFFFF';
@@ -279,7 +296,7 @@ export default function PdfToImageConverter() {
         setProgress(0);
 
         const indicesToDownload = pageRangeMode === 'all' 
-            ? pages.map(p => p.index + 1)
+            ? pages.map(p => p.globalIndex)
             : parsePageRanges(customRange, pages.length);
 
         if (indicesToDownload.length === 0) {
@@ -291,13 +308,13 @@ export default function PdfToImageConverter() {
         try {
             const zip = new JSZip();
             const ext = outputFormat === 'jpeg' ? 'jpg' : 'png';
-            const filteredPages = pages.filter(p => indicesToDownload.includes(p.index + 1));
+            const filteredPages = pages.filter(p => indicesToDownload.includes(p.globalIndex));
 
             for (let i = 0; i < filteredPages.length; i++) {
                 const p = filteredPages[i];
                 const hiResDataUrl = await renderHighResPage(p);
                 const base64Data = hiResDataUrl.split(',')[1];
-                zip.file(`extracted-page-${p.index + 1}.jpg`, base64Data, { base64: true });
+                zip.file(`extracted-page-${p.globalIndex}.jpg`, base64Data, { base64: true });
                 setProgress(Math.round(((i + 1) / filteredPages.length) * 100));
             }
 
@@ -316,12 +333,47 @@ export default function PdfToImageConverter() {
 
     const handleReset = () => {
         setPages([]);
-        setPdfFile(null);
         setSelectedId(null);
         setPageRangeMode('all');
         setCustomRange('');
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
+
+    if (pages.length === 0 && !isProcessing) {
+        return (
+            <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
+                <Card className={cn(
+                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                )}
+                    onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-10 md:p-12">
+                        <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
+                            <div className="relative">
+                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                            </div>
+                            <div className="text-center px-4">
+                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF here</p>
+                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Extraction happens locally.</p>
+                            </div>
+                        </div>
+                        <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
+                    </CardContent>
+                    <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-10 bg-muted/10 pt-6 px-4">
+                        <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500" /> 300 DPI HD</div>
+                        <div className="flex items-center gap-1.5"><ImageIcon className="size-4 text-primary" /> PNG/JPG</div>
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem] mx-auto animate-in fade-in duration-700">
@@ -449,7 +501,7 @@ export default function PdfToImageConverter() {
                                                 <div className="relative size-full flex items-center justify-center overflow-hidden" style={{ transform: `rotate(${p.rotation}deg)` }}>
                                                     <img 
                                                         src={p.previewSrc} 
-                                                        alt={`P${p.index + 1}`} 
+                                                        alt={`P${p.globalIndex}`} 
                                                         className={cn(
                                                             "w-full object-contain pointer-events-none mx-auto block shadow-sm",
                                                             p.fitMode === 'original' ? "max-h-[85%]" : "max-h-full"
@@ -500,4 +552,3 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
-
