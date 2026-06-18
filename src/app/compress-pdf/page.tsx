@@ -22,18 +22,6 @@ export default function CompressPdfPage() {
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
-            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Zap className="size-2.5" /> OPTIMIZATION STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase leading-none">
-                    PDF <span className="text-gradient-hero">Compressor</span>
-                </h1>
-                <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-xs md:text-base">
-                    Shrink PDF to 100KB, 200KB or 500KB while maintaining crisp text quality. 100% private.
-                </p>
-            </div>
-
             <div className="w-full flex justify-center">
                 <PdfCompressor />
             </div>
@@ -131,7 +119,7 @@ export default function CompressPdfPage() {
                     </AccordionItem>
                     <AccordionItem value="item-4" className="border-b-2 py-2">
                         <AccordionTrigger className="text-xl font-bold text-left">Does it work with encrypted PDFs?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-lg leading-relaxed pt-2">
+                        <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">
                             If the PDF is password-protected, you must first use our **"Unlock PDF"** tool. Once the document is open, you can upload it here for optimization.
                         </AccordionContent>
                     </AccordionItem>
