@@ -45,31 +45,14 @@ export default function GstInvoicePage() {
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 no-print max-w-[1600px] mx-auto">
-            {/* Compact Hero Section */}
             <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
-                {/* PREMIUM CAPSULE HEADER */}
-                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
-                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
-                        <X className="size-4 md:size-5 stroke-[4]" />
-                    </div>
-                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
-                        BILLING STUDIO
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        GST Invoice Generator
                     </span>
-                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
-                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
-                </div>
+                </h1>
 
-                {/* 3D TITLE BAR */}
-                <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-2xl md:text-4xl lg:text-5xl tracking-tighter leading-none flex flex-col items-center">
-                            <span className="font-['Dancing_Script'] text-primary normal-case text-2xl md:text-4xl lg:text-5xl block mb-[-10px]">GST Invoice</span>
-                            <span className="font-jakarta font-black uppercase text-gradient-hero">Generator</span>
-                        </h1>
-                    </div>
-                </div>
-
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-sm">
                     Create professional GST-compliant invoices instantly. Fast, accurate, and 100% private.
                 </p>
             </div>

@@ -46,11 +46,10 @@ export default function ColorPickerPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-2.5" /> DESIGN STUDIO
-                </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Color Picker <span className="text-gradient-hero">& Studio</span>
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Color Picker Studio
+                    </span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
                     Identify colors, generate palettes and check contrast ratios. 100% Private local RAM processing.

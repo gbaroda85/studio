@@ -46,11 +46,10 @@ export default function MarriageBiodataPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-12 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Heart className="size-3 fill-rose-600" /> PREMIUM WEDDING STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Marriage <span className="text-gradient-hero">Bio Data</span> Maker
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Marriage Bio Data Maker
+                    </span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Design a professional biodata in minutes with our real-time A4 studio. No more manual typing or formatting issues.

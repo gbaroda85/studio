@@ -268,13 +268,11 @@ export default function BackgroundRemover() {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-                <Eraser className="size-8" />
-                <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    <Sparkles className="size-2.5" />
-                </div>
-            </div>
-            <h1 className="text-2xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none"><span className="text-gradient-hero">Background Remover</span></h1>
+            <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                    Background Remover
+                </span>
+            </h1>
             <p className="text-xs md:sm text-muted-foreground font-semibold max-xl mx-auto">High-precision AI edge detection. 100% Private local RAM processing.</p>
         </motion.div>
         <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
@@ -362,7 +360,7 @@ export default function BackgroundRemover() {
              <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Change Image</Button>
             <Button 
                 size="lg" 
-                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50" 
+                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50" 
                 onClick={handleDownload} 
                 disabled={isProcessing || !previewImageSrc}
             >
@@ -381,7 +379,7 @@ export default function BackgroundRemover() {
                 <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
                     <AnimatePresence mode="wait">
                         {isProcessing ? (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-white/95 backdrop-blur-xl p-8 text-center gap-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-white/95 backdrop-blur-xl p-8 text-center gap-6">
                                 <div className="relative"><Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary stroke-[3]" /><Zap className="absolute inset-0 m-auto h-8 w-8 md:h-10 md:w-10 text-primary animate-pulse" /></div>
                                 <div className="space-y-3 w-full max-w-[280px] md:max-w-sm"><p className="font-black text-xl md:text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p><Progress value={progress} className="h-2 shadow-inner" /><p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Optimizing Neural Mask...</p></div>
                             </motion.div>

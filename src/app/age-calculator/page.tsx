@@ -23,22 +23,12 @@ export default function AgeCalculatorPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                {/* PREMIUM CAPSULE HEADER */}
-                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
-                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
-                        <X className="size-4 md:size-5 stroke-[4]" />
-                    </div>
-                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
-                        AGE CALCULATOR
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Age Calculator
                     </span>
-                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
-                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
-                </div>
-
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">
-                    Age <span className="text-gradient-hero">Calculator</span>
                 </h1>
-                <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
+                <p className="text-muted-foreground font-bold max-xl mx-auto text-xs md:text-sm">
                     Find out your exact age in years, months, and days. Explore your lifetime analytics and birthday countdown.
                 </p>
             </div>

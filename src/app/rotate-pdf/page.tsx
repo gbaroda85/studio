@@ -21,11 +21,23 @@ export default function RotatePdfPage() {
     <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <PdfRotator />
+        <div className="w-full flex flex-col items-center mb-12 px-4">
+            <div className="w-full max-w-5xl text-center mb-10 space-y-4">
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Rotate PDF Studio
+                    </span>
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
+                    Fix sideways scans and upside-down documents instantly.
+                </p>
+            </div>
+            <div className="w-full flex justify-center">
+                <PdfRotator />
+            </div>
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4 pb-20 mx-auto">
+        <div className="w-full max-w-5xl space-y-16 px-4 pb-20 mx-auto">
             <HowToGuide title="PDF Rotator Studio" steps={[
                 "Upload: Select the PDF document you want to rotate.",
                 "Visual Grid: See all pages as thumbnails in the studio workspace.",
@@ -62,7 +74,7 @@ export default function RotatePdfPage() {
                                     <RotateCw className="text-cyan-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Full Control</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Rotate by 90, 180, or 270 degrees. Fix landscape or portrait orientation instantly.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Rotate by 90, 180, or 270 degrees. Fix landscape or portrait orientation instantly.</p>
                             </div>
                         </div>
 
@@ -72,7 +84,7 @@ export default function RotatePdfPage() {
                                     <LayoutGrid className="text-indigo-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">Visual Previews</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Stop guessing. See exactly how each page looks before you save the final document.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Stop guessing. See exactly how each page looks before you save the final document.</p>
                             </div>
                         </div>
 
@@ -82,40 +94,11 @@ export default function RotatePdfPage() {
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% Private</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your documents never leave your device. All rotation math happens 100% locally in your browser.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Your documents never leave your device. All rotation math happens 100% locally in your browser.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="space-y-8 py-10 border-t">
-                <div className="text-center">
-                    <HelpCircle className="mx-auto size-12 text-primary mb-4" />
-                    <h2 className="text-3xl font-black uppercase tracking-tight">Rotation FAQs</h2>
-                </div>
-
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Is the rotation permanent?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Yes. Our tool modifies the internal **Rotation Metadata** of the PDF. When you save the file, it will open correctly in any PDF reader like Adobe Acrobat, Chrome, or on mobile devices.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Does it reduce PDF quality?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            No. We do not "screenshot" or rasterize your pages. We use high-fidelity vector manipulation which preserves all original text, fonts, and images perfectly.
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-3" className="border-b-2">
-                        <AccordionTrigger className="text-lg font-bold text-left">Can I rotate just one page in a 100-page file?</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                            Absolutely. Our **Visual Grid** allows you to select and rotate individual pages without affecting the rest of the document.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
             </section>
         </div>
     </main>

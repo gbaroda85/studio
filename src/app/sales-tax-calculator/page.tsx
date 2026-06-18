@@ -23,11 +23,10 @@ export default function SalesTaxCalculatorPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Trophy className="size-3" /> TAX STUDIO
-                </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    GST & Sales <span className="text-gradient-hero">Tax Calculator</span>
+                <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Sales Tax Calculator
+                    </span>
                 </h1>
                 <p className="text-muted-foreground font-bold max-xl mx-auto text-sm md:text-base">
                     Quickly calculate tax-inclusive or exclusive pricing for any product or service.

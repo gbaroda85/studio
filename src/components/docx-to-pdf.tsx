@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef } from 'react';
@@ -27,6 +28,19 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import confetti from 'canvas-confetti';
+import { motion, AnimatePresence } from "framer-motion";
+
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
 
 export default function DocxToPdf() {
   const { toast } = useToast();
@@ -113,14 +127,10 @@ export default function DocxToPdf() {
   return (
     <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
       <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
-          <div className="mx-auto mb-2 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary shadow-xl relative">
-              <FileText className="size-8" />
-              <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                  <Sparkles className="size-2.5" />
-              </div>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-              Word to <span className="text-gradient-hero">PDF Cloud</span>
+          <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                    Word to PDF
+                </span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
               Professional high-fidelity conversion. <br/>Supports .DOC, .DOCX and Encrypted documents.
@@ -229,6 +239,7 @@ export default function DocxToPdf() {
             <div className="text-center space-y-8 animate-in zoom-in-95 duration-500 py-6">
                 <div className="size-24 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-green-500/40 relative">
                     <CheckCircle className="size-12" />
+                    <StarIcons />
                     <Sparkles className="absolute -top-2 -right-2 text-yellow-400" />
                 </div>
                 <div className="space-y-2">
