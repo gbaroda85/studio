@@ -223,21 +223,6 @@ export default function PdfRotator() {
     if (!pdfFile) {
         return (
             <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-                    <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-                        <RotateCw className="size-8" />
-                        <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                            <Sparkles className="size-2.5" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                        PDF <span className="text-gradient-hero">Rotator Studio</span>
-                    </h1>
-                    <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                        Fix sideways scans and upside-down documents instantly. <br/>100% Private local RAM processing.
-                    </p>
-                </motion.div>
-
                 <Card className={cn(
                     "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                     isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
