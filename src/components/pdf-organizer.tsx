@@ -90,6 +90,7 @@ interface PageItem {
     previewSrc: string;
     isDeleted: boolean;
     type: PageType;
+    sourceFile?: File; // Store reference to original file for multi-pdf support
 }
 
 const StarIcons = () => (
@@ -119,6 +120,7 @@ function SortablePage({
     onRotate, 
     onInsertBlank,
     onInsertImage,
+    onInsertPdf,
     onView,
     isRestored
 }: { 
@@ -127,6 +129,7 @@ function SortablePage({
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
     onInsertImage: (id: string) => void;
+    onInsertPdf: (id: string) => void;
     onView: (page: PageItem) => void;
     isRestored: boolean;
 }) {
@@ -201,6 +204,9 @@ function SortablePage({
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center" className="z-[1000] rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900">
+                        <DropdownMenuItem onClick={() => onInsertPdf(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
+                            <FileDigit className="size-3.5 mr-2 text-rose-500" /> Add PDF
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onInsertBlank(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
                             <Plus className="size-3.5 mr-2 text-primary" /> Add Blank Page
                         </DropdownMenuItem>
@@ -249,10 +255,12 @@ export default function PdfOrganizer() {
     const [restoredId, setRestoredId] = useState<string | null>(null);
     
     const [insertAfterId, setInsertAfterId] = useState<string | null>(null);
+    const [insertType, setInsertType] = useState<'image' | 'pdf' | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const insertImgInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
+    const renderIdRef = useRef(0);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -282,13 +290,15 @@ export default function PdfOrganizer() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const handleFileChange = async (file: File | null) => {
+    const handleFileChange = async (file: File | null, afterId?: string) => {
         if (file && file.type === 'application/pdf') {
             setIsRendering(true);
-            setPdfFile(file);
-            setPages([]);
-            setDeletedPages([]);
-            setResultPdfUrl(null);
+            if (!afterId) {
+                setPdfFile(file);
+                setPages([]);
+                setDeletedPages([]);
+                setResultPdfUrl(null);
+            }
             setProgress(0);
 
             try {
@@ -298,8 +308,8 @@ export default function PdfOrganizer() {
                     cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                     cMapPacked: true
                 }).promise;
-                pdfDocRef.current = pdf;
                 const totalPages = pdf.numPages;
+                const newPagesBatch: PageItem[] = [];
 
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
@@ -320,14 +330,24 @@ export default function PdfOrganizer() {
                             rotation: 0,
                             isDeleted: false,
                             previewSrc: canvas.toDataURL('image/jpeg', 0.8),
-                            type: 'original'
+                            type: 'original',
+                            sourceFile: file // Keep track of which file this page belongs to
                         };
                         
-                        setPages(prev => [...prev, newPage]);
+                        newPagesBatch.push(newPage);
                     }
                     setProgress(Math.round((i / totalPages) * 100));
                 }
-                toast({ title: 'PDF Loaded', description: `Visual map of ${totalPages} pages ready.` });
+
+                setPages(prev => {
+                    if (!afterId) return newPagesBatch;
+                    const index = prev.findIndex(p => p.id === afterId);
+                    const next = [...prev];
+                    next.splice(index + 1, 0, ...newPagesBatch);
+                    return next;
+                });
+
+                toast({ title: afterId ? 'PDF Inserted' : 'PDF Loaded', description: `Visual map of ${totalPages} pages added.` });
             } catch (e) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to process document.' });
             } finally {
@@ -336,7 +356,16 @@ export default function PdfOrganizer() {
         }
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        if (insertType === 'pdf' && insertAfterId) {
+            handleFileChange(file, insertAfterId);
+            setInsertAfterId(null);
+            setInsertType(null);
+        } else {
+            handleFileChange(file);
+        }
+    };
 
     const deletePage = (id: string) => {
         const pageToDelete = pages.find(p => p.id === id);
@@ -407,6 +436,12 @@ export default function PdfOrganizer() {
         insertImgInputRef.current?.click();
     };
 
+    const onInsertPdfClick = (afterId: string) => {
+        setInsertAfterId(afterId);
+        setInsertType('pdf');
+        fileInputRef.current?.click();
+    };
+
     const handleInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !insertAfterId) return;
@@ -468,12 +503,11 @@ export default function PdfOrganizer() {
     };
 
     const handleSavePdf = async () => {
-        if (!pdfFile || pages.length === 0) return;
+        if (pages.length === 0) return;
         setIsSaving(true);
         try {
-            const existingPdfBytes = await pdfFile.arrayBuffer();
-            const originalPdf = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
             const newPdfDoc = await PDFDocument.create();
+            const fileBuffers = new Map<string, PDFDocument>();
 
             for (const p of pages) {
                 if (p.type === 'blank') {
@@ -484,8 +518,14 @@ export default function PdfOrganizer() {
                     const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
                     const page = newPdfDoc.addPage([embeddedImg.width, embeddedImg.height]);
                     page.drawImage(embeddedImg, { x: 0, y: 0, width: embeddedImg.width, height: embeddedImg.height, rotate: degrees(-p.rotation) });
-                } else {
-                    const [copiedPage] = await newPdfDoc.copyPages(originalPdf, [p.index - 1]);
+                } else if (p.sourceFile) {
+                    let sourcePdf = fileBuffers.get(p.sourceFile.name);
+                    if (!sourcePdf) {
+                        const bytes = await p.sourceFile.arrayBuffer();
+                        sourcePdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+                        fileBuffers.set(p.sourceFile.name, sourcePdf);
+                    }
+                    const [copiedPage] = await newPdfDoc.copyPages(sourcePdf, [p.index - 1]);
                     const currentRot = copiedPage.getRotation().angle;
                     copiedPage.setRotation(degrees(currentRot + p.rotation));
                     newPdfDoc.addPage(copiedPage);
@@ -506,6 +546,7 @@ export default function PdfOrganizer() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#043873', '#4F9CF9', '#ffffff'] });
             toast({ title: "Organize Success!", description: "Changes bundled into new PDF." });
         } catch (error) {
+            console.error(error);
             toast({ variant: 'destructive', title: 'Save Error' });
         } finally {
             setIsSaving(false);
@@ -590,6 +631,7 @@ export default function PdfOrganizer() {
                                                             onRotate={rotatePage} 
                                                             onInsertBlank={addBlankPage} 
                                                             onInsertImage={onInsertImageClick}
+                                                            onInsertPdf={onInsertPdfClick}
                                                             onView={(page) => setZoomPage(page)}
                                                             isRestored={restoredId === p.id}
                                                         />
