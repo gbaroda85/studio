@@ -35,7 +35,7 @@ export default function SignatureResizerPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28 text-left">
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
@@ -55,8 +55,8 @@ export default function SignatureResizerPage() {
                 {/* 3D TITLE BAR */}
                 <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
                     <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
-                            Signature <span className="text-gradient-hero">Resizer Pro</span>
+                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
+                            Signature <span className="text-gradient-hero">Resizer Studio</span>
                         </h1>
                     </div>
                 </div>

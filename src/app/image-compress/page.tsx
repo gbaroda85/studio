@@ -61,8 +61,8 @@ export default function ImageCompressPage() {
                 {/* 3D TITLE BAR */}
                 <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
                     <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-2xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                            Bulk Image <span className="text-gradient-hero">Optimizer</span>
+                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
+                            Bulk Image <span className="text-gradient-hero">Optimizer Pro</span>
                         </h1>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ export default function ImageCompressPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-24">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 mx-auto pb-24">
             <HowToGuide title="Bulk Image Optimizer" steps={deepSteps} />
 
             <section className="space-y-12 py-10 border-t">

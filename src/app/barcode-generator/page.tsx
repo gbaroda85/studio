@@ -44,8 +44,8 @@ export default function BarcodeGeneratorPage() {
     <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28 text-left">
         <ToolNavigation href="/tools?tab=converters" label="Back to Converters" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4">
-            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
                 {/* PREMIUM CAPSULE HEADER */}
                 <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
                     <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
@@ -58,9 +58,15 @@ export default function BarcodeGeneratorPage() {
                     <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
 
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
-                    Smart Barcode <span className="text-gradient-hero">Generator</span>
-                </h1>
+                {/* 3D TITLE BAR */}
+                <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
+                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
+                            Smart Barcode <span className="text-gradient-hero">Generator</span>
+                        </h1>
+                    </div>
+                </div>
+
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
                     Generate industry-standard barcodes instantly. Scannable, HD quality, and 100% private processing.
                 </p>

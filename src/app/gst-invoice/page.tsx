@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Receipt, ShieldCheck, HelpCircle, FileDigit, Smartphone, Zap, Sparkles } from 'lucide-react';
+import { Receipt, ShieldCheck, HelpCircle, FileDigit, Smartphone, Zap, Sparkles, X, ChevronDown } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'GST Invoice Generator - Create Professional Invoices Online Free (A4 PDF)',
@@ -44,15 +44,30 @@ export default function GstInvoicePage() {
     <main className="flex-1 flex flex-col items-center w-full pt-10 md:pt-16">
         <ToolNavigation href="/tools?tab=calculator" label="Back to Tools" />
 
-        <div className="w-full flex flex-col items-center mb-12 px-4 no-print">
+        <div className="w-full flex flex-col items-center mb-12 px-4 no-print max-w-[1600px] mx-auto">
             {/* Compact Hero Section */}
-            <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-2.5" /> BILLING STUDIO
+            <div className="w-full max-w-5xl text-center mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                {/* PREMIUM CAPSULE HEADER */}
+                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
+                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
+                        <X className="size-4 md:size-5 stroke-[4]" />
+                    </div>
+                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
+                        BILLING STUDIO
+                    </span>
+                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
+                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
-                    GST Invoice <span className="text-gradient-hero">Generator</span>
-                </h1>
+
+                {/* 3D TITLE BAR */}
+                <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
+                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
+                            GST Invoice <span className="text-gradient-hero">Generator</span>
+                        </h1>
+                    </div>
+                </div>
+
                 <p className="text-muted-foreground font-bold max-w-xl mx-auto text-xs md:text-sm">
                     Create professional GST-compliant invoices instantly. Fast, accurate, and 100% private.
                 </p>
