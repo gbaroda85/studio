@@ -311,10 +311,18 @@ export default function BarcodeGenerator() {
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Data
                     </Button>
                     {previews.length > 1 && (
-                        <Button className="magic-button magic-button-success flex-1 md:flex-none h-11 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={handleDownloadAllZip} disabled={isProcessing}>
-                            <StarIcons />
-                            {isProcessing ? <Loader2 className="size-4 animate-spin" /> : <Archive className="size-4" />}
-                            <span className="uppercase tracking-tighter text-[10px]">DOWNLOAD ZIP BUNDLE</span>
+                        <Button 
+                            size="lg" 
+                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                            onClick={handleDownloadAllZip} 
+                            disabled={isProcessing}
+                        >
+                            <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                            <span className="flex-1 px-10 text-center tracking-widest text-[10px] uppercase">DOWNLOAD ZIP BUNDLE</span>
+                            <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                {isProcessing ? <Loader2 className="size-6 animate-spin" /> : <Archive className="size-6 group-hover:scale-110 transition-transform" />}
+                                <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                            </div>
                         </Button>
                     )}
                 </div>
@@ -469,7 +477,7 @@ export default function BarcodeGenerator() {
                                 )}
                             </div>
 
-                            <div className="p-4 md:p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm">
+                            <div className="p-4 md:p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
                                 <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                                 <div>
                                     <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Scannable Output</p>

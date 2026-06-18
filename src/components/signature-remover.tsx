@@ -318,16 +318,11 @@ export default function SignatureRemover() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-8">
-                    <Button 
-                        size="lg" 
-                        className="magic-button magic-button-success w-full h-16 md:h-20 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
-                        onClick={handleDownload} 
-                        disabled={isProcessing || !resultImageSrc}
-                    >
-                        <StarIcons />
-                        <Download className="size-7 md:size-9 group-hover:translate-y-1 transition-transform" />
-                        <span className="uppercase tracking-tighter text-lg md:text-xl">SAVE PROFESSIONAL IMAGE</span>
-                    </Button>
+                    <div className="flex items-center justify-center gap-8 w-full text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                        <div className="flex items-center gap-2"><Eye className="size-4 text-primary" /> INSTANT PREVIEW</div>
+                        <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD EXPORT</div>
+                    </div>
                 </CardFooter>
             </Card>
         </div>
@@ -335,9 +330,9 @@ export default function SignatureRemover() {
         {/* Sidebar: Controls */}
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
-                <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
-                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
-                        <Settings2 className="size-4 text-primary" /> Adjustment Studio
+                <CardHeader className="bg-primary/5 border-b border-white/10 p-4 text-left">
+                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter">
+                        <Settings2 className="size-4 md:size-5 text-primary" /> Adjustment Studio
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
@@ -375,10 +370,6 @@ export default function SignatureRemover() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
-                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> GLITCH-PROOF</div>
-                </CardFooter>
             </Card>
         </div>
       </div>
