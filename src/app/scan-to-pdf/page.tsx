@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck } from 'lucide-react';
+import { ShieldCheck, HelpCircle, ScanLine, Smartphone, MonitorCheck, Zap, Maximize } from 'lucide-react';
 import ScannerToPdf from '@/components/scanner-to-pdf';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -25,7 +25,7 @@ export default function ScanToPdfPage() {
             <ScannerToPdf />
         </div>
 
-        <div className="w-full max-w-4xl space-y-16 px-4">
+        <div className="w-full max-w-7xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="Mobile PDF Scanner" steps={[
                 "Camera Permission: Allow the browser to access your camera (Environment mode).",
                 "Capture: Align your document in the viewfinder and click 'Scan Current Page'.",
@@ -34,12 +34,12 @@ export default function ScanToPdfPage() {
                 "Generate: Click 'Create PDF' to bundle everything into one high-quality file."
             ]} />
 
-            {/* AdSense Ready Content */}
+            {/* Infographic Ready Content Section */}
             <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         <ScanLine className="text-primary size-8" />
-                        Portable Office in your Browser
+                        Next-Gen Browser Digitization
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         No need for a bulky flatbed scanner or paid mobile apps. Our <strong>Scan-to-PDF Studio</strong> uses your device's high-res camera to capture and digitize paperwork instantly with full privacy.
@@ -82,7 +82,7 @@ export default function ScanToPdfPage() {
                                 <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">Local Privacy</h3>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% Private</h3>
                                 <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your camera feed and captured images stay 100% on your device. We never see what you scan.</p>
                             </div>
                         </div>
@@ -97,7 +97,7 @@ export default function ScanToPdfPage() {
                     <h2 className="text-3xl font-black uppercase tracking-tight">Scanning FAQs</h2>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
                     <AccordionItem value="item-1" className="border-b-2">
                         <AccordionTrigger className="text-lg font-bold text-left">Why is my scan blurry?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-base leading-relaxed">
