@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { 
     UploadCloud, 
     Loader2, 
@@ -13,14 +14,16 @@ import {
     Sparkles, 
     Image as ImageIcon,
     Settings2,
-    RefreshCcw,
-    CheckCircle2,
+    RefreshCcw, 
+    RotateCcw,
+    CheckCircle2, 
     ArrowLeftRight,
     Cpu,
     MousePointer2,
     Palette,
     Layers,
-    Crop as CropIcon
+    Crop as CropIcon,
+    ChevronRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -264,7 +267,7 @@ export default function BackgroundRemover() {
       
       {/* 1. UPLOAD STAGE */}
       {stage === 'upload' && (
-        <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6">
+        <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6 text-left">
           <Card className={cn(
             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
@@ -275,7 +278,7 @@ export default function BackgroundRemover() {
                       <div className="relative"><UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" /></div>
                       <div className="text-center">
                           <p className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
-                          <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
+                          <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
                       </div>
                   </div>
                   <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
@@ -287,7 +290,7 @@ export default function BackgroundRemover() {
 
       {/* 2. PREVIEW STAGE (Confirming selection) */}
       {stage === 'preview' && (
-          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 rounded-[2.5rem]">
+          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 rounded-[2.5rem] text-left">
               <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-black uppercase tracking-tighter">Confirm Selection</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleReset} className="text-destructive h-8 w-8"><X /></Button>
@@ -311,7 +314,7 @@ export default function BackgroundRemover() {
 
       {/* 3. CROP STAGE */}
       {stage === 'crop' && (
-        <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem]">
+        <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] text-left">
             <CardHeader className="bg-muted/30 border-b p-6 flex items-center justify-between">
                 <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
                 <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
@@ -337,7 +340,7 @@ export default function BackgroundRemover() {
 
       {/* 4. PROCESSING STAGE */}
       {stage === 'process' && (
-          <div className="w-full max-w-2xl py-20 flex flex-col items-center justify-center gap-10 animate-in zoom-in-95 duration-500">
+          <div className="w-full max-w-2xl py-20 flex flex-col items-center justify-center gap-10 animate-in zoom-in-95 duration-500 text-left">
               <div className="relative">
                   <div className="size-32 md:size-48 rounded-full border-[8px] border-primary/20 border-t-primary animate-spin" />
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -354,7 +357,7 @@ export default function BackgroundRemover() {
 
       {/* 5. STUDIO STAGE (The main editor) */}
       {stage === 'studio' && previewImageSrc && (
-        <div className="w-full flex flex-col gap-6 animate-in slide-in-from-bottom-6 duration-500">
+        <div className="w-full flex flex-col gap-6 animate-in slide-in-from-bottom-6 duration-500 text-left">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-6" /></div>
@@ -364,7 +367,7 @@ export default function BackgroundRemover() {
                     <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-2 size-4" /> Change Photo</Button>
                     <Button 
                         size="lg" 
-                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
+                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
                         onClick={handleDownload} 
                     >
                         <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
@@ -380,7 +383,7 @@ export default function BackgroundRemover() {
                 <div className="lg:col-span-8 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[3rem] relative">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-left">
                                 <ArrowLeftRight className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Side-by-Side Verification</CardTitle>
                             </div>
@@ -427,15 +430,15 @@ export default function BackgroundRemover() {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
                              <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
                              <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> WEBGPU BOOST</div>
                         </CardFooter>
                     </Card>
                 </div>
 
-                <div className="lg:col-span-4 space-y-6">
-                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
+                <div className="lg:col-span-4 space-y-6 h-full">
+                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
                                 <Palette className="size-4 md:size-5 text-primary" /> Finish Settings
@@ -492,4 +495,3 @@ export default function BackgroundRemover() {
     </div>
   );
 }
-
