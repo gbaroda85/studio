@@ -61,8 +61,9 @@ export default function BarcodeGeneratorPage() {
                 {/* 3D TITLE BAR */}
                 <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
                     <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
-                            Smart Barcode <span className="text-gradient-hero">Generator</span>
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl tracking-tighter leading-none flex flex-col items-center">
+                            <span className="font-['Dancing_Script'] text-primary normal-case text-2xl md:text-4xl lg:text-5xl block mb-[-10px]">Smart Barcode</span>
+                            <span className="font-jakarta font-black uppercase text-gradient-hero">Generator</span>
                         </h1>
                     </div>
                 </div>

@@ -61,8 +61,9 @@ export default function QrCodeGeneratorPage() {
                 {/* 3D TITLE BAR */}
                 <div className="w-full max-w-4xl mx-auto p-1 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-200 dark:bg-slate-800 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,1)] mb-2">
                     <div className="bg-white dark:bg-slate-900 rounded-[2.3rem] md:rounded-[3.3rem] py-4 md:py-6 px-10 flex items-center justify-center border border-white/40 dark:border-white/5 shadow-inner transition-all hover:scale-[1.01]">
-                        <h1 className="text-xl md:text-3xl lg:text-5xl font-jakarta font-black tracking-tighter uppercase leading-none">
-                            Smart QR <span className="text-gradient-hero">Generator Studio</span>
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl tracking-tighter leading-none flex flex-col items-center">
+                            <span className="font-['Dancing_Script'] text-primary normal-case text-2xl md:text-4xl lg:text-5xl block mb-[-10px]">Smart QR</span>
+                            <span className="font-jakarta font-black uppercase text-gradient-hero">Generator Studio</span>
                         </h1>
                     </div>
                 </div>
@@ -86,7 +87,7 @@ export default function QrCodeGeneratorPage() {
                     <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         Industrial Grade Scannable Patterns
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Our <strong>Professional QR Studio</strong> uses advanced vector mapping to ensure your generated codes are 100% scannable by all iOS, Android, and industrial scanners.
                     </p>
                 </div>
