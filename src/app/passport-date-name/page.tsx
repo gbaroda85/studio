@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import PassportDateNameMaker from '@/components/passport-date-name-maker';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
-import { Sparkles, Maximize, ShieldCheck, Zap, User, Calendar, Download } from 'lucide-react';
+import { Sparkles, Maximize, ShieldCheck, Zap, User, Calendar, Download, X, ChevronDown } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Add Name & Date on Photo Online – Free Photo Text Tool - GR7 Tools',
@@ -40,9 +40,18 @@ export default function PassportDateNamePage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-2.5" /> RECRUITMENT STUDIO
+                {/* PREMIUM CAPSULE HEADER */}
+                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
+                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
+                        <X className="size-4 md:size-5 stroke-[4]" />
+                    </div>
+                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
+                        ADD NAME & PHOTO
+                    </span>
+                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
+                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
+
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
                     Add Name & <span className="text-gradient-hero">Date to Photo</span>
                 </h1>
@@ -56,15 +65,15 @@ export default function PassportDateNamePage() {
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Add Name & Date to Photo" steps={steps} />
 
-            <section className="space-y-12 py-10 border-t">
+            <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-800 dark:text-white">
+                    <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         Standard Recruitment Compliance
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base font-medium">
+                    <p className="text-muted-foreground max-w-3xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Most government portals like <strong>Staff Selection Commission (SSC)</strong> and <strong>UPSC</strong> require the candidate's name and photo date printed clearly.
                     </p>
                 </div>

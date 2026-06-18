@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Barcode, ShieldCheck, HelpCircle, LayoutGrid, Scan, Maximize, Printer, Sparkles, Download, Zap } from 'lucide-react';
+import { Barcode, ShieldCheck, HelpCircle, LayoutGrid, Scan, Maximize, Printer, Sparkles, Download, Zap, X, ChevronDown } from 'lucide-react';
 import BarcodeGenerator from '@/components/barcode-generator';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
@@ -46,9 +46,18 @@ export default function BarcodeGeneratorPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                    <Sparkles className="size-2.5" /> INDUSTRIAL STUDIO
+                {/* PREMIUM CAPSULE HEADER */}
+                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
+                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
+                        <X className="size-4 md:size-5 stroke-[4]" />
+                    </div>
+                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
+                        BARCODE GENERATOR
+                    </span>
+                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
+                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
+
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase leading-none">
                     Smart Barcode <span className="text-gradient-hero">Generator</span>
                 </h1>
@@ -62,7 +71,7 @@ export default function BarcodeGeneratorPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 pb-20">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-20">
             <HowToGuide title="Barcode Generator" steps={deepSteps} />
 
             <section className="space-y-12 py-10 border-t">
@@ -70,7 +79,7 @@ export default function BarcodeGeneratorPage() {
                     <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
                         Industrial Grade Scannable Output
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base font-medium">
+                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Our <strong>Professional Barcode Studio</strong> uses precise vector mapping to ensure your generated codes are 100% compliant with international standards.
                     </p>
                 </div>

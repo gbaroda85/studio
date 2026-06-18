@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import SignatureResizer from '@/components/signature-resizer';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
-import { Sparkles, Maximize, ShieldCheck, Zap, MousePointer2 } from 'lucide-react';
+import { Sparkles, Maximize, ShieldCheck, Zap, MousePointer2, X, ChevronDown } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Professional Signature Resizer - Resize to CM, Pixel & 20KB Online',
@@ -40,9 +40,18 @@ export default function SignatureResizerPage() {
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
             <div className="w-full max-w-5xl text-center mb-8 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-600 text-[9px] font-black uppercase tracking-[0.2em] mb-1 shadow-sm">
-                    <Sparkles className="size-2.5" /> OFFICIAL PORTAL READY
+                {/* PREMIUM CAPSULE HEADER */}
+                <div className="inline-flex items-center p-1 md:p-1.5 pr-4 md:pr-6 rounded-full bg-[#e0fdf4] dark:bg-emerald-950/30 border border-[#bbf7d0] dark:border-emerald-500/20 shadow-sm mb-4 mx-auto group transition-all hover:scale-105">
+                    <div className="size-7 md:size-8 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-lg shrink-0">
+                        <X className="size-4 md:size-5 stroke-[4]" />
+                    </div>
+                    <span className="ml-3 font-black text-[10px] md:text-xs tracking-widest text-slate-800 dark:text-emerald-400 uppercase">
+                        SIGNATURE RESIZER
+                    </span>
+                    <div className="w-px h-4 bg-slate-300/60 dark:bg-emerald-500/20 mx-4" />
+                    <ChevronDown className="size-4 text-slate-800 dark:text-emerald-400 opacity-50" />
                 </div>
+
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-none">
                     Signature <span className="text-gradient-hero">Resizer Pro</span>
                 </h1>
@@ -56,7 +65,7 @@ export default function SignatureResizerPage() {
             </div>
         </div>
 
-        <div className="w-full max-w-[1600px] mx-auto space-y-16 px-4 md:px-12 pb-20">
+        <div className="w-full max-w-5xl mx-auto space-y-16 px-4 md:px-12 pb-20">
             <HowToGuide title="Signature Resizer" steps={steps} />
 
             <section className="space-y-10 py-10 border-t">
@@ -69,21 +78,46 @@ export default function SignatureResizerPage() {
                     </p>
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-orange-500/50 transition-all">
-                        <Maximize className="text-orange-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Unit Precision</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Switch between Centimeters for offline print specs or Pixels for digital portal requirements instantly.</p>
+                <div className="relative">
+                    {/* Connecting Lines (Desktop) */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                        </svg>
                     </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-blue-500/50 transition-all">
-                        <Zap className="text-blue-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Smart 20KB Loop</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Our engine automatically runs multiple compression passes to find the best quality that fits under your KB limit.</p>
-                    </div>
-                    <div className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 shadow-xl space-y-4 hover:border-teal-500/50 transition-all">
-                        <ShieldCheck className="text-teal-500 size-10" />
-                        <h3 className="font-black uppercase text-sm tracking-widest text-slate-800 dark:text-white">Zero Server Risk</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Your signatures are your identity. We process everything in local RAM, ensuring they are never stored or seen by anyone.</p>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                    <Maximize className="text-cyan-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">UNIT PRECISION</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Switch between Centimeters for offline print specs or Pixels for digital portal requirements instantly.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                    <Zap className="text-indigo-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">SMART 20KB LOOP</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Our engine automatically runs multiple compression passes to find the best quality that fits under your KB limit.</p>
+                            </div>
+                        </div>
+
+                        <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                                <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                    <ShieldCheck className="text-purple-500 size-6" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">ZERO SERVER RISK</h3>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Your signatures are your identity. We process everything in local RAM, ensuring they are never stored or seen by anyone.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
