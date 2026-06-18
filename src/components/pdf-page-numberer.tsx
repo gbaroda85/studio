@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -36,7 +35,7 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from './ui/badge';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from './ui/progress';
 import { Slider } from './ui/slider';
 import confetti from 'canvas-confetti';
@@ -416,21 +415,6 @@ export default function PdfPageNumberer() {
   
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
-      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4 no-print mx-auto">
-          <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-              <Hash className="size-8" />
-              <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                  <Sparkles className="size-2.5" />
-              </div>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
-              Add Page <span className="text-gradient-hero">Numbers Pro</span>
-          </h1>
-          <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto uppercase tracking-widest opacity-60">
-              Professional positioning at the absolute edge.
-          </p>
-      </div>
-
       {!pdfFile ? (
         <Card
             className={cn(
@@ -565,7 +549,7 @@ export default function PdfPageNumberer() {
 
                         <div className="space-y-4 pt-4 border-t border-dashed text-left">
                             <div className="flex justify-between items-center px-1">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-2">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-1.5">
                                     <Move className="size-3" /> Margins
                                 </Label>
                                 <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
@@ -659,7 +643,7 @@ export default function PdfPageNumberer() {
                                             </div>
                                             
                                             <div className="absolute top-2 right-2 opacity-20 flex items-center gap-1.5">
-                                                <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE {i+1} PREVIEW</Badge>
+                                                <Badge variant="outline" className="text-[7px] font-black uppercase border-black">PAGE {i+1} PREVIEW</Badge>
                                             </div>
                                         </div>
                                     ))

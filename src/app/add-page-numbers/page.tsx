@@ -18,11 +18,25 @@ export const metadata: Metadata = {
 
 export default function AddPageNumbersPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28 text-left">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <PdfPageNumbererClient />
+        <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Add Page Numbers
+                    </span>
+                </h1>
+
+                <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-xs md:text-base">
+                    Insert professional page numbers into your PDF documents. 100% Private local processing.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <PdfPageNumbererClient />
+            </div>
         </div>
 
         <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
