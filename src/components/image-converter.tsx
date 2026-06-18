@@ -58,6 +58,7 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const formatTitle = outputFormat === 'jpeg' ? 'JPG' : outputFormat.toUpperCase();
+  const pageTitle = targetFormat === 'jpeg' ? 'Image to JPG' : targetFormat === 'png' ? 'Image to PNG' : 'Image Converter';
   const mimeType = `image/${outputFormat}`;
 
   const handleFileChange = (file: File | null) => {
@@ -129,9 +130,9 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-2 mb-4">
-            <h1 className="text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                 <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
-                    Image Converter
+                    {pageTitle}
                 </span>
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
@@ -329,3 +330,4 @@ export default function ImageConverter({ targetFormat }: ImageConverterProps) {
     </div>
   );
 }
+
