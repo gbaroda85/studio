@@ -176,21 +176,6 @@ export default function Unzipper() {
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 flex flex-col items-center gap-6">
             {!zipFile && (
                 <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6">
-                    <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 mb-4">
-                        <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-                            <ArchiveRestore className="size-8" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                                <Sparkles className="size-2.5" />
-                            </div>
-                        </div>
-                        <h1 className="text-2xl md:text-4xl font-black font-headline tracking-tighter uppercase leading-none">
-                            Secure <span className="text-gradient-hero">Unzip Pro</span>
-                        </h1>
-                        <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                            Extract ZIP archives instantly without server uploads. <br/>100% Private local RAM processing.
-                        </p>
-                    </div>
-
                     <Card
                         className={cn(
                             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 select-none",
