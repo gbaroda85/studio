@@ -18,14 +18,27 @@ export const metadata: Metadata = {
 
 export default function LockPdfPage() {
   return (
-    <main className="flex-1 flex flex-col items-center pt-16 md:pt-20">
+    <main className="flex-1 flex flex-col items-center pt-16 md:pt-28">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        <div className="w-full flex justify-center mb-12 px-4">
-            <PdfLocker />
+        <div className="w-full flex flex-col items-center mb-12 px-4">
+            <div className="w-full max-w-5xl text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        PDF Locker Studio
+                    </span>
+                </h1>
+                <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-xs md:text-base uppercase tracking-widest opacity-60">
+                    Secure IDs with standard AES-128 encryption. 100% Private.
+                </p>
+            </div>
+
+            <div className="w-full flex justify-center">
+                <PdfLocker />
+            </div>
         </div>
 
-        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto">
+        <div className="w-full max-w-5xl space-y-16 px-4 mx-auto pb-20">
             <HowToGuide title="Vault PDF Locker" steps={[
                 "Upload PDF: Drag and drop your sensitive document into the locker workspace.",
                 "Set Password: Enter a secure password and confirm it carefully.",
@@ -50,7 +63,7 @@ export default function LockPdfPage() {
                             </div>
                             <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-full shadow-sm border border-primary/10">
                                 <Globe className="text-blue-500 size-4" />
-                                <span className="text-[10px) font-black uppercase">Offline Engine</span>
+                                <span className="text-[10px] font-black uppercase">Offline Engine</span>
                             </div>
                         </div>
                     </div>
@@ -104,7 +117,7 @@ export default function LockPdfPage() {
                                 <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">AADHAAR READY</h3>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">100% PRIVATE</h3>
                                 <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Perfect for protecting e-Aadhaar cards, bank statements, and sensitive financial reports for safe sharing.</p>
                             </div>
                         </div>

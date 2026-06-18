@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -154,21 +153,6 @@ export default function PdfLocker() {
         <AnimatePresence mode="wait">
             {!pdfFile ? (
                 <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-2xl py-10 flex flex-col items-center">
-                    <div className="text-center space-y-2 mb-8">
-                        <div className="mx-auto mb-4 grid size-20 place-items-center rounded-[2.5rem] bg-primary/10 text-primary shadow-xl relative border-2 border-primary/20">
-                            <Lock className="size-10" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-6 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-3" />
-                            </div>
-                        </div>
-                        <h1 className="text-3xl md:text-5xl font-black font-headline tracking-tighter uppercase leading-none">
-                            Vault <span className="text-gradient-hero">PDF Locker</span>
-                        </h1>
-                        <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest opacity-60">
-                            Secure IDs with standard AES-128 encryption.
-                        </p>
-                    </div>
-
                     <Card
                         className={cn(
                             "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer",
