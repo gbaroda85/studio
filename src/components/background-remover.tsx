@@ -1,7 +1,7 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { 
     UploadCloud, 
     Loader2, 
@@ -12,20 +12,15 @@ import {
     ShieldCheck, 
     Sparkles, 
     Image as ImageIcon,
-    Palette,
-    Layers,
-    RotateCcw,
-    ChevronRight,
     Settings2,
-    Crop as CropIcon,
-    Maximize,
-    Scaling,
-    RotateCw,
+    RefreshCcw,
     CheckCircle2,
-    Eye,
     ArrowLeftRight,
     Cpu,
-    MousePointer2
+    MousePointer2,
+    Palette,
+    Layers,
+    Crop as CropIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -37,15 +32,10 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { motion, AnimatePresence } from 'framer-motion';
-
-/**
- * AI MODEL CONFIGURATION
- */
-const MODEL_ID = 'Xenova/modnet'; 
+import confetti from 'canvas-confetti';
 
 type Stage = 'upload' | 'preview' | 'crop' | 'process' | 'studio';
 
@@ -110,13 +100,13 @@ export default function BackgroundRemover() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compositeCanvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const sliderContainerRef = useRef<HTMLDivElement>(null);
 
   const checkerboardStyle: React.CSSProperties = {
     backgroundImage:
-      "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)",
+      "linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.05) 75%), linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.05) 75%)",
     backgroundSize: "20px 20px",
     backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+    backgroundColor: "#ffffff"
   };
 
   const handleFileChange = (file: File | null) => {
@@ -169,10 +159,10 @@ export default function BackgroundRemover() {
       for (let i = 0; i < maskData.length; ++i) {
           const alpha = maskData[i];
           const j = i * 4;
-          rgbaData[j] = 0;       // R
-          rgbaData[j + 1] = 0;   // G
-          rgbaData[j + 2] = 0;   // B
-          rgbaData[j + 3] = alpha; // A 
+          rgbaData[j] = 0;       
+          rgbaData[j + 1] = 0;   
+          rgbaData[j + 2] = 0;   
+          rgbaData[j + 3] = alpha; 
       }
 
       const maskCanvas = document.createElement('canvas');
@@ -201,6 +191,7 @@ export default function BackgroundRemover() {
       const resultUrl = finalCanvas.toDataURL('image/png');
       setSubjectImageSrc(resultUrl);
       setStage('studio');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#22c55e', '#ffffff'] });
       toast({ title: "Precision Success", description: "Background isolated with Neural precision." });
     } catch (error: any) {
         console.error(error);
@@ -254,7 +245,7 @@ export default function BackgroundRemover() {
     if (!previewImageSrc || !imageFile) return;
     const link = document.createElement("a");
     link.href = previewImageSrc;
-    link.download = `GR7-Tools-BG-Cleaned-${Date.now()}.png`;
+    link.download = `GR7-BG-Cleaned-${Date.now()}.png`;
     link.click();
   };
 
@@ -263,157 +254,242 @@ export default function BackgroundRemover() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  if (stage === 'upload') {
-    return (
-      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
-        <Card className={cn("w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:-translate-y-1 hover:border-primary/50", isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]")} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
-            <CardHeader className="bg-muted/30 border-b p-6 text-center"><CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle></CardHeader>
-            <CardContent className="p-8 md:p-12">
-                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
-                    <div className="relative"><UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" /></div>
-                    <div className="text-center px-4"><p className="text-lg md:text-xl font-black uppercase tracking-tighter">Drop High-Res Photo</p><p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Unlimited local extractions.</p></div>
-                </div>
-                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
-            </CardContent>
-            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                <div className="flex items-center gap-1.5"><Cpu className="size-3 text-blue-500" /> WEBGPU BOOST</div>
-                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> HD PRECISION</div>
-            </CardFooter>
-        </Card>
-      </div>
-    );
-  }
+  const getAspectRatio = () => {
+    const p = SIZE_PRESETS[parseInt(selectedSizeIndex)];
+    return p.width > 0 ? p.width / p.height : undefined;
+  };
 
-  if (stage === 'preview') {
-      return (
-          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
-              <CardHeader className="glass-panel border-b p-4 flex flex-row items-center justify-between"><CardTitle className="text-sm md:base font-black uppercase tracking-tighter">Original Scan</CardTitle></CardHeader>
-              <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[350px]"><img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-2 border-white" /></CardContent>
-              <CardFooter className="glass-panel border-t p-4 flex justify-between gap-4">
-                    <Button variant="ghost" onClick={handleReset} className="font-black text-[9px] uppercase h-11 px-4 rounded-xl border-2 border-transparent hover:border-muted"><RotateCcw className="mr-1.5 size-4" /> Change</Button>
-                    <div className="flex gap-3 flex-1 justify-end">
-                        <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-11 rounded-xl text-[10px] uppercase px-4 hover:bg-primary/5" onClick={() => setStage('crop')}><CropIcon className="mr-1.5 size-4" /> Area</Button>
-                        <Button 
-                            className="magic-button h-11 px-8 rounded-full bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
-                            onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}
-                        >
-                            <StarIcons />
-                            <Eraser className="size-5 group-hover:rotate-12 transition-transform" />
-                            <span className="text-[11px] uppercase tracking-widest">REMOVE BACKGROUND</span>
-                        </Button>
-                    </div>
+  return (
+    <div className="w-full flex flex-col items-center gap-6 px-4 pb-20">
+      
+      {/* 1. UPLOAD STAGE */}
+      {stage === 'upload' && (
+        <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6">
+          <Card className={cn(
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer",
+            isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+          )} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onClick={() => fileInputRef.current?.click()}>
+              <CardHeader className="bg-muted/30 border-b p-8 text-center"><CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AI WORKSPACE</CardTitle></CardHeader>
+              <CardContent className="p-12 md:p-20">
+                  <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
+                      <div className="relative"><UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" /><Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" /></div>
+                      <div className="text-center">
+                          <p className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Photo here</p>
+                          <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
+                      </div>
+                  </div>
+                  <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={onFileChange} />
+              </CardContent>
+          </Card>
+          <div className="flex gap-8 opacity-20"><ShieldCheck className="size-8" /><Zap className="size-8" /><Sparkles className="size-8" /></div>
+        </div>
+      )}
+
+      {/* 2. PREVIEW STAGE (Confirming selection) */}
+      {stage === 'preview' && (
+          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 rounded-[2.5rem]">
+              <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-lg font-black uppercase tracking-tighter">Confirm Selection</CardTitle>
+                <Button variant="ghost" size="icon" onClick={handleReset} className="text-destructive h-8 w-8"><X /></Button>
+              </CardHeader>
+              <CardContent className="p-10 flex justify-center bg-black/5">
+                <img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-4 border-white" />
+              </CardContent>
+              <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
+                    <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-12 rounded-xl text-[10px] uppercase px-6" onClick={() => setStage('crop')}><CropIcon className="mr-2 size-4" /> Define Area</Button>
+                    <Button 
+                        className="magic-button h-12 px-10 rounded-full bg-primary hover:bg-primary/90 text-white font-black transition-all active:scale-95 group flex items-center gap-3 border-none" 
+                        onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}
+                    >
+                        <StarIcons />
+                        <Eraser className="size-5" />
+                        <span className="text-xs uppercase tracking-widest">REMOVE BACKGROUND</span>
+                    </Button>
               </CardFooter>
           </Card>
-      );
-  }
+      )}
 
-  if (stage === 'crop') {
-    return (
-        <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-            <CardHeader className="glass-panel border-b p-4">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm md:base font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
-                    <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
-                        <SelectTrigger className="h-9 w-40 font-black border-2 rounded-lg text-[10px] uppercase"><SelectValue /></SelectTrigger>
-                        <SelectContent className="rounded-lg border-2">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase">{p.name}</SelectItem>))}</SelectContent>
-                    </Select>
-                </div>
+      {/* 3. CROP STAGE */}
+      {stage === 'crop' && (
+        <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem]">
+            <CardHeader className="bg-muted/30 border-b p-6 flex items-center justify-between">
+                <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
+                <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
+                    <SelectTrigger className="h-10 w-56 font-black border-2 rounded-xl text-[10px] uppercase bg-background"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-2 shadow-2xl">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase py-3">{p.name}</SelectItem>))}</SelectContent>
+                </Select>
             </CardHeader>
-            <CardContent className="p-4 md:p-8 flex justify-center bg-black/5 min-h-[450px]">
-                <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={selectedSizeIndex === '0' ? undefined : (SIZE_PRESETS[parseInt(selectedSizeIndex)].width / SIZE_PRESETS[parseInt(selectedSizeIndex)].height)}>
-                    <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[55vh] object-contain block" />
-                </ReactCrop>
+            <CardContent className="p-8 md:p-12 flex items-center justify-center bg-slate-200/50 min-h-[450px]">
+                <div className="max-h-[55vh] overflow-hidden rounded-xl border-4 border-white shadow-2xl">
+                    <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
+                        <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[55vh] w-auto block object-contain" />
+                    </ReactCrop>
+                </div>
             </CardContent>
-            <CardFooter className="glass-panel border-t p-4 flex justify-between gap-4">
-                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[9px] uppercase h-11 px-4 rounded-xl border-2 border-transparent hover:border-muted"><RotateCcw className="mr-1.5 size-4" /> Back</Button>
-                <Button 
-                    className="magic-button h-11 px-10 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary font-black transition-all active:scale-95 group flex items-center gap-2" 
-                    onClick={handleApplyCrop}
-                >
-                    <StarIcons />
-                    <Cpu className="size-5 group-hover:scale-110 transition-transform" />
-                    <span className="text-[11px] uppercase tracking-widest">PROCESS SUBJECT</span>
+            <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl"><RotateCcw className="mr-2 size-4" /> Back</Button>
+                <Button className="h-14 px-12 rounded-xl bg-primary text-white font-black transition-all active:scale-95 text-lg" onClick={handleApplyCrop}>
+                    CONFIRM & PROCESS <ChevronRight className="ml-2 size-6" />
                 </Button>
             </CardFooter>
         </Card>
-    );
-  }
+      )}
 
-  return (
-    <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-        <div className="flex items-center gap-3">
-            <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0"><Settings2 className="size-5 md:size-6" /></div>
-            <div><h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2></div>
-        </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-             <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-1.5 size-4" /> Change Image</Button>
-            <Button 
-                size="lg" 
-                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 disabled:opacity-50 border-none" 
-                onClick={handleDownload} 
-                disabled={isProcessing || !previewImageSrc}
-            >
-                <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
-                <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">DOWNLOAD PNG</span>
-                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                    <Download className="size-6 group-hover:scale-110 transition-transform" />
-                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+      {/* 4. PROCESSING STAGE */}
+      {stage === 'process' && (
+          <div className="w-full max-w-2xl py-20 flex flex-col items-center justify-center gap-10 animate-in zoom-in-95 duration-500">
+              <div className="relative">
+                  <div className="size-32 md:size-48 rounded-full border-[8px] border-primary/20 border-t-primary animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                       <Cpu className="size-12 md:size-20 text-primary animate-pulse" />
+                  </div>
+              </div>
+              <div className="text-center space-y-4 w-full px-10">
+                  <p className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter animate-pulse">{statusText}</p>
+                  <Progress value={progress} className="h-2 shadow-inner" />
+                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] opacity-40">Local GPU Engine • No Cloud Upload</p>
+              </div>
+          </div>
+      )}
+
+      {/* 5. STUDIO STAGE (The main editor) */}
+      {stage === 'studio' && previewImageSrc && (
+        <div className="w-full flex flex-col gap-6 animate-in slide-in-from-bottom-6 duration-500">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-6" /></div>
+                    <h2 className="text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
                 </div>
-            </Button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8">
-            <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-2xl md:rounded-[3rem]">
-                <CardContent className="p-0 aspect-video relative bg-white flex items-center justify-center min-h-[450px]" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
-                    <AnimatePresence mode="wait">
-                        {isProcessing ? (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-white/95 backdrop-blur-xl p-8 text-center gap-6">
-                                <div className="relative"><Loader2 className="h-16 w-16 md:h-24 md:w-24 animate-spin text-primary stroke-[3]" /><Zap className="absolute inset-0 m-auto h-8 w-8 md:h-10 md:w-10 text-primary animate-pulse" /></div>
-                                <div className="space-y-3 w-full max-w-[280px] md:max-w-sm"><p className="font-black text-xl md:text-2xl text-primary animate-pulse uppercase tracking-tighter">{statusText}</p><Progress value={progress} className="h-2 shadow-inner" /><p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Optimizing Neural Mask...</p></div>
-                            </motion.div>
-                        ) : previewImageSrc ? (
-                            <div className="relative w-full h-full flex items-center justify-center overflow-hidden" ref={sliderContainerRef}>
-                                <div className="absolute inset-0 flex items-center justify-center p-8"><div className="relative w-full h-full"><Image src={previewImageSrc} alt="Result" fill className="object-contain drop-shadow-2xl" /></div></div>
-                                <div className="absolute inset-0 flex items-center justify-center p-8 select-none pointer-events-none" style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}><div className="relative w-full h-full"><Image src={croppedImageSrc || originalImageSrc!} alt="Original" fill className="object-contain" /></div></div>
-                                <div className="absolute inset-y-0 z-10 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] cursor-ew-resize flex items-center justify-center" style={{ left: `${sliderPosition}%` }}><div className="size-10 rounded-full bg-white shadow-xl border-2 border-primary flex items-center justify-center -translate-x-1/2"><ArrowLeftRight className="size-5 text-primary" /></div></div>
-                                <input type="range" min="0" max="100" value={sliderPosition} onChange={(e) => setSliderPosition(Number(e.target.value))} className="absolute inset-0 z-20 w-full h-full opacity-0 cursor-ew-resize" />
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl z-30 pointer-events-none"><MousePointer2 className="size-3.5 text-primary animate-pulse" /> Slide to compare edges</div>
-                            </div>
-                        ) : null}
-                    </AnimatePresence>
-                </CardContent>
-            </Card>
-        </div>
-        <div className="lg:col-span-4 space-y-4">
-            <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
-                <CardHeader className="bg-primary/5 border-b border-white/10 p-4"><CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter"><Palette className="size-4 text-primary" /> Finish Stage</CardTitle></CardHeader>
-                <CardContent className="p-6 md:p-8 space-y-8">
-                    <div className="space-y-6">
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Background Presets</Label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {COLOR_PRESETS.map((p) => (<button key={p.value} onClick={() => setBgColor(p.value)} className={cn("h-9 rounded-lg border-2 flex items-center justify-center transition-all shadow-sm", bgColor === p.value ? "border-primary ring-2 ring-primary/10 scale-105" : "border-white/10 bg-white/5")} title={p.name}>{p.icon ? <p.icon className="size-3 text-muted-foreground" /> : <div className="size-4 rounded-full border border-black/10" style={{ backgroundColor: p.value }} />}</button>))}
-                            </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-2 size-4" /> Change Photo</Button>
+                    <Button 
+                        size="lg" 
+                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
+                        onClick={handleDownload} 
+                    >
+                        <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                        <span className="flex-1 px-10 text-center tracking-widest text-xs uppercase">DOWNLOAD HD</span>
+                        <div className="bg-white h-full px-6 flex items-center justify-center text-[#00aeef] transition-all group-hover:px-7" style={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                            <Download className="size-7 group-hover:scale-110 transition-transform" />
                         </div>
-                        <div className="space-y-4 pt-4 border-t border-white/5"><div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Border Width</Label><Badge variant="secondary" className="font-black text-[8px]">{borderWidth[0]}%</Badge></div><Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} className="py-2" /></div>
-                    </div>
-                    <div className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4">
-                        <CheckCircle2 className="size-6 text-green-600 shrink-0 mt-0.5" />
-                        <div><p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Result Ready</p><p className="text-[8px] text-green-600/80 font-medium leading-tight mt-1 uppercase">Neural mask has optimized hair details. <br/>Resolution: <strong>HD Original</strong></p></div>
-                    </div>
-                </CardContent>
-                <CardFooter className="bg-muted/10 p-3 border-t border-white/10 flex justify-center gap-4 opacity-40 text-[7px] font-black uppercase tracking-widest">
-                    <div className="flex items-center gap-1"><ShieldCheck className="size-2.5 text-green-500" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1"><Zap className="size-2.5 text-yellow-500" /> WEBGPU BOOST</div>
-                    <div className="flex items-center gap-1"><Sparkles className="size-2.5 text-primary" /> HD PRECISION</div>
-                </CardFooter>
-            </Card>
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-8 flex flex-col gap-6">
+                    <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[3rem] relative">
+                        <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <ArrowLeftRight className="h-4 w-4 text-primary" />
+                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Side-by-Side Verification</CardTitle>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md">RENDER READY</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex items-center justify-center relative overflow-hidden select-none">
+                            <div className="relative w-full h-full max-w-4xl aspect-[16/10] overflow-hidden rounded-3xl border-4 border-white dark:border-slate-800 shadow-2xl bg-white">
+                                
+                                {/* PROCESSED (RESULT) - BOTTOM LAYER */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
+                                    <img src={previewImageSrc} alt="Result" className="max-w-full max-h-full object-contain drop-shadow-2xl" />
+                                </div>
+                                
+                                {/* ORIGINAL (BEFORE) - CLIPPED TOP LAYER */}
+                                <div 
+                                    className="absolute inset-0 flex items-center justify-center p-4 md:p-8 border-r-2 border-white pointer-events-none select-none overflow-hidden bg-slate-200" 
+                                    style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                                >
+                                    <img src={croppedImageSrc || originalImageSrc!} alt="Original" className="max-w-full max-h-full object-contain" />
+                                </div>
+
+                                {/* SLIDER HANDLE UI */}
+                                <div className="absolute inset-y-0 z-40 w-1 bg-white shadow-[0_0_20px_rgba(0,0,0,0.5)] cursor-ew-resize flex items-center justify-center pointer-events-none" style={{ left: `${sliderPosition}%` }}>
+                                    <div className="size-10 rounded-full bg-white shadow-2xl border-4 border-primary flex items-center justify-center -translate-x-1/2 group">
+                                        <ArrowLeftRight className="size-5 text-primary" />
+                                    </div>
+                                </div>
+
+                                {/* TRANSPARENT INPUT SLIDER (Actual Interaction) */}
+                                <input 
+                                    type="range" min="0" max="100" value={sliderPosition} 
+                                    onChange={(e) => setSliderPosition(Number(e.target.value))} 
+                                    className="absolute inset-0 z-50 w-full h-full opacity-0 cursor-ew-resize" 
+                                />
+
+                                {/* Labels */}
+                                <div className="absolute top-4 left-4 z-40 bg-black/60 backdrop-blur-md text-white text-[8px] font-black px-3 py-1 rounded-full border border-white/20 uppercase tracking-widest">Original Scan</div>
+                                <div className="absolute top-4 right-4 z-40 bg-primary/80 backdrop-blur-md text-white text-[8px] font-black px-3 py-1 rounded-full border border-white/20 uppercase tracking-widest">Neural Extract</div>
+                                
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2.5 bg-black/70 backdrop-blur-xl rounded-full text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 pointer-events-none animate-in fade-in slide-in-from-bottom-2">
+                                     <MousePointer2 className="size-3.5 text-primary animate-pulse" /> SLIDE TO VERIFY EDGES
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
+                             <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> WEBGPU BOOST</div>
+                        </CardFooter>
+                    </Card>
+                </div>
+
+                <div className="lg:col-span-4 space-y-6">
+                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
+                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                                <Palette className="size-4 md:size-5 text-primary" /> Finish Settings
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-8 space-y-10">
+                            <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Background Presets</Label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {COLOR_PRESETS.map((p) => (
+                                            <button 
+                                                key={p.value} 
+                                                onClick={() => setBgColor(p.value)} 
+                                                className={cn(
+                                                    "h-10 rounded-xl border-2 flex items-center justify-center transition-all shadow-sm", 
+                                                    bgColor === p.value ? "border-primary ring-4 ring-primary/10 scale-105" : "border-white/10 bg-white/5"
+                                                )}
+                                                title={p.name}
+                                            >
+                                                {p.icon ? <p.icon className="size-4 text-muted-foreground" /> : <div className="size-5 rounded-full border border-black/10" style={{ backgroundColor: p.value }} />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-4 pt-6 border-t border-white/10 text-left">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-1.5"><Layers className="size-3" /> External Border</Label>
+                                        <Badge variant="secondary" className="font-black text-[9px]">{borderWidth[0]}%</Badge>
+                                    </div>
+                                    <Slider min={0} max={10} step={0.5} value={borderWidth} onValueChange={setBorderWidth} className="py-2" />
+                                </div>
+                            </div>
+
+                            <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
+                                <div className="size-10 rounded-full bg-green-500/10 border-2 border-green-500/20 flex items-center justify-center shrink-0">
+                                    <CheckCircle2 className="size-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">AI SEGMENTATION OK</p>
+                                    <p className="text-[8px] text-green-600/80 font-medium leading-relaxed uppercase mt-1">
+                                        Neural mask has optimized hair and edge details for high-fidelity extraction.
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
-      </div>
+      )}
+
       <canvas ref={compositeCanvasRef} className="hidden" />
     </div>
   );
 }
+
