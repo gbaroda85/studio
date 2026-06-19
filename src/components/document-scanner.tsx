@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -165,7 +166,10 @@ export default function DocumentScanner() {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
         });
-        if (videoRef.current) videoRef.current.srcObject = stream;
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.muted = true;
+        }
     } catch (err) {
         toast({ variant: 'destructive', title: 'Camera Error', description: 'Using native camera app.' });
         cameraInputRef.current?.click();
@@ -266,6 +270,7 @@ export default function DocumentScanner() {
     setPendingPages(prev => [...prev, ...newPages]);
     setIsProcessing(false);
     setBatchProgress(null);
+    e.target.value = "";
   };
 
   const handleEditPage = (page: ScannedPage) => {
@@ -284,8 +289,7 @@ export default function DocumentScanner() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-              // CRITICAL: Reducing size for cloud processing stability to prevent 413 error
-              const MAX_WIDTH = 800; 
+              const MAX_WIDTH = 1200; // Increased to 1200 for better AI analysis while keeping payload safe
               let width = img.width;
               let height = img.height;
               if (width > MAX_WIDTH) {
@@ -295,7 +299,7 @@ export default function DocumentScanner() {
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+              resolve(canvas.toDataURL('image/jpeg', 0.5)); // Reduced quality to stay under 1MB payload
           };
       });
   };
@@ -312,7 +316,8 @@ export default function DocumentScanner() {
             toast({ title: "AI Enhancement Ready", description: "Image optimized using Neural details." });
         }
     } catch (error) {
-        toast({ variant: 'destructive', title: "AI Error", description: "Could not enhance image via cloud." });
+        console.error(error);
+        toast({ variant: 'destructive', title: "AI Error", description: "Could not enhance image via cloud. Check network." });
     } finally {
         setIsAiProcessing(false);
     }
