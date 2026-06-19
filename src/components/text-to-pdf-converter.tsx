@@ -160,11 +160,11 @@ export default function TextToPdfConverter() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch h-[700px] lg:h-[850px]">
                 {/* LEFT: SOURCE EDITOR */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 h-[700px] lg:h-[900px]">
-                        <CardHeader className="bg-primary/5 border-b p-6 shrink-0">
+                <div className="lg:col-span-5 flex flex-col gap-6 h-full">
+                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 h-full min-h-0">
+                        <CardHeader className="bg-primary/5 border-b p-4 md:p-6 shrink-0">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
@@ -177,7 +177,7 @@ export default function TextToPdfConverter() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8 min-h-0">
+                        <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8 min-h-0 overflow-hidden">
                             <div className="flex-1 flex flex-col gap-3 min-h-0">
                                 <div className="flex justify-between items-center px-1">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
@@ -232,7 +232,7 @@ export default function TextToPdfConverter() {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-center shrink-0">
+                        <CardFooter className="bg-muted/10 p-4 border-t flex justify-center shrink-0">
                             <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT PERFORMANCE</div>
@@ -241,24 +241,25 @@ export default function TextToPdfConverter() {
                     </Card>
                 </div>
 
-                {/* RIGHT: HD VIEWPORT - FIXED HEIGHT SCROLLABLE */}
-                <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 h-[700px] lg:h-[900px]">
-                        <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
+                {/* RIGHT: HD VIEWPORT - STRICTLY CONSTRAINED HEIGHT */}
+                <div className="lg:col-span-7 flex flex-col gap-6 h-full min-h-0">
+                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 h-full min-h-0">
+                        <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Eye className="size-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Direct Render</CardTitle>
                             </div>
                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                         </CardHeader>
+                        
                         <CardContent className="flex-1 p-0 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex flex-col min-h-0">
-                            
-                            <ScrollArea className="flex-1 w-full h-full">
-                                <div className="flex justify-center p-6 md:p-12 lg:p-20">
-                                    <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.9] xl:scale-[1.0] origin-top transition-transform duration-500 flex justify-center w-full">
+                            {/* SCROLL AREA WITH NATIVE OVERFLOW CONSTRAINTS */}
+                            <div className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-200 dark:bg-slate-800 p-6 md:p-12 lg:p-20 relative">
+                                <div className="flex justify-center w-full min-h-full">
+                                    <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.9] xl:scale-[1.0] origin-top transition-transform duration-500 flex justify-center w-full h-fit">
                                         <div 
                                             ref={previewRef} 
-                                            className="bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative text-left select-none pointer-events-none overflow-hidden" 
+                                            className="bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6)] relative text-left select-none pointer-events-none overflow-hidden" 
                                             style={{ 
                                                 width: '210mm',
                                                 minHeight: '297mm',
@@ -280,17 +281,17 @@ export default function TextToPdfConverter() {
                                         </div>
                                     </div>
                                 </div>
-                                <ScrollBar />
-                            </ScrollArea>
+                            </div>
 
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-2.5 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
                                  <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
                             </div>
                         </CardContent>
+
                         <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center shrink-0">
                             <Button 
                                 size="lg" 
-                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                                 onClick={handleDownload}
                                 disabled={isGenerating || !text.trim()}
                             >
@@ -300,7 +301,7 @@ export default function TextToPdfConverter() {
                                 </span>
                                 <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
                                     <Download className="size-8 group-hover:scale-110 transition-transform" />
-                                    <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
+                                    <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                 </div>
                             </Button>
                             <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground/30 text-[8px] font-black uppercase tracking-widest shrink-0">

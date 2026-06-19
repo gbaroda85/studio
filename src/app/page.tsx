@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -123,7 +124,7 @@ const ALL_TOOLS = [
   { icon: PenLine, title: "SIGNATURE REMOVER", description: "Extract clean signatures from paper photos.", href: "/remove-signature", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
-  { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "image" },
+  { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -143,30 +144,30 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-[0_15px_35px_-12px_rgba(0,0,0,0.12),0_4px_10px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_45px_100px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-3 hover:scale-[1.03] border-2 border-slate-100/80 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ring-1 ring-black/[0.03]">
-      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-4 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]", lightBg, "dark:bg-[#0a040d]/60")}>
+    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02]">
+      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-3.5 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
         {/* COMPACT 3D ICON CONTAINER */}
         <div className={cn(
-          `size-12 md:size-14 rounded-[1.25rem] flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
-          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.5),inset_-2px_-2px_4px_rgba(0,0,0,0.3),0_10px_20px_-5px_rgba(0,0,0,0.3)]",
+          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_8px_15px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
-          <Icon className="size-6 md:size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
+          <Icon className="size-6 drop-shadow-[1.5px_1.5px_3px_rgba(0,0,0,0.3)]" />
         </div>
         <div className="flex-1 flex flex-col">
           <h3 className="text-base md:text-lg font-bold mb-1 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 tracking-tight">{description}</p>
+          <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-2">{description}</p>
           
-          <div className="flex flex-wrap gap-2 mt-auto pt-3">
-             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Professional</Badge>
-             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Local RAM</Badge>
+          <div className="flex flex-wrap gap-1.5 mt-auto pt-2.5">
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Professional</Badge>
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Local RAM</Badge>
           </div>
         </div>
       </div>
       
-      <div className="bg-transparent p-1.5 px-6 flex items-center justify-between rounded-b-[2.5rem]">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400">Launch Tool</span>
-        <div className="launch-arrow-btn">
+      <div className="bg-transparent py-1 px-5 flex items-center justify-between rounded-b-[2rem]">
+        <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
+        <div className="launch-arrow-btn scale-75 origin-right -mr-2">
           <div className="button-box">
             <span className="button-elem">
               <ArrowRight />
